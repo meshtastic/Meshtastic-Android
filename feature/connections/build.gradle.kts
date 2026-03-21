@@ -18,8 +18,6 @@
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
-    jvm()
-
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.connections"

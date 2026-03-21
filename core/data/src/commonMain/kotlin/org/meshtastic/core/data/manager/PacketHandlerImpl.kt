@@ -19,7 +19,6 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
@@ -30,6 +29,7 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -67,7 +67,7 @@ class PacketHandlerImpl(
     }
 
     private var queueJob: Job? = null
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher)
 
     private val queueMutex = Mutex()
     private val queuedPackets = mutableListOf<MeshPacket>()

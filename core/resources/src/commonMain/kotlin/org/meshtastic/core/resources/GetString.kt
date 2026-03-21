@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.resources
 
+import org.meshtastic.core.common.util.formatString
+
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString as composeGetString
@@ -28,7 +30,7 @@ fun getString(stringResource: StringResource, vararg formatArgs: Any): String = 
     val pattern = composeGetString(stringResource)
     if (formatArgs.isNotEmpty()) {
         @Suppress("SpreadOperator")
-        pattern.format(*formatArgs)
+        formatString(pattern, *formatArgs)
     } else {
         pattern
     }
@@ -53,7 +55,7 @@ suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: 
     val pattern = composeGetString(stringResource)
     return if (resolvedArgs.isNotEmpty()) {
         @Suppress("SpreadOperator")
-        pattern.format(*resolvedArgs)
+        formatString(pattern, *resolvedArgs)
     } else {
         pattern
     }

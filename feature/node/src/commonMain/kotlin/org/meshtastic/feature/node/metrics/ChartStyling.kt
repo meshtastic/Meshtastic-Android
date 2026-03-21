@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
+import org.meshtastic.core.common.util.formatString
 
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -242,7 +243,7 @@ object ChartStyling {
                         if (pointIndex > 0) append(", ")
                         // Force alpha to 1f so text is readable even if the line is transparent/subtle
                         val color = point.color.copy(alpha = .8f)
-                        val text = format(point.entry.y, color)
+                        val text = formatString("%.1f", point.entry.y)
                         withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(text) }
                     }
                 }

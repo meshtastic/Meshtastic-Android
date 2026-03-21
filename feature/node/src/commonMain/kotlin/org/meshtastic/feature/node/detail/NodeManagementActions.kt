@@ -18,10 +18,10 @@ package org.meshtastic.feature.node.detail
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.service.ServiceAction
@@ -59,7 +59,7 @@ constructor(
     }
 
     open fun removeNode(scope: CoroutineScope, nodeNum: Int) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             Logger.i { "Removing node '$nodeNum'" }
             val packetId = radioController.getPacketId()
             radioController.removeByNodenum(packetId, nodeNum)
@@ -80,7 +80,7 @@ constructor(
     }
 
     open fun ignoreNode(scope: CoroutineScope, node: Node) {
-        scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Ignore(node)) }
+        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Ignore(node)) }
     }
 
     open fun requestMuteNode(scope: CoroutineScope, node: Node) {
@@ -96,7 +96,7 @@ constructor(
     }
 
     open fun muteNode(scope: CoroutineScope, node: Node) {
-        scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Mute(node)) }
+        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Mute(node)) }
     }
 
     open fun requestFavoriteNode(scope: CoroutineScope, node: Node) {
@@ -115,11 +115,11 @@ constructor(
     }
 
     open fun favoriteNode(scope: CoroutineScope, node: Node) {
-        scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Favorite(node)) }
+        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Favorite(node)) }
     }
 
     open fun setNodeNotes(scope: CoroutineScope, nodeNum: Int, notes: String) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 nodeRepository.setNodeNotes(nodeNum, notes)
             } catch (ex: Exception) {

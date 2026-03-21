@@ -22,8 +22,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
     android { namespace = "org.meshtastic.core.navigation" }
 
     sourceSets {

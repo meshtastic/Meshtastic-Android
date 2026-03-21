@@ -62,6 +62,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
@@ -201,9 +202,9 @@ private fun PowerMetricsChart(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     when (color.copy(alpha = 1f)) {
-                        currentColor -> "Current: %.0f mA".format(value)
-                        voltageColor -> "Voltage: %.1f V".format(value)
-                        else -> "%.1f".format(value)
+                        currentColor -> formatString("Current: %.0f mA", value)
+                        voltageColor -> formatString("Voltage: %.1f V", value)
+                        else -> formatString("%.1f", value)
                     }
                 },
             )
@@ -275,7 +276,7 @@ private fun PowerMetricsChart(
                 if (currentData.isNotEmpty()) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = currentColor),
-                        valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
+                        valueFormatter = { _, value, _ -> formatString("%.0f mA", value) },
                     )
                 } else {
                     null
@@ -284,7 +285,7 @@ private fun PowerMetricsChart(
                 if (voltageData.isNotEmpty()) {
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                        valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+                        valueFormatter = { _, value, _ -> formatString("%.1f V", value) },
                     )
                 } else {
                     null
@@ -372,7 +373,7 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
             MetricIndicator(PowerMetric.VOLTAGE.color)
             Spacer(Modifier.width(4.dp))
             Text(
-                text = "%.2fV".format(voltage),
+                text = formatString("%.2fV", voltage),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
             )
@@ -381,7 +382,7 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
             MetricIndicator(PowerMetric.CURRENT.color)
             Spacer(Modifier.width(4.dp))
             Text(
-                text = "%.1fmA".format(current),
+                text = formatString("%.1fmA", current),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
             )

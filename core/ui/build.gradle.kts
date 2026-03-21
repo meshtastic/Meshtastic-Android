@@ -23,8 +23,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
     android {
         namespace = "org.meshtastic.core.ui"
         androidResources.enable = false
@@ -48,11 +46,14 @@ kotlin {
             implementation(libs.compose.multiplatform.materialIconsExtended)
             implementation(libs.compose.multiplatform.ui)
             implementation(libs.compose.multiplatform.foundation)
-            implementation(libs.compose.multiplatform.ui.tooling)
 
             implementation(libs.kermit)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.qrcode.kotlin)
+        }
+
+        val jvmAndroidMain by getting {
+            dependencies { implementation(libs.compose.multiplatform.ui.tooling) }
         }
 
         androidMain.dependencies { implementation(libs.androidx.activity.compose) }

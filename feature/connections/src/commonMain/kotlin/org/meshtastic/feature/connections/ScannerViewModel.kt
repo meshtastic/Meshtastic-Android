@@ -19,6 +19,7 @@ package org.meshtastic.feature.connections
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.common.util.ioDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -84,7 +85,7 @@ open class ScannerViewModel(
                             timeout = kotlin.time.Duration.INFINITE,
                             serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
                         )
-                        .flowOn(kotlinx.coroutines.Dispatchers.IO)
+                        .flowOn(ioDispatcher)
                         .collect { device ->
                             if (!scannedBleDevices.value.containsKey(device.address)) {
                                 scannedBleDevices.update { current -> current + (device.address to device) }

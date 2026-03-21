@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bad
 import org.meshtastic.core.resources.fair
@@ -153,7 +154,7 @@ fun Snr(snr: Float, modifier: Modifier = Modifier) {
 
     Text(
         modifier = modifier,
-        text = "%s %.2fdB".format(stringResource(Res.string.snr), snr),
+        text = formatString("%s %.2fdB", stringResource(Res.string.snr), snr),
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )
@@ -171,7 +172,7 @@ fun Rssi(rssi: Int, modifier: Modifier = Modifier) {
         }
     Text(
         modifier = modifier,
-        text = "%s %ddBm".format(stringResource(Res.string.rssi), rssi),
+        text = formatString("%s %ddBm", stringResource(Res.string.rssi), rssi),
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )

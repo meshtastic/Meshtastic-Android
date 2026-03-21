@@ -98,7 +98,7 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
                     cleartextPSK
                 } else {
                     // Treat an index of 1 as the old channelDefaultKey and work up from there
-                    val bytes = channelDefaultKey.clone()
+                    val bytes = channelDefaultKey.copyOf()
                     bytes[bytes.size - 1] = (0xff and (bytes[bytes.size - 1] + pskIndex - 1)).toByte()
                     bytes.toByteString()
                 }

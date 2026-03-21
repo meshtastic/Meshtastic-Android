@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.close
@@ -110,7 +111,7 @@ private fun LoadingContent(state: ResponseState.Loading, onComplete: () -> Unit)
     val progress by animateFloatAsState(targetValue = clampedProgress, label = "progress")
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "%.0f%%".format(progress * 100f),
+            text = formatString("%.0f%%", progress * 100f),
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.secondary,
         )

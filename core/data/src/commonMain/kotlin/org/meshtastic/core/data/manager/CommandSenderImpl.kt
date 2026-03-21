@@ -19,7 +19,6 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -27,6 +26,7 @@ import kotlinx.coroutines.flow.onEach
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -58,7 +58,7 @@ class CommandSenderImpl(
     private val nodeManager: NodeManager,
     private val radioConfigRepository: RadioConfigRepository,
 ) : CommandSender {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
     private val sessionPasskey = atomic(ByteString.EMPTY)
     override val tracerouteStartTimes = mutableMapOf<Int, Long>()

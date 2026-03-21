@@ -62,7 +62,7 @@ private fun decodeSharedContactData(data: String): SharedContact {
             sanitized.decodeBase64() ?: throw IllegalArgumentException("Invalid Base64 string")
         } catch (e: IllegalArgumentException) {
             throw MalformedMeshtasticUrlException(
-                "Failed to Base64 decode SharedContact data ($data): ${e.javaClass.simpleName}: ${e.message}",
+                "Failed to Base64 decode SharedContact data ($data): ${e::class.simpleName}: ${e.message}",
             )
         }
 
@@ -70,7 +70,7 @@ private fun decodeSharedContactData(data: String): SharedContact {
         SharedContact.ADAPTER.decode(decodedBytes)
     } catch (e: Exception) {
         throw MalformedMeshtasticUrlException(
-            "Failed to proto decode SharedContact: ${e.javaClass.simpleName}: ${e.message}",
+            "Failed to proto decode SharedContact: ${e::class.simpleName}: ${e.message}",
         )
     }
 }

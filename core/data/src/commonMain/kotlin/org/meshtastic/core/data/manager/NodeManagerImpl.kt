@@ -21,13 +21,13 @@ import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import okio.ByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceMetrics
 import org.meshtastic.core.model.EnvironmentMetrics
@@ -62,7 +62,7 @@ class NodeManagerImpl(
     private val serviceBroadcasts: ServiceBroadcasts,
     private val notificationManager: NotificationManager,
 ) : NodeManager {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
     private val _nodeDBbyNodeNum = atomic(persistentMapOf<Int, Node>())
     private val _nodeDBbyID = atomic(persistentMapOf<String, Node>())

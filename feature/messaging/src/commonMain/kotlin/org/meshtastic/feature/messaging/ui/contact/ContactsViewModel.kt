@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.messaging.ui.contact
+import org.meshtastic.core.common.util.ioDispatcher
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -189,17 +190,17 @@ class ContactsViewModel(
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
     fun deleteContacts(contacts: List<String>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.deleteContacts(contacts) }
 
-    fun markAllAsRead() = viewModelScope.launch(Dispatchers.IO) { packetRepository.clearAllUnreadCounts() }
+    fun markAllAsRead() = viewModelScope.launch(ioDispatcher) { packetRepository.clearAllUnreadCounts() }
 
     fun setMuteUntil(contacts: List<String>, until: Long) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.setMuteUntil(contacts, until) }
 
     fun getContactSettings() = packetRepository.getContactSettings()
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
     }
 
     /**

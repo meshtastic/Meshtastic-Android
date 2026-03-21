@@ -17,6 +17,7 @@
 package org.meshtastic.core.di.di
 
 import kotlinx.coroutines.Dispatchers
+import org.meshtastic.core.common.util.ioDispatcher
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -25,5 +26,5 @@ import org.meshtastic.core.di.CoroutineDispatchers
 class CoreDiModule {
     @Single
     fun provideCoroutineDispatchers(): CoroutineDispatchers =
-        CoroutineDispatchers(io = Dispatchers.IO, main = Dispatchers.Main, default = Dispatchers.Default)
+        CoroutineDispatchers(io = ioDispatcher, main = Dispatchers.Main, default = Dispatchers.Default)
 }

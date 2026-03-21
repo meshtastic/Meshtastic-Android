@@ -17,17 +17,17 @@
 package org.meshtastic.core.datastore.di
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.ioDispatcher
 
 @Module
 @ComponentScan("org.meshtastic.core.datastore")
 class CoreDatastoreModule {
     @Single
     @Named("DataStoreScope")
-    fun provideDataStoreScope(): CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    fun provideDataStoreScope(): CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 }

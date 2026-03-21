@@ -81,7 +81,7 @@ object HomoglyphCharacterStringTransformer {
      */
     fun optimizeUtf8StringWithHomoglyphs(value: String): String {
         val stringBuilder = StringBuilder()
-        for (c in value.toCharArray()) stringBuilder.append(homoglyphCharactersSubstitutionMapping.getOrDefault(c, c))
+        for (c in value.toCharArray()) stringBuilder.append(homoglyphCharactersSubstitutionMapping[c] ?: c)
         return stringBuilder.toString()
     }
 }

@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.MeshLog
@@ -277,7 +278,7 @@ class DebugViewModel(
         }
     }
 
-    suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> = withContext(Dispatchers.IO) {
+    suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> = withContext(ioDispatcher) {
         val unbounded = meshLogRepository.getAllLogsUnbounded().first()
         val logs = if (unbounded.isEmpty()) meshLogRepository.getAllLogs().first() else unbounded
         toUiState(logs)
@@ -405,7 +406,7 @@ class DebugViewModel(
         )
     }
 
-    fun deleteAllLogs() = viewModelScope.launch(Dispatchers.IO) { meshLogRepository.deleteAll() }
+    fun deleteAllLogs() = viewModelScope.launch(ioDispatcher) { meshLogRepository.deleteAll() }
 
     @Immutable
     data class UiMeshLog(

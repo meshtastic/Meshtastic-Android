@@ -23,6 +23,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -100,7 +102,7 @@ class SharedRadioInterfaceService(
     private var radioIf: RadioTransport? = null
     private var isStarted = false
 
-    @Volatile private var listenersInitialized = false
+    private val listenersInitialized = kotlinx.atomicfu.atomic(false)
     private var heartbeatJob: kotlinx.coroutines.Job? = null
     private var lastHeartbeatMillis = 0L
 
@@ -108,42 +110,46 @@ class SharedRadioInterfaceService(
         private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
     }
 
+    private val initLock = Mutex()
+
     private fun initStateListeners() {
-        if (listenersInitialized) return
-        synchronized(this) {
-            if (listenersInitialized) return
-            listenersInitialized = true
+        if (listenersInitialized.value) return
+        processLifecycle.coroutineScope.launch {
+            initLock.withLock {
+                if (listenersInitialized.value) return@withLock
+                listenersInitialized.value = true
 
-            radioPrefs.devAddr
-                .onEach { addr ->
-                    if (_currentDeviceAddressFlow.value != addr) {
-                        _currentDeviceAddressFlow.value = addr
-                        startInterface()
+                radioPrefs.devAddr
+                    .onEach { addr ->
+                        if (_currentDeviceAddressFlow.value != addr) {
+                            _currentDeviceAddressFlow.value = addr
+                            startInterface()
+                        }
                     }
-                }
-                .launchIn(processLifecycle.coroutineScope)
+                    .launchIn(processLifecycle.coroutineScope)
 
-            bluetoothRepository.state
-                .onEach { state ->
-                    if (state.enabled) {
-                        startInterface()
-                    } else if (getBondedDeviceAddress()?.startsWith(InterfaceId.BLUETOOTH.id) == true) {
-                        stopInterface()
+                bluetoothRepository.state
+                    .onEach { state ->
+                        if (state.enabled) {
+                            startInterface()
+                        } else if (getBondedDeviceAddress()?.startsWith(InterfaceId.BLUETOOTH.id) == true) {
+                            stopInterface()
+                        }
                     }
-                }
-                .catch { Logger.e(it) { "bluetoothRepository.state flow crashed!" } }
-                .launchIn(processLifecycle.coroutineScope)
+                    .catch { Logger.e(it) { "bluetoothRepository.state flow crashed!" } }
+                    .launchIn(processLifecycle.coroutineScope)
 
-            networkRepository.networkAvailable
-                .onEach { state ->
-                    if (state) {
-                        startInterface()
-                    } else if (getBondedDeviceAddress()?.startsWith(InterfaceId.TCP.id) == true) {
-                        stopInterface()
+                networkRepository.networkAvailable
+                    .onEach { state ->
+                        if (state) {
+                            startInterface()
+                        } else if (getBondedDeviceAddress()?.startsWith(InterfaceId.TCP.id) == true) {
+                            stopInterface()
+                        }
                     }
-                }
-                .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed!" } }
-                .launchIn(processLifecycle.coroutineScope)
+                    .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed!" } }
+                    .launchIn(processLifecycle.coroutineScope)
+            }
         }
     }
 

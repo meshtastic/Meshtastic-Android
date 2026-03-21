@@ -23,8 +23,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.network"

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.messaging
+import org.meshtastic.core.common.util.ioDispatcher
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,7 +32,7 @@ class QuickChatViewModel(private val quickChatActionRepository: QuickChatActionR
         get() = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
     fun updateActionPositions(actions: List<QuickChatAction>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             for (position in actions.indices) {
                 quickChatActionRepository.setItemPosition(actions[position].uuid, position)
             }
@@ -39,8 +40,8 @@ class QuickChatViewModel(private val quickChatActionRepository: QuickChatActionR
     }
 
     fun addQuickChatAction(action: QuickChatAction) =
-        viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.upsert(action) }
+        viewModelScope.launch(ioDispatcher) { quickChatActionRepository.upsert(action) }
 
     fun deleteQuickChatAction(action: QuickChatAction) =
-        viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.delete(action) }
+        viewModelScope.launch(ioDispatcher) { quickChatActionRepository.delete(action) }
 }

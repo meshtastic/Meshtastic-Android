@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.core.ui.component
+import org.meshtastic.core.ui.component.preview.*
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +41,6 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
@@ -217,7 +217,7 @@ fun EditTextPreference(
             isError = isError,
             onValueChange = {
                 if (maxSize > 0) {
-                    if (it.toByteArray().size <= maxSize) {
+                    if (it.encodeToByteArray().size <= maxSize) {
                         onValueChanged(it)
                     }
                 } else {
@@ -255,7 +255,7 @@ fun EditTextPreference(
         if (maxSize > 0 && isFocused) {
             Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "${value.toByteArray().size}/$maxSize",
+                    text = "${value.encodeToByteArray().size}/$maxSize",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(end = 8.dp, bottom = 4.dp),

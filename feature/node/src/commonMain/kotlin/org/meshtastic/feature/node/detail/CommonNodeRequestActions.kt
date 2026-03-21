@@ -18,7 +18,6 @@ package org.meshtastic.feature.node.detail
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -28,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
@@ -60,7 +60,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
     override val lastRequestNeighborTimes: StateFlow<Map<Int, Long>> = _lastRequestNeighborTimes.asStateFlow()
 
     override fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             Logger.i { "Requesting UserInfo for '$destNum'" }
             radioController.requestUserInfo(destNum)
             _effects.emit(
@@ -72,7 +72,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
     }
 
     override fun requestNeighborInfo(scope: CoroutineScope, destNum: Int, longName: String) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             Logger.i { "Requesting NeighborInfo for '$destNum'" }
             val packetId = radioController.getPacketId()
             radioController.requestNeighborInfo(packetId, destNum)
@@ -86,7 +86,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
     }
 
     override fun requestPosition(scope: CoroutineScope, destNum: Int, longName: String, position: Position) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             Logger.i { "Requesting position for '$destNum'" }
             radioController.requestPosition(destNum, position)
             _effects.emit(
@@ -98,7 +98,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
     }
 
     override fun requestTelemetry(scope: CoroutineScope, destNum: Int, longName: String, type: TelemetryType) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             Logger.i { "Requesting telemetry for '$destNum'" }
             val packetId = radioController.getPacketId()
             radioController.requestTelemetry(packetId, destNum, type.ordinal)
@@ -121,7 +121,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
     }
 
     override fun requestTraceroute(scope: CoroutineScope, destNum: Int, longName: String) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             Logger.i { "Requesting traceroute for '$destNum'" }
             val packetId = radioController.getPacketId()
             radioController.requestTraceroute(packetId, destNum)

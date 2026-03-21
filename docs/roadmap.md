@@ -16,7 +16,8 @@ These items address structural gaps identified in the March 2026 architecture re
 | Add feature module `commonTest` (settings, node, messaging) | Medium | Medium | ✅ |
 | Desktop Koin `checkModules()` integration test | Medium | Low | ✅ |
 | Auto-wire Desktop ViewModels via K2 Compiler (eliminate manual wiring) | Medium | Low | ✅ |
-here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low | ✅ |
+| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low | ✅ |
+| **iOS CI gate (compile-only validation)** | High | Medium | ✅ |
 
 ## Active Work
 

@@ -61,6 +61,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
@@ -256,11 +257,11 @@ private fun DeviceMetricsChart(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     when (color.copy(alpha = 1f)) {
-                        batteryColor -> percentValueTemplate.format(batteryLabel, value)
-                        voltageColor -> voltageValueTemplate.format(voltageLabel, value)
-                        chUtilColor -> percentValueTemplate.format(channelUtilizationLabel, value)
-                        airUtilColor -> percentValueTemplate.format(airUtilizationLabel, value)
-                        else -> numericValueTemplate.format(value)
+                        batteryColor -> formatString(percentValueTemplate, batteryLabel, value)
+                        voltageColor -> formatString(voltageValueTemplate, voltageLabel, value)
+                        chUtilColor -> formatString(percentValueTemplate, channelUtilizationLabel, value)
+                        airUtilColor -> formatString(percentValueTemplate, airUtilizationLabel, value)
+                        else -> formatString(numericValueTemplate, value)
                     }
                 },
             )
@@ -366,7 +367,7 @@ private fun DeviceMetricsChart(
                 if (leftLayer != null) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = batteryColor),
-                        valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
+                        valueFormatter = { _, value, _ -> formatString("%.0f%%", value) },
                     )
                 } else {
                     null
@@ -375,7 +376,7 @@ private fun DeviceMetricsChart(
                 if (rightLayer != null) {
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                        valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+                        valueFormatter = { _, value, _ -> formatString("%.1f V", value) },
                     )
                 } else {
                     null
@@ -488,7 +489,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                                 Spacer(Modifier.width(4.dp))
                                 Text(
                                     text =
-                                    percentValueTemplate.format(
+                                    formatString(
+                                        percentValueTemplate,
                                         channelUtilizationLabel,
                                         deviceMetrics.channel_utilization ?: 0f,
                                     ),
@@ -502,7 +504,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                                 Spacer(Modifier.width(4.dp))
                                 Text(
                                     text =
-                                    percentValueTemplate.format(
+                                    formatString(
+                                        percentValueTemplate,
                                         airUtilizationLabel,
                                         deviceMetrics.air_util_tx ?: 0f,
                                     ),
@@ -513,7 +516,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                         }
                         Text(
                             text =
-                            labelValueTemplate.format(
+                            formatString(
+                                labelValueTemplate,
                                 uptimeLabel,
                                 formatUptime(deviceMetrics?.uptime_seconds ?: 0),
                             ),

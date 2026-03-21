@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
@@ -146,7 +147,7 @@ private fun TemperatureDisplay(
                 MetricIndicator(Environment.TEMPERATURE.color)
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    text = textFormat.format(stringResource(Res.string.temperature), temperature),
+                    text = formatString(textFormat, stringResource(Res.string.temperature), temperature),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
@@ -171,7 +172,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                     MetricIndicator(Environment.HUMIDITY.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "%s %.2f%%".format(stringResource(Res.string.humidity), humidity),
+                        text = formatString("%s %.2f%%", stringResource(Res.string.humidity), humidity),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         modifier = Modifier.padding(vertical = 0.dp),
@@ -184,7 +185,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                     MetricIndicator(Environment.BAROMETRIC_PRESSURE.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "%.2f hPa".format(pressure),
+                        text = formatString("%.2f hPa", pressure),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         modifier = Modifier.padding(vertical = 0.dp),
@@ -214,7 +215,8 @@ private fun SoilMetricsDisplay(
                         Spacer(Modifier.width(4.dp))
                         Text(
                             text =
-                            soilMoistureTextFormat.format(
+                            formatString(
+                                soilMoistureTextFormat,
                                 stringResource(Res.string.soil_moisture),
                                 soilMoistureValue,
                             ),
@@ -231,7 +233,8 @@ private fun SoilMetricsDisplay(
                         Spacer(Modifier.width(4.dp))
                         Text(
                             text =
-                            soilTemperatureTextFormat.format(
+                            formatString(
+                                soilTemperatureTextFormat,
                                 stringResource(Res.string.soil_temperature),
                                 soilTemperature,
                             ),
@@ -258,7 +261,7 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
                     MetricIndicator(Environment.LUX.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "%s %.0f lx".format(stringResource(Res.string.lux), luxValue),
+                        text = formatString("%s %.0f lx", stringResource(Res.string.lux), luxValue),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     )
@@ -270,7 +273,7 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
                     MetricIndicator(Environment.UV_LUX.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "%s %.0f UVlx".format(stringResource(Res.string.uv_lux), uvLuxValue),
+                        text = formatString("%s %.0f UVlx", stringResource(Res.string.uv_lux), uvLuxValue),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     )
@@ -290,7 +293,7 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
             if (hasVoltage) {
                 val voltage = envMetrics.voltage!!
                 Text(
-                    text = "%s %.2f V".format(stringResource(Res.string.voltage), voltage),
+                    text = formatString("%s %.2f V", stringResource(Res.string.voltage), voltage),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
@@ -298,7 +301,7 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
             if (hasCurrent) {
                 val currentValue = envMetrics.current!!
                 Text(
-                    text = "%s %.2f mA".format(stringResource(Res.string.current), currentValue),
+                    text = formatString("%s %.2f mA", stringResource(Res.string.current), currentValue),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
@@ -332,7 +335,7 @@ private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                     MetricIndicator(Environment.GAS_RESISTANCE.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = "%s %.2f Ohm".format(stringResource(Res.string.gas_resistance), gasResistance),
+                        text = formatString("%s %.2f Ohm", stringResource(Res.string.gas_resistance), gasResistance),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     )
@@ -348,7 +351,7 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
         if (!radiation.isNaN() && radiation > 0f) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = "%s %.2f µR/h".format(stringResource(Res.string.radiation), radiation),
+                    text = formatString("%s %.2f µR/h", stringResource(Res.string.radiation), radiation),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )

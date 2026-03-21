@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.messaging
+import org.meshtastic.core.common.util.ioDispatcher
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -190,7 +191,7 @@ class MessageViewModel(
     }
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
     }
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
@@ -218,10 +219,10 @@ class MessageViewModel(
         viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey)) }
 
     fun deleteMessages(uuidList: List<Long>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.deleteMessages(uuidList) }
 
     fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
             if (lastReadTimestamp <= existingTimestamp) {
                 return@launch

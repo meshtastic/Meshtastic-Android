@@ -18,12 +18,12 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -56,7 +56,7 @@ class MeshConfigFlowManagerImpl(
     private val commandSender: CommandSender,
     private val packetHandler: PacketHandler,
 ) : MeshConfigFlowManager {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
     private val configOnlyNonce = 69420
     private val nodeInfoNonce = 69421
     private val wantConfigDelay = 100L

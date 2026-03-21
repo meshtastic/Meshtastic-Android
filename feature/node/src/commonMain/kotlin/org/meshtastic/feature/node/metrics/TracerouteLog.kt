@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
@@ -163,7 +164,7 @@ fun TracerouteLogScreen(
                                     statusYellow = statusYellow,
                                     statusOrange = statusOrange,
                                 )
-                            val durationText = stringResource(Res.string.traceroute_duration, "%.1f".format(seconds))
+                            val durationText = stringResource(Res.string.traceroute_duration, formatString("%.1f", seconds))
                             buildAnnotatedString {
                                 append(annotatedBase)
                                 append("\n\n$durationText")
