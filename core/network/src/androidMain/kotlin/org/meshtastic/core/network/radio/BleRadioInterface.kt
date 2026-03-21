@@ -145,8 +145,6 @@ class BleRadioInterface(
 
     private fun connect() {
         connectionScope.launch {
-            val device = findDevice()
-
             bleConnection.connectionState
                 .onEach { state ->
                     if (state is BleConnectionState.Disconnected && isFullyConnected) {
@@ -170,6 +168,8 @@ class BleRadioInterface(
 
                     connectionStartTime = nowMillis
                     Logger.i { "[$address] BLE connection attempt started" }
+
+                    val device = findDevice()
 
                     var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
 
