@@ -64,7 +64,7 @@ These items address structural gaps identified in the March 2026 architecture re
 
 | Feature | Status |
 |---|---|
-| Settings | ✅ ~35 real screens (6 desktop-specific) + desktop locale picker with in-place recomposition |
+| Settings | ✅ ~35 real screens (fully shared) + desktop locale picker with in-place recomposition |
 | Node list | ✅ Adaptive list-detail with real `NodeDetailContent` |
 | Messaging | ✅ Adaptive contacts with real message view + send |
 | Connections | ✅ Unified shared UI with dynamic transport detection |

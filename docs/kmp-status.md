@@ -43,9 +43,9 @@ Modules that share JVM-specific code between Android and desktop now standardize
 
 | Module | UI in commonMain? | Desktop wired? |
 |---|:---:|:---:|
-| `feature:settings` | ✅ | ✅ ~35 real screens; shared `ChannelScreen` & `ViewModel` |
-| `feature:node` | ✅ | ✅ Adaptive list-detail; shared `NodeContextMenu` |
-| `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; 17 shared files in commonMain (ViewModels, MessageBubble, MessageItem, QuickChat, Reactions, DeliveryInfo, actions, events) |
+| `feature:settings` | ✅ | ✅ ~35 real screens; fully shared `settingsGraph` and UI |
+| `feature:node` | ✅ | ✅ Adaptive list-detail; fully shared `nodesGraph`, `PositionLogScreen`, and `NodeContextMenu` |
+| `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; fully shared `contactsGraph`, `MessageScreen`, `ContactsScreen`, and `MessageListPaged` |
 | `feature:connections` | ✅ | ✅ Shared `ConnectionsScreen` with dynamic transport detection |
 | `feature:intro` | ✅ | — |
 | `feature:map` | ✅ | Placeholder; shared `NodeMapViewModel` |
@@ -63,7 +63,7 @@ Working Compose Desktop application with:
 - **Desktop language picker** backed by `UiPreferencesDataSource.locale`, with immediate Compose Multiplatform resource updates
 - **Navigation-preserving locale switching** via `Main.kt` `staticCompositionLocalOf` recomposition instead of recreating the Nav3 backstack
 - Node detail metrics screens (Device, Environment, Signal, Power, Pax) wired with shared KMP + Vico charts
-- 6 desktop-specific screens (Settings, Device, Position, Network, Security, ExternalNotification)
+- **Feature-driven Architecture:** Desktop navigation completely relies on feature modules via `commonMain` exported graphs (`settingsGraph`, `nodesGraph`, `contactsGraph`, etc.), reducing the desktop module to a simple host shell.
 - **Native notifications and system tray icon** wired via `DesktopNotificationManager`
 - **Native release pipeline** generating `.dmg` (macOS), `.msi` (Windows), and `.deb` (Linux) installers in CI
 
