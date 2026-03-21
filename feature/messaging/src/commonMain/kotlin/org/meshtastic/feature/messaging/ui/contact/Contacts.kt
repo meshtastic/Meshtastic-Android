@@ -105,7 +105,6 @@ import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
 import org.meshtastic.core.ui.icon.VolumeUpTwoTone
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.rememberShowToastResource
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
 import kotlin.time.Duration.Companion.days
