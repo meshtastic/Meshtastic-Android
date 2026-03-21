@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.feature.settings.DesktopDeviceConfigScreen
 import org.meshtastic.feature.settings.DesktopExternalNotificationConfigScreen
-import org.meshtastic.feature.settings.DesktopNetworkConfigScreen
 import org.meshtastic.feature.settings.DesktopPositionConfigScreen
 import org.meshtastic.feature.settings.DesktopSecurityConfigScreen
 import org.meshtastic.feature.settings.DesktopSettingsScreen
@@ -49,11 +48,6 @@ actual fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
 @Composable
 actual fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     DesktopPositionConfigScreen(viewModel = viewModel, onBack = onBack)
-}
-
-@Composable
-actual fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    DesktopNetworkConfigScreen(viewModel = viewModel, onBack = onBack)
 }
 
 @Composable

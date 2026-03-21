@@ -23,7 +23,6 @@ import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.DeviceConfigScreen as AndroidDeviceConfigScreen
 import org.meshtastic.feature.settings.radio.component.ExternalNotificationConfigScreen as AndroidExternalNotificationConfigScreen
-import org.meshtastic.feature.settings.radio.component.NetworkConfigScreen as AndroidNetworkConfigScreen
 import org.meshtastic.feature.settings.radio.component.PositionConfigScreen as AndroidPositionConfigScreen
 import org.meshtastic.feature.settings.radio.component.SecurityConfigScreen as AndroidSecurityConfigScreen
 
@@ -50,11 +49,6 @@ actual fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
 @Composable
 actual fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     AndroidPositionConfigScreen(viewModel = viewModel, onBack = onBack)
-}
-
-@Composable
-actual fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidNetworkConfigScreen(viewModel = viewModel, onBack = onBack)
 }
 
 @Composable

@@ -49,6 +49,7 @@ import org.meshtastic.feature.settings.radio.component.DisplayConfigScreen
 import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
 import org.meshtastic.feature.settings.radio.component.MQTTConfigScreen
 import org.meshtastic.feature.settings.radio.component.NeighborInfoConfigScreen
+import org.meshtastic.feature.settings.radio.component.NetworkConfigScreen
 import org.meshtastic.feature.settings.radio.component.PaxcounterConfigScreen
 import org.meshtastic.feature.settings.radio.component.PowerConfigScreen
 import org.meshtastic.feature.settings.radio.component.RangeTestConfigScreen
@@ -204,11 +205,7 @@ expect fun SettingsMainScreen(
 
 /** Expect declarations for platform-specific config screens. */
 @Composable expect fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
-
 @Composable expect fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
-
-@Composable expect fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
-
 @Composable expect fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
 
 @Composable expect fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)

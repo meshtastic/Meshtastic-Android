@@ -31,18 +31,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
+import org.meshtastic.core.common.util.CommonUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.common.util.extractWifiCredentials
 import org.meshtastic.core.model.util.handleMeshtasticUri
-import org.meshtastic.core.model.util.toCommonUri
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
@@ -81,7 +79,6 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.ui.util.openNfcSettings
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
@@ -90,11 +87,14 @@ private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
     MeshtasticDialog(titleRes = Res.string.error, messageRes = Res.string.wifi_qr_code_error, onDismiss = onDismiss)
 
 @Composable
-fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
+fun NetworkConfigScreen(
+    viewModel: RadioConfigViewModel,
+    onBack: () -> Unit,
+    onOpenNfcSettings: () -> Unit = {},
+) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val networkConfig = state.radioConfig.network ?: Config.NetworkConfig()
     val formState = rememberConfigState(initialValue = networkConfig)
-    val context = LocalContext.current
 
     var showScanErrorDialog: Boolean by rememberSaveable { mutableStateOf(false) }
     if (showScanErrorDialog) {
@@ -109,7 +109,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             message = stringResource(Res.string.nfc_disabled),
             confirmText = stringResource(Res.string.open_settings),
             onConfirm = {
-                context.openNfcSettings()
+                onOpenNfcSettings()
                 showNfcDisabledDialog = false
             },
             dismissText = stringResource(Res.string.cancel),
@@ -120,7 +120,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         if (contents != null) {
             val handled =
                 handleMeshtasticUri(
-                    uri = contents.toUri().toCommonUri(),
+                    uri = CommonUri.parse(contents),
                     onChannel = {}, // No-op, not supported in network config
                     onContact = {}, // No-op, not supported in network config
                 )
