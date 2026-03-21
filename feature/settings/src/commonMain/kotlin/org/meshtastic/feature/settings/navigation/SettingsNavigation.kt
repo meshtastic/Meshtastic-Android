@@ -182,10 +182,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     entry<SettingsRoutes.About> {
-        AboutScreen(
-            onNavigateUp = { backStack.removeLastOrNull() },
-            jsonProvider = { SettingsRoutes::class.java.getResource("/aboutlibraries.json")?.readText() ?: "" },
-        )
+        AboutScreen(onNavigateUp = { backStack.removeLastOrNull() }, jsonProvider = { getAboutLibrariesJson() })
     }
 
     entry<SettingsRoutes.FilterSettings> {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.debugging
+package org.meshtastic.feature.messaging.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.ui.component.ScrollToTopEvent
 
 @Composable
-actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.UiMeshLog>): (fileName: String) -> Unit =
-    { _ ->
-    }
+actual fun ContactsEntryContent(
+    backStack: NavBackStack<NavKey>,
+    scrollToTopEvents: Flow<ScrollToTopEvent>,
+    initialContactKey: String?,
+    initialMessage: String,
+) {
+    // TODO: Implement iOS contacts screen
+}
