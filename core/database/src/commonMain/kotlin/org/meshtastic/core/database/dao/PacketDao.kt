@@ -76,6 +76,7 @@ interface PacketDao {
     ) latest ON p.contact_key = latest.contact_key AND p.received_time = latest.max_time
     WHERE (p.myNodeNum = 0 OR p.myNodeNum = (SELECT myNodeNum FROM my_node))
         AND p.port_num = 1 AND p.filtered = 0
+    GROUP BY p.contact_key
     ORDER BY p.received_time DESC
     """,
     )
