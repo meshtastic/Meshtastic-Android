@@ -186,16 +186,6 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
     }
 }
 
-/** Expect declaration for the platform-specific node list screen. */
-@Composable
-expect fun AdaptiveNodeListScreen(
-    backStack: NavBackStack<NavKey>,
-    scrollToTopEvents: Flow<ScrollToTopEvent>,
-    initialNodeId: Int? = null,
-    onNavigate: (Route) -> Unit,
-    onNavigateToMessages: (String) -> Unit,
-)
-
 /** Expect declaration for the platform-specific traceroute map screen. */
 @Composable expect fun TracerouteMapScreen(destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit)
 

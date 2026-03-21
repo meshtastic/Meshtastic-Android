@@ -70,14 +70,14 @@ private sealed interface NodeDetailOverlay {
 }
 
 @Composable
-fun NodeDetailScreen(
+actual fun NodeDetailScreen(
     nodeId: Int,
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     viewModel: NodeDetailViewModel,
-    navigateToMessages: (String) -> Unit = {},
-    onNavigate: (Route) -> Unit = {},
-    onNavigateUp: () -> Unit = {},
-    compassViewModel: CompassViewModel? = null,
+    navigateToMessages: (String) -> Unit,
+    onNavigate: (Route) -> Unit,
+    onNavigateUp: () -> Unit,
+    compassViewModel: CompassViewModel?,
 ) {
     LaunchedEffect(nodeId) { viewModel.start(nodeId) }
 

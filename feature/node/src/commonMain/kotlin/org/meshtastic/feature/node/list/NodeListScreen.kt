@@ -42,7 +42,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
@@ -74,7 +73,7 @@ fun NodeListScreen(
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
 ) {
-    val context = LocalContext.current
+    val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
 
@@ -126,7 +125,7 @@ fun NodeListScreen(
                     sharedContact = sharedContact,
                     onImport = { uriString ->
                         viewModel.handleScannedUri(uriString) {
-                            scope.launch { context.showToast(Res.string.channel_invalid) }
+                            scope.launch { showToast(Res.string.channel_invalid) }
                         }
                     },
                     onDismissSharedContact = { viewModel.setSharedContactRequested(null) },

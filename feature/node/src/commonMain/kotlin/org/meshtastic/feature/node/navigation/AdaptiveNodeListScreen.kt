@@ -16,7 +16,9 @@
  */
 package org.meshtastic.feature.node.navigation
 
-import androidx.activity.compose.BackHandler
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
+import androidx.navigationevent.NavigationEventInfo
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
@@ -36,6 +38,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.ui.component.EmptyDetailPlaceholder
@@ -51,10 +54,11 @@ import org.meshtastic.feature.node.list.NodeListViewModel
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun AndroidAdaptiveNodeListScreen(
+fun AdaptiveNodeListScreen(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     initialNodeId: Int? = null,
+    onNavigate: (Route) -> Unit = {},
     onNavigateToMessages: (String) -> Unit = {},
 ) {
     val nodeListViewModel: NodeListViewModel = koinViewModel()
@@ -78,7 +82,13 @@ fun AndroidAdaptiveNodeListScreen(
         }
     }
 
-    BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) { handleBack() }
+    val navState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = navState,
+        isBackEnabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail,
+        onBackCancelled = { },
+        onBackCompleted = { handleBack() }
+    )
 
     LaunchedEffect(initialNodeId) {
         if (initialNodeId != null) {
@@ -134,7 +144,7 @@ fun AndroidAdaptiveNodeListScreen(
                             viewModel = nodeDetailViewModel,
                             compassViewModel = compassViewModel,
                             navigateToMessages = onNavigateToMessages,
-                            onNavigate = { route -> backStack.add(route) },
+                            onNavigate = onNavigate,
                             onNavigateUp = handleBack,
                         )
                     }
