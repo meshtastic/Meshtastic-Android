@@ -22,13 +22,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.toByteString
 import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
+import kotlinx.coroutines.launch
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -63,7 +64,6 @@ import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
 import org.meshtastic.core.resources.error_duty_cycle
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.low_battery_message
 import org.meshtastic.core.resources.low_battery_title
 import org.meshtastic.core.resources.unknown_username
@@ -433,9 +433,13 @@ class MeshDataHandlerImpl(
                                 if (shouldBatteryNotificationShow(fromNum, t, myNodeNum)) {
                                     notificationManager.dispatch(
                                         Notification(
-                                            title = getString(Res.string.low_battery_title, nextNode.user.short_name),
+                                            title =
+                                                getStringSuspend(
+                                                    Res.string.low_battery_title,
+                                                    nextNode.user.short_name
+                                                ),
                                             message =
-                                            getString(
+                                            getStringSuspend(
                                                 Res.string.low_battery_message,
                                                 nextNode.user.long_name,
                                                 nextNode.deviceMetrics.battery_level ?: 0,
@@ -502,7 +506,12 @@ class MeshDataHandlerImpl(
         val payload = packet.decoded?.payload ?: return
         val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
         if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
-            serviceRepository.setErrorMessage(getString(Res.string.error_duty_cycle), Severity.Warn)
+            scope.launch {
+                serviceRepository.setErrorMessage(
+                    getStringSuspend(Res.string.error_duty_cycle),
+                    Severity.Warn
+                )
+            }
         }
         handleAckNak(
             packet.decoded?.request_id ?: 0,
@@ -659,25 +668,27 @@ class MeshDataHandlerImpl(
         val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
         val isSilent = conversationMuted || nodeMuted
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
-            notificationManager.dispatch(
-                Notification(
-                    title = getSenderName(dataPacket),
-                    message = dataPacket.alert ?: getString(Res.string.critical_alert),
-                    category = Notification.Category.Alert,
-                    contactKey = contactKey,
-                ),
-            )
+            scope.launch {
+                notificationManager.dispatch(
+                    Notification(
+                        title = getSenderName(dataPacket),
+                        message = dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
+                        category = Notification.Category.Alert,
+                        contactKey = contactKey,
+                    ),
+                )
+            }
         } else if (updateNotification && !isSilent) {
             scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
         }
     }
 
-    private fun getSenderName(packet: DataPacket): String {
+    private suspend fun getSenderName(packet: DataPacket): String {
         if (packet.from == DataPacket.ID_LOCAL) {
             val myId = nodeManager.getMyId()
-            return nodeManager.nodeDBbyID[myId]?.user?.long_name ?: getString(Res.string.unknown_username)
+            return nodeManager.nodeDBbyID[myId]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
         }
-        return nodeManager.nodeDBbyID[packet.from]?.user?.long_name ?: getString(Res.string.unknown_username)
+        return nodeManager.nodeDBbyID[packet.from]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
     }
 
     private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket, isSilent: Boolean) {
@@ -701,7 +712,7 @@ class MeshDataHandlerImpl(
             }
 
             PortNum.WAYPOINT_APP.value -> {
-                val message = getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
+                val message = getStringSuspend(Res.string.waypoint_received, dataPacket.waypoint!!.name)
                 notificationManager.dispatch(
                     Notification(
                         title = getSenderName(dataPacket),

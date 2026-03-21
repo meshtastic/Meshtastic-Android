@@ -18,7 +18,6 @@ package org.meshtastic.core.resources
 
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.common.util.formatString
 import org.jetbrains.compose.resources.getString as composeGetString
 
 /** Retrieves a string from the [StringResource] in a blocking manner. Use primarily in non-composable code. */
@@ -26,12 +25,22 @@ fun getString(stringResource: StringResource): String = runBlocking { composeGet
 
 /** Retrieves a formatted string from the [StringResource] in a blocking manner. */
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
-    val pattern = composeGetString(stringResource)
-    if (formatArgs.isNotEmpty()) {
+    val resolvedArgs =
+        formatArgs
+            .map { arg ->
+                if (arg is StringResource) {
+                    composeGetString(arg)
+                } else {
+                    arg
+                }
+            }
+            .toTypedArray()
+
+    if (resolvedArgs.isNotEmpty()) {
         @Suppress("SpreadOperator")
-        formatString(pattern, *formatArgs)
+        composeGetString(stringResource, *resolvedArgs)
     } else {
-        pattern
+        composeGetString(stringResource)
     }
 }
 
@@ -51,11 +60,10 @@ suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: 
             }
             .toTypedArray()
 
-    val pattern = composeGetString(stringResource)
     return if (resolvedArgs.isNotEmpty()) {
         @Suppress("SpreadOperator")
-        formatString(pattern, *resolvedArgs)
+        composeGetString(stringResource, *resolvedArgs)
     } else {
-        pattern
+        composeGetString(stringResource)
     }
 }

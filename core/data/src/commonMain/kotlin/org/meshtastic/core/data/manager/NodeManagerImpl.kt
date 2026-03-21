@@ -43,7 +43,7 @@ import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
@@ -196,13 +196,15 @@ class NodeManagerImpl(
                     node.copy(user = newUser, channel = channel, manuallyVerified = manuallyVerified)
                 }
             if (newNode && !shouldPreserve) {
-                notificationManager.dispatch(
-                    Notification(
-                        title = getString(Res.string.new_node_seen, next.user.short_name),
-                        message = next.user.long_name,
-                        category = Notification.Category.NodeEvent,
-                    ),
-                )
+                scope.handledLaunch {
+                    notificationManager.dispatch(
+                        Notification(
+                            title = getStringSuspend(Res.string.new_node_seen, next.user.short_name),
+                            message = next.user.long_name,
+                            category = Notification.Category.NodeEvent,
+                        ),
+                    )
+                }
             }
             next
         }
