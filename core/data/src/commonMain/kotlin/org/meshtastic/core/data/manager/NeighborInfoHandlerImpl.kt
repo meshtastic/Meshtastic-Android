@@ -17,6 +17,9 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.update
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
@@ -38,7 +41,7 @@ class NeighborInfoHandlerImpl(
 ) : NeighborInfoHandler {
     private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
-    private val startTimes = mutableMapOf<Int, Long>()
+    private val startTimes = atomic(persistentMapOf<Int, Long>())
 
     override var lastNeighborInfo: NeighborInfo? = null
 
@@ -47,7 +50,7 @@ class NeighborInfoHandlerImpl(
     }
 
     override fun recordStartTime(requestId: Int) {
-        startTimes[requestId] = nowMillis
+        startTimes.update { it.put(requestId, nowMillis) }
     }
 
     override fun handleNeighborInfo(packet: MeshPacket) {
@@ -66,7 +69,8 @@ class NeighborInfoHandlerImpl(
 
         // Format for UI response
         val requestId = packet.decoded?.request_id ?: 0
-        val start = startTimes.remove(requestId)
+        val start = startTimes.value[requestId]
+        startTimes.update { it.remove(requestId) }
 
         val neighbors =
             ni.neighbors.joinToString("\n") { n ->
