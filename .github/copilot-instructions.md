@@ -58,7 +58,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 
 ### A. UI Development (Jetpack Compose)
 -   **Material 3:** The app uses Material 3.
--   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). NEVER use hardcoded strings.
+-   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). For ViewModels or non-composable Coroutines, use the asynchronous `getStringSuspend(Res.string.your_key)`. NEVER use hardcoded strings, and NEVER use the blocking `getString()` in a coroutine.
 -   **Dialogs:** Use centralized components in `core:ui` (e.g., `MeshtasticResourceDialog`).
 -   **Platform/Flavor UI:** Inject platform-specific behavior (e.g., map providers) via `CompositionLocal` from `app`.
 
