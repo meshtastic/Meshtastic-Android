@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -142,37 +143,55 @@ class DesktopBleInterface(
 
     private fun connect() {
         connectionScope.launch {
-            try {
-                connectionStartTime = nowMillis
-                Logger.i { "[$address] BLE connection attempt started" }
-
-                bleConnection.connectionState
-                    .onEach { state ->
-                        if (state is BleConnectionState.Disconnected) {
-                            onDisconnected(state)
-                        }
+            bleConnection.connectionState
+                .onEach { state ->
+                    if (state is BleConnectionState.Disconnected) {
+                        onDisconnected(state)
                     }
-                    .catch { e ->
-                        Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
-                        handleFailure(e)
-                    }
-                    .launchIn(connectionScope)
-
-                val device = findDevice()
-                val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
-                if (state !is BleConnectionState.Connected) {
-                    throw RadioNotConnectedException("Failed to connect to device at address $address")
                 }
+                .catch { e ->
+                    Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
+                    handleFailure(e)
+                }
+                .launchIn(connectionScope)
 
-                onConnected()
-                discoverServicesAndSetupCharacteristics()
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                Logger.d { "[$address] BLE connection coroutine cancelled" }
-                throw e
-            } catch (e: Exception) {
-                val failureTime = nowMillis - connectionStartTime
-                Logger.w(e) { "[$address] Failed to connect to device after ${failureTime}ms" }
-                handleFailure(e)
+            while (isActive) {
+                try {
+                    // Add a delay to allow any pending background disconnects (from a previous close() call)
+                    // to complete before we attempt a new connection.
+                    @Suppress("MagicNumber")
+                    val connectDelayMs = 1000L
+                    kotlinx.coroutines.delay(connectDelayMs)
+
+                    connectionStartTime = nowMillis
+                    Logger.i { "[$address] BLE connection attempt started" }
+
+                    val device = findDevice()
+
+                    val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                    if (state !is BleConnectionState.Connected) {
+                        throw RadioNotConnectedException("Failed to connect to device at address $address")
+                    }
+
+                    onConnected()
+                    discoverServicesAndSetupCharacteristics()
+
+                    // Suspend here until Kable drops the connection
+                    bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+
+                    Logger.i { "[$address] BLE connection dropped, preparing to reconnect..." }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    Logger.d { "[$address] BLE connection coroutine cancelled" }
+                    throw e
+                } catch (e: Exception) {
+                    val failureTime = nowMillis - connectionStartTime
+                    Logger.w(e) { "[$address] Failed to connect to device after ${failureTime}ms" }
+                    handleFailure(e)
+
+                    // Wait before retrying to prevent hot loops
+                    @Suppress("MagicNumber")
+                    kotlinx.coroutines.delay(5000L)
+                }
             }
         }
     }
