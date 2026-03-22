@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9973",
+      "title": "Add LED_BUILTIN for variant tlora_v1",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9973",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9955",
       "title": "Add Env for Seeed XIAO ESP32-C6 + Wio-SX1262",
       "page_url": "https://github.com/meshtastic/firmware/pull/9955",
