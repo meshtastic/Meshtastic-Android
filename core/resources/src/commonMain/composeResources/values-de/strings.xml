@@ -42,6 +42,7 @@
     <string name="internal">Intern</string>
     <string name="node_sort_via_favorite">über Favorit</string>
     <string name="node_filter_show_ignored">Nur ignorierte Knoten anzeigen</string>
+    <string name="node_filter_exclude_mqtt">MQTT ausschließen</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>

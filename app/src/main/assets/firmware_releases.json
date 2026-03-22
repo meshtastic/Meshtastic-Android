@@ -201,12 +201,6 @@
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "9953",
-      "title": "Fix: Enable touch-to-backlight on T-Echo (not just T-Echo Plus)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9953",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
       "id": "9951",
       "title": "fix: big-endian byte ordering for radio packet header fields",
       "page_url": "https://github.com/meshtastic/firmware/pull/9951",
