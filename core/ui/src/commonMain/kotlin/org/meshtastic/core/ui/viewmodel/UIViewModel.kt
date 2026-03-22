@@ -121,8 +121,6 @@ class UIViewModel(
         _scrollToTopEventFlow.tryEmit(event)
     }
 
-    val currentAlert = alertManager.currentAlert
-
     fun tracerouteMapAvailability(forwardRoute: List<Int>, returnRoute: List<Int>): TracerouteMapAvailability =
         evaluateTracerouteMapAvailability(
             forwardRoute = forwardRoute,

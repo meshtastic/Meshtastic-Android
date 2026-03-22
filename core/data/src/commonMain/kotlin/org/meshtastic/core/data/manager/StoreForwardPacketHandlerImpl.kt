@@ -18,12 +18,12 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
 import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.SfppHasher
@@ -48,7 +48,7 @@ class StoreForwardPacketHandlerImpl(
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,
 ) : StoreForwardPacketHandler {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope
