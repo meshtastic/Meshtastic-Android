@@ -72,6 +72,7 @@ compose.desktop {
             // App Icon & OS Specific Configurations
             macOS {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
+                minimumSystemVersion = "12.0"
                 // TODO: To prepare for real distribution on macOS, you'll need to sign and notarize.
                 // You can inject these from CI environment variables.
                 // bundleID = "org.meshtastic.desktop"
