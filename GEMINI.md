@@ -41,7 +41,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
 | `core:navigation` | Shared navigation keys/routes for Navigation 3. |
-| `core:ui` | Shared Compose UI components (`EmptyDetailPlaceholder`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
+| `core:ui` | Shared Compose UI components (`AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
 | `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
 | `core:api` | Public AIDL/API integration module for external clients. |
 | `core:prefs` | KMP preferences layer built on DataStore abstractions. |
@@ -60,6 +60,9 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **Material 3:** The app uses Material 3.
 -   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). For ViewModels or non-composable Coroutines, use the asynchronous `getStringSuspend(Res.string.your_key)`. NEVER use hardcoded strings, and NEVER use the blocking `getString()` in a coroutine.
 -   **Dialogs:** Use centralized components in `core:ui` (e.g., `MeshtasticResourceDialog`).
+-   **Alerts:** Use `AlertHost(alertManager)` from `core:ui/commonMain` in each platform host shell (`Main.kt`, `DesktopMainScreen.kt`). Do NOT duplicate inline alert-rendering boilerplate. For shared QR/contact dialogs, use the `SharedDialogs` composable.
+-   **Placeholders:** For desktop/JVM features not yet implemented, use `PlaceholderScreen(name)` from `core:ui/commonMain`. Do NOT define inline placeholder composables in feature modules.
+-   **Theme Picker:** Use `ThemePickerDialog` and `ThemeOption` from `feature:settings/commonMain`. Do NOT duplicate the theme dialog or enum in platform-specific source sets.
 -   **Platform/Flavor UI:** Inject platform-specific behavior (e.g., map providers) via `CompositionLocal` from `app`.
 
 ### B. Logic & Data Layer
@@ -69,6 +72,9 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
     -   `java.util.concurrent.ConcurrentHashMap` → `atomicfu` or `Mutex`-guarded `mutableMapOf()`.
     -   `java.util.concurrent.locks.*` → `kotlinx.coroutines.sync.Mutex`.
     -   `java.io.*` → Okio (`BufferedSource`/`BufferedSink`).
+    -   `kotlinx.coroutines.Dispatchers.IO` → `org.meshtastic.core.common.util.ioDispatcher` (expect/actual).
+-   **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract it to a function in `commonMain`. Examples: `formatLogsTo()` in `feature:settings`, `handleNodeAction()` in `feature:node`, `findNodeByNameSuffix()` in `feature:connections`.
+-   **KMP file naming:** In KMP modules, `commonMain` and platform source sets (`androidMain`, `jvmMain`) share the same package namespace. If both contain a file with the same name (e.g., `LogExporter.kt`), the Kotlin/JVM compiler will produce a duplicate class error. Use distinct filenames: keep the `expect` declaration in `LogExporter.kt` and put shared helpers in a separate file like `LogFormatter.kt`.
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Dependency Injection:** Use **Koin Annotations** with the K2 compiler plugin (0.4.0+). Keep root graph assembly in `app`.
 -   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`.
