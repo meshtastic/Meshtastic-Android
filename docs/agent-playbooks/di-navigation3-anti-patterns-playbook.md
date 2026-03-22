@@ -14,9 +14,9 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 - Do ensure modules are reachable from app bootstrap in `app/src/main/kotlin/org/meshtastic/app/MeshUtilApplication.kt`.
 - Don't assume feature/core `@Module` classes are active automatically.
 - Do ensure they are included by the app root module (`@Module(includes = [...])`) in `app/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt`.
-- **Don't use Koin 0.4.0's A1 Module Compile Safety checks for inverted dependencies.**
-- **Do** leave A1 `compileSafety` disabled in `build-logic/convention/src/main/kotlin/KoinConventionPlugin.kt`. We rely on Koin's A3 full-graph validation (`startKoin` / `VerifyModule`) to handle our decoupled Clean Architecture design where interfaces are declared in one module and implemented in another.
-- **Don't** expect Koin to inject default parameters automatically. Koin 0.4.0's `skipDefaultValues = true` (default behavior) will cause Koin to skip parameters that have default Kotlin values.
+- **Don't use Koin K2 Compiler Plugin's A1 Module Compile Safety checks for inverted dependencies.**
+- **Do** leave A1 `compileSafety` disabled in `build-logic/convention/src/main/kotlin/KoinConventionPlugin.kt` (uses typed `KoinGradleExtension`). We rely on Koin's A3 full-graph validation (`startKoin` / `VerifyModule`) to handle our decoupled Clean Architecture design where interfaces are declared in one module and implemented in another.
+- **Don't** expect Koin to inject default parameters automatically. The K2 plugin's `skipDefaultValues = true` (default behavior) will cause Koin to skip parameters that have default Kotlin values.
 
 ### Current code anchors (DI)
 
