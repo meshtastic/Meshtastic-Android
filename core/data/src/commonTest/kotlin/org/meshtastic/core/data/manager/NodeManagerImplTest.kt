@@ -16,17 +16,36 @@
  */
 package org.meshtastic.core.data.manager
 
+import dev.mokkery.MockMode
+import dev.mokkery.mock
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.User
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import org.meshtastic.proto.Position as ProtoPosition
+
 class NodeManagerImplTest {
-    /*
 
-
+    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
+    private val serviceBroadcasts: ServiceBroadcasts = mock(MockMode.autofill)
+    private val notificationManager: NotificationManager = mock(MockMode.autofill)
 
     private lateinit var nodeManager: NodeManagerImpl
 
-    @Before
+    @BeforeTest
     fun setUp() {
-        mockkStatic("org.meshtastic.core.resources.GetStringKt")
-
         nodeManager = NodeManagerImpl(nodeRepository, serviceBroadcasts, notificationManager)
     }
 
@@ -63,8 +82,9 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedUser updates user if incoming is higher detail`() {
         val nodeNum = 1234
+        // Use a non-UNSET hw_model so isUnknownUser=false (avoids new-node notification + getString)
         val existingUser =
-            User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
+            User(id = "!12345678", long_name = "Old Name", short_name = "ON", hw_model = HardwareModel.TLORA_V2)
 
         nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
 
@@ -81,29 +101,30 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedPosition updates node position`() {
         val nodeNum = 1234
-        val position = Position(latitude_i = 450000000, longitude_i = 900000000)
+        val position = ProtoPosition(latitude_i = 450000000, longitude_i = 900000000)
 
         nodeManager.handleReceivedPosition(nodeNum, 9999, position, 0)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertNotNull(result!!.position)
-        assertEquals(45.0, result.latitude, 0.0001)
-        assertEquals(90.0, result.longitude, 0.0001)
+        assertNotNull(result)
+        assertNotNull(result.position)
+        assertEquals(450000000, result.position.latitude_i)
+        assertEquals(900000000, result.position.longitude_i)
     }
 
     @Test
     fun `handleReceivedPosition with zero coordinates preserves last known location but updates satellites`() {
         val nodeNum = 1234
-        val initialPosition = Position(latitude_i = 450000000, longitude_i = 900000000, sats_in_view = 10)
+        val initialPosition = ProtoPosition(latitude_i = 450000000, longitude_i = 900000000, sats_in_view = 10)
         nodeManager.handleReceivedPosition(nodeNum, 9999, initialPosition, 1000000L)
 
         // Receive "zero" position with new satellite count
-        val zeroPosition = Position(latitude_i = 0, longitude_i = 0, sats_in_view = 5, time = 1001)
+        val zeroPosition = ProtoPosition(latitude_i = 0, longitude_i = 0, sats_in_view = 5, time = 1001)
         nodeManager.handleReceivedPosition(nodeNum, 9999, zeroPosition, 1001000L)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertEquals(45.0, result!!.latitude, 0.0001)
-        assertEquals(90.0, result.longitude, 0.0001)
+        assertEquals(450000000, result!!.position.latitude_i)
+        assertEquals(900000000, result.position.longitude_i)
         assertEquals(5, result.position.sats_in_view)
         assertEquals(1001, result.lastHeard)
     }
@@ -111,13 +132,13 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedPosition for local node ignores purely empty packets`() {
         val myNum = 1111
-        val emptyPos = Position(latitude_i = 0, longitude_i = 0, sats_in_view = 0, time = 0)
+        val emptyPos = ProtoPosition(latitude_i = 0, longitude_i = 0, sats_in_view = 0, time = 0)
 
         nodeManager.handleReceivedPosition(myNum, myNum, emptyPos, 0)
 
         val result = nodeManager.nodeDBbyNodeNum[myNum]
-        // Should still be a default/unset node if it didn't exist, or shouldn't have position
-        assertTrue(result == null || result.position.latitude_i == null)
+        // Should still be null since the empty position for local node is ignored
+        assertNull(result)
     }
 
     @Test
@@ -125,11 +146,7 @@ class NodeManagerImplTest {
         val nodeNum = 1234
         nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
 
-        val telemetry =
-            org.meshtastic.proto.Telemetry(
-                time = 2000,
-                device_metrics = org.meshtastic.proto.DeviceMetrics(battery_level = 50),
-            )
+        val telemetry = Telemetry(time = 2000, device_metrics = DeviceMetrics(battery_level = 50))
 
         nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
 
@@ -140,10 +157,7 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedTelemetry updates device metrics`() {
         val nodeNum = 1234
-        val telemetry =
-            org.meshtastic.proto.Telemetry(
-                device_metrics = org.meshtastic.proto.DeviceMetrics(battery_level = 75, voltage = 3.8f),
-            )
+        val telemetry = Telemetry(device_metrics = DeviceMetrics(battery_level = 75, voltage = 3.8f))
 
         nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
 
@@ -157,10 +171,7 @@ class NodeManagerImplTest {
     fun `handleReceivedTelemetry updates environment metrics`() {
         val nodeNum = 1234
         val telemetry =
-            org.meshtastic.proto.Telemetry(
-                environment_metrics =
-                org.meshtastic.proto.EnvironmentMetrics(temperature = 22.5f, relative_humidity = 45.0f),
-            )
+            Telemetry(environment_metrics = EnvironmentMetrics(temperature = 22.5f, relative_humidity = 45.0f))
 
         nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
 
@@ -180,5 +191,39 @@ class NodeManagerImplTest {
         assertNull(nodeManager.myNodeNum)
     }
 
-     */
+    @Test
+    fun `toNodeID returns broadcast ID for broadcast nodeNum`() {
+        val result = nodeManager.toNodeID(DataPacket.NODENUM_BROADCAST)
+        assertEquals(DataPacket.ID_BROADCAST, result)
+    }
+
+    @Test
+    fun `toNodeID returns default hex ID for unknown node`() {
+        val result = nodeManager.toNodeID(0x1234)
+        assertEquals(DataPacket.nodeNumToDefaultId(0x1234), result)
+    }
+
+    @Test
+    fun `toNodeID returns user ID for known node`() {
+        val nodeNum = 5678
+        val userId = "!customid"
+        nodeManager.updateNode(nodeNum) { it.copy(user = it.user.copy(id = userId)) }
+        val result = nodeManager.toNodeID(nodeNum)
+        assertEquals(userId, result)
+    }
+
+    @Test
+    fun `removeByNodenum removes node from both maps`() {
+        val nodeNum = 1234
+        nodeManager.updateNode(nodeNum) {
+            Node(num = nodeNum, user = User(id = "!testnode", long_name = "Test", short_name = "T"))
+        }
+        assertTrue(nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
+        assertTrue(nodeManager.nodeDBbyID.containsKey("!testnode"))
+
+        nodeManager.removeByNodenum(nodeNum)
+
+        assertTrue(!nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
+        assertTrue(!nodeManager.nodeDBbyID.containsKey("!testnode"))
+    }
 }

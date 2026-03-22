@@ -26,6 +26,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
@@ -57,8 +58,6 @@ class MeshConfigFlowManagerImpl(
     private val packetHandler: PacketHandler,
 ) : MeshConfigFlowManager {
     private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
-    private val configOnlyNonce = 69420
-    private val nodeInfoNonce = 69421
     private val wantConfigDelay = 100L
 
     override fun start(scope: CoroutineScope) {
@@ -76,8 +75,8 @@ class MeshConfigFlowManagerImpl(
 
     override fun handleConfigComplete(configCompleteId: Int) {
         when (configCompleteId) {
-            configOnlyNonce -> handleConfigOnlyComplete()
-            nodeInfoNonce -> handleNodeInfoComplete()
+            HandshakeConstants.CONFIG_NONCE -> handleConfigOnlyComplete()
+            HandshakeConstants.NODE_INFO_NONCE -> handleNodeInfoComplete()
             else -> Logger.w { "Config complete id mismatch: $configCompleteId" }
         }
     }

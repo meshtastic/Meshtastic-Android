@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flowOn
 import org.koin.core.annotation.Single
 import java.io.IOException
 import java.net.InetAddress
+import java.net.NetworkInterface
 import javax.jmdns.JmDNS
 import javax.jmdns.ServiceEvent
 import javax.jmdns.ServiceListener
@@ -34,9 +35,14 @@ class JvmServiceDiscovery : ServiceDiscovery {
     @Suppress("TooGenericExceptionCaught")
     override val resolvedServices: Flow<List<DiscoveredService>> =
         callbackFlow {
+            trySend(emptyList()) // Emit initial empty list so downstream combine() is not blocked
+
+            val bindAddress = findLanAddress() ?: InetAddress.getLocalHost()
+            Logger.i { "JmDNS binding to ${bindAddress.hostAddress}" }
+
             val jmdns =
                 try {
-                    JmDNS.create(InetAddress.getLocalHost())
+                    JmDNS.create(bindAddress)
                 } catch (e: IOException) {
                     Logger.e(e) { "Failed to create JmDNS" }
                     null
@@ -93,4 +99,24 @@ class JvmServiceDiscovery : ServiceDiscovery {
             }
         }
             .flowOn(Dispatchers.IO)
+
+    companion object {
+        /**
+         * Finds a non-loopback, up, IPv4 LAN address for JmDNS to bind to. On many systems (especially Windows),
+         * [InetAddress.getLocalHost] resolves to `127.0.0.1` or `::1`, which prevents JmDNS from seeing multicast
+         * traffic on the actual LAN interface.
+         */
+        @Suppress("TooGenericExceptionCaught", "LoopWithTooManyJumpStatements")
+        internal fun findLanAddress(): InetAddress? = try {
+            NetworkInterface.getNetworkInterfaces()
+                ?.toList()
+                .orEmpty()
+                .filter { it.isUp && !it.isLoopback }
+                .flatMap { it.inetAddresses.toList() }
+                .firstOrNull { !it.isLoopbackAddress && it is java.net.Inet4Address }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to enumerate network interfaces, falling back to getLocalHost()" }
+            null
+        }
+    }
 }

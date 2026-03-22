@@ -120,6 +120,22 @@ Formerly found in 3 prefs files:
 
 Vico chart screens (DeviceMetrics, EnvironmentMetrics, SignalMetrics, PowerMetrics, PaxMetrics) have been migrated to `feature:node/commonMain` using Vico's KMP artifacts (`vico-compose`, `vico-compose-m3`). Desktop wires them via shared composables. No Android-only chart code remains.
 
+### B5. Cross-platform code deduplication *(resolved 2026-03-21)*
+
+Comprehensive audit of `androidMain` vs `jvmMain` duplication across all feature modules. Extracted shared components:
+
+| Component | Module | Eliminated from |
+|---|---|---|
+| `AlertHost` composable | `core:ui/commonMain` | Android `Main.kt`, Desktop `DesktopMainScreen.kt` |
+| `SharedDialogs` composable | `core:ui/commonMain` | Android `Main.kt`, Desktop `DesktopMainScreen.kt` |
+| `PlaceholderScreen` composable | `core:ui/commonMain` | 4 copies: `desktop/navigation`, `feature:map/jvmMain`, `feature:node/jvmMain` (×2) |
+| `ThemePickerDialog` + `ThemeOption` | `feature:settings/commonMain` | Android `SettingsScreen.kt`, Desktop `DesktopSettingsScreen.kt` |
+| `formatLogsTo()` + `redactedKeys` | `feature:settings/commonMain` (`LogFormatter.kt`) | Android + Desktop `LogExporter.kt` actuals |
+| `handleNodeAction()` | `feature:node/commonMain` | Android `NodeDetailScreen.kt`, Desktop `NodeDetailScreens.kt` |
+| `findNodeByNameSuffix()` | `feature:connections/commonMain` | Android USB matcher, TCP recent device matcher |
+
+Also fixed `Dispatchers.IO` usage in `StoreForwardPacketHandlerImpl` (would break iOS), removed dead `UIViewModel.currentAlert` property, and added `firebase-debug.log` to `.gitignore`.
+
 ---
 
 ## C. DI Improvements
@@ -203,12 +219,12 @@ Ordered by impact × effort:
 | Area | Previous | Current | Notes |
 |---|---:|---:|---|
 | Shared business/data logic | 8.5/10 | **9/10** | RadioTransport interface unified; all core layers shared |
-| Shared feature/UI logic | 9.5/10 | **8.5/10** | All 7 KMP features; connections unified; Vico charts in commonMain |
+| Shared feature/UI logic | 9.5/10 | **9/10** | All 7 KMP features; connections unified; cross-platform deduplication complete |
 | Android decoupling | 8.5/10 | **9/10** | Connections, Navigation, Services, & Widgets extracted; GMS purged; app ~40->target 20 files |
 | Multi-target readiness | 8/10 | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | 8.5/10 | **9/10** | 25 modules validated; feature:connections + desktop in CI; native release installers |
 | DI portability | 7/10 | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
-| Test maturity | — | **8/10** | 131 commonTest + 89 platform-specific = 219 tests across all 7 features; core:testing established |
+| Test maturity | — | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 8 features |
 
 ---
 

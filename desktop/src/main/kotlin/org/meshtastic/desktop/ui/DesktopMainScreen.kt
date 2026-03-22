@@ -35,13 +35,12 @@ import androidx.navigation3.ui.NavDisplay
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.ui.component.AlertHost
+import org.meshtastic.core.ui.component.SharedDialogs
 import org.meshtastic.core.ui.navigation.icon
-import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
-import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
 
@@ -67,15 +66,15 @@ fun DesktopMainScreen(
     val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
     val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
 
-    if (connectionState == ConnectionState.Connected) {
-        sharedContactRequested?.let {
-            SharedContactDialog(sharedContact = it, onDismiss = { uiViewModel.clearSharedContactRequested() })
-        }
+    SharedDialogs(
+        connectionState = connectionState,
+        sharedContactRequested = sharedContactRequested,
+        requestChannelSet = requestChannelSet,
+        onDismissSharedContact = { uiViewModel.clearSharedContactRequested() },
+        onDismissChannelSet = { uiViewModel.clearRequestChannelUrl() },
+    )
 
-        requestChannelSet?.let { newChannelSet ->
-            ScannedQrCodeDialog(newChannelSet, onDismiss = { uiViewModel.clearRequestChannelUrl() })
-        }
-    }
+    AlertHost(uiViewModel.alertManager)
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Row(modifier = Modifier.fillMaxSize()) {

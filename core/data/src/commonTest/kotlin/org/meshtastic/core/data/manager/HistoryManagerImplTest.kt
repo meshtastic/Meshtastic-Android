@@ -16,9 +16,9 @@
  */
 package org.meshtastic.core.data.manager
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
 import org.meshtastic.proto.StoreAndForward
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class HistoryManagerImplTest {
 

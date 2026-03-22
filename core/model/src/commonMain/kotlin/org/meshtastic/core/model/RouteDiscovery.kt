@@ -76,7 +76,7 @@ private fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): S
         .joinToString("\n")
 }
 
-private fun RouteDiscovery.getTracerouteResponse(
+fun RouteDiscovery.getTracerouteResponse(
     getUser: (nodeNum: Int) -> String,
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
@@ -97,15 +97,6 @@ fun MeshPacket.getTracerouteResponse(
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
 ): String? = fullRouteDiscovery?.getTracerouteResponse(getUser, headerTowards, headerBack)
-
-/** Returns a traceroute response string only when the result is complete (both directions). */
-fun MeshPacket.getFullTracerouteResponse(
-    getUser: (nodeNum: Int) -> String,
-    headerTowards: String = "Route traced toward destination:\n\n",
-    headerBack: String = "Route traced back to us:\n\n",
-): String? = fullRouteDiscovery
-    ?.takeIf { it.route.isNotEmpty() && it.route_back.isNotEmpty() }
-    ?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
 enum class TracerouteMapAvailability {
     Ok,

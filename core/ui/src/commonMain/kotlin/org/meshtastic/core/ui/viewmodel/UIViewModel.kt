@@ -79,7 +79,7 @@ class UIViewModel(
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val notificationManager: NotificationManager,
     packetRepository: PacketRepository,
-    private val alertManager: AlertManager,
+    val alertManager: AlertManager,
 ) : ViewModel() {
 
     private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)
@@ -120,8 +120,6 @@ class UIViewModel(
     fun emitScrollToTopEvent(event: ScrollToTopEvent) {
         _scrollToTopEventFlow.tryEmit(event)
     }
-
-    val currentAlert = alertManager.currentAlert
 
     fun tracerouteMapAvailability(forwardRoute: List<Int>, returnRoute: List<Int>): TracerouteMapAvailability =
         evaluateTracerouteMapAvailability(

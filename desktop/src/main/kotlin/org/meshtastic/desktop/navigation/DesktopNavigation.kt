@@ -16,13 +16,6 @@
  */
 package org.meshtastic.desktop.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -67,15 +60,4 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(backStack: NavBackStack<NavKey>) 
 
     // Connections — shared screen
     connectionsGraph(backStack)
-}
-
-@Composable
-internal fun PlaceholderScreen(name: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
 }

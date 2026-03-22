@@ -90,6 +90,21 @@ internal fun Project.configureKotlinMultiplatform() {
         }
     }
 
+    // Disable iOS native test link & run tasks.
+    // iOS targets exist only for compile-time validation; linking test
+    // executables is extremely slow and causes `./gradlew test` to hang.
+    tasks.configureEach {
+        val taskName = name.lowercase()
+        if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
+            if (taskName.startsWith("link") && taskName.contains("test") ||
+                taskName == "iosarm64test" || taskName == "iossimulatorarm64test" ||
+                taskName.endsWith("testbinaries")
+            ) {
+                enabled = false
+            }
+        }
+    }
+
     configureMokkery()
     configureKotlin<KotlinMultiplatformExtension>()
 }

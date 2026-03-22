@@ -17,13 +17,15 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.update
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.ServiceBroadcasts
@@ -35,13 +37,20 @@ import org.meshtastic.proto.NeighborInfo
 class NeighborInfoHandlerImpl(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
-    private val commandSender: CommandSender,
     private val serviceBroadcasts: ServiceBroadcasts,
 ) : NeighborInfoHandler {
     private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
+    private val startTimes = atomic(persistentMapOf<Int, Long>())
+
+    override var lastNeighborInfo: NeighborInfo? = null
+
     override fun start(scope: CoroutineScope) {
         this.scope = scope
+    }
+
+    override fun recordStartTime(requestId: Int) {
+        startTimes.update { it.put(requestId, nowMillis) }
     }
 
     override fun handleNeighborInfo(packet: MeshPacket) {
@@ -51,7 +60,7 @@ class NeighborInfoHandlerImpl(
         // Store the last neighbor info from our connected radio
         val from = packet.from
         if (from == nodeManager.myNodeNum) {
-            commandSender.lastNeighborInfo = ni
+            lastNeighborInfo = ni
             Logger.d { "Stored last neighbor info from connected radio" }
         }
 
@@ -60,7 +69,8 @@ class NeighborInfoHandlerImpl(
 
         // Format for UI response
         val requestId = packet.decoded?.request_id ?: 0
-        val start = commandSender.neighborInfoStartTimes.remove(requestId)
+        val start = startTimes.value[requestId]
+        startTimes.update { it.remove(requestId) }
 
         val neighbors =
             ni.neighbors.joinToString("\n") { n ->

@@ -229,34 +229,6 @@ private fun NodeDetailBottomSheet(onDismiss: () -> Unit, content: @Composable ()
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) { content() }
 }
 
-private fun handleNodeAction(
-    action: NodeDetailAction,
-    uiState: NodeDetailUiState,
-    navigateToMessages: (String) -> Unit,
-    onNavigateUp: () -> Unit,
-    onNavigate: (Route) -> Unit,
-    viewModel: NodeDetailViewModel,
-) {
-    when (action) {
-        is NodeDetailAction.Navigate -> onNavigate(action.route)
-        is NodeDetailAction.TriggerServiceAction -> viewModel.onServiceAction(action.action)
-        is NodeDetailAction.HandleNodeMenuAction -> {
-            when (val menuAction = action.action) {
-                is NodeMenuAction.DirectMessage -> {
-                    val route = viewModel.getDirectMessageRoute(menuAction.node, uiState.ourNode)
-                    navigateToMessages(route)
-                }
-                is NodeMenuAction.Remove -> {
-                    viewModel.handleNodeMenuAction(menuAction)
-                    onNavigateUp()
-                }
-                else -> viewModel.handleNodeMenuAction(menuAction)
-            }
-        }
-        else -> {}
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun NodeDetailListPreview(@PreviewParameter(NodePreviewParameterProvider::class) node: Node) {

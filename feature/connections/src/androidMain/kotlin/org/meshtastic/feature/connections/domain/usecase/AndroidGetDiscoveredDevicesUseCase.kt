@@ -29,7 +29,6 @@ import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.NetworkRepository
-import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddressString
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -55,7 +54,6 @@ class AndroidGetDiscoveredDevicesUseCase(
     private val radioInterfaceService: RadioInterfaceService,
     private val usbManagerLazy: Lazy<UsbManager>,
 ) : GetDiscoveredDevicesUseCase {
-    private val suffixLength = 4
     private val macSuffixLength = 8
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -69,24 +67,8 @@ class AndroidGetDiscoveredDevicesUseCase(
                     tcpServices,
                     recentList,
                 ->
-                val recentMap = recentList.associateBy({ it.address }) { it.name }
-                tcpServices
-                    .map { service ->
-                        val address = "t${service.toAddressString()}"
-                        val txtRecords = service.txt
-                        val shortNameBytes = txtRecords["shortname"]
-                        val idBytes = txtRecords["id"]
-
-                        val shortName =
-                            shortNameBytes?.let { String(it, Charsets.UTF_8) } ?: getString(Res.string.meshtastic)
-                        val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
-                        var displayName = recentMap[address] ?: shortName
-                        if (deviceId != null && (displayName.split("_").none { it == deviceId })) {
-                            displayName += "_$deviceId"
-                        }
-                        DeviceListEntry.Tcp(displayName, address)
-                    }
-                    .sortedBy { it.name }
+                val defaultName = getString(Res.string.meshtastic)
+                processTcpServices(tcpServices, recentList, defaultName)
             }
 
         val usbDevicesFlow =
@@ -131,6 +113,7 @@ class AndroidGetDiscoveredDevicesUseCase(
             @Suppress("UNCHECKED_CAST", "MagicNumber")
             val recentList = args[5] as List<RecentAddress>
 
+            // Android-specific: BLE node matching by MAC suffix and Meshtastic short name
             val bleForUi =
                 bondedBle
                     .map { entry ->
@@ -153,61 +136,20 @@ class AndroidGetDiscoveredDevicesUseCase(
                     }
                     .sortedBy { it.name }
 
+            // Android-specific: USB node matching via shared helper
             val usbForUi =
                 (
                     usbDevices +
                         if (showMock) listOf(DeviceListEntry.Mock(getString(Res.string.demo_mode))) else emptyList()
                     )
                     .map { entry ->
-                        val matchingNode =
-                            if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                                db.values.find { node ->
-                                    val suffix = entry.name.split("_").lastOrNull()?.lowercase(Locale.ROOT)
-                                    suffix != null &&
-                                        suffix.length >= suffixLength &&
-                                        node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
-                                }
-                            } else {
-                                null
-                            }
-                        entry.copy(node = matchingNode)
+                        entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
                     }
 
-            val discoveredTcpForUi =
-                processedTcp.map { entry ->
-                    val matchingNode =
-                        if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                            val resolvedService = resolved.find { "t${it.toAddressString()}" == entry.fullAddress }
-                            val deviceId = resolvedService?.txt?.get("id")?.let { String(it, Charsets.UTF_8) }
-                            db.values.find { node ->
-                                node.user.id == deviceId || (deviceId != null && node.user.id == "!$deviceId")
-                            }
-                        } else {
-                            null
-                        }
-                    entry.copy(node = matchingNode)
-                }
-
+            // Shared TCP logic via helpers
+            val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
             val discoveredTcpAddresses = processedTcp.map { it.fullAddress }.toSet()
-            val recentTcpForUi =
-                recentList
-                    .filterNot { discoveredTcpAddresses.contains(it.address) }
-                    .map { DeviceListEntry.Tcp(it.name, it.address) }
-                    .map { entry ->
-                        val matchingNode =
-                            if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                                val suffix = entry.name.split("_").lastOrNull()?.lowercase(Locale.ROOT)
-                                db.values.find { node ->
-                                    suffix != null &&
-                                        suffix.length >= suffixLength &&
-                                        node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
-                                }
-                            } else {
-                                null
-                            }
-                        entry.copy(node = matchingNode)
-                    }
-                    .sortedBy { it.name }
+            val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, databaseManager)
 
             DiscoveredDevices(
                 bleDevices = bleForUi,

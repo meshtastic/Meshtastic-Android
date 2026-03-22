@@ -57,32 +57,7 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
             }
 
             context.contentResolver.openOutputStream(targetUri)?.use { os ->
-                OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer ->
-                    logs.forEach { log ->
-                        writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
-                        writer.write(log.logMessage)
-                        log.decodedPayload?.let { decodedPayload ->
-                            if (decodedPayload.isNotBlank()) {
-                                writer.write("\n\nDecoded Payload:\n{\n")
-                                // Redact Decoded keys.
-                                decodedPayload.lineSequence().forEach { line ->
-                                    var outputLine = line
-                                    val redacted = redactedKeys.firstOrNull { line.contains(it) }
-                                    if (redacted != null) {
-                                        val idx = line.indexOf(':')
-                                        if (idx != -1) {
-                                            outputLine = line.take(idx + 1)
-                                            outputLine += "<redacted>"
-                                        }
-                                    }
-                                    writer.write(outputLine)
-                                    writer.write("\n")
-                                }
-                                writer.write("}\n\n")
-                            }
-                        }
-                    }
-                }
+                OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer -> formatLogsTo(writer, logs) }
             }
             Logger.i { "MeshLog exported successfully to $targetUri" }
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
@@ -91,5 +66,3 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
         }
     }
-
-private val redactedKeys = listOf("session_passkey", "private_key", "admin_key")

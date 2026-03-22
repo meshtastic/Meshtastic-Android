@@ -23,8 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.feature.node.compass.CompassViewModel
-import org.meshtastic.feature.node.component.NodeMenuAction
-import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
 actual fun NodeDetailScreen(
@@ -45,24 +43,14 @@ actual fun NodeDetailScreen(
         uiState = uiState,
         modifier = modifier,
         onAction = { action ->
-            when (action) {
-                is NodeDetailAction.Navigate -> onNavigate(action.route)
-                is NodeDetailAction.TriggerServiceAction -> viewModel.onServiceAction(action.action)
-                is NodeDetailAction.HandleNodeMenuAction -> {
-                    when (val menuAction = action.action) {
-                        is NodeMenuAction.DirectMessage -> {
-                            val route = viewModel.getDirectMessageRoute(menuAction.node, uiState.ourNode)
-                            navigateToMessages(route)
-                        }
-                        is NodeMenuAction.Remove -> {
-                            viewModel.handleNodeMenuAction(menuAction)
-                            onNavigateUp()
-                        }
-                        else -> viewModel.handleNodeMenuAction(menuAction)
-                    }
-                }
-                else -> {}
-            }
+            handleNodeAction(
+                action = action,
+                uiState = uiState,
+                navigateToMessages = navigateToMessages,
+                onNavigateUp = onNavigateUp,
+                onNavigate = onNavigate,
+                viewModel = viewModel,
+            )
         },
         onFirmwareSelect = { /* No-op on desktop for now */ },
         onSaveNotes = { num, notes -> viewModel.setNodeNotes(num, notes) },

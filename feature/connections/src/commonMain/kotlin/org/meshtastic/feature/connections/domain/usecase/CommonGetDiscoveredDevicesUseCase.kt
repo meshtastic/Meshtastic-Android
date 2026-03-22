@@ -23,7 +23,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.network.repository.NetworkRepository
-import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddressString
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.demo_mode
@@ -40,9 +39,7 @@ class CommonGetDiscoveredDevicesUseCase(
     private val networkRepository: NetworkRepository,
     private val usbScanner: UsbScanner? = null,
 ) : GetDiscoveredDevicesUseCase {
-    private val suffixLength = 4
 
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun invoke(showMock: Boolean): Flow<DiscoveredDevices> {
         val nodeDb = nodeRepository.nodeDBbyNum
         val usbFlow = usbScanner?.scanUsbDevices() ?: kotlinx.coroutines.flow.flowOf(emptyList())
@@ -52,25 +49,8 @@ class CommonGetDiscoveredDevicesUseCase(
                     tcpServices,
                     recentList,
                 ->
-                val recentMap = recentList.associateBy({ it.address }) { it.name }
-                tcpServices
-                    .map { service ->
-                        val address = "t${service.toAddressString()}"
-                        val txtRecords = service.txt
-                        val shortNameBytes = txtRecords["shortname"]
-                        val idBytes = txtRecords["id"]
-
-                        val shortName =
-                            shortNameBytes?.let { it.decodeToString() }
-                                ?: runCatching { getString(Res.string.meshtastic) }.getOrDefault("Meshtastic")
-                        val deviceId = idBytes?.let { it.decodeToString() }?.replace("!", "")
-                        var displayName = recentMap[address] ?: shortName
-                        if (deviceId != null && (displayName.split("_").none { it == deviceId })) {
-                            displayName += "_$deviceId"
-                        }
-                        DeviceListEntry.Tcp(displayName, address)
-                    }
-                    .sortedBy { it.name }
+                val defaultName = runCatching { getString(Res.string.meshtastic) }.getOrDefault("Meshtastic")
+                processTcpServices(tcpServices, recentList, defaultName)
             }
 
         return combine(
@@ -80,42 +60,9 @@ class CommonGetDiscoveredDevicesUseCase(
             recentAddressesDataSource.recentAddresses,
             usbFlow,
         ) { db, processedTcp, resolved, recentList, usbList ->
-            val discoveredTcpForUi =
-                processedTcp.map { entry ->
-                    val matchingNode =
-                        if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                            val resolvedService = resolved.find { "t${it.toAddressString()}" == entry.fullAddress }
-                            val deviceId = resolvedService?.txt?.get("id")?.let { it.decodeToString() }
-                            db.values.find { node ->
-                                node.user.id == deviceId || (deviceId != null && node.user.id == "!$deviceId")
-                            }
-                        } else {
-                            null
-                        }
-                    entry.copy(node = matchingNode)
-                }
-
+            val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
             val discoveredTcpAddresses = processedTcp.map { it.fullAddress }.toSet()
-
-            val recentTcpForUi =
-                recentList
-                    .filterNot { discoveredTcpAddresses.contains(it.address) }
-                    .map { DeviceListEntry.Tcp(it.name, it.address) }
-                    .map { entry ->
-                        val matchingNode =
-                            if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                                val suffix = entry.name.split("_").lastOrNull()?.lowercase()
-                                db.values.find { node ->
-                                    suffix != null &&
-                                        suffix.length >= suffixLength &&
-                                        node.user.id.lowercase().endsWith(suffix)
-                                }
-                            } else {
-                                null
-                            }
-                        entry.copy(node = matchingNode)
-                    }
-                    .sortedBy { it.name }
+            val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, databaseManager)
 
             DiscoveredDevices(
                 discoveredTcpDevices = discoveredTcpForUi,

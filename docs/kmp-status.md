@@ -1,6 +1,6 @@
 # KMP Migration Status
 
-> Last updated: 2026-03-16
+> Last updated: 2026-03-21
 
 Single source of truth for Kotlin Multiplatform migration progress. For the forward-looking roadmap, see [`roadmap.md`](./roadmap.md). For completed decision records, see [`decisions/`](./decisions/).
 
@@ -72,7 +72,7 @@ Working Compose Desktop application with:
 | Area | Score | Notes |
 |---|---|---|
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
-| Shared feature/UI logic | **8.5/10** | All 7 KMP; feature:connections unified with dynamic transport detection |
+| Shared feature/UI logic | **9/10** | All 7 KMP; feature:connections unified; cross-platform deduplication complete |
 | Android decoupling | **9/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation, connections, background services, and widgets extracted) |
 | Multi-target readiness | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
@@ -87,7 +87,7 @@ Working Compose Desktop application with:
 |---|---:|
 | Android-first structural KMP | ~100% |
 | Shared business logic | ~98% |
-| Shared feature/UI | ~95% |
+| Shared feature/UI | ~97% |
 | True multi-target readiness | ~85% |
 | "Add iOS without surprises" | ~100% |
 
@@ -114,6 +114,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | **Transport Lifecycle Unification** | ✅ Done | `SharedRadioInterfaceService` orchestrates auto-reconnect, connection state, and heartbeat uniformly across Android and Desktop. |
 | **Database Parity** | ✅ Done | `DatabaseManager` is pure KMP, giving iOS and Desktop support for multiple connected nodes with LRU caching. |
 | Emoji picker unification | ✅ Done | Single commonMain implementation replacing 3 platform variants |
+| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()` to `commonMain`; eliminated ~200 lines of duplicated code across Android/desktop |
 
 ## Navigation Parity Note
 

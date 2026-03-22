@@ -69,6 +69,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
             implementation(libs.kotest.assertions)
             implementation(libs.kotest.property)
         }

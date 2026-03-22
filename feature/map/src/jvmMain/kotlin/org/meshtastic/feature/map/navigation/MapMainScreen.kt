@@ -16,25 +16,11 @@
  */
 package org.meshtastic.feature.map.navigation
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import org.meshtastic.core.ui.component.PlaceholderScreen
 
 @Composable
 actual fun MapMainScreen(onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
     // Desktop placeholder for now
-    org.meshtastic.feature.map.navigation.PlaceholderScreen(name = "Map")
-}
-
-@Composable
-internal fun PlaceholderScreen(name: String) {
-    androidx.compose.foundation.layout.Box(
-        modifier = androidx.compose.ui.Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center,
-    ) {
-        androidx.compose.material3.Text(
-            text = name,
-            style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
-            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    PlaceholderScreen(name = "Map")
 }

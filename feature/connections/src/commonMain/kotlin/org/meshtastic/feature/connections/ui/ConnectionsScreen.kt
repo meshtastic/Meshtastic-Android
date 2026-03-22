@@ -47,7 +47,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -86,7 +85,6 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
-import org.meshtastic.proto.Config
 import kotlin.uuid.ExperimentalUuidApi
 
 /** Composable screen for managing device connections (BLE, TCP, USB). It displays connection status. */
@@ -102,25 +100,12 @@ fun ConnectionsScreen(
     onConfigNavigate: (Route) -> Unit,
 ) {
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
-    val config by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
     val scanStatusText by scanModel.errorText.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
-
-    // Prevent continuous recomposition from lastHeard and snr updates on the node
-    val ourNode by
-        remember(connectionsViewModel.ourNodeInfo) {
-            connectionsViewModel.ourNodeInfo.distinctUntilChanged { old, new ->
-                old?.num == new?.num &&
-                    old?.user == new?.user &&
-                    old?.batteryLevel == new?.batteryLevel &&
-                    old?.voltage == new?.voltage &&
-                    old?.metadata?.firmware_version == new?.metadata?.firmware_version
-            }
-        }
-            .collectAsStateWithLifecycle(initialValue = connectionsViewModel.ourNodeInfo.value)
+    val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
+    val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
-    val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -192,63 +177,31 @@ fun ConnectionsScreen(
 
                 Crossfade(targetState = uiState, label = "connection_state") { state ->
                     when (state) {
-                        2 -> {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                ourNode?.let { node ->
-                                    TitledCard(title = stringResource(Res.string.connected_device)) {
-                                        CurrentlyConnectedInfo(
-                                            node = node,
-                                            bleDevice =
-                                            bleDevices.find { it.fullAddress == selectedDevice }
-                                                as DeviceListEntry.Ble?,
-                                            onNavigateToNodeDetails = onNavigateToNodeDetails,
-                                            onClickDisconnect = { scanModel.disconnect() },
-                                        )
-                                    }
-                                }
+                        2 ->
+                            ConnectedDeviceContent(
+                                ourNode = ourNode,
+                                regionUnset = regionUnset,
+                                selectedDevice = selectedDevice,
+                                bleDevices = bleDevices,
+                                onNavigateToNodeDetails = onNavigateToNodeDetails,
+                                onClickDisconnect = { scanModel.disconnect() },
+                                onSetRegion = {
+                                    isWaiting = true
+                                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                                },
+                            )
 
-                                if (regionUnset && selectedDevice != "m") {
-                                    TitledCard(title = null) {
-                                        ListItem(
-                                            leadingIcon = Icons.Rounded.Language,
-                                            text = stringResource(Res.string.set_your_region),
-                                        ) {
-                                            isWaiting = true
-                                            radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        1 ->
+                            ConnectingDeviceContent(
+                                selectedDevice = selectedDevice,
+                                bleDevices = bleDevices,
+                                discoveredTcpDevices = discoveredTcpDevices,
+                                recentTcpDevices = recentTcpDevices,
+                                usbDevices = usbDevices,
+                                onClickDisconnect = { scanModel.disconnect() },
+                            )
 
-                        1 -> {
-                            val selectedEntry =
-                                bleDevices.find { it.fullAddress == selectedDevice }
-                                    ?: discoveredTcpDevices.find { it.fullAddress == selectedDevice }
-                                    ?: recentTcpDevices.find { it.fullAddress == selectedDevice }
-                                    ?: usbDevices.find { it.fullAddress == selectedDevice }
-
-                            val name = selectedEntry?.name ?: stringResource(Res.string.unknown_device)
-                            val address = selectedEntry?.address ?: selectedDevice
-
-                            TitledCard(title = stringResource(Res.string.connected_device)) {
-                                ConnectingDeviceInfo(
-                                    deviceName = name,
-                                    deviceAddress = address,
-                                    onClickDisconnect = { scanModel.disconnect() },
-                                )
-                            }
-                        }
-
-                        else -> {
-                            Card(modifier = Modifier.fillMaxWidth()) {
-                                EmptyStateContent(
-                                    imageVector = MeshtasticIcons.NoDevice,
-                                    text = stringResource(Res.string.no_device_selected),
-                                    modifier = Modifier.height(160.dp),
-                                )
-                            }
-                        }
+                        else -> NoDeviceContent()
                     }
                 }
 
@@ -332,5 +285,76 @@ fun ConnectionsScreen(
                 }
             }
         }
+    }
+}
+
+/** Content shown when connected to a device with node info available. */
+@Composable
+private fun ConnectedDeviceContent(
+    ourNode: org.meshtastic.core.model.Node?,
+    regionUnset: Boolean,
+    selectedDevice: String,
+    bleDevices: List<DeviceListEntry>,
+    onNavigateToNodeDetails: (Int) -> Unit,
+    onClickDisconnect: () -> Unit,
+    onSetRegion: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        ourNode?.let { node ->
+            TitledCard(title = stringResource(Res.string.connected_device)) {
+                CurrentlyConnectedInfo(
+                    node = node,
+                    bleDevice = bleDevices.find { it.fullAddress == selectedDevice } as DeviceListEntry.Ble?,
+                    onNavigateToNodeDetails = onNavigateToNodeDetails,
+                    onClickDisconnect = onClickDisconnect,
+                )
+            }
+        }
+
+        if (regionUnset && selectedDevice != "m") {
+            TitledCard(title = null) {
+                ListItem(
+                    leadingIcon = Icons.Rounded.Language,
+                    text = stringResource(Res.string.set_your_region),
+                    onClick = onSetRegion,
+                )
+            }
+        }
+    }
+}
+
+/** Content shown when connecting or a device is selected but node info is not yet available. */
+@Composable
+private fun ConnectingDeviceContent(
+    selectedDevice: String,
+    bleDevices: List<DeviceListEntry>,
+    discoveredTcpDevices: List<DeviceListEntry>,
+    recentTcpDevices: List<DeviceListEntry>,
+    usbDevices: List<DeviceListEntry>,
+    onClickDisconnect: () -> Unit,
+) {
+    val selectedEntry =
+        bleDevices.find { it.fullAddress == selectedDevice }
+            ?: discoveredTcpDevices.find { it.fullAddress == selectedDevice }
+            ?: recentTcpDevices.find { it.fullAddress == selectedDevice }
+            ?: usbDevices.find { it.fullAddress == selectedDevice }
+
+    val name = selectedEntry?.name ?: stringResource(Res.string.unknown_device)
+    val address = selectedEntry?.address ?: selectedDevice
+
+    TitledCard(title = stringResource(Res.string.connected_device)) {
+        ConnectingDeviceInfo(deviceName = name, deviceAddress = address, onClickDisconnect = onClickDisconnect)
+    }
+}
+
+/** Content shown when no device is selected. */
+@Composable
+private fun NoDeviceContent() {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        EmptyStateContent(
+            imageVector = MeshtasticIcons.NoDevice,
+            text = stringResource(Res.string.no_device_selected),
+            modifier = Modifier.height(160.dp),
+        )
     }
 }

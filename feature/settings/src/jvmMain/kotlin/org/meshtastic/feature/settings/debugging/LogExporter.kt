@@ -54,32 +54,7 @@ actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.U
                     val exportFile = File(directory, selectedFile)
                     try {
                         FileOutputStream(exportFile).use { fos ->
-                            OutputStreamWriter(fos, StandardCharsets.UTF_8).use { writer ->
-                                logs.forEach { log ->
-                                    writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
-                                    writer.write(log.logMessage)
-                                    log.decodedPayload?.let { decodedPayload ->
-                                        if (decodedPayload.isNotBlank()) {
-                                            writer.write("\n\nDecoded Payload:\n{\n")
-                                            // Redact Decoded keys.
-                                            decodedPayload.lineSequence().forEach { line ->
-                                                var outputLine = line
-                                                val redacted = redactedKeys.firstOrNull { line.contains(it) }
-                                                if (redacted != null) {
-                                                    val idx = line.indexOf(':')
-                                                    if (idx != -1) {
-                                                        outputLine = line.take(idx + 1)
-                                                        outputLine += "<redacted>"
-                                                    }
-                                                }
-                                                writer.write(outputLine)
-                                                writer.write("\n")
-                                            }
-                                            writer.write("}\n\n")
-                                        }
-                                    }
-                                }
-                            }
+                            OutputStreamWriter(fos, StandardCharsets.UTF_8).use { writer -> formatLogsTo(writer, logs) }
                         }
                         Logger.i { "MeshLog exported successfully to ${exportFile.absolutePath}" }
                     } catch (e: java.io.IOException) {
@@ -92,5 +67,3 @@ actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.U
         }
     }
 }
-
-private val redactedKeys = listOf("session_passkey", "private_key", "admin_key")

@@ -18,11 +18,18 @@ package org.meshtastic.core.repository
 
 import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.NeighborInfo
 
 /** Interface for handling neighbor info responses from the mesh. */
 interface NeighborInfoHandler {
     /** Starts the neighbor info handler with the given coroutine scope. */
     fun start(scope: CoroutineScope)
+
+    /** Records the start time for a neighbor info request. */
+    fun recordStartTime(requestId: Int)
+
+    /** The latest neighbor info received from the connected radio. */
+    var lastNeighborInfo: NeighborInfo?
 
     /**
      * Processes a neighbor info packet.

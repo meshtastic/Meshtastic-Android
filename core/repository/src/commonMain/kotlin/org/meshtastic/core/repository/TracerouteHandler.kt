@@ -25,6 +25,9 @@ interface TracerouteHandler {
     /** Starts the traceroute handler with the given coroutine scope. */
     fun start(scope: CoroutineScope)
 
+    /** Records the start time for a traceroute request. */
+    fun recordStartTime(requestId: Int)
+
     /**
      * Processes a traceroute packet.
      *
