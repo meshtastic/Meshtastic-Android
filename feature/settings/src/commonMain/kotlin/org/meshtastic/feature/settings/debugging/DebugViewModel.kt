@@ -385,7 +385,7 @@ class DebugViewModel(
     private fun StringBuilder.annotateNodeId(nodeId: Int): Boolean {
         val nodeIdStr = nodeId.toUInt().toString()
         // Only match if whitespace before and after
-        val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""", RegexOption.DOT_MATCHES_ALL)
+        val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""")
         regex.find(this)?.let { _ ->
             regex.findAll(this).toList().asReversed().forEach {
                 val idx = it.range.last + 1
