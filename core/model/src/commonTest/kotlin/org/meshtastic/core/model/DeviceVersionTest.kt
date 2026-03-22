@@ -16,10 +16,11 @@
  */
 package org.meshtastic.core.model
 
-class DeviceVersionTest {
-    /*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-    /** make sure we match the python and device code behavior */
+class DeviceVersionTest {
+
     @Test
     fun canParse() {
         assertEquals(10000, DeviceVersion("1.0.0").asInt)
@@ -28,5 +29,21 @@ class DeviceVersionTest {
         assertEquals(12357, DeviceVersion("1.23.57.abde123").asInt)
     }
 
-     */
+    @Test
+    fun twoPartVersionAppends_zero() {
+        assertEquals(20700, DeviceVersion("2.7").asInt)
+    }
+
+    @Test
+    fun invalidVersionReturns_zero() {
+        assertEquals(0, DeviceVersion("invalid").asInt)
+    }
+
+    @Test
+    fun comparisonIsCorrect() {
+        kotlin.test.assertTrue(DeviceVersion("2.7.12") >= DeviceVersion("2.7.11"))
+        kotlin.test.assertTrue(DeviceVersion("3.0.0") > DeviceVersion("2.8.1"))
+        assertEquals(DeviceVersion("2.7.12"), DeviceVersion("2.7.12"))
+        kotlin.test.assertFalse(DeviceVersion("2.6.9") >= DeviceVersion("2.7.0"))
+    }
 }

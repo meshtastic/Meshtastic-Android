@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,17 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Telemetry
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class EnvironmentMetricsStateTest {
 
     @Test
-    fun `environmentMetricsForGraphing correctly calculates times`() {
+    fun environmentMetricsForGraphing_correctly_calculates_times() {
         val now = nowSeconds.toInt()
         val metrics =
             listOf(
@@ -42,7 +42,7 @@ class EnvironmentMetricsStateTest {
     }
 
     @Test
-    fun `environmentMetricsForGraphing handles valid zero temperatures`() {
+    fun environmentMetricsForGraphing_handles_valid_zero_temperatures() {
         val now = nowSeconds.toInt()
         val metrics = listOf(Telemetry(time = now, environment_metrics = EnvironmentMetrics(temperature = 0.0f)))
         val state = EnvironmentMetricsState(metrics)

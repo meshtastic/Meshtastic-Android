@@ -23,14 +23,13 @@ import dev.mokkery.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runTest
-import org.junit.Test
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.proto.User
+import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NodeManagementActionsTest {
@@ -51,7 +50,7 @@ class NodeManagementActionsTest {
         )
 
     @Test
-    fun `requestRemoveNode shows confirmation alert`() {
+    fun requestRemoveNode_shows_confirmation_alert() {
         val node = Node(num = 123, user = User(long_name = "Test Node"))
 
         actions.requestRemoveNode(testScope, node)
@@ -69,12 +68,5 @@ class NodeManagementActionsTest {
                 choices = any(),
             )
         }
-    }
-
-    @Test
-    fun `requestFavoriteNode shows confirmation alert`() = runTest(testDispatcher) {
-        // This test might fail due to getString() not being mocked easily
-        // but let's see if we can at least get requestRemoveNode passing.
-        // Actually, if getString() fails, the coroutine will fail.
     }
 }

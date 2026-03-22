@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,16 @@ package org.meshtastic.core.ble
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleRetryTest {
 
     @Test
-    fun `retryBleOperation returns immediately on success`() = runTest {
+    fun retryBleOperation_returns_immediately_on_success() = runTest {
         var attempts = 0
         val result =
             retryBleOperation(count = 3, delayMs = 10L) {
@@ -39,7 +40,7 @@ class BleRetryTest {
     }
 
     @Test
-    fun `retryBleOperation retries on exception and succeeds`() = runTest {
+    fun retryBleOperation_retries_on_exception_and_succeeds() = runTest {
         var attempts = 0
         val result =
             retryBleOperation(count = 3, delayMs = 10L) {
@@ -54,32 +55,30 @@ class BleRetryTest {
     }
 
     @Test
-    fun `retryBleOperation throws exception after max attempts`() = runTest {
+    fun retryBleOperation_throws_exception_after_max_attempts() = runTest {
         var attempts = 0
-        var caughtException: Exception? = null
-        try {
-            retryBleOperation(count = 3, delayMs = 10L) {
-                attempts++
-                throw RuntimeException("Persistent error")
+        val ex =
+            assertFailsWith<RuntimeException> {
+                retryBleOperation(count = 3, delayMs = 10L) {
+                    attempts++
+                    throw RuntimeException("Persistent error")
+                }
             }
-        } catch (e: Exception) {
-            caughtException = e
-        }
 
-        assertTrue(caughtException is RuntimeException)
-        assertEquals("Persistent error", caughtException?.message)
+        assertTrue(ex is RuntimeException)
+        assertEquals("Persistent error", ex.message)
         assertEquals(3, attempts)
     }
 
-    @Test(expected = CancellationException::class)
-    fun `retryBleOperation does not retry CancellationException`() = runTest {
+    @Test
+    fun retryBleOperation_does_not_retry_CancellationException() = runTest {
         var attempts = 0
-        retryBleOperation(count = 3, delayMs = 10L) {
-            attempts++
-            throw CancellationException("Cancelled")
+        assertFailsWith<CancellationException> {
+            retryBleOperation(count = 3, delayMs = 10L) {
+                attempts++
+                throw CancellationException("Cancelled")
+            }
         }
-        // Test fails if it catches and doesn't rethrow, or if it retries.
-        // It shouldn't reach the assertion below because the exception should be thrown immediately.
         assertEquals(1, attempts)
     }
 }

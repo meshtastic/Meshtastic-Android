@@ -16,81 +16,83 @@
  */
 package org.meshtastic.core.model
 
-class CapabilitiesTest {
-    /*
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
+class CapabilitiesTest {
 
     private fun caps(version: String?) = Capabilities(version, forceEnableAll = false)
 
     @Test
-    fun canMuteNodeRequiresV2718() {
+    fun canMuteNode_requires_V2_7_18() {
         assertFalse(caps("2.7.15").canMuteNode)
         assertTrue(caps("2.7.18").canMuteNode)
         assertTrue(caps("2.8.0").canMuteNode)
     }
 
     @Test
-    fun canRequestNeighborInfoIsCurrentlyDisabled() {
+    fun canRequestNeighborInfo_is_currently_disabled() {
         assertFalse(caps("2.7.14").canRequestNeighborInfo)
         assertFalse(caps("3.0.0").canRequestNeighborInfo)
     }
 
     @Test
-    fun canSendVerifiedContactsRequiresV2712() {
+    fun canSendVerifiedContacts_requires_V2_7_12() {
         assertFalse(caps("2.7.11").canSendVerifiedContacts)
         assertTrue(caps("2.7.12").canSendVerifiedContacts)
     }
 
     @Test
-    fun canToggleTelemetryEnabledRequiresV2712() {
+    fun canToggleTelemetryEnabled_requires_V2_7_12() {
         assertFalse(caps("2.7.11").canToggleTelemetryEnabled)
         assertTrue(caps("2.7.12").canToggleTelemetryEnabled)
     }
 
     @Test
-    fun canToggleUnmessageableRequiresV269() {
+    fun canToggleUnmessageable_requires_V2_6_9() {
         assertFalse(caps("2.6.8").canToggleUnmessageable)
         assertTrue(caps("2.6.9").canToggleUnmessageable)
     }
 
     @Test
-    fun supportsQrCodeSharingRequiresV268() {
+    fun supportsQrCodeSharing_requires_V2_6_8() {
         assertFalse(caps("2.6.7").supportsQrCodeSharing)
         assertTrue(caps("2.6.8").supportsQrCodeSharing)
     }
 
     @Test
-    fun supportsSecondaryChannelLocationRequiresV2610() {
+    fun supportsSecondaryChannelLocation_requires_V2_6_10() {
         assertFalse(caps("2.6.9").supportsSecondaryChannelLocation)
         assertTrue(caps("2.6.10").supportsSecondaryChannelLocation)
     }
 
     @Test
-    fun supportsStatusMessageRequiresV2717() {
+    fun supportsStatusMessage_requires_V2_7_17() {
         assertFalse(caps("2.7.16").supportsStatusMessage)
         assertTrue(caps("2.7.17").supportsStatusMessage)
     }
 
     @Test
-    fun supportsTrafficManagementConfigRequiresV300() {
+    fun supportsTrafficManagementConfig_requires_V3_0_0() {
         assertFalse(caps("2.7.18").supportsTrafficManagementConfig)
         assertTrue(caps("3.0.0").supportsTrafficManagementConfig)
     }
 
     @Test
-    fun supportsTakConfigRequiresV2719() {
+    fun supportsTakConfig_requires_V2_7_19() {
         assertFalse(caps("2.7.18").supportsTakConfig)
         assertTrue(caps("2.7.19").supportsTakConfig)
     }
 
     @Test
-    fun supportsEsp32OtaRequiresV2718() {
+    fun supportsEsp32Ota_requires_V2_7_18() {
         assertFalse(caps("2.7.17").supportsEsp32Ota)
         assertTrue(caps("2.7.18").supportsEsp32Ota)
     }
 
     @Test
-    fun nullFirmwareReturnsAllFalse() {
+    fun nullFirmware_returns_all_false() {
         val c = caps(null)
         assertFalse(c.canMuteNode)
         assertFalse(c.canRequestNeighborInfo)
@@ -106,7 +108,7 @@ class CapabilitiesTest {
     }
 
     @Test
-    fun forceEnableAllReturnsTrueForEverythingRegardlessOfVersion() {
+    fun forceEnableAll_returns_true_regardless_of_version() {
         val c = Capabilities(firmwareVersion = null, forceEnableAll = true)
         assertTrue(c.canMuteNode)
         assertTrue(c.canSendVerifiedContacts)
@@ -114,23 +116,4 @@ class CapabilitiesTest {
         assertTrue(c.supportsTrafficManagementConfig)
         assertTrue(c.supportsTakConfig)
     }
-
-    @Test
-    fun deviceVersionParsingIsRobust() {
-        assertEquals(20712, DeviceVersion("2.7.12").asInt)
-        assertEquals(20712, DeviceVersion("2.7.12-beta").asInt)
-        assertEquals(30000, DeviceVersion("3.0.0").asInt)
-        assertEquals(20700, DeviceVersion("2.7").asInt) // Handles 2-part versions
-        assertEquals(0, DeviceVersion("invalid").asInt)
-    }
-
-    @Test
-    fun deviceVersionComparisonIsCorrect() {
-        assertTrue(DeviceVersion("2.7.12") >= DeviceVersion("2.7.11"))
-        assertTrue(DeviceVersion("3.0.0") > DeviceVersion("2.8.1"))
-        assertTrue(DeviceVersion("2.7.12") == DeviceVersion("2.7.12"))
-        assertFalse(DeviceVersion("2.6.9") >= DeviceVersion("2.7.0"))
-    }
-
-     */
 }

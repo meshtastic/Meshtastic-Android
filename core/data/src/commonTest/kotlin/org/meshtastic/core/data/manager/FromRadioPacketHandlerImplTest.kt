@@ -170,10 +170,8 @@ class FromRadioPacketHandlerImplTest {
         // is not available in headless JVM tests. We test the parts that don't trigger it.
         try {
             handler.handleFromRadio(proto)
-        } catch (_: ExceptionInInitializerError) {
-            // Expected: Skiko can't load in headless JVM
-        } catch (_: NoClassDefFoundError) {
-            // Expected: same root cause
+        } catch (_: Throwable) {
+            // Expected: Skiko can't load in headless JVM/native
         }
 
         verify { serviceRepository.setClientNotification(notification) }

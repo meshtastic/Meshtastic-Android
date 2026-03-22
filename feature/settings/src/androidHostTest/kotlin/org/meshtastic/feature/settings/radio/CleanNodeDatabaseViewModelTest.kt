@@ -17,6 +17,7 @@
 package org.meshtastic.feature.settings.radio
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
@@ -58,7 +59,7 @@ class CleanNodeDatabaseViewModelTest {
     }
 
     @Test
-    fun `getNodesToDelete updates state`() = runTest {
+    fun getNodesToDelete_updates_state() = runTest {
         val nodes = listOf(Node(num = 1), Node(num = 2))
         everySuspend { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
 
@@ -69,7 +70,7 @@ class CleanNodeDatabaseViewModelTest {
     }
 
     @Test
-    fun `cleanNodes calls useCase and clears state`() = runTest {
+    fun cleanNodes_calls_useCase_and_clears_state() = runTest {
         val nodes = listOf(Node(num = 1))
         everySuspend { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
         viewModel.getNodesToDelete()

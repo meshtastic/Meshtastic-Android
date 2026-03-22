@@ -16,17 +16,17 @@
  */
 package org.meshtastic.core.ui.util
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class AlertManagerTest {
 
     private val alertManager = AlertManager()
 
     @Test
-    fun `showAlert updates currentAlert flow`() {
+    fun showAlert_updates_currentAlert_flow() {
         val title = "Test Title"
         val message = "Test Message"
 
@@ -34,12 +34,12 @@ class AlertManagerTest {
 
         val alertData = alertManager.currentAlert.value
         assertNotNull(alertData)
-        assertEquals(title, alertData?.title)
-        assertEquals(message, alertData?.message)
+        assertEquals(title, alertData.title)
+        assertEquals(message, alertData.message)
     }
 
     @Test
-    fun `dismissAlert clears currentAlert flow`() {
+    fun dismissAlert_clears_currentAlert_flow() {
         alertManager.showAlert(title = "Title")
         assertNotNull(alertManager.currentAlert.value)
 
@@ -48,7 +48,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun `onConfirm triggers and dismisses alert`() {
+    fun onConfirm_triggers_and_dismisses_alert() {
         var confirmClicked = false
         alertManager.showAlert(title = "Confirm Test", onConfirm = { confirmClicked = true })
 
@@ -59,7 +59,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun `onDismiss triggers and dismisses alert`() {
+    fun onDismiss_triggers_and_dismisses_alert() {
         var dismissClicked = false
         alertManager.showAlert(title = "Dismiss Test", onDismiss = { dismissClicked = true })
 

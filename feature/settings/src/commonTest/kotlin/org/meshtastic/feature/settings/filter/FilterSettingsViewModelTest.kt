@@ -17,15 +17,17 @@
 package org.meshtastic.feature.settings.filter
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class FilterSettingsViewModelTest {
 
@@ -34,23 +36,23 @@ class FilterSettingsViewModelTest {
 
     private lateinit var viewModel: FilterSettingsViewModel
 
-    @Before
+    @BeforeTest
     fun setUp() {
-        every { filterPrefs.filterEnabled.value } returns true
-        every { filterPrefs.filterWords.value } returns setOf("apple", "banana")
+        every { filterPrefs.filterEnabled } returns MutableStateFlow(true)
+        every { filterPrefs.filterWords } returns MutableStateFlow(setOf("apple", "banana"))
 
         viewModel = FilterSettingsViewModel(filterPrefs = filterPrefs, messageFilter = messageFilter)
     }
 
     @Test
-    fun `setFilterEnabled updates prefs and state`() {
+    fun setFilterEnabled_updates_prefs_and_state() {
         viewModel.setFilterEnabled(false)
         verify { filterPrefs.setFilterEnabled(false) }
         assertEquals(false, viewModel.filterEnabled.value)
     }
 
     @Test
-    fun `addFilterWord updates prefs and rebuilds patterns`() {
+    fun addFilterWord_updates_prefs_and_rebuilds_patterns() {
         viewModel.addFilterWord("cherry")
 
         verify { filterPrefs.setFilterWords(any()) }
@@ -59,7 +61,7 @@ class FilterSettingsViewModelTest {
     }
 
     @Test
-    fun `removeFilterWord updates prefs and rebuilds patterns`() {
+    fun removeFilterWord_updates_prefs_and_rebuilds_patterns() {
         viewModel.removeFilterWord("apple")
 
         verify { filterPrefs.setFilterWords(any()) }

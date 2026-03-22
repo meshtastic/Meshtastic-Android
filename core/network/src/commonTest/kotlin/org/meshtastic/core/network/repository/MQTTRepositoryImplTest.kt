@@ -20,6 +20,7 @@ import kotlinx.serialization.json.Json
 import org.meshtastic.core.model.MqttJsonPayload
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class MQTTRepositoryImplTest {
 
@@ -67,8 +68,8 @@ class MQTTRepositoryImplTest {
         val json = Json { ignoreUnknownKeys = true }
         val jsonStr = json.encodeToString(MqttJsonPayload.serializer(), payload)
 
-        assert(jsonStr.contains("\"type\":\"text\""))
-        assert(jsonStr.contains("\"from\":12345678"))
-        assert(jsonStr.contains("\"payload\":\"Hello World\""))
+        assertTrue(jsonStr.contains("\"type\":\"text\""))
+        assertTrue(jsonStr.contains("\"from\":12345678"))
+        assertTrue(jsonStr.contains("\"payload\":\"Hello World\""))
     }
 }
