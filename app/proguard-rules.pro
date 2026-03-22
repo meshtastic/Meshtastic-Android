@@ -20,6 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Room KMP: preserve generated database constructor (required for R8/ProGuard)
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+
 # Needed for protobufs
 -keep class com.google.protobuf.** { *; }
 -keep class org.meshtastic.proto.** { *; }

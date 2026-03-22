@@ -45,16 +45,7 @@ kotlin {
             implementation(projects.core.di)
         }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.datastore)
-            implementation(libs.androidx.datastore.preferences)
-            implementation(libs.androidx.lifecycle.runtime.ktx)
-            implementation(libs.androidx.lifecycle.viewmodel.ktx)
-            implementation(libs.androidx.navigation.common)
-            implementation(libs.androidx.savedstate.compose)
-            implementation(libs.androidx.savedstate.ktx)
-            implementation(libs.material)
-        }
+        androidMain.dependencies { implementation(libs.material) }
 
         androidUnitTest.dependencies {
             implementation(libs.junit)

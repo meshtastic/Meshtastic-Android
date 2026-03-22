@@ -3,6 +3,9 @@
 -dontwarn com.squareup.wire.AndroidMessage**
 -dontwarn io.ktor.**
 
+# Room KMP: preserve generated database constructor (required for R8/ProGuard)
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+
 # Suppress ProGuard notes about duplicate resource files (common in Compose Desktop)
 -dontnote **
 
