@@ -79,7 +79,7 @@ class UIViewModel(
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val notificationManager: NotificationManager,
     packetRepository: PacketRepository,
-    private val alertManager: AlertManager,
+    val alertManager: AlertManager,
 ) : ViewModel() {
 
     private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)

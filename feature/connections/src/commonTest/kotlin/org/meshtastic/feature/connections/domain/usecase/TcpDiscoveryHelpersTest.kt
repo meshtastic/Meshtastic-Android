@@ -197,4 +197,36 @@ class TcpDiscoveryHelpersTest {
         result[0].name shouldBe "Alpha"
         result[1].name shouldBe "Zebra"
     }
+
+    @Test
+    fun `findNodeByNameSuffix returns null when no database`() {
+        val node = TestDataFactory.createTestNode(num = 1, userId = "!abcd1234")
+        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor(any()) } returns false }
+
+        val result = findNodeByNameSuffix("Device_1234", "s/dev/ttyUSB0", mapOf(1 to node), databaseManager)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `findNodeByNameSuffix matches by last underscore segment`() {
+        val node = TestDataFactory.createTestNode(num = 1, userId = "!abcd1234")
+        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor("s/dev/ttyUSB0") } returns true }
+
+        val result = findNodeByNameSuffix("Device_1234", "s/dev/ttyUSB0", mapOf(1 to node), databaseManager)
+
+        assertNotNull(result)
+        result.user.id shouldBe "!abcd1234"
+    }
+
+    @Test
+    fun `findNodeByNameSuffix returns null when suffix is too short`() {
+        val node = TestDataFactory.createTestNode(num = 1, userId = "!abcd1234")
+        val databaseManager = mock<DatabaseManager> { every { hasDatabaseFor("s/dev/ttyUSB0") } returns true }
+
+        val result = findNodeByNameSuffix("Device_ab", "s/dev/ttyUSB0", mapOf(1 to node), databaseManager)
+
+        // "ab" is only 2 chars, below the minimum SUFFIX_LENGTH of 4
+        assertNull(result)
+    }
 }

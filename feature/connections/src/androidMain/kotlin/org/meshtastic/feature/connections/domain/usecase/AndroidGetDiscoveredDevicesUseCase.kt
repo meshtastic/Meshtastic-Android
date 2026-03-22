@@ -54,7 +54,6 @@ class AndroidGetDiscoveredDevicesUseCase(
     private val radioInterfaceService: RadioInterfaceService,
     private val usbManagerLazy: Lazy<UsbManager>,
 ) : GetDiscoveredDevicesUseCase {
-    private val suffixLength = 4
     private val macSuffixLength = 8
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -137,25 +136,14 @@ class AndroidGetDiscoveredDevicesUseCase(
                     }
                     .sortedBy { it.name }
 
-            // Android-specific: USB node matching
+            // Android-specific: USB node matching via shared helper
             val usbForUi =
                 (
                     usbDevices +
                         if (showMock) listOf(DeviceListEntry.Mock(getString(Res.string.demo_mode))) else emptyList()
                     )
                     .map { entry ->
-                        val matchingNode =
-                            if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                                db.values.find { node ->
-                                    val suffix = entry.name.split("_").lastOrNull()?.lowercase(Locale.ROOT)
-                                    suffix != null &&
-                                        suffix.length >= suffixLength &&
-                                        node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
-                                }
-                            } else {
-                                null
-                            }
-                        entry.copy(node = matchingNode)
+                        entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
                     }
 
             // Shared TCP logic via helpers

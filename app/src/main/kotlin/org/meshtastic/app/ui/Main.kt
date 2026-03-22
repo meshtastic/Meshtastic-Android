@@ -90,11 +90,10 @@ import org.meshtastic.core.resources.should_update_firmware
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
 import org.meshtastic.core.service.MeshService
-import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.AlertHost
 import org.meshtastic.core.ui.component.ScrollToTopEvent
+import org.meshtastic.core.ui.component.SharedDialogs
 import org.meshtastic.core.ui.navigation.icon
-import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
-import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
@@ -122,39 +121,17 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
     val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
 
-    if (connectionState == ConnectionState.Connected) {
-        sharedContactRequested?.let {
-            SharedContactDialog(sharedContact = it, onDismiss = { uIViewModel.clearSharedContactRequested() })
-        }
-
-        requestChannelSet?.let { newChannelSet ->
-            ScannedQrCodeDialog(newChannelSet, onDismiss = { uIViewModel.clearRequestChannelUrl() })
-        }
-    }
+    SharedDialogs(
+        connectionState = connectionState,
+        sharedContactRequested = sharedContactRequested,
+        requestChannelSet = requestChannelSet,
+        onDismissSharedContact = { uIViewModel.clearSharedContactRequested() },
+        onDismissChannelSet = { uIViewModel.clearRequestChannelUrl() },
+    )
 
     VersionChecks(uIViewModel)
 
-    val alertDialogState by uIViewModel.currentAlert.collectAsStateWithLifecycle()
-    alertDialogState?.let { state ->
-        val title = state.title ?: state.titleRes?.let { stringResource(it) } ?: ""
-        val message = state.message ?: state.messageRes?.let { stringResource(it) }
-        val confirmText = state.confirmText ?: state.confirmTextRes?.let { stringResource(it) }
-        val dismissText = state.dismissText ?: state.dismissTextRes?.let { stringResource(it) }
-
-        MeshtasticDialog(
-            title = title,
-            message = message,
-            html = state.html,
-            icon = state.icon,
-            text = state.composableMessage?.let { msg -> { msg.Content() } },
-            confirmText = confirmText,
-            onConfirm = state.onConfirm,
-            dismissText = dismissText,
-            onDismiss = state.onDismiss,
-            choices = state.choices,
-            dismissable = state.dismissable,
-        )
-    }
+    AlertHost(uIViewModel.alertManager)
 
     val traceRouteResponse by uIViewModel.tracerouteResponse.collectAsStateWithLifecycle(null)
     var dismissedTracerouteRequestId by remember { mutableStateOf<Int?>(null) }

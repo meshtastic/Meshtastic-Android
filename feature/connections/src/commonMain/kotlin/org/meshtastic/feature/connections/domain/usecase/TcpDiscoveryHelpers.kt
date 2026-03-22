@@ -88,15 +88,25 @@ internal fun buildRecentTcpEntries(
     .filterNot { discoveredAddresses.contains(it.address) }
     .map { DeviceListEntry.Tcp(it.name, it.address) }
     .map { entry ->
-        val matchingNode =
-            if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                val suffix = entry.name.split("_").lastOrNull()?.lowercase()
-                nodeDb.values.find { node ->
-                    suffix != null && suffix.length >= SUFFIX_LENGTH && node.user.id.lowercase().endsWith(suffix)
-                }
-            } else {
-                null
-            }
-        entry.copy(node = matchingNode)
+        entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, nodeDb, databaseManager))
     }
     .sortedBy { it.name }
+
+/**
+ * Finds a [Node] matching the last `_`-delimited segment of [displayName], if a local database exists for the given
+ * [fullAddress]. Used by both TCP recent-device matching and Android USB device matching to avoid duplicated
+ * suffix-lookup logic.
+ */
+internal fun findNodeByNameSuffix(
+    displayName: String,
+    fullAddress: String,
+    nodeDb: Map<Int, Node>,
+    databaseManager: DatabaseManager,
+): Node? {
+    val suffix = displayName.split("_").lastOrNull()?.lowercase()
+    return if (!databaseManager.hasDatabaseFor(fullAddress) || suffix == null || suffix.length < SUFFIX_LENGTH) {
+        null
+    } else {
+        nodeDb.values.find { it.user.id.lowercase().endsWith(suffix) }
+    }
+}
