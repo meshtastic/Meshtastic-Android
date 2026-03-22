@@ -20,7 +20,6 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -36,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
@@ -46,23 +44,18 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
-import org.meshtastic.core.resources.choose_theme
-import org.meshtastic.core.resources.dynamic
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
-import org.meshtastic.core.resources.theme_dark
-import org.meshtastic.core.resources.theme_light
-import org.meshtastic.core.resources.theme_system
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
-import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
 import org.meshtastic.feature.settings.component.PersistenceSection
 import org.meshtastic.feature.settings.component.PrivacySection
+import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
@@ -262,31 +255,6 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
                 languageMap().forEach { (languageTag, languageName) ->
                     ListItem(text = languageName, trailingIcon = null) {
                         LanguageUtils.setAppLocale(languageTag)
-                        onDismiss()
-                    }
-                }
-            }
-        },
-    )
-}
-
-private enum class ThemeOption(val label: StringResource, val mode: Int) {
-    DYNAMIC(label = Res.string.dynamic, mode = MODE_DYNAMIC),
-    LIGHT(label = Res.string.theme_light, mode = AppCompatDelegate.MODE_NIGHT_NO),
-    DARK(label = Res.string.theme_dark, mode = AppCompatDelegate.MODE_NIGHT_YES),
-    SYSTEM(label = Res.string.theme_system, mode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),
-}
-
-@Composable
-private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    MeshtasticDialog(
-        title = stringResource(Res.string.choose_theme),
-        onDismiss = onDismiss,
-        text = {
-            Column {
-                ThemeOption.entries.forEach { option ->
-                    ListItem(text = stringResource(option.label), trailingIcon = null) {
-                        onClickTheme(option.mode)
                         onDismiss()
                     }
                 }

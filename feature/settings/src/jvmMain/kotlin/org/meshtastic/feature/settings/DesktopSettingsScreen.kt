@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
@@ -52,28 +51,23 @@ import org.meshtastic.core.resources.acknowledgements
 import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.bottom_nav_settings
-import org.meshtastic.core.resources.choose_theme
 import org.meshtastic.core.resources.device_db_cache_limit
 import org.meshtastic.core.resources.device_db_cache_limit_summary
-import org.meshtastic.core.resources.dynamic
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.modules_already_unlocked
 import org.meshtastic.core.resources.modules_unlocked
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.theme
-import org.meshtastic.core.resources.theme_dark
-import org.meshtastic.core.resources.theme_light
-import org.meshtastic.core.resources.theme_system
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
-import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.HomoglyphSetting
 import org.meshtastic.feature.settings.component.NotificationSection
+import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
@@ -289,31 +283,6 @@ private fun DesktopAppVersionButton(
             }
         }
     }
-}
-
-private enum class ThemeOption(val label: StringResource, val mode: Int) {
-    DYNAMIC(label = Res.string.dynamic, mode = MODE_DYNAMIC),
-    LIGHT(label = Res.string.theme_light, mode = 1), // MODE_NIGHT_NO
-    DARK(label = Res.string.theme_dark, mode = 2), // MODE_NIGHT_YES
-    SYSTEM(label = Res.string.theme_system, mode = -1), // MODE_NIGHT_FOLLOW_SYSTEM
-}
-
-@Composable
-private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    MeshtasticDialog(
-        title = stringResource(Res.string.choose_theme),
-        onDismiss = onDismiss,
-        text = {
-            Column {
-                ThemeOption.entries.forEach { option ->
-                    ListItem(text = stringResource(option.label), trailingIcon = null) {
-                        onClickTheme(option.mode)
-                        onDismiss()
-                    }
-                }
-            }
-        },
-    )
 }
 
 /**

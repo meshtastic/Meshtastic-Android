@@ -16,21 +16,10 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import org.meshtastic.core.ui.component.PlaceholderScreen
 
 @Composable
 actual fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = "Position Log",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    PlaceholderScreen(name = "Position Log")
 }

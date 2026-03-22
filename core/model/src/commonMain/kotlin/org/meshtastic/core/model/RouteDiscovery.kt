@@ -98,7 +98,6 @@ fun MeshPacket.getTracerouteResponse(
     headerBack: String = "Route traced back to us:\n\n",
 ): String? = fullRouteDiscovery?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
-
 enum class TracerouteMapAvailability {
     Ok,
     MissingEndpoints,
