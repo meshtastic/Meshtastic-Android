@@ -878,7 +878,9 @@ class MeshServiceNotificationsImpl(
 
         // Traffic Stats
         if (num_packets_tx > 0 || num_packets_rx > 0) {
-            parts.add(BULLET + getString(Res.string.local_stats_traffic).format(num_packets_tx, num_packets_rx, num_rx_dupe))
+            parts.add(
+                BULLET + getString(Res.string.local_stats_traffic).format(num_packets_tx, num_packets_rx, num_rx_dupe),
+            )
         }
         if (num_tx_relay > 0) {
             parts.add(BULLET + getString(Res.string.local_stats_relays).format(num_tx_relay, num_tx_relay_canceled))
@@ -887,12 +889,15 @@ class MeshServiceNotificationsImpl(
         // Diagnostic Fields
         val diagnosticParts = mutableListOf<String>()
         if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise).format(noise_floor))
-        if (num_packets_rx_bad > 0) diagnosticParts.add(getString(Res.string.local_stats_bad).format(num_packets_rx_bad))
+        if (num_packets_rx_bad > 0) {
+            diagnosticParts.add(getString(Res.string.local_stats_bad).format(num_packets_rx_bad))
+        }
         if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped).format(num_tx_dropped))
 
         if (diagnosticParts.isNotEmpty()) {
             parts.add(
-                BULLET + getString(Res.string.local_stats_diagnostics_prefix).format(diagnosticParts.joinToString(" | ")),
+                BULLET +
+                    getString(Res.string.local_stats_diagnostics_prefix).format(diagnosticParts.joinToString(" | ")),
             )
         }
 
@@ -905,7 +910,8 @@ class MeshServiceNotificationsImpl(
         uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime).format(formatUptime(it))) }
         if (channel_utilization != null || air_util_tx != null) {
             parts.add(
-                BULLET + getString(Res.string.local_stats_utilization).format(channel_utilization ?: 0f, air_util_tx ?: 0f),
+                BULLET +
+                    getString(Res.string.local_stats_utilization).format(channel_utilization ?: 0f, air_util_tx ?: 0f),
             )
         }
         return parts.joinToString("\n")
