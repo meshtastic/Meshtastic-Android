@@ -60,6 +60,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **Material 3:** The app uses Material 3.
 -   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). For ViewModels or non-composable Coroutines, use the asynchronous `getStringSuspend(Res.string.your_key)`. NEVER use hardcoded strings, and NEVER use the blocking `getString()` in a coroutine.
 -   **Dialogs:** Use centralized components in `core:ui` (e.g., `MeshtasticResourceDialog`).
+-   **Alerts:** Use `AlertHost(alertManager)` from `core:ui/commonMain` in each platform host shell (`Main.kt`, `DesktopMainScreen.kt`). Do NOT duplicate inline alert-rendering boilerplate. For shared QR/contact dialogs, use the `SharedDialogs` composable.
 -   **Platform/Flavor UI:** Inject platform-specific behavior (e.g., map providers) via `CompositionLocal` from `app`.
 
 ### B. Logic & Data Layer
@@ -69,6 +70,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
     -   `java.util.concurrent.ConcurrentHashMap` → `atomicfu` or `Mutex`-guarded `mutableMapOf()`.
     -   `java.util.concurrent.locks.*` → `kotlinx.coroutines.sync.Mutex`.
     -   `java.io.*` → Okio (`BufferedSource`/`BufferedSink`).
+    -   `kotlinx.coroutines.Dispatchers.IO` → `org.meshtastic.core.common.util.ioDispatcher` (expect/actual).
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Dependency Injection:** Use **Koin Annotations** with the K2 compiler plugin (0.4.0+). Keep root graph assembly in `app`.
 -   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`.
