@@ -860,39 +860,39 @@ class MeshServiceNotificationsImpl(
             if (it > MAX_BATTERY_LEVEL) {
                 parts.add(BULLET + getString(Res.string.powered))
             } else {
-                parts.add(BULLET + getString(Res.string.local_stats_battery, it))
+                parts.add(BULLET + getString(Res.string.local_stats_battery).format(it))
             }
         }
-        parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
-        parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
-        parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization, air_util_tx))
+        parts.add(BULLET + getString(Res.string.local_stats_nodes).format(num_online_nodes, num_total_nodes))
+        parts.add(BULLET + getString(Res.string.local_stats_uptime).format(formatUptime(uptime_seconds)))
+        parts.add(BULLET + getString(Res.string.local_stats_utilization).format(channel_utilization, air_util_tx))
 
         if (heap_free_bytes > 0 || heap_total_bytes > 0) {
             parts.add(
                 BULLET +
                     getString(Res.string.local_stats_heap) +
                     ": " +
-                    getString(Res.string.local_stats_heap_value, heap_free_bytes, heap_total_bytes),
+                    getString(Res.string.local_stats_heap_value).format(heap_free_bytes, heap_total_bytes),
             )
         }
 
         // Traffic Stats
         if (num_packets_tx > 0 || num_packets_rx > 0) {
-            parts.add(BULLET + getString(Res.string.local_stats_traffic, num_packets_tx, num_packets_rx, num_rx_dupe))
+            parts.add(BULLET + getString(Res.string.local_stats_traffic).format(num_packets_tx, num_packets_rx, num_rx_dupe))
         }
         if (num_tx_relay > 0) {
-            parts.add(BULLET + getString(Res.string.local_stats_relays, num_tx_relay, num_tx_relay_canceled))
+            parts.add(BULLET + getString(Res.string.local_stats_relays).format(num_tx_relay, num_tx_relay_canceled))
         }
 
         // Diagnostic Fields
         val diagnosticParts = mutableListOf<String>()
-        if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise, noise_floor))
-        if (num_packets_rx_bad > 0) diagnosticParts.add(getString(Res.string.local_stats_bad, num_packets_rx_bad))
-        if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped, num_tx_dropped))
+        if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise).format(noise_floor))
+        if (num_packets_rx_bad > 0) diagnosticParts.add(getString(Res.string.local_stats_bad).format(num_packets_rx_bad))
+        if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped).format(num_tx_dropped))
 
         if (diagnosticParts.isNotEmpty()) {
             parts.add(
-                BULLET + getString(Res.string.local_stats_diagnostics_prefix, diagnosticParts.joinToString(" | ")),
+                BULLET + getString(Res.string.local_stats_diagnostics_prefix).format(diagnosticParts.joinToString(" | ")),
             )
         }
 
@@ -901,11 +901,11 @@ class MeshServiceNotificationsImpl(
 
     private fun DeviceMetrics.formatToString(): String {
         val parts = mutableListOf<String>()
-        battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
-        uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(it))) }
+        battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery).format(it)) }
+        uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime).format(formatUptime(it))) }
         if (channel_utilization != null || air_util_tx != null) {
             parts.add(
-                BULLET + getString(Res.string.local_stats_utilization, channel_utilization ?: 0f, air_util_tx ?: 0f),
+                BULLET + getString(Res.string.local_stats_utilization).format(channel_utilization ?: 0f, air_util_tx ?: 0f),
             )
         }
         return parts.joinToString("\n")
