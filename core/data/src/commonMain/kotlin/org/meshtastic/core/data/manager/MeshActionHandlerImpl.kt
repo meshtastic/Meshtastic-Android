@@ -41,6 +41,7 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
@@ -63,6 +64,7 @@ class MeshActionHandlerImpl(
     private val databaseManager: DatabaseManager,
     private val notificationManager: NotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
+    private val radioConfigRepository: RadioConfigRepository,
 ) : MeshActionHandler {
     private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
@@ -224,6 +226,10 @@ class MeshActionHandlerImpl(
     override fun handleSetConfig(payload: ByteArray, myNodeNum: Int) {
         val c = Config.ADAPTER.decode(payload)
         commandSender.sendAdmin(myNodeNum) { AdminMessage(set_config = c) }
+        // Optimistically persist the config locally so CommandSender picks up
+        // the new values (e.g. hop_limit) immediately instead of waiting for
+        // the next want_config handshake.
+        scope.handledLaunch { radioConfigRepository.setLocalConfig(c) }
     }
 
     override fun handleSetRemoteConfig(id: Int, destNum: Int, payload: ByteArray) {
@@ -245,6 +251,11 @@ class MeshActionHandlerImpl(
         val c = ModuleConfig.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_module_config = c) }
         c.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
+        // Optimistically persist module config locally so the UI reflects the
+        // new values immediately instead of waiting for the next want_config handshake.
+        if (destNum == nodeManager.myNodeNum) {
+            scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(c) }
+        }
     }
 
     override fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {
@@ -275,6 +286,10 @@ class MeshActionHandlerImpl(
         if (payload != null) {
             val c = Channel.ADAPTER.decode(payload)
             commandSender.sendAdmin(myNodeNum) { AdminMessage(set_channel = c) }
+            // Optimistically persist the channel settings locally so the UI
+            // reflects changes immediately instead of waiting for the next
+            // want_config handshake.
+            scope.handledLaunch { radioConfigRepository.updateChannelSettings(c) }
         }
     }
 
