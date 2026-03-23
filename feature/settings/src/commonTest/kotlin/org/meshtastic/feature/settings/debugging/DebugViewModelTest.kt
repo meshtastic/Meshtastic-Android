@@ -16,27 +16,39 @@
  */
 package org.meshtastic.feature.settings.debugging
 
+import dev.mokkery.MockMode
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.verify
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.testing.FakeMeshLogPrefs
+import org.meshtastic.core.testing.FakeMeshLogRepository
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.ui.util.AlertManager
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DebugViewModelTest {
-    /*
 
+    private val meshLogRepository = FakeMeshLogRepository()
+    private val nodeRepository = FakeNodeRepository()
+    private val meshLogPrefs = FakeMeshLogPrefs()
+    private val alertManager: AlertManager = mock(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
-
+    private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
 
     private lateinit var viewModel: DebugViewModel
 
-    @Before
+    @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-
-        every { meshLogRepository.getAllLogs() } returns flowOf(emptyList())
-        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
-        every { meshLogPrefs.retentionDays.value } returns 7
-        every { meshLogPrefs.loggingEnabled.value } returns true
+        meshLogPrefs.setRetentionDays(7)
+        meshLogPrefs.setLoggingEnabled(true)
 
         viewModel =
             DebugViewModel(
@@ -44,29 +56,26 @@ class DebugViewModelTest {
                 nodeRepository = nodeRepository,
                 meshLogPrefs = meshLogPrefs,
                 alertManager = alertManager,
+                dispatchers = dispatchers,
             )
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
     }
 
     @Test
     fun `setRetentionDays updates prefs and deletes old logs`() = runTest {
         viewModel.setRetentionDays(14)
 
-        verify { meshLogPrefs.setRetentionDays(14) }
-        verifySuspend { meshLogRepository.deleteLogsOlderThan(14) }
+        meshLogPrefs.retentionDays.value shouldBe 14
+        meshLogRepository.deleteLogsOlderThanCalledDays shouldBe 14
         viewModel.retentionDays.value shouldBe 14
     }
 
     @Test
     fun `setLoggingEnabled false deletes all logs`() = runTest {
+        meshLogRepository.insert(org.meshtastic.core.model.MeshLog("123", "type", 1L, "raw"))
         viewModel.setLoggingEnabled(false)
 
-        verify { meshLogPrefs.setLoggingEnabled(false) }
-        verifySuspend { meshLogRepository.deleteAll() }
+        meshLogPrefs.loggingEnabled.value shouldBe false
+        meshLogRepository.currentLogs shouldBe emptyList()
         viewModel.loggingEnabled.value shouldBe false
     }
 
@@ -91,6 +100,4 @@ class DebugViewModelTest {
         viewModel.requestDeleteAllLogs()
         verify { alertManager.showAlert(titleRes = any(), messageRes = any(), onConfirm = any()) }
     }
-
-     */
 }

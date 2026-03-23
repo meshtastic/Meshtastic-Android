@@ -23,11 +23,12 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.datastore.RecentAddressesDataSource
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.test.BeforeTest
@@ -40,7 +41,7 @@ class ScannerViewModelTest {
 
     private lateinit var viewModel: ScannerViewModel
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
-    private val radioController: RadioController = mock(MockMode.autofill)
+    private val radioController = FakeRadioController()
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase = mock(MockMode.autofill)
@@ -70,9 +71,9 @@ class ScannerViewModelTest {
                 recentAddressesDataSource = recentAddressesDataSource,
                 getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
                 dispatchers = org.meshtastic.core.di.CoroutineDispatchers(
-                    io = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
-                    main = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
-                    default = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
+                    io = UnconfinedTestDispatcher(),
+                    main = UnconfinedTestDispatcher(),
+                    default = UnconfinedTestDispatcher(),
                 ),
                 bleScanner = bleScanner,
             )
@@ -110,11 +111,9 @@ class ScannerViewModelTest {
 
     @Test
     fun `changeDeviceAddress calls radioController`() {
-        every { radioController.setDeviceAddress(any()) } returns Unit
-
         viewModel.changeDeviceAddress("test_address")
 
-        dev.mokkery.verify { radioController.setDeviceAddress("test_address") }
+        assertEquals("test_address", radioController.lastSetDeviceAddress)
     }
 
     @Test
