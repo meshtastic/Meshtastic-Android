@@ -18,46 +18,46 @@ package org.meshtastic.feature.node.list
 
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.UiPreferences
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.repository.UiPrefs
 
 @Single
-open class NodeFilterPreferences constructor(private val uiPreferences: UiPreferences) {
-    open val includeUnknown = uiPreferences.includeUnknown
-    open val excludeInfrastructure = uiPreferences.excludeInfrastructure
-    open val onlyOnline = uiPreferences.onlyOnline
-    open val onlyDirect = uiPreferences.onlyDirect
-    open val showIgnored = uiPreferences.showIgnored
-    open val excludeMqtt = uiPreferences.excludeMqtt
+open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
+    open val includeUnknown = uiPrefs.includeUnknown
+    open val excludeInfrastructure = uiPrefs.excludeInfrastructure
+    open val onlyOnline = uiPrefs.onlyOnline
+    open val onlyDirect = uiPrefs.onlyDirect
+    open val showIgnored = uiPrefs.showIgnored
+    open val excludeMqtt = uiPrefs.excludeMqtt
 
     open val nodeSortOption =
-        uiPreferences.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
+        uiPrefs.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
 
     open fun setNodeSort(option: NodeSortOption) {
-        uiPreferences.setNodeSort(option.ordinal)
+        uiPrefs.setNodeSort(option.ordinal)
     }
 
     open fun toggleIncludeUnknown() {
-        uiPreferences.setIncludeUnknown(!includeUnknown.value)
+        uiPrefs.setIncludeUnknown(!includeUnknown.value)
     }
 
     open fun toggleExcludeInfrastructure() {
-        uiPreferences.setExcludeInfrastructure(!excludeInfrastructure.value)
+        uiPrefs.setExcludeInfrastructure(!excludeInfrastructure.value)
     }
 
     open fun toggleOnlyOnline() {
-        uiPreferences.setOnlyOnline(!onlyOnline.value)
+        uiPrefs.setOnlyOnline(!onlyOnline.value)
     }
 
     open fun toggleOnlyDirect() {
-        uiPreferences.setOnlyDirect(!onlyDirect.value)
+        uiPrefs.setOnlyDirect(!onlyDirect.value)
     }
 
     open fun toggleShowIgnored() {
-        uiPreferences.setShowIgnored(!showIgnored.value)
+        uiPrefs.setShowIgnored(!showIgnored.value)
     }
 
     open fun toggleExcludeMqtt() {
-        uiPreferences.setExcludeMqtt(!excludeMqtt.value)
+        uiPrefs.setExcludeMqtt(!excludeMqtt.value)
     }
 }

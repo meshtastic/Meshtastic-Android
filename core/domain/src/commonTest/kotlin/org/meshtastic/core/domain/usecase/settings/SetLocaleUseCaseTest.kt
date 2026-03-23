@@ -21,24 +21,24 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
-import org.meshtastic.core.common.UiPreferences
+import org.meshtastic.core.repository.UiPrefs
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class SetLocaleUseCaseTest {
 
-    private val uiPreferences: UiPreferences = mock()
+    private val uiPrefs: UiPrefs = mock()
     private lateinit var useCase: SetLocaleUseCase
 
     @BeforeTest
     fun setUp() {
-        useCase = SetLocaleUseCase(uiPreferences)
+        useCase = SetLocaleUseCase(uiPrefs)
     }
 
     @Test
     fun `invoke calls setLocale on uiPreferences`() {
-        every { uiPreferences.setLocale(any()) } returns Unit
+        every { uiPrefs.setLocale(any()) } returns Unit
         useCase("en")
-        verify { uiPreferences.setLocale("en") }
+        verify { uiPrefs.setLocale("en") }
     }
 }

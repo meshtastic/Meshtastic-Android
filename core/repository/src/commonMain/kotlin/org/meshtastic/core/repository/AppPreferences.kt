@@ -17,7 +17,6 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.common.UiPreferences
 
 /** Reactive interface for analytics-related preferences. */
 interface AnalyticsPrefs {
@@ -71,7 +70,48 @@ interface CustomEmojiPrefs {
 }
 
 /** Reactive interface for general UI preferences. */
+@Suppress("TooManyFunctions")
 interface UiPrefs {
+    val appIntroCompleted: StateFlow<Boolean>
+
+    fun setAppIntroCompleted(completed: Boolean)
+
+    val theme: StateFlow<Int>
+
+    fun setTheme(value: Int)
+
+    val locale: StateFlow<String>
+
+    fun setLocale(languageTag: String)
+
+    val nodeSort: StateFlow<Int>
+
+    fun setNodeSort(value: Int)
+
+    val includeUnknown: StateFlow<Boolean>
+
+    fun setIncludeUnknown(value: Boolean)
+
+    val excludeInfrastructure: StateFlow<Boolean>
+
+    fun setExcludeInfrastructure(value: Boolean)
+
+    val onlyOnline: StateFlow<Boolean>
+
+    fun setOnlyOnline(value: Boolean)
+
+    val onlyDirect: StateFlow<Boolean>
+
+    fun setOnlyDirect(value: Boolean)
+
+    val showIgnored: StateFlow<Boolean>
+
+    fun setShowIgnored(value: Boolean)
+
+    val excludeMqtt: StateFlow<Boolean>
+
+    fun setExcludeMqtt(value: Boolean)
+
     val hasShownNotPairedWarning: StateFlow<Boolean>
 
     fun setHasShownNotPairedWarning(shown: Boolean)
@@ -181,7 +221,6 @@ interface AppPreferences {
     val meshLog: MeshLogPrefs
     val emoji: CustomEmojiPrefs
     val ui: UiPrefs
-    val uiPrefs: UiPreferences
     val map: MapPrefs
     val mapConsent: MapConsentPrefs
     val mapTileProvider: MapTileProviderPrefs

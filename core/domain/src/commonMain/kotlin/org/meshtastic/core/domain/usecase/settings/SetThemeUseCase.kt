@@ -17,11 +17,11 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.UiPreferences
+import org.meshtastic.core.repository.UiPrefs
 
 @Single
-open class SetThemeUseCase constructor(private val uiPreferences: UiPreferences) {
+open class SetThemeUseCase constructor(private val uiPrefs: UiPrefs) {
     operator fun invoke(value: Int) {
-        uiPreferences.setTheme(value)
+        uiPrefs.setTheme(value)
     }
 }

@@ -37,13 +37,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.feature.map.model.CustomTileProviderConfig
 import org.meshtastic.feature.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.feature.map.repository.CustomTileProviderRepository
@@ -61,7 +61,7 @@ class MapViewModelTest {
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
     private val radioController = mock<RadioController>(MockMode.autofill)
     private val customTileProviderRepository = mock<CustomTileProviderRepository>(MockMode.autofill)
-    private val uiPreferencesDataSource = mock<UiPreferencesDataSource>(MockMode.autofill)
+    private val uiPrefs = mock<UiPrefs>(MockMode.autofill)
     private val savedStateHandle = SavedStateHandle(mapOf("waypointId" to null))
 
     private val testDispatcher = StandardTestDispatcher()
@@ -89,7 +89,7 @@ class MapViewModelTest {
 
         every { customTileProviderRepository.getCustomTileProviders() } returns flowOf(emptyList())
         every { radioConfigRepository.deviceProfileFlow } returns flowOf(mock(MockMode.autofill))
-        every { uiPreferencesDataSource.theme } returns MutableStateFlow(1)
+        every { uiPrefs.theme } returns MutableStateFlow(1)
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
         every { nodeRepository.myId } returns MutableStateFlow(null)
@@ -108,7 +108,7 @@ class MapViewModelTest {
                 radioConfigRepository,
                 radioController,
                 customTileProviderRepository,
-                uiPreferencesDataSource,
+                uiPrefs,
                 savedStateHandle,
             )
     }
