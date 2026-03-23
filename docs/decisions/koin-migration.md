@@ -31,6 +31,4 @@ Key choices:
 - Desktop bootstraps its own `DesktopKoinModule` with stubs + real implementations
 - 11 passthrough Android ViewModel wrappers eliminated
 
-## Archive
 
-Full migration plan: [`archive/koin-migration-plan.md`](../archive/koin-migration-plan.md)

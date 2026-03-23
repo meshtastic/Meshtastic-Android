@@ -24,8 +24,3 @@ However, as Desktop integration advanced, we found the need for a unified BLE tr
 - **Maximal Code Deduplication:** The BLE implementation is completely shared across Android and Desktop in `core:ble/commonMain`.
 - **Future-Proofing:** Adding an `iosMain` target in the future will be trivial, as it can leverage the same shared Kable abstractions.
 - **Lost Nordic Mocks:** Kable lacks the comprehensive mock infrastructure of the Nordic library. Consequently, several complex BLE OTA unit tests had to be deprecated. Re-establishing this test coverage using custom Kable fakes is an ongoing technical debt item.
-
-## Archive
-
-- Original Hybrid Analysis: [`archive/ble-kmp-strategy.md`](../archive/ble-kmp-strategy.md)
-- Original Abstraction Plan: [`archive/ble-kmp-abstraction-plan.md`](../archive/ble-kmp-abstraction-plan.md)

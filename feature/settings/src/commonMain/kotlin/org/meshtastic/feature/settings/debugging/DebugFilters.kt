@@ -117,14 +117,13 @@ fun DebugPresetFilters(
     onFilterTextsChange: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val availableFilters =
-        presetFilters.filter { filter ->
-            logs.any { log ->
-                log.logMessage.contains(filter, ignoreCase = true) ||
-                    log.messageType.contains(filter, ignoreCase = true) ||
-                    log.formattedReceivedDate.contains(filter, ignoreCase = true)
-            }
+    val availableFilters = presetFilters.filter { filter ->
+        logs.any { log ->
+            log.logMessage.contains(filter, ignoreCase = true) ||
+                log.messageType.contains(filter, ignoreCase = true) ||
+                log.formattedReceivedDate.contains(filter, ignoreCase = true)
         }
+    }
     Column(modifier = modifier) {
         Text(
             text = stringResource(Res.string.debug_filter_preset_title),

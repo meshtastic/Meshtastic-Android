@@ -40,7 +40,8 @@ enum class TopLevelDestination(val label: StringResource, val route: Route) {
     ;
 
     companion object {
-        fun fromNavKey(key: NavKey?): TopLevelDestination? =
-            entries.find { dest -> key?.let { it::class == dest.route::class } == true }
+        fun fromNavKey(key: NavKey?): TopLevelDestination? = entries.find { dest ->
+            key?.let { it::class == dest.route::class } == true
+        }
     }
 }

@@ -288,14 +288,13 @@ class TcpTransport(
 
     private fun startHeartbeat(address: String) {
         heartbeatJob?.cancel()
-        heartbeatJob =
-            scope.launch {
-                while (true) {
-                    delay(HEARTBEAT_INTERVAL_MILLIS)
-                    Logger.d { "$logTag: [$address] Sending heartbeat" }
-                    sendHeartbeat()
-                }
+        heartbeatJob = scope.launch {
+            while (true) {
+                delay(HEARTBEAT_INTERVAL_MILLIS)
+                Logger.d { "$logTag: [$address] Sending heartbeat" }
+                sendHeartbeat()
             }
+        }
     }
 
     // endregion

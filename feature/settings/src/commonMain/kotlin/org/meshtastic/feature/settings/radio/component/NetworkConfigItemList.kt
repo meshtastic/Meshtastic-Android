@@ -168,7 +168,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                             if (wifiStatus.is_connected) {
                                 ListItem(
                                     text = stringResource(Res.string.wifi_ip),
-                                    supportingText = formatIpAddress(wifiStatus.ip_address ?: 0),
+                                    supportingText = formatIpAddress(wifiStatus.ip_address),
                                     trailingIcon = null,
                                 )
                             }
@@ -177,7 +177,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                             if (ethernetStatus.is_connected) {
                                 ListItem(
                                     text = stringResource(Res.string.ethernet_ip),
-                                    supportingText = formatIpAddress(ethernetStatus.ip_address ?: 0),
+                                    supportingText = formatIpAddress(ethernetStatus.ip_address),
                                     trailingIcon = null,
                                 )
                             }

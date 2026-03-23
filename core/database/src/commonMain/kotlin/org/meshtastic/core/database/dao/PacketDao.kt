@@ -361,21 +361,20 @@ interface PacketDao {
 
     @Transaction
     suspend fun setMuteUntil(contacts: List<String>, until: Long) {
-        val contactList =
-            contacts.map { contact ->
-                // Always mute
-                val absoluteMuteUntil =
-                    if (until == Long.MAX_VALUE) {
-                        Long.MAX_VALUE
-                    } else if (until == 0L) { // unmute
-                        0L
-                    } else {
-                        nowMillis + until
-                    }
+        val contactList = contacts.map { contact ->
+            // Always mute
+            val absoluteMuteUntil =
+                if (until == Long.MAX_VALUE) {
+                    Long.MAX_VALUE
+                } else if (until == 0L) { // unmute
+                    0L
+                } else {
+                    nowMillis + until
+                }
 
-                getContactSettings(contact)?.copy(muteUntil = absoluteMuteUntil)
-                    ?: ContactSettings(contact_key = contact, muteUntil = absoluteMuteUntil)
-            }
+            getContactSettings(contact)?.copy(muteUntil = absoluteMuteUntil)
+                ?: ContactSettings(contact_key = contact, muteUntil = absoluteMuteUntil)
+        }
         upsertContactSettings(contactList)
     }
 
@@ -480,10 +479,9 @@ interface PacketDao {
         val indexMap =
             oldSettings
                 .mapIndexed { oldIndex, oldChannel ->
-                    val pskMatches =
-                        newSettings.mapIndexedNotNull { index, channel ->
-                            if (channel.psk == oldChannel.psk) index to channel else null
-                        }
+                    val pskMatches = newSettings.mapIndexedNotNull { index, channel ->
+                        if (channel.psk == oldChannel.psk) index to channel else null
+                    }
 
                     val newIndex =
                         when {

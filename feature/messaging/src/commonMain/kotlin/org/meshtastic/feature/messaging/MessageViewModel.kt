@@ -214,8 +214,9 @@ class MessageViewModel(
         viewModelScope.launch { sendMessageUseCase.invoke(str, contactKey, replyId) }
     }
 
-    fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
-        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey)) }
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
+        serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
+    }
 
     fun deleteMessages(uuidList: List<Long>) =
         viewModelScope.launch(ioDispatcher) { packetRepository.deleteMessages(uuidList) }

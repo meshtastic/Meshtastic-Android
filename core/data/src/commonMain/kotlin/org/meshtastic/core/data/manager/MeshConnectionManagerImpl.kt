@@ -188,20 +188,19 @@ class MeshConnectionManagerImpl(
 
     private fun startHandshakeStallGuard(stage: Int, action: () -> Unit) {
         handshakeTimeout?.cancel()
-        handshakeTimeout =
-            scope.handledLaunch {
+        handshakeTimeout = scope.handledLaunch {
+            delay(HANDSHAKE_TIMEOUT)
+            if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
+                Logger.w { "Handshake stall detected! Retrying Stage $stage." }
+                action()
+                // Recursive timeout for one more try
                 delay(HANDSHAKE_TIMEOUT)
                 if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
-                    Logger.w { "Handshake stall detected! Retrying Stage $stage." }
-                    action()
-                    // Recursive timeout for one more try
-                    delay(HANDSHAKE_TIMEOUT)
-                    if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
-                        Logger.e { "Handshake still stalled after retry. Resetting connection." }
-                        onConnectionChanged(ConnectionState.Disconnected)
-                    }
+                    Logger.e { "Handshake still stalled after retry. Resetting connection." }
+                    onConnectionChanged(ConnectionState.Disconnected)
                 }
             }
+        }
     }
 
     private fun handleDeviceSleep() {
@@ -220,19 +219,18 @@ class MeshConnectionManagerImpl(
             )
         }
 
-        sleepTimeout =
-            scope.handledLaunch {
-                try {
-                    val localConfig = radioConfigRepository.localConfigFlow.first()
-                    val timeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
-                    Logger.d { "Waiting for sleeping device, timeout=$timeout secs" }
-                    delay(timeout.seconds)
-                    Logger.w { "Device timeout out, setting disconnected" }
-                    onConnectionChanged(ConnectionState.Disconnected)
-                } catch (_: CancellationException) {
-                    Logger.d { "device sleep timeout cancelled" }
-                }
+        sleepTimeout = scope.handledLaunch {
+            try {
+                val localConfig = radioConfigRepository.localConfigFlow.first()
+                val timeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
+                Logger.d { "Waiting for sleeping device, timeout=$timeout secs" }
+                delay(timeout.seconds)
+                Logger.w { "Device timeout out, setting disconnected" }
+                onConnectionChanged(ConnectionState.Disconnected)
+            } catch (_: CancellationException) {
+                Logger.d { "device sleep timeout cancelled" }
             }
+        }
 
         serviceBroadcasts.broadcastConnection()
     }

@@ -17,8 +17,8 @@
 package org.meshtastic.feature.settings.component
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Message
 import androidx.compose.material.icons.rounded.BatteryAlert
-import androidx.compose.material.icons.rounded.Message
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
@@ -44,7 +44,7 @@ fun NotificationSection(
     ExpressiveSection(title = stringResource(Res.string.app_notifications)) {
         SwitchListItem(
             text = stringResource(Res.string.meshtastic_messages_notifications),
-            leadingIcon = Icons.Rounded.Message,
+            leadingIcon = Icons.AutoMirrored.Rounded.Message,
             checked = messagesEnabled,
             onClick = { onToggleMessages(!messagesEnabled) },
         )

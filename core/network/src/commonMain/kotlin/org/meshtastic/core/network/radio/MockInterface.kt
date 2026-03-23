@@ -298,7 +298,7 @@ class MockInterface(private val service: RadioInterfaceService, val address: Str
     private fun sendFakeAck(pr: ToRadio) = service.serviceScope.handledLaunch {
         val packet = pr.packet ?: return@handledLaunch
         delay(2000)
-        service.handleFromRadio(makeAck(MY_NODE + 1, packet.from ?: 0, packet.id).encode())
+        service.handleFromRadio(makeAck(MY_NODE + 1, packet.from, packet.id).encode())
     }
 
     private fun sendConfigResponse(configId: Int) {

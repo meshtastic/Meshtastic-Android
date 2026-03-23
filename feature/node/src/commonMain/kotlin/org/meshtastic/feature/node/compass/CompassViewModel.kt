@@ -92,17 +92,13 @@ class CompassViewModel(
 
         updatesJob?.cancel()
 
-        updatesJob =
-            viewModelScope.launch {
-                combine(headingProvider.headingUpdates(), phoneLocationProvider.locationUpdates()) {
-                        heading,
-                        location,
-                    ->
-                    buildState(heading, location)
-                }
-                    .flowOn(dispatchers.default)
-                    .collect { _uiState.value = it }
+        updatesJob = viewModelScope.launch {
+            combine(headingProvider.headingUpdates(), phoneLocationProvider.locationUpdates()) { heading, location ->
+                buildState(heading, location)
             }
+                .flowOn(dispatchers.default)
+                .collect { _uiState.value = it }
+        }
     }
 
     fun stop() {

@@ -43,19 +43,18 @@ class SequentialJob {
      */
     fun launch(scope: CoroutineScope, timeoutMs: Long = 0, block: suspend CoroutineScope.() -> Unit) {
         cancel()
-        val newJob =
-            scope.handledLaunch {
-                if (timeoutMs > 0) {
-                    try {
-                        withTimeout(timeoutMs, block)
-                    } catch (e: TimeoutCancellationException) {
-                        Logger.w { "SequentialJob timed out after ${timeoutMs}ms" }
-                        throw e
-                    }
-                } else {
-                    block()
+        val newJob = scope.handledLaunch {
+            if (timeoutMs > 0) {
+                try {
+                    withTimeout(timeoutMs, block)
+                } catch (e: TimeoutCancellationException) {
+                    Logger.w { "SequentialJob timed out after ${timeoutMs}ms" }
+                    throw e
                 }
+            } else {
+                block()
             }
+        }
         job.value = newJob
 
         newJob.invokeOnCompletion { job.compareAndSet(newJob, null) }

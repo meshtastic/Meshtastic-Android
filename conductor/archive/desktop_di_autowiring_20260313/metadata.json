@@ -1,8 +1,0 @@
-{
-  "track_id": "desktop_di_autowiring_20260313",
-  "type": "chore",
-  "status": "completed",
-  "created_at": "2026-03-13T12:00:00Z",
-  "updated_at": "2026-03-13T12:00:00Z",
-  "description": "Architecture Health & DI (Immediate Priority) * Desktop Koin checkModules() test: Add a test to ensure Desktop DI bindings are validated at compile-time/test-time so we catch missing interfaces early. * Auto-wire Desktop ViewModels: Configure KSP so we can eliminate the manual ViewModel wiring in DesktopKoinModule and rely on @KoinViewModel annotations like Android does."
-}

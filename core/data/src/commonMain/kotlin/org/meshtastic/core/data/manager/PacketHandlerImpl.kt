@@ -146,32 +146,31 @@ class PacketHandlerImpl(
 
     private fun startPacketQueue() {
         if (queueJob?.isActive == true) return
-        queueJob =
-            scope.handledLaunch {
-                try {
-                    while (serviceRepository.connectionState.value == ConnectionState.Connected) {
-                        val packet = queueMutex.withLock { queuedPackets.removeFirstOrNull() } ?: break
-                        @Suppress("TooGenericExceptionCaught", "SwallowedException")
-                        try {
-                            val response = sendPacket(packet)
-                            Logger.d { "queueJob packet id=${packet.id.toUInt()} waiting" }
-                            val success = withTimeout(TIMEOUT) { response.await() }
-                            Logger.d { "queueJob packet id=${packet.id.toUInt()} success $success" }
-                        } catch (e: TimeoutCancellationException) {
-                            Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
-                        } catch (e: Exception) {
-                            Logger.d { "queueJob packet id=${packet.id.toUInt()} failed" }
-                        } finally {
-                            responseMutex.withLock { queueResponse.remove(packet.id) }
-                        }
-                    }
-                } finally {
-                    queueJob = null
-                    if (queueMutex.withLock { queuedPackets.isNotEmpty() }) {
-                        startPacketQueue()
+        queueJob = scope.handledLaunch {
+            try {
+                while (serviceRepository.connectionState.value == ConnectionState.Connected) {
+                    val packet = queueMutex.withLock { queuedPackets.removeFirstOrNull() } ?: break
+                    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+                    try {
+                        val response = sendPacket(packet)
+                        Logger.d { "queueJob packet id=${packet.id.toUInt()} waiting" }
+                        val success = withTimeout(TIMEOUT) { response.await() }
+                        Logger.d { "queueJob packet id=${packet.id.toUInt()} success $success" }
+                    } catch (e: TimeoutCancellationException) {
+                        Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
+                    } catch (e: Exception) {
+                        Logger.d { "queueJob packet id=${packet.id.toUInt()} failed" }
+                    } finally {
+                        responseMutex.withLock { queueResponse.remove(packet.id) }
                     }
                 }
+            } finally {
+                queueJob = null
+                if (queueMutex.withLock { queuedPackets.isNotEmpty() }) {
+                    startPacketQueue()
+                }
             }
+        }
     }
 
     private fun changeStatus(packetId: Int, m: MessageStatus) = scope.handledLaunch {

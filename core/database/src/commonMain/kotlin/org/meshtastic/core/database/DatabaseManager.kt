@@ -184,8 +184,9 @@ open class DatabaseManager(
         val limit = getCurrentCacheLimit()
         val all = listExistingDbNames()
         // Only enforce the limit over device-specific DBs; exclude legacy and default DBs
-        val deviceDbs =
-            all.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
+        val deviceDbs = all.filterNot {
+            it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME
+        }
 
         if (deviceDbs.size <= limit) return@withLock
         val usageSnapshot = deviceDbs.associateWith { lastUsed(it) }
