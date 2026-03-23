@@ -1,8 +1,0 @@
-{
-  "track_id": "desktop_ble_kable_20260314",
-  "type": "feature",
-  "status": "completed",
-  "created_at": "2026-03-14T12:00:00Z",
-  "updated_at": "2026-03-14T12:00:00Z",
-  "description": "Kable swap Keep Nordic on Android short-term. Add Kable backend only for jvmMain in core:ble first (desktop BLE enablement). Introduce a MeshtasticRadioProfile abstraction in core:ble/commonMain so NordicBleInterface no longer depends on Android/Nordic classes. Once that seam is clean, decide whether Android should stay Nordic or move to Kable."
-}

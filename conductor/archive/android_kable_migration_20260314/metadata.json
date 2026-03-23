@@ -1,8 +1,0 @@
-{
-  "track_id": "android_kable_migration_20260314",
-  "type": "feature",
-  "status": "completed",
-  "created_at": "2026-03-14T17:15:00Z",
-  "updated_at": "2026-03-14T17:15:00Z",
-  "description": "Replace Nordic with Kable on Android"
-}

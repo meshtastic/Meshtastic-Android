@@ -1,8 +1,0 @@
-{
-  "id": "extract_radio_interface_kmp_20260320",
-  "name": "Extract RadioInterfaceService to KMP",
-  "description": "Unify the connection orchestration lifecycle (TCP, Serial, BLE) into a shared multiplatform service.",
-  "status": "completed",
-  "tags": ["core", "service", "kmp", "desktop", "radio", "connection"],
-  "created_at": "2026-03-20T12:00:00Z"
-}
