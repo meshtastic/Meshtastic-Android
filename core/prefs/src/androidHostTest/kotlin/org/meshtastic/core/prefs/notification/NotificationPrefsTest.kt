@@ -58,12 +58,14 @@ class NotificationPrefsTest {
     fun `messagesEnabled defaults to true`() = testScope.runTest { assertTrue(notificationPrefs.messagesEnabled.value) }
 
     @Test
-    fun `nodeEventsEnabled defaults to true`() =
-        testScope.runTest { assertTrue(notificationPrefs.nodeEventsEnabled.value) }
+    fun `nodeEventsEnabled defaults to true`() = testScope.runTest {
+        assertTrue(notificationPrefs.nodeEventsEnabled.value)
+    }
 
     @Test
-    fun `lowBatteryEnabled defaults to true`() =
-        testScope.runTest { assertTrue(notificationPrefs.lowBatteryEnabled.value) }
+    fun `lowBatteryEnabled defaults to true`() = testScope.runTest {
+        assertTrue(notificationPrefs.lowBatteryEnabled.value)
+    }
 
     @Test
     fun `setting messagesEnabled updates preference`() = testScope.runTest {

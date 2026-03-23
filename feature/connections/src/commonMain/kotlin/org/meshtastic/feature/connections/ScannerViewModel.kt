@@ -77,26 +77,25 @@ open class ScannerViewModel(
         isBleScanningState.value = true
         scannedBleDevices.value = emptyMap()
 
-        scanJob =
-            viewModelScope.launch {
-                try {
-                    bleScanner
-                        .scan(
-                            timeout = kotlin.time.Duration.INFINITE,
-                            serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
-                        )
-                        .flowOn(ioDispatcher)
-                        .collect { device ->
-                            if (!scannedBleDevices.value.containsKey(device.address)) {
-                                scannedBleDevices.update { current -> current + (device.address to device) }
-                            }
+        scanJob = viewModelScope.launch {
+            try {
+                bleScanner
+                    .scan(
+                        timeout = kotlin.time.Duration.INFINITE,
+                        serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
+                    )
+                    .flowOn(ioDispatcher)
+                    .collect { device ->
+                        if (!scannedBleDevices.value.containsKey(device.address)) {
+                            scannedBleDevices.update { current -> current + (device.address to device) }
                         }
-                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                    co.touchlab.kermit.Logger.w(e) { "BLE scan failed" }
-                } finally {
-                    isBleScanningState.value = false
-                }
+                    }
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                co.touchlab.kermit.Logger.w(e) { "BLE scan failed" }
+            } finally {
+                isBleScanningState.value = false
             }
+        }
     }
 
     fun stopBleScan() {

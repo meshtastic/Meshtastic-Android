@@ -35,6 +35,7 @@ class SharedContactViewModel(nodeRepository: NodeRepository, private val service
     val unfilteredNodes: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    fun addSharedContact(sharedContact: SharedContact) =
-        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.ImportContact(sharedContact)) }
+    fun addSharedContact(sharedContact: SharedContact) = viewModelScope.launch {
+        serviceRepository.onServiceAction(ServiceAction.ImportContact(sharedContact))
+    }
 }

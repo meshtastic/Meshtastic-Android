@@ -51,8 +51,7 @@ class ModuleConfigDataSource(
         when {
             config.mqtt != null -> current.copy(mqtt = config.mqtt)
             config.serial != null -> current.copy(serial = config.serial)
-            config.external_notification != null ->
-                current.copy(external_notification = config.external_notification)
+            config.external_notification != null -> current.copy(external_notification = config.external_notification)
             config.store_forward != null -> current.copy(store_forward = config.store_forward)
             config.range_test != null -> current.copy(range_test = config.range_test)
             config.telemetry != null -> current.copy(telemetry = config.telemetry)

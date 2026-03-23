@@ -630,8 +630,7 @@ class MeshDataHandlerImpl(
         // Find the original packet to get the contactKey
         packetRepository.value.getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
             // Skip notification if the original message was filtered
-            val targetId =
-                if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
+            val targetId = if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
             val contactKey = "${originalPacket.channel}$targetId"
             val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
@@ -640,11 +639,7 @@ class MeshDataHandlerImpl(
             if (!isSilent) {
                 val channelName =
                     if (originalPacket.to == DataPacket.ID_BROADCAST) {
-                        radioConfigRepository.channelSetFlow
-                            .first()
-                            .settings
-                            .getOrNull(originalPacket.channel)
-                            ?.name
+                        radioConfigRepository.channelSetFlow.first().settings.getOrNull(originalPacket.channel)?.name
                     } else {
                         null
                     }

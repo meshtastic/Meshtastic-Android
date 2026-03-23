@@ -58,8 +58,9 @@ class FilterPrefsTest {
     @Test fun `filterEnabled defaults to false`() = testScope.runTest { assertFalse(filterPrefs.filterEnabled.value) }
 
     @Test
-    fun `filterWords defaults to empty set`() =
-        testScope.runTest { assertTrue(filterPrefs.filterWords.value.isEmpty()) }
+    fun `filterWords defaults to empty set`() = testScope.runTest {
+        assertTrue(filterPrefs.filterWords.value.isEmpty())
+    }
 
     @Test
     fun `setting filterEnabled updates preference`() = testScope.runTest {

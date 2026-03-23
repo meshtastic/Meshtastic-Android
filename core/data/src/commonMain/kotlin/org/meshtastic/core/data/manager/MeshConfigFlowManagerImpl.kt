@@ -119,11 +119,10 @@ class MeshConfigFlowManagerImpl(
 
     private fun handleNodeInfoComplete() {
         Logger.i { "NodeInfo complete (Stage 2)" }
-        val entities =
-            newNodes.map { info ->
-                nodeManager.installNodeInfo(info, withBroadcast = false)
-                nodeManager.nodeDBbyNodeNum[info.num]!!
-            }
+        val entities = newNodes.map { info ->
+            nodeManager.installNodeInfo(info, withBroadcast = false)
+            nodeManager.nodeDBbyNodeNum[info.num]!!
+        }
         newNodes.clear()
 
         scope.handledLaunch {

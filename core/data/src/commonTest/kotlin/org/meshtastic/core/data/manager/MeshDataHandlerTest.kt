@@ -490,8 +490,10 @@ class MeshDataHandlerTest {
             MeshPacket(
                 id = 42,
                 from = 456,
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
+                decoded = Data(
+                    portnum = PortNum.TEXT_MESSAGE_APP,
+                    payload = "hello".encodeToByteArray().toByteString(),
+                ),
             )
         val dataPacket =
             DataPacket(
@@ -508,8 +510,7 @@ class MeshDataHandlerTest {
         // Provide sender node so getSenderName() doesn't fall back to getString (requires Skiko)
         every { nodeManager.nodeDBbyID } returns
             mapOf(
-                "!remote" to
-                    Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
+                "!remote" to Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
             )
 
         handler.handleReceivedData(packet, 123)
@@ -524,8 +525,10 @@ class MeshDataHandlerTest {
             MeshPacket(
                 id = 42,
                 from = 456,
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
+                decoded = Data(
+                    portnum = PortNum.TEXT_MESSAGE_APP,
+                    payload = "hello".encodeToByteArray().toByteString(),
+                ),
             )
         val dataPacket =
             DataPacket(
@@ -597,8 +600,7 @@ class MeshDataHandlerTest {
             MeshPacket(
                 id = 55,
                 from = 456,
-                decoded =
-                Data(portnum = PortNum.RANGE_TEST_APP, payload = "test".encodeToByteArray().toByteString()),
+                decoded = Data(portnum = PortNum.RANGE_TEST_APP, payload = "test".encodeToByteArray().toByteString()),
             )
         val dataPacket =
             DataPacket(
@@ -614,8 +616,7 @@ class MeshDataHandlerTest {
         every { messageFilter.shouldFilter(any(), any()) } returns false
         every { nodeManager.nodeDBbyID } returns
             mapOf(
-                "!remote" to
-                    Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
+                "!remote" to Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
             )
 
         handler.handleReceivedData(packet, 123)
@@ -687,8 +688,10 @@ class MeshDataHandlerTest {
             MeshPacket(
                 id = 88,
                 from = 456,
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
+                decoded = Data(
+                    portnum = PortNum.TEXT_MESSAGE_APP,
+                    payload = "hello".encodeToByteArray().toByteString(),
+                ),
             )
         val dataPacket =
             DataPacket(

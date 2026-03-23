@@ -165,16 +165,15 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                         filterMode = filterMode,
                         onFilterModeChange = { filterMode = it },
                         onExportLogs = {
-                            val format =
-                                LocalDateTime.Format {
-                                    year()
-                                    monthNumber()
-                                    day()
-                                    char('_')
-                                    hour()
-                                    minute()
-                                    second()
-                                }
+                            val format = LocalDateTime.Format {
+                                year()
+                                monthNumber()
+                                day()
+                                char('_')
+                                hour()
+                                minute()
+                                second()
+                            }
                             val timestamp =
                                 fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
                             val fileName = "meshtastic_debug_$timestamp.txt"

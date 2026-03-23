@@ -227,13 +227,12 @@ class SharedRadioInterfaceService(
 
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
-        heartbeatJob =
-            serviceScope.launch {
-                while (true) {
-                    delay(HEARTBEAT_INTERVAL_MILLIS)
-                    keepAlive()
-                }
+        heartbeatJob = serviceScope.launch {
+            while (true) {
+                delay(HEARTBEAT_INTERVAL_MILLIS)
+                keepAlive()
             }
+        }
     }
 
     fun keepAlive(now: Long = nowMillis) {

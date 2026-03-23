@@ -114,8 +114,9 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Relative Humidity
-        val humidities =
-            telemetries.mapNotNull { it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f } }
+        val humidities = telemetries.mapNotNull {
+            it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f }
+        }
         if (humidities.isNotEmpty()) {
             minValues.add(humidities.minOf { it })
             maxValues.add(humidities.maxOf { it })
@@ -123,8 +124,9 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Soil Temperature
-        val soilTemperatures =
-            telemetries.mapNotNull { it.environment_metrics?.soil_temperature?.takeIf { !it.isNaN() } }
+        val soilTemperatures = telemetries.mapNotNull {
+            it.environment_metrics?.soil_temperature?.takeIf { !it.isNaN() }
+        }
         if (soilTemperatures.isNotEmpty()) {
             var minSoilTemperatureValue = soilTemperatures.minOf { it }
             var maxSoilTemperatureValue = soilTemperatures.maxOf { it }
@@ -138,8 +140,9 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Soil Moisture
-        val soilMoistures =
-            telemetries.mapNotNull { it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE } }
+        val soilMoistures = telemetries.mapNotNull {
+            it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE }
+        }
         if (soilMoistures.isNotEmpty()) {
             minValues.add(soilMoistures.minOf { it.toFloat() })
             maxValues.add(soilMoistures.maxOf { it.toFloat() })

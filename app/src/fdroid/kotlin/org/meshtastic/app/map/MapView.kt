@@ -693,10 +693,9 @@ fun MapView(
         if (nodeTracks == null || focusedNodeNum == null) return emptyList<Marker>() to emptyList<Polyline>()
 
         val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
-        val timeFilteredPositions =
-            nodeTracks.filter {
-                lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
-            }
+        val timeFilteredPositions = nodeTracks.filter {
+            lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
+        }
         val sortedPositions = timeFilteredPositions.sortedBy { it.time }
 
         val focusedNode = nodes.find { it.num == focusedNodeNum } ?: return emptyList<Marker>() to emptyList<Polyline>()
@@ -719,18 +718,17 @@ fun MapView(
             }
         }
 
-        val trackMarkers =
-            sortedPositions.mapIndexedNotNull { index, position ->
-                if (index == sortedPositions.lastIndex) return@mapIndexedNotNull null
+        val trackMarkers = sortedPositions.mapIndexedNotNull { index, position ->
+            if (index == sortedPositions.lastIndex) return@mapIndexedNotNull null
 
-                Marker(this).apply {
-                    this.position = GeoPoint((position.latitude_i ?: 0) * 1e-7, (position.longitude_i ?: 0) * 1e-7)
-                    icon = AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot)
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    title = getString(Res.string.position)
-                    snippet = formatAgo(position.time)
-                }
+            Marker(this).apply {
+                this.position = GeoPoint((position.latitude_i ?: 0) * 1e-7, (position.longitude_i ?: 0) * 1e-7)
+                icon = AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot)
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                title = getString(Res.string.position)
+                snippet = formatAgo(position.time)
             }
+        }
         return trackMarkers to trackPolylines
     }
 
@@ -1160,16 +1158,15 @@ private fun offsetPolyline(
     val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
     if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
 
-    val headings =
-        headingPoints.mapIndexed { index, _ ->
-            when (index) {
-                0 -> bearingRad(headingPoints[0], headingPoints[1])
-                headingPoints.lastIndex ->
-                    bearingRad(headingPoints[headingPoints.lastIndex - 1], headingPoints[headingPoints.lastIndex])
+    val headings = headingPoints.mapIndexed { index, _ ->
+        when (index) {
+            0 -> bearingRad(headingPoints[0], headingPoints[1])
+            headingPoints.lastIndex ->
+                bearingRad(headingPoints[headingPoints.lastIndex - 1], headingPoints[headingPoints.lastIndex])
 
-                else -> bearingRad(headingPoints[index - 1], headingPoints[index + 1])
-            }
+            else -> bearingRad(headingPoints[index - 1], headingPoints[index + 1])
         }
+    }
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]

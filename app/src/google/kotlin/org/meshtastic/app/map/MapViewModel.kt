@@ -412,33 +412,32 @@ class MapViewModel(
 
                     if (persistedLayerFiles != null) {
                         val hiddenLayerUrls = googleMapsPrefs.hiddenLayerUrls.value
-                        val loadedItems =
-                            persistedLayerFiles.mapNotNull { file ->
-                                if (file.isFile) {
-                                    val layerType =
-                                        when (file.extension.lowercase()) {
-                                            "kml",
-                                            "kmz",
-                                            -> LayerType.KML
-                                            "geojson",
-                                            "json",
-                                            -> LayerType.GEOJSON
-                                            else -> null
-                                        }
-
-                                    layerType?.let {
-                                        val uri = Uri.fromFile(file)
-                                        MapLayerItem(
-                                            name = file.nameWithoutExtension,
-                                            uri = uri,
-                                            isVisible = !hiddenLayerUrls.contains(uri.toString()),
-                                            layerType = it,
-                                        )
+                        val loadedItems = persistedLayerFiles.mapNotNull { file ->
+                            if (file.isFile) {
+                                val layerType =
+                                    when (file.extension.lowercase()) {
+                                        "kml",
+                                        "kmz",
+                                        -> LayerType.KML
+                                        "geojson",
+                                        "json",
+                                        -> LayerType.GEOJSON
+                                        else -> null
                                     }
-                                } else {
-                                    null
+
+                                layerType?.let {
+                                    val uri = Uri.fromFile(file)
+                                    MapLayerItem(
+                                        name = file.nameWithoutExtension,
+                                        uri = uri,
+                                        isVisible = !hiddenLayerUrls.contains(uri.toString()),
+                                        layerType = it,
+                                    )
                                 }
+                            } else {
+                                null
                             }
+                        }
 
                         val networkItems =
                             googleMapsPrefs.networkMapLayers.value.mapNotNull { networkString ->

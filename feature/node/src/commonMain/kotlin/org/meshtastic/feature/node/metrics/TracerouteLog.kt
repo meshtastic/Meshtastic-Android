@@ -148,47 +148,43 @@ fun TracerouteLogScreen(
                 val (text, icon) = route.getTextAndIcon()
                 var expanded by remember { mutableStateOf(false) }
 
-                val tracerouteDetailsAnnotated: AnnotatedString? =
-                    result?.let { res ->
-                        if (route != null && route.route.isNotEmpty() && route.route_back.isNotEmpty()) {
-                            val seconds =
-                                (res.received_date - log.received_date).coerceAtLeast(0).toDouble() / MS_PER_SEC
-                            val annotatedBase =
-                                annotateTraceroute(
-                                    res.fromRadio.packet?.getTracerouteResponse(
-                                        ::getUsername,
-                                        headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                        headerBack = headerBackStr,
-                                    ),
-                                    statusGreen = statusGreen,
-                                    statusYellow = statusYellow,
-                                    statusOrange = statusOrange,
-                                )
-                            val durationText =
-                                stringResource(Res.string.traceroute_duration, formatString("%.1f", seconds))
-                            buildAnnotatedString {
-                                append(annotatedBase)
-                                append("\n\n$durationText")
-                            }
-                        } else {
-                            // For cases where there's a result but no full route, display plain text
-                            res.fromRadio.packet
-                                ?.getTracerouteResponse(
+                val tracerouteDetailsAnnotated: AnnotatedString? = result?.let { res ->
+                    if (route != null && route.route.isNotEmpty() && route.route_back.isNotEmpty()) {
+                        val seconds = (res.received_date - log.received_date).coerceAtLeast(0).toDouble() / MS_PER_SEC
+                        val annotatedBase =
+                            annotateTraceroute(
+                                res.fromRadio.packet?.getTracerouteResponse(
                                     ::getUsername,
                                     headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
                                     headerBack = headerBackStr,
-                                )
-                                ?.let { AnnotatedString(it) }
+                                ),
+                                statusGreen = statusGreen,
+                                statusYellow = statusYellow,
+                                statusOrange = statusOrange,
+                            )
+                        val durationText = stringResource(Res.string.traceroute_duration, formatString("%.1f", seconds))
+                        buildAnnotatedString {
+                            append(annotatedBase)
+                            append("\n\n$durationText")
                         }
+                    } else {
+                        // For cases where there's a result but no full route, display plain text
+                        res.fromRadio.packet
+                            ?.getTracerouteResponse(
+                                ::getUsername,
+                                headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
+                                headerBack = headerBackStr,
+                            )
+                            ?.let { AnnotatedString(it) }
                     }
-                val overlay =
-                    route?.let {
-                        TracerouteOverlay(
-                            requestId = log.fromRadio.packet?.id ?: 0,
-                            forwardRoute = it.route,
-                            returnRoute = it.route_back,
-                        )
-                    }
+                }
+                val overlay = route?.let {
+                    TracerouteOverlay(
+                        requestId = log.fromRadio.packet?.id ?: 0,
+                        forwardRoute = it.route,
+                        returnRoute = it.route_back,
+                    )
+                }
 
                 Box {
                     MetricLogItem(

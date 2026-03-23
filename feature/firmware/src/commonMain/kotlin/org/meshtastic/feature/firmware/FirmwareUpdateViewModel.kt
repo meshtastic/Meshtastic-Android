@@ -149,67 +149,66 @@ class FirmwareUpdateViewModel(
     @Suppress("LongMethod")
     fun checkForUpdates() {
         updateJob?.cancel()
-        updateJob =
-            viewModelScope.launch {
-                _state.value = FirmwareUpdateState.Checking
-                runCatching {
-                    val ourNode = nodeRepository.myNodeInfo.value
-                    val address = radioPrefs.devAddr.value?.drop(1)
-                    if (address == null || ourNode == null) {
-                        _state.value = FirmwareUpdateState.Error(getString(Res.string.firmware_update_no_device))
-                        return@launch
-                    }
-                    getDeviceHardware(ourNode)?.let { deviceHardware ->
-                        _deviceHardware.value = deviceHardware
-                        _currentFirmwareVersion.value = ourNode.firmwareVersion
+        updateJob = viewModelScope.launch {
+            _state.value = FirmwareUpdateState.Checking
+            runCatching {
+                val ourNode = nodeRepository.myNodeInfo.value
+                val address = radioPrefs.devAddr.value?.drop(1)
+                if (address == null || ourNode == null) {
+                    _state.value = FirmwareUpdateState.Error(getString(Res.string.firmware_update_no_device))
+                    return@launch
+                }
+                getDeviceHardware(ourNode)?.let { deviceHardware ->
+                    _deviceHardware.value = deviceHardware
+                    _currentFirmwareVersion.value = ourNode.firmwareVersion
 
-                        val releaseFlow =
-                            if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
-                                kotlinx.coroutines.flow.flowOf(null)
-                            } else {
-                                firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
-                            }
-
-                        releaseFlow.collectLatest { release ->
-                            _selectedRelease.value = release
-                            val dismissed = bootloaderWarningDataSource.isDismissed(address)
-                            val firmwareUpdateMethod =
-                                when {
-                                    radioPrefs.isSerial() -> {
-                                        // ESP32 Serial updates are not supported from the app yet.
-                                        if (deviceHardware.isEsp32Arc) {
-                                            FirmwareUpdateMethod.Unknown
-                                        } else {
-                                            FirmwareUpdateMethod.Usb
-                                        }
-                                    }
-
-                                    radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
-                                    radioPrefs.isTcp() -> FirmwareUpdateMethod.Wifi
-                                    else -> FirmwareUpdateMethod.Unknown
-                                }
-                            _state.value =
-                                FirmwareUpdateState.Ready(
-                                    release = release,
-                                    deviceHardware = deviceHardware,
-                                    address = address,
-                                    showBootloaderWarning =
-                                    deviceHardware.requiresBootloaderUpgradeForOta == true &&
-                                        !dismissed &&
-                                        radioPrefs.isBle(),
-                                    updateMethod = firmwareUpdateMethod,
-                                    currentFirmwareVersion = ourNode.firmwareVersion,
-                                )
+                    val releaseFlow =
+                        if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
+                            kotlinx.coroutines.flow.flowOf(null)
+                        } else {
+                            firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
                         }
+
+                    releaseFlow.collectLatest { release ->
+                        _selectedRelease.value = release
+                        val dismissed = bootloaderWarningDataSource.isDismissed(address)
+                        val firmwareUpdateMethod =
+                            when {
+                                radioPrefs.isSerial() -> {
+                                    // ESP32 Serial updates are not supported from the app yet.
+                                    if (deviceHardware.isEsp32Arc) {
+                                        FirmwareUpdateMethod.Unknown
+                                    } else {
+                                        FirmwareUpdateMethod.Usb
+                                    }
+                                }
+
+                                radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
+                                radioPrefs.isTcp() -> FirmwareUpdateMethod.Wifi
+                                else -> FirmwareUpdateMethod.Unknown
+                            }
+                        _state.value =
+                            FirmwareUpdateState.Ready(
+                                release = release,
+                                deviceHardware = deviceHardware,
+                                address = address,
+                                showBootloaderWarning =
+                                deviceHardware.requiresBootloaderUpgradeForOta == true &&
+                                    !dismissed &&
+                                    radioPrefs.isBle(),
+                                updateMethod = firmwareUpdateMethod,
+                                currentFirmwareVersion = ourNode.firmwareVersion,
+                            )
                     }
                 }
-                    .onFailure { e ->
-                        if (e is CancellationException) throw e
-                        Logger.e(e) { "Error checking for updates" }
-                        val unknownError = getString(Res.string.firmware_update_unknown_error)
-                        _state.value = FirmwareUpdateState.Error(e.message ?: unknownError)
-                    }
             }
+                .onFailure { e ->
+                    if (e is CancellationException) throw e
+                    Logger.e(e) { "Error checking for updates" }
+                    val unknownError = getString(Res.string.firmware_update_unknown_error)
+                    _state.value = FirmwareUpdateState.Error(e.message ?: unknownError)
+                }
+        }
     }
 
     fun startUpdate() {
@@ -220,30 +219,29 @@ class FirmwareUpdateViewModel(
         viewModelScope.launch {
             if (checkBatteryLevel()) {
                 updateJob?.cancel()
-                updateJob =
-                    viewModelScope.launch {
-                        try {
-                            tempFirmwareFile =
-                                firmwareUpdateManager.startUpdate(
-                                    release = release,
-                                    hardware = currentState.deviceHardware,
-                                    address = currentState.address,
-                                    updateState = { _state.value = it },
-                                )
+                updateJob = viewModelScope.launch {
+                    try {
+                        tempFirmwareFile =
+                            firmwareUpdateManager.startUpdate(
+                                release = release,
+                                hardware = currentState.deviceHardware,
+                                address = currentState.address,
+                                updateState = { _state.value = it },
+                            )
 
-                            if (_state.value is FirmwareUpdateState.Success) {
-                                verifyUpdateResult(originalDeviceAddress)
-                            }
-                        } catch (e: CancellationException) {
-                            Logger.i { "Firmware update cancelled" }
-                            _state.value = FirmwareUpdateState.Idle
-                            checkForUpdates()
-                            throw e
-                        } catch (e: Exception) {
-                            val failedMsg = getString(Res.string.firmware_update_failed)
-                            _state.value = FirmwareUpdateState.Error(e.message ?: failedMsg)
+                        if (_state.value is FirmwareUpdateState.Success) {
+                            verifyUpdateResult(originalDeviceAddress)
                         }
+                    } catch (e: CancellationException) {
+                        Logger.i { "Firmware update cancelled" }
+                        _state.value = FirmwareUpdateState.Idle
+                        checkForUpdates()
+                        throw e
+                    } catch (e: Exception) {
+                        val failedMsg = getString(Res.string.firmware_update_failed)
+                        _state.value = FirmwareUpdateState.Error(e.message ?: failedMsg)
                     }
+                }
             }
         }
     }
@@ -293,38 +291,36 @@ class FirmwareUpdateViewModel(
         originalDeviceAddress = currentState.address
 
         updateJob?.cancel()
-        updateJob =
-            viewModelScope.launch {
-                try {
-                    val extractingMsg = getString(Res.string.firmware_update_extracting)
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(extractingMsg))
-                    val extension = if (currentState.updateMethod is FirmwareUpdateMethod.Ble) ".zip" else ".uf2"
-                    val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
+        updateJob = viewModelScope.launch {
+            try {
+                val extractingMsg = getString(Res.string.firmware_update_extracting)
+                _state.value = FirmwareUpdateState.Processing(ProgressState(extractingMsg))
+                val extension = if (currentState.updateMethod is FirmwareUpdateMethod.Ble) ".zip" else ".uf2"
+                val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
 
-                    tempFirmwareFile = extractedFile
-                    val firmwareUri = if (extractedFile != null) CommonUri.parse("file://$extractedFile") else uri
+                tempFirmwareFile = extractedFile
+                val firmwareUri = if (extractedFile != null) CommonUri.parse("file://$extractedFile") else uri
 
-                    tempFirmwareFile =
-                        firmwareUpdateManager.startUpdate(
-                            release =
-                            FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
-                            hardware = currentState.deviceHardware,
-                            address = currentState.address,
-                            updateState = { _state.value = it },
-                            firmwareUri = firmwareUri,
-                        )
+                tempFirmwareFile =
+                    firmwareUpdateManager.startUpdate(
+                        release = FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                        hardware = currentState.deviceHardware,
+                        address = currentState.address,
+                        updateState = { _state.value = it },
+                        firmwareUri = firmwareUri,
+                    )
 
-                    if (_state.value is FirmwareUpdateState.Success) {
-                        verifyUpdateResult(originalDeviceAddress)
-                    }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Logger.e(e) { "Error starting update from file" }
-                    val failedMsg = getString(Res.string.firmware_update_local_failed)
-                    _state.value = FirmwareUpdateState.Error(e.message ?: failedMsg)
+                if (_state.value is FirmwareUpdateState.Success) {
+                    verifyUpdateResult(originalDeviceAddress)
                 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Logger.e(e) { "Error starting update from file" }
+                val failedMsg = getString(Res.string.firmware_update_local_failed)
+                _state.value = FirmwareUpdateState.Error(e.message ?: failedMsg)
             }
+        }
     }
 
     fun dismissBootloaderWarningForCurrentDevice() {

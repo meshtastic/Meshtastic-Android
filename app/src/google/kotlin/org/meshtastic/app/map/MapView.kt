@@ -302,17 +302,16 @@ fun MapView(
     }
 
     val myNodeNum = mapViewModel.myNodeNum
-    val nodeClusterItems =
-        displayNodes.map { node ->
-            val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
-            NodeClusterItem(
-                node = node,
-                nodePosition = latLng,
-                nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
-                nodeSnippet = "${node.user.long_name}",
-                myNodeNum = myNodeNum,
-            )
-        }
+    val nodeClusterItems = displayNodes.map { node ->
+        val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
+        NodeClusterItem(
+            node = node,
+            nodePosition = latLng,
+            nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
+            nodeSnippet = "${node.user.long_name}",
+            myNodeNum = myNodeNum,
+        )
+    }
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
     val theme by mapViewModel.theme.collectAsStateWithLifecycle()
     val dark =
@@ -492,11 +491,9 @@ fun MapView(
 
             if (nodeTracks != null && focusedNodeNum != null) {
                 val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
-                val timeFilteredPositions =
-                    nodeTracks.filter {
-                        lastHeardTrackFilter == LastHeardFilter.Any ||
-                            it.time > nowSeconds - lastHeardTrackFilter.seconds
-                    }
+                val timeFilteredPositions = nodeTracks.filter {
+                    lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
+                }
                 val sortedPositions = timeFilteredPositions.sortedBy { it.time }
                 allNodes
                     .find { it.num == focusedNodeNum }
@@ -872,19 +869,18 @@ private fun offsetPolyline(
     val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
     if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
 
-    val headings =
-        headingPoints.mapIndexed { index, _ ->
-            when (index) {
-                0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
-                headingPoints.lastIndex ->
-                    SphericalUtil.computeHeading(
-                        headingPoints[headingPoints.lastIndex - 1],
-                        headingPoints[headingPoints.lastIndex],
-                    )
+    val headings = headingPoints.mapIndexed { index, _ ->
+        when (index) {
+            0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
+            headingPoints.lastIndex ->
+                SphericalUtil.computeHeading(
+                    headingPoints[headingPoints.lastIndex - 1],
+                    headingPoints[headingPoints.lastIndex],
+                )
 
-                else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
-            }
+            else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
         }
+    }
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]

@@ -162,13 +162,12 @@ class MeshMessageProcessorImpl(
 
     private fun flushEarlyReceivedPackets(reason: String) {
         scope.launch {
-            val packets =
-                earlyMutex.withLock {
-                    if (earlyReceivedPackets.isEmpty()) return@withLock emptyList<MeshPacket>()
-                    val list = earlyReceivedPackets.toList()
-                    earlyReceivedPackets.clear()
-                    list
-                }
+            val packets = earlyMutex.withLock {
+                if (earlyReceivedPackets.isEmpty()) return@withLock emptyList<MeshPacket>()
+                val list = earlyReceivedPackets.toList()
+                earlyReceivedPackets.clear()
+                list
+            }
             if (packets.isEmpty()) return@launch
 
             Logger.d { "replayEarlyPackets reason=$reason count=${packets.size}" }

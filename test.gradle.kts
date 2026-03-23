@@ -1,2 +1,0 @@
-import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryExtension
-println(KotlinMultiplatformAndroidLibraryExtension::class.java.name)

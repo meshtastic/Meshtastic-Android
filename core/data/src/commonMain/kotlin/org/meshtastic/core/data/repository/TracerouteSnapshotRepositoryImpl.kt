@@ -48,15 +48,14 @@ class TracerouteSnapshotRepositoryImpl(
             val dao = dbManager.currentDb.value.tracerouteNodePositionDao()
             dao.deleteByLogUuid(logUuid)
             if (positions.isEmpty()) return@withContext
-            val entities =
-                positions.map { (nodeNum, position) ->
-                    TracerouteNodePositionEntity(
-                        logUuid = logUuid,
-                        requestId = requestId,
-                        nodeNum = nodeNum,
-                        position = position,
-                    )
-                }
+            val entities = positions.map { (nodeNum, position) ->
+                TracerouteNodePositionEntity(
+                    logUuid = logUuid,
+                    requestId = requestId,
+                    nodeNum = nodeNum,
+                    position = position,
+                )
+            }
             dao.insertAll(entities)
         }
 }

@@ -123,22 +123,21 @@ class MQTTRepositoryImpl(
 
         client = newClient
 
-        clientJob =
-            scope.launch {
-                try {
-                    Logger.i { "MQTT Starting client loop for $host:$port" }
-                    newClient.runSuspend()
-                } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
-                    Logger.e(e) { "MQTT Client loop error (MQTT)" }
-                    close(e)
-                } catch (e: io.github.davidepianca98.socket.IOException) {
-                    Logger.e(e) { "MQTT Client loop error (IO)" }
-                    close(e)
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    Logger.i { "MQTT Client loop cancelled" }
-                    throw e
-                }
+        clientJob = scope.launch {
+            try {
+                Logger.i { "MQTT Starting client loop for $host:$port" }
+                newClient.runSuspend()
+            } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
+                Logger.e(e) { "MQTT Client loop error (MQTT)" }
+                close(e)
+            } catch (e: io.github.davidepianca98.socket.IOException) {
+                Logger.e(e) { "MQTT Client loop error (IO)" }
+                close(e)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                Logger.i { "MQTT Client loop cancelled" }
+                throw e
             }
+        }
 
         // Subscriptions
         val subscriptions = mutableListOf<Subscription>()

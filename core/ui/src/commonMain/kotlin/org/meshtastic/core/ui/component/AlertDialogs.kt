@@ -90,21 +90,20 @@ fun MeshtasticDialog(
     val confirmButtonText = confirmText ?: confirmTextRes?.let { stringResource(it) }
     val dismissButtonText = dismissText ?: dismissTextRes?.let { stringResource(it) }
 
-    val htmlAnnotated =
-        html?.let {
-            annotatedStringFromHtml(
-                it,
-                linkStyles =
-                TextLinkStyles(
-                    style =
-                    SpanStyle(
-                        textDecoration = TextDecoration.Underline,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.primary,
-                    ),
+    val htmlAnnotated = html?.let {
+        annotatedStringFromHtml(
+            it,
+            linkStyles =
+            TextLinkStyles(
+                style =
+                SpanStyle(
+                    textDecoration = TextDecoration.Underline,
+                    fontStyle = FontStyle.Italic,
+                    color = MaterialTheme.colorScheme.primary,
                 ),
-            )
-        }
+            ),
+        )
+    }
 
     AlertDialog(
         onDismissRequest = { if (dismissable) onDismiss?.invoke() },

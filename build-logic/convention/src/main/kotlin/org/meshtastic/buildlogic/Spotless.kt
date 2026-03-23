@@ -27,7 +27,7 @@ internal fun Project.configureSpotless(extension: SpotlessExtension) {
         kotlin {
             target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
             targetExclude("**/build/**/*.kt")
-            ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
+            ktfmt(libs.version("ktfmt")).kotlinlangStyle().configure { it.setMaxWidth(120) }
             ktlint(ktlintVersion)
                 .setEditorConfigPath(rootProject.file("config/spotless/.editorconfig").path)
             licenseHeaderFile(rootProject.file("config/spotless/copyright.kt"))
@@ -35,7 +35,7 @@ internal fun Project.configureSpotless(extension: SpotlessExtension) {
         kotlinGradle {
             target("**/*.gradle.kts")
             targetExclude("**/build/**", "**/dependencies/**")
-            ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
+            ktfmt(libs.version("ktfmt")).kotlinlangStyle().configure { it.setMaxWidth(120) }
             ktlint(ktlintVersion)
                 .setEditorConfigPath(rootProject.file("config/spotless/.editorconfig").path)
             licenseHeaderFile(
