@@ -39,8 +39,6 @@ kotlin {
             implementation(libs.jetbrains.navigation3.runtime)
         }
 
-        androidMain.dependencies { implementation(libs.jetbrains.navigation3.ui) }
-
         androidUnitTest.dependencies {
             implementation(libs.junit)
             implementation(libs.robolectric)

@@ -55,10 +55,6 @@ kotlin {
             implementation(projects.core.barcode)
             implementation(projects.core.nfc)
             implementation(libs.androidx.appcompat)
-
-            implementation(libs.markdown.renderer.android)
-            implementation(libs.markdown.renderer.m3)
-            implementation(libs.markdown.renderer)
         }
 
         androidUnitTest.dependencies {

@@ -53,7 +53,6 @@ kotlin {
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)
-            implementation(libs.vico.compose.m2)
             implementation(libs.vico.compose.m3)
 
             // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
@@ -66,8 +65,6 @@ kotlin {
             implementation(libs.androidx.appcompat)
 
             implementation(libs.markdown.renderer.android)
-            implementation(libs.markdown.renderer.m3)
-            implementation(libs.markdown.renderer)
         }
 
         androidUnitTest.dependencies {

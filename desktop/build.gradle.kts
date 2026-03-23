@@ -182,7 +182,6 @@ dependencies {
     implementation(libs.okio)
 
     // Ktor HttpClient (Java engine for JVM/Desktop)
-    implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.java)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
