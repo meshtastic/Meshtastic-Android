@@ -139,14 +139,16 @@ class ContactsViewModel(
 
                 packetRepository.getContactsPaged().map { pagingData ->
                     pagingData.map { packetData: DataPacket ->
-                        val contactKey =
-                            "${packetData.channel}${packetData.to}" // This might be wrong, need to check how contactKey
-                        // is derived in PagingSource
-
                         // Determine if this is my message (originated on this device)
                         val fromLocal =
                             (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
                         val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
+
+                        // Reconstruct contactKey exactly as rememberDataPacket() computes it:
+                        // For outgoing or broadcast: use the "to" field (recipient / ^all)
+                        // For incoming DMs: use the "from" field (the other party)
+                        val contactId = if (fromLocal || toBroadcast) packetData.to else packetData.from
+                        val contactKey = "${packetData.channel}$contactId"
 
                         // grab usernames from NodeInfo
                         val userId = if (fromLocal) packetData.to else packetData.from
@@ -161,18 +163,15 @@ class ContactsViewModel(
                                 user.long_name
                             }
 
-                        val contactKeyComputed =
-                            if (toBroadcast) "${packetData.channel}${DataPacket.ID_BROADCAST}" else contactKey
-
                         Contact(
-                            contactKey = contactKeyComputed,
+                            contactKey = contactKey,
                             shortName = if (toBroadcast) packetData.channel.toString() else shortName,
                             longName = longName,
                             lastMessageTime = if (packetData.time != 0L) packetData.time else null,
                             lastMessageText = if (fromLocal) packetData.text else "$shortName: ${packetData.text}",
-                            unreadCount = packetRepository.getUnreadCount(contactKeyComputed),
-                            messageCount = packetRepository.getMessageCount(contactKeyComputed),
-                            isMuted = settings[contactKeyComputed]?.isMuted == true,
+                            unreadCount = packetRepository.getUnreadCount(contactKey),
+                            messageCount = packetRepository.getMessageCount(contactKey),
+                            isMuted = settings[contactKey]?.isMuted == true,
                             isUnmessageable = user.is_unmessagable ?: false,
                             nodeColors =
                             if (!toBroadcast) {
