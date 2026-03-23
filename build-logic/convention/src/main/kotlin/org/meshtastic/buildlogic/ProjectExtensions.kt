@@ -67,6 +67,12 @@ internal fun Project.configureTestOptions() {
         testLogging { events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED) }
     }
 
+    // Gradle 9+ fails when test sources exist but no test classes are discovered (e.g. all
+    // tests are commented out). Disable to avoid breaking builds for modules with WIP tests.
+    tasks.withType<AbstractTestTask>().configureEach {
+        failOnNoDiscoveredTests.set(false)
+    }
+
     // Configure test retry if the plugin is applied
     pluginManager.withPlugin("org.gradle.test-retry") {
         tasks.withType<AbstractTestTask>().configureEach {
