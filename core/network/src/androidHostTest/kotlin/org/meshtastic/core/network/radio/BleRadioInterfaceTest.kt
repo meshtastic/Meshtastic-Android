@@ -17,6 +17,7 @@
 package org.meshtastic.core.network.radio
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
@@ -36,6 +37,7 @@ import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.BluetoothState
 import org.meshtastic.core.repository.RadioInterfaceService
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -53,8 +55,8 @@ class BleRadioInterfaceTest {
     private val connectionStateFlow = MutableSharedFlow<BleConnectionState>(replay = 1)
     private val bluetoothStateFlow = MutableStateFlow(BluetoothState())
 
-    @Before
-    fun setUp() {
+    @BeforeTest
+    fun setup() {
         every { connectionFactory.create(any(), any()) } returns connection
         every { connection.connectionState } returns connectionStateFlow
         every { bluetoothRepository.state } returns bluetoothStateFlow.asStateFlow()
