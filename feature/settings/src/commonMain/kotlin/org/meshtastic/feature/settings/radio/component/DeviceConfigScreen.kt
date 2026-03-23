@@ -130,7 +130,7 @@ private val Config.DeviceConfig.Role.description: StringResource
             Config.DeviceConfig.Role.LOST_AND_FOUND -> Res.string.role_lost_and_found_desc
             Config.DeviceConfig.Role.TAK_TRACKER -> Res.string.role_tak_tracker_desc
             Config.DeviceConfig.Role.ROUTER_LATE -> Res.string.role_router_late_desc
-            Config.DeviceConfig.Role.UNRECOGNIZED -> Res.string.unrecognized
+            else -> Res.string.unrecognized
         }
 
 private val Config.DeviceConfig.RebroadcastMode.description: StringResource
@@ -143,7 +143,7 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
             Config.DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
             Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY ->
                 Res.string.rebroadcast_mode_core_portnums_only_desc
-            Config.DeviceConfig.RebroadcastMode.UNRECOGNIZED -> Res.string.unrecognized
+            else -> Res.string.unrecognized
         }
 
 @Suppress("DEPRECATION", "LongMethod")
