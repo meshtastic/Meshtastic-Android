@@ -16,10 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
@@ -39,8 +35,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.admin_key
@@ -54,8 +48,6 @@ import org.meshtastic.core.resources.config_security_public_key
 import org.meshtastic.core.resources.config_security_serial_enabled
 import org.meshtastic.core.resources.debug_log_api_enabled
 import org.meshtastic.core.resources.direct_message_key
-import org.meshtastic.core.resources.export_keys
-import org.meshtastic.core.resources.export_keys_confirmation
 import org.meshtastic.core.resources.legacy_admin_channel
 import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.managed_mode
@@ -73,13 +65,19 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
-import java.security.SecureRandom
+import kotlin.random.Random
+
+@Composable
+expect fun ExportSecurityConfigButton(
+    viewModel: RadioConfigViewModel,
+    enabled: Boolean,
+    securityConfig: Config.SecurityConfig,
+)
 
 @Composable
 @Suppress("LongMethod")
-fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
+fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val node by viewModel.destNode.collectAsStateWithLifecycle()
     val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
     val formState = rememberConfigState(initialValue = securityConfig)
 
@@ -92,13 +90,6 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         }
     }
 
-    val exportConfigLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri.toMeshtasticUri(), securityConfig) }
-            }
-        }
-
     var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
     PrivateKeyRegenerateDialog(
         showKeyGenerationDialog = showKeyGenerationDialog,
@@ -110,24 +101,6 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         },
         onDismiss = { showKeyGenerationDialog = false },
     )
-    var showEditSecurityConfigDialog by rememberSaveable { mutableStateOf(false) }
-    if (showEditSecurityConfigDialog) {
-        MeshtasticResourceDialog(
-            titleRes = Res.string.export_keys,
-            messageRes = Res.string.export_keys_confirmation,
-            onDismiss = { showEditSecurityConfigDialog = false },
-            onConfirm = {
-                showEditSecurityConfigDialog = false
-                val intent =
-                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/*"
-                        putExtra(Intent.EXTRA_TITLE, "${node?.user?.short_name}_keys_$nowMillis.json")
-                    }
-                exportConfigLauncher.launch(intent)
-            },
-        )
-    }
 
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
@@ -180,13 +153,10 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     icon = Icons.TwoTone.Warning,
                     onClick = { showKeyGenerationDialog = true },
                 )
-                HorizontalDivider()
-                NodeActionButton(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    title = stringResource(Res.string.export_keys),
+                ExportSecurityConfigButton(
+                    viewModel = viewModel,
                     enabled = state.connected,
-                    icon = Icons.TwoTone.Warning,
-                    onClick = { showEditSecurityConfigDialog = true },
+                    securityConfig = securityConfig,
                 )
             }
         }
@@ -261,7 +231,7 @@ fun PrivateKeyRegenerateDialog(
             messageRes = Res.string.regenerate_keys_confirmation,
             onConfirm = {
                 // Generate a random "f" value
-                val f = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+                val f = ByteArray(32).apply { Random.nextBytes(this) }
                 // Adjust the value to make it valid as an "s" value for eval().
                 // According to the specification we need to mask off the 3
                 // right-most bits of f[0], mask off the left-most bit of f[31],

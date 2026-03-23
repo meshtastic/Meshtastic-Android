@@ -182,7 +182,10 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
                 },
             )
         }
-    val navSuiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
+    val navSuiteType =
+        NavigationSuiteScaffoldDefaults.navigationSuiteType(
+            currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true),
+        )
     val currentKey = backStack.lastOrNull()
     val topLevelDestination = TopLevelDestination.fromNavKey(currentKey)
 

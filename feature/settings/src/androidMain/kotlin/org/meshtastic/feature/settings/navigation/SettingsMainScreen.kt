@@ -21,10 +21,10 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.feature.settings.SettingsScreen
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.component.DeviceConfigScreen as AndroidDeviceConfigScreen
-import org.meshtastic.feature.settings.radio.component.ExternalNotificationConfigScreen as AndroidExternalNotificationConfigScreen
-import org.meshtastic.feature.settings.radio.component.PositionConfigScreen as AndroidPositionConfigScreen
-import org.meshtastic.feature.settings.radio.component.SecurityConfigScreen as AndroidSecurityConfigScreen
+import org.meshtastic.feature.settings.radio.component.DeviceConfigScreenCommon
+import org.meshtastic.feature.settings.radio.component.ExternalNotificationConfigScreenCommon
+import org.meshtastic.feature.settings.radio.component.PositionConfigScreenCommon
+import org.meshtastic.feature.settings.radio.component.SecurityConfigScreenCommon
 
 @Composable
 actual fun SettingsMainScreen(
@@ -43,20 +43,20 @@ actual fun SettingsMainScreen(
 
 @Composable
 actual fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidDeviceConfigScreen(viewModel = viewModel, onBack = onBack)
+    DeviceConfigScreenCommon(viewModel = viewModel, onBack = onBack)
 }
 
 @Composable
 actual fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidPositionConfigScreen(viewModel = viewModel, onBack = onBack)
+    PositionConfigScreenCommon(viewModel = viewModel, onBack = onBack)
 }
 
 @Composable
 actual fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidSecurityConfigScreen(viewModel = viewModel, onBack = onBack)
+    SecurityConfigScreenCommon(viewModel = viewModel, onBack = onBack)
 }
 
 @Composable
 actual fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidExternalNotificationConfigScreen(viewModel = viewModel, onBack = onBack)
+    ExternalNotificationConfigScreenCommon(viewModel = viewModel, onBack = onBack)
 }

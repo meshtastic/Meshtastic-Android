@@ -16,20 +16,10 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import android.media.MediaPlayer
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,12 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
@@ -55,7 +43,6 @@ import org.meshtastic.core.resources.alert_message_vibra
 import org.meshtastic.core.resources.external_notification
 import org.meshtastic.core.resources.external_notification_config
 import org.meshtastic.core.resources.external_notification_enabled
-import org.meshtastic.core.resources.import_label
 import org.meshtastic.core.resources.nag_timeout_seconds
 import org.meshtastic.core.resources.notifications_on_alert_bell_receipt
 import org.meshtastic.core.resources.notifications_on_message_receipt
@@ -64,7 +51,6 @@ import org.meshtastic.core.resources.output_duration_milliseconds
 import org.meshtastic.core.resources.output_led_active_high
 import org.meshtastic.core.resources.output_led_gpio
 import org.meshtastic.core.resources.output_vibra_gpio
-import org.meshtastic.core.resources.play
 import org.meshtastic.core.resources.ringtone
 import org.meshtastic.core.resources.use_i2s_as_buzzer
 import org.meshtastic.core.resources.use_pwm_buzzer
@@ -74,16 +60,17 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
-import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
-import java.io.File
 
 private const val MAX_RINGTONE_SIZE = 230
 
+@Composable
+expect fun RingtoneTrailingIcon(ringtoneInput: String, onRingtoneImported: (String) -> Unit, enabled: Boolean)
+
 @Suppress("LongMethod", "TooGenericExceptionCaught")
 @Composable
-fun ExternalNotificationConfigScreen(
+fun ExternalNotificationConfigScreenCommon(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RadioConfigViewModel,
@@ -94,30 +81,6 @@ fun ExternalNotificationConfigScreen(
     val formState = rememberConfigState(initialValue = extNotificationConfig)
     var ringtoneInput by rememberSaveable(ringtone) { mutableStateOf(ringtone) }
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
-
-    val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                try {
-                    context.contentResolver.openInputStream(it)?.use { stream ->
-                        stream.bufferedReader().use { reader ->
-                            val buffer = CharArray(MAX_RINGTONE_SIZE)
-                            val read = reader.read(buffer)
-                            if (read > 0) {
-                                ringtoneInput = String(buffer, 0, read)
-                                Toast.makeText(context, "Imported ringtone", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(context, "File is empty", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    Logger.e(e) { "Error importing ringtone" }
-                    Toast.makeText(context, "Error importing: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
 
     RadioConfigScreenList(
         modifier = modifier,
@@ -209,7 +172,7 @@ fun ExternalNotificationConfigScreen(
 
         item {
             TitledCard(title = stringResource(Res.string.advanced)) {
-                val gpio = remember { gpioPins }
+                val gpio = remember { org.meshtastic.feature.settings.util.gpioPins }
                 DropDownPreference(
                     title = stringResource(Res.string.output_led_gpio),
                     items = gpio,
@@ -283,36 +246,11 @@ fun ExternalNotificationConfigScreen(
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { ringtoneInput = it },
                     trailingIcon = {
-                        Row {
-                            IconButton(onClick = { launcher.launch("*/*") }, enabled = state.connected) {
-                                Icon(
-                                    Icons.Default.FolderOpen,
-                                    contentDescription = stringResource(Res.string.import_label),
-                                )
-                            }
-
-                            IconButton(
-                                onClick = {
-                                    try {
-                                        val tempFile = File.createTempFile("ringtone", ".rtttl", context.cacheDir)
-                                        tempFile.writeText(ringtoneInput)
-                                        val mediaPlayer = MediaPlayer()
-                                        mediaPlayer.setDataSource(tempFile.absolutePath)
-                                        mediaPlayer.prepare()
-                                        mediaPlayer.start()
-                                        mediaPlayer.setOnCompletionListener {
-                                            it.release()
-                                            tempFile.delete()
-                                        }
-                                    } catch (e: Exception) {
-                                        Logger.e(e) { "Failed to play ringtone" }
-                                    }
-                                },
-                                enabled = state.connected,
-                            ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.play))
-                            }
-                        }
+                        RingtoneTrailingIcon(
+                            ringtoneInput = ringtoneInput,
+                            onRingtoneImported = { ringtoneInput = it },
+                            enabled = state.connected,
+                        )
                     },
                 )
                 HorizontalDivider()
