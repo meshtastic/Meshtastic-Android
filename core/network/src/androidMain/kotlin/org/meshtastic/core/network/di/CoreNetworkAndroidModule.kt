@@ -17,7 +17,7 @@
 package org.meshtastic.core.network.di
 
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -29,5 +29,5 @@ import org.koin.core.annotation.Single
 @ComponentScan("org.meshtastic.core.network")
 class CoreNetworkAndroidModule {
     @Single
-    fun provideHttpClient(json: Json): HttpClient = HttpClient(OkHttp) { install(ContentNegotiation) { json(json) } }
+    fun provideHttpClient(json: Json): HttpClient = HttpClient(Android) { install(ContentNegotiation) { json(json) } }
 }

@@ -30,11 +30,12 @@ import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
 import coil3.util.Logger
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
@@ -79,9 +80,11 @@ class NetworkModule {
     }
 
     @Single
-    fun provideHttpClient(okHttpClient: OkHttpClient, json: Json): HttpClient = HttpClient(engineFactory = OkHttp) {
-        engine { preconfigured = okHttpClient }
-
-        install(plugin = ContentNegotiation) { json(json) }
-    }
+    fun provideHttpClient(json: Json, buildConfigProvider: BuildConfigProvider): HttpClient =
+        HttpClient(engineFactory = Android) {
+            install(plugin = ContentNegotiation) { json(json) }
+            if (buildConfigProvider.isDebug) {
+                install(plugin = Logging) { level = LogLevel.BODY }
+            }
+        }
 }

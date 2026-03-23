@@ -61,8 +61,7 @@ kotlin {
             implementation(projects.core.ble)
             implementation(projects.core.prefs)
             implementation(libs.usb.serial.android)
-            implementation(libs.ktor.client.okhttp)
-            implementation(libs.okhttp3.logging.interceptor)
+            implementation(libs.ktor.client.android)
         }
 
         commonTest.dependencies {

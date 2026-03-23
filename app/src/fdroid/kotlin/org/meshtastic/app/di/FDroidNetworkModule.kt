@@ -16,29 +16,14 @@
  */
 package org.meshtastic.app.di
 
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.service.ApiService
 
 @Module
 class FDroidNetworkModule {
-
-    @Single
-    fun provideOkHttpClient(buildConfigProvider: BuildConfigProvider): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(
-            interceptor =
-            HttpLoggingInterceptor().apply {
-                if (buildConfigProvider.isDebug) {
-                    setLevel(HttpLoggingInterceptor.Level.BODY)
-                }
-            },
-        )
-        .build()
 
     @Single
     fun provideApiService(): ApiService = object : ApiService {

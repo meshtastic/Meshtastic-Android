@@ -25,7 +25,6 @@ import androidx.work.WorkerParameters
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineDispatcher
-import okhttp3.OkHttpClient
 import org.junit.Test
 import org.koin.test.verify.definition
 import org.koin.test.verify.injectedParameters
@@ -53,7 +52,6 @@ class KoinVerificationTest {
                     NodeIdLookup::class,
                     HttpClient::class,
                     HttpClientEngine::class,
-                    OkHttpClient::class,
                 ),
                 injections =
                 injectedParameters(
