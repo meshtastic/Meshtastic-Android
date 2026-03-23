@@ -35,6 +35,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ScannerViewModelTest {
 
     private lateinit var viewModel: ScannerViewModel
@@ -68,6 +69,11 @@ class ScannerViewModelTest {
                 radioInterfaceService = radioInterfaceService,
                 recentAddressesDataSource = recentAddressesDataSource,
                 getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
+                dispatchers = org.meshtastic.core.di.CoroutineDispatchers(
+                    io = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
+                    main = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
+                    default = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
+                ),
                 bleScanner = bleScanner,
             )
     }

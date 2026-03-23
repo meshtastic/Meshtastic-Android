@@ -24,7 +24,6 @@ import io.github.davidepianca98.mqtt.packets.Qos
 import io.github.davidepianca98.mqtt.packets.mqttv5.SubscriptionOptions
 import io.github.davidepianca98.socket.tls.TLSClientSettings
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
@@ -47,6 +46,7 @@ import org.meshtastic.proto.MqttClientProxyMessage
 class MQTTRepositoryImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val nodeRepository: NodeRepository,
+    dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
 ) : MQTTRepository {
 
     companion object {
@@ -58,7 +58,7 @@ class MQTTRepositoryImpl(
 
     private var client: MQTTClient? = null
     private val json = Json { ignoreUnknownKeys = true }
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val scope = CoroutineScope(dispatchers.default + SupervisorJob())
     private var clientJob: Job? = null
     private val publishSemaphore = Semaphore(20)
 

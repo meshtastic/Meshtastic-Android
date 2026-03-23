@@ -23,7 +23,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -220,12 +219,13 @@ class DebugViewModel(
     private val nodeRepository: NodeRepository,
     private val meshLogPrefs: MeshLogPrefs,
     private val alertManager: AlertManager,
+    private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
 ) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
         meshLogRepository
             .getAllLogs()
-            .mapLatest { logs -> withContext(Dispatchers.Default) { toUiState(logs) } }
+            .mapLatest { logs -> withContext(dispatchers.default) { toUiState(logs) } }
             .stateInWhileSubscribed(initialValue = persistentListOf())
 
     private val _retentionDays = MutableStateFlow(meshLogPrefs.retentionDays.value)

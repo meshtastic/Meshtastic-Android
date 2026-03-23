@@ -66,6 +66,9 @@ import org.meshtastic.core.service.di.module as coreServiceModule
 import org.meshtastic.core.ui.di.module as coreUiModule
 import org.meshtastic.desktop.di.module as desktopDiModule
 import org.meshtastic.feature.connections.di.module as featureConnectionsModule
+import org.meshtastic.feature.firmware.di.module as featureFirmwareModule
+import org.meshtastic.feature.intro.di.module as featureIntroModule
+import org.meshtastic.feature.map.di.module as featureMapModule
 import org.meshtastic.feature.messaging.di.module as featureMessagingModule
 import org.meshtastic.feature.node.di.module as featureNodeModule
 import org.meshtastic.feature.settings.di.module as featureSettingsModule
@@ -100,6 +103,9 @@ fun desktopModule() = module {
         org.meshtastic.feature.node.di.FeatureNodeModule().featureNodeModule(),
         org.meshtastic.feature.messaging.di.FeatureMessagingModule().featureMessagingModule(),
         org.meshtastic.feature.connections.di.FeatureConnectionsModule().featureConnectionsModule(),
+        org.meshtastic.feature.map.di.FeatureMapModule().featureMapModule(),
+        org.meshtastic.feature.firmware.di.FeatureFirmwareModule().featureFirmwareModule(),
+        org.meshtastic.feature.intro.di.FeatureIntroModule().featureIntroModule(),
         org.meshtastic.desktop.di.DesktopDiModule().desktopDiModule(),
         desktopPlatformStubsModule(),
     )
@@ -168,4 +174,9 @@ private fun desktopPlatformStubsModule() = module {
             override fun loadBootloaderOtaQuirksFromJsonAsset(): List<BootloaderOtaQuirk> = emptyList()
         }
     }
+
+    // Firmware update stubs
+    single<org.meshtastic.feature.firmware.FirmwareUpdateManager> { org.meshtastic.desktop.stub.NoopFirmwareUpdateManager() }
+    single<org.meshtastic.feature.firmware.FirmwareUsbManager> { org.meshtastic.desktop.stub.NoopFirmwareUsbManager() }
+    single<org.meshtastic.feature.firmware.FirmwareFileHandler> { org.meshtastic.desktop.stub.NoopFirmwareFileHandler() }
 }

@@ -21,6 +21,7 @@ package org.meshtastic.feature.firmware
  *
  * Tests firmware update flow, state management, and error handling.
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class FirmwareUpdateIntegrationTest {
     /*
 
@@ -70,6 +71,11 @@ class FirmwareUpdateIntegrationTest {
                 firmwareUpdateManager = firmwareUpdateManager,
                 usbManager = usbManager,
                 fileHandler = fileHandler,
+                dispatchers = org.meshtastic.core.di.CoroutineDispatchers(
+                    io = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
+                    main = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
+                    default = kotlinx.coroutines.test.UnconfinedTestDispatcher(),
+                )
             )
     }
 
