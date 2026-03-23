@@ -28,12 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.Window
@@ -49,7 +46,6 @@ import org.koin.core.context.startKoin
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
-import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
@@ -200,56 +196,6 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
         ) {
             val backStack =
                 rememberNavBackStack(MeshtasticNavSavedStateConfig, TopLevelDestination.Connections.route as NavKey)
-
-            MenuBar {
-                Menu("File") {
-                    Item("Settings", shortcut = KeyShortcut(Key.Comma, meta = true)) {
-                        if (
-                            TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())
-                        ) {
-                            backStack.add(TopLevelDestination.Settings.route)
-                            while (backStack.size > 1) {
-                                backStack.removeAt(0)
-                            }
-                        }
-                    }
-                    Separator()
-                    Item("Quit", shortcut = KeyShortcut(Key.Q, meta = true)) { exitApplication() }
-                }
-                Menu("View") {
-                    Item("Toggle Theme", shortcut = KeyShortcut(Key.T, meta = true, shift = true)) {
-                        val newTheme = if (isDarkTheme) 1 else 2 // 1 = Light, 2 = Dark
-                        uiPrefs.setTheme(newTheme)
-                    }
-                }
-                Menu("Navigate") {
-                    Item("Conversations", shortcut = KeyShortcut(Key.One, meta = true)) {
-                        backStack.add(TopLevelDestination.Conversations.route)
-                        while (backStack.size > 1) {
-                            backStack.removeAt(0)
-                        }
-                    }
-                    Item("Nodes", shortcut = KeyShortcut(Key.Two, meta = true)) {
-                        backStack.add(TopLevelDestination.Nodes.route)
-                        while (backStack.size > 1) {
-                            backStack.removeAt(0)
-                        }
-                    }
-                    Item("Map", shortcut = KeyShortcut(Key.Three, meta = true)) {
-                        backStack.add(TopLevelDestination.Map.route)
-                        while (backStack.size > 1) {
-                            backStack.removeAt(0)
-                        }
-                    }
-                    Item("Connections", shortcut = KeyShortcut(Key.Four, meta = true)) {
-                        backStack.add(TopLevelDestination.Connections.route)
-                        while (backStack.size > 1) {
-                            backStack.removeAt(0)
-                        }
-                    }
-                }
-                Menu("Help") { Item("About") { backStack.add(SettingsRoutes.About) } }
-            }
 
             // Providing localePref via a staticCompositionLocalOf forces the entire subtree to
             // recompose when the locale changes — CMP Resources' rememberResourceEnvironment then
