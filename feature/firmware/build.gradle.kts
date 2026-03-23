@@ -57,7 +57,6 @@ kotlin {
             implementation(libs.androidx.appcompat)
             implementation(libs.nordic.dfu)
             implementation(libs.coil)
-            implementation(libs.coil.network.okhttp)
             implementation(libs.markdown.renderer.android)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.markdown.renderer)

@@ -61,8 +61,6 @@ kotlin {
             implementation(projects.core.ble)
             implementation(projects.core.prefs)
             implementation(libs.usb.serial.android)
-            implementation(libs.coil.network.okhttp)
-            implementation(libs.coil.svg)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.okhttp3.logging.interceptor)
         }

@@ -21,9 +21,10 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.nsd.NsdManager
 import coil3.ImageLoader
+import coil3.annotation.ExperimentalCoilApi
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
-import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
@@ -52,26 +53,24 @@ class NetworkModule {
     fun provideNsdManager(application: Application): NsdManager =
         application.getSystemService(Context.NSD_SERVICE) as NsdManager
 
+    @OptIn(ExperimentalCoilApi::class)
     @Single
     fun provideImageLoader(
-        okHttpClient: OkHttpClient,
+        httpClient: HttpClient,
         application: Context,
         buildConfigProvider: BuildConfigProvider,
-    ): ImageLoader {
-        val sharedOkHttp = okHttpClient.newBuilder().build()
-        return ImageLoader.Builder(context = application)
-            .components {
-                add(OkHttpNetworkFetcherFactory(callFactory = { sharedOkHttp }))
-                add(SvgDecoder.Factory(scaleToDensity = true))
-            }
-            .memoryCache {
-                MemoryCache.Builder().maxSizePercent(context = application, percent = MEMORY_CACHE_PERCENT).build()
-            }
-            .diskCache { DiskCache.Builder().maxSizePercent(percent = DISK_CACHE_PERCENT).build() }
-            .logger(logger = if (buildConfigProvider.isDebug) DebugLogger(minLevel = Logger.Level.Verbose) else null)
-            .crossfade(enable = true)
-            .build()
-    }
+    ): ImageLoader = ImageLoader.Builder(context = application)
+        .components {
+            add(KtorNetworkFetcherFactory(httpClient = httpClient))
+            add(SvgDecoder.Factory(scaleToDensity = true))
+        }
+        .memoryCache {
+            MemoryCache.Builder().maxSizePercent(context = application, percent = MEMORY_CACHE_PERCENT).build()
+        }
+        .diskCache { DiskCache.Builder().maxSizePercent(percent = DISK_CACHE_PERCENT).build() }
+        .logger(logger = if (buildConfigProvider.isDebug) DebugLogger(minLevel = Logger.Level.Verbose) else null)
+        .crossfade(enable = true)
+        .build()
 
     @Single
     fun provideJson(): Json = Json {

@@ -56,7 +56,6 @@ kotlin {
             implementation(projects.core.nfc)
             implementation(libs.androidx.appcompat)
 
-            implementation(libs.coil)
             implementation(libs.markdown.renderer.android)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.markdown.renderer)
