@@ -88,11 +88,11 @@ class ServiceBroadcasts(private val context: Context, private val serviceReposit
         lastHeard = lastHeard,
         deviceMetrics =
         org.meshtastic.core.model.DeviceMetrics(
-            batteryLevel = deviceMetrics.battery_level ?: 0,
-            voltage = deviceMetrics.voltage ?: 0f,
-            channelUtilization = deviceMetrics.channel_utilization ?: 0f,
-            airUtilTx = deviceMetrics.air_util_tx ?: 0f,
-            uptimeSeconds = deviceMetrics.uptime_seconds ?: 0,
+            batteryLevel = deviceMetrics.battery_level,
+            voltage = deviceMetrics.voltage,
+            channelUtilization = deviceMetrics.channel_utilization,
+            airUtilTx = deviceMetrics.air_util_tx,
+            uptimeSeconds = deviceMetrics.uptime_seconds,
         ),
         channel = channel,
         environmentMetrics = org.meshtastic.core.model.EnvironmentMetrics.fromTelemetryProto(environmentMetrics, 0),

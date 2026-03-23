@@ -449,7 +449,7 @@ fun MapView(
                 if (!mapFilterStateValue.showPrecisionCircle) {
                     setPrecisionBits(0)
                 } else {
-                    setPrecisionBits(p.precision_bits ?: 0)
+                    setPrecisionBits(p.precision_bits)
                 }
                 setOnLongClickListener {
                     navigateToNodeDetails(node.num)
@@ -469,7 +469,7 @@ fun MapView(
             Logger.d { "User deleted waypoint ${waypoint.id} for me" }
             mapViewModel.deleteWaypoint(waypoint.id)
         }
-        if ((waypoint.locked_to ?: 0) in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
+        if (waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             builder.setPositiveButton(getString(Res.string.delete_for_everyone)) { _, _ ->
                 Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
                 mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
@@ -497,7 +497,7 @@ fun MapView(
         Logger.d { "marker long pressed id=$id" }
         val waypoint = waypoints[id]?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
-        if ((waypoint.locked_to ?: 0) in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
+        if (waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             showEditWaypointDialog = waypoint
         } else {
             showDeleteMarkerDialog(waypoint)
@@ -515,15 +515,15 @@ fun MapView(
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.waypoint ?: return@mapNotNull null
             if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
-            val lock = if ((pt.locked_to ?: 0) != 0) "\uD83D\uDD12" else ""
+            val lock = if (pt.locked_to != 0) "\uD83D\uDD12" else ""
             val time = DateFormatter.formatDateTime(waypoint.time)
-            val label = (pt.name ?: "") + " " + formatAgo((waypoint.time / 1000).toInt())
-            val emoji = String(Character.toChars(if ((pt.icon ?: 0) == 0) 128205 else pt.icon!!))
+            val label = pt.name + " " + formatAgo((waypoint.time / 1000).toInt())
+            val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
             val now = nowMillis
-            val expireTimeMillis = (pt.expire ?: 0) * 1000L
+            val expireTimeMillis = pt.expire * 1000L
             val expireTimeStr =
                 when {
-                    (pt.expire ?: 0) == 0 || pt.expire == Int.MAX_VALUE -> "Never"
+                    pt.expire == 0 || pt.expire == Int.MAX_VALUE -> "Never"
                     expireTimeMillis <= now -> "Expired"
                     else -> DateFormatter.formatRelativeTime(expireTimeMillis)
                 }
@@ -941,12 +941,11 @@ fun MapView(
                 Logger.d { "User clicked send waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
 
-                val newId =
-                    if (waypoint.id == 0) mapViewModel.generatePacketId() ?: return@EditWaypointDialog else waypoint.id
+                val newId = if (waypoint.id == 0) mapViewModel.generatePacketId() else waypoint.id
                 val newName = if (waypoint.name.isNullOrEmpty()) "Dropped Pin" else waypoint.name
-                val newExpire = if ((waypoint.expire ?: 0) == 0) Int.MAX_VALUE else (waypoint.expire ?: Int.MAX_VALUE)
-                val newLockedTo = if ((waypoint.locked_to ?: 0) != 0) mapViewModel.myNodeNum ?: 0 else 0
-                val newIcon = if ((waypoint.icon ?: 0) == 0) 128205 else waypoint.icon
+                val newExpire = if (waypoint.expire == 0) Int.MAX_VALUE else waypoint.expire
+                val newLockedTo = if (waypoint.locked_to != 0) mapViewModel.myNodeNum ?: 0 else 0
+                val newIcon = if (waypoint.icon == 0) 128205 else waypoint.icon
 
                 mapViewModel.sendWaypoint(
                     waypoint.copy(

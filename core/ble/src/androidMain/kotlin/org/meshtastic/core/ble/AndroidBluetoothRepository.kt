@@ -92,8 +92,10 @@ class AndroidBluetoothRepository(
                     override fun onReceive(c: Context, intent: android.content.Intent) {
                         if (intent.action == android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
                             val d =
-                                intent.getParcelableExtra<android.bluetooth.BluetoothDevice>(
+                                androidx.core.content.IntentCompat.getParcelableExtra(
+                                    intent,
                                     android.bluetooth.BluetoothDevice.EXTRA_DEVICE,
+                                    android.bluetooth.BluetoothDevice::class.java,
                                 )
                             if (d?.address?.equals(macAddress, ignoreCase = true) == true) {
                                 val state =
@@ -111,7 +113,7 @@ class AndroidBluetoothRepository(
                                     try {
                                         context.unregisterReceiver(this)
                                     } catch (ignored: Exception) {}
-                                    if (cont.isActive) cont.resume(Unit) {}
+                                    if (cont.isActive) cont.resume(Unit)
                                 } else if (
                                     state == android.bluetooth.BluetoothDevice.BOND_NONE &&
                                     prevState == android.bluetooth.BluetoothDevice.BOND_BONDING

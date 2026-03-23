@@ -39,6 +39,7 @@ class FdroidMapViewProvider : MapViewProvider {
     ) {
         val mapViewModel: MapViewModel = koinViewModel()
         LaunchedEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
+        @Suppress("UNCHECKED_CAST")
         org.meshtastic.app.map.MapView(
             modifier = modifier,
             mapViewModel = mapViewModel,

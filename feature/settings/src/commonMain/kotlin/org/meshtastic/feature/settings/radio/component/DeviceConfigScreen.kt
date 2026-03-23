@@ -130,7 +130,7 @@ private val Config.DeviceConfig.Role.description: StringResource
             Config.DeviceConfig.Role.LOST_AND_FOUND -> Res.string.role_lost_and_found_desc
             Config.DeviceConfig.Role.TAK_TRACKER -> Res.string.role_tak_tracker_desc
             Config.DeviceConfig.Role.ROUTER_LATE -> Res.string.role_router_late_desc
-            else -> Res.string.unrecognized
+            Config.DeviceConfig.Role.UNRECOGNIZED -> Res.string.unrecognized
         }
 
 private val Config.DeviceConfig.RebroadcastMode.description: StringResource
@@ -143,7 +143,7 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
             Config.DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
             Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY ->
                 Res.string.rebroadcast_mode_core_portnums_only_desc
-            else -> Res.string.unrecognized
+            Config.DeviceConfig.RebroadcastMode.UNRECOGNIZED -> Res.string.unrecognized
         }
 
 @Suppress("DEPRECATION", "LongMethod")
@@ -180,7 +180,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
     ) {
         item {
             TitledCard(title = stringResource(Res.string.options)) {
-                val currentRole = formState.value.role ?: Config.DeviceConfig.Role.CLIENT
+                val currentRole = formState.value.role
                 DropDownPreference(
                     title = stringResource(Res.string.role),
                     enabled = state.connected,
@@ -193,7 +193,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 HorizontalDivider()
 
-                val currentRebroadcastMode = formState.value.rebroadcast_mode ?: Config.DeviceConfig.RebroadcastMode.ALL
+                val currentRebroadcastMode = formState.value.rebroadcast_mode
                 DropDownPreference(
                     title = stringResource(Res.string.rebroadcast_mode),
                     enabled = state.connected,
@@ -207,7 +207,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.nodeinfo_broadcast_interval),
-                    selectedItem = (formState.value.node_info_broadcast_secs ?: 0).toLong(),
+                    selectedItem = formState.value.node_info_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(node_info_broadcast_secs = it.toInt()) },
@@ -255,7 +255,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 EditTextPreference(
                     title = "",
-                    value = formState.value.tzdef ?: "",
+                    value = formState.value.tzdef,
                     summary = stringResource(Res.string.config_device_tzdef_summary),
                     maxSize = 64, // tzdef max_size:65
                     enabled = state.connected,
@@ -292,7 +292,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
                     title = stringResource(Res.string.button_gpio),
-                    value = formState.value.button_gpio ?: 0,
+                    value = formState.value.button_gpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(button_gpio = it) },
@@ -302,7 +302,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
 
                 EditTextPreference(
                     title = stringResource(Res.string.buzzer_gpio),
-                    value = formState.value.buzzer_gpio ?: 0,
+                    value = formState.value.buzzer_gpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(buzzer_gpio = it) },
