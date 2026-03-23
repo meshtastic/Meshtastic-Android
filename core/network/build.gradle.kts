@@ -61,7 +61,6 @@ kotlin {
             implementation(projects.core.ble)
             implementation(projects.core.prefs)
             implementation(libs.usb.serial.android)
-            implementation(libs.ktor.client.android)
         }
 
         commonTest.dependencies {
