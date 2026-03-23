@@ -43,6 +43,7 @@ class NoopFirmwareUsbManager : FirmwareUsbManager {
     override fun deviceDetachFlow(): Flow<Unit> = emptyFlow()
 }
 
+@Suppress("EmptyFunctionBlock")
 class NoopFirmwareFileHandler : FirmwareFileHandler {
     override fun cleanupAllTemporaryFiles() {}
 

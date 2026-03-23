@@ -26,21 +26,22 @@ import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 
+@Suppress("TooManyFunctions")
 class FakeMeshLogRepository : MeshLogRepository {
-    private val _logs = MutableStateFlow<List<MeshLog>>(emptyList())
+    private val logsFlow = MutableStateFlow<List<MeshLog>>(emptyList())
     val currentLogs: List<MeshLog>
-        get() = _logs.value
+        get() = logsFlow.value
 
     var deleteLogsOlderThanCalledDays: Int? = null
 
-    override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = _logs.map { it.take(maxItem) }
+    override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
 
-    override fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>> = _logs.map { it.take(maxItem) }
+    override fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
 
-    override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = _logs
+    override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = logsFlow
 
     override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> =
-        _logs.map { it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum } }
+        logsFlow.map { it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum } }
 
     override fun getMeshPacketsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshPacket>> = MutableStateFlow(emptyList())
 
@@ -52,19 +53,19 @@ class FakeMeshLogRepository : MeshLogRepository {
     override fun getMyNodeInfo(): Flow<MyNodeInfo?> = MutableStateFlow(null)
 
     override suspend fun insert(log: MeshLog) {
-        _logs.value = _logs.value + log
+        logsFlow.value = logsFlow.value + log
     }
 
     override suspend fun deleteAll() {
-        _logs.value = emptyList()
+        logsFlow.value = emptyList()
     }
 
     override suspend fun deleteLog(uuid: String) {
-        _logs.value = _logs.value.filter { it.uuid != uuid }
+        logsFlow.value = logsFlow.value.filter { it.uuid != uuid }
     }
 
     override suspend fun deleteLogs(nodeNum: Int, portNum: Int) {
-        _logs.value = _logs.value.filterNot { it.fromNum == nodeNum && it.portNum == portNum }
+        logsFlow.value = logsFlow.value.filterNot { it.fromNum == nodeNum && it.portNum == portNum }
     }
 
     override suspend fun deleteLogsOlderThan(retentionDays: Int) {
@@ -72,6 +73,6 @@ class FakeMeshLogRepository : MeshLogRepository {
     }
 
     fun setLogs(logs: List<MeshLog>) {
-        _logs.value = logs
+        logsFlow.value = logs
     }
 }

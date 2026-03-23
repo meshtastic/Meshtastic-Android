@@ -27,8 +27,8 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.test.BeforeTest
@@ -40,14 +40,13 @@ import kotlin.test.assertNotNull
 class ScannerViewModelTest {
 
     private lateinit var viewModel: ScannerViewModel
-    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val serviceRepository = FakeServiceRepository()
     private val radioController = FakeRadioController()
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase = mock(MockMode.autofill)
     private val bleScanner: org.meshtastic.core.ble.BleScanner = mock(MockMode.autofill)
 
-    private val connectionProgressFlow = MutableStateFlow<String?>(null)
     private val discoveredDevicesFlow = MutableStateFlow(DiscoveredDevices())
 
     @BeforeTest
@@ -56,11 +55,10 @@ class ScannerViewModelTest {
         every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
         every { radioInterfaceService.supportedDeviceTypes } returns emptyList()
 
-        every { serviceRepository.connectionProgress } returns connectionProgressFlow
         every { getDiscoveredDevicesUseCase.invoke(any()) } returns discoveredDevicesFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
 
-        connectionProgressFlow.value = null
+        serviceRepository.setConnectionProgress("")
         discoveredDevicesFlow.value = DiscoveredDevices()
 
         viewModel =
@@ -88,8 +86,8 @@ class ScannerViewModelTest {
     @Test
     fun `errorText reflects connectionProgress`() = runTest {
         viewModel.errorText.test {
-            assertEquals(null, awaitItem())
-            connectionProgressFlow.value = "Connecting..."
+            assertEquals("", awaitItem())
+            serviceRepository.setConnectionProgress("Connecting...")
             assertEquals("Connecting...", awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
