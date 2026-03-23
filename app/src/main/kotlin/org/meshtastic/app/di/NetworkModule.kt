@@ -36,6 +36,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
@@ -68,7 +69,12 @@ class NetworkModule {
         .memoryCache {
             MemoryCache.Builder().maxSizePercent(context = application, percent = MEMORY_CACHE_PERCENT).build()
         }
-        .diskCache { DiskCache.Builder().maxSizePercent(percent = DISK_CACHE_PERCENT).build() }
+        .diskCache {
+            DiskCache.Builder()
+                .directory(application.cacheDir.resolve("image_cache").toOkioPath())
+                .maxSizePercent(percent = DISK_CACHE_PERCENT)
+                .build()
+        }
         .logger(logger = if (buildConfigProvider.isDebug) DebugLogger(minLevel = Logger.Level.Verbose) else null)
         .crossfade(enable = true)
         .build()
