@@ -251,7 +251,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.jetbrains.lifecycle.viewmodel.compose)
     implementation(libs.jetbrains.lifecycle.runtime.compose)
-    implementation(libs.jetbrains.navigation3.runtime)
     implementation(libs.jetbrains.navigation3.ui)
     implementation(libs.androidx.paging.compose)
     implementation(libs.ktor.client.android)

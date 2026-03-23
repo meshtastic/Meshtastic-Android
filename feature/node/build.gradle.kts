@@ -48,7 +48,7 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.feature.map)
 
-            implementation(libs.jetbrains.navigation3.runtime)
+            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)

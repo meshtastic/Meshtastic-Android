@@ -45,7 +45,7 @@ kotlin {
             implementation(projects.core.network)
             implementation(projects.feature.settings)
 
-            implementation(libs.jetbrains.navigation3.runtime)
+            implementation(libs.jetbrains.navigation3.ui)
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }

@@ -98,9 +98,6 @@ jetbrains-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifec
 jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "jetbrains-lifecycle" }
-# JetBrains Navigation 3 currently publishes `navigation3-ui` (no separate `navigation3-runtime` artifact).
-# Both `jetbrains-navigation3-runtime` and `jetbrains-navigation3-ui` resolve to the same coordinate.
-jetbrains-navigation3-runtime = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 jetbrains-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationevent" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }

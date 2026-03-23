@@ -28,7 +28,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.resources)
             implementation(libs.kotlinx.serialization.core)
-            implementation(libs.jetbrains.navigation3.runtime)
+            implementation(libs.jetbrains.navigation3.ui)
         }
 
         commonTest.dependencies { implementation(kotlin("test")) }
