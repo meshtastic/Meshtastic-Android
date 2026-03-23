@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.buildlogic
 
 import com.android.build.api.attributes.ProductFlavorAttr
@@ -33,24 +32,24 @@ internal fun Project.configureAndroidMarketplaceFallback() {
     val marketplaceAttr = ProductFlavorAttr.of(MeshtasticFlavor.fdroid.dimension.name)
     val legacyMarketplaceAttr = Attribute.of(LEGACY_MARKETPLACE_ATTRIBUTE_NAME, String::class.java)
 
-    afterEvaluate {
-        configurations.configureEach {
-            if (!isCanBeResolved || isCanBeConsumed) return@configureEach
-            if (!name.contains("android", ignoreCase = true)) return@configureEach
-            if (attributes.getAttribute(marketplaceAttr) != null && attributes.getAttribute(legacyMarketplaceAttr) != null) {
-                return@configureEach
+    configurations.configureEach {
+        if (!isCanBeResolved || isCanBeConsumed) return@configureEach
+        if (!name.contains("android", ignoreCase = true)) return@configureEach
+        if (
+            attributes.getAttribute(marketplaceAttr) != null && attributes.getAttribute(legacyMarketplaceAttr) != null
+        ) {
+            return@configureEach
+        }
+
+        // Prefer explicit flavor from configuration name; otherwise use configurable default.
+        val inferredMarketplace =
+            when {
+                name.contains(MeshtasticFlavor.fdroid.name, ignoreCase = true) -> MeshtasticFlavor.fdroid.name
+                name.contains(MeshtasticFlavor.google.name, ignoreCase = true) -> MeshtasticFlavor.google.name
+                else -> defaultMarketplace
             }
 
-            // Prefer explicit flavor from configuration name; otherwise use configurable default.
-            val inferredMarketplace =
-                when {
-                    name.contains(MeshtasticFlavor.fdroid.name, ignoreCase = true) -> MeshtasticFlavor.fdroid.name
-                    name.contains(MeshtasticFlavor.google.name, ignoreCase = true) -> MeshtasticFlavor.google.name
-                    else -> defaultMarketplace
-                }
-
-            attributes.attribute(marketplaceAttr, objects.named(ProductFlavorAttr::class.java, inferredMarketplace))
-            attributes.attribute(legacyMarketplaceAttr, inferredMarketplace)
-        }
+        attributes.attribute(marketplaceAttr, objects.named(ProductFlavorAttr::class.java, inferredMarketplace))
+        attributes.attribute(legacyMarketplaceAttr, inferredMarketplace)
     }
 }

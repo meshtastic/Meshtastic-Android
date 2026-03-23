@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.buildlogic
 
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
@@ -25,12 +24,8 @@ fun Project.configureKover() {
     extensions.configure<KoverProjectExtension> {
         reports {
             total {
-                xml {
-                    onCheck.set(true)
-                }
-                html {
-                    onCheck.set(true)
-                }
+                xml { onCheck.set(true) }
+                html { onCheck.set(true) }
             }
             filters {
                 excludes {
@@ -42,16 +37,14 @@ fun Project.configureKover() {
                     classes("*.R")
                     classes("*.R$*")
 
+                    // Exclude iOS compile-only stubs (no test execution on these targets)
+                    classes("*NoopStubs*")
+
                     // Exclude UI components
                     annotatedBy("*Preview")
 
                     // Exclude declarations
-                    annotatedBy(
-                        "*.Module",
-                        "*.Provides",
-                        "*.Binds",
-                        "*.Composable",
-                    )
+                    annotatedBy("*.Module", "*.Provides", "*.Binds", "*.Composable")
 
                     // Suppress generated code
                     packages("koin_aggregated_deps")
@@ -63,13 +56,11 @@ fun Project.configureKover() {
 }
 
 /**
- * Configure Kover aggregation in a way that is compatible with Gradle Isolated Projects.
- * Instead of blindly adding all subprojects, we only add those that have the Kover plugin applied.
+ * Configure Kover aggregation in a way that is compatible with Gradle Isolated Projects. Instead of blindly adding all
+ * subprojects, we only add those that have the Kover plugin applied.
  */
 fun Project.configureKoverAggregation() {
     subprojects.forEach { subproject ->
-        subproject.pluginManager.withPlugin("org.jetbrains.kotlinx.kover") {
-            dependencies.add("kover", subproject)
-        }
+        subproject.pluginManager.withPlugin("org.jetbrains.kotlinx.kover") { dependencies.add("kover", subproject) }
     }
 }

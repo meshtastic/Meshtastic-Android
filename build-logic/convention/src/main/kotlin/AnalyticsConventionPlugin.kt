@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.datadog.gradle.plugin.DdExtension
@@ -29,8 +28,8 @@ import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
 /**
- * Convention plugin for analytics (Google Services, Crashlytics, Datadog).
- * Segregates these plugins to only affect the "google" flavor and disables their tasks for "fdroid".
+ * Convention plugin for analytics (Google Services, Crashlytics, Datadog). Segregates these plugins to only affect the
+ * "google" flavor and disables their tasks for "fdroid".
  */
 class AnalyticsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -50,7 +49,9 @@ class AnalyticsConventionPlugin : Plugin<Project> {
             // This avoids iterating all tasks with a generic filter and improves configuration performance.
             plugins.withId("com.google.gms.google-services") {
                 tasks.configureEach {
-                    if (name.contains("GoogleServices", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)) {
+                    if (
+                        name.contains("GoogleServices", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)
+                    ) {
                         enabled = false
                     }
                 }
@@ -66,10 +67,13 @@ class AnalyticsConventionPlugin : Plugin<Project> {
 
             plugins.withId("com.datadoghq.dd-sdk-android-gradle-plugin") {
                 tasks.configureEach {
-                    if ((name.contains("datadog", ignoreCase = true) || 
-                            name.contains("uploadMapping", ignoreCase = true) || 
-                            name.contains("buildId", ignoreCase = true)) && 
-                        name.contains("fdroid", ignoreCase = true)) {
+                    if (
+                        (
+                            name.contains("datadog", ignoreCase = true) ||
+                                name.contains("uploadMapping", ignoreCase = true) ||
+                                name.contains("buildId", ignoreCase = true)
+                            ) && name.contains("fdroid", ignoreCase = true)
+                    ) {
                         enabled = false
                     }
                 }

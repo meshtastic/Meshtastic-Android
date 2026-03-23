@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.meshtastic.buildlogic.configureJvmAndroidMainHierarchy
 
 /**
- * Opt-in convention for KMP modules that intentionally share a `jvmAndroidMain` source set
- * between the desktop JVM target and the Android target.
+ * Opt-in convention for KMP modules that intentionally share a `jvmAndroidMain` source set between the desktop JVM
+ * target and the Android target.
  */
 class KmpJvmAndroidConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        with(target) {
-            configureJvmAndroidMainHierarchy()
-        }
+        with(target) { configureJvmAndroidMainHierarchy() }
     }
 }
-

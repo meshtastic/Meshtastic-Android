@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -26,10 +25,9 @@ import org.meshtastic.buildlogic.libs
 /**
  * Convention plugin for KMP feature modules.
  *
- * Composes [KmpLibraryConventionPlugin], [KmpLibraryComposeConventionPlugin], and
- * [KoinConventionPlugin] and wires the common Compose / Lifecycle / Koin dependencies
- * that every feature module needs.  Feature `build.gradle.kts` files only declare
- * their module-specific deps.
+ * Composes [KmpLibraryConventionPlugin], [KmpLibraryComposeConventionPlugin], and [KoinConventionPlugin] and wires the
+ * common Compose / Lifecycle / Koin dependencies that every feature module needs. Feature `build.gradle.kts` files only
+ * declare their module-specific deps.
  *
  * Modelled after the `AndroidFeatureImplConventionPlugin` pattern from
  * [Now in Android](https://github.com/android/nowinandroid).
@@ -71,12 +69,8 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                     implementation(libs.library("androidx-compose-ui-tooling-preview"))
                 }
 
-                sourceSets.getByName("commonTest").dependencies {
-                    implementation(project(":core:testing"))
-                }
+                sourceSets.getByName("commonTest").dependencies { implementation(project(":core:testing")) }
             }
         }
     }
 }
-
-
