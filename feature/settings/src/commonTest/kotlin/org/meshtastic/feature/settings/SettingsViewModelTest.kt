@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.common.UiPreferences
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
@@ -42,6 +41,7 @@ import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCas
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.AppPreferences
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
@@ -63,7 +63,6 @@ class SettingsViewModelTest {
     private lateinit var radioController: FakeRadioController
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
-    private val uiPreferences: UiPreferences = mock(MockMode.autofill)
     private val buildConfigProvider: BuildConfigProvider = mock(MockMode.autofill)
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
     private val meshLogPrefs: MeshLogPrefs = mock(MockMode.autofill)
@@ -88,10 +87,14 @@ class SettingsViewModelTest {
         val isOtaCapableUseCase: IsOtaCapableUseCase = mock(MockMode.autofill)
         every { isOtaCapableUseCase() } returns flowOf(true)
 
-        val setThemeUseCase = SetThemeUseCase(uiPreferences)
-        val setLocaleUseCase = SetLocaleUseCase(uiPreferences)
-        val setAppIntroCompletedUseCase = SetAppIntroCompletedUseCase(uiPreferences)
-        val setProvideLocationUseCase = SetProvideLocationUseCase(uiPreferences)
+        val setThemeUseCase = SetThemeUseCase(uiPrefs)
+        val setLocaleUseCase = SetLocaleUseCase(uiPrefs)
+        val setAppIntroCompletedUseCase = SetAppIntroCompletedUseCase(uiPrefs)
+
+        val appPreferences: AppPreferences = mock(MockMode.autofill)
+        every { appPreferences.ui } returns uiPrefs
+        val setProvideLocationUseCase = SetProvideLocationUseCase(uiPrefs)
+
         val setDatabaseCacheLimitUseCase = SetDatabaseCacheLimitUseCase(databaseManager)
         val setMeshLogSettingsUseCase = SetMeshLogSettingsUseCase(meshLogRepository, meshLogPrefs)
         val setNotificationSettingsUseCase = SetNotificationSettingsUseCase(notificationPrefs)

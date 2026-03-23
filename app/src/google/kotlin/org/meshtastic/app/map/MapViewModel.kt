@@ -45,12 +45,12 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
-import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.Config
@@ -84,7 +84,7 @@ class MapViewModel(
     radioConfigRepository: RadioConfigRepository,
     radioController: RadioController,
     private val customTileProviderRepository: CustomTileProviderRepository,
-    uiPreferencesDataSource: UiPreferencesDataSource,
+    uiPrefs: UiPrefs,
     savedStateHandle: SavedStateHandle,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController) {
 
@@ -125,7 +125,7 @@ class MapViewModel(
             ),
         )
 
-    val theme: StateFlow<Int> = uiPreferencesDataSource.theme
+    val theme: StateFlow<Int> = uiPrefs.theme
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()

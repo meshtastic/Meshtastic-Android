@@ -33,13 +33,6 @@ import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.datastore.KEY_APP_INTRO_COMPLETED
-import org.meshtastic.core.datastore.KEY_INCLUDE_UNKNOWN
-import org.meshtastic.core.datastore.KEY_NODE_SORT
-import org.meshtastic.core.datastore.KEY_ONLY_DIRECT
-import org.meshtastic.core.datastore.KEY_ONLY_ONLINE
-import org.meshtastic.core.datastore.KEY_SHOW_IGNORED
-import org.meshtastic.core.datastore.KEY_THEME
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
@@ -61,23 +54,7 @@ class PreferencesDataStoreModule {
     ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
         migrations =
-        listOf(
-            SharedPreferencesMigration(context = context, sharedPreferencesName = USER_PREFERENCES_NAME),
-            SharedPreferencesMigration(
-                context = context,
-                sharedPreferencesName = "ui-prefs",
-                keysToMigrate =
-                setOf(
-                    KEY_APP_INTRO_COMPLETED,
-                    KEY_THEME,
-                    KEY_NODE_SORT,
-                    KEY_INCLUDE_UNKNOWN,
-                    KEY_ONLY_ONLINE,
-                    KEY_ONLY_DIRECT,
-                    KEY_SHOW_IGNORED,
-                ),
-            ),
-        ),
+        listOf(SharedPreferencesMigration(context = context, sharedPreferencesName = USER_PREFERENCES_NAME)),
         scope = scope,
         produceFile = { context.preferencesDataStoreFile(USER_PREFERENCES_NAME) },
     )

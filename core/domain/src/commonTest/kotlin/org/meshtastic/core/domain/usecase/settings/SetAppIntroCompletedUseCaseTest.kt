@@ -18,19 +18,19 @@ package org.meshtastic.core.domain.usecase.settings
 
 import dev.mokkery.mock
 import dev.mokkery.verify
-import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.repository.UiPrefs
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class SetAppIntroCompletedUseCaseTest {
 
-    private lateinit var uiPreferencesDataSource: UiPreferencesDataSource
+    private lateinit var uiPrefs: UiPrefs
     private lateinit var useCase: SetAppIntroCompletedUseCase
 
     @BeforeTest
     fun setUp() {
-        uiPreferencesDataSource = mock(dev.mokkery.MockMode.autofill)
-        useCase = SetAppIntroCompletedUseCase(uiPreferencesDataSource)
+        uiPrefs = mock(dev.mokkery.MockMode.autofill)
+        useCase = SetAppIntroCompletedUseCase(uiPrefs)
     }
 
     @Test
@@ -39,6 +39,6 @@ class SetAppIntroCompletedUseCaseTest {
         useCase(true)
 
         // Assert
-        verify { uiPreferencesDataSource.setAppIntroCompleted(true) }
+        verify { uiPrefs.setAppIntroCompleted(true) }
     }
 }

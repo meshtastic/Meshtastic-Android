@@ -37,7 +37,6 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.asDeviceVersion
-import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.RadioController
@@ -51,6 +50,7 @@ import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.compromised_keys
@@ -76,7 +76,7 @@ class UIViewModel(
     radioInterfaceService: RadioInterfaceService,
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
-    private val uiPreferencesDataSource: UiPreferencesDataSource,
+    private val uiPrefs: UiPrefs,
     private val notificationManager: NotificationManager,
     packetRepository: PacketRepository,
     val alertManager: AlertManager,
@@ -99,7 +99,7 @@ class UIViewModel(
             )
     }
 
-    val theme: StateFlow<Int> = uiPreferencesDataSource.theme
+    val theme: StateFlow<Int> = uiPrefs.theme
 
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
 
@@ -257,9 +257,9 @@ class UIViewModel(
         serviceRepository.clearNeighborInfoResponse()
     }
 
-    val appIntroCompleted: StateFlow<Boolean> = uiPreferencesDataSource.appIntroCompleted
+    val appIntroCompleted: StateFlow<Boolean> = uiPrefs.appIntroCompleted
 
     fun onAppIntroCompleted() {
-        uiPreferencesDataSource.setAppIntroCompleted(true)
+        uiPrefs.setAppIntroCompleted(true)
     }
 }

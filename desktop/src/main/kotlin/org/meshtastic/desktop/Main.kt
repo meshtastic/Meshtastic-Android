@@ -63,10 +63,10 @@ import okio.Path.Companion.toPath
 import org.jetbrains.skia.Image
 import org.koin.core.context.startKoin
 import org.meshtastic.core.common.util.MeshtasticUri
-import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -151,7 +151,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
         onDispose { meshServiceController.stop() }
     }
 
-    val uiPrefs = remember { koinApp.koin.get<UiPreferencesDataSource>() }
+    val uiPrefs = remember { koinApp.koin.get<UiPrefs>() }
     val themePref by uiPrefs.theme.collectAsState(initial = -1) // -1 is SYSTEM usually
     val localePref by uiPrefs.locale.collectAsState(initial = "")
 

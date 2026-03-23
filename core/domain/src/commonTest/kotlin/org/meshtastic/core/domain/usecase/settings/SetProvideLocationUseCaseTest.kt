@@ -20,19 +20,19 @@ import dev.mokkery.MockMode
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.common.UiPreferences
+import org.meshtastic.core.repository.UiPrefs
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class SetProvideLocationUseCaseTest {
 
-    private lateinit var uiPreferences: UiPreferences
+    private lateinit var uiPrefs: UiPrefs
     private lateinit var useCase: SetProvideLocationUseCase
 
     @BeforeTest
     fun setUp() {
-        uiPreferences = mock(MockMode.autofill)
-        useCase = SetProvideLocationUseCase(uiPreferences)
+        uiPrefs = mock(MockMode.autofill)
+        useCase = SetProvideLocationUseCase(uiPrefs)
     }
 
     @Test
@@ -41,6 +41,6 @@ class SetProvideLocationUseCaseTest {
         useCase(123, true)
 
         // Assert
-        verifySuspend { uiPreferences.setShouldProvideNodeLocation(123, true) }
+        verifySuspend { uiPrefs.setShouldProvideNodeLocation(123, true) }
     }
 }
