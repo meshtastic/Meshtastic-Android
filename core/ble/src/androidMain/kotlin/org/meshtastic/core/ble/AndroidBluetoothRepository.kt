@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import kotlin.coroutines.resume
 
 /** Android implementation of [BluetoothRepository]. */
 @Single
