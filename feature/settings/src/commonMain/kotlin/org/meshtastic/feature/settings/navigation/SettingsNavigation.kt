@@ -45,15 +45,19 @@ import org.meshtastic.feature.settings.radio.component.AudioConfigScreen
 import org.meshtastic.feature.settings.radio.component.BluetoothConfigScreen
 import org.meshtastic.feature.settings.radio.component.CannedMessageConfigScreen
 import org.meshtastic.feature.settings.radio.component.DetectionSensorConfigScreen
+import org.meshtastic.feature.settings.radio.component.DeviceConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.DisplayConfigScreen
+import org.meshtastic.feature.settings.radio.component.ExternalNotificationConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
 import org.meshtastic.feature.settings.radio.component.MQTTConfigScreen
 import org.meshtastic.feature.settings.radio.component.NeighborInfoConfigScreen
 import org.meshtastic.feature.settings.radio.component.NetworkConfigScreen
 import org.meshtastic.feature.settings.radio.component.PaxcounterConfigScreen
+import org.meshtastic.feature.settings.radio.component.PositionConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.PowerConfigScreen
 import org.meshtastic.feature.settings.radio.component.RangeTestConfigScreen
 import org.meshtastic.feature.settings.radio.component.RemoteHardwareConfigScreen
+import org.meshtastic.feature.settings.radio.component.SecurityConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StatusMessageConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
@@ -131,14 +135,14 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
             when (routeInfo) {
                 ConfigRoute.USER -> UserConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ConfigRoute.CHANNELS -> ChannelConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
-                ConfigRoute.DEVICE -> DeviceConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
-                ConfigRoute.POSITION -> PositionConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.DEVICE -> DeviceConfigScreenCommon(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.POSITION -> PositionConfigScreenCommon(viewModel, onBack = { backStack.removeLastOrNull() })
                 ConfigRoute.POWER -> PowerConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ConfigRoute.NETWORK -> NetworkConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ConfigRoute.DISPLAY -> DisplayConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ConfigRoute.LORA -> LoRaConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ConfigRoute.BLUETOOTH -> BluetoothConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
-                ConfigRoute.SECURITY -> SecurityConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.SECURITY -> SecurityConfigScreenCommon(viewModel, onBack = { backStack.removeLastOrNull() })
             }
         }
     }
@@ -150,7 +154,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
                 ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ModuleRoute.SERIAL -> SerialConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ModuleRoute.EXT_NOTIFICATION ->
-                    ExternalNotificationConfigScreen(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
+                    ExternalNotificationConfigScreenCommon(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
                 ModuleRoute.STORE_FORWARD ->
                     StoreForwardConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ModuleRoute.RANGE_TEST -> RangeTestConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
@@ -201,14 +205,6 @@ expect fun SettingsMainScreen(
 )
 
 /** Expect declarations for platform-specific config screens. */
-@Composable expect fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
-
-@Composable expect fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
-
-@Composable expect fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
-
-@Composable expect fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
-
 fun <R : Route> EntryProviderScope<NavKey>.configComposable(
     route: KClass<R>,
     backStack: NavBackStack<NavKey>,

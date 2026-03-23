@@ -30,23 +30,3 @@ actual fun SettingsMainScreen(
 ) {
     // TODO: Implement iOS settings main screen
 }
-
-@Composable
-actual fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    // TODO: Implement iOS device config screen
-}
-
-@Composable
-actual fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    // TODO: Implement iOS position config screen
-}
-
-@Composable
-actual fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    // TODO: Implement iOS security config screen
-}
-
-@Composable
-actual fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    // TODO: Implement iOS external notification config screen
-}

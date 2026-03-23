@@ -21,10 +21,6 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.feature.settings.DesktopSettingsScreen
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.component.DeviceConfigScreenCommon
-import org.meshtastic.feature.settings.radio.component.ExternalNotificationConfigScreenCommon
-import org.meshtastic.feature.settings.radio.component.PositionConfigScreenCommon
-import org.meshtastic.feature.settings.radio.component.SecurityConfigScreenCommon
 
 @Composable
 actual fun SettingsMainScreen(
@@ -38,24 +34,4 @@ actual fun SettingsMainScreen(
         radioConfigViewModel = radioConfigViewModel,
         onNavigate = onNavigate,
     )
-}
-
-@Composable
-actual fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    DeviceConfigScreenCommon(viewModel = viewModel, onBack = onBack)
-}
-
-@Composable
-actual fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    PositionConfigScreenCommon(viewModel = viewModel, onBack = onBack)
-}
-
-@Composable
-actual fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    SecurityConfigScreenCommon(viewModel = viewModel, onBack = onBack)
-}
-
-@Composable
-actual fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    ExternalNotificationConfigScreenCommon(viewModel = viewModel, onBack = onBack)
 }
