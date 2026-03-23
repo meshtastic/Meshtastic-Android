@@ -173,6 +173,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     val appIcon = classpathPainterResource("icon.png")
 
     val notificationManager = remember { koinApp.koin.get<DesktopNotificationManager>() }
+    val alertManager = remember { koinApp.koin.get<org.meshtastic.core.ui.util.AlertManager>() }
     val desktopPrefs = remember { koinApp.koin.get<DesktopPreferencesDataSource>() }
     val windowState = rememberWindowState()
 
@@ -309,7 +310,10 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
             // re-reads Locale.current and all stringResource() calls update.  Unlike key(), this
             // preserves remembered state (including the navigation backstack).
             CompositionLocalProvider(LocalAppLocale provides localePref) {
-                AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(backStack) }
+                AppTheme(darkTheme = isDarkTheme) {
+                    org.meshtastic.core.ui.component.AlertHost(alertManager)
+                    DesktopMainScreen(backStack)
+                }
             }
         }
     }
