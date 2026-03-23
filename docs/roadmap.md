@@ -65,7 +65,7 @@ These items address structural gaps identified in the March 2026 architecture re
 
 | Feature | Status |
 |---|---|
-| Settings | ✅ ~35 real screens (fully shared) + desktop locale picker with in-place recomposition |
+| Settings | ✅ ~35 real screens (fully shared); `DeviceConfig`, `PositionConfig`, `SecurityConfig`, `ExternalNotificationConfig` fully unified into `commonMain` |
 | Node list | ✅ Adaptive list-detail with real `NodeDetailContent` |
 | Messaging | ✅ Adaptive contacts with real message view + send |
 | Connections | ✅ Unified shared UI with dynamic transport detection |
@@ -95,7 +95,7 @@ These items address structural gaps identified in the March 2026 architecture re
 2. **Migrate to Navigation 3 Scene-based architecture** — leverage the first stable release of Nav 3 to support multi-pane layouts. **Investigate 3-pane "Power User" scenes** (e.g., Node List + Detail + Map/Charts) on Large (1200dp) and Extra-large (1600dp) displays (Android 16 QPR3).
 3. **`core:api` contract split** — separate transport-neutral service contracts from the Android AIDL packaging to support iOS/Desktop service layers.
 4. **Decouple Firmware DFU** — `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it to allow the core `feature:firmware` module to be utilized on desktop/iOS.
-5. **Adopt `WindowSizeClass.BREAKPOINTS_V2`** — Update `AdaptiveTwoPane.kt` and related components to call `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` for seamless transition between mobile and external displays.
+5. ✅ **Adopt `WindowSizeClass.BREAKPOINTS_V2`** — Done: Updated `AdaptiveTwoPane.kt` and `Main.kt` components to call `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)`.
 
 ## Longer-Term (90+ days)
 
