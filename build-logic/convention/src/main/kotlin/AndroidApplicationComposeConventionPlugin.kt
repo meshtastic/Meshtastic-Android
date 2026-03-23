@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -26,19 +25,17 @@ import org.meshtastic.buildlogic.plugin
 
 /**
  * Compose configuration for Android applications.
- * 
- * Note: This has identical implementation to AndroidLibraryComposeConventionPlugin.
- * Both use the same configureAndroidCompose() function which works with CommonExtension.
- * Kept separate to maintain explicit intent in build.gradle.kts configuration despite duplication.
+ *
+ * Note: This has identical implementation to AndroidLibraryComposeConventionPlugin. Both use the same
+ * configureAndroidCompose() function which works with CommonExtension. Kept separate to maintain explicit intent in
+ * build.gradle.kts configuration despite duplication.
  */
 class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = libs.plugin("compose-compiler").get().pluginId)
             apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
-            extensions.configure<ApplicationExtension> {
-                configureAndroidCompose(this)
-            }
+            extensions.configure<ApplicationExtension> { configureAndroidCompose(this) }
         }
     }
 }

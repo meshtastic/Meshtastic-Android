@@ -47,7 +47,6 @@ kotlin {
 
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.aboutlibraries.compose.m3)
-            implementation(libs.jetbrains.navigation3.runtime)
             implementation(libs.jetbrains.navigation3.ui)
         }
 
@@ -55,11 +54,6 @@ kotlin {
             implementation(projects.core.barcode)
             implementation(projects.core.nfc)
             implementation(libs.androidx.appcompat)
-
-            implementation(libs.coil)
-            implementation(libs.markdown.renderer.android)
-            implementation(libs.markdown.renderer.m3)
-            implementation(libs.markdown.renderer)
         }
 
         androidUnitTest.dependencies {

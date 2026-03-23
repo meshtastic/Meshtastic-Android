@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_17
-    }
-}
+kotlin { compilerOptions { jvmTarget = JvmTarget.JVM_17 } }
 
 dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
@@ -78,17 +74,16 @@ spotless {
         target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
         targetExclude("**/build/**/*.kt")
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint(libs.versions.ktlint.get()).setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
+        ktlint(libs.versions.ktlint.get())
+            .setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
         licenseHeaderFile(rootProject.file("../config/spotless/copyright.kt"))
     }
     kotlinGradle {
         target("**/*.gradle.kts")
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint(libs.versions.ktlint.get()).setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
-        licenseHeaderFile(
-            rootProject.file("../config/spotless/copyright.kts"),
-            "(^(?![\\/ ]\\*).*$)"
-        )
+        ktlint(libs.versions.ktlint.get())
+            .setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
+        licenseHeaderFile(rootProject.file("../config/spotless/copyright.kts"), "(^(?![\\/ ]\\*).*$)")
     }
 }
 
@@ -98,12 +93,7 @@ detekt {
     buildUponDefaultConfig = true
     allRules = false
     baseline = file("detekt-baseline.xml")
-    source.setFrom(
-        files(
-            "src/main/java",
-            "src/main/kotlin",
-        )
-    )
+    source.setFrom(files("src/main/java", "src/main/kotlin"))
 }
 
 gradlePlugin {
@@ -196,6 +186,5 @@ gradlePlugin {
             id = "meshtastic.root"
             implementationClass = "RootConventionPlugin"
         }
-
     }
 }

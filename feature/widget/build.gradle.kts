@@ -33,6 +33,7 @@ dependencies {
     implementation(projects.core.resources)
     implementation(projects.core.repository)
 
+    implementation(libs.androidx.compose.ui) // LocalConfiguration, LocalDensity
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.glance.preview)

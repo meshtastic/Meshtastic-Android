@@ -121,6 +121,11 @@ dependencies {
     implementation(libs.aboutlibraries.core)
     implementation(libs.aboutlibraries.compose.m3)
 
+    // Coil image loading (network + SVG decoding for device hardware images)
+    implementation(libs.coil)
+    implementation(libs.coil.network.ktor3)
+    implementation(libs.coil.svg)
+
     // Core KMP modules (JVM variants)
     implementation(projects.core.common)
     implementation(projects.core.di)
@@ -177,7 +182,6 @@ dependencies {
     implementation(libs.okio)
 
     // Ktor HttpClient (Java engine for JVM/Desktop)
-    implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.java)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)

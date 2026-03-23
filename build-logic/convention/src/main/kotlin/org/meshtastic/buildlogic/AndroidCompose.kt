@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,22 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.buildlogic
 
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 
-/**
- * Configure Compose-specific options
- */
-internal fun Project.configureAndroidCompose(
-    commonExtension: CommonExtension,
-) {
-    commonExtension.apply {
-        buildFeatures.compose = true
-    }
+/** Configure Compose-specific options */
+internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
+    commonExtension.apply { buildFeatures.compose = true }
 
     val hasAndroidTest = project.projectDir.resolve("src/androidTest").exists()
     dependencies {
@@ -38,10 +31,9 @@ internal fun Project.configureAndroidCompose(
         if (hasAndroidTest) {
             "androidTestImplementation"(platform(bom))
         }
-        "implementation"(libs.library("androidx-compose-ui-tooling"))
+        "debugImplementation"(libs.library("androidx-compose-ui-tooling"))
         "implementation"(libs.library("androidx-compose-runtime"))
         "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
-        "debugImplementation"(libs.library("androidx-compose-ui-tooling"))
 
         "implementation"(libs.library("compose-multiplatform-runtime"))
         "implementation"(libs.library("compose-multiplatform-resources"))

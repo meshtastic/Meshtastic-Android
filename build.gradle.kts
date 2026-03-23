@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
@@ -26,7 +24,6 @@ plugins {
     alias(libs.plugins.devtools.ksp) apply false
     alias(libs.plugins.koin.compiler) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
-    alias(libs.plugins.firebase.perf) apply false
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.room) apply false
     alias(libs.plugins.kotlin.android) apply false
@@ -41,20 +38,9 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.dokka)
     alias(libs.plugins.test.retry) apply false
-    alias(libs.plugins.dependency.guard) apply false
     alias(libs.plugins.meshtastic.root)
 }
 
-
-
-
-
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
-}
-
-subprojects {
-    tasks.withType<Test> {
-        failOnNoDiscoveredTests = false
-    }
 }

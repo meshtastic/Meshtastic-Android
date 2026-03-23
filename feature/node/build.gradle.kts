@@ -48,12 +48,11 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.feature.map)
 
-            implementation(libs.jetbrains.navigation3.runtime)
+            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)
-            implementation(libs.vico.compose.m2)
             implementation(libs.vico.compose.m3)
 
             // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
@@ -65,10 +64,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.appcompat)
 
-            implementation(libs.coil)
             implementation(libs.markdown.renderer.android)
-            implementation(libs.markdown.renderer.m3)
-            implementation(libs.markdown.renderer)
         }
 
         androidUnitTest.dependencies {

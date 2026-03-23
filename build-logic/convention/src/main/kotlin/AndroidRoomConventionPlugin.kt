@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import androidx.room3.gradle.RoomExtension
 import com.google.devtools.ksp.gradle.KspExtension
 import org.gradle.api.Plugin
@@ -33,9 +32,7 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
             apply(plugin = "androidx.room3")
             apply(plugin = "com.google.devtools.ksp")
 
-            extensions.configure<KspExtension> {
-                arg("room.generateKotlin", "true")
-            }
+            extensions.configure<KspExtension> { arg("room.generateKotlin", "true") }
 
             extensions.configure<RoomExtension> {
                 // The schemas directory contains a schema file for each version of the Room database.
@@ -50,13 +47,9 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
 
             pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
                 extensions.configure<KotlinMultiplatformExtension> {
-                    sourceSets.getByName("commonMain").dependencies {
-                        implementation(roomRuntime)
-                    }
+                    sourceSets.getByName("commonMain").dependencies { implementation(roomRuntime) }
                 }
-                dependencies {
-                    add("kspAndroid", roomCompiler)
-                }
+                dependencies { add("kspAndroid", roomCompiler) }
             }
 
             pluginManager.withPlugin("org.jetbrains.kotlin.android") {

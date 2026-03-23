@@ -27,8 +27,7 @@
 -keep class com.google.protobuf.** { *; }
 -keep class org.meshtastic.proto.** { *; }
 
-# OkHttp
--dontwarn okhttp3.internal.platform.**
+# Networking
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**

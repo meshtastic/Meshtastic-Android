@@ -17,6 +17,7 @@
 package org.meshtastic.desktop
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -28,7 +29,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Notification
@@ -41,11 +51,21 @@ import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import co.touchlab.kermit.Logger
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
+import coil3.network.ktor3.KtorNetworkFetcherFactory
+import coil3.request.crossfade
+import coil3.svg.SvgDecoder
 import kotlinx.coroutines.flow.first
+import okio.Path.Companion.toPath
+import org.jetbrains.skia.Image
 import org.koin.core.context.startKoin
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
+import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
@@ -72,6 +92,26 @@ import java.util.Locale
  * the new locale, causing all `stringResource()` calls to resolve in the updated language.
  */
 private val LocalAppLocale = staticCompositionLocalOf { "" }
+
+private const val MEMORY_CACHE_MAX_BYTES = 64L * 1024L * 1024L // 64 MiB
+private const val DISK_CACHE_MAX_BYTES = 32L * 1024L * 1024L // 32 MiB
+
+/**
+ * Loads a [Painter] from a Java classpath resource path (e.g. `"icon.png"`).
+ *
+ * This replaces the deprecated `androidx.compose.ui.res.painterResource(String)` API. Desktop native-distribution icons
+ * (`.icns`, `.ico`) remain in `src/main/resources` for the packaging plugin; this helper reads the same directory at
+ * runtime.
+ */
+@Composable
+private fun classpathPainterResource(path: String): Painter {
+    val bitmap: ImageBitmap =
+        remember(path) {
+            val bytes = Thread.currentThread().contextClassLoader!!.getResourceAsStream(path)!!.readAllBytes()
+            Image.makeFromEncoded(bytes).toComposeImageBitmap()
+        }
+    return remember(bitmap) { BitmapPainter(bitmap) }
+}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun main(args: Array<String>) = application(exitProcessOnExit = false) {
@@ -130,7 +170,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     var isAppVisible by remember { mutableStateOf(true) }
     var isWindowReady by remember { mutableStateOf(false) }
     val trayState = rememberTrayState()
-    val appIcon = painterResource("icon.png")
+    val appIcon = classpathPainterResource("icon.png")
 
     val notificationManager = remember { koinApp.koin.get<DesktopNotificationManager>() }
     val desktopPrefs = remember { koinApp.koin.get<DesktopPreferencesDataSource>() }
@@ -188,14 +228,81 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     )
 
     if (isWindowReady && isAppVisible) {
+        val backStack =
+            rememberNavBackStack(MeshtasticNavSavedStateConfig, TopLevelDestination.Connections.route as NavKey)
+
         Window(
             onCloseRequest = { isAppVisible = false },
             title = "Meshtastic Desktop",
             icon = appIcon,
             state = windowState,
+            onPreviewKeyEvent = { event ->
+                if (event.type != KeyEventType.KeyDown || !event.isMetaPressed) return@Window false
+                when {
+                    // ⌘Q  → Quit
+                    event.key == Key.Q -> {
+                        exitApplication()
+                        true
+                    }
+                    // ⌘,  → Settings
+                    event.key == Key.Comma -> {
+                        if (
+                            TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())
+                        ) {
+                            navigateTopLevel(backStack, TopLevelDestination.Settings.route)
+                        }
+                        true
+                    }
+                    // ⌘⇧T → Toggle theme
+                    event.key == Key.T && event.isShiftPressed -> {
+                        uiPrefs.setTheme(if (isDarkTheme) 1 else 2)
+                        true
+                    }
+                    // ⌘1  → Conversations
+                    event.key == Key.One -> {
+                        navigateTopLevel(backStack, TopLevelDestination.Conversations.route)
+                        true
+                    }
+                    // ⌘2  → Nodes
+                    event.key == Key.Two -> {
+                        navigateTopLevel(backStack, TopLevelDestination.Nodes.route)
+                        true
+                    }
+                    // ⌘3  → Map
+                    event.key == Key.Three -> {
+                        navigateTopLevel(backStack, TopLevelDestination.Map.route)
+                        true
+                    }
+                    // ⌘4  → Connections
+                    event.key == Key.Four -> {
+                        navigateTopLevel(backStack, TopLevelDestination.Connections.route)
+                        true
+                    }
+                    // ⌘/  → About
+                    event.key == Key.Slash -> {
+                        backStack.add(SettingsRoutes.About)
+                        true
+                    }
+                    else -> false
+                }
+            },
         ) {
-            val backStack =
-                rememberNavBackStack(MeshtasticNavSavedStateConfig, TopLevelDestination.Connections.route as NavKey)
+            // Configure Coil ImageLoader for desktop with SVG decoding and network fetching.
+            // This is the desktop equivalent of the Android app's NetworkModule.provideImageLoader().
+            setSingletonImageLoaderFactory { context ->
+                val cacheDir = System.getProperty("user.home") + "/.meshtastic/image_cache"
+                ImageLoader.Builder(context)
+                    .components {
+                        add(KtorNetworkFetcherFactory())
+                        add(SvgDecoder.Factory())
+                    }
+                    .memoryCache { MemoryCache.Builder().maxSizeBytes(MEMORY_CACHE_MAX_BYTES).build() }
+                    .diskCache {
+                        DiskCache.Builder().directory(cacheDir.toPath()).maxSizeBytes(DISK_CACHE_MAX_BYTES).build()
+                    }
+                    .crossfade(true)
+                    .build()
+            }
 
             // Providing localePref via a staticCompositionLocalOf forces the entire subtree to
             // recompose when the locale changes — CMP Resources' rememberResourceEnvironment then
@@ -205,5 +312,13 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                 AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(backStack) }
             }
         }
+    }
+}
+
+/** Replaces the backstack with a single top-level destination route. */
+private fun navigateTopLevel(backStack: MutableList<NavKey>, route: NavKey) {
+    backStack.add(route)
+    while (backStack.size > 1) {
+        backStack.removeAt(0)
     }
 }

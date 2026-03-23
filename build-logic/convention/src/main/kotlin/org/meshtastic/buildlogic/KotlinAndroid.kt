@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.buildlogic
 
 import com.android.build.api.dsl.ApplicationExtension
@@ -35,12 +34,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-/**
- * Configure base Kotlin with Android options
- */
-internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension,
-) {
+/** Configure base Kotlin with Android options */
+internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
     val compileSdkVersion = configProperties.getProperty("COMPILE_SDK").toInt()
     val minSdkVersion = configProperties.getProperty("MIN_SDK").toInt()
     val targetSdkVersion = configProperties.getProperty("TARGET_SDK").toInt()
@@ -49,7 +44,7 @@ internal fun Project.configureKotlinAndroid(
         compileSdk = compileSdkVersion
 
         defaultConfig.minSdk = minSdkVersion
-        
+
         if (this is ApplicationExtension) {
             defaultConfig.targetSdk = targetSdkVersion
         }
@@ -62,9 +57,7 @@ internal fun Project.configureKotlinAndroid(
     configureKotlin<KotlinAndroidProjectExtension>()
 }
 
-/**
- * Configure Kotlin Multiplatform options
- */
+/** Configure Kotlin Multiplatform options */
 internal fun Project.configureKotlinMultiplatform() {
     extensions.configure<KotlinMultiplatformExtension> {
         // Standard KMP targets for Meshtastic
@@ -80,7 +73,7 @@ internal fun Project.configureKotlinMultiplatform() {
             extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
                 compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
                 minSdk = configProperties.getProperty("MIN_SDK").toInt()
-                
+
                 // Set the namespace automatically if not already set
                 if (namespace == null) {
                     val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
@@ -96,8 +89,10 @@ internal fun Project.configureKotlinMultiplatform() {
     tasks.configureEach {
         val taskName = name.lowercase()
         if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
-            if (taskName.startsWith("link") && taskName.contains("test") ||
-                taskName == "iosarm64test" || taskName == "iossimulatorarm64test" ||
+            if (
+                taskName.startsWith("link") && taskName.contains("test") ||
+                taskName == "iosarm64test" ||
+                taskName == "iossimulatorarm64test" ||
                 taskName.endsWith("testbinaries")
             ) {
                 enabled = false
@@ -109,22 +104,18 @@ internal fun Project.configureKotlinMultiplatform() {
     configureKotlin<KotlinMultiplatformExtension>()
 }
 
-/**
- * Configure Mokkery for the project
- */
+/** Configure Mokkery for the project */
 internal fun Project.configureMokkery() {
     pluginManager.withPlugin(libs.plugin("mokkery").get().pluginId) {
-        extensions.configure<MokkeryGradleExtension> {
-            stubs.allowConcreteClassInstantiation.set(true)
-        }
+        extensions.configure<MokkeryGradleExtension> { stubs.allowConcreteClassInstantiation.set(true) }
     }
 }
 
 /**
  * Configure a shared `jvmAndroidMain` source set using Kotlin's hierarchy template DSL.
  *
- * This is for modules that intentionally share JVM-only implementations between the desktop
- * `jvm()` target and the Android target without hand-written `dependsOn` edges.
+ * This is for modules that intentionally share JVM-only implementations between the desktop `jvm()` target and the
+ * Android target without hand-written `dependsOn` edges.
  */
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 internal fun Project.configureJvmAndroidMainHierarchy() {
@@ -133,8 +124,7 @@ internal fun Project.configureJvmAndroidMainHierarchy() {
             common {
                 group("jvmAndroid") {
                     withCompilations { compilation ->
-                        compilation.target.targetName == "android" ||
-                            compilation.target.targetName == "jvm"
+                        compilation.target.targetName == "android" || compilation.target.targetName == "jvm"
                     }
                 }
             }
@@ -142,9 +132,7 @@ internal fun Project.configureJvmAndroidMainHierarchy() {
     }
 }
 
-/**
- * Configure common test dependencies for KMP modules
- */
+/** Configure common test dependencies for KMP modules */
 internal fun Project.configureKmpTestDependencies() {
     extensions.configure<KotlinMultiplatformExtension> {
         sourceSets.apply {
@@ -155,7 +143,7 @@ internal fun Project.configureKmpTestDependencies() {
                 implementation(libs.library("kotest-property"))
                 implementation(libs.library("turbine"))
             }
-            
+
             // Configure androidHostTest if it exists
             val androidHostTest = findByName("androidHostTest")
             androidHostTest?.dependencies {
@@ -167,23 +155,17 @@ internal fun Project.configureKmpTestDependencies() {
 
             // Configure jvmTest if it exists
             val jvmTest = findByName("jvmTest")
-            jvmTest?.dependencies {
-                implementation(libs.library("kotest-runner-junit6"))
-            }
+            jvmTest?.dependencies { implementation(libs.library("kotest-runner-junit6")) }
         }
     }
 }
 
-/**
- * Configure base Kotlin options for JVM (non-Android)
- */
+/** Configure base Kotlin options for JVM (non-Android) */
 internal fun Project.configureKotlinJvm() {
     configureKotlin<KotlinJvmProjectExtension>()
 }
 
-/**
- * Configure base Kotlin options
- */
+/** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
     extensions.configure<T> {
         // Using Java 17 for better compatibility with consumers (e.g. plugins, older environments)
@@ -203,7 +185,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                                 "-Xexpect-actual-classes",
                                 "-Xcontext-parameters",
                                 "-Xannotation-default-target=param-property",
-                                "-Xskip-prerelease-check"
+                                "-Xskip-prerelease-check",
                             )
                         }
                     }
@@ -212,10 +194,12 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         }
     }
 
+    val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
+
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
-            allWarningsAsErrors.set(false)
+            allWarningsAsErrors.set(warningsAsErrors)
             freeCompilerArgs.addAll(
                 // Enable experimental coroutines APIs, including Flow
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
@@ -225,7 +209,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 "-Xexpect-actual-classes",
                 "-Xcontext-parameters",
                 "-Xannotation-default-target=param-property",
-                "-Xskip-prerelease-check"
+                "-Xskip-prerelease-check",
             )
         }
     }

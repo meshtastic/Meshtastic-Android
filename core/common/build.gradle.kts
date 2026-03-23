@@ -33,8 +33,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(libs.aboutlibraries.core)
-            implementation(libs.aboutlibraries.compose.m3)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)

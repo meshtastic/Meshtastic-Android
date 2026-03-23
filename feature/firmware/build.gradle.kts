@@ -32,7 +32,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.jetbrains.navigation3.runtime)
             implementation(libs.jetbrains.navigation3.ui)
             implementation(projects.core.ble)
             implementation(projects.core.common)
@@ -48,19 +47,18 @@ kotlin {
             implementation(projects.core.resources)
             implementation(projects.core.ui)
 
+            implementation(libs.coil)
             implementation(libs.kable.core)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.ktor.client.core)
+            implementation(libs.markdown.renderer)
+            implementation(libs.markdown.renderer.m3)
         }
 
         androidMain.dependencies {
             implementation(libs.androidx.appcompat)
             implementation(libs.nordic.dfu)
-            implementation(libs.coil)
-            implementation(libs.coil.network.okhttp)
             implementation(libs.markdown.renderer.android)
-            implementation(libs.markdown.renderer.m3)
-            implementation(libs.markdown.renderer)
         }
 
         val androidHostTest by getting {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.buildlogic
 
 import org.gradle.api.Project
@@ -37,17 +36,13 @@ import java.util.Properties
 val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
-fun VersionCatalog.library(alias: String): Provider<MinimalExternalModuleDependency> =
-    findLibrary(alias).get()
+fun VersionCatalog.library(alias: String): Provider<MinimalExternalModuleDependency> = findLibrary(alias).get()
 
-fun VersionCatalog.bundle(alias: String): Provider<ExternalModuleDependencyBundle> =
-    findBundle(alias).get()
+fun VersionCatalog.bundle(alias: String): Provider<ExternalModuleDependencyBundle> = findBundle(alias).get()
 
-fun VersionCatalog.plugin(alias: String): Provider<PluginDependency> =
-    findPlugin(alias).get()
+fun VersionCatalog.plugin(alias: String): Provider<PluginDependency> = findPlugin(alias).get()
 
-fun VersionCatalog.version(alias: String): String =
-    findVersion(alias).get().requiredVersion
+fun VersionCatalog.version(alias: String): String = findVersion(alias).get().requiredVersion
 
 val Project.configProperties: Properties
     get() {
@@ -59,19 +54,23 @@ val Project.configProperties: Properties
         return properties
     }
 
-/**
- * Configure common test options like parallel execution and logging.
- */
+/** Configure common test options like parallel execution and logging. */
 internal fun Project.configureTestOptions() {
     tasks.withType<Test>().configureEach {
         // Parallelize unit tests
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
         maxHeapSize = "2g"
+        // Allow modules with no discovered tests to pass without failing the build
+        filter { isFailOnNoMatchingTests = false }
 
         // Show test results in the console
-        testLogging {
-            events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
-        }
+        testLogging { events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED) }
+    }
+
+    // Gradle 9+ fails when test sources exist but no test classes are discovered (e.g. all
+    // tests are commented out). Disable to avoid breaking builds for modules with WIP tests.
+    tasks.withType<AbstractTestTask>().configureEach {
+        failOnNoDiscoveredTests.set(false)
     }
 
     // Configure test retry if the plugin is applied

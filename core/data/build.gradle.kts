@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
 }
 
@@ -51,21 +52,18 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
         }
 
+        // Room / SQLite runtime shared between Android and Desktop JVM targets
+        val jvmAndroidMain by getting {
+            dependencies {
+                implementation(libs.androidx.room.runtime)
+                implementation(libs.androidx.room.paging)
+                implementation(libs.androidx.sqlite.bundled)
+            }
+        }
+
         androidMain.dependencies {
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.core.location.altitude)
-
-            // Needed because core:data references MeshtasticDatabase (supertype RoomDatabase)
-            implementation(libs.androidx.room.runtime)
-            implementation(libs.androidx.room.paging)
-            implementation(libs.androidx.sqlite.bundled)
-        }
-
-        jvmMain.dependencies {
-            // Room / SQLite runtime for JVM target
-            implementation(libs.androidx.room.runtime)
-            implementation(libs.androidx.room.paging)
-            implementation(libs.androidx.sqlite.bundled)
         }
 
         commonTest.dependencies {

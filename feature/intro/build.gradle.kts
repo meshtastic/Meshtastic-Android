@@ -36,10 +36,8 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.resources)
 
-            implementation(libs.jetbrains.navigation3.runtime)
+            implementation(libs.jetbrains.navigation3.ui)
         }
-
-        androidMain.dependencies { implementation(libs.jetbrains.navigation3.ui) }
 
         androidUnitTest.dependencies {
             implementation(libs.junit)
