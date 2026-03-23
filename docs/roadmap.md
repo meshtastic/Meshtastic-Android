@@ -43,6 +43,7 @@ These items address structural gaps identified in the March 2026 architecture re
 2.  **Tier 2: Polish (High Priority)**
     -   Additional desktop-specific settings polish
     -   ✅ **Keyboard shortcuts** via `onPreviewKeyEvent` (MenuBar removed)
+    -   **Adaptive density & multitasking optimizations** (2026 Desktop Guidelines)
     -   Window management
     -   State persistence
 3.  **Tier 3: Advanced (Nice-to-have)**
@@ -64,7 +65,7 @@ These items address structural gaps identified in the March 2026 architecture re
 
 | Feature | Status |
 |---|---|
-| Settings | ✅ ~35 real screens (fully shared) + desktop locale picker with in-place recomposition |
+| Settings | ✅ ~35 real screens (fully shared); `DeviceConfig`, `PositionConfig`, `SecurityConfig`, `ExternalNotificationConfig` fully unified into `commonMain` |
 | Node list | ✅ Adaptive list-detail with real `NodeDetailContent` |
 | Messaging | ✅ Adaptive contacts with real message view + send |
 | Connections | ✅ Unified shared UI with dynamic transport detection |
@@ -91,8 +92,10 @@ These items address structural gaps identified in the March 2026 architecture re
 ## Medium-Term Priorities (60 days)
 
 1. **iOS proof target** — ✅ **Done (Stubbing):** Stubbed iOS target implementations (`NoopStubs.kt` equivalent) to successfully pass compile-time checks. **Next:** Setup an Xcode skeleton project and launch the iOS app.
-2. **`core:api` contract split** — separate transport-neutral service contracts from the Android AIDL packaging to support iOS/Desktop service layers.
-3. **Decouple Firmware DFU** — `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it to allow the core `feature:firmware` module to be utilized on desktop/iOS.
+2. **Migrate to Navigation 3 Scene-based architecture** — leverage the first stable release of Nav 3 to support multi-pane layouts. **Investigate 3-pane "Power User" scenes** (e.g., Node List + Detail + Map/Charts) on Large (1200dp) and Extra-large (1600dp) displays (Android 16 QPR3).
+3. **`core:api` contract split** — separate transport-neutral service contracts from the Android AIDL packaging to support iOS/Desktop service layers.
+4. **Decouple Firmware DFU** — `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it to allow the core `feature:firmware` module to be utilized on desktop/iOS.
+5. ✅ **Adopt `WindowSizeClass.BREAKPOINTS_V2`** — Done: Updated `AdaptiveTwoPane.kt` and `Main.kt` components to call `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)`.
 
 ## Longer-Term (90+ days)
 

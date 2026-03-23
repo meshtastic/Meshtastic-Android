@@ -18,8 +18,9 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
   - **UI:** Jetpack Compose Multiplatform (Material 3).
   - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` and `desktop`.
-  - **Navigation:** JetBrains Navigation 3 (Multiplatform fork) with shared backstack state.
+  - **Navigation:** JetBrains Navigation 3 (Stable Scene-based architecture) with shared backstack state.
   - **Lifecycle:** JetBrains multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
+  - **Adaptive UI:** Material 3 Adaptive (v1.3+) with support for Large (1200dp) and Extra-large (1600dp) breakpoints.
   - **Database:** Room KMP.
 
 ## 2. Codebase Map
@@ -63,6 +64,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **Alerts:** Use `AlertHost(alertManager)` from `core:ui/commonMain` in each platform host shell (`Main.kt`, `DesktopMainScreen.kt`). Do NOT duplicate inline alert-rendering boilerplate. For shared QR/contact dialogs, use the `SharedDialogs` composable.
 -   **Placeholders:** For desktop/JVM features not yet implemented, use `PlaceholderScreen(name)` from `core:ui/commonMain`. Do NOT define inline placeholder composables in feature modules.
 -   **Theme Picker:** Use `ThemePickerDialog` and `ThemeOption` from `feature:settings/commonMain`. Do NOT duplicate the theme dialog or enum in platform-specific source sets.
+-   **Adaptive Layouts:** Use `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support the 2026 Desktop Experience breakpoints. Prioritize **higher information density** and mouse-precision interactions for Desktop and External Display (Android 16 QPR3) targets. **Investigate 3-pane "Power User" scenes** (e.g., Node List + Detail + Map/Charts) using Navigation 3 Scenes and `ThreePaneScaffold` for widths ≥ 1200dp.
 -   **Platform/Flavor UI:** Inject platform-specific behavior (e.g., map providers) via `CompositionLocal` from `app`.
 
 ### B. Logic & Data Layer

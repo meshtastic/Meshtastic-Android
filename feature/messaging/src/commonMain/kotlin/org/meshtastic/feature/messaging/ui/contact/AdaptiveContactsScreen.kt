@@ -17,21 +17,12 @@
 package org.meshtastic.feature.messaging.ui.contact
 
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.AnimatedPane
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import androidx.navigationevent.NavigationEventInfo
-import androidx.navigationevent.NavigationEventTransitionState
-import androidx.navigationevent.compose.NavigationBackHandler
-import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -41,6 +32,7 @@ import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.conversations
+import org.meshtastic.core.ui.component.AdaptiveListDetailScaffold
 import org.meshtastic.core.ui.component.EmptyDetailPlaceholder
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.icon.Conversations
@@ -69,9 +61,8 @@ fun AdaptiveContactsScreen(
 ) {
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
-    val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
-    val handleBack: () -> Unit = {
+    val onBackToGraph: () -> Unit = {
         val currentKey = backStack.lastOrNull()
 
         if (
@@ -90,97 +81,53 @@ fun AdaptiveContactsScreen(
             if (isFromDifferentGraph) {
                 // Navigate back via NavController to return to the previous screen (e.g. Node Details)
                 backStack.removeLastOrNull()
+            }
+        }
+    }
+
+    AdaptiveListDetailScaffold(
+        navigator = navigator,
+        scrollToTopEvents = scrollToTopEvents,
+        onBackToGraph = onBackToGraph,
+        onTabPressedEvent = { it is ScrollToTopEvent.ConversationsTabPressed },
+        initialKey = initialContactKey,
+        listPane = { isActive, activeContactKey ->
+            ContactsScreen(
+                onNavigateToShare = { backStack.add(ChannelsRoutes.ChannelsGraph) },
+                sharedContactRequested = sharedContactRequested,
+                requestChannelSet = requestChannelSet,
+                onHandleScannedUri = onHandleScannedUri,
+                onClearSharedContactRequested = onClearSharedContactRequested,
+                onClearRequestChannelUrl = onClearRequestChannelUrl,
+                viewModel = contactsViewModel,
+                onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+                onNavigateToMessages = { contactKey ->
+                    scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, contactKey) }
+                },
+                onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+                scrollToTopEvents = scrollToTopEvents,
+                activeContactKey = activeContactKey,
+            )
+        },
+        detailPane = { contentKey, handleBack ->
+            if (detailPaneCustom != null) {
+                detailPaneCustom(contentKey)
             } else {
-                // Close the detail pane within the adaptive scaffold
-                scope.launch { navigator.navigateBack(backNavigationBehavior) }
-            }
-        } else {
-            scope.launch { navigator.navigateBack(backNavigationBehavior) }
-        }
-    }
-
-    val navState = rememberNavigationEventState(NavigationEventInfo.None)
-    NavigationBackHandler(
-        state = navState,
-        isBackEnabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail,
-        onBackCancelled = { /* Gesture cancelled */ },
-        onBackCompleted = { handleBack() },
-    )
-    LaunchedEffect(navState.transitionState) {
-        val transitionState = navState.transitionState
-        if (transitionState is NavigationEventTransitionState.InProgress) {
-            val progress = transitionState.latestEvent.progress
-            // Animate the back gesture progress could be used here to drive UI if scaffold supported it
-        }
-    }
-
-    LaunchedEffect(initialContactKey) {
-        if (initialContactKey != null) {
-            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, initialContactKey)
-        }
-    }
-
-    LaunchedEffect(scrollToTopEvents) {
-        scrollToTopEvents.collect { event ->
-            if (
-                event is ScrollToTopEvent.ConversationsTabPressed &&
-                navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail
-            ) {
-                if (navigator.canNavigateBack(backNavigationBehavior)) {
-                    navigator.navigateBack(backNavigationBehavior)
-                } else {
-                    navigator.navigateTo(ListDetailPaneScaffoldRole.List)
-                }
-            }
-        }
-    }
-
-    ListDetailPaneScaffold(
-        directive = navigator.scaffoldDirective,
-        value = navigator.scaffoldValue,
-        listPane = {
-            AnimatedPane {
-                ContactsScreen(
-                    onNavigateToShare = { backStack.add(ChannelsRoutes.ChannelsGraph) },
-                    sharedContactRequested = sharedContactRequested,
-                    requestChannelSet = requestChannelSet,
-                    onHandleScannedUri = onHandleScannedUri,
-                    onClearSharedContactRequested = onClearSharedContactRequested,
-                    onClearRequestChannelUrl = onClearRequestChannelUrl,
-                    viewModel = contactsViewModel,
-                    onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
-                    onNavigateToMessages = { contactKey ->
-                        scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, contactKey) }
-                    },
-                    onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
-                    scrollToTopEvents = scrollToTopEvents,
-                    activeContactKey = navigator.currentDestination?.contentKey,
+                MessageScreen(
+                    contactKey = contentKey,
+                    message = if (contentKey == initialContactKey) initialMessage else "",
+                    viewModel = messageViewModel,
+                    navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+                    navigateToQuickChatOptions = { backStack.add(ContactsRoutes.QuickChat) },
+                    onNavigateBack = handleBack,
                 )
             }
         },
-        detailPane = {
-            AnimatedPane {
-                navigator.currentDestination?.contentKey?.let { contactKey ->
-                    key(contactKey) {
-                        if (detailPaneCustom != null) {
-                            detailPaneCustom(contactKey)
-                        } else {
-                            MessageScreen(
-                                contactKey = contactKey,
-                                message = if (contactKey == initialContactKey) initialMessage else "",
-                                viewModel = messageViewModel,
-                                navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
-                                navigateToQuickChatOptions = { backStack.add(ContactsRoutes.QuickChat) },
-                                onNavigateBack = handleBack,
-                            )
-                        }
-                    }
-                }
-                    ?: EmptyDetailPlaceholder(
-                        icon = MeshtasticIcons.Conversations,
-                        title = stringResource(Res.string.conversations),
-                    )
-            }
+        emptyDetailPane = {
+            EmptyDetailPlaceholder(
+                icon = MeshtasticIcons.Conversations,
+                title = stringResource(Res.string.conversations),
+            )
         },
     )
 }

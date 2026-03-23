@@ -51,6 +51,10 @@ kotlin {
             implementation(libs.kermit)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.qrcode.kotlin)
+            implementation(libs.jetbrains.compose.material3.adaptive)
+            implementation(libs.jetbrains.compose.material3.adaptive.layout)
+            implementation(libs.jetbrains.compose.material3.adaptive.navigation)
+            implementation(libs.jetbrains.navigationevent.compose)
         }
 
         val jvmAndroidMain by getting { dependencies { implementation(libs.compose.multiplatform.ui.tooling) } }

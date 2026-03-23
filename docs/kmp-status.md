@@ -72,7 +72,7 @@ Working Compose Desktop application with:
 | Area | Score | Notes |
 |---|---|---|
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
-| Shared feature/UI logic | **9/10** | All 7 KMP; feature:connections unified; cross-platform deduplication complete |
+| Shared feature/UI logic | **9.5/10** | All 7 KMP; feature:connections unified; Navigation 3 Stable Scene-based architecture adopted; cross-platform deduplication complete |
 | Android decoupling | **9/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation, connections, background services, and widgets extracted) |
 | Multi-target readiness | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
@@ -107,18 +107,19 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | Navigation 3 parity model (shared `TopLevelDestination` + platform adapters) | ✅ Done | Both shells use shared enum + parity tests. See [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md) |
 | Hilt → Koin | ✅ Done | See [`decisions/koin-migration.md`](./decisions/koin-migration.md) |
 | BLE abstraction (Kable) | ✅ Done | See [`decisions/ble-strategy.md`](./decisions/ble-strategy.md) |
-| Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-alpha04` |
+| Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-alpha04`; supports Large (1200dp) and Extra-large (1600dp) breakpoints |
 | JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
 | Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
 | Transport deduplication | ✅ Done | `StreamFrameCodec`, `TcpTransport`, and `SerialTransport` shared in `core:network` |
 | **Transport Lifecycle Unification** | ✅ Done | `SharedRadioInterfaceService` orchestrates auto-reconnect, connection state, and heartbeat uniformly across Android and Desktop. |
 | **Database Parity** | ✅ Done | `DatabaseManager` is pure KMP, giving iOS and Desktop support for multiple connected nodes with LRU caching. |
 | Emoji picker unification | ✅ Done | Single commonMain implementation replacing 3 platform variants |
-| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()` to `commonMain`; eliminated ~200 lines of duplicated code across Android/desktop |
+| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `AdaptiveListDetailScaffold`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()` to `commonMain`; eliminated ~1,200 lines of duplicated Compose UI code across Android/desktop |
 
 ## Navigation Parity Note
 
 - Desktop and Android both use the shared `TopLevelDestination` enum from `core:navigation/commonMain` — no separate `DesktopDestination` remains.
+- Both shells utilize the stable **Navigation 3 Scene-based architecture**, allowing for multi-pane layouts (e.g., three-pane on Large/XL displays) using shared routes.
 - Both shells iterate `TopLevelDestination.entries` with shared icon mapping from `core:ui` (`TopLevelDestinationExt.icon`).
 - Desktop locale changes now trigger a full subtree recomposition from `Main.kt` without resetting the shared Navigation 3 backstack, so translated labels update in place.
 - Firmware remains available as an in-flow route instead of a top-level destination, matching Android information architecture.

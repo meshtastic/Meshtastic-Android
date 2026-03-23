@@ -14,19 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.navigation
+package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.runtime.Composable
-import org.meshtastic.core.navigation.Route
-import org.meshtastic.feature.settings.SettingsViewModel
+import org.meshtastic.core.model.Position
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 @Composable
-actual fun SettingsMainScreen(
-    settingsViewModel: SettingsViewModel,
-    radioConfigViewModel: RadioConfigViewModel,
-    onClickNodeChip: (Int) -> Unit,
-    onNavigate: (Route) -> Unit,
+actual fun DeviceLocationButton(
+    viewModel: RadioConfigViewModel,
+    enabled: Boolean,
+    onLocationReceived: (Position) -> Unit,
 ) {
-    // TODO: Implement iOS settings main screen
+    // No-op for desktop since it doesn't have a phone GPS
 }

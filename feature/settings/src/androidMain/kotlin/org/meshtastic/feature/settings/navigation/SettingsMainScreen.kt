@@ -21,10 +21,6 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.feature.settings.SettingsScreen
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.component.DeviceConfigScreen as AndroidDeviceConfigScreen
-import org.meshtastic.feature.settings.radio.component.ExternalNotificationConfigScreen as AndroidExternalNotificationConfigScreen
-import org.meshtastic.feature.settings.radio.component.PositionConfigScreen as AndroidPositionConfigScreen
-import org.meshtastic.feature.settings.radio.component.SecurityConfigScreen as AndroidSecurityConfigScreen
 
 @Composable
 actual fun SettingsMainScreen(
@@ -39,24 +35,4 @@ actual fun SettingsMainScreen(
         onClickNodeChip = onClickNodeChip,
         onNavigate = onNavigate,
     )
-}
-
-@Composable
-actual fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidDeviceConfigScreen(viewModel = viewModel, onBack = onBack)
-}
-
-@Composable
-actual fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidPositionConfigScreen(viewModel = viewModel, onBack = onBack)
-}
-
-@Composable
-actual fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidSecurityConfigScreen(viewModel = viewModel, onBack = onBack)
-}
-
-@Composable
-actual fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
-    AndroidExternalNotificationConfigScreen(viewModel = viewModel, onBack = onBack)
 }

@@ -16,26 +16,17 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import android.annotation.SuppressLint
-import android.location.Location
-import android.os.Build
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.core.location.LocationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.resources.Res
@@ -58,7 +49,6 @@ import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.minimum_distance
 import org.meshtastic.core.resources.minimum_interval
 import org.meshtastic.core.resources.position
-import org.meshtastic.core.resources.position_config_set_fixed_from_phone
 import org.meshtastic.core.resources.position_flags
 import org.meshtastic.core.resources.position_packet
 import org.meshtastic.core.resources.smart_position
@@ -71,16 +61,20 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
-import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
 
 @Composable
+expect fun DeviceLocationButton(
+    viewModel: RadioConfigViewModel,
+    enabled: Boolean,
+    onLocationReceived: (Position) -> Unit,
+)
+
+@Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
+fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val coroutineScope = rememberCoroutineScope()
-    var phoneLocation: Location? by remember { mutableStateOf(null) }
     val node by viewModel.destNode.collectAsStateWithLifecycle()
     val currentPosition =
         Position(
@@ -110,23 +104,6 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val formState = rememberConfigState(initialValue = sanitizedPositionConfig)
     var locationInput by rememberSaveable { mutableStateOf(currentPosition) }
 
-    LaunchedEffect(phoneLocation) {
-        phoneLocation?.let { phoneLoc ->
-            locationInput =
-                Position(
-                    latitude = phoneLoc.latitude,
-                    longitude = phoneLoc.longitude,
-                    altitude =
-                    LocationCompat.hasMslAltitude(phoneLoc).let {
-                        if (it && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                            phoneLoc.mslAltitudeMeters.toInt()
-                        } else {
-                            phoneLoc.altitude.toInt()
-                        }
-                    },
-                )
-        }
-    }
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
         title = stringResource(Res.string.position),
@@ -250,17 +227,11 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         onValueChanged = { alt: Int -> locationInput = locationInput.copy(altitude = alt) },
                     )
                     HorizontalDivider()
-                    // RequireLocation wrapper removed to complete Nordic removal.
-                    // Should be replaced with a generic solution later.
-                    TextButton(
+                    DeviceLocationButton(
+                        viewModel = viewModel,
                         enabled = state.connected,
-                        onClick = {
-                            @SuppressLint("MissingPermission")
-                            coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() as? Location }
-                        },
-                    ) {
-                        Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
-                    }
+                        onLocationReceived = { locationInput = it },
+                    )
                 } else {
                     HorizontalDivider()
                     DropDownPreference(
@@ -304,7 +275,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         }
         item {
             TitledCard(title = stringResource(Res.string.advanced_device_gps)) {
-                val pins = remember { gpioPins }
+                val pins = remember { org.meshtastic.feature.settings.util.gpioPins }
                 DropDownPreference(
                     title = stringResource(Res.string.gps_receive_gpio),
                     enabled = state.connected,

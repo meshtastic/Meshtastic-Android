@@ -14,19 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.navigation
+package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.runtime.Composable
-import org.meshtastic.core.navigation.Route
-import org.meshtastic.feature.settings.SettingsViewModel
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 @Composable
-actual fun SettingsMainScreen(
-    settingsViewModel: SettingsViewModel,
-    radioConfigViewModel: RadioConfigViewModel,
-    onClickNodeChip: (Int) -> Unit,
-    onNavigate: (Route) -> Unit,
-) {
-    // TODO: Implement iOS settings main screen
+actual fun rememberSystemTimeZonePosixString(): String {
+    // TODO: Implementing proper iOS Posix string extraction will be required later.
+    return "GMT0"
 }

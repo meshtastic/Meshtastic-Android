@@ -20,14 +20,20 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 
 @Composable
-fun AdaptiveTwoPane(first: @Composable ColumnScope.() -> Unit, second: @Composable ColumnScope.() -> Unit) =
+fun AdaptiveTwoPane(first: @Composable ColumnScope.() -> Unit, second: @Composable ColumnScope.() -> Unit) {
+    val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
+
+    // In V2 Breakpoints, we check the breakpoint explicitly. Medium corresponds to 600dp+.
+    val compactWidth =
+        !adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
     BoxWithConstraints {
-        val compactWidth = maxWidth < 600.dp
         Row {
             Column(modifier = Modifier.weight(1f)) {
                 first()
@@ -42,3 +48,4 @@ fun AdaptiveTwoPane(first: @Composable ColumnScope.() -> Unit, second: @Composab
             }
         }
     }
+}

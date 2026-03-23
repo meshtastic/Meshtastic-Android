@@ -16,10 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,7 +36,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,19 +45,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.toPosixString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.accept
 import org.meshtastic.core.resources.are_you_sure
@@ -106,6 +97,7 @@ import org.meshtastic.core.resources.role_tracker_desc
 import org.meshtastic.core.resources.router_role_confirmation_text
 import org.meshtastic.core.resources.time_zone
 import org.meshtastic.core.resources.triple_click_adhoc_ping
+import org.meshtastic.core.resources.unrecognized
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
@@ -113,11 +105,13 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.role
+import org.meshtastic.core.ui.util.annotatedStringFromHtml
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
-import java.time.ZoneId
+
+@Composable expect fun rememberSystemTimeZonePosixString(): String
 
 @Suppress("DEPRECATION")
 private val Config.DeviceConfig.Role.description: StringResource
@@ -136,6 +130,7 @@ private val Config.DeviceConfig.Role.description: StringResource
             Config.DeviceConfig.Role.LOST_AND_FOUND -> Res.string.role_lost_and_found_desc
             Config.DeviceConfig.Role.TAK_TRACKER -> Res.string.role_tak_tracker_desc
             Config.DeviceConfig.Role.ROUTER_LATE -> Res.string.role_router_late_desc
+            else -> Res.string.unrecognized
         }
 
 private val Config.DeviceConfig.RebroadcastMode.description: StringResource
@@ -148,11 +143,12 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
             Config.DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
             Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY ->
                 Res.string.rebroadcast_mode_core_portnums_only_desc
+            else -> Res.string.unrecognized
         }
 
 @Suppress("DEPRECATION", "LongMethod")
 @Composable
-fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
+fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val deviceConfig = state.radioConfig.device ?: Config.DeviceConfig()
     val formState = rememberConfigState(initialValue = deviceConfig)
@@ -184,7 +180,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     ) {
         item {
             TitledCard(title = stringResource(Res.string.options)) {
-                val currentRole = formState.value.role
+                val currentRole = formState.value.role ?: Config.DeviceConfig.Role.CLIENT
                 DropDownPreference(
                     title = stringResource(Res.string.role),
                     enabled = state.connected,
@@ -197,7 +193,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 
                 HorizontalDivider()
 
-                val currentRebroadcastMode = formState.value.rebroadcast_mode
+                val currentRebroadcastMode = formState.value.rebroadcast_mode ?: Config.DeviceConfig.RebroadcastMode.ALL
                 DropDownPreference(
                     title = stringResource(Res.string.rebroadcast_mode),
                     enabled = state.connected,
@@ -211,7 +207,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.nodeinfo_broadcast_interval),
-                    selectedItem = formState.value.node_info_broadcast_secs.toLong(),
+                    selectedItem = (formState.value.node_info_broadcast_secs ?: 0).toLong(),
                     enabled = state.connected,
                     items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(node_info_broadcast_secs = it.toInt()) },
@@ -255,28 +251,11 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         }
         item {
             TitledCard(title = stringResource(Res.string.time_zone)) {
-                val context = LocalContext.current
-                var appTzPosixString by remember { mutableStateOf(ZoneId.systemDefault().toPosixString()) }
-
-                DisposableEffect(context) {
-                    val receiver =
-                        object : BroadcastReceiver() {
-                            override fun onReceive(context: Context, intent: Intent) {
-                                appTzPosixString = ZoneId.systemDefault().toPosixString()
-                            }
-                        }
-                    androidx.core.content.ContextCompat.registerReceiver(
-                        context,
-                        receiver,
-                        IntentFilter(Intent.ACTION_TIMEZONE_CHANGED),
-                        androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED,
-                    )
-                    onDispose { context.unregisterReceiver(receiver) }
-                }
+                val appTzPosixString = rememberSystemTimeZonePosixString()
 
                 EditTextPreference(
                     title = "",
-                    value = formState.value.tzdef,
+                    value = formState.value.tzdef ?: "",
                     summary = stringResource(Res.string.config_device_tzdef_summary),
                     maxSize = 64, // tzdef max_size:65
                     enabled = state.connected,
@@ -313,7 +292,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
                     title = stringResource(Res.string.button_gpio),
-                    value = formState.value.button_gpio,
+                    value = formState.value.button_gpio ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(button_gpio = it) },
@@ -323,7 +302,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 
                 EditTextPreference(
                     title = stringResource(Res.string.buzzer_gpio),
-                    value = formState.value.buzzer_gpio,
+                    value = formState.value.buzzer_gpio ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(buzzer_gpio = it) },
@@ -337,8 +316,8 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 fun RouterRoleConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     val dialogTitle = stringResource(Res.string.are_you_sure)
     val annotatedDialogText =
-        AnnotatedString.fromHtml(
-            htmlString = stringResource(Res.string.router_role_confirmation_text),
+        annotatedStringFromHtml(
+            html = stringResource(Res.string.router_role_confirmation_text),
             linkStyles = TextLinkStyles(style = SpanStyle(color = Color.Blue)),
         )
 

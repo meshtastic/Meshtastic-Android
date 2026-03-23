@@ -14,19 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.navigation
+package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.runtime.Composable
-import org.meshtastic.core.navigation.Route
-import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.proto.Config
 
 @Composable
-actual fun SettingsMainScreen(
-    settingsViewModel: SettingsViewModel,
-    radioConfigViewModel: RadioConfigViewModel,
-    onClickNodeChip: (Int) -> Unit,
-    onNavigate: (Route) -> Unit,
+actual fun ExportSecurityConfigButton(
+    viewModel: RadioConfigViewModel,
+    enabled: Boolean,
+    securityConfig: Config.SecurityConfig,
 ) {
-    // TODO: Implement iOS settings main screen
+    // No-op for iOS for now
 }

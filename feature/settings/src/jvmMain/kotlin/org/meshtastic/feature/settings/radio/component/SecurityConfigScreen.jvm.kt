@@ -14,19 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.navigation
+package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.runtime.Composable
-import org.meshtastic.core.navigation.Route
-import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.proto.Config
 
 @Composable
-actual fun SettingsMainScreen(
-    settingsViewModel: SettingsViewModel,
-    radioConfigViewModel: RadioConfigViewModel,
-    onClickNodeChip: (Int) -> Unit,
-    onNavigate: (Route) -> Unit,
+actual fun ExportSecurityConfigButton(
+    viewModel: RadioConfigViewModel,
+    enabled: Boolean,
+    securityConfig: Config.SecurityConfig,
 ) {
-    // TODO: Implement iOS settings main screen
+    // Desktop currently does not implement a specific "export security config" button
+    // within the config screen. If it did, we'd add it here.
 }
