@@ -154,7 +154,10 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
                 ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ModuleRoute.SERIAL -> SerialConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ModuleRoute.EXT_NOTIFICATION ->
-                    ExternalNotificationConfigScreenCommon(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
+                    ExternalNotificationConfigScreenCommon(
+                        viewModel = viewModel,
+                        onBack = { backStack.removeLastOrNull() },
+                    )
                 ModuleRoute.STORE_FORWARD ->
                     StoreForwardConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 ModuleRoute.RANGE_TEST -> RangeTestConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
