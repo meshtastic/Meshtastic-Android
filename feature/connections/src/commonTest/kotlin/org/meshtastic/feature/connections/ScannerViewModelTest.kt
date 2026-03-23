@@ -70,7 +70,8 @@ class ScannerViewModelTest {
                 radioInterfaceService = radioInterfaceService,
                 recentAddressesDataSource = recentAddressesDataSource,
                 getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
-                dispatchers = org.meshtastic.core.di.CoroutineDispatchers(
+                dispatchers =
+                org.meshtastic.core.di.CoroutineDispatchers(
                     io = UnconfinedTestDispatcher(),
                     main = UnconfinedTestDispatcher(),
                     default = UnconfinedTestDispatcher(),

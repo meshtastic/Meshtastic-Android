@@ -21,14 +21,18 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.core.testing.FakeMeshLogRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.ui.util.AlertManager
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -47,6 +51,7 @@ class DebugViewModelTest {
 
     @BeforeTest
     fun setUp() {
+        Dispatchers.setMain(testDispatcher)
         meshLogPrefs.setRetentionDays(7)
         meshLogPrefs.setLoggingEnabled(true)
 
@@ -58,6 +63,11 @@ class DebugViewModelTest {
                 alertManager = alertManager,
                 dispatchers = dispatchers,
             )
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test

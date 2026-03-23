@@ -176,7 +176,11 @@ private fun desktopPlatformStubsModule() = module {
     }
 
     // Firmware update stubs
-    single<org.meshtastic.feature.firmware.FirmwareUpdateManager> { org.meshtastic.desktop.stub.NoopFirmwareUpdateManager() }
+    single<org.meshtastic.feature.firmware.FirmwareUpdateManager> {
+        org.meshtastic.desktop.stub.NoopFirmwareUpdateManager()
+    }
     single<org.meshtastic.feature.firmware.FirmwareUsbManager> { org.meshtastic.desktop.stub.NoopFirmwareUsbManager() }
-    single<org.meshtastic.feature.firmware.FirmwareFileHandler> { org.meshtastic.desktop.stub.NoopFirmwareFileHandler() }
+    single<org.meshtastic.feature.firmware.FirmwareFileHandler> {
+        org.meshtastic.desktop.stub.NoopFirmwareFileHandler()
+    }
 }

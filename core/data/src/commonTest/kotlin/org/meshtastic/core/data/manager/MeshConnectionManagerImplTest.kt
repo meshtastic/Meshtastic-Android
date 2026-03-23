@@ -125,9 +125,7 @@ class MeshConnectionManagerImplTest {
             )
     }
 
-    @AfterTest
-    fun tearDown() {
-    }
+    @AfterTest fun tearDown() {}
 
     @Test
     fun `Connected state triggers broadcast and config start`() = runTest(testDispatcher) {
@@ -245,10 +243,11 @@ class MeshConnectionManagerImplTest {
 
     @Test
     fun `onNodeDbReady starts MQTT and requests history`() = runTest(testDispatcher) {
-        val moduleConfig = LocalModuleConfig(
-            mqtt = ModuleConfig.MQTTConfig(enabled = true, proxy_to_client_enabled = true),
-            store_forward = ModuleConfig.StoreForwardConfig(enabled = true)
-        )
+        val moduleConfig =
+            LocalModuleConfig(
+                mqtt = ModuleConfig.MQTTConfig(enabled = true, proxy_to_client_enabled = true),
+                store_forward = ModuleConfig.StoreForwardConfig(enabled = true),
+            )
         moduleConfigFlow.value = moduleConfig
         every { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
         every { nodeManager.myNodeNum } returns 123

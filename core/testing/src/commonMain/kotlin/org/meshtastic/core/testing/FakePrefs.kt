@@ -22,12 +22,14 @@ import org.meshtastic.core.repository.MeshLogPrefs
 class FakeMeshLogPrefs : MeshLogPrefs {
     private val _retentionDays = MutableStateFlow(MeshLogPrefs.DEFAULT_RETENTION_DAYS)
     override val retentionDays = _retentionDays
+
     override fun setRetentionDays(days: Int) {
         _retentionDays.value = days
     }
 
     private val _loggingEnabled = MutableStateFlow(true)
     override val loggingEnabled = _loggingEnabled
+
     override fun setLoggingEnabled(enabled: Boolean) {
         _loggingEnabled.value = enabled
     }

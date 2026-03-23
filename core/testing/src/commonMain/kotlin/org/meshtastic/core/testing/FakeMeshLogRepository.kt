@@ -28,8 +28,9 @@ import org.meshtastic.proto.Telemetry
 
 class FakeMeshLogRepository : MeshLogRepository {
     private val _logs = MutableStateFlow<List<MeshLog>>(emptyList())
-    val currentLogs: List<MeshLog> get() = _logs.value
-    
+    val currentLogs: List<MeshLog>
+        get() = _logs.value
+
     var deleteLogsOlderThanCalledDays: Int? = null
 
     override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = _logs.map { it.take(maxItem) }
@@ -38,15 +39,15 @@ class FakeMeshLogRepository : MeshLogRepository {
 
     override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = _logs
 
-    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> = _logs.map {
-        it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum }
-    }
+    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> =
+        _logs.map { it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum } }
 
     override fun getMeshPacketsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshPacket>> = MutableStateFlow(emptyList())
 
     override fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = MutableStateFlow(emptyList())
 
-    override fun getRequestLogs(targetNodeNum: Int, portNum: PortNum): Flow<List<MeshLog>> = MutableStateFlow(emptyList())
+    override fun getRequestLogs(targetNodeNum: Int, portNum: PortNum): Flow<List<MeshLog>> =
+        MutableStateFlow(emptyList())
 
     override fun getMyNodeInfo(): Flow<MyNodeInfo?> = MutableStateFlow(null)
 
