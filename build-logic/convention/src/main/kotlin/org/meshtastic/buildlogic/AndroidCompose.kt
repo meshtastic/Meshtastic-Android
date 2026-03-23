@@ -38,10 +38,9 @@ internal fun Project.configureAndroidCompose(
         if (hasAndroidTest) {
             "androidTestImplementation"(platform(bom))
         }
-        "implementation"(libs.library("androidx-compose-ui-tooling"))
+        "debugImplementation"(libs.library("androidx-compose-ui-tooling"))
         "implementation"(libs.library("androidx-compose-runtime"))
         "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
-        "debugImplementation"(libs.library("androidx-compose-ui-tooling"))
 
         "implementation"(libs.library("compose-multiplatform-runtime"))
         "implementation"(libs.library("compose-multiplatform-resources"))

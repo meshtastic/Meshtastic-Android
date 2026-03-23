@@ -67,6 +67,8 @@ internal fun Project.configureTestOptions() {
         // Parallelize unit tests
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
         maxHeapSize = "2g"
+        // Allow modules with no discovered tests to pass without failing the build
+        filter { isFailOnNoMatchingTests = false }
 
         // Show test results in the console
         testLogging {
