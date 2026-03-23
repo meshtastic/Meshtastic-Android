@@ -19,9 +19,25 @@ package org.meshtastic.buildlogic
 import com.android.build.api.attributes.ProductFlavorAttr
 import org.gradle.api.Project
 import org.gradle.api.attributes.Attribute
+import org.gradle.api.attributes.AttributeDisambiguationRule
+import org.gradle.api.attributes.MultipleCandidatesDetails
+import javax.inject.Inject
 
 private const val LEGACY_MARKETPLACE_ATTRIBUTE_NAME = "marketplace"
 
+/**
+ * Registers [AttributeDisambiguationRule]s so Gradle can pick a default product flavor when a consumer configuration
+ * (e.g. `androidHostTestRuntimeClasspath` from a KMP module) does not carry the marketplace flavor attribute, but the
+ * producer (e.g. `core:barcode`) publishes multiple flavor variants.
+ *
+ * This replaces the previous `afterEvaluate { configurations.configureEach { … } }` approach that stamped attributes on
+ * every resolvable Android configuration. Disambiguation rules fire during dependency resolution — not configuration
+ * time — so they are immune to KGP's lazy configuration creation order and fully compatible with Configuration Cache,
+ * Isolated Projects, and future Gradle/KGP changes.
+ *
+ * The default flavor is configurable via the `meshtastic.defaultMarketplace` Gradle property (defaults to the
+ * [MeshtasticFlavor] entry marked `default = true`, which is `google`).
+ */
 internal fun Project.configureAndroidMarketplaceFallback() {
     val defaultMarketplace =
         providers
@@ -29,27 +45,34 @@ internal fun Project.configureAndroidMarketplaceFallback() {
             .orElse(MeshtasticFlavor.entries.first { it.default }.name)
             .get()
 
+    // AGP publishes the typed ProductFlavorAttr on flavored variant configurations.
     val marketplaceAttr = ProductFlavorAttr.of(MeshtasticFlavor.fdroid.dimension.name)
+    dependencies.attributesSchema.attribute(marketplaceAttr) {
+        disambiguationRules.add(ProductFlavorDisambiguationRule::class.java) { params(defaultMarketplace) }
+    }
+
+    // Some AGP versions also publish a plain String "marketplace" attribute.
     val legacyMarketplaceAttr = Attribute.of(LEGACY_MARKETPLACE_ATTRIBUTE_NAME, String::class.java)
+    dependencies.attributesSchema.attribute(legacyMarketplaceAttr) {
+        disambiguationRules.add(StringDisambiguationRule::class.java) { params(defaultMarketplace) }
+    }
+}
 
-    configurations.configureEach {
-        if (!isCanBeResolved || isCanBeConsumed) return@configureEach
-        if (!name.contains("android", ignoreCase = true)) return@configureEach
-        if (
-            attributes.getAttribute(marketplaceAttr) != null && attributes.getAttribute(legacyMarketplaceAttr) != null
-        ) {
-            return@configureEach
-        }
+/**
+ * Selects the default marketplace flavor when Gradle encounters ambiguous [ProductFlavorAttr] candidates during
+ * variant-aware dependency resolution.
+ */
+internal abstract class ProductFlavorDisambiguationRule @Inject constructor(private val defaultFlavor: String) :
+    AttributeDisambiguationRule<ProductFlavorAttr> {
+    override fun execute(details: MultipleCandidatesDetails<ProductFlavorAttr>) {
+        details.candidateValues.find { it.name == defaultFlavor }?.let { details.closestMatch(it) }
+    }
+}
 
-        // Prefer explicit flavor from configuration name; otherwise use configurable default.
-        val inferredMarketplace =
-            when {
-                name.contains(MeshtasticFlavor.fdroid.name, ignoreCase = true) -> MeshtasticFlavor.fdroid.name
-                name.contains(MeshtasticFlavor.google.name, ignoreCase = true) -> MeshtasticFlavor.google.name
-                else -> defaultMarketplace
-            }
-
-        attributes.attribute(marketplaceAttr, objects.named(ProductFlavorAttr::class.java, inferredMarketplace))
-        attributes.attribute(legacyMarketplaceAttr, inferredMarketplace)
+/** Selects the default marketplace for the legacy plain-String "marketplace" attribute. */
+internal abstract class StringDisambiguationRule @Inject constructor(private val defaultFlavor: String) :
+    AttributeDisambiguationRule<String> {
+    override fun execute(details: MultipleCandidatesDetails<String>) {
+        details.candidateValues.find { it == defaultFlavor }?.let { details.closestMatch(it) }
     }
 }
