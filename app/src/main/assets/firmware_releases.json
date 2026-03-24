@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "9999",
+      "title": "Use UDP as roof node <---> indoor nodes backchannel",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9999",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9998",
+      "title": "fix ExternalNotificationsModule Buzzer is all or nothing",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9998",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9955",
       "title": "Add Env for Seeed XIAO ESP32-C6 + Wio-SX1262",
       "page_url": "https://github.com/meshtastic/firmware/pull/9955",
