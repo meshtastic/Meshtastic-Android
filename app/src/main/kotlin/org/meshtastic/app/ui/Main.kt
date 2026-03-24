@@ -97,8 +97,17 @@ import org.meshtastic.feature.settings.radio.channel.channelsGraph
 @Composable
 fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerViewModel = koinViewModel()) {
     val backStack = rememberNavBackStack(MeshtasticNavSavedStateConfig, NodesRoutes.NodesGraph as NavKey)
-    // LaunchedEffect(uIViewModel) { uIViewModel.navigationDeepLink.collectLatest { uri -> navController.navigate(uri) }
-    // }
+
+    LaunchedEffect(uIViewModel) {
+        uIViewModel.navigationDeepLink.collect { uri ->
+            val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
+            org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri)?.let { navKeys ->
+                backStack.clear()
+                backStack.addAll(navKeys)
+            }
+        }
+    }
+
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
 
@@ -239,6 +248,7 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
                     nodesGraph(
                         backStack = backStack,
                         scrollToTopEvents = uIViewModel.scrollToTopEventFlow,
+                        onHandleDeepLink = uIViewModel::handleDeepLink,
                         nodeMapScreen = { destNum, onNavigateUp ->
                             val vm =
                                 org.koin.compose.viewmodel.koinViewModel<

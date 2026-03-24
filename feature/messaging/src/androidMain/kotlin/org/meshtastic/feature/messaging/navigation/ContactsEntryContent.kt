@@ -50,7 +50,7 @@ actual fun ContactsEntryContent(
         scrollToTopEvents = scrollToTopEvents,
         sharedContactRequested = sharedContactRequested,
         requestChannelSet = requestChannelSet,
-        onHandleScannedUri = uiViewModel::handleScannedUri,
+        onHandleDeepLink = uiViewModel::handleDeepLink,
         onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
         onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
         initialContactKey = initialContactKey,

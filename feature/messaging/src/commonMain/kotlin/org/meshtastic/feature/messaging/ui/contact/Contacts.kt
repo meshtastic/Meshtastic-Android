@@ -115,7 +115,7 @@ fun ContactsScreen(
     onNavigateToShare: () -> Unit,
     sharedContactRequested: SharedContact?,
     requestChannelSet: ChannelSet?,
-    onHandleScannedUri: (MeshtasticUri, onInvalid: () -> Unit) -> Unit,
+    onHandleDeepLink: (MeshtasticUri, onInvalid: () -> Unit) -> Unit,
     onClearSharedContactRequested: () -> Unit,
     onClearRequestChannelUrl: () -> Unit,
     viewModel: ContactsViewModel,
@@ -253,7 +253,7 @@ fun ContactsScreen(
                 MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
                     onImport = { uriString ->
-                        onHandleScannedUri(MeshtasticUri(uriString)) {
+                        onHandleDeepLink(MeshtasticUri(uriString)) {
                             scope.launch { showToast(Res.string.channel_invalid) }
                         }
                     },

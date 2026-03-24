@@ -67,6 +67,7 @@ import kotlin.reflect.KClass
 fun EntryProviderScope<NavKey>.nodesGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
+    onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
     nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit = { _, _ -> },
 ) {
     entry<NodesRoutes.NodesGraph> {
@@ -75,6 +76,7 @@ fun EntryProviderScope<NavKey>.nodesGraph(
             scrollToTopEvents = scrollToTopEvents,
             onNavigate = { backStack.add(it) },
             onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
+            onHandleDeepLink = onHandleDeepLink,
         )
     }
 
@@ -84,16 +86,18 @@ fun EntryProviderScope<NavKey>.nodesGraph(
             scrollToTopEvents = scrollToTopEvents,
             onNavigate = { backStack.add(it) },
             onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
+            onHandleDeepLink = onHandleDeepLink,
         )
     }
 
-    nodeDetailGraph(backStack, scrollToTopEvents, nodeMapScreen)
+    nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink, nodeMapScreen)
 }
 
 @Suppress("LongMethod")
 fun EntryProviderScope<NavKey>.nodeDetailGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
+    onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
     nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit,
 ) {
     entry<NodesRoutes.NodeDetailGraph> { args ->
@@ -103,6 +107,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
             initialNodeId = args.destNum,
             onNavigate = { backStack.add(it) },
             onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
+            onHandleDeepLink = onHandleDeepLink,
         )
     }
 
@@ -113,6 +118,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
             initialNodeId = args.destNum,
             onNavigate = { backStack.add(it) },
             onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
+            onHandleDeepLink = onHandleDeepLink,
         )
     }
 

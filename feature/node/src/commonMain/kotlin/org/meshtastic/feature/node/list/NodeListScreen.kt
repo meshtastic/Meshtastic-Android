@@ -57,11 +57,9 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
-import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
-import org.meshtastic.proto.SharedContact
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -71,6 +69,7 @@ fun NodeListScreen(
     onNavigateToChannels: () -> Unit = {},
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
+    onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
     val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
@@ -100,9 +99,6 @@ fun NodeListScreen(
         derivedStateOf { listState.isScrollInProgress && (listState.canScrollForward || listState.canScrollBackward) }
     }
 
-    val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
-    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { viewModel.clearRequestChannelSet() }) }
-
     Scaffold(
         topBar = {
             MainAppBar(
@@ -118,14 +114,13 @@ fun NodeListScreen(
         },
         floatingActionButton = {
             val shareCapable = ourNode?.capabilities?.supportsQrCodeSharing ?: false
-            val sharedContact: SharedContact? by viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
             if (!isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable) {
                 MeshtasticImportFAB(
-                    sharedContact = sharedContact,
                     onImport = { uriString ->
-                        viewModel.handleScannedUri(uriString) { scope.launch { showToast(Res.string.channel_invalid) } }
+                        onHandleDeepLink(org.meshtastic.core.common.util.MeshtasticUri(uriString)) {
+                            scope.launch { showToast(Res.string.channel_invalid) }
+                        }
                     },
-                    onDismissSharedContact = { viewModel.setSharedContactRequested(null) },
                     isContactContext = true,
                 )
             }

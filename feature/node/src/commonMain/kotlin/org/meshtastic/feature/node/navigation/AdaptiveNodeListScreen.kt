@@ -52,6 +52,7 @@ fun AdaptiveNodeListScreen(
     initialNodeId: Int? = null,
     onNavigate: (Route) -> Unit = {},
     onNavigateToMessages: (String) -> Unit = {},
+    onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
     val nodeListViewModel: NodeListViewModel = koinViewModel()
     val navigator = rememberListDetailPaneScaffoldNavigator<Int>()
@@ -85,6 +86,7 @@ fun AdaptiveNodeListScreen(
                 onNavigateToChannels = { backStack.add(ChannelsRoutes.ChannelsGraph) },
                 scrollToTopEvents = scrollToTopEvents,
                 activeNodeId = activeNodeId,
+                onHandleDeepLink = onHandleDeepLink,
             )
         },
         detailPane = { contentKey, handleBack ->

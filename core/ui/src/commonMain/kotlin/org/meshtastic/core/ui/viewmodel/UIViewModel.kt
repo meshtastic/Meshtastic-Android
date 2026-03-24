@@ -87,18 +87,22 @@ class UIViewModel(
     private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
-    fun handleNavigationDeepLink(uri: MeshtasticUri) {
-        _navigationDeepLink.tryEmit(uri)
-    }
+    /** Unified handler for all deep links (navigation, contacts, channels). */
+    fun handleDeepLink(uri: MeshtasticUri, onInvalid: () -> Unit = {}) {
+        val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
 
-    /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
-    fun handleScannedUri(uri: MeshtasticUri, onInvalid: () -> Unit) {
-        org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
-            .dispatchMeshtasticUri(
-                onContact = { setSharedContactRequested(it) },
-                onChannel = { setRequestChannelSet(it) },
-                onInvalid = onInvalid,
-            )
+        // Try navigation routing first
+        if (org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri) != null) {
+            _navigationDeepLink.tryEmit(uri)
+            return
+        }
+
+        // Fallback to channel/contact importing
+        commonUri.dispatchMeshtasticUri(
+            onContact = { setSharedContactRequested(it) },
+            onChannel = { setRequestChannelSet(it) },
+            onInvalid = onInvalid,
+        )
     }
 
     val theme: StateFlow<Int> = uiPrefs.theme

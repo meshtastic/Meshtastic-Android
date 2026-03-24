@@ -27,6 +27,7 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -64,6 +65,16 @@ fun DesktopMainScreen(
 ) {
     val currentKey = backStack.lastOrNull()
     val selected = TopLevelDestination.fromNavKey(currentKey)
+
+    LaunchedEffect(uiViewModel) {
+        uiViewModel.navigationDeepLink.collect { uri ->
+            val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
+            org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri)?.let { navKeys ->
+                backStack.clear()
+                backStack.addAll(navKeys)
+            }
+        }
+    }
 
     val connectionState by radioService.connectionState.collectAsStateWithLifecycle()
     val selectedDevice by radioService.currentDeviceAddressFlow.collectAsStateWithLifecycle()
@@ -113,7 +124,7 @@ fun DesktopMainScreen(
                     modifier = Modifier.weight(1f).fillMaxSize(),
                     hostModifier = Modifier.padding(bottom = 24.dp),
                 ) {
-                    val provider = entryProvider<NavKey> { desktopNavGraph(backStack) }
+                    val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel) }
 
                     NavDisplay(
                         backStack = backStack,
