@@ -937,6 +937,7 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="meshtastic_stats">Статистика на Meshtastic</string>
     <string name="refresh">Опресняване</string>
+    <string name="updated">Актуализирано</string>
     <!-- Network Map Layers -->
     <string name="add_network_layer">Добавяне на мрежов слой</string>
     <string name="refresh_layer">Опресняване на слоя</string>
