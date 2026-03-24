@@ -51,7 +51,9 @@ The module depends on the JVM variants of KMP modules:
 
 **DI:** A Koin DI graph is bootstrapped in `Main.kt` with platform-specific implementations injected.
 
-**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop acts as a thin host shell, delegating almost entirely to fully shared KMP UI modules.
+**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop acts as a thin host shell, delegating almost entirely to fully shared KMP UI modules. Includes native macOS notification support (via `TrayState` and `bundleID` identification) and a monochrome SVG tray icon for a native look and feel.
+
+**Notifications:** Implements the common `NotificationManager` interface via `DesktopNotificationManager`. Repository-level notifications (messages, node events, alerts) are collected in `Main.kt` and forwarded to the system tray. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) and the `NSUserNotificationAlertStyle` key in `Info.plist` for notifications to appear correctly in the distributable.
 
 **Localization:** Desktop exposes a language picker, persisting the selected BCP-47 tag in `UiPreferencesDataSource.locale`. `Main.kt` applies the override to the JVM default `Locale` and uses a `staticCompositionLocalOf`-backed recomposition trigger so Compose Multiplatform `stringResource()` calls update immediately without recreating the Navigation 3 backstack.
 
@@ -64,6 +66,8 @@ The module depends on the JVM variants of KMP modules:
 | `ui/DesktopMainScreen.kt` | Navigation 3 shell — `NavigationRail` + `NavDisplay` |
 | `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations (delegates to shared feature graphs) |
 | `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB, and BLE transports |
+| `notification/DesktopMeshServiceNotifications.kt` | Real implementation of notification triggers for Desktop |
+| `DesktopNotificationManager.kt` | Bridge between repository notifications and Compose `TrayState` |
 | `radio/DesktopMeshServiceController.kt` | Mesh service lifecycle — orchestrates `want_config` handshake chain |
 | `radio/DesktopMessageQueue.kt` | Message queue for outbound mesh packets |
 | `di/DesktopKoinModule.kt` | Koin module with stub implementations |
@@ -83,6 +87,7 @@ The module depends on the JVM variants of KMP modules:
 
 - [x] Implement real navigation with shared `core:navigation` routes (Navigation 3 shell)
 - [x] Adopt JetBrains multiplatform forks for lifecycle and navigation3
+- [x] Implement native macOS/Desktop notification support with `TrayState` and system tray
 - [x] Wire `feature:settings` composables into the nav graph (first real feature — ~30 screens)
 - [x] Wire `feature:node` composables into the nav graph (node list with shared ViewModel + NodeItem)
 - [x] Wire `feature:messaging` composables into the nav graph (contacts list with shared ViewModel)

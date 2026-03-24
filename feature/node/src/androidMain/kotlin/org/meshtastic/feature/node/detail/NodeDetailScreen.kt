@@ -26,8 +26,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -81,21 +79,11 @@ actual fun NodeDetailScreen(
 ) {
     LaunchedEffect(nodeId) { viewModel.start(nodeId) }
 
-    val snackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(Unit) {
-        viewModel.effects.collect { effect ->
-            if (effect is NodeRequestEffect.ShowFeedback) {
-                snackbarHostState.showSnackbar(effect.text.resolve())
-            }
-        }
-    }
 
     NodeDetailScaffold(
         modifier = modifier,
         uiState = uiState,
-        snackbarHostState = snackbarHostState,
         viewModel = viewModel,
         navigateToMessages = navigateToMessages,
         onNavigate = onNavigate,
@@ -109,7 +97,6 @@ actual fun NodeDetailScreen(
 private fun NodeDetailScaffold(
     modifier: Modifier,
     uiState: NodeDetailUiState,
-    snackbarHostState: SnackbarHostState,
     viewModel: NodeDetailViewModel,
     navigateToMessages: (String) -> Unit,
     onNavigate: (Route) -> Unit,
@@ -139,7 +126,6 @@ private fun NodeDetailScaffold(
                 onClickChip = {},
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         NodeDetailContent(
             uiState = uiState,

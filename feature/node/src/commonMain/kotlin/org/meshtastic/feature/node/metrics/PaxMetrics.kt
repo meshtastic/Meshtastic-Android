@@ -31,7 +31,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,7 +69,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
-import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
 
 private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
@@ -177,18 +175,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
     val paxMetrics by metricsViewModel.filteredPaxMetrics.collectAsStateWithLifecycle()
     val timeFrame by metricsViewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by metricsViewModel.availableTimeFrames.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(Unit) {
-        metricsViewModel.effects.collect { effect ->
-            when (effect) {
-                is NodeRequestEffect.ShowFeedback -> {
-                    @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(effect.text.resolve())
-                }
-            }
-        }
-    }
 
     // Prepare data for graph
     val graphData =
@@ -211,7 +197,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
         nodeName = state.node?.user?.long_name ?: "",
         data = paxMetrics,
         timeProvider = { (it.first.received_date / CommonCharts.MS_PER_SEC).toDouble() },
-        snackbarHostState = snackbarHostState,
         onRequestTelemetry = { metricsViewModel.requestTelemetry(TelemetryType.PAX) },
         controlPart = {
             TimeFrameSelector(

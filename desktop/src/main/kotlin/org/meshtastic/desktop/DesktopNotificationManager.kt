@@ -27,6 +27,10 @@ import androidx.compose.ui.window.Notification as ComposeNotification
 
 @Single
 class DesktopNotificationManager(private val prefs: NotificationPrefs) : NotificationManager {
+    init {
+        co.touchlab.kermit.Logger.i { "DesktopNotificationManager initialized" }
+    }
+
     private val _notifications = MutableSharedFlow<ComposeNotification>(extraBufferCapacity = 10)
     val notifications: SharedFlow<ComposeNotification> = _notifications.asSharedFlow()
 
@@ -40,6 +44,10 @@ class DesktopNotificationManager(private val prefs: NotificationPrefs) : Notific
                 Notification.Category.Service -> true
             }
 
+        co.touchlab.kermit.Logger.d {
+            "DesktopNotificationManager dispatch: category=${notification.category}, enabled=$enabled"
+        }
+
         if (!enabled) return
 
         val composeType =
@@ -50,7 +58,8 @@ class DesktopNotificationManager(private val prefs: NotificationPrefs) : Notific
                 Notification.Type.Error -> ComposeNotification.Type.Error
             }
 
-        _notifications.tryEmit(ComposeNotification(notification.title, notification.message, composeType))
+        val success = _notifications.tryEmit(ComposeNotification(notification.title, notification.message, composeType))
+        co.touchlab.kermit.Logger.d { "DesktopNotificationManager emit: success=$success, title=${notification.title}" }
     }
 
     override fun cancel(id: Int) {

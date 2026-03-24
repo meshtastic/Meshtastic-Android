@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -64,7 +63,6 @@ import org.meshtastic.core.ui.util.toMessageRes
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.detail.NodeRequestActions
-import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
@@ -174,8 +172,6 @@ open class MetricsViewModel(
                 .mapNotNull { log -> decodePaxFromLog(log)?.let { log to it } }
         }
             .stateInWhileSubscribed(emptyList())
-
-    val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 
     val lastTraceRouteTime: StateFlow<Long?> = nodeRequestActions.lastTracerouteTime
 

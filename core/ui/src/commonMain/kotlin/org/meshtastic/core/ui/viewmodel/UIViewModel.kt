@@ -57,6 +57,7 @@ import org.meshtastic.core.resources.compromised_keys
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.ComposableContent
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.SharedContact
@@ -80,6 +81,7 @@ class UIViewModel(
     private val notificationManager: NotificationManager,
     packetRepository: PacketRepository,
     val alertManager: AlertManager,
+    val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
     private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)
@@ -163,6 +165,10 @@ class UIViewModel(
 
     fun dismissAlert() {
         alertManager.dismissAlert()
+    }
+
+    fun showSnackbar(message: String, actionLabel: String? = null, onAction: (() -> Unit)? = null) {
+        snackbarManager.showSnackbar(message = message, actionLabel = actionLabel, onAction = onAction)
     }
 
     fun setDeviceAddress(address: String) {

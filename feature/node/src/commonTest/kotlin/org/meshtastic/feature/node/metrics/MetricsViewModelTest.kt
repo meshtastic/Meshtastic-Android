@@ -78,7 +78,6 @@ class MetricsViewModelTest {
 
         // Default setup for flows
         every { serviceRepository.tracerouteResponse } returns MutableStateFlow(null)
-        every { nodeRequestActions.effects } returns mock()
         every { nodeRequestActions.lastTracerouteTime } returns MutableStateFlow(null)
         every { nodeRequestActions.lastRequestNeighborTimes } returns MutableStateFlow(emptyMap())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())

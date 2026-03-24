@@ -30,8 +30,6 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -152,7 +150,6 @@ fun <T> BaseMetricScreen(
     data: List<T>,
     timeProvider: (T) -> Double,
     infoData: List<InfoDialogData> = emptyList(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onRequestTelemetry: (() -> Unit)? = null,
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
     listPart: @Composable (Modifier, Double?, LazyListState, (Double) -> Unit) -> Unit,
@@ -192,7 +189,6 @@ fun <T> BaseMetricScreen(
                 onClickChip = {},
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             if (displayInfoDialog) {
