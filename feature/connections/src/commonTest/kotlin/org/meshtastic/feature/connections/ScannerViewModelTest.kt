@@ -23,11 +23,12 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.datastore.RecentAddressesDataSource
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.test.BeforeTest
@@ -35,17 +36,17 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ScannerViewModelTest {
 
     private lateinit var viewModel: ScannerViewModel
-    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
-    private val radioController: RadioController = mock(MockMode.autofill)
+    private val serviceRepository = FakeServiceRepository()
+    private val radioController = FakeRadioController()
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase = mock(MockMode.autofill)
     private val bleScanner: org.meshtastic.core.ble.BleScanner = mock(MockMode.autofill)
 
-    private val connectionProgressFlow = MutableStateFlow<String?>(null)
     private val discoveredDevicesFlow = MutableStateFlow(DiscoveredDevices())
 
     @BeforeTest
@@ -54,11 +55,10 @@ class ScannerViewModelTest {
         every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
         every { radioInterfaceService.supportedDeviceTypes } returns emptyList()
 
-        every { serviceRepository.connectionProgress } returns connectionProgressFlow
         every { getDiscoveredDevicesUseCase.invoke(any()) } returns discoveredDevicesFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
 
-        connectionProgressFlow.value = null
+        serviceRepository.setConnectionProgress("")
         discoveredDevicesFlow.value = DiscoveredDevices()
 
         viewModel =
@@ -68,6 +68,12 @@ class ScannerViewModelTest {
                 radioInterfaceService = radioInterfaceService,
                 recentAddressesDataSource = recentAddressesDataSource,
                 getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
+                dispatchers =
+                org.meshtastic.core.di.CoroutineDispatchers(
+                    io = UnconfinedTestDispatcher(),
+                    main = UnconfinedTestDispatcher(),
+                    default = UnconfinedTestDispatcher(),
+                ),
                 bleScanner = bleScanner,
             )
     }
@@ -80,8 +86,8 @@ class ScannerViewModelTest {
     @Test
     fun `errorText reflects connectionProgress`() = runTest {
         viewModel.errorText.test {
-            assertEquals(null, awaitItem())
-            connectionProgressFlow.value = "Connecting..."
+            assertEquals("", awaitItem())
+            serviceRepository.setConnectionProgress("Connecting...")
             assertEquals("Connecting...", awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
@@ -104,11 +110,9 @@ class ScannerViewModelTest {
 
     @Test
     fun `changeDeviceAddress calls radioController`() {
-        every { radioController.setDeviceAddress(any()) } returns Unit
-
         viewModel.changeDeviceAddress("test_address")
 
-        dev.mokkery.verify { radioController.setDeviceAddress("test_address") }
+        assertEquals("test_address", radioController.lastSetDeviceAddress)
     }
 
     @Test

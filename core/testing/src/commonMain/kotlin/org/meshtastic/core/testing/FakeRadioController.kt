@@ -52,6 +52,7 @@ class FakeRadioController : RadioController {
     val favoritedNodes = mutableListOf<Int>()
     val sentSharedContacts = mutableListOf<Int>()
     var throwOnSend: Boolean = false
+    var lastSetDeviceAddress: String? = null
 
     override suspend fun sendMessage(packet: DataPacket) {
         if (throwOnSend) error("Fake send failure")
@@ -136,7 +137,9 @@ class FakeRadioController : RadioController {
 
     override fun stopProvideLocation() {}
 
-    override fun setDeviceAddress(address: String) {}
+    override fun setDeviceAddress(address: String) {
+        lastSetDeviceAddress = address
+    }
 
     // --- Helper methods for testing ---
 

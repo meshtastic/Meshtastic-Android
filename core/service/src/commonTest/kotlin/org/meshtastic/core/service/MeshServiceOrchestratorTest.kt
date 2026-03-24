@@ -16,36 +16,60 @@
  */
 package org.meshtastic.core.service
 
-class MeshServiceOrchestratorTest {
-    /*
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.verify
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.ServiceRepository
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
+class MeshServiceOrchestratorTest {
+
+    private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
+    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val packetHandler: PacketHandler = mock(MockMode.autofill)
+    private val nodeManager: NodeManager = mock(MockMode.autofill)
+    private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
+    private val commandSender: CommandSender = mock(MockMode.autofill)
+    private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
+    private val router: MeshRouter = mock(MockMode.autofill)
+    private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
 
     @Test
     fun testStartWiresComponents() {
-        val radioInterfaceService = mockk<RadioInterfaceService>(relaxed = true)
-        val serviceRepository = mockk<ServiceRepository>(relaxed = true)
-        val packetHandler = mockk<PacketHandler>(relaxed = true)
-        val nodeManager = mockk<NodeManager>(relaxed = true)
-        val messageProcessor = mockk<MeshMessageProcessor>(relaxed = true)
-        val commandSender = mockk<CommandSender>(relaxed = true)
-        val connectionManager = mockk<MeshConnectionManager>(relaxed = true)
-        val router = mockk<MeshRouter>(relaxed = true)
-        val serviceNotifications = mockk<MeshServiceNotifications>(relaxed = true)
-
         every { radioInterfaceService.receivedData } returns MutableSharedFlow()
         every { serviceRepository.serviceAction } returns MutableSharedFlow()
 
         val orchestrator =
             MeshServiceOrchestrator(
-                radioInterfaceService,
-                serviceRepository,
-                packetHandler,
-                nodeManager,
-                messageProcessor,
-                commandSender,
-                connectionManager,
-                router,
-                serviceNotifications,
+                radioInterfaceService = radioInterfaceService,
+                serviceRepository = serviceRepository,
+                packetHandler = packetHandler,
+                nodeManager = nodeManager,
+                messageProcessor = messageProcessor,
+                commandSender = commandSender,
+                connectionManager = connectionManager,
+                router = router,
+                serviceNotifications = serviceNotifications,
+                dispatchers = dispatchers,
             )
 
         assertFalse(orchestrator.isRunning)
@@ -59,6 +83,4 @@ class MeshServiceOrchestratorTest {
         orchestrator.stop()
         assertFalse(orchestrator.isRunning)
     }
-
-     */
 }

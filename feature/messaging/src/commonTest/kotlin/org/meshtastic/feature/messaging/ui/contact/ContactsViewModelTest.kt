@@ -29,10 +29,10 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.ChannelSet
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -45,7 +45,7 @@ class ContactsViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: ContactsViewModel
-    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
+    private val nodeRepository = FakeNodeRepository()
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
@@ -53,11 +53,6 @@ class ContactsViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-
-        every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
-        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
-        every { nodeRepository.myId } returns MutableStateFlow(null)
-        every { nodeRepository.getNodes() } returns MutableStateFlow(emptyList())
 
         every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
         every { packetRepository.getUnreadCountTotal() } returns MutableStateFlow(0)

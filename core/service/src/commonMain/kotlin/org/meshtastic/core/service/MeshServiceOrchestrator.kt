@@ -18,7 +18,6 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -54,6 +53,7 @@ class MeshServiceOrchestrator(
     private val connectionManager: MeshConnectionManager,
     private val router: MeshRouter,
     private val serviceNotifications: MeshServiceNotifications,
+    private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
 ) {
     private var serviceJob: Job? = null
 
@@ -80,7 +80,7 @@ class MeshServiceOrchestrator(
         Logger.i { "Starting mesh service orchestrator" }
         val job = Job()
         serviceJob = job
-        val scope = CoroutineScope(Dispatchers.Default + job)
+        val scope = CoroutineScope(dispatchers.default + job)
         serviceScope = scope
 
         serviceNotifications.initChannels()

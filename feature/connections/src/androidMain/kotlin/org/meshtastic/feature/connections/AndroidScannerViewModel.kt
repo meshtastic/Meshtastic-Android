@@ -42,6 +42,7 @@ class AndroidScannerViewModel(
     radioInterfaceService: RadioInterfaceService,
     recentAddressesDataSource: RecentAddressesDataSource,
     getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
+    dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
     private val usbRepository: UsbRepository,
     bleScanner: org.meshtastic.core.ble.BleScanner? = null,
@@ -51,6 +52,7 @@ class AndroidScannerViewModel(
     radioInterfaceService,
     recentAddressesDataSource,
     getDiscoveredDevicesUseCase,
+    dispatchers,
     bleScanner,
 ) {
     override fun requestBonding(entry: DeviceListEntry.Ble) {

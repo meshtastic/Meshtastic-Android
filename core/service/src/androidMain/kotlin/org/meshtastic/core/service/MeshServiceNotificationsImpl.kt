@@ -53,6 +53,10 @@ import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.R.raw
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
+import org.meshtastic.core.resources.connected
+import org.meshtastic.core.resources.connecting
+import org.meshtastic.core.resources.device_sleeping
+import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_battery
@@ -98,7 +102,7 @@ import kotlin.time.Duration.Companion.minutes
  * This class centralizes notification logic, including channel creation, builder configuration, and displaying
  * notifications for various events like new messages, alerts, and service status changes.
  */
-@Suppress("TooManyFunctions", "LongParameterList")
+@Suppress("TooManyFunctions", "LongParameterList", "LargeClass")
 @Single
 class MeshServiceNotificationsImpl(
     private val context: Context,
@@ -287,7 +291,19 @@ class MeshServiceNotificationsImpl(
 
     // region Public Notification Methods
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
-    override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification {
+    override fun updateServiceStateNotification(
+        state: org.meshtastic.core.model.ConnectionState,
+        telemetry: Telemetry?,
+    ): Notification {
+        val summaryString =
+            when (state) {
+                is org.meshtastic.core.model.ConnectionState.Connected ->
+                    getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
+                is org.meshtastic.core.model.ConnectionState.Disconnected -> getString(Res.string.disconnected)
+                is org.meshtastic.core.model.ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
+                is org.meshtastic.core.model.ConnectionState.Connecting -> getString(Res.string.connecting)
+            }
+
         // Update caches if telemetry is provided
         telemetry?.let { t ->
             t.local_stats?.let { stats ->

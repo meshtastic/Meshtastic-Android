@@ -129,8 +129,8 @@ class CompassViewModelTest {
             }
 
             // Bearing from (0,0) to (1,1) is approx 45 degrees
-            assertEquals(45f, state.bearing!!, 0.5f)
-            assertEquals(0f, state.heading!!, 0.1f)
+            assertEquals(45f, state.bearing, 0.5f)
+            assertEquals(0f, state.heading, 0.1f)
             assertTrue(state.hasTargetPosition)
 
             cancelAndIgnoreRemainingEvents()

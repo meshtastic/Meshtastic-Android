@@ -54,13 +54,6 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.connected
-import org.meshtastic.core.resources.connecting
-import org.meshtastic.core.resources.device_sleeping
-import org.meshtastic.core.resources.disconnected
-import org.meshtastic.core.resources.getString
-import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
@@ -326,17 +319,11 @@ class MeshConnectionManagerImpl(
         updateStatusNotification(t)
     }
 
-    override fun updateStatusNotification(telemetry: Telemetry?): Any {
-        val summary =
-            when (serviceRepository.connectionState.value) {
-                is ConnectionState.Connected ->
-                    getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
-                is ConnectionState.Disconnected -> getString(Res.string.disconnected)
-                is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
-                is ConnectionState.Connecting -> getString(Res.string.connecting)
-            }
-        return serviceNotifications.updateServiceStateNotification(summary, telemetry = telemetry)
-    }
+    override fun updateStatusNotification(telemetry: Telemetry?): Any =
+        serviceNotifications.updateServiceStateNotification(
+            serviceRepository.connectionState.value,
+            telemetry = telemetry,
+        )
 
     companion object {
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30

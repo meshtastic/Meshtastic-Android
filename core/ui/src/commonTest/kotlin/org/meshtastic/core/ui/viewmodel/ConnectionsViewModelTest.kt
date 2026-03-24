@@ -28,10 +28,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.proto.LocalConfig
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -45,8 +45,8 @@ class ConnectionsViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var viewModel: ConnectionsViewModel
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
-    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
+    private val serviceRepository = FakeServiceRepository()
+    private val nodeRepository = FakeNodeRepository()
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
 
     @BeforeTest
@@ -54,10 +54,6 @@ class ConnectionsViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
-        every { serviceRepository.connectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Disconnected)
-        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
-        every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
         every { uiPrefs.hasShownNotPairedWarning } returns MutableStateFlow(false)
 
         viewModel =

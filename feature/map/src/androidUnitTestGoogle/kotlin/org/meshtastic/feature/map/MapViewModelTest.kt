@@ -37,13 +37,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MapPrefs
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.feature.map.model.CustomTileProviderConfig
 import org.meshtastic.feature.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.feature.map.repository.CustomTileProviderRepository
@@ -56,10 +55,10 @@ class MapViewModelTest {
     private val application = mock<Application>(MockMode.autofill)
     private val mapPrefs = mock<MapPrefs>(MockMode.autofill)
     private val googleMapsPrefs = mock<GoogleMapsPrefs>(MockMode.autofill)
-    private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
+    private val nodeRepository = FakeNodeRepository()
     private val packetRepository = mock<PacketRepository>(MockMode.autofill)
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
-    private val radioController = mock<RadioController>(MockMode.autofill)
+    private val radioController = FakeRadioController()
     private val customTileProviderRepository = mock<CustomTileProviderRepository>(MockMode.autofill)
     private val uiPrefs = mock<UiPrefs>(MockMode.autofill)
     private val savedStateHandle = SavedStateHandle(mapOf("waypointId" to null))
@@ -90,13 +89,7 @@ class MapViewModelTest {
         every { customTileProviderRepository.getCustomTileProviders() } returns flowOf(emptyList())
         every { radioConfigRepository.deviceProfileFlow } returns flowOf(mock(MockMode.autofill))
         every { uiPrefs.theme } returns MutableStateFlow(1)
-        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
-        every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
-        every { nodeRepository.myId } returns MutableStateFlow(null)
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
-        every { nodeRepository.getNodes() } returns flowOf(emptyList())
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
-        every { radioController.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
         viewModel =
             MapViewModel(

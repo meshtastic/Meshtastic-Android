@@ -24,9 +24,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.proto.User
 import kotlin.test.Test
@@ -34,9 +34,9 @@ import kotlin.test.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class NodeManagementActionsTest {
 
-    private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
+    private val nodeRepository = FakeNodeRepository()
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
-    private val radioController = mock<RadioController>(MockMode.autofill)
+    private val radioController = FakeRadioController()
     private val alertManager = mock<AlertManager>(MockMode.autofill)
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)

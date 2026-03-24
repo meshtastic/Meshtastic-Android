@@ -53,11 +53,11 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -82,7 +82,7 @@ class RadioConfigViewModelTest {
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
-    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
+    private val nodeRepository = FakeNodeRepository()
     private val locationRepository: LocationRepository = mock(MockMode.autofill)
     private val mapConsentPrefs: MapConsentPrefs = mock(MockMode.autofill)
     private val analyticsPrefs: AnalyticsPrefs = mock(MockMode.autofill)
@@ -107,8 +107,6 @@ class RadioConfigViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
-        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
@@ -153,7 +151,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `setConfig calls useCase`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER))
@@ -191,7 +189,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `processPacketResponse updates state on metadata result`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
 
         val packet = MeshPacket()
         val metadata = DeviceMetadata(firmware_version = "3.0.0")
@@ -214,7 +212,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `updateChannels calls useCase for each changed channel`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         val old = listOf(ChannelSettings(name = "Old"))
@@ -231,7 +229,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `setResponseStateLoading for REBOOT calls useCase after packet response`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -252,7 +250,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `setResponseStateLoading for FACTORY_RESET calls useCase after packet response`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -283,7 +281,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `setOwner calls useCase`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         val user = User(long_name = "Test User")
@@ -297,7 +295,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `setRingtone calls useCase`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         everySuspend { radioConfigUseCase.setRingtone(any(), any()) } returns Unit
@@ -311,7 +309,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `setCannedMessages calls useCase`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         everySuspend { radioConfigUseCase.setCannedMessages(any(), any()) } returns Unit
@@ -341,7 +339,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `registerRequestId timeout clears request and sets error`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         everySuspend { radioConfigUseCase.getOwner(any()) } returns 42

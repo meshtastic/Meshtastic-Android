@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.RadioController
@@ -52,6 +51,7 @@ open class ScannerViewModel(
     private val radioInterfaceService: RadioInterfaceService,
     private val recentAddressesDataSource: RecentAddressesDataSource,
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
+    private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
     private val bleScanner: org.meshtastic.core.ble.BleScanner? = null,
 ) : ViewModel() {
     private val _showMockInterface = MutableStateFlow(false)
@@ -84,7 +84,7 @@ open class ScannerViewModel(
                         timeout = kotlin.time.Duration.INFINITE,
                         serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
                     )
-                    .flowOn(ioDispatcher)
+                    .flowOn(dispatchers.io)
                     .collect { device ->
                         if (!scannedBleDevices.value.containsKey(device.address)) {
                             scannedBleDevices.update { current -> current + (device.address to device) }
@@ -123,7 +123,7 @@ open class ScannerViewModel(
                 // Sort by name
                 (bonded + unbondedScanned).sortedBy { it.name }
             }
-            .flowOn(kotlinx.coroutines.Dispatchers.Default)
+            .flowOn(dispatchers.default)
             .distinctUntilChanged()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

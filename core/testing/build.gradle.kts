@@ -31,6 +31,7 @@ kotlin {
             // Heavy modules (database, data, domain) should depend on core:testing, not vice versa.
             api(projects.core.model)
             api(projects.core.repository)
+            api(libs.kermit)
 
             // Testing libraries - these are public API for all test consumers
             api(kotlin("test"))

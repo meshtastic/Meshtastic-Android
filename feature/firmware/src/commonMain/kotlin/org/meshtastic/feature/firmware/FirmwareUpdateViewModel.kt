@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -42,6 +41,7 @@ import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MyNodeInfo
@@ -98,6 +98,7 @@ class FirmwareUpdateViewModel(
     private val firmwareUpdateManager: FirmwareUpdateManager,
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
+    private val dispatchers: CoroutineDispatchers,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
@@ -332,7 +333,7 @@ class FirmwareUpdateViewModel(
     }
 
     private suspend fun observeDfuProgress() {
-        firmwareUpdateManager.dfuProgressFlow().flowOn(Dispatchers.Main).collect { dfuState ->
+        firmwareUpdateManager.dfuProgressFlow().flowOn(dispatchers.main).collect { dfuState ->
             when (dfuState) {
                 is DfuInternalState.Progress -> handleDfuProgress(dfuState)
 
