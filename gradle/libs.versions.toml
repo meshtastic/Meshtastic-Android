@@ -26,7 +26,7 @@ ktlint = "1.7.1"
 ktfmt = "0.62"
 kover = "0.9.7"
 mokkery = "3.3.0"
-kotest = "6.1.7"
+kotest = "6.1.8"
 testRetry = "1.6.4"
 turbine = "1.2.1"
 
