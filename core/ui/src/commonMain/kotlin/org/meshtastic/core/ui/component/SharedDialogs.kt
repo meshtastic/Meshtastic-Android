@@ -17,11 +17,12 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
-import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.SharedContact
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
  * Shared composable that conditionally renders [SharedContactDialog] and [ScannedQrCodeDialog] when the device is
@@ -30,16 +31,18 @@ import org.meshtastic.proto.SharedContact
  * This eliminates identical boilerplate from Android `MainScreen` and Desktop `DesktopMainScreen`.
  */
 @Composable
-fun SharedDialogs(
-    connectionState: ConnectionState,
-    sharedContactRequested: SharedContact?,
-    requestChannelSet: ChannelSet?,
-    onDismissSharedContact: () -> Unit,
-    onDismissChannelSet: () -> Unit,
-) {
-    if (connectionState == ConnectionState.Connected) {
-        sharedContactRequested?.let { SharedContactDialog(sharedContact = it, onDismiss = onDismissSharedContact) }
+fun SharedDialogs(uiViewModel: UIViewModel) {
+    val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle()
+    val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
 
-        requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(newChannelSet, onDismiss = onDismissChannelSet) }
+    if (connectionState == ConnectionState.Connected) {
+        sharedContactRequested?.let {
+            SharedContactDialog(sharedContact = it, onDismiss = { uiViewModel.clearSharedContactRequested() })
+        }
+
+        requestChannelSet?.let { newChannelSet ->
+            ScannedQrCodeDialog(newChannelSet, onDismiss = { uiViewModel.clearRequestChannelUrl() })
+        }
     }
 }

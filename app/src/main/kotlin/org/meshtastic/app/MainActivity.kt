@@ -57,7 +57,6 @@ import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.common.util.toMeshtasticUri
-import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
@@ -217,11 +216,9 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        uri.dispatchMeshtasticUri(
-            onChannel = { model.setRequestChannelSet(it) },
-            onContact = { model.setSharedContactRequested(it) },
-            onInvalid = { lifecycleScope.launch { showToast(Res.string.channel_invalid) } },
-        )
+        model.handleScannedUri(uri.toMeshtasticUri()) {
+            lifecycleScope.launch { showToast(Res.string.channel_invalid) }
+        }
     }
 
     private fun createShareIntent(message: String): PendingIntent {

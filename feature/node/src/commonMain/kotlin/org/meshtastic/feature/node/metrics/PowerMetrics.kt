@@ -36,7 +36,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,7 +72,6 @@ import org.meshtastic.core.resources.power_metrics_log
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
-import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
 
@@ -112,18 +110,6 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.powerMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(Unit) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is NodeRequestEffect.ShowFeedback -> {
-                    @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(effect.text.resolve())
-                }
-            }
-        }
-    }
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
@@ -132,7 +118,6 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         nodeName = state.node?.user?.long_name ?: "",
         data = data,
         timeProvider = { it.time.toDouble() },
-        snackbarHostState = snackbarHostState,
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.POWER) },
         controlPart = {
             Column {

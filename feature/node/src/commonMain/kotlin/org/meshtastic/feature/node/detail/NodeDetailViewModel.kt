@@ -21,7 +21,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -83,8 +82,6 @@ class NodeDetailViewModel(
                 getNodeDetailsUseCase(nodeId)
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NodeDetailUiState())
-
-    val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 
     fun start(nodeId: Int) {
         if (manualNodeId.value != nodeId) {

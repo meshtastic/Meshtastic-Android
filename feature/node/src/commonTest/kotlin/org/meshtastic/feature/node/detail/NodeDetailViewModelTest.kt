@@ -57,7 +57,6 @@ class NodeDetailViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         every { getNodeDetailsUseCase(any()) } returns emptyFlow()
-        every { nodeRequestActions.effects } returns kotlinx.coroutines.flow.MutableSharedFlow()
 
         viewModel = createViewModel(1234)
     }

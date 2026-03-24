@@ -36,7 +36,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -84,7 +83,6 @@ import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
-import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
 
@@ -130,23 +128,11 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.deviceMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
     val hasVoltage = remember(data) { data.any { it.device_metrics?.voltage != null } }
     val hasChUtil = remember(data) { data.any { it.device_metrics?.channel_utilization != null } }
     val hasAirUtil = remember(data) { data.any { it.device_metrics?.air_util_tx != null } }
-
-    LaunchedEffect(Unit) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is NodeRequestEffect.ShowFeedback -> {
-                    @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(effect.text.resolve())
-                }
-            }
-        }
-    }
 
     val filteredLegendData =
         remember(hasBattery, hasVoltage, hasChUtil, hasAirUtil) {
@@ -193,7 +179,6 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         data = data,
         timeProvider = { it.time.toDouble() },
         infoData = infoItems,
-        snackbarHostState = snackbarHostState,
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.DEVICE) },
         controlPart = {
             TimeFrameSelector(

@@ -43,6 +43,12 @@ tasks.withType<Detekt>().configureEach { exclude("**/generated/**") }
 compose.desktop {
     application {
         mainClass = "org.meshtastic.desktop.MainKt"
+        jvmArgs(
+            "-Xmx2G",
+            "-Dapple.awt.application.name=Meshtastic",
+            "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic",
+            "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
+        )
 
         buildTypes.release.proguard {
             // Note: Enabling ProGuard will reduce final distribution size significantly,
@@ -67,15 +73,28 @@ compose.desktop {
 
             // Default JVM arguments for the packaged application
             // Increase max heap size to prevent OOM issues on complex maps/data
-            jvmArgs("-Xmx2G")
+            jvmArgs(
+                "-Xmx2G",
+                "-Dapple.awt.application.name=Meshtastic",
+                "-Dcom.apple.mrj.application.apple.name=Meshtastic",
+                "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
+            )
 
             // App Icon & OS Specific Configurations
             macOS {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
                 minimumSystemVersion = "12.0"
+                bundleID = "org.meshtastic.desktop"
+                infoPlist {
+                    extraKeysRawXml =
+                        """
+                        <key>NSUserNotificationAlertStyle</key>
+                        <string>alert</string>
+                        """
+                            .trimIndent()
+                }
                 // TODO: To prepare for real distribution on macOS, you'll need to sign and notarize.
                 // You can inject these from CI environment variables.
-                // bundleID = "org.meshtastic.desktop"
                 // sign = true
                 // notarize = true
                 // appleID = System.getenv("APPLE_ID")

@@ -35,7 +35,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -67,7 +66,6 @@ import org.meshtastic.core.resources.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
-import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshPacket
 
@@ -89,18 +87,6 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.signalMetrics.filter { it.rx_time.toLong() >= timeFrame.timeThreshold() }
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    LaunchedEffect(Unit) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is NodeRequestEffect.ShowFeedback -> {
-                    @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(effect.text.resolve())
-                }
-            }
-        }
-    }
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
@@ -109,7 +95,6 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         nodeName = state.node?.user?.long_name ?: "",
         data = data,
         timeProvider = { it.rx_time.toDouble() },
-        snackbarHostState = snackbarHostState,
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) },
         infoData =
         listOf(

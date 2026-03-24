@@ -1,12 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="24" height="24" viewBox="0 0 100 55" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-    <g transform="matrix(0.802386,0,0,0.460028,-421.748,-122.127)">
-        <g transform="matrix(0.579082,0,0,1.01004,460.975,-39.6867)">
-            <path d="M250.908,330.267L193.126,415.005L180.938,406.694L244.802,313.037C246.174,311.024 248.453,309.819 250.889,309.816C253.326,309.814 255.606,311.015 256.982,313.026L320.994,406.536L308.821,414.869L250.908,330.267Z" style="fill:white;"/>
-        </g>
-        <g transform="matrix(0.582378,0,0,1.01579,485.019,-211.182)">
-            <path d="M87.642,581.398L154.757,482.977L142.638,474.713L75.523,573.134L87.642,581.398Z" style="fill:white;"/>
-        </g>
-    </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="512" height="512"><path d="M125 0Q0 0 0 125v262q0 125 125 125h262q125 0 125-125V125Q512 0 387 0Z" style="stroke:#d5828b;stroke-width:0;stroke-dasharray:none;stroke-linecap:butt;stroke-dashoffset:0;stroke-linejoin:miter;stroke-miterlimit:4;fill:#67ea94;fill-rule:nonzero;opacity:1" vector-effect="non-scaling-stroke"/><path d="m250.908 330.267-57.782 84.738-12.188-8.311 63.864-93.657a7.378 7.378 0 0 1 12.18-.011l64.012 93.51-12.173 8.333z" style="stroke:none;stroke-width:1;stroke-dasharray:none;stroke-linecap:butt;stroke-dashoffset:0;stroke-linejoin:round;stroke-miterlimit:2;fill:#2c2d3c;fill-rule:evenodd;opacity:1" transform="translate(-135.496 -390.354)scale(1.79)" vector-effect="non-scaling-stroke"/><path d="m87.642 581.398 67.115-98.421-12.119-8.264-67.115 98.421z" style="stroke:none;stroke-width:1;stroke-dasharray:none;stroke-linecap:butt;stroke-dashoffset:0;stroke-linejoin:round;stroke-miterlimit:2;fill:#2c2d3c;fill-rule:evenodd;opacity:1" transform="translate(-63.403 -699.639)scale(1.81)" vector-effect="non-scaling-stroke"/></svg>

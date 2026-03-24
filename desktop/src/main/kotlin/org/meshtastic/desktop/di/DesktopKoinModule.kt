@@ -137,6 +137,10 @@ private fun desktopPlatformStubsModule() = module {
             locationManager = get(),
         )
     }
+    single { org.meshtastic.desktop.DesktopNotificationManager(prefs = get()) }
+    single<org.meshtastic.core.repository.NotificationManager> {
+        get<org.meshtastic.desktop.DesktopNotificationManager>()
+    }
     single<MeshServiceNotifications> {
         org.meshtastic.desktop.notification.DesktopMeshServiceNotifications(notificationManager = get())
     }

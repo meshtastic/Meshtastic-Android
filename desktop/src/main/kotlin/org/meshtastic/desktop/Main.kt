@@ -66,6 +66,7 @@ import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
+import org.meshtastic.core.navigation.navigateTopLevel
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
@@ -172,13 +173,21 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     val trayState = rememberTrayState()
     val appIcon = classpathPainterResource("icon.png")
 
+    @Suppress("DEPRECATION")
+    val trayIcon =
+        androidx.compose.ui.res.painterResource(
+            if (isSystemInDarkTheme()) "tray_icon_white.svg" else "tray_icon_black.svg",
+        )
+
     val notificationManager = remember { koinApp.koin.get<DesktopNotificationManager>() }
-    val alertManager = remember { koinApp.koin.get<org.meshtastic.core.ui.util.AlertManager>() }
     val desktopPrefs = remember { koinApp.koin.get<DesktopPreferencesDataSource>() }
     val windowState = rememberWindowState()
 
     LaunchedEffect(Unit) {
-        notificationManager.notifications.collect { notification -> trayState.sendNotification(notification) }
+        notificationManager.notifications.collect { notification ->
+            Logger.d { "Main.kt: Received notification for Tray: title=${notification.title}" }
+            trayState.sendNotification(notification)
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -209,7 +218,9 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
 
     Tray(
         state = trayState,
-        icon = appIcon,
+        icon = trayIcon,
+        tooltip = "Meshtastic Desktop",
+        onAction = { isAppVisible = true },
         menu = {
             Item("Show Meshtastic", onClick = { isAppVisible = true })
             Item(
@@ -250,7 +261,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                         if (
                             TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())
                         ) {
-                            navigateTopLevel(backStack, TopLevelDestination.Settings.route)
+                            backStack.navigateTopLevel(TopLevelDestination.Settings.route)
                         }
                         true
                     }
@@ -261,22 +272,22 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                     }
                     // ⌘1  → Conversations
                     event.key == Key.One -> {
-                        navigateTopLevel(backStack, TopLevelDestination.Conversations.route)
+                        backStack.navigateTopLevel(TopLevelDestination.Conversations.route)
                         true
                     }
                     // ⌘2  → Nodes
                     event.key == Key.Two -> {
-                        navigateTopLevel(backStack, TopLevelDestination.Nodes.route)
+                        backStack.navigateTopLevel(TopLevelDestination.Nodes.route)
                         true
                     }
                     // ⌘3  → Map
                     event.key == Key.Three -> {
-                        navigateTopLevel(backStack, TopLevelDestination.Map.route)
+                        backStack.navigateTopLevel(TopLevelDestination.Map.route)
                         true
                     }
                     // ⌘4  → Connections
                     event.key == Key.Four -> {
-                        navigateTopLevel(backStack, TopLevelDestination.Connections.route)
+                        backStack.navigateTopLevel(TopLevelDestination.Connections.route)
                         true
                     }
                     // ⌘/  → About
@@ -310,19 +321,8 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
             // re-reads Locale.current and all stringResource() calls update.  Unlike key(), this
             // preserves remembered state (including the navigation backstack).
             CompositionLocalProvider(LocalAppLocale provides localePref) {
-                AppTheme(darkTheme = isDarkTheme) {
-                    org.meshtastic.core.ui.component.AlertHost(alertManager)
-                    DesktopMainScreen(backStack)
-                }
+                AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(backStack) }
             }
         }
-    }
-}
-
-/** Replaces the backstack with a single top-level destination route. */
-private fun navigateTopLevel(backStack: MutableList<NavKey>, route: NavKey) {
-    backStack.add(route)
-    while (backStack.size > 1) {
-        backStack.removeAt(0)
     }
 }

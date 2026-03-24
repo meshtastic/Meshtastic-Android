@@ -18,11 +18,8 @@ package org.meshtastic.feature.node.detail
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -46,12 +43,14 @@ import org.meshtastic.core.resources.requesting_from
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.user_info
+import org.meshtastic.core.ui.util.SnackbarManager
 
 @Single(binds = [NodeRequestActions::class])
-class CommonNodeRequestActions constructor(private val radioController: RadioController) : NodeRequestActions {
-
-    private val _effects = MutableSharedFlow<NodeRequestEffect>()
-    override val effects: SharedFlow<NodeRequestEffect> = _effects.asSharedFlow()
+class CommonNodeRequestActions
+constructor(
+    private val radioController: RadioController,
+    private val snackbarManager: SnackbarManager,
+) : NodeRequestActions {
 
     private val _lastTracerouteTime = MutableStateFlow<Long?>(null)
     override val lastTracerouteTime: StateFlow<Long?> = _lastTracerouteTime.asStateFlow()
@@ -59,15 +58,15 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
     private val _lastRequestNeighborTimes = MutableStateFlow<Map<Int, Long>>(emptyMap())
     override val lastRequestNeighborTimes: StateFlow<Map<Int, Long>> = _lastRequestNeighborTimes.asStateFlow()
 
+    private suspend fun showFeedback(text: UiText) {
+        snackbarManager.showSnackbar(message = text.resolve())
+    }
+
     override fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(ioDispatcher) {
             Logger.i { "Requesting UserInfo for '$destNum'" }
             radioController.requestUserInfo(destNum)
-            _effects.emit(
-                NodeRequestEffect.ShowFeedback(
-                    UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName),
-                ),
-            )
+            showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName))
         }
     }
 
@@ -77,11 +76,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
             val packetId = radioController.getPacketId()
             radioController.requestNeighborInfo(packetId, destNum)
             _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
-            _effects.emit(
-                NodeRequestEffect.ShowFeedback(
-                    UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName),
-                ),
-            )
+            showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
         }
     }
 
@@ -89,11 +84,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
         scope.launch(ioDispatcher) {
             Logger.i { "Requesting position for '$destNum'" }
             radioController.requestPosition(destNum, position)
-            _effects.emit(
-                NodeRequestEffect.ShowFeedback(
-                    UiText.Resource(Res.string.requesting_from, Res.string.position, longName),
-                ),
-            )
+            showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.position, longName))
         }
     }
 
@@ -114,9 +105,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
                     TelemetryType.PAX -> Res.string.request_pax_metrics
                 }
 
-            _effects.emit(
-                NodeRequestEffect.ShowFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName)),
-            )
+            showFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName))
         }
     }
 
@@ -126,11 +115,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
             val packetId = radioController.getPacketId()
             radioController.requestTraceroute(packetId, destNum)
             _lastTracerouteTime.value = nowMillis
-            _effects.emit(
-                NodeRequestEffect.ShowFeedback(
-                    UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName),
-                ),
-            )
+            showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
         }
     }
 }

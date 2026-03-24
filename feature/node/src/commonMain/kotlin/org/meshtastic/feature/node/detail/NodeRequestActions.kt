@@ -17,19 +17,12 @@
 package org.meshtastic.feature.node.detail
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.resources.UiText
-
-sealed class NodeRequestEffect {
-    data class ShowFeedback(val text: UiText) : NodeRequestEffect()
-}
 
 /** Interface for high-level node request actions (e.g., requesting user info, position, telemetry). */
 interface NodeRequestActions {
-    val effects: SharedFlow<NodeRequestEffect>
     val lastTracerouteTime: StateFlow<Long?>
     val lastRequestNeighborTimes: StateFlow<Map<Int, Long>>
 
