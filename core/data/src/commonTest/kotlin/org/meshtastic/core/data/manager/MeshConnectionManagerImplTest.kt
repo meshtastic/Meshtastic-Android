@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -95,6 +96,10 @@ class MeshConnectionManagerImplTest {
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
         every { serviceRepository.connectionState } returns connectionStateFlow
+        every { serviceRepository.setConnectionState(any()) } calls
+            { call ->
+                connectionStateFlow.value = call.arg<ConnectionState>(0)
+            }
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
         every { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
         every { packetHandler.stopPacketQueue() } returns Unit
