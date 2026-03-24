@@ -18,7 +18,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
   - **UI:** Jetpack Compose Multiplatform (Material 3).
   - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` and `desktop`.
-  - **Navigation:** JetBrains Navigation 3 (Stable Scene-based architecture) with shared backstack state.
+  - **Navigation:** JetBrains Navigation 3 (Stable Scene-based architecture) with shared backstack state. Deep linking uses RESTful paths (e.g. `/nodes/1234`) parsed by `DeepLinkRouter` in `core:navigation`.
   - **Lifecycle:** JetBrains multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
   - **Adaptive UI:** Material 3 Adaptive (v1.3+) with support for Large (1200dp) and Extra-large (1600dp) breakpoints.
   - **Database:** Room KMP.

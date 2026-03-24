@@ -26,6 +26,16 @@ import org.meshtastic.core.common.util.CommonUri
  * Maps an incoming OS intent URI to a list of NavKeys representing the target backstack. This ensures that when a user
  * deep links into a detail view, the logical "up" hierarchy is synthesized and correctly populated in the user-owned
  * NavBackStack list.
+ *
+ * Supports both legacy query-parameter URIs and modern RESTful path patterns:
+ * - `/nodes` -> List of all nodes
+ * - `/nodes/{destNum}` -> Node details
+ * - `/nodes/{destNum}/{metric}` -> Specific node metric (e.g., `/nodes/1234/device-metrics`)
+ * - `/messages` -> Conversation list
+ * - `/messages/{contactKey}` -> Specific conversation
+ * - `/settings` -> Settings root
+ * - `/settings/{destNum}/{page}` -> Specific settings page for a node
+ * - `/share?message={text}` -> Share message screen
  */
 object DeepLinkRouter {
     /**

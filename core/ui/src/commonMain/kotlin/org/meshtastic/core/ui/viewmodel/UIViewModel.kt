@@ -87,7 +87,15 @@ class UIViewModel(
     private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
-    /** Unified handler for all deep links (navigation, contacts, channels). */
+    /**
+     * Unified handler for all Meshtastic deep links and OS intents.
+     *
+     * This method orchestrates two distinct types of URI handling:
+     * 1. **Navigation:** First attempts to parse the URI into a typed [NavKey] backstack via [DeepLinkRouter].
+     *    If successful, navigates the user to the target screen.
+     * 2. **Data Import:** If navigation fails, falls back to legacy contact/channel parsing via [dispatchMeshtasticUri].
+     *    This triggers import dialogs for shared nodes or channel configurations.
+     */
     fun handleDeepLink(uri: MeshtasticUri, onInvalid: () -> Unit = {}) {
         val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
 
