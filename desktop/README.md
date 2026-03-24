@@ -16,9 +16,26 @@ A Compose Desktop application target — the first full non-Android target for t
 # Run tests
 ./gradlew :desktop:test
 
-# Package native distribution (DMG/MSI/DEB)
+# Package native distribution (DMG/MSI/DEB) — debug (no ProGuard)
 ./gradlew :desktop:packageDistributionForCurrentOS
+
+# Package native distribution (DMG/MSI/DEB) — release (ProGuard minified)
+./gradlew :desktop:packageReleaseDistributionForCurrentOS
 ```
+
+## ProGuard / Minification
+
+Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source.
+
+**Configuration:**
+- `build.gradle.kts` — `buildTypes.release.proguard` block enables ProGuard with `optimize.set(true)` and `obfuscate.set(false)`.
+- `proguard-rules.pro` — Comprehensive keep-rules for all reflection/JNI-sensitive dependencies (Koin, kotlinx-serialization, Wire protobuf, Room KMP, Ktor, Kable BLE, Coil, SQLite JNI, Compose Multiplatform resources).
+
+**Troubleshooting ProGuard issues:**
+- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule in `proguard-rules.pro`.
+- To debug which classes ProGuard removes, temporarily add `-printusage proguard-usage.txt` to the rules file and inspect the output in `desktop/proguard-usage.txt`.
+- To see the full mapping of optimizations applied, add `-printseeds proguard-seeds.txt`.
+- Run `./gradlew :desktop:runRelease` for a quick smoke-test of the minified app before packaging.
 
 ## Architecture
 

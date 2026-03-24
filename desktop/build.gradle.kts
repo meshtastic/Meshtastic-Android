@@ -45,10 +45,9 @@ compose.desktop {
         mainClass = "org.meshtastic.desktop.MainKt"
 
         buildTypes.release.proguard {
-            // Note: Enabling ProGuard will reduce final distribution size significantly,
-            // but will require thorough testing of serialization, reflection (Koin), and JNI (SQLite).
-            // Recommend enabling when ready: isEnabled.set(true)
-            isEnabled.set(false)
+            isEnabled.set(true)
+            obfuscate.set(false) // Open-source project — obfuscation adds no value
+            optimize.set(true)
             configurationFiles.from(project.file("proguard-rules.pro"))
         }
 
