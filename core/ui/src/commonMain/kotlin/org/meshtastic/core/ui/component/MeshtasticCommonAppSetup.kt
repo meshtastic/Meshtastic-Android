@@ -22,8 +22,8 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 /**
  * Common application-level setup for all Meshtastic platforms (Android, Desktop, etc.).
  *
- * This component encapsulates headless global UI logic that must reside at the root of the application hierarchy.
- * It manages:
+ * This component encapsulates headless global UI logic that must reside at the root of the application hierarchy. It
+ * manages:
  * - Shared system dialogs (e.g. contact/channel import)
  * - Global version and firmware checks
  * - System-wide alerts and snackbar hosts
