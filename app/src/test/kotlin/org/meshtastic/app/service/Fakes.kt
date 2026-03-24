@@ -34,8 +34,10 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
 
     override fun initChannels() {}
 
-    override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification =
-        mock(MockMode.autofill)
+    override fun updateServiceStateNotification(
+        state: org.meshtastic.core.model.ConnectionState,
+        telemetry: Telemetry?,
+    ): Notification = mock(MockMode.autofill)
 
     override suspend fun updateMessageNotification(
         contactKey: String,

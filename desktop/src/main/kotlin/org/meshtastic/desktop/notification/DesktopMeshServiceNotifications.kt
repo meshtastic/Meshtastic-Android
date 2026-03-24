@@ -40,7 +40,10 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
         // no-op for desktop
     }
 
-    override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Any {
+    override fun updateServiceStateNotification(
+        state: org.meshtastic.core.model.ConnectionState,
+        telemetry: Telemetry?,
+    ): Any {
         // We don't have a foreground service on desktop
         return Unit
     }
