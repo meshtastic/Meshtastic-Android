@@ -46,15 +46,11 @@ object DeepLinkRouter {
         return when (firstSegment) {
             "share",
             "messages",
-            "conversations",
-            "contacts",
             "quickchat",
             -> routeContacts(uri, pathSegments)
             "connections" -> listOf(ConnectionsRoutes.ConnectionsGraph)
             "map" -> routeMap(uri, pathSegments)
-            "node",
-            "nodes",
-            -> routeNodes(uri, pathSegments)
+            "nodes" -> routeNodes(uri, pathSegments)
             "settings" -> routeSettings(pathSegments)
             "channels" -> listOf(ChannelsRoutes.ChannelsGraph)
             "firmware" -> routeFirmware(pathSegments)
@@ -75,9 +71,7 @@ object DeepLinkRouter {
             "quickchat" -> {
                 listOf(ContactsRoutes.ContactsGraph, ContactsRoutes.QuickChat)
             }
-            "messages",
-            "conversations",
-            -> {
+            "messages" -> {
                 val contactKey = if (segments.size > 1) segments[1] else uri.getQueryParameter("contactKey") ?: ""
                 val message = uri.getQueryParameter("message") ?: ""
                 if (contactKey.isNotBlank()) {
