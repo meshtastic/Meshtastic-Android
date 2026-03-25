@@ -337,6 +337,151 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `setModuleConfig calls useCase`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val config = org.meshtastic.proto.ModuleConfig(mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig(enabled = true))
+        everySuspend { radioConfigUseCase.setModuleConfig(any(), any()) } returns 42
+
+        viewModel.setModuleConfig(config)
+
+        verifySuspend { radioConfigUseCase.setModuleConfig(123, config) }
+        assertEquals(true, viewModel.radioConfigState.value.moduleConfig.mqtt?.enabled)
+    }
+
+    @Test
+    fun `setFixedPosition calls useCase`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val pos = org.meshtastic.core.model.Position(latitude = 1.0, longitude = 2.0, altitude = 0)
+        everySuspend { radioConfigUseCase.setFixedPosition(any(), any()) } returns Unit
+
+        viewModel.setFixedPosition(pos)
+
+        verifySuspend { radioConfigUseCase.setFixedPosition(123, pos) }
+    }
+
+    @Test
+    fun `removeFixedPosition calls useCase`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.removeFixedPosition(any()) } returns Unit
+
+        viewModel.removeFixedPosition()
+
+        verifySuspend { radioConfigUseCase.removeFixedPosition(123) }
+    }
+
+    @Test
+    fun `installProfile calls useCase`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        val profile = DeviceProfile()
+        everySuspend { installProfileUseCase(any(), any(), any()) } returns Unit
+
+        viewModel.installProfile(profile)
+
+        verifySuspend { installProfileUseCase(123, profile, any()) }
+    }
+
+    @Test
+    fun `processPacketResponse updates state on various results`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        
+        viewModel = createViewModel()
+
+        // ConfigResponse
+        val configResponse = Config(lora = Config.LoRaConfig(hop_limit = 5))
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(configResponse)
+        packetFlow.emit(MeshPacket())
+        assertEquals(5, viewModel.radioConfigState.value.radioConfig.lora?.hop_limit)
+
+        // ModuleConfigResponse
+        val moduleResponse = org.meshtastic.proto.ModuleConfig(telemetry = org.meshtastic.proto.ModuleConfig.TelemetryConfig(device_update_interval = 300))
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ModuleConfigResponse(moduleResponse)
+        packetFlow.emit(MeshPacket())
+        assertEquals(300, viewModel.radioConfigState.value.moduleConfig.telemetry?.device_update_interval)
+
+        // Owner
+        val user = User(long_name = "New Name")
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Owner(user)
+        packetFlow.emit(MeshPacket())
+        assertEquals("New Name", viewModel.radioConfigState.value.userConfig.long_name)
+
+        // Ringtone
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Ringtone("bell.mp3")
+        packetFlow.emit(MeshPacket())
+        assertEquals("bell.mp3", viewModel.radioConfigState.value.ringtone)
+
+        // Error
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Error(org.meshtastic.core.resources.UiText.DynamicString("Fail"))
+        packetFlow.emit(MeshPacket())
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
+    }
+
+    @Test
+    fun `Admin actions call correct useCases`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
+
+        viewModel = createViewModel()
+
+        // SHUTDOWN
+        everySuspend { adminActionsUseCase.shutdown(any()) } returns 42
+        // Set metadata to allow shutdown
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Metadata(DeviceMetadata(canShutdown = true))
+        packetFlow.emit(MeshPacket())
+        
+        viewModel.setResponseStateLoading(AdminRoute.SHUTDOWN)
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
+        packetFlow.emit(MeshPacket())
+        verifySuspend { adminActionsUseCase.shutdown(123) }
+
+        // NODEDB_RESET
+        everySuspend { adminActionsUseCase.nodedbReset(any(), any(), any()) } returns 42
+        viewModel.setResponseStateLoading(AdminRoute.NODEDB_RESET)
+        packetFlow.emit(MeshPacket())
+        verifySuspend { adminActionsUseCase.nodedbReset(123, any(), any()) }
+    }
+
+    @Test
+    fun `setResponseStateLoading for various routes calls correct useCases`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+
+        // USER
+        everySuspend { radioConfigUseCase.getOwner(any()) } returns 42
+        viewModel.setResponseStateLoading(ConfigRoute.USER)
+        verifySuspend { radioConfigUseCase.getOwner(123) }
+
+        // CHANNELS
+        everySuspend { radioConfigUseCase.getChannel(any(), any()) } returns 42
+        everySuspend { radioConfigUseCase.getConfig(any(), any()) } returns 42
+        viewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
+        verifySuspend { radioConfigUseCase.getChannel(123, 0) }
+        verifySuspend { radioConfigUseCase.getConfig(123, org.meshtastic.proto.AdminMessage.ConfigType.LORA_CONFIG.value) }
+
+        // LORA
+        viewModel.setResponseStateLoading(ConfigRoute.LORA)
+        verifySuspend { radioConfigUseCase.getConfig(123, ConfigRoute.LORA.type) }
+    }
+
+    @Test
     fun `registerRequestId timeout clears request and sets error`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))

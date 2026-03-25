@@ -17,6 +17,7 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.User
 
@@ -50,11 +51,22 @@ object TestDataFactory {
     }
 
     /**
+     * Creates a test [org.meshtastic.proto.MeshPacket] with default values.
+     */
+    fun createTestPacket(
+        from: Int = 1,
+        to: Int = 0xffffffff.toInt(),
+        decoded: org.meshtastic.proto.Data? = null,
+        relayNode: Int = 0,
+    ) = org.meshtastic.proto.MeshPacket(
+        from = from,
+        to = to,
+        decoded = decoded,
+        relay_node = relayNode,
+    )
+
+    /**
      * Creates multiple test nodes with sequential IDs.
-     *
-     * @param count Number of nodes to create
-     * @param baseNum Starting node number (default: 1)
-     * @return A list of Node instances
      */
     fun createTestNodes(count: Int, baseNum: Int = 1): List<Node> = (0 until count).map { i ->
         createTestNode(
@@ -64,6 +76,31 @@ object TestDataFactory {
             shortName = "T$i",
         )
     }
+
+    /** Creates a test [MyNodeInfo] with default values. */
+    fun createMyNodeInfo(
+        myNodeNum: Int = 1,
+        hasGPS: Boolean = false,
+        model: String? = "TBEAM",
+        firmwareVersion: String? = "2.5.0",
+        hasWifi: Boolean = false,
+    ) = MyNodeInfo(
+        myNodeNum = myNodeNum,
+        hasGPS = hasGPS,
+        model = model,
+        firmwareVersion = firmwareVersion,
+        couldUpdate = false,
+        shouldUpdate = false,
+        currentPacketId = 1L,
+        messageTimeoutMsec = 300000,
+        minAppVersion = 1,
+        maxChannels = 8,
+        hasWifi = hasWifi,
+        channelUtilization = 0f,
+        airUtilTx = 0f,
+        deviceId = "!$myNodeNum",
+        pioEnv = null,
+    )
 }
 
 /**
