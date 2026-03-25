@@ -5,7 +5,7 @@ appcompat = "1.7.1"
 accompanist = "0.37.3"
 
 # androidx
-androidxTracing = "1.10.5"
+androidxTracing = "1.10.6"
 datastore = "1.2.1"
 glance = "1.2.0-rc01"
 lifecycle = "2.10.0"
@@ -112,7 +112,7 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 androidx-work-testing = { module = "androidx.work:work-testing", version = "2.11.2" }
 
 # AndroidX Compose
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.03.00" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.03.01" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
