@@ -88,6 +88,7 @@ actual fun rememberOpenUrl(): (url: String) -> Unit {
 }
 
 @Composable
+@Suppress("Wrapping")
 actual fun rememberSaveFileLauncher(
     onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit {

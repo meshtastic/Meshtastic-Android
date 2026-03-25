@@ -85,17 +85,7 @@ class FakeNodeRepository :
     ): Flow<List<Node>> = _nodeDBbyNum.map { db ->
         db.values
             .asSequence()
-            .filter {
-                if (filter.isBlank()) {
-                    true
-                } else {
-                    it.user.long_name.contains(filter, ignoreCase = true) ||
-                        it.user.id.contains(filter, ignoreCase = true)
-                }
-            }
-            .filter { if (includeUnknown) true else !it.isUnknownUser }
-            .filter { if (onlyOnline) it.isOnline else true }
-            .filter { if (onlyDirect) it.hopsAway == 0 else true }
+            .filter { filterNode(it, filter, includeUnknown, onlyOnline, onlyDirect) }
             .toList()
             .let { nodes ->
                 when (sort) {
@@ -108,6 +98,24 @@ class FakeNodeRepository :
                     NodeSortOption.VIA_FAVORITE -> nodes.sortedBy { if (it.isFavorite) 0 else 1 }
                 }
             }
+    }
+
+    private fun filterNode(
+        node: Node,
+        filter: String,
+        includeUnknown: Boolean,
+        onlyOnline: Boolean,
+        onlyDirect: Boolean,
+    ): Boolean {
+        val matchesFilter =
+            filter.isBlank() ||
+                node.user.long_name.contains(filter, ignoreCase = true) ||
+                node.user.id.contains(filter, ignoreCase = true)
+        val matchesUnknown = includeUnknown || !node.isUnknownUser
+        val matchesOnline = !onlyOnline || node.isOnline
+        val matchesDirect = !onlyDirect || node.hopsAway == 0
+
+        return matchesFilter && matchesUnknown && matchesOnline && matchesDirect
     }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =

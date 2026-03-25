@@ -40,7 +40,8 @@ class FakeBleDevice(
     override val address: String,
     override val name: String? = "Fake Device",
     initialState: BleConnectionState = BleConnectionState.Disconnected,
-) : BleDevice, BaseFake() {
+) : BaseFake(),
+    BleDevice {
     private val _state = mutableStateFlow(initialState)
     override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
 
@@ -51,7 +52,7 @@ class FakeBleDevice(
     override val isConnected: Boolean
         get() = _state.value == BleConnectionState.Connected
 
-    override suspend fun readRssi(): Int = -60
+    override suspend fun readRssi(): Int = DEFAULT_RSSI
 
     override suspend fun bond() {
         _isBonded.value = true
@@ -60,21 +61,29 @@ class FakeBleDevice(
     fun setState(newState: BleConnectionState) {
         _state.value = newState
     }
+
+    companion object {
+        private const val DEFAULT_RSSI = -60
+    }
 }
 
-class FakeBleScanner : BleScanner, BaseFake() {
-    private val _foundDevices = mutableSharedFlow<BleDevice>(replay = 10)
+class FakeBleScanner :
+    BaseFake(),
+    BleScanner {
+    private val foundDevices = mutableSharedFlow<BleDevice>(replay = 10)
 
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
-        emitAll(_foundDevices)
+        emitAll(foundDevices)
     }
 
     fun emitDevice(device: BleDevice) {
-        _foundDevices.tryEmit(device)
+        foundDevices.tryEmit(device)
     }
 }
 
-class FakeBleConnection : BleConnection, BaseFake() {
+class FakeBleConnection :
+    BaseFake(),
+    BleConnection {
     private val _device = mutableStateFlow<BleDevice?>(null)
     override val device: BleDevice?
         get() = _device.value
@@ -122,9 +131,7 @@ class FakeBleConnection : BleConnection, BaseFake() {
         serviceUuid: Uuid,
         timeout: Duration,
         setup: suspend CoroutineScope.(BleService) -> T,
-    ): T {
-        return CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined).setup(FakeBleService())
-    }
+    ): T = CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined).setup(FakeBleService())
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int = 512
 }
@@ -136,7 +143,10 @@ class FakeBleConnectionFactory(private val fakeConnection: FakeBleConnection = F
     override fun create(scope: CoroutineScope, tag: String): BleConnection = fakeConnection
 }
 
-class FakeBluetoothRepository : BluetoothRepository, BaseFake() {
+@Suppress("EmptyFunctionBlock")
+class FakeBluetoothRepository :
+    BaseFake(),
+    BluetoothRepository {
     private val _state = mutableStateFlow(BluetoothState(hasPermissions = true, enabled = true))
     override val state: StateFlow<BluetoothState> = _state.asStateFlow()
 

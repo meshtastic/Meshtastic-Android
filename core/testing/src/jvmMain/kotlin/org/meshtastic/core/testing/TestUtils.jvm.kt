@@ -16,4 +16,5 @@
  */
 package org.meshtastic.core.testing
 
+@Suppress("EmptyFunctionBlock")
 actual fun setupTestContext() {}

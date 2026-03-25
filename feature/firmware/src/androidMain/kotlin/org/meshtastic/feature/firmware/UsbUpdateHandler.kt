@@ -59,14 +59,13 @@ class UsbUpdateHandler(
 
             updateState(
                 FirmwareUpdateState.Downloading(
-                    ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f)
-                )
+                    ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
+                ),
             )
 
             if (firmwareUri != null) {
-                updateState(
-                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_rebooting)))
-                )
+                val rebootingMsg = UiText.Resource(Res.string.firmware_update_rebooting)
+                updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
                 val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
                 radioController.rebootToDfu(myNodeNum)
                 delay(REBOOT_DELAY)
@@ -83,8 +82,8 @@ class UsbUpdateHandler(
                                     message = UiText.DynamicString(downloadingMsg),
                                     progress = progress,
                                     details = "$percent%",
-                                )
-                            )
+                                ),
+                            ),
                         )
                     }
 
@@ -93,16 +92,14 @@ class UsbUpdateHandler(
                     updateState(FirmwareUpdateState.Error(UiText.DynamicString(retrievalFailedMsg)))
                     null
                 } else {
-                    updateState(
-                        FirmwareUpdateState.Processing(
-                            ProgressState(UiText.Resource(Res.string.firmware_update_rebooting))
-                        )
-                    )
+                    val rebootingMsg = UiText.Resource(Res.string.firmware_update_rebooting)
+                    updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
                     val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
                     radioController.rebootToDfu(myNodeNum)
                     delay(REBOOT_DELAY)
 
-                    updateState(FirmwareUpdateState.AwaitingFileSave(firmwareFile, java.io.File(firmwareFile).name))
+                    val fileName = java.io.File(firmwareFile).name
+                    updateState(FirmwareUpdateState.AwaitingFileSave(firmwareFile, fileName))
                     firmwareFile
                 }
             }

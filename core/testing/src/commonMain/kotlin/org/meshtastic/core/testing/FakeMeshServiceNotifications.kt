@@ -22,6 +22,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
 /** A test double for [MeshServiceNotifications] that provides a no-op implementation. */
+@Suppress("TooManyFunctions", "EmptyFunctionBlock")
 class FakeMeshServiceNotifications : MeshServiceNotifications {
     override fun clearNotifications() {}
 

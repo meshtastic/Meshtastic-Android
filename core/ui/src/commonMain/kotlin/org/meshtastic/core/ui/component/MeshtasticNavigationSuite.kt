@@ -92,86 +92,134 @@ fun MeshtasticNavigationSuite(
     val topLevelDestination = TopLevelDestination.fromNavKey(rootKey)
 
     val onNavigate = { destination: TopLevelDestination ->
-        val isRepress = destination == topLevelDestination
-        if (isRepress) {
-            when (destination) {
-                TopLevelDestination.Nodes -> {
-                    val onNodesList = currentKey is NodesRoutes.NodesGraph || currentKey is NodesRoutes.Nodes
-                    if (!onNodesList) {
-                        backStack.navigateTopLevel(destination.route)
-                    } else {
-                        uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
-                    }
-                }
-                TopLevelDestination.Conversations -> {
-                    val onConversationsList =
-                        currentKey is ContactsRoutes.ContactsGraph || currentKey is ContactsRoutes.Contacts
-                    if (!onConversationsList) {
-                        backStack.navigateTopLevel(destination.route)
-                    } else {
-                        uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
-                    }
-                }
-                else -> {
-                    if (currentKey != destination.route) {
-                        backStack.navigateTopLevel(destination.route)
-                    }
-                }
-            }
-        } else {
-            backStack.navigateTopLevel(destination.route)
-        }
+        handleNavigation(destination, topLevelDestination, currentKey, backStack, uiViewModel)
     }
 
     if (isCompact) {
         Scaffold(
             modifier = modifier,
             bottomBar = {
-                NavigationBar {
-                    TopLevelDestination.entries.forEach { destination ->
-                        NavigationBarItem(
-                            selected = destination == topLevelDestination,
-                            onClick = { onNavigate(destination) },
-                            icon = {
-                                NavigationIconContent(
-                                    destination = destination,
-                                    isSelected = destination == topLevelDestination,
-                                    connectionState = connectionState,
-                                    unreadMessageCount = unreadMessageCount,
-                                    selectedDevice = selectedDevice,
-                                    uiViewModel = uiViewModel,
-                                )
-                            },
-                            label = { Text(stringResource(destination.label)) },
-                        )
-                    }
-                }
+                MeshtasticNavigationBar(
+                    topLevelDestination = topLevelDestination,
+                    connectionState = connectionState,
+                    unreadMessageCount = unreadMessageCount,
+                    selectedDevice = selectedDevice,
+                    uiViewModel = uiViewModel,
+                    onNavigate = onNavigate,
+                )
             },
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize().padding(padding)) { content() }
         }
     } else {
         Row(modifier = modifier.fillMaxSize()) {
-            NavigationRail {
-                TopLevelDestination.entries.forEach { destination ->
-                    NavigationRailItem(
-                        selected = destination == topLevelDestination,
-                        onClick = { onNavigate(destination) },
-                        icon = {
-                            NavigationIconContent(
-                                destination = destination,
-                                isSelected = destination == topLevelDestination,
-                                connectionState = connectionState,
-                                unreadMessageCount = unreadMessageCount,
-                                selectedDevice = selectedDevice,
-                                uiViewModel = uiViewModel,
-                            )
-                        },
-                        label = { Text(stringResource(destination.label)) },
-                    )
+            MeshtasticNavigationRail(
+                topLevelDestination = topLevelDestination,
+                connectionState = connectionState,
+                unreadMessageCount = unreadMessageCount,
+                selectedDevice = selectedDevice,
+                uiViewModel = uiViewModel,
+                onNavigate = onNavigate,
+            )
+            Box(modifier = Modifier.weight(1f).fillMaxSize()) { content() }
+        }
+    }
+}
+
+private fun handleNavigation(
+    destination: TopLevelDestination,
+    topLevelDestination: TopLevelDestination?,
+    currentKey: NavKey?,
+    backStack: NavBackStack<NavKey>,
+    uiViewModel: UIViewModel,
+) {
+    val isRepress = destination == topLevelDestination
+    if (isRepress) {
+        when (destination) {
+            TopLevelDestination.Nodes -> {
+                val onNodesList = currentKey is NodesRoutes.NodesGraph || currentKey is NodesRoutes.Nodes
+                if (!onNodesList) {
+                    backStack.navigateTopLevel(destination.route)
+                } else {
+                    uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                 }
             }
-            Box(modifier = Modifier.weight(1f).fillMaxSize()) { content() }
+            TopLevelDestination.Conversations -> {
+                val onConversationsList =
+                    currentKey is ContactsRoutes.ContactsGraph || currentKey is ContactsRoutes.Contacts
+                if (!onConversationsList) {
+                    backStack.navigateTopLevel(destination.route)
+                } else {
+                    uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
+                }
+            }
+            else -> {
+                if (currentKey != destination.route) {
+                    backStack.navigateTopLevel(destination.route)
+                }
+            }
+        }
+    } else {
+        backStack.navigateTopLevel(destination.route)
+    }
+}
+
+@Composable
+private fun MeshtasticNavigationBar(
+    topLevelDestination: TopLevelDestination?,
+    connectionState: ConnectionState,
+    unreadMessageCount: Int,
+    selectedDevice: String?,
+    uiViewModel: UIViewModel,
+    onNavigate: (TopLevelDestination) -> Unit,
+) {
+    NavigationBar {
+        TopLevelDestination.entries.forEach { destination ->
+            NavigationBarItem(
+                selected = destination == topLevelDestination,
+                onClick = { onNavigate(destination) },
+                icon = {
+                    NavigationIconContent(
+                        destination = destination,
+                        isSelected = destination == topLevelDestination,
+                        connectionState = connectionState,
+                        unreadMessageCount = unreadMessageCount,
+                        selectedDevice = selectedDevice,
+                        uiViewModel = uiViewModel,
+                    )
+                },
+                label = { Text(stringResource(destination.label)) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun MeshtasticNavigationRail(
+    topLevelDestination: TopLevelDestination?,
+    connectionState: ConnectionState,
+    unreadMessageCount: Int,
+    selectedDevice: String?,
+    uiViewModel: UIViewModel,
+    onNavigate: (TopLevelDestination) -> Unit,
+) {
+    NavigationRail {
+        TopLevelDestination.entries.forEach { destination ->
+            NavigationRailItem(
+                selected = destination == topLevelDestination,
+                onClick = { onNavigate(destination) },
+                icon = {
+                    NavigationIconContent(
+                        destination = destination,
+                        isSelected = destination == topLevelDestination,
+                        connectionState = connectionState,
+                        unreadMessageCount = unreadMessageCount,
+                        selectedDevice = selectedDevice,
+                        uiViewModel = uiViewModel,
+                    )
+                },
+                label = { Text(stringResource(destination.label)) },
+            )
         }
     }
 }

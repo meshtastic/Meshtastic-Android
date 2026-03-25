@@ -23,7 +23,7 @@ import org.meshtastic.core.common.database.DatabaseManager
 class FakeDatabaseManager :
     BaseFake(),
     DatabaseManager {
-    private val _cacheLimit = mutableStateFlow(100)
+    private val _cacheLimit = mutableStateFlow(DEFAULT_CACHE_LIMIT)
     override val cacheLimit: StateFlow<Int> = _cacheLimit
 
     var lastSwitchedAddress: String? = null
@@ -31,7 +31,7 @@ class FakeDatabaseManager :
 
     init {
         registerResetAction {
-            _cacheLimit.value = 100
+            _cacheLimit.value = DEFAULT_CACHE_LIMIT
             lastSwitchedAddress = null
             existingDatabases.clear()
         }
@@ -48,4 +48,8 @@ class FakeDatabaseManager :
     }
 
     override fun hasDatabaseFor(address: String?): Boolean = address != null && existingDatabases.contains(address)
+
+    companion object {
+        private const val DEFAULT_CACHE_LIMIT = 100
+    }
 }

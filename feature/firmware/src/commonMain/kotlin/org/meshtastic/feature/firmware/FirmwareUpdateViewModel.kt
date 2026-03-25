@@ -241,6 +241,7 @@ class FirmwareUpdateViewModel(
                         checkForUpdates()
                         throw e
                     } catch (e: Exception) {
+                        Logger.e(e) { "Firmware update failed" }
                         _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
                     }
                 }

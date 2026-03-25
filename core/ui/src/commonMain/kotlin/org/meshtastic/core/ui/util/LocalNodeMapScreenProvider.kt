@@ -24,6 +24,7 @@ import org.meshtastic.core.ui.component.PlaceholderScreen
  * Provides the platform-specific Map Screen for a Node (e.g. Google Maps or OSMDroid on Android). On Desktop or JVM
  * targets where native maps aren't available yet, it falls back to a [PlaceholderScreen].
  */
+@Suppress("Wrapping")
 val LocalNodeMapScreenProvider =
     compositionLocalOf<@Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit> {
         { destNum, _ -> PlaceholderScreen("Node Map ($destNum)") }

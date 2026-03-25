@@ -24,6 +24,7 @@ import org.meshtastic.core.ui.component.PlaceholderScreen
  * Provides the platform-specific Traceroute Map Screen. On Desktop or JVM targets where native maps aren't available
  * yet, it falls back to a [PlaceholderScreen].
  */
+@Suppress("Wrapping")
 val LocalTracerouteMapScreenProvider =
     compositionLocalOf<@Composable (destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit) -> Unit> {
         { _, _, _, _ -> PlaceholderScreen("Traceroute Map") }
