@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.map.navigation
+package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
+import org.meshtastic.core.ui.component.PlaceholderScreen
 
-@Composable
-actual fun MapMainScreen(onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
-    // TODO: Implement iOS map main screen
-}
+/**
+ * Provides the platform-specific Map Main Screen.
+ * On Desktop or JVM targets where native maps aren't available yet, it falls back to a [PlaceholderScreen].
+ */
+val LocalMapMainScreenProvider =
+    compositionLocalOf<@Composable (onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) -> Unit> {
+        { _, _, _ -> PlaceholderScreen("Map") }
+    }

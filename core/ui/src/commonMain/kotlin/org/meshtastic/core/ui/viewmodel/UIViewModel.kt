@@ -84,7 +84,7 @@ class UIViewModel(
     val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
-    private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)
+    private val _navigationDeepLink = MutableSharedFlow<List<androidx.navigation3.runtime.NavKey>>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
     /**
@@ -100,8 +100,9 @@ class UIViewModel(
         val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
 
         // Try navigation routing first
-        if (org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri) != null) {
-            _navigationDeepLink.tryEmit(uri)
+        val navKeys = org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri)
+        if (navKeys != null) {
+            _navigationDeepLink.tryEmit(navKeys)
             return
         }
 

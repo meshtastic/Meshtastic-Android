@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.map.navigation
 
-import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -25,13 +24,11 @@ import org.meshtastic.core.navigation.NodesRoutes
 
 fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
     entry<MapRoutes.Map> { args ->
-        MapMainScreen(
-            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
-            navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
-            waypointId = args.waypointId,
+        val mapScreen = org.meshtastic.core.ui.util.LocalMapMainScreenProvider.current
+        mapScreen(
+            { backStack.add(NodesRoutes.NodeDetailGraph(it)) }, // onClickNodeChip
+            { backStack.add(NodesRoutes.NodeDetailGraph(it)) }, // navigateToNodeDetails
+            args.waypointId,
         )
     }
 }
-
-@Composable
-expect fun MapMainScreen(onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?)

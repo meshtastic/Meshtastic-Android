@@ -146,12 +146,8 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoutes.TracerouteMap> { args ->
-        TracerouteMapScreen(
-            destNum = args.destNum,
-            requestId = args.requestId,
-            logUuid = args.logUuid,
-            onNavigateUp = { backStack.removeLastOrNull() },
-        )
+        val tracerouteMapScreen = org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider.current
+        tracerouteMapScreen(args.destNum, args.requestId, args.logUuid) { backStack.removeLastOrNull() }
     }
 
     NodeDetailRoute.entries.forEach { routeInfo ->
@@ -194,7 +190,6 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
 }
 
 /** Expect declaration for the platform-specific traceroute map screen. */
-@Composable expect fun TracerouteMapScreen(destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit)
 
 enum class NodeDetailRoute(
     val title: StringResource,
