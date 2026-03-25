@@ -36,6 +36,7 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_nordic_failed
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
@@ -68,7 +69,7 @@ class NordicDfuHandler(
                     .replace(Regex(":?\\s*%1\\\$d%?"), "")
                     .trim()
 
-            updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
+            updateState(FirmwareUpdateState.Downloading(ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f)))
 
             if (firmwareUri != null) {
                 initiateDfu(target, hardware, firmwareUri, updateState)
@@ -79,14 +80,14 @@ class NordicDfuHandler(
                         val percent = (progress * PERCENT_MAX).toInt()
                         updateState(
                             FirmwareUpdateState.Downloading(
-                                ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
+                                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = progress, details = "$percent%"),
                             ),
                         )
                     }
 
                 if (firmwareFile == null) {
                     val errorMsg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
-                    updateState(FirmwareUpdateState.Error(errorMsg))
+                    updateState(FirmwareUpdateState.Error(UiText.DynamicString(errorMsg)))
                     null
                 } else {
                     initiateDfu(target, hardware, CommonUri.parse("file://$firmwareFile"), updateState)
@@ -98,7 +99,7 @@ class NordicDfuHandler(
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "Nordic DFU Update failed" }
             val errorMsg = getString(Res.string.firmware_update_nordic_failed)
-            updateState(FirmwareUpdateState.Error(e.message ?: errorMsg))
+            updateState(FirmwareUpdateState.Error(UiText.DynamicString(e.message ?: errorMsg)))
             null
         }
 
@@ -108,8 +109,7 @@ class NordicDfuHandler(
         firmwareUri: CommonUri,
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
-        val startingMsg = getString(Res.string.firmware_update_starting_service)
-        updateState(FirmwareUpdateState.Processing(ProgressState(startingMsg)))
+        updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_service))))
 
         // n = Nordic (Legacy prefix handling in mesh service)
         radioController.setDeviceAddress("n")

@@ -26,7 +26,7 @@ Focus on ViewModel logic and feature-specific business rules.
 - [x] Task: Align `feature:node` & `feature:messaging`: Migrate tests to `commonTest`, target 80% coverage (Brief pass requested, coverage at ~31% and ~23%).
 - [x] Task: Align `feature:map` & `feature:connections`: Migrate tests to `commonTest`, target 80% coverage (Brief pass requested, coverage at ~41% and ~56%).
 - [x] Task: Align remaining `feature:*` modules (In-depth pass for firmware reaching ~43%; intro:~34%, widget:0%).
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: feature Modules Alignment' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 3: feature Modules Alignment' (Protocol in workflow.md)
 
 ## Phase 4: Network & Hardware Abstractions Alignment
 Handle the more complex platform-dependent modules.
