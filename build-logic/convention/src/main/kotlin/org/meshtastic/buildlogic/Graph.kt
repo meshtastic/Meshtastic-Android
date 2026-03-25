@@ -47,7 +47,7 @@ internal enum class PluginType(val id: String, val ref: String, val style: Strin
         style = "fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000",
     ),
     ComposeDesktopApplication(
-        id = "org.jetbrains.compose",
+        id = "?desktop",
         ref = "compose-desktop-application",
         style = "fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000",
     ),
@@ -80,6 +80,11 @@ internal enum class PluginType(val id: String, val ref: String, val style: Strin
         id = "meshtastic.kmp.feature",
         ref = "kmp-feature",
         style = "fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000",
+    ),
+    KmpLibraryCompose(
+        id = "meshtastic.kmp.library.compose",
+        ref = "kmp-library-compose",
+        style = "fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000",
     ),
     KmpLibrary(
         id = "meshtastic.kmp.library",
@@ -200,6 +205,7 @@ private abstract class GraphDumpTask : DefaultTask() {
         appendLine("    L1[Application]:::android-application")
         appendLine("    L2[Library]:::android-library")
         appendLine("    L3[Feature]:::android-feature")
+        appendLine("    L4[KMP Library]:::kmp-library")
         appendLine("  end")
         PluginType.entries.forEach { appendLine("classDef ${it.ref} ${it.style};") }
     }
