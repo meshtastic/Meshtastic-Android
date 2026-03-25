@@ -86,3 +86,27 @@ actual fun rememberOpenUrl(): (url: String) -> Unit {
         }
     }
 }
+
+@Composable
+actual fun rememberSaveFileLauncher(
+    onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit
+): (defaultFilename: String, mimeType: String) -> Unit {
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            result.data?.data?.let { uri -> onUriReceived(uri.toString().let { org.meshtastic.core.common.util.MeshtasticUri(it) }) }
+        }
+    }
+
+    return remember(launcher) {
+        { defaultFilename, mimeType ->
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = mimeType
+                putExtra(Intent.EXTRA_TITLE, defaultFilename)
+            }
+            launcher.launch(intent)
+        }
+    }
+}

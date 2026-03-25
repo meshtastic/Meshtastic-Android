@@ -20,7 +20,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,9 +48,9 @@ fun AnimatedConnectionsNavIcon(
     connectionState: ConnectionState,
     deviceType: DeviceType?,
     meshActivityFlow: Flow<MeshActivity>,
-    colorScheme: ColorScheme,
     modifier: Modifier = Modifier,
 ) {
+    val colorScheme = androidx.compose.material3.MaterialTheme.colorScheme
     var currentGlowColor by remember { mutableStateOf(Color.Transparent) }
     val animatedGlowAlpha = remember { Animatable(0f) }
 

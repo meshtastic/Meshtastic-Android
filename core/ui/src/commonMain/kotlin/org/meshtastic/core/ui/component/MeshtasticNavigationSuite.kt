@@ -88,27 +88,34 @@ fun MeshtasticNavigationSuite(
     val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
     val isCompact = adaptiveInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
     val currentKey = backStack.lastOrNull()
-    val topLevelDestination = TopLevelDestination.fromNavKey(currentKey)
+    val rootKey = backStack.firstOrNull()
+    val topLevelDestination = TopLevelDestination.fromNavKey(rootKey)
 
     val onNavigate = { destination: TopLevelDestination ->
         val isRepress = destination == topLevelDestination
         if (isRepress) {
             when (destination) {
                 TopLevelDestination.Nodes -> {
-                    val onNodesList = currentKey is NodesRoutes.Nodes
+                    val onNodesList = currentKey is NodesRoutes.NodesGraph || currentKey is NodesRoutes.Nodes
                     if (!onNodesList) {
                         backStack.navigateTopLevel(destination.route)
+                    } else {
+                        uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                     }
-                    uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                 }
                 TopLevelDestination.Conversations -> {
-                    val onConversationsList = currentKey is ContactsRoutes.Contacts
+                    val onConversationsList = currentKey is ContactsRoutes.ContactsGraph || currentKey is ContactsRoutes.Contacts
                     if (!onConversationsList) {
                         backStack.navigateTopLevel(destination.route)
+                    } else {
+                        uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                     }
-                    uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                 }
-                else -> Unit
+                else -> {
+                    if (currentKey != destination.route) {
+                        backStack.navigateTopLevel(destination.route)
+                    }
+                }
             }
         } else {
             backStack.navigateTopLevel(destination.route)
@@ -205,7 +212,6 @@ private fun NavigationIconContent(
                 connectionState = connectionState,
                 deviceType = DeviceType.fromAddress(selectedDevice ?: "NoDevice"),
                 meshActivityFlow = uiViewModel.meshActivity,
-                colorScheme = colorScheme,
             )
         } else {
             BadgedBox(
