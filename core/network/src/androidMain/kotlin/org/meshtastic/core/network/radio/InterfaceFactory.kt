@@ -30,7 +30,6 @@ import org.meshtastic.core.repository.RadioTransport
 @Single
 class InterfaceFactory(
     private val nopInterfaceFactory: NopInterfaceFactory,
-    private val bluetoothSpec: Lazy<BleRadioInterfaceSpec>,
     private val mockSpec: Lazy<MockInterfaceSpec>,
     private val serialSpec: Lazy<SerialInterfaceSpec>,
     private val tcpSpec: Lazy<TCPInterfaceSpec>,
@@ -40,7 +39,6 @@ class InterfaceFactory(
     private val specMap: Map<InterfaceId, InterfaceSpec<*>>
         get() =
             mapOf(
-                InterfaceId.BLUETOOTH to bluetoothSpec.value,
                 InterfaceId.MOCK to mockSpec.value,
                 InterfaceId.NOP to NopInterfaceSpec(nopInterfaceFactory),
                 InterfaceId.SERIAL to serialSpec.value,
