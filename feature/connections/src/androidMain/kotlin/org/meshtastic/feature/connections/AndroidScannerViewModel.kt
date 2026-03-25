@@ -29,6 +29,7 @@ import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -40,6 +41,7 @@ class AndroidScannerViewModel(
     serviceRepository: ServiceRepository,
     radioController: RadioController,
     radioInterfaceService: RadioInterfaceService,
+    radioPrefs: RadioPrefs,
     recentAddressesDataSource: RecentAddressesDataSource,
     getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
     dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
@@ -50,6 +52,7 @@ class AndroidScannerViewModel(
     serviceRepository,
     radioController,
     radioInterfaceService,
+    radioPrefs,
     recentAddressesDataSource,
     getDiscoveredDevicesUseCase,
     dispatchers,

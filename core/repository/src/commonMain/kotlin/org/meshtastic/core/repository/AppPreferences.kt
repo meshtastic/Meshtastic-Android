@@ -185,7 +185,12 @@ interface MapTileProviderPrefs {
 interface RadioPrefs {
     val devAddr: StateFlow<String?>
 
+    /** The persisted user-visible name of the connected device (e.g. "Meshtastic_1234"). */
+    val devName: StateFlow<String?>
+
     fun setDevAddr(address: String?)
+
+    fun setDevName(name: String?)
 }
 
 fun RadioPrefs.isBle() = devAddr.value?.startsWith("x") == true

@@ -38,6 +38,7 @@ import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -49,6 +50,7 @@ open class ScannerViewModel(
     protected val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
     private val radioInterfaceService: RadioInterfaceService,
+    private val radioPrefs: RadioPrefs,
     private val recentAddressesDataSource: RecentAddressesDataSource,
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
     private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
@@ -150,6 +152,9 @@ open class ScannerViewModel(
 
     val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
 
+    /** The persisted device name from the last selection, for use as a UI fallback. */
+    val persistedDeviceName: StateFlow<String?> = radioPrefs.devName
+
     val selectedNotNullFlow: StateFlow<String> =
         selectedAddressFlow
             .map { it ?: NO_DEVICE_SELECTED }
@@ -193,6 +198,7 @@ open class ScannerViewModel(
     fun onSelected(it: DeviceListEntry): Boolean = when (it) {
         is DeviceListEntry.Ble -> {
             if (it.bonded) {
+                radioPrefs.setDevName(it.name)
                 changeDeviceAddress(it.fullAddress)
                 true
             } else {
@@ -202,6 +208,7 @@ open class ScannerViewModel(
         }
         is DeviceListEntry.Usb -> {
             if (it.bonded) {
+                radioPrefs.setDevName(it.name)
                 changeDeviceAddress(it.fullAddress)
                 true
             } else {
@@ -211,12 +218,14 @@ open class ScannerViewModel(
         }
         is DeviceListEntry.Tcp -> {
             viewModelScope.launch {
+                radioPrefs.setDevName(it.name)
                 addRecentAddress(it.fullAddress, it.name)
                 changeDeviceAddress(it.fullAddress)
             }
             true
         }
         is DeviceListEntry.Mock -> {
+            radioPrefs.setDevName(it.name)
             changeDeviceAddress(it.fullAddress)
             true
         }
@@ -228,6 +237,7 @@ open class ScannerViewModel(
     protected open fun requestPermission(entry: DeviceListEntry.Usb) {}
 
     fun disconnect() {
+        radioPrefs.setDevName(null)
         changeDeviceAddress(NO_DEVICE_SELECTED)
     }
 }

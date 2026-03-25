@@ -106,6 +106,7 @@ fun ConnectionsScreen(
     val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
+    val persistedDeviceName by scanModel.persistedDeviceName.collectAsStateWithLifecycle()
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -194,6 +195,7 @@ fun ConnectionsScreen(
                         1 ->
                             ConnectingDeviceContent(
                                 selectedDevice = selectedDevice,
+                                persistedDeviceName = persistedDeviceName,
                                 bleDevices = bleDevices,
                                 discoveredTcpDevices = discoveredTcpDevices,
                                 recentTcpDevices = recentTcpDevices,
@@ -327,6 +329,7 @@ private fun ConnectedDeviceContent(
 @Composable
 private fun ConnectingDeviceContent(
     selectedDevice: String,
+    persistedDeviceName: String?,
     bleDevices: List<DeviceListEntry>,
     discoveredTcpDevices: List<DeviceListEntry>,
     recentTcpDevices: List<DeviceListEntry>,
@@ -339,7 +342,9 @@ private fun ConnectingDeviceContent(
             ?: recentTcpDevices.find { it.fullAddress == selectedDevice }
             ?: usbDevices.find { it.fullAddress == selectedDevice }
 
-    val name = selectedEntry?.name ?: stringResource(Res.string.unknown_device)
+    // Use the entry name if found in scan lists, otherwise fall back to the persisted name
+    // from the last successful selection, and only show "Unknown Device" as a last resort.
+    val name = selectedEntry?.name ?: persistedDeviceName ?: stringResource(Res.string.unknown_device)
     val address = selectedEntry?.address ?: selectedDevice
 
     TitledCard(title = stringResource(Res.string.connected_device)) {

@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.feature.connections.model.DiscoveredDevices
@@ -43,6 +44,7 @@ class ScannerViewModelTest {
     private val serviceRepository = FakeServiceRepository()
     private val radioController = FakeRadioController()
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
+    private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
     private val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase = mock(MockMode.autofill)
     private val bleScanner: org.meshtastic.core.ble.BleScanner = mock(MockMode.autofill)
@@ -66,6 +68,7 @@ class ScannerViewModelTest {
                 serviceRepository = serviceRepository,
                 radioController = radioController,
                 radioInterfaceService = radioInterfaceService,
+                radioPrefs = radioPrefs,
                 recentAddressesDataSource = recentAddressesDataSource,
                 getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
                 dispatchers =
