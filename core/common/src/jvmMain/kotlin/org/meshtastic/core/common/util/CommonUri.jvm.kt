@@ -32,20 +32,10 @@ actual class CommonUri(private val uri: URI) {
 
     actual fun getQueryParameter(key: String): String? = queryParameters[key]?.firstOrNull()
 
-    actual fun getBooleanQueryParameter(key: String, defaultValue: Boolean): Boolean =
-        when (getQueryParameter(key)?.lowercase()) {
-            "1",
-            "true",
-            "yes",
-            "on",
-            -> true
-            "0",
-            "false",
-            "no",
-            "off",
-            -> false
-            else -> defaultValue
-        }
+    actual fun getBooleanQueryParameter(key: String, defaultValue: Boolean): Boolean {
+        val value = getQueryParameter(key) ?: return defaultValue
+        return value != "false" && value != "0"
+    }
 
     actual override fun toString(): String = uri.toString()
 
