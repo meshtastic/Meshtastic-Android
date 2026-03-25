@@ -45,6 +45,54 @@ The `:core:testing` module is a dedicated **Kotlin Multiplatform (KMP)** library
 
 By centralizing fakes and mocking utilities here, we prevent duplication of test setups and enforce a standard approach to testing ViewModels, Repositories, and pure domain logic.
 
+## Handling Platform-Specific Setup (Robolectric)
+
+Some KMP modules interact with Android framework components (e.g., `android.net.Uri`, `androidx.room`, `DataStore`) that require Robolectric to run on the JVM. To maintain a unified test suite while providing platform-specific initialization, follow the **Subclassing Pattern**:
+
+### 1. Create an Abstract Base Test in `commonTest`
+Place your test logic in an abstract class in `src/commonTest`. Do NOT use `@BeforeTest` for setup that requires platform-specific context.
+
+```kotlin
+abstract class CommonMyViewModelTest {
+    protected lateinit var viewModel: MyViewModel
+    
+    // Call this from subclasses
+    fun setupRepo() {
+        // ... common setup logic
+    }
+    
+    @Test
+    fun testLogic() { /* ... */ }
+}
+```
+
+### 2. Implement the JVM Subclass in `jvmTest`
+A simple subclass is usually enough for pure JVM targets.
+
+```kotlin
+class MyViewModelTest : CommonMyViewModelTest() {
+    @BeforeTest
+    fun setup() {
+        setupRepo()
+    }
+}
+```
+
+### 3. Implement the Android Subclass in `androidHostTest`
+Use `@RunWith(RobolectricTestRunner::class)` and call `setupTestContext()` to initialize `ContextServices.app`.
+
+```kotlin
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
+class MyViewModelTest : CommonMyViewModelTest() {
+    @BeforeTest
+    fun setup() {
+        setupTestContext() // From :core:testing, initializes Robolectric context
+        setupRepo()
+    }
+}
+```
+
 ## Key Components
 
 - **Test Doubles / Fakes**: Provides in-memory implementations of core repositories (e.g., `FakeNodeRepository`, `FakeMeshLogRepository`) to isolate components under test.

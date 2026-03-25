@@ -44,5 +44,9 @@ kotlin {
             api(libs.turbine)
             api(libs.junit)
         }
+        androidMain.dependencies {
+            api(libs.androidx.test.core)
+            api(libs.robolectric)
+        }
     }
 }
