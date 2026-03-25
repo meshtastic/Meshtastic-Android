@@ -110,3 +110,38 @@ actual fun rememberSaveFileLauncher(
         }
     }
 }
+
+@Composable
+actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        if (permissions.values.any { it }) {
+            onGranted()
+        } else {
+            onDenied()
+        }
+    }
+    return remember(launcher) {
+        {
+            launcher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                )
+            )
+        }
+    }
+}
+
+@Composable
+actual fun rememberOpenLocationSettings(): () -> Unit {
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { _ -> }
+    return remember(launcher) {
+        {
+            launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+        }
+    }
+}

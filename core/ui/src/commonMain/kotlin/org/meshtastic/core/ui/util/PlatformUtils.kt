@@ -36,3 +36,9 @@ import org.jetbrains.compose.resources.StringResource
 
 /** Returns a launcher function to prompt the user to save a file. The callback receives the saved file URI. */
 @Composable expect fun rememberSaveFileLauncher(onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit): (defaultFilename: String, mimeType: String) -> Unit
+
+/** Returns a launcher to request location permissions. */
+@Composable expect fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
+
+/** Returns a launcher to open the platform's location settings. */
+@Composable expect fun rememberOpenLocationSettings(): () -> Unit

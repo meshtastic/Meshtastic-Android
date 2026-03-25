@@ -54,3 +54,14 @@ actual fun rememberSaveFileLauncher(
 ): (defaultFilename: String, mimeType: String) -> Unit = { _, _ ->
     Logger.w { "File saving not implemented on Desktop" }
 }
+
+@Composable
+actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
+    Logger.w { "Location permissions not implemented on Desktop" }
+    onDenied()
+}
+
+@Composable
+actual fun rememberOpenLocationSettings(): () -> Unit = {
+    Logger.w { "Location settings not implemented on Desktop" }
+}
