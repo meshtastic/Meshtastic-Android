@@ -40,12 +40,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.navigateTopLevel
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.ui.component.MeshtasticCommonAppSetup
-import org.meshtastic.core.ui.component.MeshtasticSnackbarProvider
+import org.meshtastic.core.ui.component.MeshtasticAppShell
 import org.meshtastic.core.ui.navigation.icon
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
@@ -80,57 +78,50 @@ fun DesktopMainScreen(
     val selectedDevice by radioService.currentDeviceAddressFlow.collectAsStateWithLifecycle()
     val colorScheme = MaterialTheme.colorScheme
 
-    MeshtasticCommonAppSetup(
-        uiViewModel = uiViewModel,
-        onNavigateToTracerouteMap = { destNum, requestId, logUuid ->
-            backStack.add(NodeDetailRoutes.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid))
-        },
-    )
-
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                NavigationRail {
-                    TopLevelDestination.entries.forEach { destination ->
-                        NavigationRailItem(
-                            selected = destination == selected,
-                            onClick = {
-                                if (destination != selected) {
-                                    backStack.navigateTopLevel(destination.route)
-                                }
-                            },
-                            icon = {
-                                if (destination == TopLevelDestination.Connections) {
-                                    org.meshtastic.feature.connections.ui.components.AnimatedConnectionsNavIcon(
-                                        connectionState = connectionState,
-                                        deviceType = DeviceType.fromAddress(selectedDevice ?: "NoDevice"),
-                                        meshActivityFlow = radioService.meshActivity,
-                                        colorScheme = colorScheme,
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = destination.icon,
-                                        contentDescription = stringResource(destination.label),
-                                    )
-                                }
-                            },
-                            label = { Text(stringResource(destination.label)) },
-                        )
+        MeshtasticAppShell(
+            backStack = backStack,
+            uiViewModel = uiViewModel,
+            hostModifier = Modifier.padding(bottom = 24.dp),
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    NavigationRail {
+                        TopLevelDestination.entries.forEach { destination ->
+                            NavigationRailItem(
+                                selected = destination == selected,
+                                onClick = {
+                                    if (destination != selected) {
+                                        backStack.navigateTopLevel(destination.route)
+                                    }
+                                },
+                                icon = {
+                                    if (destination == TopLevelDestination.Connections) {
+                                        org.meshtastic.feature.connections.ui.components.AnimatedConnectionsNavIcon(
+                                            connectionState = connectionState,
+                                            deviceType = DeviceType.fromAddress(selectedDevice ?: "NoDevice"),
+                                            meshActivityFlow = radioService.meshActivity,
+                                            colorScheme = colorScheme,
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = destination.icon,
+                                            contentDescription = stringResource(destination.label),
+                                        )
+                                    }
+                                },
+                                label = { Text(stringResource(destination.label)) },
+                            )
+                        }
                     }
-                }
 
-                MeshtasticSnackbarProvider(
-                    snackbarManager = uiViewModel.snackbarManager,
-                    modifier = Modifier.weight(1f).fillMaxSize(),
-                    hostModifier = Modifier.padding(bottom = 24.dp),
-                ) {
                     val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel) }
 
                     NavDisplay(
                         backStack = backStack,
                         onBack = { backStack.removeLastOrNull() },
                         entryProvider = provider,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.weight(1f).fillMaxSize(),
                     )
                 }
             }

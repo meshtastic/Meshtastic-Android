@@ -67,7 +67,6 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
-import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.navigateTopLevel
@@ -78,8 +77,7 @@ import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.must_update
-import org.meshtastic.core.ui.component.MeshtasticCommonAppSetup
-import org.meshtastic.core.ui.component.MeshtasticSnackbarProvider
+import org.meshtastic.core.ui.component.MeshtasticAppShell
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.navigation.icon
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -111,13 +109,6 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
 
-    MeshtasticCommonAppSetup(
-        uiViewModel = uIViewModel,
-        onNavigateToTracerouteMap = { destNum, requestId, logUuid ->
-            backStack.add(NodeDetailRoutes.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid))
-        },
-    )
-
     AndroidAppVersionCheck(uIViewModel)
     val navSuiteType =
         NavigationSuiteScaffoldDefaults.navigationSuiteType(
@@ -129,118 +120,127 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
     // State for determining the connection type icon to display
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
 
-    NavigationSuiteScaffold(
-        modifier = Modifier.fillMaxSize(),
-        navigationSuiteItems = {
-            TopLevelDestination.entries.forEach { destination ->
-                val isSelected = destination == topLevelDestination
-                val isConnectionsRoute = destination == TopLevelDestination.Connections
-                item(
-                    icon = {
-                        TooltipBox(
-                            positionProvider =
-                            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                            tooltip = {
-                                PlainTooltip {
-                                    Text(
-                                        if (isConnectionsRoute) {
-                                            when (connectionState) {
-                                                ConnectionState.Connected -> stringResource(Res.string.connected)
-                                                ConnectionState.Connecting -> stringResource(Res.string.connecting)
-                                                ConnectionState.DeviceSleep ->
-                                                    stringResource(Res.string.device_sleeping)
-                                                ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
-                                            }
-                                        } else {
-                                            stringResource(destination.label)
-                                        },
-                                    )
-                                }
-                            },
-                            state = rememberTooltipState(),
-                        ) {
-                            if (isConnectionsRoute) {
-                                org.meshtastic.feature.connections.ui.components.AnimatedConnectionsNavIcon(
-                                    connectionState = connectionState,
-                                    deviceType = DeviceType.fromAddress(selectedDevice),
-                                    meshActivityFlow = uIViewModel.meshActivity,
-                                    colorScheme = colorScheme,
-                                )
-                            } else {
-                                BadgedBox(
-                                    badge = {
-                                        if (destination == TopLevelDestination.Conversations) {
-                                            // Keep track of the last non-zero count for display during exit animation
-                                            var lastNonZeroCount by remember { mutableIntStateOf(unreadMessageCount) }
-                                            if (unreadMessageCount > 0) {
-                                                lastNonZeroCount = unreadMessageCount
-                                            }
-                                            AnimatedVisibility(
-                                                visible = unreadMessageCount > 0,
-                                                enter = scaleIn() + fadeIn(),
-                                                exit = scaleOut() + fadeOut(),
-                                            ) {
-                                                Badge { Text(lastNonZeroCount.toString()) }
-                                            }
-                                        }
-                                    },
-                                ) {
-                                    Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
-                                        Icon(
-                                            imageVector = destination.icon,
-                                            contentDescription = stringResource(destination.label),
-                                            tint =
-                                            if (isSelectedState) colorScheme.primary else LocalContentColor.current,
+    MeshtasticAppShell(
+        backStack = backStack,
+        uiViewModel = uIViewModel,
+        hostModifier = Modifier.safeDrawingPadding().padding(bottom = 16.dp),
+    ) {
+        NavigationSuiteScaffold(
+            modifier = Modifier.fillMaxSize(),
+            navigationSuiteItems = {
+                TopLevelDestination.entries.forEach { destination ->
+                    val isSelected = destination == topLevelDestination
+                    val isConnectionsRoute = destination == TopLevelDestination.Connections
+                    item(
+                        icon = {
+                            TooltipBox(
+                                positionProvider =
+                                TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                                tooltip = {
+                                    PlainTooltip {
+                                        Text(
+                                            if (isConnectionsRoute) {
+                                                when (connectionState) {
+                                                    ConnectionState.Connected -> stringResource(Res.string.connected)
+                                                    ConnectionState.Connecting -> stringResource(Res.string.connecting)
+                                                    ConnectionState.DeviceSleep ->
+                                                        stringResource(Res.string.device_sleeping)
+                                                    ConnectionState.Disconnected ->
+                                                        stringResource(Res.string.disconnected)
+                                                }
+                                            } else {
+                                                stringResource(destination.label)
+                                            },
                                         )
                                     }
+                                },
+                                state = rememberTooltipState(),
+                            ) {
+                                if (isConnectionsRoute) {
+                                    org.meshtastic.feature.connections.ui.components.AnimatedConnectionsNavIcon(
+                                        connectionState = connectionState,
+                                        deviceType = DeviceType.fromAddress(selectedDevice),
+                                        meshActivityFlow = uIViewModel.meshActivity,
+                                        colorScheme = colorScheme,
+                                    )
+                                } else {
+                                    BadgedBox(
+                                        badge = {
+                                            if (destination == TopLevelDestination.Conversations) {
+                                                // Keep track of the last non-zero count for display during exit
+                                                // animation
+                                                var lastNonZeroCount by remember {
+                                                    mutableIntStateOf(unreadMessageCount)
+                                                }
+                                                if (unreadMessageCount > 0) {
+                                                    lastNonZeroCount = unreadMessageCount
+                                                }
+                                                AnimatedVisibility(
+                                                    visible = unreadMessageCount > 0,
+                                                    enter = scaleIn() + fadeIn(),
+                                                    exit = scaleOut() + fadeOut(),
+                                                ) {
+                                                    Badge { Text(lastNonZeroCount.toString()) }
+                                                }
+                                            }
+                                        },
+                                    ) {
+                                        Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
+                                            Icon(
+                                                imageVector = destination.icon,
+                                                contentDescription = stringResource(destination.label),
+                                                tint =
+                                                if (isSelectedState) {
+                                                    colorScheme.primary
+                                                } else {
+                                                    LocalContentColor.current
+                                                },
+                                            )
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    },
-                    selected = isSelected,
-                    label = {
-                        Text(
-                            text = stringResource(destination.label),
-                            modifier =
-                            if (navSuiteType == NavigationSuiteType.ShortNavigationBarCompact) {
-                                Modifier.width(1.dp)
-                                    .height(1.dp) // hide on phone - min 1x1 or talkback won't see it.
+                        },
+                        selected = isSelected,
+                        label = {
+                            Text(
+                                text = stringResource(destination.label),
+                                modifier =
+                                if (navSuiteType == NavigationSuiteType.ShortNavigationBarCompact) {
+                                    Modifier.width(1.dp)
+                                        .height(1.dp) // hide on phone - min 1x1 or talkback won't see it.
+                                } else {
+                                    Modifier
+                                },
+                            )
+                        },
+                        onClick = {
+                            val isRepress = destination == topLevelDestination
+                            if (isRepress) {
+                                when (destination) {
+                                    TopLevelDestination.Nodes -> {
+                                        val onNodesList = currentKey is NodesRoutes.Nodes
+                                        if (!onNodesList) {
+                                            backStack.navigateTopLevel(destination.route)
+                                        }
+                                        uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
+                                    }
+                                    TopLevelDestination.Conversations -> {
+                                        val onConversationsList = currentKey is ContactsRoutes.Contacts
+                                        if (!onConversationsList) {
+                                            backStack.navigateTopLevel(destination.route)
+                                        }
+                                        uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
+                                    }
+                                    else -> Unit
+                                }
                             } else {
-                                Modifier
-                            },
-                        )
-                    },
-                    onClick = {
-                        val isRepress = destination == topLevelDestination
-                        if (isRepress) {
-                            when (destination) {
-                                TopLevelDestination.Nodes -> {
-                                    val onNodesList = currentKey is NodesRoutes.Nodes
-                                    if (!onNodesList) {
-                                        backStack.navigateTopLevel(destination.route)
-                                    }
-                                    uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
-                                }
-                                TopLevelDestination.Conversations -> {
-                                    val onConversationsList = currentKey is ContactsRoutes.Contacts
-                                    if (!onConversationsList) {
-                                        backStack.navigateTopLevel(destination.route)
-                                    }
-                                    uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
-                                }
-                                else -> Unit
+                                backStack.navigateTopLevel(destination.route)
                             }
-                        } else {
-                            backStack.navigateTopLevel(destination.route)
-                        }
-                    },
-                )
-            }
-        },
-    ) {
-        MeshtasticSnackbarProvider(
-            snackbarManager = uIViewModel.snackbarManager,
-            hostModifier = Modifier.safeDrawingPadding().padding(bottom = 16.dp),
+                        },
+                    )
+                }
+            },
         ) {
             val provider =
                 entryProvider<NavKey> {

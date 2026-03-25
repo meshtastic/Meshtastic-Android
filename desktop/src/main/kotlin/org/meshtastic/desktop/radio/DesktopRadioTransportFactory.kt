@@ -16,6 +16,7 @@
  */
 package org.meshtastic.desktop.radio
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
@@ -23,55 +24,32 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.network.SerialTransport
+import org.meshtastic.core.network.radio.BaseRadioTransportFactory
 import org.meshtastic.core.network.radio.TCPInterface
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 
+@Single(binds = [RadioTransportFactory::class])
 class DesktopRadioTransportFactory(
-    private val scanner: BleScanner,
-    private val bluetoothRepository: BluetoothRepository,
-    private val connectionFactory: BleConnectionFactory,
-    private val dispatchers: CoroutineDispatchers,
-) : RadioTransportFactory {
+    scanner: BleScanner,
+    bluetoothRepository: BluetoothRepository,
+    connectionFactory: BleConnectionFactory,
+    dispatchers: CoroutineDispatchers,
+) : BaseRadioTransportFactory(scanner, bluetoothRepository, connectionFactory, dispatchers) {
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
 
     override fun isMockInterface(): Boolean = false
 
-    override fun isAddressValid(address: String?): Boolean {
-        val spec = address?.getOrNull(0) ?: return false
-        return spec == InterfaceId.TCP.id ||
-            spec == InterfaceId.SERIAL.id ||
-            spec == InterfaceId.BLUETOOTH.id ||
-            address.startsWith("!")
-    }
-
-    override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
-
-    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport =
+    override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
         if (address.startsWith(InterfaceId.TCP.id)) {
-            TCPInterface(service, dispatchers, address.removePrefix(InterfaceId.TCP.id.toString()))
+            return TCPInterface(service, dispatchers, address.removePrefix(InterfaceId.TCP.id.toString()))
         } else if (address.startsWith(InterfaceId.SERIAL.id)) {
-            SerialTransport(portName = address.removePrefix(InterfaceId.SERIAL.id.toString()), service = service)
-        } else if (address.startsWith(InterfaceId.BLUETOOTH.id)) {
-            DesktopBleInterface(
-                serviceScope = service.serviceScope,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                service = service,
-                address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()),
-            )
+            return SerialTransport(portName = address.removePrefix(InterfaceId.SERIAL.id.toString()), service = service)
         } else {
-            val stripped = if (address.startsWith("!")) address.removePrefix("!") else address
-            DesktopBleInterface(
-                serviceScope = service.serviceScope,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                service = service,
-                address = stripped,
-            )
+            // Fallback for unsupported / nop
+            error("Unsupported transport for address: $address")
         }
+    }
 }
