@@ -1,6 +1,6 @@
 # Implementation Plan: KMP Testing Best Practices & Coverage Alignment
 
-## Phase 1: Foundation & core:testing Expansion
+## Phase 1: Foundation & core:testing Expansion [checkpoint: 2a63b07]
 Standardize and expand the shared testing infrastructure.
 
 - [x] Task: Audit `core:testing` for existing fakes and identify gaps based on common repository/manager interfaces. 1b9dfab
@@ -8,7 +8,7 @@ Standardize and expand the shared testing infrastructure.
 - [x] Task: Implement `FakeMeshService` and `FakeRadioInterface` fakes in `core:testing`. fa81ce0
 - [x] Task: Implement `FakeSettingsRepository` and `FakeLocationRepository`. f1d3bfc
 - [x] Task: Standardize `BaseFake` or similar utility for consistent state management in fakes. 58e85f5
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & core:testing Expansion' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & core:testing Expansion' (Protocol in workflow.md)
 
 ## Phase 2: core Modules Alignment
 Migrate and improve coverage for core business logic modules.
