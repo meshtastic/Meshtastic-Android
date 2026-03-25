@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,51 +16,45 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.testing.FakeMeshLogPrefs
+import org.meshtastic.core.testing.FakeMeshLogRepository
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class SetMeshLogSettingsUseCaseTest {
-    /*
 
-
-    private lateinit var meshLogRepository: MeshLogRepository
-    private lateinit var meshLogPrefs: MeshLogPrefs
+    private lateinit var meshLogRepository: FakeMeshLogRepository
+    private lateinit var meshLogPrefs: FakeMeshLogPrefs
     private lateinit var useCase: SetMeshLogSettingsUseCase
 
     @BeforeTest
     fun setUp() {
+        meshLogRepository = FakeMeshLogRepository()
+        meshLogPrefs = FakeMeshLogPrefs()
         useCase = SetMeshLogSettingsUseCase(meshLogRepository, meshLogPrefs)
     }
 
     @Test
-    fun `setRetentionDays clamps and updates prefs and repository`() = runTest {
-        // Act
-        useCase.setRetentionDays(MeshLogPrefs.MIN_RETENTION_DAYS - 1)
-
-        // Assert
-        verify { meshLogPrefs.setRetentionDays(MeshLogPrefs.MIN_RETENTION_DAYS) }
-        verifySuspend { meshLogRepository.deleteLogsOlderThan(MeshLogPrefs.MIN_RETENTION_DAYS) }
+    fun `setRetentionDays clamps value and deletes old logs`() = runTest {
+        useCase.setRetentionDays(500) // Max is 365
+        assertEquals(365, meshLogPrefs.retentionDays.value)
+        assertEquals(365, meshLogRepository.lastDeletedOlderThan)
     }
 
     @Test
-    fun `setLoggingEnabled true triggers cleanup`() = runTest {
-        // Arrange
-        every { meshLogPrefs.retentionDays.value } returns 30
-
-        // Act
-        useCase.setLoggingEnabled(true)
-
-        // Assert
-        verify { meshLogPrefs.setLoggingEnabled(true) }
-        verifySuspend { meshLogRepository.deleteLogsOlderThan(30) }
-    }
-
-    @Test
-    fun `setLoggingEnabled false triggers deletion`() = runTest {
-        // Act
+    fun `setLoggingEnabled false deletes all logs`() = runTest {
         useCase.setLoggingEnabled(false)
-
-        // Assert
-        verify { meshLogPrefs.setLoggingEnabled(false) }
-        verifySuspend { meshLogRepository.deleteAll() }
+        assertEquals(false, meshLogPrefs.loggingEnabled.value)
+        assertEquals(true, meshLogRepository.deleteAllCalled)
     }
 
-     */
+    @Test
+    fun `setLoggingEnabled true deletes logs older than retention`() = runTest {
+        meshLogPrefs.setRetentionDays(15)
+        useCase.setLoggingEnabled(true)
+        assertEquals(true, meshLogPrefs.loggingEnabled.value)
+        assertEquals(15, meshLogRepository.lastDeletedOlderThan)
+    }
 }
