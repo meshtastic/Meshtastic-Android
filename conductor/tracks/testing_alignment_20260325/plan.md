@@ -3,7 +3,7 @@
 ## Phase 1: Foundation & core:testing Expansion
 Standardize and expand the shared testing infrastructure.
 
-- [ ] Task: Audit `core:testing` for existing fakes and identify gaps based on common repository/manager interfaces.
+- [x] Task: Audit `core:testing` for existing fakes and identify gaps based on common repository/manager interfaces. 1b9dfab
 - [ ] Task: Implement `FakeNodeRepository` in `core:testing` (if missing or incomplete).
 - [ ] Task: Implement `FakeMeshService` and `FakeRadioInterface` fakes in `core:testing`.
 - [ ] Task: Implement `FakeSettingsRepository` and `FakeLocationRepository`.
