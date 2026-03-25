@@ -1,7 +1,7 @@
 # `:core:network`
 
 ## Overview
-The `:core:network` module handles all internet-based communication, including fetching firmware metadata, device hardware definitions, and map tiles (in the `fdroid` flavor).
+The `:core:network` module handles all internet-based communication, including fetching firmware metadata, device hardware definitions, and map tiles (in the `fdroid` flavor). It also provides the shared radio transport layer (`TCPInterface`, `SerialTransport`, `BleRadioInterface`).
 
 ## Key Components
 
@@ -11,6 +11,12 @@ The module uses **Ktor** as its primary HTTP client for high-performance, asynch
 ### 2. Remote Data Sources
 - **`FirmwareReleaseRemoteDataSource`**: Fetches the latest firmware versions from GitHub or Meshtastic's metadata servers.
 - **`DeviceHardwareRemoteDataSource`**: Fetches definitions for supported Meshtastic hardware devices.
+
+### 3. Shared Transports
+- **`BleRadioInterface`**: Multiplatform BLE transport powered by Kable.
+- **`TCPInterface`**: Multiplatform TCP transport.
+- **`SerialTransport`**: JVM-shared USB/Serial transport powered by jSerialComm.
+- **`BaseRadioTransportFactory`**: Common factory for instantiating the KMP transports.
 
 ## Module dependency graph
 

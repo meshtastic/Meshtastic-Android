@@ -97,9 +97,9 @@ The module depends on the JVM variants of KMP modules:
 - [x] Create connections screen using shared `feature:connections` with dynamic transport detection
 - [x] Replace 5 placeholder config screens with real desktop implementations (Device, Position, Network, Security, ExtNotification)
 - [x] Add desktop language picker backed by shared `UiPreferencesDataSource.locale` with live translation updates
-- [ ] Wire remaining `feature:*` composables (map) into the nav graph
-- [ ] Move remaining node detail and message composables from `androidMain` to `commonMain`
+- [x] Wire remaining `feature:*` composables (map) into the nav graph
+- [x] Move remaining node detail and message composables from `androidMain` to `commonMain`
 - [x] Add serial/USB transport for direct radio connection on Desktop
 - [x] Add BLE transport (via Kable) for direct radio connection on Desktop
-- [ ] Add MQTT transport for cloud-connected operation
+- [x] Add MQTT transport for cloud-connected operation
 - [x] Package as native distributions (DMG, MSI, DEB) via CI release pipeline
