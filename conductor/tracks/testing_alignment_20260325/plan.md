@@ -5,7 +5,7 @@ Standardize and expand the shared testing infrastructure.
 
 - [x] Task: Audit `core:testing` for existing fakes and identify gaps based on common repository/manager interfaces. 1b9dfab
 - [x] Task: Implement `FakeNodeRepository` in `core:testing` (if missing or incomplete). 8022439
-- [ ] Task: Implement `FakeMeshService` and `FakeRadioInterface` fakes in `core:testing`.
+- [x] Task: Implement `FakeMeshService` and `FakeRadioInterface` fakes in `core:testing`. fa81ce0
 - [ ] Task: Implement `FakeSettingsRepository` and `FakeLocationRepository`.
 - [ ] Task: Standardize `BaseFake` or similar utility for consistent state management in fakes.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Foundation & core:testing Expansion' (Protocol in workflow.md)
