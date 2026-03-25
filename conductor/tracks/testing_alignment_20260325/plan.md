@@ -25,7 +25,7 @@ Focus on ViewModel logic and feature-specific business rules.
 - [x] Task: Align `feature:settings`: Migrate ViewModel tests to commonTest, use fakes, target 80% coverage (Best effort reached ~39%).
 - [x] Task: Align `feature:node` & `feature:messaging`: Migrate tests to `commonTest`, target 80% coverage (Brief pass requested, coverage at ~31% and ~23%).
 - [x] Task: Align `feature:map` & `feature:connections`: Migrate tests to `commonTest`, target 80% coverage (Brief pass requested, coverage at ~41% and ~56%).
-- [ ] Task: Align remaining `feature:*` modules.
+- [x] Task: Align remaining `feature:*` modules (Brief pass requested, coverage at intro:~34%, widget:0%, firmware:~0.3%).
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: feature Modules Alignment' (Protocol in workflow.md)
 
 ## Phase 4: Network & Hardware Abstractions Alignment
