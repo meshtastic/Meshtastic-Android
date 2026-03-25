@@ -32,6 +32,7 @@ kotlin {
             api(projects.core.model)
             api(projects.core.repository)
             api(projects.core.database)
+            api(projects.core.ble)
             implementation(projects.core.datastore)
             implementation(libs.androidx.room.runtime)
             implementation(libs.jetbrains.lifecycle.runtime)

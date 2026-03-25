@@ -17,26 +17,17 @@
 package org.meshtastic.core.network.radio
 
 import dev.mokkery.MockMode
-import dev.mokkery.answering.returns
-import dev.mokkery.every
-import dev.mokkery.everySuspend
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.ble.BleConnection
-import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
-import org.meshtastic.core.ble.BleDevice
-import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.ble.BluetoothRepository
-import org.meshtastic.core.ble.BluetoothState
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.testing.FakeBleConnection
+import org.meshtastic.core.testing.FakeBleConnectionFactory
+import org.meshtastic.core.testing.FakeBleDevice
+import org.meshtastic.core.testing.FakeBleScanner
+import org.meshtastic.core.testing.FakeBluetoothRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -45,33 +36,23 @@ import kotlin.test.assertEquals
 class BleRadioInterfaceTest {
 
     private val testScope = TestScope()
-    private val scanner: BleScanner = mock()
-    private val bluetoothRepository: BluetoothRepository = mock()
-    private val connectionFactory: BleConnectionFactory = mock()
-    private val connection: BleConnection = mock()
+    private val scanner = FakeBleScanner()
+    private val bluetoothRepository = FakeBluetoothRepository()
+    private val connection = FakeBleConnection()
+    private val connectionFactory = FakeBleConnectionFactory(connection)
     private val service: RadioInterfaceService = mock(MockMode.autofill)
     private val address = "00:11:22:33:44:55"
 
-    private val connectionStateFlow = MutableSharedFlow<BleConnectionState>(replay = 1)
-    private val bluetoothStateFlow = MutableStateFlow(BluetoothState())
-
     @BeforeTest
     fun setup() {
-        every { connectionFactory.create(any(), any()) } returns connection
-        every { connection.connectionState } returns connectionStateFlow
-        every { bluetoothRepository.state } returns bluetoothStateFlow.asStateFlow()
-
-        bluetoothStateFlow.value = BluetoothState(enabled = true, hasPermissions = true)
+        bluetoothRepository.setHasPermissions(true)
+        bluetoothRepository.setBluetoothEnabled(true)
     }
 
     @Test
     fun `connect attempts to scan and connect via init`() = runTest {
-        val device: BleDevice = mock()
-        every { device.address } returns address
-        every { device.name } returns "Test Device"
-
-        every { scanner.scan(any(), any()) } returns flowOf(device)
-        everySuspend { connection.connectAndAwait(any(), any(), any()) } returns BleConnectionState.Connected
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        scanner.emitDevice(device)
 
         val bleInterface =
             BleRadioInterface(
@@ -84,8 +65,9 @@ class BleRadioInterfaceTest {
             )
 
         // init starts connect() which is async
-        // We can wait for the coEvery to be triggered if needed,
-        // but for a basic test this confirms it doesn't crash on init.
+        // In a real test we'd verify the connection state,
+        // but for now this confirms it works with the fakes.
+        assertEquals(address, bleInterface.address)
     }
 
     @Test
