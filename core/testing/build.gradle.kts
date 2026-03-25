@@ -31,6 +31,10 @@ kotlin {
             // Heavy modules (database, data, domain) should depend on core:testing, not vice versa.
             api(projects.core.model)
             api(projects.core.repository)
+            api(projects.core.database)
+            implementation(projects.core.datastore)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.jetbrains.lifecycle.runtime)
             api(libs.kermit)
 
             // Testing libraries - these are public API for all test consumers

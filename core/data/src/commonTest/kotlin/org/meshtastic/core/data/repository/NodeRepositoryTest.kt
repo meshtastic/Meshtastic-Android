@@ -16,32 +16,68 @@
  */
 package org.meshtastic.core.data.repository
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
+import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.NodeWithRelations
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.testing.FakeLocalStatsDataSource
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NodeRepositoryTest {
-    /*
 
-
-    private val lifecycleScope: LifecycleCoroutineScope = mock()
-
-    private val testDispatcher = StandardTestDispatcher()
+    private lateinit var lifecycleOwner: LifecycleOwner
+    private lateinit var readDataSource: NodeInfoReadDataSource
+    private lateinit var writeDataSource: NodeInfoWriteDataSource
+    private lateinit var localStatsDataSource: FakeLocalStatsDataSource
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
     private val myNodeInfoFlow = MutableStateFlow<MyNodeEntity?>(null)
 
-    @Before
+    private lateinit var repository: NodeRepositoryImpl
+
+    @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        mockkStatic("androidx.lifecycle.LifecycleKt")
-        every { lifecycleScope.coroutineContext } returns testDispatcher + Job()
-        every { lifecycle.coroutineScope } returns lifecycleScope
+        lifecycleOwner = object : LifecycleOwner {
+            override val lifecycle = LifecycleRegistry(this)
+        }
+        (lifecycleOwner.lifecycle as LifecycleRegistry).handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+
+        readDataSource = mock(MockMode.autofill)
+        writeDataSource = mock(MockMode.autofill)
+        localStatsDataSource = FakeLocalStatsDataSource()
+
         every { readDataSource.myNodeInfoFlow() } returns myNodeInfoFlow
-        every { readDataSource.nodeDBbyNumFlow() } returns MutableStateFlow(emptyMap())
+        every { readDataSource.nodeDBbyNumFlow() } returns MutableStateFlow<Map<Int, NodeWithRelations>>(emptyMap())
+
+        repository = NodeRepositoryImpl(lifecycleOwner.lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
+        // Essential to stop background jobs in NodeRepositoryImpl
+        (lifecycleOwner.lifecycle as LifecycleRegistry).handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         Dispatchers.resetMain()
     }
 
@@ -63,10 +99,6 @@ class NodeRepositoryTest {
         val myNodeNum = 12345
         myNodeInfoFlow.value = createMyNodeEntity(myNodeNum)
 
-        val repository =
-            NodeRepositoryImpl(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
-        testScheduler.runCurrent()
-
         val result = repository.effectiveLogNodeId(myNodeNum).filter { it == MeshLog.NODE_NUM_LOCAL }.first()
 
         assertEquals(MeshLog.NODE_NUM_LOCAL, result)
@@ -78,42 +110,8 @@ class NodeRepositoryTest {
         val remoteNodeNum = 67890
         myNodeInfoFlow.value = createMyNodeEntity(myNodeNum)
 
-        val repository =
-            NodeRepositoryImpl(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
-        testScheduler.runCurrent()
-
         val result = repository.effectiveLogNodeId(remoteNodeNum).first()
 
         assertEquals(remoteNodeNum, result)
     }
-
-    @Test
-    fun `effectiveLogNodeId updates when local node number changes`() = runTest(testDispatcher) {
-        val firstNodeNum = 111
-        val secondNodeNum = 222
-        val targetNodeNum = 111
-
-        myNodeInfoFlow.value = createMyNodeEntity(firstNodeNum)
-        val repository =
-            NodeRepositoryImpl(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
-        testScheduler.runCurrent()
-
-        // Initially should be mapped to LOCAL because it matches
-        assertEquals(
-            MeshLog.NODE_NUM_LOCAL,
-            repository.effectiveLogNodeId(targetNodeNum).filter { it == MeshLog.NODE_NUM_LOCAL }.first(),
-        )
-
-        // Change local node num
-        myNodeInfoFlow.value = createMyNodeEntity(secondNodeNum)
-        testScheduler.runCurrent()
-
-        // Now it shouldn't match, so should return the original num
-        assertEquals(
-            targetNodeNum,
-            repository.effectiveLogNodeId(targetNodeNum).filter { it == targetNodeNum }.first(),
-        )
-    }
-
-     */
 }

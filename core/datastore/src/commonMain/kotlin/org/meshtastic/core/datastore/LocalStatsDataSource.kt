@@ -25,10 +25,19 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.proto.LocalStats
 
-/** Class that handles saving and retrieving [LocalStats] data. */
+/** Interface that handles saving and retrieving [LocalStats] data. */
+interface LocalStatsDataSource {
+    val localStatsFlow: Flow<LocalStats>
+    suspend fun setLocalStats(stats: LocalStats)
+    suspend fun clearLocalStats()
+}
+
+/** Implementation of [LocalStatsDataSource] using DataStore. */
 @Single
-open class LocalStatsDataSource(@Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>) {
-    val localStatsFlow: Flow<LocalStats> =
+open class LocalStatsDataSourceImpl(
+    @Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>
+) : LocalStatsDataSource {
+    override val localStatsFlow: Flow<LocalStats> =
         localStatsStore.data.catch { exception ->
             if (exception is IOException) {
                 Logger.e { "Error reading LocalStats: ${exception.message}" }
@@ -38,11 +47,11 @@ open class LocalStatsDataSource(@Named("CoreLocalStatsDataStore") private val lo
             }
         }
 
-    open suspend fun setLocalStats(stats: LocalStats) {
+    override suspend fun setLocalStats(stats: LocalStats) {
         localStatsStore.updateData { stats }
     }
 
-    open suspend fun clearLocalStats() {
+    override suspend fun clearLocalStats() {
         localStatsStore.updateData { LocalStats() }
     }
 }

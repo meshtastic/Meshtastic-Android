@@ -16,24 +16,61 @@
  */
 package org.meshtastic.core.data.repository
 
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.testing.FakeDatabaseProvider
+import org.meshtastic.core.testing.FakeMeshLogPrefs
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Telemetry
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+
 class MeshLogRepositoryTest {
-    /*
 
-
-    private val dbManager: DatabaseProvider = mock()
-    private val appDatabase: MeshtasticDatabase = mock()
-    private val meshLogDao: MeshLogDao = mock()
-    private val meshLogPrefs: MeshLogPrefs = mock()
-    private val nodeInfoReadDataSource: NodeInfoReadDataSource = mock()
+    private lateinit var dbProvider: FakeDatabaseProvider
+    private lateinit var meshLogPrefs: FakeMeshLogPrefs
+    private lateinit var nodeInfoReadDataSource: NodeInfoReadDataSource
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
-    private val repository = MeshLogRepositoryImpl(dbManager, dispatchers, meshLogPrefs, nodeInfoReadDataSource)
+    private lateinit var repository: MeshLogRepositoryImpl
 
-    init {
-        every { dbManager.currentDb } returns MutableStateFlow(appDatabase)
-        every { appDatabase.meshLogDao() } returns meshLogDao
+    private val nowMillis = 1000000000L
+
+    @BeforeTest
+    fun setUp() {
+        dbProvider = FakeDatabaseProvider()
+        meshLogPrefs = FakeMeshLogPrefs()
+        meshLogPrefs.setLoggingEnabled(true)
+        nodeInfoReadDataSource = mock(MockMode.autofill)
+
         every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(null)
+
+        repository = MeshLogRepositoryImpl(dbProvider, dispatchers, meshLogPrefs, nodeInfoReadDataSource)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        dbProvider.close()
     }
 
     @Test
@@ -46,150 +83,61 @@ class MeshLogRepositoryTest {
 
         val meshLog =
             MeshLog(
-                uuid = Uuid.random().toString(),
+                uuid = "123",
                 message_type = "telemetry",
                 received_date = nowMillis,
                 raw_message = "",
+                fromNum = 0,
+                portNum = PortNum.TELEMETRY_APP.value,
                 fromRadio = FromRadio(packet = meshPacket),
             )
 
-        // Using reflection to test private method parseTelemetryLog
-        val method = MeshLogRepositoryImpl::class.java.getDeclaredMethod("parseTelemetryLog", MeshLog::class.java)
-        method.isAccessible = true
-        val result = method.invoke(repository, meshLog) as Telemetry?
+        repository.insert(meshLog)
+
+        val result = repository.getTelemetryFrom(0).first()
 
         assertNotNull(result)
-        val resultMetrics = result?.environment_metrics
-        assertNotNull(resultMetrics)
-        assertEquals(zeroTemp, resultMetrics?.temperature ?: 0f, 0.01f)
-    }
-
-    @Test
-    fun `parseTelemetryLog maps missing temperature to NaN`() = runTest(testDispatcher) {
-        val telemetry = Telemetry(environment_metrics = EnvironmentMetrics(temperature = null))
-
-        val meshPacket =
-            MeshPacket(decoded = Data(payload = telemetry.encode().toByteString(), portnum = PortNum.TELEMETRY_APP))
-
-        val meshLog =
-            MeshLog(
-                uuid = Uuid.random().toString(),
-                message_type = "telemetry",
-                received_date = nowMillis,
-                raw_message = "",
-                fromRadio = FromRadio(packet = meshPacket),
-            )
-
-        val method = MeshLogRepositoryImpl::class.java.getDeclaredMethod("parseTelemetryLog", MeshLog::class.java)
-        method.isAccessible = true
-        val result = method.invoke(repository, meshLog) as Telemetry?
-
-        assertNotNull(result)
-        val resultMetrics = result?.environment_metrics
-
-        // Should be NaN as per repository logic for missing fields
-        assertEquals(Float.NaN, resultMetrics?.temperature ?: 0f, 0.01f)
-    }
-
-    @Test
-    fun `getRequestLogs filters correctly`() = runTest(testDispatcher) {
-        val targetNode = 123
-        val otherNode = 456
-        val port = PortNum.TRACEROUTE_APP
-
-        val logs =
-            listOf(
-                // Valid request
-                MeshLogEntity(
-                    uuid = "1",
-                    message_type = "Packet",
-                    received_date = nowMillis,
-                    raw_message = "",
-                    fromNum = 0,
-                    portNum = port.value,
-                    fromRadio =
-                    FromRadio(
-                        packet =
-                        MeshPacket(to = targetNode, decoded = Data(portnum = port, want_response = true)),
-                    ),
-                ),
-                // Wrong target
-                MeshLogEntity(
-                    uuid = "2",
-                    message_type = "Packet",
-                    received_date = nowMillis,
-                    raw_message = "",
-                    fromNum = 0,
-                    portNum = port.value,
-                    fromRadio =
-                    FromRadio(
-                        packet =
-                        MeshPacket(to = otherNode, decoded = Data(portnum = port, want_response = true)),
-                    ),
-                ),
-                // Not a request (want_response = false)
-                MeshLogEntity(
-                    uuid = "3",
-                    message_type = "Packet",
-                    received_date = nowMillis,
-                    raw_message = "",
-                    fromNum = 0,
-                    portNum = port.value,
-                    fromRadio =
-                    FromRadio(
-                        packet =
-                        MeshPacket(to = targetNode, decoded = Data(portnum = port, want_response = false)),
-                    ),
-                ),
-                // Wrong fromNum
-                MeshLogEntity(
-                    uuid = "4",
-                    message_type = "Packet",
-                    received_date = nowMillis,
-                    raw_message = "",
-                    fromNum = 789,
-                    portNum = port.value,
-                    fromRadio =
-                    FromRadio(
-                        packet =
-                        MeshPacket(to = targetNode, decoded = Data(portnum = port, want_response = true)),
-                    ),
-                ),
-            )
-
-
-        val result = repository.getRequestLogs(targetNode, port).first()
-
         assertEquals(1, result.size)
-        assertEquals("1", result[0].uuid)
+        val resultMetrics = result[0].environment_metrics
+        assertNotNull(resultMetrics)
+        assertEquals(zeroTemp, resultMetrics.temperature ?: 0f, 0.01f)
     }
 
     @Test
     fun `deleteLogs redirects local node number to NODE_NUM_LOCAL`() = runTest(testDispatcher) {
         val localNodeNum = 999
-        val port = 100
-        val myNodeEntity = mock<MyNodeEntity>()
-        every { myNodeEntity.myNodeNum } returns localNodeNum
+        val port = PortNum.TEXT_MESSAGE_APP.value
+        val myNodeEntity = MyNodeEntity(
+            myNodeNum = localNodeNum,
+            model = "model",
+            firmwareVersion = "1.0",
+            couldUpdate = false,
+            shouldUpdate = false,
+            currentPacketId = 0L,
+            messageTimeoutMsec = 0,
+            minAppVersion = 0,
+            maxChannels = 0,
+            hasWifi = false,
+        )
         every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(myNodeEntity)
+
+        val log = MeshLog(
+            uuid = "123",
+            message_type = "TEXT",
+            received_date = nowMillis,
+            raw_message = "",
+            fromNum = 0, // asEntity will map it if we pass localNodeNum to asEntity, but here we set it manually
+            portNum = port,
+            fromRadio = FromRadio(packet = MeshPacket(from = localNodeNum, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)))
+        )
+        repository.insert(log)
+
+        // Verify it's there
+        assertEquals(1, repository.getAllLogsUnbounded().first().size)
 
         repository.deleteLogs(localNodeNum, port)
 
-        verifySuspend { meshLogDao.deleteLogs(MeshLog.NODE_NUM_LOCAL, port) }
+        val logs = repository.getAllLogsUnbounded().first()
+        assertTrue(logs.isEmpty())
     }
-
-    @Test
-    fun `deleteLogs preserves remote node numbers`() = runTest(testDispatcher) {
-        val localNodeNum = 999
-        val remoteNodeNum = 888
-        val port = 100
-        val myNodeEntity = mock<MyNodeEntity>()
-        every { myNodeEntity.myNodeNum } returns localNodeNum
-        every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(myNodeEntity)
-
-        repository.deleteLogs(remoteNodeNum, port)
-
-        verifySuspend { meshLogDao.deleteLogs(remoteNodeNum, port) }
-    }
-
-     */
 }

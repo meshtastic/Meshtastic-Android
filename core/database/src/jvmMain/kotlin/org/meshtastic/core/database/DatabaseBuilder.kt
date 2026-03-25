@@ -48,6 +48,14 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
         .configureCommon()
 }
 
+/** Returns a [RoomDatabase.Builder] configured for an in-memory JVM database. */
+actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> {
+    return Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
+        factory = { MeshtasticDatabaseConstructor.initialize() },
+    )
+        .configureCommon()
+}
+
 /** Returns the JVM/Desktop directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path = desktopDataDir().toPath()
 

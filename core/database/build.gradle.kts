@@ -48,9 +48,11 @@ kotlin {
             implementation(libs.kermit)
         }
         commonTest.dependencies {
+            implementation(projects.core.testing)
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
+            implementation(libs.turbine)
         }
 
         val androidHostTest by getting {
@@ -74,6 +76,7 @@ kotlin {
 
 dependencies {
     "kspJvm"(libs.androidx.room.compiler)
+    "kspJvmTest"(libs.androidx.room.compiler)
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
 }
