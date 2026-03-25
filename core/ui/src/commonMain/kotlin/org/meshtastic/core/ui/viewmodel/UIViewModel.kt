@@ -127,6 +127,8 @@ class UIViewModel(
     /** Emits events for mesh network send/receive activity. */
     val meshActivity: Flow<MeshActivity> = radioInterfaceService.meshActivity
 
+    val currentDeviceAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
+
     private val _scrollToTopEventFlow =
         MutableSharedFlow<ScrollToTopEvent>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val scrollToTopEventFlow: Flow<ScrollToTopEvent> = _scrollToTopEventFlow.asSharedFlow()

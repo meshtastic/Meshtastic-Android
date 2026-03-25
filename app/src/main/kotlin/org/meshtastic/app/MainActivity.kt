@@ -138,6 +138,11 @@ class MainActivity : ComponentActivity() {
                 LocalMapViewProvider provides getMapViewProvider(),
                 LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
                 LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),
+                org.meshtastic.core.ui.util.LocalNodeMapScreenProvider provides { destNum, onNavigateUp ->
+                    val vm = koinViewModel<org.meshtastic.feature.map.node.NodeMapViewModel>()
+                    vm.setDestNum(destNum)
+                    org.meshtastic.app.map.node.NodeMapScreen(vm, onNavigateUp = onNavigateUp)
+                },
             ) {
                 AppTheme(dynamicColor = dynamic, darkTheme = dark) {
                     val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()

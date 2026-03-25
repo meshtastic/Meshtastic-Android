@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.connections.ui.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.material.icons.Icons
