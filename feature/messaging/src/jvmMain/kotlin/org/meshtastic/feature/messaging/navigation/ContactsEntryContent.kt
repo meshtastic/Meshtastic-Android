@@ -42,7 +42,7 @@ actual fun ContactsEntryContent(
         scrollToTopEvents = scrollToTopEvents,
         sharedContactRequested = null,
         requestChannelSet = null,
-        onHandleScannedUri = { _, _ -> },
+        onHandleDeepLink = { _, _ -> },
         onClearSharedContactRequested = {},
         onClearRequestChannelUrl = {},
         initialContactKey = initialContactKey,

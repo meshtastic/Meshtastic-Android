@@ -36,10 +36,14 @@ import org.meshtastic.feature.settings.radio.channel.channelsGraph
  * [settingsGraph]. Connections uses the shared [ConnectionsScreen]. Other features use placeholder screens until their
  * shared composables are wired.
  */
-fun EntryProviderScope<NavKey>.desktopNavGraph(backStack: NavBackStack<NavKey>) {
+fun EntryProviderScope<NavKey>.desktopNavGraph(
+    backStack: NavBackStack<NavKey>,
+    uiViewModel: org.meshtastic.core.ui.viewmodel.UIViewModel,
+) {
     // Nodes — real composables from feature:node
     nodesGraph(
         backStack = backStack,
+        onHandleDeepLink = uiViewModel::handleDeepLink,
         nodeMapScreen = { destNum, _ -> KmpMapPlaceholder(title = "Node Map ($destNum)") },
     )
 

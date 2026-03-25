@@ -87,18 +87,30 @@ class UIViewModel(
     private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
-    fun handleNavigationDeepLink(uri: MeshtasticUri) {
-        _navigationDeepLink.tryEmit(uri)
-    }
+    /**
+     * Unified handler for all Meshtastic deep links and OS intents.
+     *
+     * This method orchestrates two distinct types of URI handling:
+     * 1. **Navigation:** First attempts to parse the URI into a typed [NavKey] backstack via [DeepLinkRouter]. If
+     *    successful, navigates the user to the target screen.
+     * 2. **Data Import:** If navigation fails, falls back to legacy contact/channel parsing via
+     *    [dispatchMeshtasticUri]. This triggers import dialogs for shared nodes or channel configurations.
+     */
+    fun handleDeepLink(uri: MeshtasticUri, onInvalid: () -> Unit = {}) {
+        val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
 
-    /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
-    fun handleScannedUri(uri: MeshtasticUri, onInvalid: () -> Unit) {
-        org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
-            .dispatchMeshtasticUri(
-                onContact = { setSharedContactRequested(it) },
-                onChannel = { setRequestChannelSet(it) },
-                onInvalid = onInvalid,
-            )
+        // Try navigation routing first
+        if (org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri) != null) {
+            _navigationDeepLink.tryEmit(uri)
+            return
+        }
+
+        // Fallback to channel/contact importing
+        commonUri.dispatchMeshtasticUri(
+            onContact = { setSharedContactRequested(it) },
+            onChannel = { setRequestChannelSet(it) },
+            onInvalid = onInvalid,
+        )
     }
 
     val theme: StateFlow<Int> = uiPrefs.theme

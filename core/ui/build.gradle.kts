@@ -55,6 +55,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.layout)
             implementation(libs.jetbrains.compose.material3.adaptive.navigation)
             implementation(libs.jetbrains.navigationevent.compose)
+            implementation(libs.jetbrains.navigation3.ui)
         }
 
         val jvmAndroidMain by getting { dependencies { implementation(libs.compose.multiplatform.ui.tooling) } }

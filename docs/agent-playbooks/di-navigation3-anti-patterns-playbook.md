@@ -35,6 +35,8 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 - Do mutate `NavBackStack<NavKey>` with `add(...)` and `removeLastOrNull()`.
 - Don't use Android's `androidx.activity.compose.BackHandler` or custom `PredictiveBackHandler` in multiplatform UI.
 - Do use the official KMP `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose` for back gestures.
+- Don't parse deep links manually in platform code or push single routes without a backstack.
+- Do use `DeepLinkRouter.route()` in `core:navigation` to synthesize the correct typed backstack from RESTful paths.
 
 ### Current code anchors (Navigation 3)
 

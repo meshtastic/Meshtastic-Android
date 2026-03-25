@@ -20,10 +20,16 @@ import androidx.compose.runtime.Composable
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
- * Encapsulates the headless, global UI components (dialogs, version checks, traceroute alerts) that need to be active
- * across all platforms at the root of the application hierarchy.
+ * Common application-level setup for all Meshtastic platforms (Android, Desktop, etc.).
  *
- * This deduplicates the setup boilerplate from Android's MainScreen and DesktopMainScreen.
+ * This component encapsulates headless global UI logic that must reside at the root of the application hierarchy. It
+ * manages:
+ * - Shared system dialogs (e.g. contact/channel import)
+ * - Global version and firmware checks
+ * - System-wide alerts and snackbar hosts
+ * - Deep link navigation interception logic
+ *
+ * Platform hosts (Main.kt) should invoke this at the root of their theme before rendering the main NavDisplay.
  */
 @Composable
 fun MeshtasticCommonAppSetup(

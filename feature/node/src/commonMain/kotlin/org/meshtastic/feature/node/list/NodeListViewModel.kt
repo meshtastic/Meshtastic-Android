@@ -20,18 +20,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -40,7 +36,6 @@ import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.SharedContact
 
 @Suppress("LongParameterList")
 @KoinViewModel
@@ -62,12 +57,6 @@ class NodeListViewModel(
     val totalNodeCount = nodeRepository.totalNodeCount.stateInWhileSubscribed(initialValue = 0)
 
     val connectionState = serviceRepository.connectionState
-
-    private val _sharedContactRequested: MutableStateFlow<SharedContact?> = MutableStateFlow(null)
-    val sharedContactRequested = _sharedContactRequested.asStateFlow()
-
-    private val _requestChannelSet = MutableStateFlow<ChannelSet?>(null)
-    val requestChannelSet = _requestChannelSet.asStateFlow()
 
     private val nodeSortOption = nodeFilterPreferences.nodeSortOption
 
@@ -133,24 +122,6 @@ class NodeListViewModel(
 
     fun setSortOption(sort: NodeSortOption) {
         nodeFilterPreferences.setNodeSort(sort)
-    }
-
-    fun setSharedContactRequested(sharedContact: SharedContact?) {
-        _sharedContactRequested.value = sharedContact
-    }
-
-    /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
-    fun handleScannedUri(uriString: String, onInvalid: () -> Unit) {
-        val uri = CommonUri.parse(uriString)
-        uri.dispatchMeshtasticUri(
-            onContact = { _sharedContactRequested.value = it },
-            onChannel = { _requestChannelSet.value = it },
-            onInvalid = onInvalid,
-        )
-    }
-
-    fun clearRequestChannelSet() {
-        _requestChannelSet.value = null
     }
 
     fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {

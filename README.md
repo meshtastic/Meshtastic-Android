@@ -64,7 +64,7 @@ The app follows modern Android development practices, built on top of a shared K
 - **UI:** JetBrains Compose Multiplatform (Material 3) using Compose Multiplatform resources.
 - **State Management:** Unidirectional Data Flow (UDF) with ViewModels, Coroutines, and Flow.
 - **Dependency Injection:** Koin with Koin Annotations (K2 Compiler Plugin).
-- **Navigation:** JetBrains Navigation 3 (Multiplatform routing).
+- **Navigation:** JetBrains Navigation 3 (Multiplatform routing with RESTful deep linking).
 - **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms).
 
 ### Bluetooth Low Energy (BLE)

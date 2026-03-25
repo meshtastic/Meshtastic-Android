@@ -129,7 +129,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                 arg.startsWith("http://meshtastic.org") ||
                 arg.startsWith("https://meshtastic.org")
             ) {
-                uiViewModel.handleScannedUri(MeshtasticUri(arg)) {
+                uiViewModel.handleDeepLink(MeshtasticUri(arg)) {
                     Logger.e { "Invalid Meshtastic URI passed via args: $arg" }
                 }
             }
@@ -140,7 +140,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_URI)) {
             Desktop.getDesktop().setOpenURIHandler { event ->
                 val uriStr = event.uri.toString()
-                uiViewModel.handleScannedUri(MeshtasticUri(uriStr)) { Logger.e { "Invalid URI from OS: $uriStr" } }
+                uiViewModel.handleDeepLink(MeshtasticUri(uriStr)) { Logger.e { "Invalid URI from OS: $uriStr" } }
             }
         }
     }

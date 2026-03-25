@@ -26,9 +26,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.core.common)
             implementation(projects.core.resources)
             implementation(libs.kotlinx.serialization.core)
             implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.kermit)
         }
 
         commonTest.dependencies { implementation(kotlin("test")) }
