@@ -59,7 +59,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(projects.core.prefs)
             implementation(libs.usb.serial.android)
         }
 
