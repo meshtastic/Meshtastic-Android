@@ -159,4 +159,8 @@ class FakeNodeRepository : BaseFake(), NodeRepository {
     fun setOurNode(node: Node?) {
         _ourNodeInfo.value = node
     }
+
+    fun setMyNodeInfo(info: MyNodeInfo?) {
+        _myNodeInfo.value = info
+    }
 }
