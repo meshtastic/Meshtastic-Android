@@ -29,14 +29,13 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.proto.PortNum
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class PacketDaoTest {
+abstract class CommonPacketDaoTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var nodeInfoDao: NodeInfoDao
     private lateinit var packetDao: PacketDao
@@ -78,8 +77,7 @@ class PacketDaoTest {
         }
     }
 
-    @BeforeTest
-    fun createDb() = runTest {
+    suspend fun createDb() {
         database = getInMemoryDatabaseBuilder().build()
         nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
 

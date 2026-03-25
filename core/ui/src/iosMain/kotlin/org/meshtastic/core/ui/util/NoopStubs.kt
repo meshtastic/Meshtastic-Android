@@ -37,4 +37,10 @@ actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): A
 
 @Composable actual fun rememberOpenUrl(): (url: String) -> Unit = { _ -> }
 
+@Composable actual fun rememberSaveFileLauncher(onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit): (defaultFilename: String, mimeType: String) -> Unit = { _, _ -> }
+
+@Composable actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
+
+@Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}
+
 @Composable actual fun SetScreenBrightness(brightness: Float) {}

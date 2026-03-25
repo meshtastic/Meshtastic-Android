@@ -39,25 +39,23 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.testing.FakeLocalStatsDataSource
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class NodeRepositoryTest {
+abstract class CommonNodeRepositoryTest {
 
-    private lateinit var lifecycleOwner: LifecycleOwner
-    private lateinit var readDataSource: NodeInfoReadDataSource
-    private lateinit var writeDataSource: NodeInfoWriteDataSource
-    private lateinit var localStatsDataSource: FakeLocalStatsDataSource
+    protected lateinit var lifecycleOwner: LifecycleOwner
+    protected lateinit var readDataSource: NodeInfoReadDataSource
+    protected lateinit var writeDataSource: NodeInfoWriteDataSource
+    protected lateinit var localStatsDataSource: FakeLocalStatsDataSource
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
     private val myNodeInfoFlow = MutableStateFlow<MyNodeEntity?>(null)
 
-    private lateinit var repository: NodeRepositoryImpl
+    protected lateinit var repository: NodeRepositoryImpl
 
-    @BeforeTest
-    fun setUp() {
+    fun setupRepo() {
         Dispatchers.setMain(testDispatcher)
         lifecycleOwner = object : LifecycleOwner {
             override val lifecycle = LifecycleRegistry(this)

@@ -39,31 +39,25 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ChannelViewModelTest {
+abstract class CommonChannelViewModelTest {
 
-    private val radioController = FakeRadioController()
-    private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-    private val analytics: PlatformAnalytics = mock(MockMode.autofill)
-    private val testDispatcher = UnconfinedTestDispatcher()
+    protected val radioController = FakeRadioController()
+    protected val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+    protected val analytics: PlatformAnalytics = mock(MockMode.autofill)
+    protected val testDispatcher = UnconfinedTestDispatcher()
 
-    private lateinit var viewModel: ChannelViewModel
+    protected lateinit var viewModel: ChannelViewModel
 
-    @BeforeTest
-    fun setUp() {
+    fun setupRepo() {
         Dispatchers.setMain(testDispatcher)
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
 
-        viewModel = ChannelViewModel(
-            radioController = radioController,
-            radioConfigRepository = radioConfigRepository,
-            analytics = analytics
-        )
+        viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics)
     }
 
     @AfterTest

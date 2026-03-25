@@ -23,20 +23,18 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PacketRepositoryTest {
+abstract class CommonPacketRepositoryTest {
 
-    private lateinit var dbProvider: FakeDatabaseProvider
+    protected lateinit var dbProvider: FakeDatabaseProvider
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
-    private lateinit var repository: PacketRepositoryImpl
+    protected lateinit var repository: PacketRepositoryImpl
 
-    @BeforeTest
-    fun setUp() {
+    fun setupRepo() {
         dbProvider = FakeDatabaseProvider()
         repository = PacketRepositoryImpl(dbProvider, dispatchers)
     }

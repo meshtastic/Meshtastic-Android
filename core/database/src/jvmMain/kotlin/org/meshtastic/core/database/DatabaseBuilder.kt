@@ -21,6 +21,7 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
@@ -46,6 +47,7 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
         .configureCommon()
+        .setDriver(BundledSQLiteDriver())
 }
 
 /** Returns a [RoomDatabase.Builder] configured for an in-memory JVM database. */
@@ -54,6 +56,7 @@ actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
         .configureCommon()
+        .setDriver(BundledSQLiteDriver())
 }
 
 /** Returns the JVM/Desktop directory where database files are stored. */

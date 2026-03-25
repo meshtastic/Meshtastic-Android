@@ -38,26 +38,24 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class MeshLogRepositoryTest {
+abstract class CommonMeshLogRepositoryTest {
 
-    private lateinit var dbProvider: FakeDatabaseProvider
-    private lateinit var meshLogPrefs: FakeMeshLogPrefs
-    private lateinit var nodeInfoReadDataSource: NodeInfoReadDataSource
+    protected lateinit var dbProvider: FakeDatabaseProvider
+    protected lateinit var meshLogPrefs: FakeMeshLogPrefs
+    protected lateinit var nodeInfoReadDataSource: NodeInfoReadDataSource
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
-    private lateinit var repository: MeshLogRepositoryImpl
+    protected lateinit var repository: MeshLogRepositoryImpl
 
     private val nowMillis = 1000000000L
 
-    @BeforeTest
-    fun setUp() {
+    fun setupRepo() {
         dbProvider = FakeDatabaseProvider()
         meshLogPrefs = FakeMeshLogPrefs()
         meshLogPrefs.setLoggingEnabled(true)

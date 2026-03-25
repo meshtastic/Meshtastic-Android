@@ -23,7 +23,6 @@ import androidx.room3.DeleteTable
 import androidx.room3.RoomDatabase
 import androidx.room3.TypeConverters
 import androidx.room3.migration.AutoMigrationSpec
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
@@ -121,7 +120,6 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         /** Configures a [RoomDatabase.Builder] with standard settings for this project. */
         fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
             this.fallbackToDestructiveMigration(dropAllTables = false)
-                .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(ioDispatcher)
     }
 }

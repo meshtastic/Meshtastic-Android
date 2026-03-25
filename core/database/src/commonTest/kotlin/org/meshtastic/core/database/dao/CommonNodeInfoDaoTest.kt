@@ -25,13 +25,12 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class NodeInfoDaoTest {
+abstract class CommonNodeInfoDaoTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var dao: NodeInfoDao
 
@@ -49,8 +48,7 @@ class NodeInfoDaoTest {
             hasWifi = false,
         )
 
-    @BeforeTest
-    fun createDb() = runTest {
+    suspend fun createDb() {
         database = getInMemoryDatabaseBuilder().build()
         dao = database.nodeInfoDao()
         dao.setMyNodeInfo(myNodeInfo)
