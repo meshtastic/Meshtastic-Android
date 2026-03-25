@@ -1,7 +1,7 @@
 # `:core:network`
 
 ## Overview
-The `:core:network` module handles all internet-based communication, including fetching firmware metadata, device hardware definitions, and map tiles (in the `fdroid` flavor).
+The `:core:network` module handles all internet-based communication, including fetching firmware metadata, device hardware definitions, and map tiles (in the `fdroid` flavor). It also provides the shared radio transport layer (`TCPInterface`, `SerialTransport`, `BleRadioInterface`).
 
 ## Key Components
 
@@ -11,6 +11,12 @@ The module uses **Ktor** as its primary HTTP client for high-performance, asynch
 ### 2. Remote Data Sources
 - **`FirmwareReleaseRemoteDataSource`**: Fetches the latest firmware versions from GitHub or Meshtastic's metadata servers.
 - **`DeviceHardwareRemoteDataSource`**: Fetches definitions for supported Meshtastic hardware devices.
+
+### 3. Shared Transports
+- **`BleRadioInterface`**: Multiplatform BLE transport powered by Kable.
+- **`TCPInterface`**: Multiplatform TCP transport.
+- **`SerialTransport`**: JVM-shared USB/Serial transport powered by jSerialComm.
+- **`BaseRadioTransportFactory`**: Common factory for instantiating the KMP transports.
 
 ## Module dependency graph
 
@@ -28,6 +34,7 @@ classDef android-library-compose fill:#9BF6FF,stroke:#000,stroke-width:2px,color
 classDef android-test fill:#A0C4FF,stroke:#000,stroke-width:2px,color:#000;
 classDef jvm-library fill:#BDB2FF,stroke:#000,stroke-width:2px,color:#000;
 classDef kmp-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library-compose fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
 classDef kmp-library fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
 classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 

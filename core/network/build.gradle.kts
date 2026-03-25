@@ -37,6 +37,7 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.proto)
+            implementation(projects.core.ble)
 
             implementation(libs.okio)
             implementation(libs.kmqtt.client)
@@ -57,11 +58,7 @@ kotlin {
             }
         }
 
-        androidMain.dependencies {
-            implementation(projects.core.ble)
-            implementation(projects.core.prefs)
-            implementation(libs.usb.serial.android)
-        }
+        androidMain.dependencies { implementation(libs.usb.serial.android) }
 
         commonTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)

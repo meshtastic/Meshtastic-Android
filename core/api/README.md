@@ -61,6 +61,7 @@ classDef android-library-compose fill:#9BF6FF,stroke:#000,stroke-width:2px,color
 classDef android-test fill:#A0C4FF,stroke:#000,stroke-width:2px,color:#000;
 classDef jvm-library fill:#BDB2FF,stroke:#000,stroke-width:2px,color:#000;
 classDef kmp-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library-compose fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
 classDef kmp-library fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
 classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 

@@ -14,7 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.desktop.radio
+@file:Suppress("TooManyFunctions", "TooGenericExceptionCaught")
+
+package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -24,7 +26,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
@@ -46,6 +47,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3
@@ -54,7 +56,7 @@ private const val CONNECTION_TIMEOUT_MS = 15_000L
 private val SCAN_TIMEOUT = 5.seconds
 
 /**
- * A [RadioTransport] implementation for BLE devices using Kable for desktop.
+ * A [RadioTransport] implementation for BLE devices using the common BLE abstractions (which are powered by Kable).
  *
  * This class handles the high-level connection lifecycle for Meshtastic radios over BLE, including:
  * - Bonding and discovery.
@@ -69,9 +71,7 @@ private val SCAN_TIMEOUT = 5.seconds
  * @param service The [RadioInterfaceService] to use for handling radio events.
  * @param address The BLE address of the device to connect to.
  */
-@OptIn(kotlin.uuid.ExperimentalUuidApi::class)
-@Suppress("TooManyFunctions", "TooGenericExceptionCaught", "SwallowedException")
-class DesktopBleInterface(
+class BleRadioInterface(
     private val serviceScope: CoroutineScope,
     private val scanner: BleScanner,
     private val bluetoothRepository: BluetoothRepository,
@@ -106,6 +106,10 @@ class DesktopBleInterface(
     private var bytesReceived: Long = 0
     private var bytesSent: Long = 0
 
+    @Suppress("VolatileModifier")
+    @Volatile
+    private var isFullyConnected = false
+
     init {
         connect()
     }
@@ -126,11 +130,13 @@ class DesktopBleInterface(
             try {
                 val d =
                     kotlinx.coroutines.withTimeoutOrNull(SCAN_TIMEOUT) {
-                        scanner.scan(SCAN_TIMEOUT).first { it.address == address }
+                        scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first {
+                            it.address == address
+                        }
                     }
                 if (d != null) return d
             } catch (e: Exception) {
-                // Ignore timeout exceptions
+                Logger.v(e) { "Scan attempt failed or timed out" }
             }
 
             if (attempt < SCAN_RETRY_COUNT - 1) {
@@ -145,7 +151,8 @@ class DesktopBleInterface(
         connectionScope.launch {
             bleConnection.connectionState
                 .onEach { state ->
-                    if (state is BleConnectionState.Disconnected) {
+                    if (state is BleConnectionState.Disconnected && isFullyConnected) {
+                        isFullyConnected = false
                         onDisconnected(state)
                     }
                 }
@@ -158,7 +165,7 @@ class DesktopBleInterface(
             while (isActive) {
                 try {
                     // Add a delay to allow any pending background disconnects (from a previous close() call)
-                    // to complete before we attempt a new connection.
+                    // to complete and the Android BLE stack to settle before we attempt a new connection.
                     @Suppress("MagicNumber")
                     val connectDelayMs = 1000L
                     kotlinx.coroutines.delay(connectDelayMs)
@@ -168,11 +175,23 @@ class DesktopBleInterface(
 
                     val device = findDevice()
 
-                    val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                    var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+
+                    if (state !is BleConnectionState.Connected) {
+                        // Kable on Android occasionally fails the first connection attempt with NotConnectedException
+                        // if the previous peripheral wasn't fully cleaned up by the OS. A quick retry resolves it.
+                        Logger.w { "[$address] First connection attempt failed, retrying in 1.5s..." }
+                        @Suppress("MagicNumber")
+                        val retryDelayMs = 1500L
+                        kotlinx.coroutines.delay(retryDelayMs)
+                        state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                    }
+
                     if (state !is BleConnectionState.Connected) {
                         throw RadioNotConnectedException("Failed to connect to device at address $address")
                     }
 
+                    isFullyConnected = true
                     onConnected()
                     discoverServicesAndSetupCharacteristics()
 
@@ -257,7 +276,7 @@ class DesktopBleInterface(
                     .launchIn(this)
 
                 // Store reference for handleSendToRadio
-                this@DesktopBleInterface.radioService = radioService
+                this@BleRadioInterface.radioService = radioService
 
                 Logger.i { "[$address] Profile service active and characteristics subscribed" }
 
@@ -265,7 +284,7 @@ class DesktopBleInterface(
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
 
-                this@DesktopBleInterface.service.onConnect()
+                this@BleRadioInterface.service.onConnect()
             }
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
@@ -324,7 +343,7 @@ class DesktopBleInterface(
                 0
             }
         Logger.i {
-            "[$address] BLE close() called - " +
+            "[$address] Disconnecting. " +
                 "Uptime: ${uptime}ms, " +
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
