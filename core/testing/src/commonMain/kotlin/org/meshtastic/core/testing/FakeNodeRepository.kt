@@ -82,18 +82,37 @@ class FakeNodeRepository : NodeRepository {
         onlyDirect: Boolean,
     ): Flow<List<Node>> = _nodeDBbyNum.map { db ->
         db.values
+            .asSequence()
+            .filter { if (filter.isBlank()) true else it.user.long_name.contains(filter, ignoreCase = true) || it.user.id.contains(filter, ignoreCase = true) }
+            .filter { if (includeUnknown) true else !it.isUnknownUser }
+            .filter { if (onlyOnline) it.isOnline else true }
+            .filter { if (onlyDirect) it.hopsAway == 0 else true }
             .toList()
-            .let { nodes -> if (filter.isBlank()) nodes else nodes.filter { it.user.long_name.contains(filter) } }
-            .sortedBy { it.num }
+            .let { nodes ->
+                when (sort) {
+                    NodeSortOption.ALPHABETICAL -> nodes.sortedBy { it.user.long_name.lowercase() }
+                    NodeSortOption.LAST_HEARD -> nodes.sortedByDescending { it.lastHeard }
+                    NodeSortOption.DISTANCE -> nodes.sortedBy { it.position.latitude_i } // Simplified
+                    NodeSortOption.HOPS_AWAY -> nodes.sortedBy { it.hopsAway }
+                    NodeSortOption.CHANNEL -> nodes.sortedBy { it.channel }
+                    NodeSortOption.VIA_MQTT -> nodes.sortedBy { if (it.viaMqtt) 0 else 1 }
+                    NodeSortOption.VIA_FAVORITE -> nodes.sortedBy { if (it.isFavorite) 0 else 1 }
+                }
+            }
     }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
         _nodeDBbyNum.value.values.filter { it.lastHeard < lastHeard }
 
-    override suspend fun getUnknownNodes(): List<Node> = emptyList()
+    override suspend fun getUnknownNodes(): List<Node> =
+        _nodeDBbyNum.value.values.filter { it.isUnknownUser }
 
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {
-        _nodeDBbyNum.value = emptyMap()
+        if (preserveFavorites) {
+            _nodeDBbyNum.value = _nodeDBbyNum.value.filter { it.value.isFavorite }
+        } else {
+            _nodeDBbyNum.value = emptyMap()
+        }
     }
 
     override suspend fun clearMyNodeInfo() {
@@ -108,7 +127,10 @@ class FakeNodeRepository : NodeRepository {
         _nodeDBbyNum.value = _nodeDBbyNum.value - nodeNums.toSet()
     }
 
-    override suspend fun setNodeNotes(num: Int, notes: String) = Unit
+    override suspend fun setNodeNotes(num: Int, notes: String) {
+        val node = _nodeDBbyNum.value[num] ?: return
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (num to node.copy(notes = notes))
+    }
 
     override suspend fun upsert(node: Node) {
         _nodeDBbyNum.value = _nodeDBbyNum.value + (node.num to node)
@@ -119,7 +141,10 @@ class FakeNodeRepository : NodeRepository {
         _nodeDBbyNum.value = nodes.associateBy { it.num }
     }
 
-    override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) = Unit
+    override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
+        val node = _nodeDBbyNum.value[nodeNum] ?: return
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (nodeNum to node.copy(metadata = metadata))
+    }
 
     // --- Helper methods for testing ---
 
