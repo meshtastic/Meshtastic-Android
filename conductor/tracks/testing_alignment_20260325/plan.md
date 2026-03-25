@@ -10,14 +10,14 @@ Standardize and expand the shared testing infrastructure.
 - [x] Task: Standardize `BaseFake` or similar utility for consistent state management in fakes. 58e85f5
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation & core:testing Expansion' (Protocol in workflow.md)
 
-## Phase 2: core Modules Alignment
+## Phase 2: core Modules Alignment [checkpoint: 32c642f]
 Migrate and improve coverage for core business logic modules.
 
 - [x] Task: Align `core:domain`: Migrate tests to `commonTest`, use fakes, target 80% coverage. af753e3
 - [x] Task: Align `core:repository`: Migrate tests to `commonTest`, target 80% coverage. 59273d7
 - [~] Task: Align `core:data`: Migrate tests to `commonTest`, target 80% coverage (Best effort reached ~25%). 082fda5
 - [x] Task: Align `core:database` & `core:datastore`: Ensure Room/DataStore tests are in `commonTest` using KMP abstractions. 082fda5
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: core Modules Alignment' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: core Modules Alignment' (Protocol in workflow.md)
 
 ## Phase 3: feature Modules Alignment
 Focus on ViewModel logic and feature-specific business rules.
