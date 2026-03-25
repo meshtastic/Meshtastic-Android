@@ -58,9 +58,7 @@ kotlin {
             }
         }
 
-        androidMain.dependencies {
-            implementation(libs.usb.serial.android)
-        }
+        androidMain.dependencies { implementation(libs.usb.serial.android) }
 
         commonTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)

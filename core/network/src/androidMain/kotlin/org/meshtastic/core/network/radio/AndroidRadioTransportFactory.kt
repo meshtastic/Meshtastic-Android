@@ -30,9 +30,9 @@ import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 
 /**
- * Android implementation of [RadioTransportFactory].
- * Handles pure-KMP transports (BLE) via [BaseRadioTransportFactory] while delegating legacy platform-specific
- * connections (like USB/Serial, TCP, and Mocks) to the Android-specific [InterfaceFactory].
+ * Android implementation of [RadioTransportFactory]. Handles pure-KMP transports (BLE) via [BaseRadioTransportFactory]
+ * while delegating legacy platform-specific connections (like USB/Serial, TCP, and Mocks) to the Android-specific
+ * [InterfaceFactory].
  */
 @Single(binds = [RadioTransportFactory::class])
 @Suppress("LongParameterList")
