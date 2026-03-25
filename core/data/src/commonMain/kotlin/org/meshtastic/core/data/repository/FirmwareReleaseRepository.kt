@@ -29,13 +29,14 @@ import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
+import org.meshtastic.core.repository.FirmwareReleaseRepository
 
 @Single
-class FirmwareReleaseRepository(
+open class FirmwareReleaseRepositoryImpl(
     private val remoteDataSource: FirmwareReleaseRemoteDataSource,
     private val localDataSource: FirmwareReleaseLocalDataSource,
     private val jsonDataSource: FirmwareReleaseJsonDataSource,
-) {
+) : FirmwareReleaseRepository {
 
     /**
      * A flow that provides the latest STABLE firmware release. It follows a "cache-then-network" strategy:
@@ -44,14 +45,14 @@ class FirmwareReleaseRepository(
      * 3. Emits the updated version upon successful fetch. Collectors should use `.distinctUntilChanged()` to avoid
      *    redundant UI updates.
      */
-    val stableRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.STABLE)
+    override val stableRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.STABLE)
 
     /**
      * A flow that provides the latest ALPHA firmware release.
      *
      * @see stableRelease for behavior details.
      */
-    val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
+    override val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
 
     private fun getLatestFirmware(
         releaseType: FirmwareReleaseType,
@@ -118,7 +119,7 @@ class FirmwareReleaseRepository(
         }
     }
 
-    suspend fun invalidateCache() {
+    override suspend fun invalidateCache() {
         localDataSource.deleteAllFirmwareReleases()
     }
 

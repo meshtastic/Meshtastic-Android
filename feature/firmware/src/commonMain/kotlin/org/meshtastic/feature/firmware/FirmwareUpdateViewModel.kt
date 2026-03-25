@@ -37,7 +37,7 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.NumberFormatter
-import org.meshtastic.core.data.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -99,6 +99,8 @@ class FirmwareUpdateViewModel(
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
     private val dispatchers: CoroutineDispatchers,
+    private val getString: suspend (StringResource) -> String = { org.jetbrains.compose.resources.getString(it) },
+    private val getStringWithArgs: suspend (StringResource, Array<out Any>) -> String = { res, args -> org.jetbrains.compose.resources.getString(res, *args) },
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
@@ -338,7 +340,7 @@ class FirmwareUpdateViewModel(
                 is DfuInternalState.Progress -> handleDfuProgress(dfuState)
 
                 is DfuInternalState.Error -> {
-                    val errorMsg = getString(Res.string.firmware_update_dfu_error, dfuState.message ?: "")
+                    val errorMsg = getStringWithArgs(Res.string.firmware_update_dfu_error, arrayOf(dfuState.message ?: ""))
                     _state.value = FirmwareUpdateState.Error(errorMsg)
                     tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                 }
@@ -413,7 +415,7 @@ class FirmwareUpdateViewModel(
             }
         viewModelScope.launch {
             val statusMsg =
-                getString(Res.string.firmware_update_updating, "").replace(Regex(":?\\s*%1\\\$s%?"), "").trim()
+                getStringWithArgs(Res.string.firmware_update_updating, arrayOf("")).replace(Regex(":?\\s*%1\\\$s%?"), "").trim()
             val details = "$percentText ($metrics)"
             _state.value = FirmwareUpdateState.Updating(ProgressState(statusMsg, progress, details))
         }
@@ -452,7 +454,7 @@ class FirmwareUpdateViewModel(
         val isBatteryLow = level in 1..MIN_BATTERY_LEVEL
 
         if (isBatteryLow) {
-            val batteryLowMsg = getString(Res.string.firmware_update_battery_low, level)
+            val batteryLowMsg = getStringWithArgs(Res.string.firmware_update_battery_low, arrayOf(level))
             _state.value = FirmwareUpdateState.Error(batteryLowMsg)
         }
         return !isBatteryLow
@@ -465,8 +467,8 @@ class FirmwareUpdateViewModel(
 
         return if (hwModelInt != null) {
             deviceHardwareRepository.getDeviceHardwareByModel(hwModelInt, target).getOrElse {
-                _state.value =
-                    FirmwareUpdateState.Error(getString(Res.string.firmware_update_unknown_hardware, hwModelInt))
+                val unknownHwMsg = getStringWithArgs(Res.string.firmware_update_unknown_hardware, arrayOf(hwModelInt))
+                _state.value = FirmwareUpdateState.Error(unknownHwMsg)
                 null
             }
         } else {

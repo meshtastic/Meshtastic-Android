@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
-import org.meshtastic.core.data.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo

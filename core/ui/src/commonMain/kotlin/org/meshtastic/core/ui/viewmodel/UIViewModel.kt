@@ -35,7 +35,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeshtasticUri
-import org.meshtastic.core.data.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo

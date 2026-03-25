@@ -37,6 +37,7 @@ object TestDataFactory {
      * @param longName User long name (default: "Test User")
      * @param shortName User short name (default: "T")
      * @param lastHeard Last heard timestamp in seconds (default: 0)
+     * @param hwModel Hardware model (default: UNSET)
      * @return A Node instance with provided or default values
      */
     fun createTestNode(
@@ -45,9 +46,12 @@ object TestDataFactory {
         longName: String = "Test User",
         shortName: String = "T",
         lastHeard: Int = 0,
+        hwModel: org.meshtastic.proto.HardwareModel = org.meshtastic.proto.HardwareModel.UNSET,
+        batteryLevel: Int? = 100,
     ): Node {
-        val user = User(id = userId, long_name = longName, short_name = shortName)
-        return Node(num = num, user = user, lastHeard = lastHeard, snr = 0f, rssi = 0, channel = 0)
+        val user = User(id = userId, long_name = longName, short_name = shortName, hw_model = hwModel)
+        val metrics = org.meshtastic.proto.DeviceMetrics(battery_level = batteryLevel)
+        return Node(num = num, user = user, lastHeard = lastHeard, snr = 0f, rssi = 0, channel = 0, deviceMetrics = metrics)
     }
 
     /**
@@ -84,6 +88,7 @@ object TestDataFactory {
         model: String? = "TBEAM",
         firmwareVersion: String? = "2.5.0",
         hasWifi: Boolean = false,
+        pioEnv: String? = null,
     ) = MyNodeInfo(
         myNodeNum = myNodeNum,
         hasGPS = hasGPS,
@@ -99,7 +104,7 @@ object TestDataFactory {
         channelUtilization = 0f,
         airUtilTx = 0f,
         deviceId = "!$myNodeNum",
-        pioEnv = null,
+        pioEnv = pioEnv,
     )
 }
 
