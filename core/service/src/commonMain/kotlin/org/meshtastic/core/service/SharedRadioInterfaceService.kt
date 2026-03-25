@@ -100,6 +100,7 @@ class SharedRadioInterfaceService(
 
     private var _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
     private var radioIf: RadioTransport? = null
+    private var runningInterfaceId: InterfaceId? = null
     private var isStarted = false
 
     private val listenersInitialized = kotlinx.atomicfu.atomic(false)
@@ -111,6 +112,7 @@ class SharedRadioInterfaceService(
     }
 
     private val initLock = Mutex()
+    private val interfaceMutex = Mutex()
 
     private fun initStateListeners() {
         if (listenersInitialized.value) return
@@ -121,19 +123,23 @@ class SharedRadioInterfaceService(
 
                 radioPrefs.devAddr
                     .onEach { addr ->
-                        if (_currentDeviceAddressFlow.value != addr) {
-                            _currentDeviceAddressFlow.value = addr
-                            startInterface()
+                        interfaceMutex.withLock {
+                            if (_currentDeviceAddressFlow.value != addr) {
+                                _currentDeviceAddressFlow.value = addr
+                                startInterfaceLocked()
+                            }
                         }
                     }
                     .launchIn(processLifecycle.coroutineScope)
 
                 bluetoothRepository.state
                     .onEach { state ->
-                        if (state.enabled) {
-                            startInterface()
-                        } else if (getBondedDeviceAddress()?.startsWith(InterfaceId.BLUETOOTH.id) == true) {
-                            stopInterface()
+                        interfaceMutex.withLock {
+                            if (state.enabled) {
+                                startInterfaceLocked()
+                            } else if (runningInterfaceId == InterfaceId.BLUETOOTH) {
+                                stopInterfaceLocked()
+                            }
                         }
                     }
                     .catch { Logger.e(it) { "bluetoothRepository.state flow crashed!" } }
@@ -141,10 +147,12 @@ class SharedRadioInterfaceService(
 
                 networkRepository.networkAvailable
                     .onEach { state ->
-                        if (state) {
-                            startInterface()
-                        } else if (getBondedDeviceAddress()?.startsWith(InterfaceId.TCP.id) == true) {
-                            stopInterface()
+                        interfaceMutex.withLock {
+                            if (state) {
+                                startInterfaceLocked()
+                            } else if (runningInterfaceId == InterfaceId.TCP) {
+                                stopInterfaceLocked()
+                            }
                         }
                     }
                     .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed!" } }
@@ -154,7 +162,7 @@ class SharedRadioInterfaceService(
     }
 
     override fun connect() {
-        startInterface()
+        processLifecycle.coroutineScope.launch { interfaceMutex.withLock { startInterfaceLocked() } }
         initStateListeners()
     }
 
@@ -183,16 +191,22 @@ class SharedRadioInterfaceService(
         }
 
         analytics.track("mesh_bond")
-        ignoreException { stopInterface() }
 
         Logger.d { "Setting bonded device to ${sanitized?.anonymize}" }
         radioPrefs.setDevAddr(sanitized)
         _currentDeviceAddressFlow.value = sanitized
-        startInterface()
+
+        processLifecycle.coroutineScope.launch {
+            interfaceMutex.withLock {
+                ignoreException { stopInterfaceLocked() }
+                startInterfaceLocked()
+            }
+        }
         return true
     }
 
-    private fun startInterface() {
+    /** Must be called under [interfaceMutex]. */
+    private fun startInterfaceLocked() {
         if (radioIf != null) return
 
         val address =
@@ -206,15 +220,18 @@ class SharedRadioInterfaceService(
 
         Logger.i { "Starting radio interface for ${address.anonymize}" }
         isStarted = true
+        runningInterfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
         radioIf = transportFactory.createTransport(address, this)
         startHeartbeat()
     }
 
-    private fun stopInterface() {
+    /** Must be called under [interfaceMutex]. */
+    private fun stopInterfaceLocked() {
         val currentIf = radioIf
         Logger.i { "Stopping interface $currentIf" }
         isStarted = false
         radioIf = null
+        runningInterfaceId = null
         currentIf?.close()
 
         _serviceScope.cancel("stopping interface")

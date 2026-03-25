@@ -21,8 +21,10 @@ package org.meshtastic.core.network.radio
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -53,6 +55,7 @@ import kotlin.time.Duration.Companion.seconds
 private const val SCAN_RETRY_COUNT = 3
 private const val SCAN_RETRY_DELAY_MS = 1000L
 private const val CONNECTION_TIMEOUT_MS = 15_000L
+private const val RECONNECT_FAILURE_THRESHOLD = 3
 private val SCAN_TIMEOUT = 5.seconds
 
 /**
@@ -106,9 +109,9 @@ class BleRadioInterface(
     private var bytesReceived: Long = 0
     private var bytesSent: Long = 0
 
-    @Suppress("VolatileModifier")
-    @Volatile
-    private var isFullyConnected = false
+    @Volatile private var isFullyConnected = false
+    private var connectionJob: Job? = null
+    private var consecutiveFailures = 0
 
     init {
         connect()
@@ -148,24 +151,11 @@ class BleRadioInterface(
     }
 
     private fun connect() {
-        connectionScope.launch {
-            bleConnection.connectionState
-                .onEach { state ->
-                    if (state is BleConnectionState.Disconnected && isFullyConnected) {
-                        isFullyConnected = false
-                        onDisconnected(state)
-                    }
-                }
-                .catch { e ->
-                    Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
-                    handleFailure(e)
-                }
-                .launchIn(connectionScope)
-
+        connectionJob = connectionScope.launch {
             while (isActive) {
                 try {
-                    // Add a delay to allow any pending background disconnects (from a previous close() call)
-                    // to complete and the Android BLE stack to settle before we attempt a new connection.
+                    // Allow any pending background disconnects to complete and the Android BLE stack
+                    // to settle before we attempt a new connection.
                     @Suppress("MagicNumber")
                     val connectDelayMs = 1000L
                     kotlinx.coroutines.delay(connectDelayMs)
@@ -191,12 +181,30 @@ class BleRadioInterface(
                         throw RadioNotConnectedException("Failed to connect to device at address $address")
                     }
 
+                    // Connection succeeded — reset failure counter
+                    consecutiveFailures = 0
                     isFullyConnected = true
                     onConnected()
-                    discoverServicesAndSetupCharacteristics()
 
-                    // Suspend here until Kable drops the connection
-                    bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+                    // Use coroutineScope so that the connectionState listener is scoped to this
+                    // iteration only. When the inner scope exits (on disconnect), the listener is
+                    // cancelled automatically before the next reconnect cycle starts a fresh one.
+                    coroutineScope {
+                        bleConnection.connectionState
+                            .onEach { s ->
+                                if (s is BleConnectionState.Disconnected && isFullyConnected) {
+                                    isFullyConnected = false
+                                    onDisconnected()
+                                }
+                            }
+                            .catch { e -> Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" } }
+                            .launchIn(this)
+
+                        discoverServicesAndSetupCharacteristics()
+
+                        // Suspend here until Kable drops the connection
+                        bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+                    }
 
                     Logger.i { "[$address] BLE connection dropped, preparing to reconnect..." }
                 } catch (e: kotlinx.coroutines.CancellationException) {
@@ -204,8 +212,17 @@ class BleRadioInterface(
                     throw e
                 } catch (e: Exception) {
                     val failureTime = nowMillis - connectionStartTime
-                    Logger.w(e) { "[$address] Failed to connect to device after ${failureTime}ms" }
-                    handleFailure(e)
+                    consecutiveFailures++
+                    Logger.w(e) {
+                        "[$address] Failed to connect to device after ${failureTime}ms " +
+                            "(consecutive failures: $consecutiveFailures)"
+                    }
+
+                    // After repeated failures, signal DeviceSleep so MeshConnectionManagerImpl can
+                    // start its sleep timeout. handleFailure covers permanent-error cases.
+                    if (consecutiveFailures >= RECONNECT_FAILURE_THRESHOLD) {
+                        handleFailure(e)
+                    }
 
                     // Wait before retrying to prevent hot loops
                     @Suppress("MagicNumber")
@@ -226,7 +243,7 @@ class BleRadioInterface(
         }
     }
 
-    private fun onDisconnected(@Suppress("UNUSED_PARAMETER") state: BleConnectionState.Disconnected) {
+    private fun onDisconnected() {
         radioService = null
 
         val uptime =
@@ -241,10 +258,10 @@ class BleRadioInterface(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-
-        // Note: Disconnected state in commonMain doesn't currently carry a reason.
-        // We might want to add that later if needed.
-        service.onDisconnect(false, errorMessage = "Disconnected")
+        // Do NOT call service.onDisconnect() here. The reconnect while-loop handles retries
+        // internally. Emitting DeviceSleep on every transient disconnect creates competing state
+        // transitions with MeshConnectionManagerImpl's sleep timeout. Instead, handleFailure()
+        // is called from the catch block after RECONNECT_FAILURE_THRESHOLD consecutive failures.
     }
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
@@ -348,9 +365,15 @@ class BleRadioInterface(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
+        // Cancel the connection scope FIRST to break the while(isActive) reconnect loop,
+        // then perform async cleanup on the parent serviceScope.
+        connectionScope.cancel("close() called")
         serviceScope.launch {
-            connectionScope.cancel()
-            bleConnection.disconnect()
+            try {
+                bleConnection.disconnect()
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "[$address] Failed to disconnect in close()" }
+            }
             service.onDisconnect(true)
         }
     }
