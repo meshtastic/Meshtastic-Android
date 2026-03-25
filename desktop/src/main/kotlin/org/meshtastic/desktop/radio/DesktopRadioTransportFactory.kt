@@ -30,6 +30,10 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 
+/**
+ * Desktop implementation of [RadioTransportFactory] delegating multiplatform transports (BLE, TCP)
+ * and providing platform-specific transports (USB/Serial) via jSerialComm.
+ */
 @Single(binds = [RadioTransportFactory::class])
 class DesktopRadioTransportFactory(
     scanner: BleScanner,
@@ -42,14 +46,14 @@ class DesktopRadioTransportFactory(
 
     override fun isMockInterface(): Boolean = false
 
-    override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport {
-        if (address.startsWith(InterfaceId.TCP.id)) {
-            return TCPInterface(service, dispatchers, address.removePrefix(InterfaceId.TCP.id.toString()))
-        } else if (address.startsWith(InterfaceId.SERIAL.id)) {
-            return SerialTransport(portName = address.removePrefix(InterfaceId.SERIAL.id.toString()), service = service)
-        } else {
-            // Fallback for unsupported / nop
-            error("Unsupported transport for address: $address")
+    override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport =
+        when {
+            address.startsWith(InterfaceId.TCP.id) -> {
+                TCPInterface(service, dispatchers, address.removePrefix(InterfaceId.TCP.id.toString()))
+            }
+            address.startsWith(InterfaceId.SERIAL.id) -> {
+                SerialTransport(portName = address.removePrefix(InterfaceId.SERIAL.id.toString()), service = service)
+            }
+            else -> error("Unsupported transport for address: $address")
         }
-    }
 }

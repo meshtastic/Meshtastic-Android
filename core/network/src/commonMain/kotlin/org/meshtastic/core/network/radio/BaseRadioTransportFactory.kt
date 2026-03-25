@@ -37,12 +37,15 @@ abstract class BaseRadioTransportFactory(
 ) : RadioTransportFactory {
 
     override fun isAddressValid(address: String?): Boolean {
-        val spec = address?.getOrNull(0) ?: return false
-        return spec == InterfaceId.TCP.id ||
-            spec == InterfaceId.SERIAL.id ||
-            spec == InterfaceId.BLUETOOTH.id ||
-            spec == InterfaceId.MOCK.id ||
-            address.startsWith("!") ||
+        val spec = address?.firstOrNull() ?: return false
+        return spec in
+            listOf(
+                InterfaceId.TCP.id,
+                InterfaceId.SERIAL.id,
+                InterfaceId.BLUETOOTH.id,
+                InterfaceId.MOCK.id,
+            ) ||
+            spec == '!' ||
             isPlatformAddressValid(address)
     }
 
@@ -51,27 +54,28 @@ abstract class BaseRadioTransportFactory(
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
     override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport =
-        if (address.startsWith(InterfaceId.BLUETOOTH.id)) {
-            BleRadioInterface(
-                serviceScope = service.serviceScope,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                service = service,
-                address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()),
-            )
-        } else if (address.startsWith("!")) {
-            val stripped = if (address.startsWith("!")) address.removePrefix("!") else address
-            BleRadioInterface(
-                serviceScope = service.serviceScope,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                service = service,
-                address = stripped,
-            )
-        } else {
-            createPlatformTransport(address, service)
+        when {
+            address.startsWith(InterfaceId.BLUETOOTH.id) -> {
+                BleRadioInterface(
+                    serviceScope = service.serviceScope,
+                    scanner = scanner,
+                    bluetoothRepository = bluetoothRepository,
+                    connectionFactory = connectionFactory,
+                    service = service,
+                    address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()),
+                )
+            }
+            address.startsWith("!") -> {
+                BleRadioInterface(
+                    serviceScope = service.serviceScope,
+                    scanner = scanner,
+                    bluetoothRepository = bluetoothRepository,
+                    connectionFactory = connectionFactory,
+                    service = service,
+                    address = address.removePrefix("!"),
+                )
+            }
+            else -> createPlatformTransport(address, service)
         }
 
     /** Delegate to platform for Mock, TCP, or Serial/USB interfaces. */
