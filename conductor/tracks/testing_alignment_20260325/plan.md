@@ -28,13 +28,13 @@ Focus on ViewModel logic and feature-specific business rules.
 - [x] Task: Align remaining `feature:*` modules (In-depth pass for firmware reaching ~43%; intro:~34%, widget:0%).
 - [x] Task: Conductor - User Manual Verification 'Phase 3: feature Modules Alignment' (Protocol in workflow.md)
 
-## Phase 4: Network & Hardware Abstractions Alignment
+## Phase 4: Network & Hardware Abstractions Alignment [checkpoint: 58aa99b]
 Handle the more complex platform-dependent modules.
 
-- [ ] Task: Align `core:network`: Migrate `StreamFrameCodec` and protocol logic tests to `commonTest`.
-- [ ] Task: Align `core:ble`: Implement robust fakes for Kable/BLE interactions and migrate logic tests.
-- [ ] Task: Align `core:common` utilities and I/O abstractions.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Network & Hardware Abstractions Alignment' (Protocol in workflow.md)
+- [x] Task: Align `core:network`: Migrate `StreamFrameCodec` and protocol logic tests to `commonTest`. db4f246
+- [x] Task: Align `core:ble`: Implement robust fakes for Kable/BLE interactions and migrate logic tests. d80bcff
+- [x] Task: Align `core:common` utilities and I/O abstractions. 58aa99b
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Network & Hardware Abstractions Alignment' (Protocol in workflow.md)
 
 ## Phase 5: Final Verification & Coverage Audit
 Ensure the entire project meets the quality bar.
