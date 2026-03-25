@@ -23,9 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 
-/**
- * A test double for [LocationRepository] that provides a manual location emission mechanism.
- */
+/** A test double for [LocationRepository] that provides a manual location emission mechanism. */
 class FakeLocationRepository : LocationRepository {
     private val _receivingLocationUpdates = MutableStateFlow(false)
     override val receivingLocationUpdates: StateFlow<Boolean> = _receivingLocationUpdates

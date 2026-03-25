@@ -41,10 +41,7 @@ import org.meshtastic.desktop.navigation.desktopNavGraph
  */
 @Composable
 @Suppress("LongMethod")
-fun DesktopMainScreen(
-    backStack: NavBackStack<NavKey>,
-    uiViewModel: UIViewModel = koinViewModel(),
-) {
+fun DesktopMainScreen(backStack: NavBackStack<NavKey>, uiViewModel: UIViewModel = koinViewModel()) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         MeshtasticAppShell(
             backStack = backStack,

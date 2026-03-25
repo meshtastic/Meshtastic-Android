@@ -105,29 +105,35 @@ abstract class CommonMeshLogRepositoryTest {
     fun `deleteLogs redirects local node number to NODE_NUM_LOCAL`() = runTest(testDispatcher) {
         val localNodeNum = 999
         val port = PortNum.TEXT_MESSAGE_APP.value
-        val myNodeEntity = MyNodeEntity(
-            myNodeNum = localNodeNum,
-            model = "model",
-            firmwareVersion = "1.0",
-            couldUpdate = false,
-            shouldUpdate = false,
-            currentPacketId = 0L,
-            messageTimeoutMsec = 0,
-            minAppVersion = 0,
-            maxChannels = 0,
-            hasWifi = false,
-        )
+        val myNodeEntity =
+            MyNodeEntity(
+                myNodeNum = localNodeNum,
+                model = "model",
+                firmwareVersion = "1.0",
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = 0L,
+                messageTimeoutMsec = 0,
+                minAppVersion = 0,
+                maxChannels = 0,
+                hasWifi = false,
+            )
         every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(myNodeEntity)
 
-        val log = MeshLog(
-            uuid = "123",
-            message_type = "TEXT",
-            received_date = nowMillis,
-            raw_message = "",
-            fromNum = 0, // asEntity will map it if we pass localNodeNum to asEntity, but here we set it manually
-            portNum = port,
-            fromRadio = FromRadio(packet = MeshPacket(from = localNodeNum, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)))
-        )
+        val log =
+            MeshLog(
+                uuid = "123",
+                message_type = "TEXT",
+                received_date = nowMillis,
+                raw_message = "",
+                fromNum =
+                0, // asEntity will map it if we pass localNodeNum to asEntity, but here we set it manually
+                portNum = port,
+                fromRadio =
+                FromRadio(
+                    packet = MeshPacket(from = localNodeNum, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)),
+                ),
+            )
         repository.insert(log)
 
         // Verify it's there

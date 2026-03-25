@@ -105,14 +105,15 @@ class ProcessRadioResponseUseCaseTest {
     @Test
     fun `invoke with unexpected sender returns error`() {
         val adminMsg = AdminMessage()
-        val packet = MeshPacket(
-            from = 456,
-            decoded = Data(
-                portnum = PortNum.ADMIN_APP,
-                request_id = 42,
-                payload = adminMsg.encode().toByteString()
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded = Data(
+                    portnum = PortNum.ADMIN_APP,
+                    request_id = 42,
+                    payload = adminMsg.encode().toByteString(),
+                ),
             )
-        )
         val result = useCase(packet, 123, setOf(42))
         assertTrue(result is RadioResponseResult.Error)
     }
@@ -121,14 +122,15 @@ class ProcessRadioResponseUseCaseTest {
     fun `invoke with owner response returns owner result`() {
         val owner = org.meshtastic.proto.User(long_name = "Owner")
         val adminMsg = AdminMessage(get_owner_response = owner)
-        val packet = MeshPacket(
-            from = 123,
-            decoded = Data(
-                portnum = PortNum.ADMIN_APP,
-                request_id = 42,
-                payload = adminMsg.encode().toByteString()
+        val packet =
+            MeshPacket(
+                from = 123,
+                decoded = Data(
+                    portnum = PortNum.ADMIN_APP,
+                    request_id = 42,
+                    payload = adminMsg.encode().toByteString(),
+                ),
             )
-        )
         val result = useCase(packet, 123, setOf(42))
         assertTrue(result is RadioResponseResult.Owner)
         assertEquals("Owner", (result as RadioResponseResult.Owner).user.long_name)
@@ -138,30 +140,33 @@ class ProcessRadioResponseUseCaseTest {
     fun `invoke with config response returns config result`() {
         val config = org.meshtastic.proto.Config(lora = org.meshtastic.proto.Config.LoRaConfig(use_preset = true))
         val adminMsg = AdminMessage(get_config_response = config)
-        val packet = MeshPacket(
-            from = 123,
-            decoded = Data(
-                portnum = PortNum.ADMIN_APP,
-                request_id = 42,
-                payload = adminMsg.encode().toByteString()
+        val packet =
+            MeshPacket(
+                from = 123,
+                decoded = Data(
+                    portnum = PortNum.ADMIN_APP,
+                    request_id = 42,
+                    payload = adminMsg.encode().toByteString(),
+                ),
             )
-        )
         val result = useCase(packet, 123, setOf(42))
         assertTrue(result is RadioResponseResult.ConfigResponse)
     }
 
     @Test
     fun `invoke with module config response returns module config result`() {
-        val config = org.meshtastic.proto.ModuleConfig(mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig(enabled = true))
+        val config =
+            org.meshtastic.proto.ModuleConfig(mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig(enabled = true))
         val adminMsg = AdminMessage(get_module_config_response = config)
-        val packet = MeshPacket(
-            from = 123,
-            decoded = Data(
-                portnum = PortNum.ADMIN_APP,
-                request_id = 42,
-                payload = adminMsg.encode().toByteString()
+        val packet =
+            MeshPacket(
+                from = 123,
+                decoded = Data(
+                    portnum = PortNum.ADMIN_APP,
+                    request_id = 42,
+                    payload = adminMsg.encode().toByteString(),
+                ),
             )
-        )
         val result = useCase(packet, 123, setOf(42))
         assertTrue(result is RadioResponseResult.ModuleConfigResponse)
     }
@@ -170,14 +175,15 @@ class ProcessRadioResponseUseCaseTest {
     fun `invoke with channel response returns channel result`() {
         val channel = org.meshtastic.proto.Channel(settings = org.meshtastic.proto.ChannelSettings(name = "Main"))
         val adminMsg = AdminMessage(get_channel_response = channel)
-        val packet = MeshPacket(
-            from = 123,
-            decoded = Data(
-                portnum = PortNum.ADMIN_APP,
-                request_id = 42,
-                payload = adminMsg.encode().toByteString()
+        val packet =
+            MeshPacket(
+                from = 123,
+                decoded = Data(
+                    portnum = PortNum.ADMIN_APP,
+                    request_id = 42,
+                    payload = adminMsg.encode().toByteString(),
+                ),
             )
-        )
         val result = useCase(packet, 123, setOf(42))
         assertTrue(result is RadioResponseResult.ChannelResponse)
         assertEquals("Main", (result as RadioResponseResult.ChannelResponse).channel.settings?.name)

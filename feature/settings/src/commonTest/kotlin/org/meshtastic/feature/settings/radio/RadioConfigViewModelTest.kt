@@ -342,7 +342,8 @@ class RadioConfigViewModelTest {
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val config = org.meshtastic.proto.ModuleConfig(mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig(enabled = true))
+        val config =
+            org.meshtastic.proto.ModuleConfig(mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig(enabled = true))
         everySuspend { radioConfigUseCase.setModuleConfig(any(), any()) } returns 42
 
         viewModel.setModuleConfig(config)
@@ -398,18 +399,23 @@ class RadioConfigViewModelTest {
         nodeRepository.setNodes(listOf(node))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        
+
         viewModel = createViewModel()
 
         // ConfigResponse
         val configResponse = Config(lora = Config.LoRaConfig(hop_limit = 5))
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(configResponse)
+        every { processRadioResponseUseCase(any(), 123, any()) } returns
+            RadioResponseResult.ConfigResponse(configResponse)
         packetFlow.emit(MeshPacket())
         assertEquals(5, viewModel.radioConfigState.value.radioConfig.lora?.hop_limit)
 
         // ModuleConfigResponse
-        val moduleResponse = org.meshtastic.proto.ModuleConfig(telemetry = org.meshtastic.proto.ModuleConfig.TelemetryConfig(device_update_interval = 300))
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ModuleConfigResponse(moduleResponse)
+        val moduleResponse =
+            org.meshtastic.proto.ModuleConfig(
+                telemetry = org.meshtastic.proto.ModuleConfig.TelemetryConfig(device_update_interval = 300),
+            )
+        every { processRadioResponseUseCase(any(), 123, any()) } returns
+            RadioResponseResult.ModuleConfigResponse(moduleResponse)
         packetFlow.emit(MeshPacket())
         assertEquals(300, viewModel.radioConfigState.value.moduleConfig.telemetry?.device_update_interval)
 
@@ -425,7 +431,8 @@ class RadioConfigViewModelTest {
         assertEquals("bell.mp3", viewModel.radioConfigState.value.ringtone)
 
         // Error
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Error(org.meshtastic.core.resources.UiText.DynamicString("Fail"))
+        every { processRadioResponseUseCase(any(), 123, any()) } returns
+            RadioResponseResult.Error(org.meshtastic.core.resources.UiText.DynamicString("Fail"))
         packetFlow.emit(MeshPacket())
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
     }
@@ -443,9 +450,10 @@ class RadioConfigViewModelTest {
         // SHUTDOWN
         everySuspend { adminActionsUseCase.shutdown(any()) } returns 42
         // Set metadata to allow shutdown
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Metadata(DeviceMetadata(canShutdown = true))
+        every { processRadioResponseUseCase(any(), 123, any()) } returns
+            RadioResponseResult.Metadata(DeviceMetadata(canShutdown = true))
         packetFlow.emit(MeshPacket())
-        
+
         viewModel.setResponseStateLoading(AdminRoute.SHUTDOWN)
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
         packetFlow.emit(MeshPacket())
@@ -474,7 +482,9 @@ class RadioConfigViewModelTest {
         everySuspend { radioConfigUseCase.getConfig(any(), any()) } returns 42
         viewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
         verifySuspend { radioConfigUseCase.getChannel(123, 0) }
-        verifySuspend { radioConfigUseCase.getConfig(123, org.meshtastic.proto.AdminMessage.ConfigType.LORA_CONFIG.value) }
+        verifySuspend {
+            radioConfigUseCase.getConfig(123, org.meshtastic.proto.AdminMessage.ConfigType.LORA_CONFIG.value)
+        }
 
         // LORA
         viewModel.setResponseStateLoading(ConfigRoute.LORA)

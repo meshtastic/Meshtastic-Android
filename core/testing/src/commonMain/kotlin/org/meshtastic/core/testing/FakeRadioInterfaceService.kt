@@ -28,12 +28,8 @@ import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.repository.RadioInterfaceService
 
-/**
- * A test double for [RadioInterfaceService] that provides an in-memory implementation.
- */
-class FakeRadioInterfaceService(
-    override val serviceScope: CoroutineScope = MainScope(),
-) : RadioInterfaceService {
+/** A test double for [RadioInterfaceService] that provides an in-memory implementation. */
+class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = MainScope()) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<DeviceType> = emptyList()
 

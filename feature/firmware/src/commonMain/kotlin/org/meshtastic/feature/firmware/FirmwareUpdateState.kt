@@ -31,7 +31,7 @@ import org.meshtastic.core.resources.UiText
 data class ProgressState(
     val message: UiText = UiText.DynamicString(""),
     val progress: Float = 0f,
-    val details: String? = null
+    val details: String? = null,
 )
 
 sealed interface FirmwareUpdateState {

@@ -48,27 +48,26 @@ abstract class CommonPacketRepositoryTest {
     fun `savePacket persists and retrieves waypoints`() = runTest(testDispatcher) {
         val myNodeNum = 1
         val contact = "contact"
-        
-        // Ensure my_node is present so getMessageCount finds the packet
-        dbProvider.currentDb.value.nodeInfoDao().setMyNodeInfo(MyNodeEntity(
-            myNodeNum = myNodeNum,
-            model = "model",
-            firmwareVersion = "1.0",
-            couldUpdate = false,
-            shouldUpdate = false,
-            currentPacketId = 0L,
-            messageTimeoutMsec = 0,
-            minAppVersion = 0,
-            maxChannels = 0,
-            hasWifi = false,
-        ))
 
-        val packet = DataPacket(
-            to = "0!ffffffff",
-            bytes = okio.ByteString.EMPTY,
-            dataType = 1,
-            id = 123
-        )
+        // Ensure my_node is present so getMessageCount finds the packet
+        dbProvider.currentDb.value
+            .nodeInfoDao()
+            .setMyNodeInfo(
+                MyNodeEntity(
+                    myNodeNum = myNodeNum,
+                    model = "model",
+                    firmwareVersion = "1.0",
+                    couldUpdate = false,
+                    shouldUpdate = false,
+                    currentPacketId = 0L,
+                    messageTimeoutMsec = 0,
+                    minAppVersion = 0,
+                    maxChannels = 0,
+                    hasWifi = false,
+                ),
+            )
+
+        val packet = DataPacket(to = "0!ffffffff", bytes = okio.ByteString.EMPTY, dataType = 1, id = 123)
 
         repository.savePacket(myNodeNum, contact, packet, 1000L)
 

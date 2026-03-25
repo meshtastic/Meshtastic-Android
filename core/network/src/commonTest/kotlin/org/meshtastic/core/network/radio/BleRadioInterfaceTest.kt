@@ -21,7 +21,6 @@ import dev.mokkery.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory

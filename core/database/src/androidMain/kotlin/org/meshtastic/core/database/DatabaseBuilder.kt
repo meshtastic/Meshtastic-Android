@@ -41,13 +41,12 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
 }
 
 /** Returns a [RoomDatabase.Builder] configured for an in-memory Android database. */
-actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> {
-    return Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
+actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
+    Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
         context = ContextServices.app.applicationContext,
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
         .configureCommon()
-}
 
 /** Returns the Android directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path {

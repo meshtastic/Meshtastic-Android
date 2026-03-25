@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.debugging
 
-import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
@@ -24,14 +23,11 @@ import dev.mokkery.verify
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.core.testing.FakeMeshLogRepository
@@ -40,7 +36,6 @@ import org.meshtastic.core.ui.util.AlertManager
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DebugViewModelTest {
@@ -126,11 +121,12 @@ class DebugViewModelTest {
 
     @Test
     fun `filterManager filters logs correctly with AND and OR modes`() {
-        val logs = listOf(
-            DebugViewModel.UiMeshLog("1", "TypeA", "Date1", "Apple Red"),
-            DebugViewModel.UiMeshLog("2", "TypeB", "Date2", "Apple Green"),
-            DebugViewModel.UiMeshLog("3", "TypeC", "Date3", "Banana Yellow"),
-        )
+        val logs =
+            listOf(
+                DebugViewModel.UiMeshLog("1", "TypeA", "Date1", "Apple Red"),
+                DebugViewModel.UiMeshLog("2", "TypeB", "Date2", "Apple Green"),
+                DebugViewModel.UiMeshLog("3", "TypeC", "Date3", "Banana Yellow"),
+            )
 
         // OR mode
         val orResults = viewModel.filterManager.filterLogs(logs, listOf("Red", "Banana"), FilterMode.OR)
@@ -146,28 +142,40 @@ class DebugViewModelTest {
     @Test
     fun `presetFilters includes my node ID and broadcast`() {
         nodeRepository.setMyNodeInfo(org.meshtastic.core.testing.TestDataFactory.createMyNodeInfo(myNodeNum = 12345678))
-        
+
         val filters = viewModel.presetFilters
-        filters.shouldBe(listOf("!00bc614e", "!ffffffff", "decoded", org.meshtastic.core.common.util.DateFormatter.formatShortDate(org.meshtastic.core.common.util.nowInstant.toEpochMilliseconds())) + org.meshtastic.proto.PortNum.entries.map { it.name })
+        filters.shouldBe(
+            listOf(
+                "!00bc614e",
+                "!ffffffff",
+                "decoded",
+                org.meshtastic.core.common.util.DateFormatter.formatShortDate(
+                    org.meshtastic.core.common.util.nowInstant.toEpochMilliseconds(),
+                ),
+            ) + org.meshtastic.proto.PortNum.entries.map { it.name },
+        )
     }
 
     @Test
     fun `decodePayloadFromMeshLog decodes various portnums`() {
         val position = org.meshtastic.proto.Position(latitude_i = 10000000, longitude_i = 20000000)
-        val packet = org.meshtastic.core.testing.TestDataFactory.createTestPacket(
-            decoded = org.meshtastic.proto.Data(
-                portnum = org.meshtastic.proto.PortNum.POSITION_APP,
-                payload = okio.ByteString.Companion.of(*position.encode())
+        val packet =
+            org.meshtastic.core.testing.TestDataFactory.createTestPacket(
+                decoded =
+                org.meshtastic.proto.Data(
+                    portnum = org.meshtastic.proto.PortNum.POSITION_APP,
+                    payload = okio.ByteString.Companion.of(*position.encode()),
+                ),
             )
-        )
-        val log = org.meshtastic.core.model.MeshLog(
-            uuid = "1",
-            message_type = "Packet",
-            received_date = 1L,
-            raw_message = "raw",
-            fromRadio = org.meshtastic.proto.FromRadio(packet = packet)
-        )
-        
+        val log =
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "Packet",
+                received_date = 1L,
+                raw_message = "raw",
+                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+            )
+
         // This is a private method but we can test it via toUiState
         // (tested in the previous test)
     }

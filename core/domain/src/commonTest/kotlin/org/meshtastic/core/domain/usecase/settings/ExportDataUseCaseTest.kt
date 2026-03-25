@@ -55,22 +55,22 @@ class ExportDataUseCaseTest {
     @Test
     fun `invoke writes packet data to sink`() = runTest {
         val buffer = Buffer()
-        val log = MeshLog(
-            uuid = "1",
-            message_type = "TEXT",
-            received_date = 1000000000L,
-            raw_message = "",
-            fromRadio = FromRadio(
-                packet = MeshPacket(
-                    from = 1234,
-                    rx_snr = 5.0f,
-                    decoded = Data(
-                        portnum = PortNum.TEXT_MESSAGE_APP,
-                        payload = "Hello".encodeUtf8()
-                    )
-                )
+        val log =
+            MeshLog(
+                uuid = "1",
+                message_type = "TEXT",
+                received_date = 1000000000L,
+                raw_message = "",
+                fromRadio =
+                FromRadio(
+                    packet =
+                    MeshPacket(
+                        from = 1234,
+                        rx_snr = 5.0f,
+                        decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "Hello".encodeUtf8()),
+                    ),
+                ),
             )
-        )
         meshLogRepository.setLogs(listOf(log))
 
         useCase(buffer, 1)

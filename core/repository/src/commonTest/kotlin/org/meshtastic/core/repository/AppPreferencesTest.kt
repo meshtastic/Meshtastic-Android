@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.meshtastic.core.testing.FakeRadioPrefs
 import kotlin.test.Test
 import kotlin.test.assertFalse

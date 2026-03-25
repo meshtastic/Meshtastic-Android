@@ -57,9 +57,10 @@ abstract class CommonNodeRepositoryTest {
 
     fun setupRepo() {
         Dispatchers.setMain(testDispatcher)
-        lifecycleOwner = object : LifecycleOwner {
-            override val lifecycle = LifecycleRegistry(this)
-        }
+        lifecycleOwner =
+            object : LifecycleOwner {
+                override val lifecycle = LifecycleRegistry(this)
+            }
         (lifecycleOwner.lifecycle as LifecycleRegistry).handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
         readDataSource = mock(MockMode.autofill)
@@ -69,7 +70,14 @@ abstract class CommonNodeRepositoryTest {
         every { readDataSource.myNodeInfoFlow() } returns myNodeInfoFlow
         every { readDataSource.nodeDBbyNumFlow() } returns MutableStateFlow<Map<Int, NodeWithRelations>>(emptyMap())
 
-        repository = NodeRepositoryImpl(lifecycleOwner.lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
+        repository =
+            NodeRepositoryImpl(
+                lifecycleOwner.lifecycle,
+                readDataSource,
+                writeDataSource,
+                dispatchers,
+                localStatsDataSource,
+            )
     }
 
     @AfterTest

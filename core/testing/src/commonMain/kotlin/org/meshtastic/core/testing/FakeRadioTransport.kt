@@ -18,9 +18,7 @@ package org.meshtastic.core.testing
 
 import org.meshtastic.core.repository.RadioTransport
 
-/**
- * A test double for [RadioTransport] that tracks sent data.
- */
+/** A test double for [RadioTransport] that tracks sent data. */
 class FakeRadioTransport : RadioTransport {
     val sentData = mutableListOf<ByteArray>()
     var closeCalled = false

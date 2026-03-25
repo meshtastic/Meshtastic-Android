@@ -28,14 +28,16 @@ import org.meshtastic.proto.LocalStats
 /** Interface that handles saving and retrieving [LocalStats] data. */
 interface LocalStatsDataSource {
     val localStatsFlow: Flow<LocalStats>
+
     suspend fun setLocalStats(stats: LocalStats)
+
     suspend fun clearLocalStats()
 }
 
 /** Implementation of [LocalStatsDataSource] using DataStore. */
 @Single
 open class LocalStatsDataSourceImpl(
-    @Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>
+    @Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>,
 ) : LocalStatsDataSource {
     override val localStatsFlow: Flow<LocalStats> =
         localStatsStore.data.catch { exception ->

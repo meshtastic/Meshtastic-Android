@@ -18,8 +18,6 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -47,9 +45,11 @@ class FakeBleDevice(
     override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
 
     private val _isBonded = mutableStateFlow(false)
-    override val isBonded: Boolean get() = _isBonded.value
+    override val isBonded: Boolean
+        get() = _isBonded.value
 
-    override val isConnected: Boolean get() = _state.value == BleConnectionState.Connected
+    override val isConnected: Boolean
+        get() = _state.value == BleConnectionState.Connected
 
     override suspend fun readRssi(): Int = -60
 
@@ -76,7 +76,8 @@ class FakeBleScanner : BleScanner, BaseFake() {
 
 class FakeBleConnection : BleConnection, BaseFake() {
     private val _device = mutableStateFlow<BleDevice?>(null)
-    override val device: BleDevice? get() = _device.value
+    override val device: BleDevice?
+        get() = _device.value
 
     private val _deviceFlow = mutableSharedFlow<BleDevice?>(replay = 1)
     override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
@@ -130,7 +131,8 @@ class FakeBleConnection : BleConnection, BaseFake() {
 
 class FakeBleService : BleService
 
-class FakeBleConnectionFactory(private val fakeConnection: FakeBleConnection = FakeBleConnection()) : BleConnectionFactory {
+class FakeBleConnectionFactory(private val fakeConnection: FakeBleConnection = FakeBleConnection()) :
+    BleConnectionFactory {
     override fun create(scope: CoroutineScope, tag: String): BleConnection = fakeConnection
 }
 

@@ -19,40 +19,30 @@ package org.meshtastic.core.testing
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/**
- * Base class for fakes that provides common utilities for state management and reset capabilities.
- */
+/** Base class for fakes that provides common utilities for state management and reset capabilities. */
 abstract class BaseFake {
     private val resetActions = mutableListOf<() -> Unit>()
 
-    /**
-     * Creates a [MutableStateFlow] and registers it for automatic reset.
-     */
+    /** Creates a [MutableStateFlow] and registers it for automatic reset. */
     protected fun <T> mutableStateFlow(initialValue: T): MutableStateFlow<T> {
         val flow = MutableStateFlow(initialValue)
         resetActions.add { flow.value = initialValue }
         return flow
     }
 
-    /**
-     * Creates a [MutableSharedFlow] and registers it for automatic reset (replay cache cleared).
-     */
+    /** Creates a [MutableSharedFlow] and registers it for automatic reset (replay cache cleared). */
     protected fun <T> mutableSharedFlow(replay: Int = 0): MutableSharedFlow<T> {
         val flow = MutableSharedFlow<T>(replay = replay)
         resetActions.add { flow.resetReplayCache() }
         return flow
     }
 
-    /**
-     * Registers a custom reset action (e.g. clearing a list of recorded calls).
-     */
+    /** Registers a custom reset action (e.g. clearing a list of recorded calls). */
     protected fun registerResetAction(action: () -> Unit) {
         resetActions.add(action)
     }
 
-    /**
-     * Resets all registered state flows and custom actions to their initial state.
-     */
+    /** Resets all registered state flows and custom actions to their initial state. */
     open fun reset() {
         resetActions.forEach { it() }
     }

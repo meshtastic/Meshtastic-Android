@@ -70,8 +70,8 @@ import org.meshtastic.core.ui.navigation.icon
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
- * Shared adaptive navigation shell. Provides a Bottom Navigation bar on phones,
- * and a Navigation Rail on tablets and desktop targets.
+ * Shared adaptive navigation shell. Provides a Bottom Navigation bar on phones, and a Navigation Rail on tablets and
+ * desktop targets.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,7 +104,8 @@ fun MeshtasticNavigationSuite(
                     }
                 }
                 TopLevelDestination.Conversations -> {
-                    val onConversationsList = currentKey is ContactsRoutes.ContactsGraph || currentKey is ContactsRoutes.Contacts
+                    val onConversationsList =
+                        currentKey is ContactsRoutes.ContactsGraph || currentKey is ContactsRoutes.Contacts
                     if (!onConversationsList) {
                         backStack.navigateTopLevel(destination.route)
                     } else {
@@ -145,7 +146,7 @@ fun MeshtasticNavigationSuite(
                         )
                     }
                 }
-            }
+            },
         ) { padding ->
             Box(modifier = Modifier.fillMaxSize().padding(padding)) { content() }
         }

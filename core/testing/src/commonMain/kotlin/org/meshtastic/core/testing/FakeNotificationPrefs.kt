@@ -17,16 +17,24 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.repository.NotificationPrefs
 
 class FakeNotificationPrefs : NotificationPrefs {
     override val messagesEnabled = MutableStateFlow(true)
-    override fun setMessagesEnabled(enabled: Boolean) { messagesEnabled.value = enabled }
+
+    override fun setMessagesEnabled(enabled: Boolean) {
+        messagesEnabled.value = enabled
+    }
 
     override val nodeEventsEnabled = MutableStateFlow(true)
-    override fun setNodeEventsEnabled(enabled: Boolean) { nodeEventsEnabled.value = enabled }
+
+    override fun setNodeEventsEnabled(enabled: Boolean) {
+        nodeEventsEnabled.value = enabled
+    }
 
     override val lowBatteryEnabled = MutableStateFlow(true)
-    override fun setLowBatteryEnabled(enabled: Boolean) { lowBatteryEnabled.value = enabled }
+
+    override fun setLowBatteryEnabled(enabled: Boolean) {
+        lowBatteryEnabled.value = enabled
+    }
 }

@@ -70,47 +70,24 @@ class RadioConfigUseCaseTest {
     }
 
     @Test
-    fun `removeFixedPosition calls radioController with zero position`() = runTest {
-        useCase.removeFixedPosition(1234)
-    }
+    fun `removeFixedPosition calls radioController with zero position`() = runTest { useCase.removeFixedPosition(1234) }
 
-    @Test
-    fun `setRingtone calls radioController`() = runTest {
-        useCase.setRingtone(1234, "ringtone.mp3")
-    }
+    @Test fun `setRingtone calls radioController`() = runTest { useCase.setRingtone(1234, "ringtone.mp3") }
 
-    @Test
-    fun `setCannedMessages calls radioController`() = runTest {
-        useCase.setCannedMessages(1234, "messages")
-    }
+    @Test fun `setCannedMessages calls radioController`() = runTest { useCase.setCannedMessages(1234, "messages") }
 
-    @Test
-    fun `getConfig calls radioController`() = runTest {
-        useCase.getConfig(1234, 1)
-    }
+    @Test fun `getConfig calls radioController`() = runTest { useCase.getConfig(1234, 1) }
 
-    @Test
-    fun `getModuleConfig calls radioController`() = runTest {
-        useCase.getModuleConfig(1234, 1)
-    }
+    @Test fun `getModuleConfig calls radioController`() = runTest { useCase.getModuleConfig(1234, 1) }
 
-    @Test
-    fun `getChannel calls radioController`() = runTest {
-        useCase.getChannel(1234, 1)
-    }
+    @Test fun `getChannel calls radioController`() = runTest { useCase.getChannel(1234, 1) }
 
     @Test
     fun `setRemoteChannel calls radioController`() = runTest {
         useCase.setRemoteChannel(1234, org.meshtastic.proto.Channel())
     }
 
-    @Test
-    fun `getRingtone calls radioController`() = runTest {
-        useCase.getRingtone(1234)
-    }
+    @Test fun `getRingtone calls radioController`() = runTest { useCase.getRingtone(1234) }
 
-    @Test
-    fun `getCannedMessages calls radioController`() = runTest {
-        useCase.getCannedMessages(1234)
-    }
+    @Test fun `getCannedMessages calls radioController`() = runTest { useCase.getCannedMessages(1234) }
 }

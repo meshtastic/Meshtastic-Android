@@ -168,11 +168,15 @@ class Esp32OtaUpdateHandler(
         null
     } catch (e: OtaProtocolException) {
         Logger.e(e) { "ESP32 OTA: Protocol error" }
-        updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")))
+        updateState(
+            FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
+        )
         null
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         Logger.e(e) { "ESP32 OTA: Unexpected error" }
-        updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")))
+        updateState(
+            FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
+        )
         null
     }
 
@@ -184,12 +188,20 @@ class Esp32OtaUpdateHandler(
     ): String? {
         val downloadingMsg =
             getString(Res.string.firmware_update_downloading_percent, 0).replace(Regex(":?\\s*%1\\\$d%?"), "").trim()
-        updateState(FirmwareUpdateState.Downloading(ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f)))
+        updateState(
+            FirmwareUpdateState.Downloading(
+                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
+            ),
+        )
         return firmwareRetriever.retrieveEsp32Firmware(release, hardware) { progress ->
             val percent = (progress * PERCENT_MAX).toInt()
             updateState(
                 FirmwareUpdateState.Downloading(
-                    ProgressState(message = UiText.DynamicString(downloadingMsg), progress = progress, details = "$percent%"),
+                    ProgressState(
+                        message = UiText.DynamicString(downloadingMsg),
+                        progress = progress,
+                        details = "$percent%",
+                    ),
                 ),
             )
         }
@@ -232,10 +244,18 @@ class Esp32OtaUpdateHandler(
         val downloadingMsg =
             getString(Res.string.firmware_update_downloading_percent, 0).replace(Regex(":?\\s*%1\\\$d%?"), "").trim()
 
-        updateState(FirmwareUpdateState.Downloading(ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f)))
+        updateState(
+            FirmwareUpdateState.Downloading(
+                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
+            ),
+        )
 
         return if (firmwareUri != null) {
-            updateState(FirmwareUpdateState.Processing(ProgressState(message = UiText.Resource(Res.string.firmware_update_extracting))))
+            updateState(
+                FirmwareUpdateState.Processing(
+                    ProgressState(message = UiText.Resource(Res.string.firmware_update_extracting)),
+                ),
+            )
             getFirmwareFromUri(firmwareUri)
         } else {
             val firmwareFile =
@@ -243,13 +263,21 @@ class Esp32OtaUpdateHandler(
                     val percent = (progress * PERCENT_MAX).toInt()
                     updateState(
                         FirmwareUpdateState.Downloading(
-                            ProgressState(message = UiText.DynamicString(downloadingMsg), progress = progress, details = "$percent%"),
+                            ProgressState(
+                                message = UiText.DynamicString(downloadingMsg),
+                                progress = progress,
+                                details = "$percent%",
+                            ),
                         ),
                     )
                 }
 
             if (firmwareFile == null) {
-                updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_not_found_in_release, hardware.displayName)))
+                updateState(
+                    FirmwareUpdateState.Error(
+                        UiText.Resource(Res.string.firmware_update_not_found_in_release, hardware.displayName),
+                    ),
+                )
                 null
             } else {
                 firmwareFile
@@ -263,11 +291,17 @@ class Esp32OtaUpdateHandler(
         updateState: (FirmwareUpdateState) -> Unit,
     ): Boolean {
         // Show "waiting for reboot" state before first connection attempt
-        updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))))
+        updateState(
+            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
+        )
 
         for (i in 1..attempts) {
             try {
-                updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_connecting_attempt, i, attempts))))
+                updateState(
+                    FirmwareUpdateState.Processing(
+                        ProgressState(UiText.Resource(Res.string.firmware_update_connecting_attempt, i, attempts)),
+                    ),
+                )
                 transport.connect().getOrThrow()
                 return true
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -288,12 +322,18 @@ class Esp32OtaUpdateHandler(
     ) {
         val file = java.io.File(firmwareFile)
         // Step 5: Start OTA
-        updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_ota))))
+        updateState(
+            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_ota))),
+        )
         transport
             .startOta(sizeBytes = file.length(), sha256Hash = sha256Hash) { status ->
                 when (status) {
                     OtaHandshakeStatus.Erasing -> {
-                        updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_erasing))))
+                        updateState(
+                            FirmwareUpdateState.Processing(
+                                ProgressState(UiText.Resource(Res.string.firmware_update_erasing)),
+                            ),
+                        )
                     }
                 }
             }

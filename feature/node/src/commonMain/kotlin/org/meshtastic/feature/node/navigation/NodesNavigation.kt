@@ -190,7 +190,6 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
 }
 
 /** Expect declaration for the platform-specific traceroute map screen. */
-
 enum class NodeDetailRoute(
     val title: StringResource,
     val routeClass: KClass<out Route>,

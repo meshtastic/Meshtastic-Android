@@ -20,7 +20,6 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

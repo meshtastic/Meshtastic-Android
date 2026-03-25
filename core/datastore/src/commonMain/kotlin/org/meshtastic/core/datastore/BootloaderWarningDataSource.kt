@@ -29,7 +29,9 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
 @Single
-open class BootloaderWarningDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
+open class BootloaderWarningDataSource(
+    @Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>,
+) {
 
     private object PreferencesKeys {
         val DISMISSED_BOOTLOADER_ADDRESSES = stringPreferencesKey("dismissed-bootloader-addresses")

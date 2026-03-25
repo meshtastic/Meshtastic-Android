@@ -41,11 +41,7 @@ kotlin {
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
 
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.robolectric)
-            }
-        }
+        val androidHostTest by getting { dependencies { implementation(libs.robolectric) } }
 
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }

@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -89,9 +88,8 @@ private fun ActionButtons(
 fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val exportPositionLauncher = org.meshtastic.core.ui.util.rememberSaveFileLauncher { uri ->
-        viewModel.savePositionCSV(uri)
-    }
+    val exportPositionLauncher =
+        org.meshtastic.core.ui.util.rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri) }
 
     var clearButtonEnabled by rememberSaveable(state.positionLogs) { mutableStateOf(state.positionLogs.isNotEmpty()) }
 

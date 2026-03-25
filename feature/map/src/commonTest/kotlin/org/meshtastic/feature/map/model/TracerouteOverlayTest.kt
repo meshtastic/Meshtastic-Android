@@ -26,7 +26,7 @@ class TracerouteOverlayTest {
     @Test
     fun `TracerouteOverlay handles empty routes correctly`() {
         val overlay = TracerouteOverlay(requestId = 1)
-        
+
         assertEquals(1, overlay.requestId)
         assertTrue(overlay.forwardRoute.isEmpty())
         assertTrue(overlay.returnRoute.isEmpty())
@@ -36,12 +36,8 @@ class TracerouteOverlayTest {
 
     @Test
     fun `TracerouteOverlay processes populated routes correctly`() {
-        val overlay = TracerouteOverlay(
-            requestId = 2,
-            forwardRoute = listOf(1, 2, 3),
-            returnRoute = listOf(3, 4, 1)
-        )
-        
+        val overlay = TracerouteOverlay(requestId = 2, forwardRoute = listOf(1, 2, 3), returnRoute = listOf(3, 4, 1))
+
         assertEquals(setOf(1, 2, 3, 4), overlay.relatedNodeNums)
         assertTrue(overlay.hasRoutes)
     }

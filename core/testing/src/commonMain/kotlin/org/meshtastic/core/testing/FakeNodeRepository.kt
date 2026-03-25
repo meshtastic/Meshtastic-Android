@@ -41,7 +41,9 @@ import org.meshtastic.proto.User
  * ```
  */
 @Suppress("TooManyFunctions")
-class FakeNodeRepository : BaseFake(), NodeRepository {
+class FakeNodeRepository :
+    BaseFake(),
+    NodeRepository {
 
     private val _myNodeInfo = mutableStateFlow<MyNodeInfo?>(null)
     override val myNodeInfo: StateFlow<MyNodeInfo?> = _myNodeInfo
@@ -83,7 +85,14 @@ class FakeNodeRepository : BaseFake(), NodeRepository {
     ): Flow<List<Node>> = _nodeDBbyNum.map { db ->
         db.values
             .asSequence()
-            .filter { if (filter.isBlank()) true else it.user.long_name.contains(filter, ignoreCase = true) || it.user.id.contains(filter, ignoreCase = true) }
+            .filter {
+                if (filter.isBlank()) {
+                    true
+                } else {
+                    it.user.long_name.contains(filter, ignoreCase = true) ||
+                        it.user.id.contains(filter, ignoreCase = true)
+                }
+            }
             .filter { if (includeUnknown) true else !it.isUnknownUser }
             .filter { if (onlyOnline) it.isOnline else true }
             .filter { if (onlyDirect) it.hopsAway == 0 else true }
@@ -104,8 +113,7 @@ class FakeNodeRepository : BaseFake(), NodeRepository {
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
         _nodeDBbyNum.value.values.filter { it.lastHeard < lastHeard }
 
-    override suspend fun getUnknownNodes(): List<Node> =
-        _nodeDBbyNum.value.values.filter { it.isUnknownUser }
+    override suspend fun getUnknownNodes(): List<Node> = _nodeDBbyNum.value.values.filter { it.isUnknownUser }
 
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {
         if (preserveFavorites) {

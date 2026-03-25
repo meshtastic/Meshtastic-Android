@@ -21,8 +21,8 @@ import androidx.compose.runtime.compositionLocalOf
 import org.meshtastic.core.ui.component.PlaceholderScreen
 
 /**
- * Provides the platform-specific Traceroute Map Screen.
- * On Desktop or JVM targets where native maps aren't available yet, it falls back to a [PlaceholderScreen].
+ * Provides the platform-specific Traceroute Map Screen. On Desktop or JVM targets where native maps aren't available
+ * yet, it falls back to a [PlaceholderScreen].
  */
 val LocalTracerouteMapScreenProvider =
     compositionLocalOf<@Composable (destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit) -> Unit> {

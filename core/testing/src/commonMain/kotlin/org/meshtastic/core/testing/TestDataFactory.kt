@@ -51,27 +51,26 @@ object TestDataFactory {
     ): Node {
         val user = User(id = userId, long_name = longName, short_name = shortName, hw_model = hwModel)
         val metrics = org.meshtastic.proto.DeviceMetrics(battery_level = batteryLevel)
-        return Node(num = num, user = user, lastHeard = lastHeard, snr = 0f, rssi = 0, channel = 0, deviceMetrics = metrics)
+        return Node(
+            num = num,
+            user = user,
+            lastHeard = lastHeard,
+            snr = 0f,
+            rssi = 0,
+            channel = 0,
+            deviceMetrics = metrics,
+        )
     }
 
-    /**
-     * Creates a test [org.meshtastic.proto.MeshPacket] with default values.
-     */
+    /** Creates a test [org.meshtastic.proto.MeshPacket] with default values. */
     fun createTestPacket(
         from: Int = 1,
         to: Int = 0xffffffff.toInt(),
         decoded: org.meshtastic.proto.Data? = null,
         relayNode: Int = 0,
-    ) = org.meshtastic.proto.MeshPacket(
-        from = from,
-        to = to,
-        decoded = decoded,
-        relay_node = relayNode,
-    )
+    ) = org.meshtastic.proto.MeshPacket(from = from, to = to, decoded = decoded, relay_node = relayNode)
 
-    /**
-     * Creates multiple test nodes with sequential IDs.
-     */
+    /** Creates multiple test nodes with sequential IDs. */
     fun createTestNodes(count: Int, baseNum: Int = 1): List<Node> = (0 until count).map { i ->
         createTestNode(
             num = baseNum + i,

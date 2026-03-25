@@ -16,15 +16,14 @@
  */
 package org.meshtastic.core.testing
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.proto.LocalStats
 
-/**
- * A test double for [LocalStatsDataSource] that provides an in-memory implementation.
- */
-class FakeLocalStatsDataSource : BaseFake(), LocalStatsDataSource {
+/** A test double for [LocalStatsDataSource] that provides an in-memory implementation. */
+class FakeLocalStatsDataSource :
+    BaseFake(),
+    LocalStatsDataSource {
     private val _localStatsFlow = mutableStateFlow(LocalStats())
     override val localStatsFlow: StateFlow<LocalStats> = _localStatsFlow
 

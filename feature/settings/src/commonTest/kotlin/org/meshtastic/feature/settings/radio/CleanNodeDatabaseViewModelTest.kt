@@ -18,17 +18,14 @@ package org.meshtastic.feature.settings.radio
 
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
-import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
-import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.domain.usecase.settings.CleanNodeDatabaseUseCase
@@ -77,9 +74,9 @@ class CleanNodeDatabaseViewModelTest {
     fun `getNodesToDelete calls useCase and updates state`() = runTest {
         val nodes = listOf(Node(num = 1, user = org.meshtastic.proto.User(id = "!1")))
         everySuspend { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
-        
+
         viewModel.getNodesToDelete()
-        
+
         assertEquals(nodes, viewModel.nodesToDelete.value)
     }
 
@@ -89,11 +86,11 @@ class CleanNodeDatabaseViewModelTest {
         val nodes = listOf(Node(num = 1, user = org.meshtastic.proto.User(id = "!1")))
         everySuspend { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
         viewModel.getNodesToDelete()
-        
+
         everySuspend { cleanNodeDatabaseUseCase.cleanNodes(any()) } returns Unit
-        
+
         viewModel.cleanNodes()
-        
+
         verifySuspend { cleanNodeDatabaseUseCase.cleanNodes(listOf(1)) }
         assertEquals(emptyList(), viewModel.nodesToDelete.value)
     }

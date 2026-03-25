@@ -16,11 +16,10 @@
  */
 package org.meshtastic.feature.firmware
 
+import org.meshtastic.core.resources.UiText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-
-import org.meshtastic.core.resources.UiText
 
 class FirmwareUpdateStateTest {
 

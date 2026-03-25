@@ -19,8 +19,8 @@ package org.meshtastic.core.testing
 /**
  * A container for all mesh-related fakes to simplify test setup.
  *
- * Instead of manually instantiating and wiring multiple fakes, you can use [FakeMeshService]
- * to get a consistent set of test doubles.
+ * Instead of manually instantiating and wiring multiple fakes, you can use [FakeMeshService] to get a consistent set of
+ * test doubles.
  */
 class FakeMeshService {
     val nodeRepository = FakeNodeRepository()

@@ -21,10 +21,12 @@ import androidx.compose.runtime.compositionLocalOf
 import org.meshtastic.core.ui.component.PlaceholderScreen
 
 /**
- * Provides the platform-specific Map Main Screen.
- * On Desktop or JVM targets where native maps aren't available yet, it falls back to a [PlaceholderScreen].
+ * Provides the platform-specific Map Main Screen. On Desktop or JVM targets where native maps aren't available yet, it
+ * falls back to a [PlaceholderScreen].
  */
 val LocalMapMainScreenProvider =
-    compositionLocalOf<@Composable (onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) -> Unit> {
+    compositionLocalOf<
+        @Composable (onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) -> Unit,
+        > {
         { _, _, _ -> PlaceholderScreen("Map") }
     }

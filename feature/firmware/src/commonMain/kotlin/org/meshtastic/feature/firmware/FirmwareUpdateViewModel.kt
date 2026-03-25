@@ -36,7 +36,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.NumberFormatter
-import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -46,6 +45,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
@@ -62,7 +62,6 @@ import org.meshtastic.core.resources.firmware_update_enabling_dfu
 import org.meshtastic.core.resources.firmware_update_extracting
 import org.meshtastic.core.resources.firmware_update_failed
 import org.meshtastic.core.resources.firmware_update_flashing
-import org.meshtastic.core.resources.firmware_update_local_failed
 import org.meshtastic.core.resources.firmware_update_method_ble
 import org.meshtastic.core.resources.firmware_update_method_usb
 import org.meshtastic.core.resources.firmware_update_method_wifi
@@ -207,7 +206,10 @@ class FirmwareUpdateViewModel(
                     if (e is CancellationException) throw e
                     Logger.e(e) { "Error checking for updates" }
                     val unknownError = UiText.Resource(Res.string.firmware_update_unknown_error)
-                    _state.value = FirmwareUpdateState.Error(if (e.message != null) UiText.DynamicString(e.message!!) else unknownError)
+                    _state.value =
+                        FirmwareUpdateState.Error(
+                            if (e.message != null) UiText.DynamicString(e.message!!) else unknownError,
+                        )
                 }
         }
     }
@@ -253,14 +255,16 @@ class FirmwareUpdateViewModel(
 
         viewModelScope.launch {
             try {
-                _state.value = FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_copying)))
+                _state.value =
+                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_copying)))
                 if (firmwareFile != null) {
                     fileHandler.copyFileToUri(firmwareFile, uri)
                 } else if (sourceUri != null) {
                     fileHandler.copyUriToUri(sourceUri, uri)
                 }
 
-                _state.value = FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_flashing)))
+                _state.value =
+                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_flashing)))
                 withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
                     ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
@@ -287,7 +291,10 @@ class FirmwareUpdateViewModel(
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                _state.value = FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_extracting)))
+                _state.value =
+                    FirmwareUpdateState.Processing(
+                        ProgressState(UiText.Resource(Res.string.firmware_update_extracting)),
+                    )
                 val extension = if (currentState.updateMethod is FirmwareUpdateMethod.Ble) ".zip" else ".uf2"
                 val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
 
@@ -345,19 +352,31 @@ class FirmwareUpdateViewModel(
                 }
 
                 is DfuInternalState.Starting -> {
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu)))
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu)),
+                        )
                 }
 
                 is DfuInternalState.EnablingDfuMode -> {
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu)))
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu)),
+                        )
                 }
 
                 is DfuInternalState.Validating -> {
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_validating)))
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_validating)),
+                        )
                 }
 
                 is DfuInternalState.Disconnecting -> {
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_disconnecting)))
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_disconnecting)),
+                        )
                 }
 
                 else -> {} // ignore connected/disconnected for UI noise
@@ -401,7 +420,7 @@ class FirmwareUpdateViewModel(
         val statusMsg = UiText.Resource(Res.string.firmware_update_updating)
         val details = "$percentText ($metrics)"
         _state.value = FirmwareUpdateState.Updating(ProgressState(statusMsg, progress, details))
-        }
+    }
 
     private suspend fun verifyUpdateResult(address: String?) {
         _state.value = FirmwareUpdateState.Verifying
@@ -448,7 +467,8 @@ class FirmwareUpdateViewModel(
 
         return if (hwModelInt != null) {
             deviceHardwareRepository.getDeviceHardwareByModel(hwModelInt, target).getOrElse {
-                _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_unknown_hardware, hwModelInt))
+                _state.value =
+                    FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_unknown_hardware, hwModelInt))
                 null
             }
         } else {

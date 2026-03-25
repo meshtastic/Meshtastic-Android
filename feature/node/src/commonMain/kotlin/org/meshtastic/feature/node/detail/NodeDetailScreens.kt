@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.meshtastic.feature.node.detail
 
 import androidx.compose.foundation.layout.padding
@@ -33,7 +49,9 @@ import org.meshtastic.feature.node.model.NodeDetailAction
 
 private sealed interface NodeDetailOverlay {
     data object SharedContact : NodeDetailOverlay
+
     data class FirmwareReleaseInfo(val release: FirmwareRelease) : NodeDetailOverlay
+
     data object Compass : NodeDetailOverlay
 }
 
@@ -73,7 +91,8 @@ private fun NodeDetailScaffold(
 ) {
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
     val actualCompassViewModel = compassViewModel
-    val compassUiState by actualCompassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
+    val compassUiState by
+        actualCompassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
 
     val node = uiState.node
     val listState = rememberLazyListState()
@@ -103,14 +122,15 @@ private fun NodeDetailScaffold(
                         actualCompassViewModel?.start(action.node, action.displayUnits)
                         activeOverlay = NodeDetailOverlay.Compass
                     }
-                    else -> handleNodeAction(
-                        action = action,
-                        uiState = uiState,
-                        navigateToMessages = navigateToMessages,
-                        onNavigateUp = onNavigateUp,
-                        onNavigate = onNavigate,
-                        viewModel = viewModel,
-                    )
+                    else ->
+                        handleNodeAction(
+                            action = action,
+                            uiState = uiState,
+                            navigateToMessages = navigateToMessages,
+                            onNavigateUp = onNavigateUp,
+                            onNavigate = onNavigate,
+                            viewModel = viewModel,
+                        )
                 }
             },
             onFirmwareSelect = { activeOverlay = NodeDetailOverlay.FirmwareReleaseInfo(it) },
@@ -134,15 +154,17 @@ private fun NodeDetailOverlays(
     onDismiss: () -> Unit,
     onRequestPosition: (Node) -> Unit,
 ) {
-    val requestLocationPermission = org.meshtastic.core.ui.util.rememberRequestLocationPermission(
-        onGranted = { node?.let { onRequestPosition(it) } },
-        onDenied = {},
-    )
+    val requestLocationPermission =
+        org.meshtastic.core.ui.util.rememberRequestLocationPermission(
+            onGranted = { node?.let { onRequestPosition(it) } },
+            onDenied = {},
+        )
     val openLocationSettings = org.meshtastic.core.ui.util.rememberOpenLocationSettings()
 
     when (overlay) {
         is NodeDetailOverlay.SharedContact -> node?.let { SharedContactDialog(it, onDismiss) }
-        is NodeDetailOverlay.FirmwareReleaseInfo -> NodeDetailBottomSheet(onDismiss) { FirmwareReleaseSheetContent(firmwareRelease = overlay.release) }
+        is NodeDetailOverlay.FirmwareReleaseInfo ->
+            NodeDetailBottomSheet(onDismiss) { FirmwareReleaseSheetContent(firmwareRelease = overlay.release) }
         is NodeDetailOverlay.Compass -> {
             DisposableEffect(Unit) { onDispose { compassViewModel?.stop() } }
             NodeDetailBottomSheet(

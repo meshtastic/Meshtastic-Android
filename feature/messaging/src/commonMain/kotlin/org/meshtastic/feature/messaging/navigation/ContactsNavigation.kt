@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.messaging.navigation
 
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -101,9 +100,10 @@ fun ContactsEntryContent(
         initialContactKey = initialContactKey,
         initialMessage = initialMessage,
         detailPaneCustom = { contactKey ->
-            val messageViewModel: org.meshtastic.feature.messaging.MessageViewModel = koinViewModel(key = "messages-$contactKey")
+            val messageViewModel: org.meshtastic.feature.messaging.MessageViewModel =
+                koinViewModel(key = "messages-$contactKey")
             messageViewModel.setContactKey(contactKey)
-            
+
             org.meshtastic.feature.messaging.MessageScreen(
                 contactKey = contactKey,
                 message = if (contactKey == initialContactKey) initialMessage else "",

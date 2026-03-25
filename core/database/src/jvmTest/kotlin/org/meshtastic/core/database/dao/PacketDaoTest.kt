@@ -20,8 +20,5 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 
 class PacketDaoTest : CommonPacketDaoTest() {
-    @BeforeTest
-    fun setup() = runTest {
-        createDb()
-    }
+    @BeforeTest fun setup() = runTest { createDb() }
 }

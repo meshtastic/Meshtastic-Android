@@ -714,7 +714,11 @@ private fun ProgressContent(
 
         Spacer(Modifier.height(24.dp))
 
-        Text(progressState.message.asString(), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(
+            progressState.message.asString(),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+        )
 
         val details = progressState.details
         if (details != null) {

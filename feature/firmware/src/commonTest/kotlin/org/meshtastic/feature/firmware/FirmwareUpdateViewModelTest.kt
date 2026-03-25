@@ -78,17 +78,25 @@ class FirmwareUpdateViewModelTest {
         val release = FirmwareRelease(id = "1", title = "1.0.0", zipUrl = "url", releaseNotes = "notes")
         every { firmwareReleaseRepository.stableRelease } returns flowOf(release)
         every { firmwareReleaseRepository.alphaRelease } returns flowOf(release)
-        
+
         every { radioPrefs.devAddr } returns MutableStateFlow("!1234abcd")
 
         val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
-        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns Result.success(hardware)
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
 
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
 
         // Setup node info
-        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "0.9.0", pioEnv = "tbeam"))
-        val node = TestDataFactory.createTestNode(num = 123, userId = "!1234abcd", hwModel = org.meshtastic.proto.HardwareModel.TLORA_V2)
+        nodeRepository.setMyNodeInfo(
+            TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "0.9.0", pioEnv = "tbeam"),
+        )
+        val node =
+            TestDataFactory.createTestNode(
+                num = 123,
+                userId = "!1234abcd",
+                hwModel = org.meshtastic.proto.HardwareModel.TLORA_V2,
+            )
         nodeRepository.setOurNode(node)
 
         // Setup file handler
@@ -116,7 +124,7 @@ class FirmwareUpdateViewModelTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
-        dispatchers
+        dispatchers,
     )
 
     @Test
@@ -147,13 +155,19 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `startUpdate sets error if battery is too low`() = runTest {
-        val node = TestDataFactory.createTestNode(num = 123, userId = "!1234abcd", hwModel = org.meshtastic.proto.HardwareModel.TLORA_V2, batteryLevel = 5)
+        val node =
+            TestDataFactory.createTestNode(
+                num = 123,
+                userId = "!1234abcd",
+                hwModel = org.meshtastic.proto.HardwareModel.TLORA_V2,
+                batteryLevel = 5,
+            )
         nodeRepository.setOurNode(node)
         advanceUntilIdle()
 
         val currentState = viewModel.state.value
         assertTrue(currentState is FirmwareUpdateState.Ready, "Expected Ready state but was $currentState")
-        
+
         viewModel.startUpdate()
         advanceUntilIdle()
 
@@ -167,21 +181,27 @@ class FirmwareUpdateViewModelTest {
     @Test
     fun `startUpdate transitions to Success if manager returns Success`() = runTest {
         advanceUntilIdle()
-        
+
         // Mock with 4 arguments
-        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }.calls {
-            @Suppress("UNCHECKED_CAST")
-            val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
-            updateState(FirmwareUpdateState.Success)
-            null
-        }
+        everySuspend { firmwareUpdateManager.startUpdate(any(), any(), any(), any()) }
+            .calls {
+                @Suppress("UNCHECKED_CAST")
+                val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
+                updateState(FirmwareUpdateState.Success)
+                null
+            }
 
         viewModel.startUpdate()
         advanceUntilIdle()
 
         // Wait for verifyUpdateResult to hit its timeout and go to VerificationFailed
         val state = viewModel.state.value
-        assertTrue(state is FirmwareUpdateState.Success || state is FirmwareUpdateState.Verifying || state is FirmwareUpdateState.VerificationFailed, "Final state was $state")
+        assertTrue(
+            state is FirmwareUpdateState.Success ||
+                state is FirmwareUpdateState.Verifying ||
+                state is FirmwareUpdateState.VerificationFailed,
+            "Final state was $state",
+        )
     }
 
     @Test
@@ -195,26 +215,35 @@ class FirmwareUpdateViewModelTest {
 
     @Test
     fun `dismissBootloaderWarningForCurrentDevice updates state`() = runTest {
-        val hardware = DeviceHardware(hwModel = 1, architecture = "nrf52", platformioTarget = "tbeam", requiresBootloaderUpgradeForOta = true)
-        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns Result.success(hardware)
+        val hardware =
+            DeviceHardware(
+                hwModel = 1,
+                architecture = "nrf52",
+                platformioTarget = "tbeam",
+                requiresBootloaderUpgradeForOta = true,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
         // Set connection to BLE so it's shown
         // In ViewModel: radioPrefs.isBle()
         // isBle is extension fun on RadioPrefs
-        // Mock connection state if needed, but isBle checks radioPrefs properties? 
+        // Mock connection state if needed, but isBle checks radioPrefs properties?
         // Actually, let's check core/repository/RadioPrefsExtensions.kt
-        
+
         // Setup node info
-        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "0.9.0", pioEnv = "tbeam"))
-        
+        nodeRepository.setMyNodeInfo(
+            TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "0.9.0", pioEnv = "tbeam"),
+        )
+
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
         everySuspend { bootloaderWarningDataSource.dismiss(any()) } returns Unit
-        
+
         viewModel = createViewModel()
         advanceUntilIdle()
 
         val state = viewModel.state.value
         if (state is FirmwareUpdateState.Ready) {
-            // We need to ensure isBle() is true. 
+            // We need to ensure isBle() is true.
             // I'll check the extension.
         }
     }

@@ -24,8 +24,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.usecase.SendMessageUseCase
-import org.meshtastic.core.repository.usecase.SendMessageUseCaseImpl
 import org.meshtastic.core.testing.FakeAppPreferences
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController

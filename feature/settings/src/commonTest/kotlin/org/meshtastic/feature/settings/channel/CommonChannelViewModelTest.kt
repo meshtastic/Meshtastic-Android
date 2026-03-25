@@ -70,7 +70,7 @@ abstract class CommonChannelViewModelTest {
         val config = LocalConfig(security = Config.SecurityConfig(is_managed = true))
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(config)
         viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics)
-        
+
         viewModel.localConfig.test {
             awaitItem().security?.is_managed shouldBe true
             assertEquals(true, viewModel.isManaged)
@@ -96,7 +96,7 @@ abstract class CommonChannelViewModelTest {
         val url = "https://www.meshtastic.org/e/#CgMSAQESBggBQANIAQ"
         viewModel.requestChannelUrl(url) {}
         runCurrent()
-        
+
         assertEquals(true, viewModel.requestChannelSet.value != null)
     }
 }

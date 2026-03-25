@@ -19,14 +19,13 @@ package org.meshtastic.feature.map.model
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 
 class MapLayerTest {
 
     @Test
     fun `MapLayerItem defaults are correct`() {
         val item = MapLayerItem(name = "Test", layerType = LayerType.GEOJSON)
-        
+
         assertNotNull(item.id)
         assertEquals("Test", item.name)
         assertEquals(null, item.uriString)

@@ -18,12 +18,9 @@ package org.meshtastic.core.testing
 
 import org.meshtastic.core.repository.Location
 
-/**
- * Creates an Android [Location] for testing.
- */
-actual fun createLocation(latitude: Double, longitude: Double, altitude: Double): Location =
-    Location("fake").apply {
-        this.latitude = latitude
-        this.longitude = longitude
-        this.altitude = altitude
-    }
+/** Creates an Android [Location] for testing. */
+actual fun createLocation(latitude: Double, longitude: Double, altitude: Double): Location = Location("fake").apply {
+    this.latitude = latitude
+    this.longitude = longitude
+    this.altitude = altitude
+}

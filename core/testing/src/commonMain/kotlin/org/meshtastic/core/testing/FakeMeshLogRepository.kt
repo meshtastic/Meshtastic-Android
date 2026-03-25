@@ -26,11 +26,11 @@ import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 
-/**
- * A test double for [MeshLogRepository] that provides in-memory log storage.
- */
+/** A test double for [MeshLogRepository] that provides in-memory log storage. */
 @Suppress("TooManyFunctions")
-class FakeMeshLogRepository : BaseFake(), MeshLogRepository {
+class FakeMeshLogRepository :
+    BaseFake(),
+    MeshLogRepository {
     private val logsFlow = mutableStateFlow<List<MeshLog>>(emptyList())
     val currentLogs: List<MeshLog>
         get() = logsFlow.value

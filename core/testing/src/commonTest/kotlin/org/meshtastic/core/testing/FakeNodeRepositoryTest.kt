@@ -31,11 +31,12 @@ class FakeNodeRepositoryTest {
 
     @Test
     fun `getNodes sorting by name`() = runTest {
-        val nodes = listOf(
-            Node(num = 1, user = User(long_name = "Charlie")),
-            Node(num = 2, user = User(long_name = "Alice")),
-            Node(num = 3, user = User(long_name = "Bob")),
-        )
+        val nodes =
+            listOf(
+                Node(num = 1, user = User(long_name = "Charlie")),
+                Node(num = 2, user = User(long_name = "Alice")),
+                Node(num = 3, user = User(long_name = "Bob")),
+            )
         repository.setNodes(nodes)
 
         repository.getNodes(sort = NodeSortOption.ALPHABETICAL).test {

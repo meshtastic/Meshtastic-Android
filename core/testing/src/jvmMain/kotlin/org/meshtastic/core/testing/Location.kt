@@ -18,7 +18,5 @@ package org.meshtastic.core.testing
 
 import org.meshtastic.core.repository.Location
 
-/**
- * Creates a placeholder JVM [Location] for testing.
- */
+/** Creates a placeholder JVM [Location] for testing. */
 actual fun createLocation(latitude: Double, longitude: Double, altitude: Double): Location = Location()

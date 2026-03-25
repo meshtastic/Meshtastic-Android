@@ -68,10 +68,11 @@ abstract class CommonPacketDaoTest {
                 contact_key = contactKey,
                 received_time = nowMillis + it,
                 read = false,
-                data = DataPacket(
+                data =
+                DataPacket(
                     to = DataPacket.ID_BROADCAST,
                     bytes = "Message $it!".encodeToByteArray().toByteString(),
-                    dataType = PortNum.TEXT_MESSAGE_APP.value
+                    dataType = PortNum.TEXT_MESSAGE_APP.value,
                 ),
             )
         }
@@ -133,12 +134,12 @@ abstract class CommonPacketDaoTest {
         val messages = packetDao.getMessagesFrom(contactKey).first()
         val packet = messages.first().packet.data
         val originalStatus = packet.status
-        
+
         // Ensure packet has a valid ID for updating
         val packetWithId = packet.copy(id = 999, from = "!$myNodeNum")
         val updatedRoomPacket = messages.first().packet.copy(data = packetWithId, packetId = 999)
         packetDao.update(updatedRoomPacket)
-        
+
         packetDao.updateMessageStatus(packetWithId, MessageStatus.DELIVERED)
         val updatedMessages = packetDao.getMessagesFrom(contactKey).first()
         assertEquals(MessageStatus.DELIVERED, updatedMessages.first { it.packet.data.id == 999 }.packet.data.status)
@@ -146,20 +147,22 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetQueuedPackets() = runTest {
-        val queuedPacket = Packet(
-            uuid = 0L,
-            myNodeNum = myNodeNum,
-            port_num = PortNum.TEXT_MESSAGE_APP.value,
-            contact_key = "queued",
-            received_time = nowMillis,
-            read = true,
-            data = DataPacket(
-                to = DataPacket.ID_BROADCAST,
-                bytes = "Queued".encodeToByteArray().toByteString(),
-                dataType = PortNum.TEXT_MESSAGE_APP.value,
-                status = MessageStatus.QUEUED
-            ),
-        )
+        val queuedPacket =
+            Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                port_num = PortNum.TEXT_MESSAGE_APP.value,
+                contact_key = "queued",
+                received_time = nowMillis,
+                read = true,
+                data =
+                DataPacket(
+                    to = DataPacket.ID_BROADCAST,
+                    bytes = "Queued".encodeToByteArray().toByteString(),
+                    dataType = PortNum.TEXT_MESSAGE_APP.value,
+                    status = MessageStatus.QUEUED,
+                ),
+            )
         packetDao.insert(queuedPacket)
         val queued = packetDao.getQueuedPackets()
         assertNotNull(queued)
@@ -183,19 +186,21 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetWaypoints() = runTest {
-        val waypointPacket = Packet(
-            uuid = 0L,
-            myNodeNum = myNodeNum,
-            port_num = PortNum.WAYPOINT_APP.value,
-            contact_key = "0${DataPacket.ID_BROADCAST}",
-            received_time = nowMillis,
-            read = true,
-            data = DataPacket(
-                to = DataPacket.ID_BROADCAST,
-                bytes = "Waypoint".encodeToByteArray().toByteString(),
-                dataType = PortNum.WAYPOINT_APP.value
-            ),
-        )
+        val waypointPacket =
+            Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                port_num = PortNum.WAYPOINT_APP.value,
+                contact_key = "0${DataPacket.ID_BROADCAST}",
+                received_time = nowMillis,
+                read = true,
+                data =
+                DataPacket(
+                    to = DataPacket.ID_BROADCAST,
+                    bytes = "Waypoint".encodeToByteArray().toByteString(),
+                    dataType = PortNum.WAYPOINT_APP.value,
+                ),
+            )
         packetDao.insert(waypointPacket)
         val waypoints = packetDao.getAllWaypoints()
         assertEquals(1, waypoints.size)
@@ -204,13 +209,8 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testUpsertReaction() = runTest {
-        val reaction = ReactionEntity(
-            myNodeNum = myNodeNum,
-            replyId = 123,
-            userId = "!test",
-            emoji = "👍",
-            timestamp = nowMillis
-        )
+        val reaction =
+            ReactionEntity(myNodeNum = myNodeNum, replyId = 123, userId = "!test", emoji = "👍", timestamp = nowMillis)
         packetDao.insert(reaction)
     }
 
@@ -229,10 +229,11 @@ abstract class CommonPacketDaoTest {
                     contact_key = contactKey,
                     received_time = nowMillis + index,
                     read = false,
-                    data = DataPacket(
+                    data =
+                    DataPacket(
                         to = DataPacket.ID_BROADCAST,
                         bytes = text.encodeToByteArray().toByteString(),
-                        dataType = PortNum.TEXT_MESSAGE_APP.value
+                        dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),
                     filtered = false,
                 )
@@ -248,10 +249,11 @@ abstract class CommonPacketDaoTest {
                     contact_key = contactKey,
                     received_time = nowMillis + normalMessages.size + index,
                     read = true,
-                    data = DataPacket(
+                    data =
+                    DataPacket(
                         to = DataPacket.ID_BROADCAST,
                         bytes = text.encodeToByteArray().toByteString(),
-                        dataType = PortNum.TEXT_MESSAGE_APP.value
+                        dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),
                     filtered = true,
                 )

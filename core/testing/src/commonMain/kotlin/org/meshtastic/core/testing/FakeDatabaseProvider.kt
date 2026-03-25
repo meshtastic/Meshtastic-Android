@@ -22,17 +22,13 @@ import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 
-/**
- * A real [DatabaseProvider] that uses an in-memory database for testing.
- */
+/** A real [DatabaseProvider] that uses an in-memory database for testing. */
 class FakeDatabaseProvider : DatabaseProvider {
     private val db: MeshtasticDatabase = getInMemoryDatabaseBuilder().build()
     private val _currentDb = MutableStateFlow(db)
     override val currentDb: StateFlow<MeshtasticDatabase> = _currentDb
 
-    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? {
-        return block(db)
-    }
+    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = block(db)
 
     fun close() {
         db.close()

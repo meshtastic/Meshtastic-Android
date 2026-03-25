@@ -69,7 +69,11 @@ class NordicDfuHandler(
                     .replace(Regex(":?\\s*%1\\\$d%?"), "")
                     .trim()
 
-            updateState(FirmwareUpdateState.Downloading(ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f)))
+            updateState(
+                FirmwareUpdateState.Downloading(
+                    ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
+                ),
+            )
 
             if (firmwareUri != null) {
                 initiateDfu(target, hardware, firmwareUri, updateState)
@@ -80,7 +84,11 @@ class NordicDfuHandler(
                         val percent = (progress * PERCENT_MAX).toInt()
                         updateState(
                             FirmwareUpdateState.Downloading(
-                                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = progress, details = "$percent%"),
+                                ProgressState(
+                                    message = UiText.DynamicString(downloadingMsg),
+                                    progress = progress,
+                                    details = "$percent%",
+                                ),
                             ),
                         )
                     }
@@ -109,7 +117,9 @@ class NordicDfuHandler(
         firmwareUri: CommonUri,
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
-        updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_service))))
+        updateState(
+            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_service))),
+        )
 
         // n = Nordic (Legacy prefix handling in mesh service)
         radioController.setDeviceAddress("n")

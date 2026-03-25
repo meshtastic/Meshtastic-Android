@@ -26,7 +26,9 @@ import org.meshtastic.proto.ClientNotification
  * A test double for [RadioController] that provides a no-op implementation and tracks calls for assertions in tests.
  */
 @Suppress("TooManyFunctions", "EmptyFunctionBlock")
-class FakeRadioController : BaseFake(), RadioController {
+class FakeRadioController :
+    BaseFake(),
+    RadioController {
 
     private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Connected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState

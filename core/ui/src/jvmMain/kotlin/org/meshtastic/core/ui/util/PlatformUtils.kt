@@ -50,7 +50,7 @@ actual fun rememberOpenUrl(): (url: String) -> Unit = { url ->
 /** JVM stub — Save file launcher is a no-op on desktop until implemented. */
 @Composable
 actual fun rememberSaveFileLauncher(
-    onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit
+    onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit = { _, _ ->
     Logger.w { "File saving not implemented on Desktop" }
 }
@@ -62,6 +62,4 @@ actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: ()
 }
 
 @Composable
-actual fun rememberOpenLocationSettings(): () -> Unit = {
-    Logger.w { "Location settings not implemented on Desktop" }
-}
+actual fun rememberOpenLocationSettings(): () -> Unit = { Logger.w { "Location settings not implemented on Desktop" } }

@@ -17,25 +17,25 @@
 package org.meshtastic.feature.settings.debugging
 
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class LogFormatterTest {
 
     @Test
     fun `formatLogsTo formats and redacts correctly`() {
-        val logs = listOf(
-            DebugViewModel.UiMeshLog(
-                uuid = "1",
-                messageType = "Packet",
-                formattedReceivedDate = "2026-03-25",
-                logMessage = "Hello",
-                decodedPayload = "session_passkey: secret\nother: value"
+        val logs =
+            listOf(
+                DebugViewModel.UiMeshLog(
+                    uuid = "1",
+                    messageType = "Packet",
+                    formattedReceivedDate = "2026-03-25",
+                    logMessage = "Hello",
+                    decodedPayload = "session_passkey: secret\nother: value",
+                ),
             )
-        )
         val out = StringBuilder()
         formatLogsTo(out, logs)
-        
+
         val result = out.toString()
         assertTrue(result.contains("2026-03-25 [Packet]"))
         assertTrue(result.contains("Hello"))

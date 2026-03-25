@@ -19,10 +19,10 @@ package org.meshtastic.core.testing
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.common.database.DatabaseManager
 
-/**
- * A test double for [DatabaseManager] that provides a simple implementation and tracks calls.
- */
-class FakeDatabaseManager : BaseFake(), DatabaseManager {
+/** A test double for [DatabaseManager] that provides a simple implementation and tracks calls. */
+class FakeDatabaseManager :
+    BaseFake(),
+    DatabaseManager {
     private val _cacheLimit = mutableStateFlow(100)
     override val cacheLimit: StateFlow<Int> = _cacheLimit
 
@@ -47,7 +47,5 @@ class FakeDatabaseManager : BaseFake(), DatabaseManager {
         lastSwitchedAddress = address
     }
 
-    override fun hasDatabaseFor(address: String?): Boolean {
-        return address != null && existingDatabases.contains(address)
-    }
+    override fun hasDatabaseFor(address: String?): Boolean = address != null && existingDatabases.contains(address)
 }

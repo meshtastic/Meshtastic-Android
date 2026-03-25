@@ -21,9 +21,7 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
-/**
- * A test double for [MeshServiceNotifications] that provides a no-op implementation.
- */
+/** A test double for [MeshServiceNotifications] that provides a no-op implementation. */
 class FakeMeshServiceNotifications : MeshServiceNotifications {
     override fun clearNotifications() {}
 

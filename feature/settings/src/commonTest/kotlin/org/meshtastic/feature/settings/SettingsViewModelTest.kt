@@ -36,7 +36,6 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -198,7 +197,7 @@ class SettingsViewModelTest {
         val myNodeNum = 456
         nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = myNodeNum))
         runCurrent()
-        
+
         viewModel.provideLocation.test {
             expectMostRecentItem() shouldBe true // Default in FakeUiPrefs is true
 
@@ -248,7 +247,7 @@ class SettingsViewModelTest {
     fun `setProvideLocation updates prefs for current node`() = runTest {
         val myNodeNum = 123
         nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = myNodeNum))
-        
+
         viewModel.setProvideLocation(true)
         appPreferences.ui.shouldProvideNodeLocation(myNodeNum).value shouldBe true
 

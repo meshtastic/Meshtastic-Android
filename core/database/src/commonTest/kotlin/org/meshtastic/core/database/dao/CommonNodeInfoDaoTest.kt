@@ -68,11 +68,12 @@ abstract class CommonNodeInfoDaoTest {
 
     @Test
     fun testUpsertNode() = runTest {
-        val node = NodeEntity(
-            num = 1234,
-            user = User(long_name = "Test Node", id = "!test", hw_model = org.meshtastic.proto.HardwareModel.TBEAM),
-            lastHeard = (nowMillis / 1000).toInt()
-        )
+        val node =
+            NodeEntity(
+                num = 1234,
+                user = User(long_name = "Test Node", id = "!test", hw_model = org.meshtastic.proto.HardwareModel.TBEAM),
+                lastHeard = (nowMillis / 1000).toInt(),
+            )
         dao.upsert(node)
         val result = dao.getNodeByNum(1234)
         assertNotNull(result)
