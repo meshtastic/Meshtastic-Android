@@ -18,21 +18,24 @@ package org.meshtastic.feature.firmware
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+import org.meshtastic.core.resources.UiText
 
 class FirmwareUpdateStateTest {
 
     @Test
     fun `ProgressState defaults are correct`() {
         val state = ProgressState()
-        assertEquals("", state.message)
+        assertTrue(state.message is UiText.DynamicString)
         assertEquals(0f, state.progress)
         assertEquals(null, state.details)
     }
 
     @Test
     fun `ProgressState can be instantiated with values`() {
-        val state = ProgressState("Downloading", 0.5f, "1MB/s")
-        assertEquals("Downloading", state.message)
+        val state = ProgressState(UiText.DynamicString("Downloading"), 0.5f, "1MB/s")
+        assertTrue(state.message is UiText.DynamicString)
         assertEquals(0.5f, state.progress)
         assertEquals("1MB/s", state.details)
     }
