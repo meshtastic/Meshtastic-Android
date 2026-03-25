@@ -19,14 +19,14 @@ Migrate and improve coverage for core business logic modules.
 - [x] Task: Align `core:database` & `core:datastore`: Ensure Room/DataStore tests are in `commonTest` using KMP abstractions. 082fda5
 - [x] Task: Conductor - User Manual Verification 'Phase 2: core Modules Alignment' (Protocol in workflow.md)
 
-## Phase 3: feature Modules Alignment
+## Phase 3: feature Modules Alignment [checkpoint: f39a9ff]
 Focus on ViewModel logic and feature-specific business rules.
 
 - [x] Task: Align `feature:settings`: Migrate ViewModel tests to commonTest, use fakes, target 80% coverage (Best effort reached ~39%).
 - [x] Task: Align `feature:node` & `feature:messaging`: Migrate tests to `commonTest`, target 80% coverage (Brief pass requested, coverage at ~31% and ~23%).
 - [x] Task: Align `feature:map` & `feature:connections`: Migrate tests to `commonTest`, target 80% coverage (Brief pass requested, coverage at ~41% and ~56%).
 - [x] Task: Align remaining `feature:*` modules (In-depth pass for firmware reaching ~43%; intro:~34%, widget:0%).
-- [~] Task: Conductor - User Manual Verification 'Phase 3: feature Modules Alignment' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: feature Modules Alignment' (Protocol in workflow.md)
 
 ## Phase 4: Network & Hardware Abstractions Alignment
 Handle the more complex platform-dependent modules.
