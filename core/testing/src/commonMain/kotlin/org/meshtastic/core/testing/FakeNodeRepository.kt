@@ -41,21 +41,21 @@ import org.meshtastic.proto.User
  * ```
  */
 @Suppress("TooManyFunctions")
-class FakeNodeRepository : NodeRepository {
+class FakeNodeRepository : BaseFake(), NodeRepository {
 
-    private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
+    private val _myNodeInfo = mutableStateFlow<MyNodeInfo?>(null)
     override val myNodeInfo: StateFlow<MyNodeInfo?> = _myNodeInfo
 
-    private val _ourNodeInfo = MutableStateFlow<Node?>(null)
+    private val _ourNodeInfo = mutableStateFlow<Node?>(null)
     override val ourNodeInfo: StateFlow<Node?> = _ourNodeInfo
 
-    private val _myId = MutableStateFlow<String?>(null)
+    private val _myId = mutableStateFlow<String?>(null)
     override val myId: StateFlow<String?> = _myId
 
-    private val _localStats = MutableStateFlow(LocalStats())
+    private val _localStats = mutableStateFlow(LocalStats())
     override val localStats: StateFlow<LocalStats> = _localStats
 
-    private val _nodeDBbyNum = MutableStateFlow<Map<Int, Node>>(emptyMap())
+    private val _nodeDBbyNum = mutableStateFlow<Map<Int, Node>>(emptyMap())
     override val nodeDBbyNum: StateFlow<Map<Int, Node>> = _nodeDBbyNum
 
     override val onlineNodeCount: Flow<Int> = _nodeDBbyNum.map { it.size }

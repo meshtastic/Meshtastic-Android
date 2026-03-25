@@ -104,14 +104,15 @@ class FakeNodeRepositoryTest {
     }
 
     @Test
-    fun `getNodesOlderThan returns correct nodes`() = runTest {
-        val node1 = Node(num = 1, lastHeard = 100)
-        val node2 = Node(num = 2, lastHeard = 200)
-        repository.setNodes(listOf(node1, node2))
+    fun `reset clears all state`() = runTest {
+        repository.setNodes(listOf(Node(num = 1)))
+        repository.setMyId("my-id")
+        repository.setNodeNotes(1, "note")
 
-        val result = repository.getNodesOlderThan(150)
-        assertEquals(1, result.size)
-        assertEquals(1, result[0].num)
+        repository.reset()
+
+        assertTrue(repository.nodeDBbyNum.value.isEmpty())
+        assertEquals(null, repository.myId.value)
     }
 
     @Test

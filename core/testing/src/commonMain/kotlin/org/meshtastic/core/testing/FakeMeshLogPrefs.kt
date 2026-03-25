@@ -19,15 +19,15 @@ package org.meshtastic.core.testing
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.meshtastic.core.repository.MeshLogPrefs
 
-class FakeMeshLogPrefs : MeshLogPrefs {
-    private val _retentionDays = MutableStateFlow(MeshLogPrefs.DEFAULT_RETENTION_DAYS)
+class FakeMeshLogPrefs : BaseFake(), MeshLogPrefs {
+    private val _retentionDays = mutableStateFlow(MeshLogPrefs.DEFAULT_RETENTION_DAYS)
     override val retentionDays = _retentionDays
 
     override fun setRetentionDays(days: Int) {
         _retentionDays.value = days
     }
 
-    private val _loggingEnabled = MutableStateFlow(true)
+    private val _loggingEnabled = mutableStateFlow(true)
     override val loggingEnabled = _loggingEnabled
 
     override fun setLoggingEnabled(enabled: Boolean) {
