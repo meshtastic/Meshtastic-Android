@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload coverage results to Codecov
         if: ${{ !cancelled() && inputs.run_unit_tests }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -107,7 +107,7 @@ jobs:
 
       - name: Upload unit test results to Codecov
         if: ${{ !cancelled() && inputs.run_unit_tests }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
@@ -225,7 +225,7 @@ jobs:
 
       - name: Upload instrumented test results to Codecov
         if: ${{ !cancelled() && inputs.run_instrumented_tests && steps.matrix_meta.outputs.is_first_api == 'true' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
