@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.messaging.navigation
 
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,20 +35,21 @@ import org.meshtastic.feature.messaging.ui.contact.AdaptiveContactsScreen
 import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 import org.meshtastic.feature.messaging.ui.sharing.ShareScreen
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
 fun EntryProviderScope<NavKey>.contactsGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
 ) {
-    entry<ContactsRoutes.ContactsGraph> {
+    entry<ContactsRoutes.ContactsGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
         ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
     }
 
-    entry<ContactsRoutes.Contacts> {
+    entry<ContactsRoutes.Contacts>(metadata = { ListDetailSceneStrategy.listPane() }) {
         ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
     }
 
-    entry<ContactsRoutes.Messages> { args ->
+    entry<ContactsRoutes.Messages>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
         ContactsEntryContent(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,

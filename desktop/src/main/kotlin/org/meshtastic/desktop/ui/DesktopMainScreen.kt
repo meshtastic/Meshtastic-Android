@@ -32,12 +32,14 @@ import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
 
-/**
- * Desktop main screen — uses shared navigation components.
- */
+/** Desktop main screen — uses shared navigation components. */
 @Composable
 fun DesktopMainScreen(uiViewModel: UIViewModel) {
-    val backStack = androidx.navigation3.runtime.rememberNavBackStack(MeshtasticNavSavedStateConfig, NodesRoutes.NodesGraph as NavKey)
+    val backStack =
+        androidx.navigation3.runtime.rememberNavBackStack(
+            MeshtasticNavSavedStateConfig,
+            NodesRoutes.NodesGraph as NavKey,
+        )
 
     Surface(modifier = Modifier.fillMaxSize()) {
         MeshtasticAppShell(
@@ -45,10 +47,12 @@ fun DesktopMainScreen(uiViewModel: UIViewModel) {
             uiViewModel = uiViewModel,
             hostModifier = Modifier.padding(bottom = 24.dp),
         ) {
-            MeshtasticNavigationSuite(backStack = backStack, uiViewModel = uiViewModel, modifier = Modifier.fillMaxSize()) {
-                val provider = entryProvider<NavKey> {
-                    desktopNavGraph(backStack, uiViewModel)
-                }
+            MeshtasticNavigationSuite(
+                backStack = backStack,
+                uiViewModel = uiViewModel,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel) }
                 MeshtasticNavDisplay(backStack = backStack, entryProvider = provider, modifier = Modifier.fillMaxSize())
             }
         }
