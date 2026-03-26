@@ -19,6 +19,7 @@ jobs:
         with:
           distribution: jetbrains
           java-version: 17
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v6

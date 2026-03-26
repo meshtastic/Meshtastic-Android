@@ -86,8 +86,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'jetbrains'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
