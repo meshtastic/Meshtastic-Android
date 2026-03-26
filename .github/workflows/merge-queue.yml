@@ -4,6 +4,9 @@ on:
   merge_group:
     types: [checks_requested]
 
+permissions:
+  contents: read
+
 concurrency:
   group: build-mq-${{ github.ref }}
   cancel-in-progress: true
@@ -23,6 +26,7 @@ jobs:
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-latest
+    permissions: {}
     needs:
       - android-check
     if: always()

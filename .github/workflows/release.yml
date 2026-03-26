@@ -76,9 +76,14 @@ jobs:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
           submodules: 'recursive'
-      - name: Determine Version Name from Tag
-        id: get_version_name
-        run: echo "APP_VERSION_NAME=$(echo ${{ inputs.tag_name }} | sed 's/-.*//' | sed 's/v//')" >> $GITHUB_OUTPUT
+      - name: Prep APP_VERSION_NAME
+        id: prep_version
+        env:
+          INPUT_TAG_NAME: ${{ inputs.tag_name }}
+        run: |
+          VERSION_NAME=$(echo $INPUT_TAG_NAME | sed 's/-.*//' | sed 's/v//')
+          echo "APP_VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "Parsed Version: $VERSION_NAME"
 
       - name: Extract VERSION_CODE_OFFSET from config.properties
         id: get_version_code_offset
