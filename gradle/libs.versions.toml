@@ -140,6 +140,7 @@ compose-multiplatform-materialIconsExtended = { module = "org.jetbrains.compose.
 jetbrains-compose-material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "jetbrains-adaptive" }
 jetbrains-compose-material3-adaptive-layout = { module = "org.jetbrains.compose.material3.adaptive:adaptive-layout", version.ref = "jetbrains-adaptive" }
 jetbrains-compose-material3-adaptive-navigation = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation", version.ref = "jetbrains-adaptive" }
+jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "compose-multiplatform-material3" }
 
 # Google
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
