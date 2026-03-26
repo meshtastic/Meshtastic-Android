@@ -66,7 +66,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '17'
-          distribution: 'jetbrains'
+          distribution: 'temurin'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Gradle
@@ -150,7 +150,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '17'
-          distribution: 'jetbrains'
+          distribution: 'temurin'
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Gradle
