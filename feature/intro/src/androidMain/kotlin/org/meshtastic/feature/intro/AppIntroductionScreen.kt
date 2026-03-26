@@ -19,9 +19,7 @@ package org.meshtastic.feature.intro
 import android.Manifest
 import android.os.Build
 import androidx.compose.runtime.Composable
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.ui.NavDisplay
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -58,9 +56,8 @@ fun AppIntroductionScreen(onDone: () -> Unit, viewModel: IntroViewModel) {
 
     val backStack = rememberNavBackStack(Welcome)
 
-    NavDisplay<NavKey>(
+    org.meshtastic.core.ui.component.MeshtasticNavDisplay(
         backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
         entryProvider =
         introNavGraph(
             backStack = backStack,
