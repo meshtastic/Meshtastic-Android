@@ -19,7 +19,9 @@
 package org.meshtastic.core.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme.Companion.expressive
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -265,6 +267,7 @@ data class ColorFamily(val color: Color, val onColor: Color, val colorContainer:
 
 val unspecified_scheme = ColorFamily(Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified)
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -276,7 +279,12 @@ fun AppTheme(
     val dynamicScheme = if (dynamicColor) dynamicColorScheme(darkTheme) else null
     val colorScheme = dynamicScheme ?: if (darkTheme) darkScheme else lightScheme
 
-    MaterialTheme(colorScheme = colorScheme, typography = AppTypography, content = content)
+    MaterialExpressiveTheme(
+        colorScheme = colorScheme,
+        typography = AppTypography,
+        motionScheme = expressive(),
+        content = content,
+    )
 }
 
 const val MODE_DYNAMIC = 6969420

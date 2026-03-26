@@ -33,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -95,6 +96,7 @@ private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
 private const val GRID_COLUMNS = 3
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
 fun NodeItem(
@@ -389,6 +391,7 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun NodeItemHeader(
     thatNode: Node,
@@ -424,7 +427,7 @@ private fun NodeItemHeader(
             ) {
                 Text(
                     text = longName,
-                    style = MaterialTheme.typography.titleMedium.copy(fontStyle = style),
+                    style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

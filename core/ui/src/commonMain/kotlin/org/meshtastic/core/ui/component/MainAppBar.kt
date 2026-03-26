@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +40,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.navigate_back
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppBar(
     modifier: Modifier = Modifier,
@@ -54,26 +55,25 @@ fun MainAppBar(
 ) {
     TopAppBar(
         title = {
-            androidx.compose.foundation.layout.Column {
+            Text(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        subtitle = {
+            subtitle?.let {
                 Text(
-                    text = title,
+                    text = it,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                subtitle?.let {
-                    Text(
-                        text = it,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
         },
         modifier = modifier,
-        navigationIcon =
         if (canNavigateUp) {
             {
                 IconButton(onClick = onNavigateUp) {

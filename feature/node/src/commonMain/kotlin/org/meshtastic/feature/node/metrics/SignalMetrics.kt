@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -134,6 +135,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
     meshPackets: List<MeshPacket>,
@@ -245,6 +247,7 @@ private fun SignalMetricsChart(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
     val time = meshPacket.rx_time.toLong() * MS_PER_SEC
     Card(
@@ -270,7 +273,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(
                                     text = CommonCharts.formatDateTime(time),
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.titleMediumEmphasized,
                                     fontWeight = FontWeight.Bold,
                                 )
                             }

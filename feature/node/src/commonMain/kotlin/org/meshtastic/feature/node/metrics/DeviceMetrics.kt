@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -214,6 +215,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
@@ -386,6 +388,7 @@ private fun DeviceMetricsChart(
 
 @Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsChartPreview() {
     val now = nowSeconds.toInt()
     val telemetries =
@@ -416,6 +419,7 @@ private fun DeviceMetricsChartPreview() {
 
 @Composable
 @Suppress("LongMethod")
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val deviceMetrics = telemetry.device_metrics
     val time = telemetry.time.toLong() * MS_PER_SEC
@@ -444,7 +448,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
                             text = CommonCharts.formatDateTime(time),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMediumEmphasized,
                             fontWeight = FontWeight.Bold,
                         )
 
@@ -518,6 +522,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 
 @Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsCardPreview() {
     val now = nowSeconds.toInt()
     val telemetry =
@@ -537,6 +542,7 @@ private fun DeviceMetricsCardPreview() {
 
 @Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsScreenPreview() {
     val now = nowSeconds.toInt()
     val telemetries =
