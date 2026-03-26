@@ -15,7 +15,7 @@ concurrency:
 jobs:
   triage:
     if: ${{ github.repository == 'meshtastic/firmware' && github.event.issue.user.type != 'Bot' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       # ─────────────────────────────────────────────────────────────────────────
       # Step 1: Quality check (spam/AI-slop detection) - runs first, exits early if spam

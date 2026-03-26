@@ -35,6 +35,28 @@ class RootConventionPlugin : Plugin<Project> {
             configureKoverAggregation()
 
             subprojects { configureGraphTasks() }
+
+            registerKmpSmokeCompileTask()
+        }
+    }
+}
+
+/**
+ * Registers a `kmpSmokeCompile` lifecycle task that auto-discovers all KMP modules
+ * and depends on their `compileKotlinJvm` and `compileKotlinIosSimulatorArm64` tasks.
+ *
+ * This replaces the long explicit task list in CI, auto-maintaining as modules are added.
+ */
+private fun Project.registerKmpSmokeCompileTask() {
+    tasks.register("kmpSmokeCompile") {
+        group = "verification"
+        description = "Compile all KMP modules for JVM and iOS Simulator ARM64 targets."
+
+        subprojects.forEach { sub ->
+            sub.pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+                dependsOn(sub.tasks.matching { it.name == "compileKotlinJvm" })
+                dependsOn(sub.tasks.matching { it.name == "compileKotlinIosSimulatorArm64" })
+            }
         }
     }
 }

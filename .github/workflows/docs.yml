@@ -38,7 +38,7 @@ concurrency:
 jobs:
   build-docs:
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -70,7 +70,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     needs: build-docs
     steps:
       - name: Deploy to GitHub Pages

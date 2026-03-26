@@ -44,10 +44,17 @@ env:
   GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
   GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
   GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
+  # CI JVM tuning: override gradle.properties values (8g heap + 4g Kotlin daemon)
+  # that exceed the 7GB RAM on ubuntu-24.04 standard runners.
+  GRADLE_OPTS: >-
+    -Dorg.gradle.jvmargs=-Xmx4g -XX:+UseParallelGC -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+    -Dorg.gradle.vfs.watch=false
+    -Dorg.gradle.workers.max=4
+    -Dkotlin.daemon.jvm.options=-Xmx2g -XX:+UseParallelGC
 
 jobs:
   host-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 60
@@ -93,7 +100,7 @@ jobs:
         run: ./gradlew test koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug core:api:koverXmlReportDebug core:barcode:koverXmlReportFdroidDebug core:barcode:koverXmlReportGoogleDebug mesh_service_example:koverXmlReportDebug desktop:koverXmlReport -Pci=true --continue --scan
 
       - name: KMP Smoke Compile
-        run: ./gradlew :core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:nfc:compileKotlinJvm :core:service:compileKotlinJvm :core:testing:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:connections:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm :core:proto:compileKotlinIosSimulatorArm64 :core:common:compileKotlinIosSimulatorArm64 :core:model:compileKotlinIosSimulatorArm64 :core:repository:compileKotlinIosSimulatorArm64 :core:di:compileKotlinIosSimulatorArm64 :core:navigation:compileKotlinIosSimulatorArm64 :core:resources:compileKotlinIosSimulatorArm64 :core:datastore:compileKotlinIosSimulatorArm64 :core:database:compileKotlinIosSimulatorArm64 :core:domain:compileKotlinIosSimulatorArm64 :core:prefs:compileKotlinIosSimulatorArm64 :core:network:compileKotlinIosSimulatorArm64 :core:data:compileKotlinIosSimulatorArm64 :core:ble:compileKotlinIosSimulatorArm64 :core:nfc:compileKotlinIosSimulatorArm64 :core:service:compileKotlinIosSimulatorArm64 :core:testing:compileKotlinIosSimulatorArm64 :core:ui:compileKotlinIosSimulatorArm64 :feature:intro:compileKotlinIosSimulatorArm64 :feature:messaging:compileKotlinIosSimulatorArm64 :feature:connections:compileKotlinIosSimulatorArm64 :feature:map:compileKotlinIosSimulatorArm64 :feature:node:compileKotlinIosSimulatorArm64 :feature:settings:compileKotlinIosSimulatorArm64 :feature:firmware:compileKotlinIosSimulatorArm64 -Pci=true --continue --scan
+        run: ./gradlew kmpSmokeCompile -Pci=true --continue --scan
 
       - name: Upload coverage results to Codecov
         if: ${{ !cancelled() && inputs.run_unit_tests }}
@@ -127,7 +134,7 @@ jobs:
           retention-days: 7
 
   android-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 60

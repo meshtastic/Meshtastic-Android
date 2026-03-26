@@ -16,7 +16,7 @@ concurrency:
 jobs:
   main-push-changelog:
     name: Generate main push changelog
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

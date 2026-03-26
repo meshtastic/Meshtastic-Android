@@ -19,7 +19,7 @@ jobs:
   # 1. CHANGE DETECTION: Prevents unnecessary builds
   check-changes:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     outputs:
       android: ${{ steps.filter.outputs.android }}
     steps:
@@ -57,7 +57,7 @@ jobs:
   # 1b. FILTER DRIFT CHECK: Ensures check-changes stays aligned with module roots
   verify-check-changes-filter:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v6
       - name: Verify module roots are represented in check-changes filter
@@ -115,7 +115,7 @@ jobs:
   # 3. WORKFLOW STATUS: Ensures required checks are satisfied
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     permissions: {}
     needs: [check-changes, verify-check-changes-filter, validate-and-build]
     if: always()

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
  check-label:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Check for PR labels
         uses: actions/github-script@v8
