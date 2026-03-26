@@ -36,19 +36,28 @@ Both modules still define separate graph-builder files (`app/navigation/*.kt`, `
 4. **Predictive back handling is KMP native.**
    - Custom `PredictiveBackHandler` wrapper was removed in favor of Jetpack's official KMP `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose`.
 
-## Alpha04 Changelog Impact Check (2026-03-13)
+## Alpha04 → Beta01 Changelog Impact Check
 
-Source reviewed: Compose Multiplatform `v1.11.0-alpha04` release notes.
+Source reviewed: Navigation 3 `1.1.0-beta01` (JetBrains fork), CMP `1.11.0-beta01`, Lifecycle `2.11.0-alpha02`.
 
-1. **No direct Navigation 3 API breakage called out.**
-   - Release notes include component version bumps for Navigation 3 (`1.1.0-alpha04`) but no `NavBackStack`, `NavDisplay`, or `entryProvider` API migration requirements.
-   - Existing shell patterns in `app` and `desktop` remain valid.
-2. **Primary risk is dependency wiring drift, not runtime behavior.**
+> **Superseded by:** [`navigation3-api-alignment-2026-03.md`](navigation3-api-alignment-2026-03.md) for the full API surface audit and Scene architecture adoption plan.
+
+1. **NavDisplay API updated to Scene-based architecture.**
+   - The `sceneStrategy: SceneStrategy<T>` parameter is deprecated in favor of `sceneStrategies: List<SceneStrategy<T>>`.
+   - New `sceneDecoratorStrategies: List<SceneDecoratorStrategy<T>>` parameter available.
+   - New `sharedTransitionScope: SharedTransitionScope?` parameter for shared element transitions.
+   - Existing shell patterns in `app` and `desktop` remain valid using the default `SinglePaneSceneStrategy`.
+2. **Entry-scoped ViewModel lifecycle adopted.**
+   - Both `app` and `desktop` now pass `ViewModelStoreNavEntryDecorator` + `SaveableStateHolderNavEntryDecorator` as explicit `entryDecorators` to `NavDisplay`.
+   - ViewModels obtained via `koinViewModel()` inside `entry<T>` blocks are now scoped to the entry's backstack lifetime.
+3. **No direct Navigation 3 API breakage.**
+   - Release is beta (API stabilized). No migration from alpha04 was required for existing usage patterns.
+4. **Primary risk is dependency wiring drift, not runtime behavior.**
    - JetBrains Navigation 3 currently publishes `navigation3-ui` coordinates (no separate `navigation3-runtime` artifact in Maven Central). The `jetbrains-navigation3-runtime` alias intentionally points to `navigation3-ui` and is documented in the version catalog.
-3. **Saved-state and typed-route parity risk remains unchanged.**
-   - Desktop still uses manual serializer registration; this is an existing risk and not introduced by alpha04.
-4. **Compose-wide migration notes do not currently impact navigation codepaths.**
-   - `Shader` wrapper changes and `Canvas.nativeCanvas` deprecations are not used in the Navigation 3 shell files.
+   - Note: The `remember*` composable factory functions from `navigation3-runtime` are not visible in non-KMP Android modules due to Kotlin metadata resolution. Use direct class constructors instead (as done in `app/Main.kt`).
+5. **Saved-state and typed-route parity risk remains unchanged.**
+   - Desktop still uses manual serializer registration; this is an existing risk and not introduced by beta01.
+6. **Updated active docs to reflect the current dependency baseline (`1.11.0-beta01`, `1.1.0-beta01`, `1.3.0-alpha06`, `2.11.0-alpha02`).**
 
 ### Actions Taken
 
