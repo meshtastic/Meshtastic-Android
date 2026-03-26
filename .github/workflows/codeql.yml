@@ -71,6 +71,7 @@ jobs:
       with:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '17'
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
