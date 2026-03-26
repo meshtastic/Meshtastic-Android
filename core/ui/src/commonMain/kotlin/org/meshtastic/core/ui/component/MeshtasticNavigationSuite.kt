@@ -188,7 +188,6 @@ private fun MeshtasticNavigationBar(
                         uiViewModel = uiViewModel,
                     )
                 },
-                label = { Text(stringResource(destination.label)) },
             )
         }
     }
