@@ -24,6 +24,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 
 /**
  * Main application introduction screen. This Composable hosts the navigation flow and hoists the permission states.
@@ -56,7 +57,7 @@ fun AppIntroductionScreen(onDone: () -> Unit, viewModel: IntroViewModel) {
 
     val backStack = rememberNavBackStack(Welcome)
 
-    org.meshtastic.core.ui.component.MeshtasticNavDisplay(
+    MeshtasticNavDisplay(
         backStack = backStack,
         entryProvider =
         introNavGraph(

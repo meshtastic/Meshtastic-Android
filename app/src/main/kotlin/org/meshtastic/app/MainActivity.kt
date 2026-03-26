@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
                     ReportDrawnWhen { true }
 
                     if (appIntroCompleted) {
-                        MainScreen(uIViewModel = model)
+                        MainScreen()
                     } else {
                         val introViewModel = koinViewModel<IntroViewModel>()
                         AppIntroductionScreen(onDone = { model.onAppIntroCompleted() }, viewModel = introViewModel)
