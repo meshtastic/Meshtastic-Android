@@ -67,7 +67,7 @@ jobs:
   prepare-build-info:
     runs-on: ubuntu-latest
     outputs:
-      APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
+      APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     steps:
       - name: Checkout code
