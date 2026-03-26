@@ -96,6 +96,8 @@ fun MeshtasticNavigationSuite(
     // large-width (1200dp+) breakpoints are respected.
     val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo).coerceNavigationType()
 
+    val showLabels = layoutType == NavigationSuiteType.NavigationRail
+
     NavigationSuiteScaffold(
         modifier = modifier,
         layoutType = layoutType,
@@ -114,7 +116,11 @@ fun MeshtasticNavigationSuite(
                             uiViewModel = uiViewModel,
                         )
                     },
-                    label = { Text(stringResource(destination.label)) },
+                    label = if (showLabels) {
+                        { Text(stringResource(destination.label)) }
+                    } else {
+                        null
+                    },
                 )
             }
         },
