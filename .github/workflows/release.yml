@@ -120,7 +120,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'jetbrains'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
@@ -212,7 +212,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'jetbrains'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
@@ -284,7 +284,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'jetbrains'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6

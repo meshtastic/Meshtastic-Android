@@ -67,7 +67,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -151,7 +151,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
