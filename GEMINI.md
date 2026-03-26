@@ -135,6 +135,8 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - Pull request CI is main-only (`.github/workflows/pull-request.yml` targets `main` branch).
 - Gradle cache writes are trusted on `main` and merge queue runs (`merge_group` / `gh-readonly-queue/*`); other refs use read-only cache mode in reusable CI.
 - PR `check-changes` path filtering lives in `.github/workflows/pull-request.yml` and must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.) so CI is not skipped for infra-only changes.
+- **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent the agent from getting stuck in an interactive prompt.
+- **Text Search:** Prefer using `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.
 
 ### C. Documentation Sync
 Update documentation continuously as part of the same change. If you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update the relevant docs (`AGENTS.md`, `.github/copilot-instructions.md`, `GEMINI.md`, `docs/agent-playbooks/*`, `docs/kmp-status.md`, and `docs/decisions/architecture-review-2026-03.md`).
