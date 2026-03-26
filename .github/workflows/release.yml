@@ -61,7 +61,7 @@ permissions:
 
 jobs:
   prepare-build-info:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
@@ -101,7 +101,7 @@ jobs:
         shell: bash
 
   release-google:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [prepare-build-info]
     environment: Release
     env:
@@ -193,7 +193,7 @@ jobs:
           subject-path: app/build/outputs/apk/google/release/*.apk
 
   release-fdroid:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [prepare-build-info]
     environment: Release
     env:
@@ -266,7 +266,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-22.04, ubuntu-22.04-arm]
+        os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -324,7 +324,7 @@ jobs:
           if-no-files-found: ignore
 
   github-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     needs: [prepare-build-info, release-google, release-fdroid, release-desktop]
     env:
       INTERNAL_BUILDS_HOST: ${{ secrets.INTERNAL_BUILDS_HOST }}

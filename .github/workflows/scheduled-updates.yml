@@ -7,7 +7,7 @@ on:
 
 jobs:
   update_assets:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.repository == 'meshtastic/Meshtastic-Android'
     permissions:
       contents: write      # To commit files and push branches
@@ -142,7 +142,7 @@ jobs:
 
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     permissions: {}
     needs:
         - update_assets

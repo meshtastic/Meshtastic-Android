@@ -65,7 +65,7 @@ permissions:
 
 jobs:
   prepare-build-info:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
@@ -102,7 +102,7 @@ jobs:
         shell: bash
 
   promote-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     environment: Release
     needs: [ prepare-build-info ]
     steps:
@@ -116,7 +116,7 @@ jobs:
           user-fraction: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
 
   update-github-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     needs: [ prepare-build-info, promote-release ]
     steps:
       - name: Checkout code

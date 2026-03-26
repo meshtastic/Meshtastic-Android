@@ -47,7 +47,7 @@ env:
 
 jobs:
   host-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 60
@@ -127,7 +127,7 @@ jobs:
           retention-days: 7
 
   android-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 60

@@ -135,6 +135,10 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - Pull request CI is main-only (`.github/workflows/pull-request.yml` targets `main` branch).
 - Gradle cache writes are trusted on `main` and merge queue runs (`merge_group` / `gh-readonly-queue/*`); other refs use read-only cache mode in reusable CI.
 - PR `check-changes` path filtering lives in `.github/workflows/pull-request.yml` and must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.) so CI is not skipped for infra-only changes.
+- **Runner strategy (three tiers):**
+  - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). These run only shell scripts or GitHub API calls and benefit from ARM runners' shorter queue times.
+  - **`ubuntu-24.04`** — Gradle-heavy jobs (CI host-check, android-check, release builds, Dokka, CodeQL, publish, dependency-submission). Pinned for reproducibility; avoid `ubuntu-latest` to prevent breakage when GitHub rolls the alias forward.
+  - **Desktop release matrix** — `[macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]` for cross-platform native packaging (DMG, MSI, deb/rpm/AppImage for x64 and ARM).
 - **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent the agent from getting stuck in an interactive prompt.
 - **Text Search:** Prefer using `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.
 
