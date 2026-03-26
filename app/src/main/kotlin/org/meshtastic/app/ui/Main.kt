@@ -57,29 +57,22 @@ fun MainScreen() {
 
     AndroidAppVersionCheck(viewModel)
 
-    MeshtasticAppShell(
-        backStack = backStack,
-        uiViewModel = viewModel,
-        hostModifier = Modifier,
-    ) {
-        MeshtasticNavigationSuite(
-            backStack = backStack,
-            uiViewModel = viewModel,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            val provider = entryProvider<NavKey> {
-                contactsGraph(backStack, viewModel.scrollToTopEventFlow)
-                nodesGraph(
-                    backStack = backStack,
-                    scrollToTopEvents = viewModel.scrollToTopEventFlow,
-                    onHandleDeepLink = viewModel::handleDeepLink,
-                )
-                mapGraph(backStack)
-                channelsGraph(backStack)
-                connectionsGraph(backStack)
-                settingsGraph(backStack)
-                firmwareGraph(backStack)
-            }
+    MeshtasticAppShell(backStack = backStack, uiViewModel = viewModel, hostModifier = Modifier) {
+        MeshtasticNavigationSuite(backStack = backStack, uiViewModel = viewModel, modifier = Modifier.fillMaxSize()) {
+            val provider =
+                entryProvider<NavKey> {
+                    contactsGraph(backStack, viewModel.scrollToTopEventFlow)
+                    nodesGraph(
+                        backStack = backStack,
+                        scrollToTopEvents = viewModel.scrollToTopEventFlow,
+                        onHandleDeepLink = viewModel::handleDeepLink,
+                    )
+                    mapGraph(backStack)
+                    channelsGraph(backStack)
+                    connectionsGraph(backStack)
+                    settingsGraph(backStack)
+                    firmwareGraph(backStack)
+                }
             MeshtasticNavDisplay(
                 backStack = backStack,
                 entryProvider = provider,

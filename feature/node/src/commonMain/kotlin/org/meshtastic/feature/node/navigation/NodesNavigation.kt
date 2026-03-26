@@ -26,6 +26,8 @@ import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.PermScanWifi
 import androidx.compose.material.icons.rounded.Power
 import androidx.compose.material.icons.rounded.Router
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.EntryProviderScope
@@ -63,13 +65,14 @@ import org.meshtastic.feature.node.metrics.SignalMetricsScreen
 import org.meshtastic.feature.node.metrics.TracerouteLogScreen
 import kotlin.reflect.KClass
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
 fun EntryProviderScope<NavKey>.nodesGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
     onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
-    entry<NodesRoutes.NodesGraph> {
+    entry<NodesRoutes.NodesGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
@@ -79,7 +82,7 @@ fun EntryProviderScope<NavKey>.nodesGraph(
         )
     }
 
-    entry<NodesRoutes.Nodes> {
+    entry<NodesRoutes.Nodes>(metadata = { ListDetailSceneStrategy.listPane() }) {
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
@@ -92,13 +95,14 @@ fun EntryProviderScope<NavKey>.nodesGraph(
     nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink)
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
 fun EntryProviderScope<NavKey>.nodeDetailGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
-    entry<NodesRoutes.NodeDetailGraph> { args ->
+    entry<NodesRoutes.NodeDetailGraph>(metadata = { ListDetailSceneStrategy.listPane() }) { args ->
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
@@ -109,7 +113,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         )
     }
 
-    entry<NodesRoutes.NodeDetail> { args ->
+    entry<NodesRoutes.NodeDetail>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
