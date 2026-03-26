@@ -68,7 +68,7 @@ fun EntryProviderScope<NavKey>.contactsGraph(
         )
     }
 
-    entry<ContactsRoutes.Share> { args ->
+    entry<ContactsRoutes.Share>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val message = args.message
         val viewModel = koinViewModel<ContactsViewModel>()
         ShareScreen(
@@ -80,7 +80,7 @@ fun EntryProviderScope<NavKey>.contactsGraph(
         )
     }
 
-    entry<ContactsRoutes.QuickChat> {
+    entry<ContactsRoutes.QuickChat>(metadata = { ListDetailSceneStrategy.extraPane() }) {
         val viewModel = koinViewModel<QuickChatViewModel>()
         QuickChatScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
     }

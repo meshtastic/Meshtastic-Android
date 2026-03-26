@@ -23,6 +23,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -54,8 +55,10 @@ private const val TRANSITION_DURATION_MS = 350
  * **Scene strategies** (evaluated in order):
  * - [DialogSceneStrategy] — entries annotated with `metadata = DialogSceneStrategy.dialog()` render as overlay
  *   [Dialog][androidx.compose.ui.window.Dialog] windows with proper backstack lifecycle.
- * - [ListDetailSceneStrategy] — entries annotated with `listPane()` / `detailPane()` render in adaptive list-detail
+ * - [androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy] — entries annotated with `listPane()`, `detailPane()`, or `extraPane()` render in adaptive list-detail
  *   layout on wider screens.
+ * - [androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy] — entries annotated with `mainPane()`, `supportingPane()`, or `extraPane()` render in adaptive
+ *   supporting pane layout.
  * - [SinglePaneSceneStrategy] — default single-pane fallback.
  *
  * **Transitions**: A uniform 350 ms crossfade for both forward and pop navigation.
@@ -72,12 +75,18 @@ fun MeshtasticNavDisplay(
     modifier: Modifier = Modifier,
 ) {
     val listDetailSceneStrategy = rememberListDetailSceneStrategy<NavKey>()
+    val supportingPaneSceneStrategy = rememberSupportingPaneSceneStrategy<NavKey>()
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider,
         entryDecorators =
         listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
-        sceneStrategies = listOf(DialogSceneStrategy(), listDetailSceneStrategy, SinglePaneSceneStrategy()),
+        sceneStrategies = listOf(
+            DialogSceneStrategy(),
+            listDetailSceneStrategy,
+            supportingPaneSceneStrategy,
+            SinglePaneSceneStrategy()
+        ),
         transitionSpec = meshtasticTransitionSpec(),
         popTransitionSpec = meshtasticTransitionSpec(),
         modifier = modifier,

@@ -123,12 +123,12 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         )
     }
 
-    entry<NodeDetailRoutes.NodeMap> { args ->
+    entry<NodeDetailRoutes.NodeMap>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val mapScreen = org.meshtastic.core.ui.util.LocalNodeMapScreenProvider.current
         mapScreen(args.destNum) { backStack.removeLastOrNull() }
     }
 
-    entry<NodeDetailRoutes.TracerouteLog> { args ->
+    entry<NodeDetailRoutes.TracerouteLog>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val metricsViewModel =
             koinViewModel<MetricsViewModel>(key = "metrics-${args.destNum}") { parametersOf(args.destNum) }
         metricsViewModel.setNodeId(args.destNum)
@@ -148,7 +148,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         )
     }
 
-    entry<NodeDetailRoutes.TracerouteMap> { args ->
+    entry<NodeDetailRoutes.TracerouteMap>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val tracerouteMapScreen = org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider.current
         tracerouteMapScreen(args.destNum, args.requestId, args.logUuid) { backStack.removeLastOrNull() }
     }
@@ -178,12 +178,13 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
 
 fun NavKey.isNodeDetailRoute(): Boolean = NodeDetailRoute.entries.any { this::class == it.routeClass }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailScreenComposable(
     backStack: NavBackStack<NavKey>,
     routeInfo: NodeDetailRoute,
     crossinline getDestNum: (R) -> Int,
 ) {
-    entry<R> { args ->
+    entry<R>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val destNum = getDestNum(args)
         val metricsViewModel = koinViewModel<MetricsViewModel>(key = "metrics-$destNum") { parametersOf(destNum) }
         metricsViewModel.setNodeId(destNum)
