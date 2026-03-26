@@ -24,22 +24,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.ui.component.MeshtasticAppShell
+import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
 
 /**
- * Desktop main screen — Navigation 3 shell with a persistent [NavigationRail] and [NavDisplay].
+ * Desktop main screen — Navigation 3 shell with a persistent [NavigationRail] and shared [MeshtasticNavDisplay].
  *
- * Uses the same shared routes from `core:navigation` and the same `NavDisplay` + `entryProvider` pattern as the Android
- * app, proving the shared backstack architecture works across targets.
+ * Uses the same shared routes from `core:navigation` and the same `MeshtasticNavDisplay` + `entryProvider` pattern as
+ * the Android app, proving the shared backstack architecture works across targets.
  */
 @Composable
 @Suppress("LongMethod")
@@ -56,17 +54,7 @@ fun DesktopMainScreen(backStack: NavBackStack<NavKey>, uiViewModel: UIViewModel 
             ) {
                 val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel) }
 
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = { backStack.removeLastOrNull() },
-                    entryDecorators =
-                    listOf(
-                        rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
-                        rememberViewModelStoreNavEntryDecorator<NavKey>(),
-                    ),
-                    entryProvider = provider,
-                    modifier = Modifier.fillMaxSize(),
-                )
+                MeshtasticNavDisplay(backStack = backStack, entryProvider = provider, modifier = Modifier.fillMaxSize())
             }
         }
     }
