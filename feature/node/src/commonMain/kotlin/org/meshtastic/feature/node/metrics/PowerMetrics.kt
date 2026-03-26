@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -168,6 +169,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 
 @Suppress("LongMethod")
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PowerMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
@@ -295,6 +297,7 @@ private fun PowerMetricsChart(
 
 @Composable
 @Suppress("CyclomaticComplexMethod")
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val time = telemetry.time.toLong() * MS_PER_SEC
     Card(
@@ -318,7 +321,7 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
                         Row {
                             Text(
                                 text = CommonCharts.formatDateTime(time),
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.titleMediumEmphasized,
                                 fontWeight = FontWeight.Bold,
                             )
                         }
@@ -347,6 +350,7 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current: Float) {
     Column {
         Text(
@@ -376,6 +380,7 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
 }
 
 /** Retrieves the appropriate voltage depending on `channelSelected`. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
     PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: Float.NaN
     PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: Float.NaN
@@ -383,6 +388,7 @@ private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry)
 }
 
 /** Retrieves the appropriate current depending on `channelSelected`. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
     PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: Float.NaN
     PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: Float.NaN

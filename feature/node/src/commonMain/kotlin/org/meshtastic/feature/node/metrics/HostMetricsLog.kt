@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -103,6 +104,7 @@ fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () ->
 
 @Suppress("LongMethod", "MagicNumber")
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: Telemetry) {
     val hostMetrics = telemetry.host_metrics
     val time = telemetry.time.toLong() * TimeConstants.MS_PER_SEC
@@ -119,7 +121,7 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: Telemetry) {
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.End,
                         text = DateFormatter.formatDateTime(time),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMediumEmphasized,
                         fontWeight = FontWeight.Bold,
                     )
                     hostMetrics?.uptime_seconds?.let {

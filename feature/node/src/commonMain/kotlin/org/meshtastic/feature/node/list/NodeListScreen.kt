@@ -30,8 +30,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -62,6 +64,7 @@ import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
@@ -114,16 +117,19 @@ fun NodeListScreen(
         },
         floatingActionButton = {
             val shareCapable = ourNode?.capabilities?.supportsQrCodeSharing ?: false
-            if (!isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable) {
-                MeshtasticImportFAB(
-                    onImport = { uriString ->
-                        onHandleDeepLink(org.meshtastic.core.common.util.MeshtasticUri(uriString)) {
-                            scope.launch { showToast(Res.string.channel_invalid) }
-                        }
-                    },
-                    isContactContext = true,
-                )
-            }
+            MeshtasticImportFAB(
+                modifier =
+                Modifier.animateFloatingActionButton(
+                    visible = !isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable,
+                    alignment = androidx.compose.ui.Alignment.BottomEnd,
+                ),
+                onImport = { uriString ->
+                    onHandleDeepLink(org.meshtastic.core.common.util.MeshtasticUri(uriString)) {
+                        scope.launch { showToast(Res.string.channel_invalid) }
+                    }
+                },
+                isContactContext = true,
+            )
         },
     ) { contentPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(contentPadding).focusable()) {

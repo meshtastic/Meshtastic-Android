@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -86,6 +87,7 @@ private val LEGEND_DATA =
 
 @Suppress("LongMethod")
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PaxMetricsChart(
     modifier: Modifier = Modifier,
     totalSeries: List<Pair<Int, Int>>,
@@ -262,6 +264,7 @@ fun PaxcountInfo(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onClick() },
@@ -279,7 +282,7 @@ fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClic
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Text(
                 text = DateFormatter.formatDateTime(log.received_date),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMediumEmphasized,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth(),

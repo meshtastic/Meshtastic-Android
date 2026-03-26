@@ -16,34 +16,23 @@
  */
 package org.meshtastic.core.ui.component
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.OfflineShare
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.material3.ToggleFloatingActionButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MenuFAB(
     expanded: Boolean,
@@ -53,61 +42,31 @@ fun MenuFAB(
     contentDescription: String? = null,
     testTag: String? = null,
 ) {
-    Column(
+    FloatingActionButtonMenu(
         modifier = modifier.then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
+        expanded = expanded,
+        button = {
+            ToggleFloatingActionButton(
+                checked = expanded,
+                onCheckedChange = onExpandedChange,
+                content = {
+                    val imageVector = if (expanded) Icons.Filled.Close else Icons.AutoMirrored.Rounded.OfflineShare
+                    Icon(imageVector = imageVector, contentDescription = contentDescription)
+                },
+                containerColor = ToggleFloatingActionButtonDefaults.containerColor(),
+            )
+        },
         horizontalAlignment = Alignment.End,
     ) {
-        AnimatedVisibility(
-            visible = expanded,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
-        ) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(bottom = 16.dp),
-            ) {
-                items.forEach { item ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = if (item.testTag != null) Modifier.testTag(item.testTag) else Modifier,
-                    ) {
-                        Surface(
-                            shape = MaterialTheme.shapes.small,
-                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            modifier = Modifier.padding(end = 8.dp),
-                        ) {
-                            Text(
-                                text = item.label,
-                                style = MaterialTheme.typography.labelLarge,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            )
-                        }
-                        SmallFloatingActionButton(
-                            onClick = {
-                                item.onClick()
-                                onExpandedChange(false)
-                            },
-                        ) {
-                            Icon(item.icon, contentDescription = item.label)
-                        }
-                    }
-                }
-            }
-        }
-
-        val rotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "fab_rotation")
-
-        FloatingActionButton(
-            onClick = { onExpandedChange(!expanded) },
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ) {
-            Icon(
-                imageVector = if (expanded) Icons.Filled.Close else Icons.AutoMirrored.Rounded.OfflineShare,
-                contentDescription = contentDescription,
-                modifier = Modifier.rotate(rotation),
+        items.forEach { item ->
+            FloatingActionButtonMenuItem(
+                modifier = if (item.testTag != null) Modifier.testTag(item.testTag) else Modifier,
+                onClick = {
+                    item.onClick()
+                    onExpandedChange(false)
+                },
+                icon = { Icon(item.icon, contentDescription = null) },
+                text = { Text(item.label) },
             )
         }
     }

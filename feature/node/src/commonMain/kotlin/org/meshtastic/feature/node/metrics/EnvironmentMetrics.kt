@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -119,6 +120,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun TemperatureDisplay(
     envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     environmentDisplayFahrenheit: Boolean,
@@ -140,6 +142,7 @@ private fun TemperatureDisplay(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val hasHumidity = envMetrics.relative_humidity?.let { !it.isNaN() } == true
     val hasPressure = envMetrics.barometric_pressure?.let { !it.isNaN() && it > 0 } == true
@@ -180,6 +183,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun SoilMetricsDisplay(
     envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     environmentDisplayFahrenheit: Boolean,
@@ -232,6 +236,7 @@ private fun SoilMetricsDisplay(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val hasLux = envMetrics.lux != null && !envMetrics.lux!!.isNaN()
     val hasUvLux = envMetrics.uv_lux != null && !envMetrics.uv_lux!!.isNaN()
@@ -267,6 +272,7 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val hasVoltage = envMetrics.voltage != null && !envMetrics.voltage!!.isNaN()
     val hasCurrent = envMetrics.current != null && !envMetrics.current!!.isNaN()
@@ -294,6 +300,7 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val iaqValue = envMetrics.iaq
     val gasResistance = envMetrics.gas_resistance
@@ -329,6 +336,7 @@ private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     envMetrics.radiation?.let { radiation ->
         if (!radiation.isNaN() && radiation > 0f) {
@@ -344,6 +352,7 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun EnvironmentMetricsCard(
     telemetry: Telemetry,
     environmentDisplayFahrenheit: Boolean,
@@ -370,6 +379,7 @@ private fun EnvironmentMetricsCard(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
     val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
     val time = telemetry.time.toLong() * MS_PER_SEC
@@ -378,7 +388,7 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = CommonCharts.formatDateTime(time),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMediumEmphasized,
                 fontWeight = FontWeight.Bold,
             )
             TemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
@@ -401,6 +411,7 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
 
 @Suppress("MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PreviewEnvironmentMetricsContent() {
     val fakeEnvMetrics =
         org.meshtastic.proto.EnvironmentMetrics(

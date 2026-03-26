@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,6 +49,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 /** Shared metric log/list UI components used by TracerouteLog, NeighborInfoLog, HostMetricsLog, and PositionLog. */
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun MetricLogItem(icon: ImageVector, text: String, contentDescription: String, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth().heightIn(min = 64.dp).padding(vertical = 4.dp, horizontal = 8.dp),
@@ -72,7 +74,7 @@ fun MetricLogItem(icon: ImageVector, text: String, contentDescription: String, m
             }
             Text(
                 text = text,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMediumEmphasized,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
