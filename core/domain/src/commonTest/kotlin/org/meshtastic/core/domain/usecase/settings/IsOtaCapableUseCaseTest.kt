@@ -145,18 +145,39 @@ class IsOtaCapableUseCaseTest {
     }
 
     @Test
-    fun `invoke returns true when hardware lookup fails but model is set`() = runTest {
-        // Arrange
+    fun `invoke returns false when disconnected`() = runTest {
+        dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(Node(num = 123))
+        dev.mokkery.every { radioController.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Disconnected)
+
+        useCase().test {
+            assertFalse(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `invoke returns false when node is null`() = runTest {
+        dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
+        dev.mokkery.every { radioController.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+
+        useCase().test {
+            assertFalse(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `invoke returns false when address is not ota capable`() = runTest {
         val node = Node(num = 123, user = User(hw_model = HardwareModel.TBEAM))
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
-        dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
-
-        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.failure(Exception())
+        dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("mqtt://example.com")
 
         useCase().test {
-            assertTrue(awaitItem())
+            assertFalse(awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

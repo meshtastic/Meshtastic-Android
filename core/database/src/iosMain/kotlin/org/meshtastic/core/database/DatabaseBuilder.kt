@@ -24,6 +24,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.cinterop.ExperimentalForeignApi
 import okio.BufferedSink
 import okio.BufferedSource
@@ -44,7 +45,14 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
         .configureCommon()
+        .setDriver(BundledSQLiteDriver())
 }
+
+/** Returns a [RoomDatabase.Builder] configured for an in-memory iOS database. */
+actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
+    Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
+        .configureCommon()
+        .setDriver(BundledSQLiteDriver())
 
 /** Returns the iOS directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path = documentDirectory().toPath()

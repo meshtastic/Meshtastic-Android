@@ -17,6 +17,7 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.User
 
@@ -36,6 +37,7 @@ object TestDataFactory {
      * @param longName User long name (default: "Test User")
      * @param shortName User short name (default: "T")
      * @param lastHeard Last heard timestamp in seconds (default: 0)
+     * @param hwModel Hardware model (default: UNSET)
      * @return A Node instance with provided or default values
      */
     fun createTestNode(
@@ -44,18 +46,31 @@ object TestDataFactory {
         longName: String = "Test User",
         shortName: String = "T",
         lastHeard: Int = 0,
+        hwModel: org.meshtastic.proto.HardwareModel = org.meshtastic.proto.HardwareModel.UNSET,
+        batteryLevel: Int? = 100,
     ): Node {
-        val user = User(id = userId, long_name = longName, short_name = shortName)
-        return Node(num = num, user = user, lastHeard = lastHeard, snr = 0f, rssi = 0, channel = 0)
+        val user = User(id = userId, long_name = longName, short_name = shortName, hw_model = hwModel)
+        val metrics = org.meshtastic.proto.DeviceMetrics(battery_level = batteryLevel)
+        return Node(
+            num = num,
+            user = user,
+            lastHeard = lastHeard,
+            snr = 0f,
+            rssi = 0,
+            channel = 0,
+            deviceMetrics = metrics,
+        )
     }
 
-    /**
-     * Creates multiple test nodes with sequential IDs.
-     *
-     * @param count Number of nodes to create
-     * @param baseNum Starting node number (default: 1)
-     * @return A list of Node instances
-     */
+    /** Creates a test [org.meshtastic.proto.MeshPacket] with default values. */
+    fun createTestPacket(
+        from: Int = 1,
+        to: Int = 0xffffffff.toInt(),
+        decoded: org.meshtastic.proto.Data? = null,
+        relayNode: Int = 0,
+    ) = org.meshtastic.proto.MeshPacket(from = from, to = to, decoded = decoded, relay_node = relayNode)
+
+    /** Creates multiple test nodes with sequential IDs. */
     fun createTestNodes(count: Int, baseNum: Int = 1): List<Node> = (0 until count).map { i ->
         createTestNode(
             num = baseNum + i,
@@ -64,6 +79,32 @@ object TestDataFactory {
             shortName = "T$i",
         )
     }
+
+    /** Creates a test [MyNodeInfo] with default values. */
+    fun createMyNodeInfo(
+        myNodeNum: Int = 1,
+        hasGPS: Boolean = false,
+        model: String? = "TBEAM",
+        firmwareVersion: String? = "2.5.0",
+        hasWifi: Boolean = false,
+        pioEnv: String? = null,
+    ) = MyNodeInfo(
+        myNodeNum = myNodeNum,
+        hasGPS = hasGPS,
+        model = model,
+        firmwareVersion = firmwareVersion,
+        couldUpdate = false,
+        shouldUpdate = false,
+        currentPacketId = 1L,
+        messageTimeoutMsec = 300000,
+        minAppVersion = 1,
+        maxChannels = 8,
+        hasWifi = hasWifi,
+        channelUtilization = 0f,
+        airUtilTx = 0f,
+        deviceId = "!$myNodeNum",
+        pioEnv = pioEnv,
+    )
 }
 
 /**

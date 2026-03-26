@@ -25,6 +25,9 @@ import okio.Path
 /** Returns a [RoomDatabase.Builder] configured for the current platform with the given [dbName]. */
 expect fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase>
 
+/** Returns a [RoomDatabase.Builder] configured for an in-memory database on the current platform. */
+expect fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase>
+
 /** Returns the platform-specific directory where database files are stored. */
 expect fun getDatabaseDirectory(): Path
 

@@ -18,7 +18,7 @@
 - **Koin 4.2:** Leverages Koin Annotations and the K2 Compiler Plugin for pure compile-time DI, completely replacing Hilt.
 
 ## Database & Storage
-- **Room 3 KMP:** Shared local database using multiplatform `DatabaseConstructor` and the `androidx.sqlite` bundled driver across Android, Desktop, and iOS.
+- **Room 3 KMP:** Shared local database using multiplatform `DatabaseConstructor` and platform-appropriate SQLite drivers (e.g., `BundledSQLiteDriver` for JVM/Desktop, Framework driver for Android).
 - **Jetpack DataStore:** Shared preferences.
 
 ## Networking & Transport
@@ -32,5 +32,7 @@
 - **Shared Tests First:** The majority of business logic, ViewModels, and state interactions are tested in the `commonTest` source set using standard `kotlin.test`.
 - **Coroutines Testing:** Use `kotlinx-coroutines-test` for virtual time management in asynchronous flows.
 - **Mocking Strategy:** Avoid JVM-specific mocking libraries. Prefer `Mokkery` or `Mockative` for multiplatform-compatible mocking interfaces, alongside handwritten fakes in `core:testing`.
+- **Platform-Specific Verification:** Use **Robolectric** on the Android host target to verify KMP modules that interact with Android framework components (like `Uri` or `Room`).
+- **Subclassing Pattern:** Maintain a unified test suite by defining abstract base tests in `commonTest` and platform-specific subclasses in `jvmTest` and `androidHostTest` for initialization (e.g., calling `setupTestContext()`).
 - **Flow Assertions:** Use `Turbine` for testing multiplatform `Flow` emissions and state updates.
 - **Property-Based Testing:** Use `Kotest` for multiplatform data-driven and property-based testing scenarios.

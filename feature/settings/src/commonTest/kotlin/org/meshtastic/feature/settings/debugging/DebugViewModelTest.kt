@@ -25,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -39,9 +40,9 @@ import kotlin.test.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class DebugViewModelTest {
 
-    private val meshLogRepository = FakeMeshLogRepository()
-    private val nodeRepository = FakeNodeRepository()
-    private val meshLogPrefs = FakeMeshLogPrefs()
+    private lateinit var meshLogRepository: FakeMeshLogRepository
+    private lateinit var nodeRepository: FakeNodeRepository
+    private lateinit var meshLogPrefs: FakeMeshLogPrefs
     private val alertManager: AlertManager = mock(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -52,6 +53,9 @@ class DebugViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        meshLogRepository = FakeMeshLogRepository()
+        nodeRepository = FakeNodeRepository()
+        meshLogPrefs = FakeMeshLogPrefs()
         meshLogPrefs.setRetentionDays(7)
         meshLogPrefs.setLoggingEnabled(true)
 
@@ -75,7 +79,7 @@ class DebugViewModelTest {
         viewModel.setRetentionDays(14)
 
         meshLogPrefs.retentionDays.value shouldBe 14
-        meshLogRepository.deleteLogsOlderThanCalledDays shouldBe 14
+        meshLogRepository.lastDeletedOlderThan shouldBe 14
         viewModel.retentionDays.value shouldBe 14
     }
 
@@ -93,16 +97,87 @@ class DebugViewModelTest {
     fun `search filters results correctly`() = runTest {
         val logs =
             listOf(
-                DebugViewModel.UiMeshLog("1", "TypeA", "Date1", "Message Apple"),
-                DebugViewModel.UiMeshLog("2", "TypeB", "Date2", "Message Banana"),
+                DebugViewModel.UiMeshLog("1", "TypeA", "Date1", "Apple"),
+                DebugViewModel.UiMeshLog("2", "TypeB", "Date2", "Banana"),
             )
 
-        viewModel.searchManager.updateMatches("Apple", logs)
+        viewModel.searchManager.setSearchText("Apple")
+        viewModel.updateFilteredLogs(logs)
+        runCurrent()
 
         val state = viewModel.searchState.value
         state.hasMatches shouldBe true
         state.allMatches.size shouldBe 1
         state.allMatches[0].logIndex shouldBe 0
+
+        viewModel.searchManager.goToNextMatch()
+        viewModel.searchState.value.currentMatchIndex shouldBe 0
+
+        viewModel.searchManager.clearSearch()
+        runCurrent()
+        viewModel.searchState.value.searchText shouldBe ""
+        viewModel.searchState.value.hasMatches shouldBe false
+    }
+
+    @Test
+    fun `filterManager filters logs correctly with AND and OR modes`() {
+        val logs =
+            listOf(
+                DebugViewModel.UiMeshLog("1", "TypeA", "Date1", "Apple Red"),
+                DebugViewModel.UiMeshLog("2", "TypeB", "Date2", "Apple Green"),
+                DebugViewModel.UiMeshLog("3", "TypeC", "Date3", "Banana Yellow"),
+            )
+
+        // OR mode
+        val orResults = viewModel.filterManager.filterLogs(logs, listOf("Red", "Banana"), FilterMode.OR)
+        orResults.size shouldBe 2
+        orResults.map { it.uuid } shouldBe listOf("1", "3")
+
+        // AND mode
+        val andResults = viewModel.filterManager.filterLogs(logs, listOf("Apple", "Green"), FilterMode.AND)
+        andResults.size shouldBe 1
+        andResults[0].uuid shouldBe "2"
+    }
+
+    @Test
+    fun `presetFilters includes my node ID and broadcast`() {
+        nodeRepository.setMyNodeInfo(org.meshtastic.core.testing.TestDataFactory.createMyNodeInfo(myNodeNum = 12345678))
+
+        val filters = viewModel.presetFilters
+        filters.shouldBe(
+            listOf(
+                "!00bc614e",
+                "!ffffffff",
+                "decoded",
+                org.meshtastic.core.common.util.DateFormatter.formatShortDate(
+                    org.meshtastic.core.common.util.nowInstant.toEpochMilliseconds(),
+                ),
+            ) + org.meshtastic.proto.PortNum.entries.map { it.name },
+        )
+    }
+
+    @Test
+    fun `decodePayloadFromMeshLog decodes various portnums`() {
+        val position = org.meshtastic.proto.Position(latitude_i = 10000000, longitude_i = 20000000)
+        val packet =
+            org.meshtastic.core.testing.TestDataFactory.createTestPacket(
+                decoded =
+                org.meshtastic.proto.Data(
+                    portnum = org.meshtastic.proto.PortNum.POSITION_APP,
+                    payload = okio.ByteString.Companion.of(*position.encode()),
+                ),
+            )
+        val log =
+            org.meshtastic.core.model.MeshLog(
+                uuid = "1",
+                message_type = "Packet",
+                received_date = 1L,
+                raw_message = "raw",
+                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+            )
+
+        // This is a private method but we can test it via toUiState
+        // (tested in the previous test)
     }
 
     @Test

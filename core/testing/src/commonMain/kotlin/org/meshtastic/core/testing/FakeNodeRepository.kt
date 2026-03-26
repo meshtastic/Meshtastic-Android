@@ -41,21 +41,23 @@ import org.meshtastic.proto.User
  * ```
  */
 @Suppress("TooManyFunctions")
-class FakeNodeRepository : NodeRepository {
+class FakeNodeRepository :
+    BaseFake(),
+    NodeRepository {
 
-    private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
+    private val _myNodeInfo = mutableStateFlow<MyNodeInfo?>(null)
     override val myNodeInfo: StateFlow<MyNodeInfo?> = _myNodeInfo
 
-    private val _ourNodeInfo = MutableStateFlow<Node?>(null)
+    private val _ourNodeInfo = mutableStateFlow<Node?>(null)
     override val ourNodeInfo: StateFlow<Node?> = _ourNodeInfo
 
-    private val _myId = MutableStateFlow<String?>(null)
+    private val _myId = mutableStateFlow<String?>(null)
     override val myId: StateFlow<String?> = _myId
 
-    private val _localStats = MutableStateFlow(LocalStats())
+    private val _localStats = mutableStateFlow(LocalStats())
     override val localStats: StateFlow<LocalStats> = _localStats
 
-    private val _nodeDBbyNum = MutableStateFlow<Map<Int, Node>>(emptyMap())
+    private val _nodeDBbyNum = mutableStateFlow<Map<Int, Node>>(emptyMap())
     override val nodeDBbyNum: StateFlow<Map<Int, Node>> = _nodeDBbyNum
 
     override val onlineNodeCount: Flow<Int> = _nodeDBbyNum.map { it.size }
@@ -82,18 +84,51 @@ class FakeNodeRepository : NodeRepository {
         onlyDirect: Boolean,
     ): Flow<List<Node>> = _nodeDBbyNum.map { db ->
         db.values
+            .asSequence()
+            .filter { filterNode(it, filter, includeUnknown, onlyOnline, onlyDirect) }
             .toList()
-            .let { nodes -> if (filter.isBlank()) nodes else nodes.filter { it.user.long_name.contains(filter) } }
-            .sortedBy { it.num }
+            .let { nodes ->
+                when (sort) {
+                    NodeSortOption.ALPHABETICAL -> nodes.sortedBy { it.user.long_name.lowercase() }
+                    NodeSortOption.LAST_HEARD -> nodes.sortedByDescending { it.lastHeard }
+                    NodeSortOption.DISTANCE -> nodes.sortedBy { it.position.latitude_i } // Simplified
+                    NodeSortOption.HOPS_AWAY -> nodes.sortedBy { it.hopsAway }
+                    NodeSortOption.CHANNEL -> nodes.sortedBy { it.channel }
+                    NodeSortOption.VIA_MQTT -> nodes.sortedBy { if (it.viaMqtt) 0 else 1 }
+                    NodeSortOption.VIA_FAVORITE -> nodes.sortedBy { if (it.isFavorite) 0 else 1 }
+                }
+            }
+    }
+
+    private fun filterNode(
+        node: Node,
+        filter: String,
+        includeUnknown: Boolean,
+        onlyOnline: Boolean,
+        onlyDirect: Boolean,
+    ): Boolean {
+        val matchesFilter =
+            filter.isBlank() ||
+                node.user.long_name.contains(filter, ignoreCase = true) ||
+                node.user.id.contains(filter, ignoreCase = true)
+        val matchesUnknown = includeUnknown || !node.isUnknownUser
+        val matchesOnline = !onlyOnline || node.isOnline
+        val matchesDirect = !onlyDirect || node.hopsAway == 0
+
+        return matchesFilter && matchesUnknown && matchesOnline && matchesDirect
     }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
         _nodeDBbyNum.value.values.filter { it.lastHeard < lastHeard }
 
-    override suspend fun getUnknownNodes(): List<Node> = emptyList()
+    override suspend fun getUnknownNodes(): List<Node> = _nodeDBbyNum.value.values.filter { it.isUnknownUser }
 
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {
-        _nodeDBbyNum.value = emptyMap()
+        if (preserveFavorites) {
+            _nodeDBbyNum.value = _nodeDBbyNum.value.filter { it.value.isFavorite }
+        } else {
+            _nodeDBbyNum.value = emptyMap()
+        }
     }
 
     override suspend fun clearMyNodeInfo() {
@@ -108,7 +143,10 @@ class FakeNodeRepository : NodeRepository {
         _nodeDBbyNum.value = _nodeDBbyNum.value - nodeNums.toSet()
     }
 
-    override suspend fun setNodeNotes(num: Int, notes: String) = Unit
+    override suspend fun setNodeNotes(num: Int, notes: String) {
+        val node = _nodeDBbyNum.value[num] ?: return
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (num to node.copy(notes = notes))
+    }
 
     override suspend fun upsert(node: Node) {
         _nodeDBbyNum.value = _nodeDBbyNum.value + (node.num to node)
@@ -119,7 +157,10 @@ class FakeNodeRepository : NodeRepository {
         _nodeDBbyNum.value = nodes.associateBy { it.num }
     }
 
-    override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) = Unit
+    override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
+        val node = _nodeDBbyNum.value[nodeNum] ?: return
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (nodeNum to node.copy(metadata = metadata))
+    }
 
     // --- Helper methods for testing ---
 
@@ -133,5 +174,9 @@ class FakeNodeRepository : NodeRepository {
 
     fun setOurNode(node: Node?) {
         _ourNodeInfo.value = node
+    }
+
+    fun setMyNodeInfo(info: MyNodeInfo?) {
+        _myNodeInfo.value = info
     }
 }

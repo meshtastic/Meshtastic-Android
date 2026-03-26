@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,41 +16,33 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.meshtastic.core.testing.FakeHomoglyphPrefs
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class ToggleHomoglyphEncodingUseCaseTest {
-    /*
 
-
-    private lateinit var homoglyphEncodingPrefs: HomoglyphPrefs
+    private lateinit var homoglyphPrefs: FakeHomoglyphPrefs
     private lateinit var useCase: ToggleHomoglyphEncodingUseCase
 
     @BeforeTest
     fun setUp() {
-        useCase = ToggleHomoglyphEncodingUseCase(homoglyphEncodingPrefs)
+        homoglyphPrefs = FakeHomoglyphPrefs()
+        useCase = ToggleHomoglyphEncodingUseCase(homoglyphPrefs)
     }
 
     @Test
-    fun `invoke toggles homoglyph encoding from false to true`() {
-        // Arrange
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled.value } returns false
-
-        // Act
+    fun `invoke toggles from false to true`() {
+        homoglyphPrefs.setHomoglyphEncodingEnabled(false)
         useCase()
-
-        // Assert
-        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(true) }
+        assertEquals(true, homoglyphPrefs.homoglyphEncodingEnabled.value)
     }
 
     @Test
-    fun `invoke toggles homoglyph encoding from true to false`() {
-        // Arrange
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled.value } returns true
-
-        // Act
+    fun `invoke toggles from true to false`() {
+        homoglyphPrefs.setHomoglyphEncodingEnabled(true)
         useCase()
-
-        // Assert
-        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) }
+        assertEquals(false, homoglyphPrefs.homoglyphEncodingEnabled.value)
     }
-
-     */
 }

@@ -86,3 +86,66 @@ actual fun rememberOpenUrl(): (url: String) -> Unit {
         }
     }
 }
+
+@Composable
+@Suppress("Wrapping")
+actual fun rememberSaveFileLauncher(
+    onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit,
+): (defaultFilename: String, mimeType: String) -> Unit {
+    val launcher =
+        androidx.activity.compose.rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+        ) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    onUriReceived(uri.toString().let { org.meshtastic.core.common.util.MeshtasticUri(it) })
+                }
+            }
+        }
+
+    return remember(launcher) {
+        { defaultFilename, mimeType ->
+            val intent =
+                Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = mimeType
+                    putExtra(Intent.EXTRA_TITLE, defaultFilename)
+                }
+            launcher.launch(intent)
+        }
+    }
+}
+
+@Composable
+actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    val launcher =
+        androidx.activity.compose.rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions(),
+        ) { permissions ->
+            if (permissions.values.any { it }) {
+                onGranted()
+            } else {
+                onDenied()
+            }
+        }
+    return remember(launcher) {
+        {
+            launcher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+actual fun rememberOpenLocationSettings(): () -> Unit {
+    val launcher =
+        androidx.activity.compose.rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+        ) { _ ->
+        }
+    return remember(launcher) { { launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)) } }
+}

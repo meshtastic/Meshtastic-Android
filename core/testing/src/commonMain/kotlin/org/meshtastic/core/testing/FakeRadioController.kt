@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.testing
 
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -25,34 +24,41 @@ import org.meshtastic.proto.ClientNotification
 
 /**
  * A test double for [RadioController] that provides a no-op implementation and tracks calls for assertions in tests.
- *
- * Use this in place of mocking the entire RadioController interface when you need fine-grained control over connection
- * state and packet tracking.
- *
- * Example:
- * ```kotlin
- * val radioController = FakeRadioController()
- * radioController.setConnectionState(ConnectionState.Connected)
- * // ... perform test ...
- * assertEquals(1, radioController.sentPackets.size)
- * ```
  */
 @Suppress("TooManyFunctions", "EmptyFunctionBlock")
-class FakeRadioController : RadioController {
+class FakeRadioController :
+    BaseFake(),
+    RadioController {
 
-    // Mutable state flows so we can manipulate them in our tests
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
+    private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Connected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState
 
-    private val _clientNotification = MutableStateFlow<ClientNotification?>(null)
+    private val _clientNotification = mutableStateFlow<ClientNotification?>(null)
     override val clientNotification: StateFlow<ClientNotification?> = _clientNotification
 
-    // Track sent packets to assert in tests
     val sentPackets = mutableListOf<DataPacket>()
     val favoritedNodes = mutableListOf<Int>()
     val sentSharedContacts = mutableListOf<Int>()
     var throwOnSend: Boolean = false
     var lastSetDeviceAddress: String? = null
+    var beginEditSettingsCalled = false
+    var commitEditSettingsCalled = false
+    var startProvideLocationCalled = false
+    var stopProvideLocationCalled = false
+
+    init {
+        registerResetAction {
+            sentPackets.clear()
+            favoritedNodes.clear()
+            sentSharedContacts.clear()
+            throwOnSend = false
+            lastSetDeviceAddress = null
+            beginEditSettingsCalled = false
+            commitEditSettingsCalled = false
+            startProvideLocationCalled = false
+            stopProvideLocationCalled = false
+        }
+    }
 
     override suspend fun sendMessage(packet: DataPacket) {
         if (throwOnSend) error("Fake send failure")
@@ -127,15 +133,23 @@ class FakeRadioController : RadioController {
 
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
 
-    override suspend fun beginEditSettings(destNum: Int) {}
+    override suspend fun beginEditSettings(destNum: Int) {
+        beginEditSettingsCalled = true
+    }
 
-    override suspend fun commitEditSettings(destNum: Int) {}
+    override suspend fun commitEditSettings(destNum: Int) {
+        commitEditSettingsCalled = true
+    }
 
     override fun getPacketId(): Int = 1
 
-    override fun startProvideLocation() {}
+    override fun startProvideLocation() {
+        startProvideLocationCalled = true
+    }
 
-    override fun stopProvideLocation() {}
+    override fun stopProvideLocation() {
+        stopProvideLocationCalled = true
+    }
 
     override fun setDeviceAddress(address: String) {
         lastSetDeviceAddress = address

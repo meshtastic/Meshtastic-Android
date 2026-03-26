@@ -19,7 +19,6 @@ package org.meshtastic.desktop.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import org.meshtastic.desktop.ui.map.KmpMapPlaceholder
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
@@ -43,12 +42,12 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(
     // Nodes — real composables from feature:node
     nodesGraph(
         backStack = backStack,
+        scrollToTopEvents = uiViewModel.scrollToTopEventFlow,
         onHandleDeepLink = uiViewModel::handleDeepLink,
-        nodeMapScreen = { destNum, _ -> KmpMapPlaceholder(title = "Node Map ($destNum)") },
     )
 
     // Conversations — real composables from feature:messaging
-    contactsGraph(backStack)
+    contactsGraph(backStack, uiViewModel.scrollToTopEventFlow)
 
     // Map — placeholder for now, will be replaced with feature:map real implementation
     mapGraph(backStack)

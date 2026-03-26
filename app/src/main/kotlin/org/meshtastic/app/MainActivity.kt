@@ -34,6 +34,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.core.content.IntentCompat
@@ -129,16 +130,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            CompositionLocalProvider(
-                LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
-                LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
-                LocalBarcodeScannerSupported provides true,
-                LocalNfcScannerSupported provides true,
-                LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
-                LocalMapViewProvider provides getMapViewProvider(),
-                LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
-                LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),
-            ) {
+            AppCompositionLocals {
                 AppTheme(dynamicColor = dynamic, darkTheme = dark) {
                     val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
 
@@ -160,6 +152,52 @@ class MainActivity : ComponentActivity() {
         addOnNewIntentListener { intent -> handleIntent(intent) }
 
         handleIntent(intent)
+    }
+
+    @Composable
+    private fun AppCompositionLocals(content: @Composable () -> Unit) {
+        CompositionLocalProvider(
+            LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
+            LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
+            LocalBarcodeScannerSupported provides true,
+            LocalNfcScannerSupported provides true,
+            LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
+            LocalMapViewProvider provides getMapViewProvider(),
+            LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
+            LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),
+            org.meshtastic.core.ui.util.LocalNodeMapScreenProvider provides
+                { destNum, onNavigateUp ->
+                    val vm = koinViewModel<org.meshtastic.feature.map.node.NodeMapViewModel>()
+                    vm.setDestNum(destNum)
+                    org.meshtastic.app.map.node.NodeMapScreen(vm, onNavigateUp = onNavigateUp)
+                },
+            org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider provides
+                { destNum, requestId, logUuid, onNavigateUp ->
+                    val metricsViewModel =
+                        koinViewModel<org.meshtastic.feature.node.metrics.MetricsViewModel>(key = "metrics-$destNum") {
+                            org.koin.core.parameter.parametersOf(destNum)
+                        }
+                    metricsViewModel.setNodeId(destNum)
+
+                    org.meshtastic.feature.node.metrics.TracerouteMapScreen(
+                        metricsViewModel = metricsViewModel,
+                        requestId = requestId,
+                        logUuid = logUuid,
+                        onNavigateUp = onNavigateUp,
+                    )
+                },
+            org.meshtastic.core.ui.util.LocalMapMainScreenProvider provides
+                { onClickNodeChip, navigateToNodeDetails, waypointId ->
+                    val viewModel = koinViewModel<org.meshtastic.feature.map.SharedMapViewModel>()
+                    org.meshtastic.feature.map.MapScreen(
+                        viewModel = viewModel,
+                        onClickNodeChip = onClickNodeChip,
+                        navigateToNodeDetails = navigateToNodeDetails,
+                        waypointId = waypointId,
+                    )
+                },
+            content = content,
+        )
     }
 
     @Suppress("NestedBlockDepth")

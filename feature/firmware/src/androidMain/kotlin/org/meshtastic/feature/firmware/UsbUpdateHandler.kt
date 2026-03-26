@@ -27,6 +27,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_rebooting
 import org.meshtastic.core.resources.firmware_update_retrieval_failed
@@ -56,11 +57,14 @@ class UsbUpdateHandler(
                     .replace(Regex(":?\\s*%1\\\$d%?"), "")
                     .trim()
 
-            updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
-
-            val rebootingMsg = getString(Res.string.firmware_update_rebooting)
+            updateState(
+                FirmwareUpdateState.Downloading(
+                    ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
+                ),
+            )
 
             if (firmwareUri != null) {
+                val rebootingMsg = UiText.Resource(Res.string.firmware_update_rebooting)
                 updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
                 val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
                 radioController.rebootToDfu(myNodeNum)
@@ -74,22 +78,28 @@ class UsbUpdateHandler(
                         val percent = (progress * PERCENT_MAX).toInt()
                         updateState(
                             FirmwareUpdateState.Downloading(
-                                ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
+                                ProgressState(
+                                    message = UiText.DynamicString(downloadingMsg),
+                                    progress = progress,
+                                    details = "$percent%",
+                                ),
                             ),
                         )
                     }
 
                 if (firmwareFile == null) {
                     val retrievalFailedMsg = getString(Res.string.firmware_update_retrieval_failed)
-                    updateState(FirmwareUpdateState.Error(retrievalFailedMsg))
+                    updateState(FirmwareUpdateState.Error(UiText.DynamicString(retrievalFailedMsg)))
                     null
                 } else {
+                    val rebootingMsg = UiText.Resource(Res.string.firmware_update_rebooting)
                     updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
                     val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
                     radioController.rebootToDfu(myNodeNum)
                     delay(REBOOT_DELAY)
 
-                    updateState(FirmwareUpdateState.AwaitingFileSave(firmwareFile, java.io.File(firmwareFile).name))
+                    val fileName = java.io.File(firmwareFile).name
+                    updateState(FirmwareUpdateState.AwaitingFileSave(firmwareFile, fileName))
                     firmwareFile
                 }
             }
@@ -98,7 +108,7 @@ class UsbUpdateHandler(
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "USB Update failed" }
             val usbFailedMsg = getString(Res.string.firmware_update_usb_failed)
-            updateState(FirmwareUpdateState.Error(e.message ?: usbFailedMsg))
+            updateState(FirmwareUpdateState.Error(UiText.DynamicString(e.message ?: usbFailedMsg)))
             null
         }
 }

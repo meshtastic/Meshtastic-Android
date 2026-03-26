@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,49 +16,52 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioController
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
 class AdminActionsUseCaseTest {
-    /*
 
-
-    private lateinit var radioController: RadioController
-    private lateinit var nodeRepository: NodeRepository
+    private lateinit var radioController: FakeRadioController
+    private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var useCase: AdminActionsUseCase
 
     @BeforeTest
     fun setUp() {
+        radioController = FakeRadioController()
+        nodeRepository = FakeNodeRepository()
         useCase = AdminActionsUseCase(radioController, nodeRepository)
-        every { radioController.getPacketId() } returns 42
     }
 
     @Test
-    fun `reboot calls radioController and returns packetId`() = runTest {
-        val result = useCase.reboot(123)
-        verifySuspend { radioController.reboot(123, 42) }
-        assertEquals(42, result)
+    fun `reboot calls radioController`() = runTest {
+        val packetId = useCase.reboot(1234)
+        assertEquals(1, packetId)
     }
 
     @Test
-    fun `shutdown calls radioController and returns packetId`() = runTest {
-        val result = useCase.shutdown(123)
-        verifySuspend { radioController.shutdown(123, 42) }
-        assertEquals(42, result)
+    fun `shutdown calls radioController`() = runTest {
+        val packetId = useCase.shutdown(1234)
+        assertEquals(1, packetId)
     }
 
     @Test
-    fun `factoryReset calls radioController and clears DB if local`() = runTest {
-        val result = useCase.factoryReset(123, isLocal = true)
-        verifySuspend { radioController.factoryReset(123, 42) }
-        verifySuspend { nodeRepository.clearNodeDB() }
-        assertEquals(42, result)
+    fun `factoryReset local node clears local NodeDB`() = runTest {
+        nodeRepository.upsert(Node(num = 1))
+        useCase.factoryReset(1234, isLocal = true)
+        assertTrue(nodeRepository.nodeDBbyNum.value.isEmpty())
     }
 
     @Test
-    fun `nodedbReset calls radioController and clears DB if local`() = runTest {
-        val result = useCase.nodedbReset(123, preserveFavorites = true, isLocal = true)
-        verifySuspend { radioController.nodedbReset(123, 42, true) }
-        verifySuspend { nodeRepository.clearNodeDB(true) }
-        assertEquals(42, result)
+    fun `nodedbReset local node clears local NodeDB with preserveFavorites`() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 1, isFavorite = true), Node(num = 2, isFavorite = false)))
+        useCase.nodedbReset(1234, preserveFavorites = true, isLocal = true)
+        assertEquals(1, nodeRepository.nodeDBbyNum.value.size)
+        assertTrue(nodeRepository.nodeDBbyNum.value.containsKey(1))
     }
-
-     */
 }

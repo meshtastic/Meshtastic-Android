@@ -47,7 +47,7 @@ class NavigationAssemblyTest {
             val backStack = rememberNavBackStack(NodesRoutes.NodesGraph)
             entryProvider<NavKey> {
                 contactsGraph(backStack, emptyFlow())
-                nodesGraph(backStack = backStack, scrollToTopEvents = emptyFlow(), nodeMapScreen = { _, _ -> })
+                nodesGraph(backStack = backStack, scrollToTopEvents = emptyFlow())
                 mapGraph(backStack)
                 channelsGraph(backStack)
                 connectionsGraph(backStack)

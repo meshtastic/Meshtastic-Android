@@ -33,11 +33,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.NumberFormatter
-import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -47,12 +45,14 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_copying
 import org.meshtastic.core.resources.firmware_update_dfu_aborted
@@ -62,7 +62,6 @@ import org.meshtastic.core.resources.firmware_update_enabling_dfu
 import org.meshtastic.core.resources.firmware_update_extracting
 import org.meshtastic.core.resources.firmware_update_failed
 import org.meshtastic.core.resources.firmware_update_flashing
-import org.meshtastic.core.resources.firmware_update_local_failed
 import org.meshtastic.core.resources.firmware_update_method_ble
 import org.meshtastic.core.resources.firmware_update_method_usb
 import org.meshtastic.core.resources.firmware_update_method_wifi
@@ -156,7 +155,7 @@ class FirmwareUpdateViewModel(
                 val ourNode = nodeRepository.myNodeInfo.value
                 val address = radioPrefs.devAddr.value?.drop(1)
                 if (address == null || ourNode == null) {
-                    _state.value = FirmwareUpdateState.Error(getString(Res.string.firmware_update_no_device))
+                    _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
                     return@launch
                 }
                 getDeviceHardware(ourNode)?.let { deviceHardware ->
@@ -206,8 +205,11 @@ class FirmwareUpdateViewModel(
                 .onFailure { e ->
                     if (e is CancellationException) throw e
                     Logger.e(e) { "Error checking for updates" }
-                    val unknownError = getString(Res.string.firmware_update_unknown_error)
-                    _state.value = FirmwareUpdateState.Error(e.message ?: unknownError)
+                    val unknownError = UiText.Resource(Res.string.firmware_update_unknown_error)
+                    _state.value =
+                        FirmwareUpdateState.Error(
+                            if (e.message != null) UiText.DynamicString(e.message!!) else unknownError,
+                        )
                 }
         }
     }
@@ -239,8 +241,8 @@ class FirmwareUpdateViewModel(
                         checkForUpdates()
                         throw e
                     } catch (e: Exception) {
-                        val failedMsg = getString(Res.string.firmware_update_failed)
-                        _state.value = FirmwareUpdateState.Error(e.message ?: failedMsg)
+                        Logger.e(e) { "Firmware update failed" }
+                        _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
                     }
                 }
             }
@@ -254,16 +256,16 @@ class FirmwareUpdateViewModel(
 
         viewModelScope.launch {
             try {
-                val copyingMsg = getString(Res.string.firmware_update_copying)
-                _state.value = FirmwareUpdateState.Processing(ProgressState(copyingMsg))
+                _state.value =
+                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_copying)))
                 if (firmwareFile != null) {
                     fileHandler.copyFileToUri(firmwareFile, uri)
                 } else if (sourceUri != null) {
                     fileHandler.copyUriToUri(sourceUri, uri)
                 }
 
-                val flashingMsg = getString(Res.string.firmware_update_flashing)
-                _state.value = FirmwareUpdateState.Processing(ProgressState(flashingMsg))
+                _state.value =
+                    FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_flashing)))
                 withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
                     ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
@@ -272,8 +274,7 @@ class FirmwareUpdateViewModel(
                 throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Error saving DFU file" }
-                val failedMsg = getString(Res.string.firmware_update_failed)
-                _state.value = FirmwareUpdateState.Error(e.message ?: failedMsg)
+                _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
             } finally {
                 cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
             }
@@ -283,10 +284,7 @@ class FirmwareUpdateViewModel(
     fun startUpdateFromFile(uri: CommonUri) {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         if (currentState.updateMethod is FirmwareUpdateMethod.Ble && !isValidBluetoothAddress(currentState.address)) {
-            viewModelScope.launch {
-                val noDeviceMsg = getString(Res.string.firmware_update_no_device)
-                _state.value = FirmwareUpdateState.Error(noDeviceMsg)
-            }
+            _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
             return
         }
         originalDeviceAddress = currentState.address
@@ -294,8 +292,10 @@ class FirmwareUpdateViewModel(
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                val extractingMsg = getString(Res.string.firmware_update_extracting)
-                _state.value = FirmwareUpdateState.Processing(ProgressState(extractingMsg))
+                _state.value =
+                    FirmwareUpdateState.Processing(
+                        ProgressState(UiText.Resource(Res.string.firmware_update_extracting)),
+                    )
                 val extension = if (currentState.updateMethod is FirmwareUpdateMethod.Ble) ".zip" else ".uf2"
                 val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
 
@@ -318,8 +318,7 @@ class FirmwareUpdateViewModel(
                 throw e
             } catch (e: Exception) {
                 Logger.e(e) { "Error starting update from file" }
-                val failedMsg = getString(Res.string.firmware_update_local_failed)
-                _state.value = FirmwareUpdateState.Error(e.message ?: failedMsg)
+                _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_failed))
             }
         }
     }
@@ -338,7 +337,7 @@ class FirmwareUpdateViewModel(
                 is DfuInternalState.Progress -> handleDfuProgress(dfuState)
 
                 is DfuInternalState.Error -> {
-                    val errorMsg = getString(Res.string.firmware_update_dfu_error, dfuState.message ?: "")
+                    val errorMsg = UiText.Resource(Res.string.firmware_update_dfu_error, dfuState.message ?: "")
                     _state.value = FirmwareUpdateState.Error(errorMsg)
                     tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                 }
@@ -349,29 +348,36 @@ class FirmwareUpdateViewModel(
                 }
 
                 is DfuInternalState.Aborted -> {
-                    val abortedMsg = getString(Res.string.firmware_update_dfu_aborted)
-                    _state.value = FirmwareUpdateState.Error(abortedMsg)
+                    _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_dfu_aborted))
                     tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                 }
 
                 is DfuInternalState.Starting -> {
-                    val msg = getString(Res.string.firmware_update_starting_dfu)
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(msg))
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu)),
+                        )
                 }
 
                 is DfuInternalState.EnablingDfuMode -> {
-                    val msg = getString(Res.string.firmware_update_enabling_dfu)
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(msg))
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu)),
+                        )
                 }
 
                 is DfuInternalState.Validating -> {
-                    val msg = getString(Res.string.firmware_update_validating)
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(msg))
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_validating)),
+                        )
                 }
 
                 is DfuInternalState.Disconnecting -> {
-                    val msg = getString(Res.string.firmware_update_disconnecting)
-                    _state.value = FirmwareUpdateState.Processing(ProgressState(msg))
+                    _state.value =
+                        FirmwareUpdateState.Processing(
+                            ProgressState(UiText.Resource(Res.string.firmware_update_disconnecting)),
+                        )
                 }
 
                 else -> {} // ignore connected/disconnected for UI noise
@@ -411,12 +417,10 @@ class FirmwareUpdateViewModel(
             } else {
                 partInfo
             }
-        viewModelScope.launch {
-            val statusMsg =
-                getString(Res.string.firmware_update_updating, "").replace(Regex(":?\\s*%1\\\$s%?"), "").trim()
-            val details = "$percentText ($metrics)"
-            _state.value = FirmwareUpdateState.Updating(ProgressState(statusMsg, progress, details))
-        }
+
+        val statusMsg = UiText.Resource(Res.string.firmware_update_updating)
+        val details = "$percentText ($metrics)"
+        _state.value = FirmwareUpdateState.Updating(ProgressState(statusMsg, progress, details))
     }
 
     private suspend fun verifyUpdateResult(address: String?) {
@@ -452,8 +456,7 @@ class FirmwareUpdateViewModel(
         val isBatteryLow = level in 1..MIN_BATTERY_LEVEL
 
         if (isBatteryLow) {
-            val batteryLowMsg = getString(Res.string.firmware_update_battery_low, level)
-            _state.value = FirmwareUpdateState.Error(batteryLowMsg)
+            _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_battery_low, level))
         }
         return !isBatteryLow
     }
@@ -466,12 +469,11 @@ class FirmwareUpdateViewModel(
         return if (hwModelInt != null) {
             deviceHardwareRepository.getDeviceHardwareByModel(hwModelInt, target).getOrElse {
                 _state.value =
-                    FirmwareUpdateState.Error(getString(Res.string.firmware_update_unknown_hardware, hwModelInt))
+                    FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_unknown_hardware, hwModelInt))
                 null
             }
         } else {
-            val nodeInfoMissing = getString(Res.string.firmware_update_node_info_missing)
-            _state.value = FirmwareUpdateState.Error(nodeInfoMissing)
+            _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_node_info_missing))
             null
         }
     }

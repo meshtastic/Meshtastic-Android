@@ -68,7 +68,6 @@ fun EntryProviderScope<NavKey>.nodesGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
     onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
-    nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit = { _, _ -> },
 ) {
     entry<NodesRoutes.NodesGraph> {
         AdaptiveNodeListScreen(
@@ -90,7 +89,7 @@ fun EntryProviderScope<NavKey>.nodesGraph(
         )
     }
 
-    nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink, nodeMapScreen)
+    nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink)
 }
 
 @Suppress("LongMethod")
@@ -98,7 +97,6 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
-    nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit,
 ) {
     entry<NodesRoutes.NodeDetailGraph> { args ->
         AdaptiveNodeListScreen(
@@ -122,7 +120,10 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         )
     }
 
-    entry<NodeDetailRoutes.NodeMap> { args -> nodeMapScreen(args.destNum) { backStack.removeLastOrNull() } }
+    entry<NodeDetailRoutes.NodeMap> { args ->
+        val mapScreen = org.meshtastic.core.ui.util.LocalNodeMapScreenProvider.current
+        mapScreen(args.destNum) { backStack.removeLastOrNull() }
+    }
 
     entry<NodeDetailRoutes.TracerouteLog> { args ->
         val metricsViewModel =
@@ -145,12 +146,8 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoutes.TracerouteMap> { args ->
-        TracerouteMapScreen(
-            destNum = args.destNum,
-            requestId = args.requestId,
-            logUuid = args.logUuid,
-            onNavigateUp = { backStack.removeLastOrNull() },
-        )
+        val tracerouteMapScreen = org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider.current
+        tracerouteMapScreen(args.destNum, args.requestId, args.logUuid) { backStack.removeLastOrNull() }
     }
 
     NodeDetailRoute.entries.forEach { routeInfo ->
@@ -193,8 +190,6 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
 }
 
 /** Expect declaration for the platform-specific traceroute map screen. */
-@Composable expect fun TracerouteMapScreen(destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit)
-
 enum class NodeDetailRoute(
     val title: StringResource,
     val routeClass: KClass<out Route>,

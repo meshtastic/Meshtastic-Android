@@ -89,6 +89,7 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.chirpy
@@ -713,7 +714,11 @@ private fun ProgressContent(
 
         Spacer(Modifier.height(24.dp))
 
-        Text(progressState.message, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(
+            progressState.message.asString(),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+        )
 
         val details = progressState.details
         if (details != null) {
@@ -829,7 +834,7 @@ private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
 }
 
 @Composable
-private fun ErrorState(error: String, onRetry: () -> Unit) {
+private fun ErrorState(error: UiText, onRetry: () -> Unit) {
     Icon(
         MeshtasticIcons.Dangerous,
         contentDescription = null,
@@ -838,7 +843,7 @@ private fun ErrorState(error: String, onRetry: () -> Unit) {
     )
     Spacer(Modifier.height(24.dp))
     Text(
-        stringResource(Res.string.firmware_update_error, error),
+        stringResource(Res.string.firmware_update_error, error.asString()),
         color = MaterialTheme.colorScheme.error,
         style = MaterialTheme.typography.bodyLarge,
         textAlign = TextAlign.Center,

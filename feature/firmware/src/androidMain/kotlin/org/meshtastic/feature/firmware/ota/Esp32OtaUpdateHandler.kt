@@ -36,6 +36,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
 import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_erasing
@@ -163,18 +164,19 @@ class Esp32OtaUpdateHandler(
         throw e
     } catch (e: OtaProtocolException.HashRejected) {
         Logger.e(e) { "ESP32 OTA: Hash rejected by device" }
-        val msg = getString(Res.string.firmware_update_hash_rejected)
-        updateState(FirmwareUpdateState.Error(msg))
+        updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_hash_rejected)))
         null
     } catch (e: OtaProtocolException) {
         Logger.e(e) { "ESP32 OTA: Protocol error" }
-        val msg = getString(Res.string.firmware_update_ota_failed, e.message ?: "")
-        updateState(FirmwareUpdateState.Error(msg))
+        updateState(
+            FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
+        )
         null
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         Logger.e(e) { "ESP32 OTA: Unexpected error" }
-        val msg = getString(Res.string.firmware_update_ota_failed, e.message ?: "")
-        updateState(FirmwareUpdateState.Error(msg))
+        updateState(
+            FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
+        )
         null
     }
 
@@ -186,12 +188,20 @@ class Esp32OtaUpdateHandler(
     ): String? {
         val downloadingMsg =
             getString(Res.string.firmware_update_downloading_percent, 0).replace(Regex(":?\\s*%1\\\$d%?"), "").trim()
-        updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
+        updateState(
+            FirmwareUpdateState.Downloading(
+                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
+            ),
+        )
         return firmwareRetriever.retrieveEsp32Firmware(release, hardware) { progress ->
             val percent = (progress * PERCENT_MAX).toInt()
             updateState(
                 FirmwareUpdateState.Downloading(
-                    ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
+                    ProgressState(
+                        message = UiText.DynamicString(downloadingMsg),
+                        progress = progress,
+                        details = "$percent%",
+                    ),
                 ),
             )
         }
@@ -234,11 +244,18 @@ class Esp32OtaUpdateHandler(
         val downloadingMsg =
             getString(Res.string.firmware_update_downloading_percent, 0).replace(Regex(":?\\s*%1\\\$d%?"), "").trim()
 
-        updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
+        updateState(
+            FirmwareUpdateState.Downloading(
+                ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
+            ),
+        )
 
         return if (firmwareUri != null) {
-            val extractingMsg = getString(Res.string.firmware_update_extracting)
-            updateState(FirmwareUpdateState.Processing(ProgressState(message = extractingMsg)))
+            updateState(
+                FirmwareUpdateState.Processing(
+                    ProgressState(message = UiText.Resource(Res.string.firmware_update_extracting)),
+                ),
+            )
             getFirmwareFromUri(firmwareUri)
         } else {
             val firmwareFile =
@@ -246,14 +263,21 @@ class Esp32OtaUpdateHandler(
                     val percent = (progress * PERCENT_MAX).toInt()
                     updateState(
                         FirmwareUpdateState.Downloading(
-                            ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
+                            ProgressState(
+                                message = UiText.DynamicString(downloadingMsg),
+                                progress = progress,
+                                details = "$percent%",
+                            ),
                         ),
                     )
                 }
 
             if (firmwareFile == null) {
-                val errorMsg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
-                updateState(FirmwareUpdateState.Error(errorMsg))
+                updateState(
+                    FirmwareUpdateState.Error(
+                        UiText.Resource(Res.string.firmware_update_not_found_in_release, hardware.displayName),
+                    ),
+                )
                 null
             } else {
                 firmwareFile
@@ -267,13 +291,17 @@ class Esp32OtaUpdateHandler(
         updateState: (FirmwareUpdateState) -> Unit,
     ): Boolean {
         // Show "waiting for reboot" state before first connection attempt
-        val waitingMsg = getString(Res.string.firmware_update_waiting_reboot)
-        updateState(FirmwareUpdateState.Processing(ProgressState(waitingMsg)))
+        updateState(
+            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
+        )
 
         for (i in 1..attempts) {
             try {
-                val connectingMsg = getString(Res.string.firmware_update_connecting_attempt, i, attempts)
-                updateState(FirmwareUpdateState.Processing(ProgressState(connectingMsg)))
+                updateState(
+                    FirmwareUpdateState.Processing(
+                        ProgressState(UiText.Resource(Res.string.firmware_update_connecting_attempt, i, attempts)),
+                    ),
+                )
                 transport.connect().getOrThrow()
                 return true
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -294,21 +322,25 @@ class Esp32OtaUpdateHandler(
     ) {
         val file = java.io.File(firmwareFile)
         // Step 5: Start OTA
-        val startingOtaMsg = getString(Res.string.firmware_update_starting_ota)
-        updateState(FirmwareUpdateState.Processing(ProgressState(startingOtaMsg)))
+        updateState(
+            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_ota))),
+        )
         transport
             .startOta(sizeBytes = file.length(), sha256Hash = sha256Hash) { status ->
                 when (status) {
                     OtaHandshakeStatus.Erasing -> {
-                        val erasingMsg = getString(Res.string.firmware_update_erasing)
-                        updateState(FirmwareUpdateState.Processing(ProgressState(erasingMsg)))
+                        updateState(
+                            FirmwareUpdateState.Processing(
+                                ProgressState(UiText.Resource(Res.string.firmware_update_erasing)),
+                            ),
+                        )
                     }
                 }
             }
             .getOrThrow()
 
         // Step 6: Stream
-        val uploadingMsg = getString(Res.string.firmware_update_uploading)
+        val uploadingMsg = UiText.Resource(Res.string.firmware_update_uploading)
         updateState(FirmwareUpdateState.Updating(ProgressState(uploadingMsg, 0f)))
         val firmwareData = file.readBytes()
         val chunkSize =

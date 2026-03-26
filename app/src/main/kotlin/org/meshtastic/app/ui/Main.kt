@@ -18,40 +18,14 @@
 
 package org.meshtastic.app.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,28 +34,16 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import co.touchlab.kermit.Logger
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.navigation.TopLevelDestination
-import org.meshtastic.core.navigation.navigateTopLevel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
-import org.meshtastic.core.resources.connected
-import org.meshtastic.core.resources.connecting
-import org.meshtastic.core.resources.device_sleeping
-import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.must_update
 import org.meshtastic.core.ui.component.MeshtasticAppShell
-import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.navigation.icon
 import org.meshtastic.core.ui.viewmodel.UIViewModel
-import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
@@ -93,154 +55,20 @@ import org.meshtastic.feature.settings.radio.channel.channelsGraph
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerViewModel = koinViewModel()) {
+fun MainScreen(uIViewModel: UIViewModel = koinViewModel()) {
     val backStack = rememberNavBackStack(MeshtasticNavSavedStateConfig, NodesRoutes.NodesGraph as NavKey)
 
-    LaunchedEffect(uIViewModel) {
-        uIViewModel.navigationDeepLink.collect { uri ->
-            val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
-            org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri)?.let { navKeys ->
-                backStack.clear()
-                backStack.addAll(navKeys)
-            }
-        }
-    }
-
-    val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
-    val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
-
     AndroidAppVersionCheck(uIViewModel)
-    val navSuiteType =
-        NavigationSuiteScaffoldDefaults.navigationSuiteType(
-            currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true),
-        )
-    val currentKey = backStack.lastOrNull()
-    val topLevelDestination = TopLevelDestination.fromNavKey(currentKey)
-
-    // State for determining the connection type icon to display
-    val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
 
     MeshtasticAppShell(
         backStack = backStack,
         uiViewModel = uIViewModel,
         hostModifier = Modifier.safeDrawingPadding().padding(bottom = 16.dp),
     ) {
-        NavigationSuiteScaffold(
+        org.meshtastic.core.ui.component.MeshtasticNavigationSuite(
+            backStack = backStack,
+            uiViewModel = uIViewModel,
             modifier = Modifier.fillMaxSize(),
-            navigationSuiteItems = {
-                TopLevelDestination.entries.forEach { destination ->
-                    val isSelected = destination == topLevelDestination
-                    val isConnectionsRoute = destination == TopLevelDestination.Connections
-                    item(
-                        icon = {
-                            TooltipBox(
-                                positionProvider =
-                                TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                                tooltip = {
-                                    PlainTooltip {
-                                        Text(
-                                            if (isConnectionsRoute) {
-                                                when (connectionState) {
-                                                    ConnectionState.Connected -> stringResource(Res.string.connected)
-                                                    ConnectionState.Connecting -> stringResource(Res.string.connecting)
-                                                    ConnectionState.DeviceSleep ->
-                                                        stringResource(Res.string.device_sleeping)
-                                                    ConnectionState.Disconnected ->
-                                                        stringResource(Res.string.disconnected)
-                                                }
-                                            } else {
-                                                stringResource(destination.label)
-                                            },
-                                        )
-                                    }
-                                },
-                                state = rememberTooltipState(),
-                            ) {
-                                if (isConnectionsRoute) {
-                                    org.meshtastic.feature.connections.ui.components.AnimatedConnectionsNavIcon(
-                                        connectionState = connectionState,
-                                        deviceType = DeviceType.fromAddress(selectedDevice),
-                                        meshActivityFlow = uIViewModel.meshActivity,
-                                        colorScheme = colorScheme,
-                                    )
-                                } else {
-                                    BadgedBox(
-                                        badge = {
-                                            if (destination == TopLevelDestination.Conversations) {
-                                                // Keep track of the last non-zero count for display during exit
-                                                // animation
-                                                var lastNonZeroCount by remember {
-                                                    mutableIntStateOf(unreadMessageCount)
-                                                }
-                                                if (unreadMessageCount > 0) {
-                                                    lastNonZeroCount = unreadMessageCount
-                                                }
-                                                AnimatedVisibility(
-                                                    visible = unreadMessageCount > 0,
-                                                    enter = scaleIn() + fadeIn(),
-                                                    exit = scaleOut() + fadeOut(),
-                                                ) {
-                                                    Badge { Text(lastNonZeroCount.toString()) }
-                                                }
-                                            }
-                                        },
-                                    ) {
-                                        Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
-                                            Icon(
-                                                imageVector = destination.icon,
-                                                contentDescription = stringResource(destination.label),
-                                                tint =
-                                                if (isSelectedState) {
-                                                    colorScheme.primary
-                                                } else {
-                                                    LocalContentColor.current
-                                                },
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        selected = isSelected,
-                        label = {
-                            Text(
-                                text = stringResource(destination.label),
-                                modifier =
-                                if (navSuiteType == NavigationSuiteType.ShortNavigationBarCompact) {
-                                    Modifier.width(1.dp)
-                                        .height(1.dp) // hide on phone - min 1x1 or talkback won't see it.
-                                } else {
-                                    Modifier
-                                },
-                            )
-                        },
-                        onClick = {
-                            val isRepress = destination == topLevelDestination
-                            if (isRepress) {
-                                when (destination) {
-                                    TopLevelDestination.Nodes -> {
-                                        val onNodesList = currentKey is NodesRoutes.Nodes
-                                        if (!onNodesList) {
-                                            backStack.navigateTopLevel(destination.route)
-                                        }
-                                        uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
-                                    }
-                                    TopLevelDestination.Conversations -> {
-                                        val onConversationsList = currentKey is ContactsRoutes.Contacts
-                                        if (!onConversationsList) {
-                                            backStack.navigateTopLevel(destination.route)
-                                        }
-                                        uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
-                                    }
-                                    else -> Unit
-                                }
-                            } else {
-                                backStack.navigateTopLevel(destination.route)
-                            }
-                        },
-                    )
-                }
-            },
         ) {
             val provider =
                 entryProvider<NavKey> {
@@ -249,14 +77,6 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
                         backStack = backStack,
                         scrollToTopEvents = uIViewModel.scrollToTopEventFlow,
                         onHandleDeepLink = uIViewModel::handleDeepLink,
-                        nodeMapScreen = { destNum, onNavigateUp ->
-                            val vm =
-                                org.koin.compose.viewmodel.koinViewModel<
-                                    org.meshtastic.feature.map.node.NodeMapViewModel,
-                                    >()
-                            vm.setDestNum(destNum)
-                            org.meshtastic.app.map.node.NodeMapScreen(vm, onNavigateUp = onNavigateUp)
-                        },
                     )
                     mapGraph(backStack)
                     channelsGraph(backStack)

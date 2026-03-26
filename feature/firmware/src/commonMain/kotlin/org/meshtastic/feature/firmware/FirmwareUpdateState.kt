@@ -19,6 +19,7 @@ package org.meshtastic.feature.firmware
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.resources.UiText
 
 /**
  * Represents the progress of a long-running firmware update task.
@@ -27,7 +28,11 @@ import org.meshtastic.core.model.DeviceHardware
  * @property progress A value between 0.0 and 1.0 representing completion percentage.
  * @property details Optional high-frequency detail text (e.g., "1.2 MiB/s, 45%").
  */
-data class ProgressState(val message: String = "", val progress: Float = 0f, val details: String? = null)
+data class ProgressState(
+    val message: UiText = UiText.DynamicString(""),
+    val progress: Float = 0f,
+    val details: String? = null,
+)
 
 sealed interface FirmwareUpdateState {
     data object Idle : FirmwareUpdateState
@@ -53,7 +58,7 @@ sealed interface FirmwareUpdateState {
 
     data object VerificationFailed : FirmwareUpdateState
 
-    data class Error(val error: String) : FirmwareUpdateState
+    data class Error(val error: UiText) : FirmwareUpdateState
 
     data object Success : FirmwareUpdateState
 

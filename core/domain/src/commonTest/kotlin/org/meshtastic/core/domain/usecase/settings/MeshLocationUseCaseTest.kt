@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,32 +16,31 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import dev.mokkery.mock
-import dev.mokkery.verify
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.testing.FakeRadioController
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class MeshLocationUseCaseTest {
 
-    private lateinit var radioController: RadioController
+    private lateinit var radioController: FakeRadioController
     private lateinit var useCase: MeshLocationUseCase
 
     @BeforeTest
     fun setUp() {
-        radioController = mock(dev.mokkery.MockMode.autofill)
+        radioController = FakeRadioController()
         useCase = MeshLocationUseCase(radioController)
     }
 
     @Test
     fun `startProvidingLocation calls radioController`() {
         useCase.startProvidingLocation()
-        verify { radioController.startProvideLocation() }
+        assertTrue(radioController.startProvideLocationCalled)
     }
 
     @Test
     fun `stopProvidingLocation calls radioController`() {
         useCase.stopProvidingLocation()
-        verify { radioController.stopProvideLocation() }
+        assertTrue(radioController.stopProvideLocationCalled)
     }
 }

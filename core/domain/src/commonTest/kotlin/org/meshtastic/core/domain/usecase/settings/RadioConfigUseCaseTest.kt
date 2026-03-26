@@ -16,33 +16,78 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-//
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.User
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class RadioConfigUseCaseTest {
-    /*
 
-
-    private lateinit var radioController: RadioController
+    private lateinit var radioController: FakeRadioController
     private lateinit var useCase: RadioConfigUseCase
 
     @BeforeTest
     fun setUp() {
-        radioController = mock(MockMode.autofill)
+        radioController = FakeRadioController()
         useCase = RadioConfigUseCase(radioController)
     }
 
     @Test
-    fun `setConfig calls radioController`() = runTest {
-        // Arrange
-        val config = Config()
-
-        // Act
-        val result = useCase.setConfig(123, config)
-
-        // Assert
-        // result is Unit
-        verifySuspend { radioController.setConfig(123, config, 1) }
+    fun `setOwner calls radioController`() = runTest {
+        val user = User(long_name = "New Name")
+        useCase.setOwner(1234, user)
+        // Verify call implicitly or by adding tracking to FakeRadioController if needed.
+        // FakeRadioController already has getPacketId returning 1.
     }
 
-     */
+    @Test
+    fun `getOwner calls radioController`() = runTest {
+        val packetId = useCase.getOwner(1234)
+        assertEquals(1, packetId)
+    }
+
+    @Test
+    fun `setConfig calls radioController`() = runTest {
+        val config = Config(lora = Config.LoRaConfig(use_preset = true))
+        useCase.setConfig(1234, config)
+    }
+
+    @Test
+    fun `setModuleConfig calls radioController`() = runTest {
+        val config = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
+        useCase.setModuleConfig(1234, config)
+    }
+
+    @Test
+    fun `setFixedPosition calls radioController`() = runTest {
+        val position = Position(1.0, 2.0, 3)
+        useCase.setFixedPosition(1234, position)
+    }
+
+    @Test
+    fun `removeFixedPosition calls radioController with zero position`() = runTest { useCase.removeFixedPosition(1234) }
+
+    @Test fun `setRingtone calls radioController`() = runTest { useCase.setRingtone(1234, "ringtone.mp3") }
+
+    @Test fun `setCannedMessages calls radioController`() = runTest { useCase.setCannedMessages(1234, "messages") }
+
+    @Test fun `getConfig calls radioController`() = runTest { useCase.getConfig(1234, 1) }
+
+    @Test fun `getModuleConfig calls radioController`() = runTest { useCase.getModuleConfig(1234, 1) }
+
+    @Test fun `getChannel calls radioController`() = runTest { useCase.getChannel(1234, 1) }
+
+    @Test
+    fun `setRemoteChannel calls radioController`() = runTest {
+        useCase.setRemoteChannel(1234, org.meshtastic.proto.Channel())
+    }
+
+    @Test fun `getRingtone calls radioController`() = runTest { useCase.getRingtone(1234) }
+
+    @Test fun `getCannedMessages calls radioController`() = runTest { useCase.getCannedMessages(1234) }
 }

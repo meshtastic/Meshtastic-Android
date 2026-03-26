@@ -35,7 +35,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeshtasticUri
-import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
@@ -44,6 +43,7 @@ import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
+import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
@@ -84,7 +84,7 @@ class UIViewModel(
     val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
-    private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)
+    private val _navigationDeepLink = MutableSharedFlow<List<androidx.navigation3.runtime.NavKey>>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
     /**
@@ -100,8 +100,9 @@ class UIViewModel(
         val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
 
         // Try navigation routing first
-        if (org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri) != null) {
-            _navigationDeepLink.tryEmit(uri)
+        val navKeys = org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri)
+        if (navKeys != null) {
+            _navigationDeepLink.tryEmit(navKeys)
             return
         }
 
@@ -126,6 +127,8 @@ class UIViewModel(
 
     /** Emits events for mesh network send/receive activity. */
     val meshActivity: Flow<MeshActivity> = radioInterfaceService.meshActivity
+
+    val currentDeviceAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
 
     private val _scrollToTopEventFlow =
         MutableSharedFlow<ScrollToTopEvent>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)

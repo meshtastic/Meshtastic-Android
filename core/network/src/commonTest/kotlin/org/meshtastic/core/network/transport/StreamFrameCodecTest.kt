@@ -155,6 +155,26 @@ class StreamFrameCodecTest {
     }
 
     @Test
+    fun `frameAndSend produces correct header for 1-byte payload`() = runTest {
+        val payload = byteArrayOf(0x42.toByte())
+        val sentBytes = mutableListOf<ByteArray>()
+
+        codec.frameAndSend(payload, sendBytes = { sentBytes.add(it) })
+
+        // First sent bytes are the 4-byte header, second is the payload
+        assertEquals(2, sentBytes.size)
+        val header = sentBytes[0]
+        assertEquals(4, header.size)
+        assertEquals(0x94.toByte(), header[0])
+        assertEquals(0xc3.toByte(), header[1])
+        assertEquals(0x00.toByte(), header[2])
+        assertEquals(0x01.toByte(), header[3])
+
+        val sentPayload = sentBytes[1]
+        assertEquals(payload.toList(), sentPayload.toList())
+    }
+
+    @Test
     fun `WAKE_BYTES is four START1 bytes`() {
         assertEquals(4, StreamFrameCodec.WAKE_BYTES.size)
         StreamFrameCodec.WAKE_BYTES.forEach { assertEquals(0x94.toByte(), it) }

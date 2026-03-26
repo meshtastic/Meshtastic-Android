@@ -29,7 +29,9 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
 @Single
-class BootloaderWarningDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
+open class BootloaderWarningDataSource(
+    @Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>,
+) {
 
     private object PreferencesKeys {
         val DISMISSED_BOOTLOADER_ADDRESSES = stringPreferencesKey("dismissed-bootloader-addresses")
@@ -51,10 +53,10 @@ class BootloaderWarningDataSource(@Named("CorePreferencesDataStore") private val
         }
 
     /** Returns true if the bootloader warning has been dismissed for the given [address]. */
-    suspend fun isDismissed(address: String): Boolean = dismissedAddressesFlow.first().contains(address)
+    open suspend fun isDismissed(address: String): Boolean = dismissedAddressesFlow.first().contains(address)
 
     /** Marks the bootloader warning as dismissed for the given [address]. */
-    suspend fun dismiss(address: String) {
+    open suspend fun dismiss(address: String) {
         val current = dismissedAddressesFlow.first()
         if (current.contains(address)) return
 

@@ -23,8 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.navigation.DeepLinkRouter
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
@@ -42,12 +40,9 @@ fun MeshtasticAppShell(
     content: @Composable () -> Unit,
 ) {
     LaunchedEffect(uiViewModel) {
-        uiViewModel.navigationDeepLink.collect { uri ->
-            val commonUri = CommonUri.parse(uri.uriString)
-            DeepLinkRouter.route(commonUri)?.let { navKeys ->
-                backStack.clear()
-                backStack.addAll(navKeys)
-            }
+        uiViewModel.navigationDeepLink.collect { navKeys ->
+            backStack.clear()
+            backStack.addAll(navKeys)
         }
     }
 

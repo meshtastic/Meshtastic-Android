@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,41 +16,33 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.meshtastic.core.testing.FakeAnalyticsPrefs
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class ToggleAnalyticsUseCaseTest {
-    /*
 
-
-    private lateinit var analyticsPrefs: AnalyticsPrefs
+    private lateinit var analyticsPrefs: FakeAnalyticsPrefs
     private lateinit var useCase: ToggleAnalyticsUseCase
 
     @BeforeTest
     fun setUp() {
+        analyticsPrefs = FakeAnalyticsPrefs()
         useCase = ToggleAnalyticsUseCase(analyticsPrefs)
     }
 
     @Test
-    fun `invoke toggles analytics from false to true`() {
-        // Arrange
-        every { analyticsPrefs.analyticsAllowed.value } returns false
-
-        // Act
+    fun `invoke toggles from false to true`() {
+        analyticsPrefs.setAnalyticsAllowed(false)
         useCase()
-
-        // Assert
-        verify { analyticsPrefs.setAnalyticsAllowed(true) }
+        assertEquals(true, analyticsPrefs.analyticsAllowed.value)
     }
 
     @Test
-    fun `invoke toggles analytics from true to false`() {
-        // Arrange
-        every { analyticsPrefs.analyticsAllowed.value } returns true
-
-        // Act
+    fun `invoke toggles from true to false`() {
+        analyticsPrefs.setAnalyticsAllowed(true)
         useCase()
-
-        // Assert
-        verify { analyticsPrefs.setAnalyticsAllowed(false) }
+        assertEquals(false, analyticsPrefs.analyticsAllowed.value)
     }
-
-     */
 }

@@ -151,6 +151,8 @@ internal fun Project.configureKmpTestDependencies() {
                 implementation(libs.library("kotest-assertions"))
                 implementation(libs.library("kotest-property"))
                 implementation(libs.library("turbine"))
+                implementation(libs.library("robolectric"))
+                implementation(libs.library("androidx-test-core"))
             }
 
             // Configure jvmTest if it exists

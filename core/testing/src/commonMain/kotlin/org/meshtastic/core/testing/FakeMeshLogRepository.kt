@@ -26,13 +26,26 @@ import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 
+/** A test double for [MeshLogRepository] that provides in-memory log storage. */
 @Suppress("TooManyFunctions")
-class FakeMeshLogRepository : MeshLogRepository {
-    private val logsFlow = MutableStateFlow<List<MeshLog>>(emptyList())
+class FakeMeshLogRepository :
+    BaseFake(),
+    MeshLogRepository {
+    private val logsFlow = mutableStateFlow<List<MeshLog>>(emptyList())
     val currentLogs: List<MeshLog>
         get() = logsFlow.value
 
-    var deleteLogsOlderThanCalledDays: Int? = null
+    var lastDeletedOlderThan: Int? = null
+        private set
+
+    var deleteAllCalled = false
+        private set
+
+    override fun reset() {
+        super.reset()
+        lastDeletedOlderThan = null
+        deleteAllCalled = false
+    }
 
     override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
 
@@ -59,6 +72,7 @@ class FakeMeshLogRepository : MeshLogRepository {
 
     override suspend fun deleteAll() {
         logsFlow.value = emptyList()
+        deleteAllCalled = true
     }
 
     override suspend fun deleteLog(uuid: String) {
@@ -70,7 +84,7 @@ class FakeMeshLogRepository : MeshLogRepository {
     }
 
     override suspend fun deleteLogsOlderThan(retentionDays: Int) {
-        deleteLogsOlderThanCalledDays = retentionDays
+        lastDeletedOlderThan = retentionDays
     }
 
     fun setLogs(logs: List<MeshLog>) {

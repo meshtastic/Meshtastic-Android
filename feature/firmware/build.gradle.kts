@@ -62,6 +62,11 @@ kotlin {
             implementation(libs.markdown.renderer.android)
         }
 
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(libs.turbine)
+        }
+
         val androidHostTest by getting {
             dependencies {
                 implementation(libs.junit)

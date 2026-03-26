@@ -17,6 +17,8 @@
 package org.meshtastic.feature.messaging.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -27,6 +29,7 @@ import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.QuickChatScreen
 import org.meshtastic.feature.messaging.QuickChatViewModel
+import org.meshtastic.feature.messaging.ui.contact.AdaptiveContactsScreen
 import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 import org.meshtastic.feature.messaging.ui.sharing.ShareScreen
 
@@ -73,9 +76,44 @@ fun EntryProviderScope<NavKey>.contactsGraph(
 }
 
 @Composable
-expect fun ContactsEntryContent(
+fun ContactsEntryContent(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     initialContactKey: String? = null,
     initialMessage: String = "",
-)
+) {
+    val uiViewModel: org.meshtastic.core.ui.viewmodel.UIViewModel = koinViewModel()
+    val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+    val contactsViewModel = koinViewModel<ContactsViewModel>()
+
+    AdaptiveContactsScreen(
+        backStack = backStack,
+        contactsViewModel = contactsViewModel,
+        messageViewModel = koinViewModel(), // Ignored by custom detail pane below
+        scrollToTopEvents = scrollToTopEvents,
+        sharedContactRequested = sharedContactRequested,
+        requestChannelSet = requestChannelSet,
+        onHandleDeepLink = uiViewModel::handleDeepLink,
+        onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
+        onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
+        initialContactKey = initialContactKey,
+        initialMessage = initialMessage,
+        detailPaneCustom = { contactKey ->
+            val messageViewModel: org.meshtastic.feature.messaging.MessageViewModel =
+                koinViewModel(key = "messages-$contactKey")
+            messageViewModel.setContactKey(contactKey)
+
+            org.meshtastic.feature.messaging.MessageScreen(
+                contactKey = contactKey,
+                message = if (contactKey == initialContactKey) initialMessage else "",
+                viewModel = messageViewModel,
+                navigateToNodeDetails = {
+                    backStack.add(org.meshtastic.core.navigation.NodesRoutes.NodeDetailGraph(it))
+                },
+                navigateToQuickChatOptions = { backStack.add(org.meshtastic.core.navigation.ContactsRoutes.QuickChat) },
+                onNavigateBack = { backStack.removeLastOrNull() },
+            )
+        },
+    )
+}

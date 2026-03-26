@@ -712,6 +712,10 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
     var currentLayer by remember { mutableStateOf<com.google.maps.android.data.Layer?>(null) }
 
     MapEffect(layerItem.id, layerItem.isRefreshing) { map ->
+        // Cleanup old layer if we're reloading
+        currentLayer?.safeRemoveLayerFromMap()
+        currentLayer = null
+
         val inputStream = mapViewModel.getInputStreamFromUri(layerItem) ?: return@MapEffect
         val layer =
             try {
@@ -727,7 +731,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
 
         layer?.let {
             if (layerItem.isVisible) {
-                it.addLayerToMap()
+                it.safeAddLayerToMap()
             }
             currentLayer = it
         }
@@ -735,7 +739,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
 
     DisposableEffect(layerItem.id) {
         onDispose {
-            currentLayer?.removeLayerFromMap()
+            currentLayer?.safeRemoveLayerFromMap()
             currentLayer = null
         }
     }
@@ -745,10 +749,30 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
     LaunchedEffect(layerItem.isVisible) {
         val layer = currentLayer ?: return@LaunchedEffect
         if (layerItem.isVisible) {
-            if (!layer.isLayerOnMap) layer.addLayerToMap()
+            layer.safeAddLayerToMap()
         } else {
-            if (layer.isLayerOnMap) layer.removeLayerFromMap()
+            layer.safeRemoveLayerFromMap()
         }
+    }
+}
+
+private fun com.google.maps.android.data.Layer.safeRemoveLayerFromMap() {
+    try {
+        removeLayerFromMap()
+    } catch (e: Exception) {
+        // Log it and ignore. This specifically handles a NullPointerException in
+        // KmlRenderer.hasNestedContainers which can occur when disposing layers.
+        Logger.withTag("MapView").e(e) { "Error removing map layer" }
+    }
+}
+
+private fun com.google.maps.android.data.Layer.safeAddLayerToMap() {
+    try {
+        if (!isLayerOnMap) {
+            addLayerToMap()
+        }
+    } catch (e: Exception) {
+        Logger.withTag("MapView").e(e) { "Error adding map layer" }
     }
 }
 
