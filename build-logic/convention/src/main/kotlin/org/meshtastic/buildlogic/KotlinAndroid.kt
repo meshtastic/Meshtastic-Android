@@ -188,6 +188,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                                 "-Xcontext-parameters",
                                 "-Xannotation-default-target=param-property",
                                 "-Xskip-prerelease-check",
+                                "-Xjvm-default=all",
                             )
                         }
                     }
@@ -212,6 +213,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 "-Xcontext-parameters",
                 "-Xannotation-default-target=param-property",
                 "-Xskip-prerelease-check",
+                "-Xjvm-default=all",
             )
         }
     }
