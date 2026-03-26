@@ -19,6 +19,11 @@ on:
         description: 'The channel to create a release for or promote to'
         required: true
         type: string
+      build_desktop:
+        description: 'Whether to build the desktop distribution'
+        required: false
+        type: boolean
+        default: false
     secrets:
       GSERVICES:
         required: true
@@ -270,6 +275,7 @@ jobs:
           subject-path: app/build/outputs/apk/fdroid/release/*.apk
 
   release-desktop:
+    if: ${{ inputs.build_desktop }}
     runs-on: ${{ matrix.os }}
     needs: [prepare-build-info]
     environment: Release
@@ -334,6 +340,7 @@ jobs:
           if-no-files-found: ignore
 
   github-release:
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-24.04-arm
     needs: [prepare-build-info, release-google, release-fdroid, release-desktop]
     env:
