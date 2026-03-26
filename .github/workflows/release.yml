@@ -108,6 +108,11 @@ jobs:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
+      GRADLE_OPTS: >-
+        -Dorg.gradle.jvmargs=-Xmx4g -XX:+UseParallelGC -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+        -Dorg.gradle.vfs.watch=false
+        -Dorg.gradle.workers.max=4
+        -Dkotlin.daemon.jvm.options=-Xmx2g -XX:+UseParallelGC
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -200,6 +205,11 @@ jobs:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
+      GRADLE_OPTS: >-
+        -Dorg.gradle.jvmargs=-Xmx4g -XX:+UseParallelGC -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
+        -Dorg.gradle.vfs.watch=false
+        -Dorg.gradle.workers.max=4
+        -Dkotlin.daemon.jvm.options=-Xmx2g -XX:+UseParallelGC
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

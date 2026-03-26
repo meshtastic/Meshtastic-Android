@@ -67,7 +67,8 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        mavenLocal()
+        // Only enable mavenLocal for local JitPack testing; never in CI.
+        if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
         google()
         mavenCentral()
         maven {

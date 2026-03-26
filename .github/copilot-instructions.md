@@ -141,6 +141,9 @@ Always run commands in the following order to ensure reliability. Do not attempt
   - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). These run only shell scripts or GitHub API calls and benefit from ARM runners' shorter queue times.
   - **`ubuntu-24.04`** — Gradle-heavy jobs (CI host-check, android-check, release builds, Dokka, CodeQL, publish, dependency-submission). Pinned for reproducibility; avoid `ubuntu-latest` to prevent breakage when GitHub rolls the alias forward.
   - **Desktop release matrix** — `[macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]` for cross-platform native packaging (DMG, MSI, deb/rpm/AppImage for x64 and ARM).
+- **CI JVM tuning:** `gradle.properties` is tuned for local dev (8g heap, 4g Kotlin daemon). CI workflows override via `GRADLE_OPTS` env var to fit the 7GB RAM budget of standard runners: `-Xmx4g` Gradle heap, `-Xmx2g` Kotlin daemon, VFS watching disabled, workers capped at 4.
+- **KMP Smoke Compile:** Use `./gradlew kmpSmokeCompile` instead of listing individual module compile tasks. The `kmpSmokeCompile` lifecycle task (registered in `RootConventionPlugin`) auto-discovers all KMP modules and depends on their `compileKotlinJvm` + `compileKotlinIosSimulatorArm64` tasks.
+- **`mavenLocal()` gated:** The `mavenLocal()` repository is disabled by default to prevent CI cache poisoning. For local JitPack testing, pass `-PuseMavenLocal` to Gradle.
 - **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent the agent from getting stuck in an interactive prompt.
 - **Text Search:** Prefer using `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.
 
