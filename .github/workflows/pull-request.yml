@@ -8,6 +8,9 @@ on:
       - 'docs/**'
       - '.gitignore'
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -113,6 +116,7 @@ jobs:
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-latest
+    permissions: {}
     needs: [check-changes, verify-check-changes-filter, validate-and-build]
     if: always()
     steps:

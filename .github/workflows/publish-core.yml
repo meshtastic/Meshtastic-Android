@@ -38,14 +38,18 @@ jobs:
 
       - name: Configure Version
         id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          VERSION_SUFFIX: ${{ inputs.version_suffix }}
         run: |
-          if [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "VERSION_NAME=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            echo "VERSION_NAME=$RELEASE_TAG" >> $GITHUB_ENV
           else
              # Use a timestamp-based version for manual/branch builds to avoid collisions
              # or use the base version + suffix
              BASE_VERSION=$(grep "VERSION_NAME_BASE" config.properties | cut -d'=' -f2)
-             echo "VERSION_NAME=${BASE_VERSION}${{ inputs.version_suffix }}" >> $GITHUB_ENV
+             echo "VERSION_NAME=${BASE_VERSION}${VERSION_SUFFIX}" >> $GITHUB_ENV
           fi
 
       - name: Publish to GitHub Packages

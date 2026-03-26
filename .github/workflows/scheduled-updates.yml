@@ -144,6 +144,7 @@ jobs:
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-latest
+    permissions: {}
     needs:
         - update_assets
     if: always()
