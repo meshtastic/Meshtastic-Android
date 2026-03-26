@@ -155,13 +155,18 @@ Remaining to be extracted from `:app` or unified in `commonMain`:
 
 | Dependency | Version | Why |
 |---|---|---|
-| Compose Multiplatform | `1.11.0-alpha04` | Required for JetBrains Adaptive `1.3.0-alpha06` |
-| Koin | `4.2.0-RC2` | Nav3 + K2 compiler plugin support |
-| JetBrains Lifecycle | `2.10.0-beta01` | Multiplatform ViewModel/lifecycle |
-| JetBrains Navigation 3 | `1.1.0-alpha04` | Multiplatform navigation |
+| Compose Multiplatform | `1.11.0-beta01` | Required for JetBrains Adaptive `1.3.0-alpha06` and Material 3 `1.11.0-alpha05` |
+| Compose Multiplatform Material 3 | `1.11.0-alpha05` | Material 3 components including `NavigationSuiteScaffold` |
+| Koin | `4.2.0` | Nav3 + K2 compiler plugin support |
+| JetBrains Lifecycle | `2.11.0-alpha02` | Multiplatform ViewModel/lifecycle; includes `lifecycle-viewmodel-navigation3` for entry-scoped ViewModels |
+| JetBrains Navigation 3 | `1.1.0-beta01` | Multiplatform navigation with Scene architecture, `NavEntry.metadata`, transition specs |
+| JetBrains Navigation Event | `1.1.0-alpha01` | KMP `NavigationBackHandler` for predictive back |
+| JetBrains Material 3 Adaptive | `1.3.0-alpha06` | `ListDetailPaneScaffold`, `ThreePaneScaffold`, Large/XL breakpoints |
 | Kable BLE | `0.42.0` | Provides fully multiplatform BLE support |
 
 **Policy:** Stable by default. RC when it unlocks KMP functionality. Alpha only behind hard abstraction seams. Do not downgrade CMP or Koin — they enable critical KMP features.
+
+> See [`decisions/navigation3-api-alignment-2026-03.md`](./decisions/navigation3-api-alignment-2026-03.md) for the full Navigation 3 API surface audit and Scene architecture adoption plan.
 
 ## References
 
