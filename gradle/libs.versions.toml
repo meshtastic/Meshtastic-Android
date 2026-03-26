@@ -31,7 +31,8 @@ testRetry = "1.6.4"
 turbine = "1.2.1"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0-alpha04"
+compose-multiplatform = "1.11.0-beta01"
+compose-multiplatform-material3 = "1.11.0-alpha05"
 jetbrains-adaptive = "1.3.0-alpha06"
 
 # Google
@@ -90,9 +91,10 @@ androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", versi
 androidx-glance-appwidget-preview = { module = "androidx.glance:glance-appwidget-preview", version.ref = "glance" }
 androidx-glance-preview = { module = "androidx.glance:glance-preview", version.ref = "glance" }
 androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
-# Android-only lifecycle (no KMP equivalent — use only in androidMain)
+# Android-only lifecycle — no KMP equivalent (use only in androidMain / androidHostTest)
+# lifecycle-runtime-ktx dropped: KTX extensions merged into lifecycle-runtime since 2.8.0;
+# use jetbrains-lifecycle-runtime (JB KMP fork) instead.
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
-androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
 # JetBrains KMP lifecycle (use in commonMain and androidMain)
 jetbrains-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "jetbrains-lifecycle" }
@@ -131,8 +133,8 @@ compose-multiplatform-ui = { module = "org.jetbrains.compose.ui:ui", version.ref
 compose-multiplatform-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-multiplatform" }
 compose-multiplatform-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
 compose-multiplatform-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
-compose-multiplatform-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform" }
-compose-multiplatform-materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version = "1.7.3" }
+compose-multiplatform-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform-material3" }
+compose-multiplatform-materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version = "1.7.3" } # last published; deprecated upstream
 
 # JetBrains Material 3 Adaptive (multiplatform — Android, Desktop, iOS)
 jetbrains-compose-material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "jetbrains-adaptive" }
@@ -288,7 +290,6 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
-dependency-guard = { id = "com.dropbox.dependency-guard", version.ref = "dependency-guard" }
 
 # Meshtastic
 meshtastic-analytics = { id = "meshtastic.analytics" }

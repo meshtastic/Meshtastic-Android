@@ -43,7 +43,7 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.androidx.lifecycle.process)
-            implementation(libs.androidx.lifecycle.runtime.ktx)
+            implementation(libs.jetbrains.lifecycle.runtime)
         }
 
         commonTest.dependencies {
