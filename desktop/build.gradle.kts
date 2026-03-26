@@ -33,7 +33,10 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.JETBRAINS)
+    }
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.add("-Xjvm-default=all")
