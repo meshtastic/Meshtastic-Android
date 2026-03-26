@@ -42,7 +42,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`, `BleRadioInterface`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
 | `core:navigation` | Shared navigation keys/routes for Navigation 3. |
-| `core:ui` | Shared Compose UI components (`AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
+| `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
 | `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
 | `core:api` | Public AIDL/API integration module for external clients. |
 | `core:prefs` | KMP preferences layer built on DataStore abstractions. |

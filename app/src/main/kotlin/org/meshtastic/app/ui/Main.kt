@@ -26,19 +26,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.navigation3.ViewModelStoreNavEntryDecorator
-import androidx.lifecycle.viewmodel.navigation3.ViewModelStoreNavEntryDecoratorDefaults
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.SaveableStateHolderNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.ui.NavDisplay
 import co.touchlab.kermit.Logger
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
@@ -49,6 +42,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
 import org.meshtastic.core.resources.must_update
 import org.meshtastic.core.ui.component.MeshtasticAppShell
+import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
@@ -90,24 +84,9 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel()) {
                     settingsGraph(backStack)
                     firmwareGraph(backStack)
                 }
-            val saveableStateHolder = rememberSaveableStateHolder()
-            val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
-            val removeOnPop = ViewModelStoreNavEntryDecoratorDefaults.removeViewModelStoreOnPop()
-            NavDisplay(
+            MeshtasticNavDisplay(
                 backStack = backStack,
                 entryProvider = provider,
-                entryDecorators =
-                listOf(
-                    remember(saveableStateHolder) {
-                        SaveableStateHolderNavEntryDecorator<NavKey>(saveableStateHolder)
-                    },
-                    remember(viewModelStoreOwner) {
-                        ViewModelStoreNavEntryDecorator<NavKey>(
-                            viewModelStore = viewModelStoreOwner.viewModelStore,
-                            removeViewModelStoreOnPop = removeOnPop,
-                        )
-                    },
-                ),
                 modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
             )
         }

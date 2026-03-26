@@ -79,31 +79,36 @@ This means the project **cannot** currently use the official M3 Adaptive Scene b
 
 ### P0: Add `ViewModelStoreNavEntryDecorator` to NavDisplay (high-value, low-risk)
 
-Gives each backstack entry its own ViewModel scope. ViewModels are automatically cleared when their entry is popped. This is the primary intended usage of `lifecycle-viewmodel-navigation3`.
+**Status:** ✅ Adopted (2026-03-26). Each backstack entry now gets its own `ViewModelStoreOwner` via `rememberViewModelStoreNavEntryDecorator()`. ViewModels obtained via `koinViewModel()` are automatically cleared when their entry is popped. Encapsulated in `MeshtasticNavDisplay` in `core:ui/commonMain`.
 
 **Impact:** Fixes subtle ViewModel leaks where popped entries retain their ViewModel in the Activity/Window store. Eliminates the need for manual `key = "metrics-$destNum"` ViewModel keying patterns over time.
 
-**Files:** `app/Main.kt`, `desktop/DesktopMainScreen.kt`, `core/ui/build.gradle.kts` (dependency).
-
 ### P1: Add default NavDisplay transitions (medium-value, low-risk)
 
-Currently there are zero animations when navigating between entries. The `NavDisplay` supports `transitionSpec`, `popTransitionSpec`, and `predictivePopTransitionSpec` parameters for default transitions (slide, fade, etc.).
+**Status:** ✅ Adopted (2026-03-26). A shared 350 ms crossfade (`fadeIn` + `fadeOut`) is applied for both forward and pop navigation via `MeshtasticNavDisplay`. This replaces the library's platform defaults (Android: 700 ms fade; Desktop: no animation) with a faster, consistent transition.
 
-**Impact:** Immediate UX improvement on both Android and Desktop with ~10 lines of code.
-
-**Files:** `app/Main.kt`, `desktop/DesktopMainScreen.kt` (or a shared composable wrapper in `core:ui`).
+**Impact:** Immediate UX improvement on both Android and Desktop. Desktop now has visible navigation transitions.
 
 ### P2: Adopt `DialogSceneStrategy` for navigation-driven dialogs (medium-value, medium-risk)
 
-Routes that render as dialogs (e.g., confirmation dialogs, share sheet) can use `entry<T>(metadata = DialogSceneStrategy.dialog()) { ... }` instead of manual `Dialog` composable wrapping. This keeps them on the backstack with proper predictive-back support.
+**Status:** ✅ Adopted (2026-03-26). `MeshtasticNavDisplay` includes `DialogSceneStrategy` in `sceneStrategies` before `SinglePaneSceneStrategy`. Feature modules can now use `entry<T>(metadata = DialogSceneStrategy.dialog()) { ... }` to render entries as overlay Dialogs with proper backstack lifecycle and predictive-back support.
 
-**Impact:** Cleaner dialog lifecycle management. Currently low urgency since most dialogs use `AlertHost`.
+**Impact:** Cleaner dialog lifecycle management available for future dialog routes. Existing dialogs via `AlertHost` are unaffected.
+
+### Consolidation: `MeshtasticNavDisplay` shared wrapper
+
+**Status:** ✅ Adopted (2026-03-26). A new `MeshtasticNavDisplay` composable in `core:ui/commonMain` encapsulates the standard `NavDisplay` configuration:
+- Entry decorators: `rememberSaveableStateHolderNavEntryDecorator` + `rememberViewModelStoreNavEntryDecorator`
+- Scene strategies: `DialogSceneStrategy` + `SinglePaneSceneStrategy`
+- Transition specs: 350 ms crossfade (forward + pop)
+
+Both `app/Main.kt` and `desktop/DesktopMainScreen.kt` now call `MeshtasticNavDisplay` instead of configuring `NavDisplay` directly. The `lifecycle-viewmodel-navigation3` dependency was moved from host modules to `core:ui`.
 
 ### P3: Per-entry transition metadata (low-value until Scene adoption)
 
 Individual entries can declare custom transitions via `entry<T>(metadata = NavDisplay.transitionSpec { ... })`. This is most useful when different route types should animate differently (e.g., detail screens slide in, settings screens fade).
 
-**Impact:** Polish improvement. Low priority until default transitions (P1) are established.
+**Impact:** Polish improvement. Low priority until default transitions (P1) are established. Now unblocked by P1 adoption.
 
 ### Deferred: Scene-based multi-pane layout
 
@@ -111,7 +116,9 @@ The `MaterialListDetailSceneStrategy` is not available in the JetBrains adaptive
 
 ## Decision
 
-Adopt **P0** (ViewModel scoping) and **P1** (default transitions) now. Defer P2/P3 and Scene-based multi-pane until the JetBrains adaptive fork adds `MaterialListDetailSceneStrategy`.
+~~Adopt **P0** (ViewModel scoping) and **P1** (default transitions) now. Defer P2/P3 and Scene-based multi-pane until the JetBrains adaptive fork adds `MaterialListDetailSceneStrategy`.~~
+
+**Updated 2026-03-26:** P0, P1, and P2 adopted and consolidated into `MeshtasticNavDisplay` in `core:ui/commonMain`. P3 (per-entry transitions) is available for incremental adoption by feature modules. Scene-based multi-pane remains deferred.
 
 ## References
 
