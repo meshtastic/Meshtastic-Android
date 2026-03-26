@@ -19,7 +19,6 @@ package org.meshtastic.desktop.ui
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,7 +33,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
 
 /**
- * Desktop main screen — Navigation 3 shell with a persistent [NavigationRail] and shared [MeshtasticNavDisplay].
+ * Desktop main screen — Navigation 3 shell with adaptive navigation and shared [MeshtasticNavDisplay].
  *
  * Uses the same shared routes from `core:navigation` and the same `MeshtasticNavDisplay` + `entryProvider` pattern as
  * the Android app, proving the shared backstack architecture works across targets.
