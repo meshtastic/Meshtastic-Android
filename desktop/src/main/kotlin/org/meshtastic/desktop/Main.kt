@@ -321,7 +321,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
             // re-reads Locale.current and all stringResource() calls update.  Unlike key(), this
             // preserves remembered state (including the navigation backstack).
             CompositionLocalProvider(LocalAppLocale provides localePref) {
-                AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(backStack) }
+                AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel) }
             }
         }
     }

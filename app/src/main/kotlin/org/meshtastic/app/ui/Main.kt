@@ -19,15 +19,12 @@
 package org.meshtastic.app.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -43,6 +40,7 @@ import org.meshtastic.core.resources.app_too_old
 import org.meshtastic.core.resources.must_update
 import org.meshtastic.core.ui.component.MeshtasticAppShell
 import org.meshtastic.core.ui.component.MeshtasticNavDisplay
+import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
@@ -52,38 +50,36 @@ import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MainScreen(uIViewModel: UIViewModel = koinViewModel()) {
+fun MainScreen() {
+    val viewModel: UIViewModel = koinViewModel()
     val backStack = rememberNavBackStack(MeshtasticNavSavedStateConfig, NodesRoutes.NodesGraph as NavKey)
 
-    AndroidAppVersionCheck(uIViewModel)
+    AndroidAppVersionCheck(viewModel)
 
     MeshtasticAppShell(
         backStack = backStack,
-        uiViewModel = uIViewModel,
-        hostModifier = Modifier.safeDrawingPadding().padding(bottom = 16.dp),
+        uiViewModel = viewModel,
+        hostModifier = Modifier,
     ) {
-        org.meshtastic.core.ui.component.MeshtasticNavigationSuite(
+        MeshtasticNavigationSuite(
             backStack = backStack,
-            uiViewModel = uIViewModel,
+            uiViewModel = viewModel,
             modifier = Modifier.fillMaxSize(),
         ) {
-            val provider =
-                entryProvider<NavKey> {
-                    contactsGraph(backStack, uIViewModel.scrollToTopEventFlow)
-                    nodesGraph(
-                        backStack = backStack,
-                        scrollToTopEvents = uIViewModel.scrollToTopEventFlow,
-                        onHandleDeepLink = uIViewModel::handleDeepLink,
-                    )
-                    mapGraph(backStack)
-                    channelsGraph(backStack)
-                    connectionsGraph(backStack)
-                    settingsGraph(backStack)
-                    firmwareGraph(backStack)
-                }
+            val provider = entryProvider<NavKey> {
+                contactsGraph(backStack, viewModel.scrollToTopEventFlow)
+                nodesGraph(
+                    backStack = backStack,
+                    scrollToTopEvents = viewModel.scrollToTopEventFlow,
+                    onHandleDeepLink = viewModel::handleDeepLink,
+                )
+                mapGraph(backStack)
+                channelsGraph(backStack)
+                connectionsGraph(backStack)
+                settingsGraph(backStack)
+                firmwareGraph(backStack)
+            }
             MeshtasticNavDisplay(
                 backStack = backStack,
                 entryProvider = provider,
@@ -99,7 +95,6 @@ private fun AndroidAppVersionCheck(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
 
-    // Check if the device is running an old app version
     LaunchedEffect(connectionState, myNodeInfo) {
         if (connectionState == ConnectionState.Connected) {
             myNodeInfo?.let { info ->

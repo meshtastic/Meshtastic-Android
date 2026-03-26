@@ -16,11 +16,9 @@
  */
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.meshtastic.core.navigation.NodeDetailRoutes
@@ -36,7 +34,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 fun MeshtasticAppShell(
     backStack: NavBackStack<NavKey>,
     uiViewModel: UIViewModel,
-    hostModifier: Modifier = Modifier.padding(bottom = 16.dp),
+    hostModifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     LaunchedEffect(uiViewModel) {
