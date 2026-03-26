@@ -53,6 +53,9 @@ import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
+import org.meshtastic.feature.node.compass.CompassViewModel
+import org.meshtastic.feature.node.detail.NodeDetailScreen
+import org.meshtastic.feature.node.detail.NodeDetailViewModel
 import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
 import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
@@ -76,8 +79,6 @@ fun EntryProviderScope<NavKey>.nodesGraph(
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
-            onNavigate = { backStack.add(it) },
-            onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
             onHandleDeepLink = onHandleDeepLink,
         )
     }
@@ -86,8 +87,6 @@ fun EntryProviderScope<NavKey>.nodesGraph(
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
-            onNavigate = { backStack.add(it) },
-            onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
             onHandleDeepLink = onHandleDeepLink,
         )
     }
@@ -106,21 +105,21 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
-            initialNodeId = args.destNum,
-            onNavigate = { backStack.add(it) },
-            onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
             onHandleDeepLink = onHandleDeepLink,
         )
     }
 
     entry<NodesRoutes.NodeDetail>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
-        AdaptiveNodeListScreen(
-            backStack = backStack,
-            scrollToTopEvents = scrollToTopEvents,
-            initialNodeId = args.destNum,
+        val nodeDetailViewModel: NodeDetailViewModel = koinViewModel()
+        val compassViewModel: CompassViewModel = koinViewModel()
+        val destNum = args.destNum ?: 0 // Handle nullable destNum if needed
+        NodeDetailScreen(
+            nodeId = destNum,
+            viewModel = nodeDetailViewModel,
+            compassViewModel = compassViewModel,
+            navigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
             onNavigate = { backStack.add(it) },
-            onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
-            onHandleDeepLink = onHandleDeepLink,
+            onNavigateUp = { backStack.removeLastOrNull() },
         )
     }
 

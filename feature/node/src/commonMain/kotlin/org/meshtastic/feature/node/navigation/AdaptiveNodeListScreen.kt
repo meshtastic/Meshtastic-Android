@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.node.list.NodeListScreen
 import org.meshtastic.feature.node.list.NodeListViewModel
@@ -32,9 +31,6 @@ import org.meshtastic.feature.node.list.NodeListViewModel
 fun AdaptiveNodeListScreen(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
-    initialNodeId: Int? = null,
-    onNavigate: (Route) -> Unit = {},
-    onNavigateToMessages: (String) -> Unit = {},
     onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
     val nodeListViewModel: NodeListViewModel = koinViewModel()

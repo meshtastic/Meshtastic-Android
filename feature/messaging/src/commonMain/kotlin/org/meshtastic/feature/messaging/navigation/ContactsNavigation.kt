@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.ContactsRoutes
+import org.meshtastic.core.navigation.replaceLast
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.QuickChatScreen
 import org.meshtastic.feature.messaging.QuickChatViewModel
@@ -50,11 +51,20 @@ fun EntryProviderScope<NavKey>.contactsGraph(
     }
 
     entry<ContactsRoutes.Messages>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
-        ContactsEntryContent(
-            backStack = backStack,
-            scrollToTopEvents = scrollToTopEvents,
-            initialContactKey = args.contactKey,
-            initialMessage = args.message,
+        val contactKey = args.contactKey
+        val messageViewModel: org.meshtastic.feature.messaging.MessageViewModel =
+            koinViewModel(key = "messages-$contactKey")
+        messageViewModel.setContactKey(contactKey)
+
+        org.meshtastic.feature.messaging.MessageScreen(
+            contactKey = contactKey,
+            message = args.message,
+            viewModel = messageViewModel,
+            navigateToNodeDetails = {
+                backStack.add(org.meshtastic.core.navigation.NodesRoutes.NodeDetailGraph(it))
+            },
+            navigateToQuickChatOptions = { backStack.add(org.meshtastic.core.navigation.ContactsRoutes.QuickChat) },
+            onNavigateBack = { backStack.removeLastOrNull() },
         )
     }
 
@@ -63,10 +73,8 @@ fun EntryProviderScope<NavKey>.contactsGraph(
         val viewModel = koinViewModel<ContactsViewModel>()
         ShareScreen(
             viewModel = viewModel,
-            onConfirm = {
-                // Navigation 3 - replace Top with Messages manually, but for now we just pop and add
-                backStack.removeLastOrNull()
-                backStack.add(ContactsRoutes.Messages(it, message))
+            onConfirm = { contactKey ->
+                backStack.replaceLast(ContactsRoutes.Messages(contactKey, message))
             },
             onNavigateUp = { backStack.removeLastOrNull() },
         )
@@ -82,8 +90,6 @@ fun EntryProviderScope<NavKey>.contactsGraph(
 fun ContactsEntryContent(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
-    initialContactKey: String? = null,
-    initialMessage: String = "",
 ) {
     val uiViewModel: org.meshtastic.core.ui.viewmodel.UIViewModel = koinViewModel()
     val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
@@ -93,30 +99,11 @@ fun ContactsEntryContent(
     AdaptiveContactsScreen(
         backStack = backStack,
         contactsViewModel = contactsViewModel,
-        messageViewModel = koinViewModel(), // Ignored by custom detail pane below
         scrollToTopEvents = scrollToTopEvents,
         sharedContactRequested = sharedContactRequested,
         requestChannelSet = requestChannelSet,
         onHandleDeepLink = uiViewModel::handleDeepLink,
         onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
         onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
-        initialContactKey = initialContactKey,
-        initialMessage = initialMessage,
-        detailPaneCustom = { contactKey ->
-            val messageViewModel: org.meshtastic.feature.messaging.MessageViewModel =
-                koinViewModel(key = "messages-$contactKey")
-            messageViewModel.setContactKey(contactKey)
-
-            org.meshtastic.feature.messaging.MessageScreen(
-                contactKey = contactKey,
-                message = if (contactKey == initialContactKey) initialMessage else "",
-                viewModel = messageViewModel,
-                navigateToNodeDetails = {
-                    backStack.add(org.meshtastic.core.navigation.NodesRoutes.NodeDetailGraph(it))
-                },
-                navigateToQuickChatOptions = { backStack.add(org.meshtastic.core.navigation.ContactsRoutes.QuickChat) },
-                onNavigateBack = { backStack.removeLastOrNull() },
-            )
-        },
     )
 }

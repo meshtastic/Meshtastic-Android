@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.meshtastic.core.navigation.NodeDetailRoutes
+import org.meshtastic.core.navigation.replaceAll
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
@@ -39,8 +40,7 @@ fun MeshtasticAppShell(
 ) {
     LaunchedEffect(uiViewModel) {
         uiViewModel.navigationDeepLink.collect { navKeys ->
-            backStack.clear()
-            backStack.addAll(navKeys)
+            backStack.replaceAll(navKeys)
         }
     }
 
