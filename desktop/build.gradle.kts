@@ -34,7 +34,10 @@ plugins {
 
 kotlin {
     jvmToolchain(17)
-    compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-Xjvm-default=all")
+    }
 }
 
 // Exclude generated Compose resource files from detekt analysis

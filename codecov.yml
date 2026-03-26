@@ -41,19 +41,24 @@ component_management:
         target: auto
         threshold: 1%
   individual_components:
-    - name: Core
+    - component_id: core
+      name: Core
       paths:
         - core/**
-    - name: Features
+    - component_id: features
+      name: Features
       paths:
         - feature/**
-    - name: App
+    - component_id: app
+      name: App
       paths:
         - app/**
-    - name: Desktop
+    - component_id: desktop
+      name: Desktop
       paths:
         - desktop/**
-    - name: Example
+    - component_id: example
+      name: Example
       paths:
         - mesh_service_example/**
 
