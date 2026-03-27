@@ -81,21 +81,11 @@ jobs:
       - name: Fix file permissions
         run: sudo chown -R $USER:$USER .
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          token: ${{ github.token }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
-          add-job-summary: always
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: 'false'
 
       - name: Update Graphs
         run: ./gradlew graphUpdate

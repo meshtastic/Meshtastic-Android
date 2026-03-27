@@ -8,7 +8,7 @@ For execution-focused recipes, see `docs/agent-playbooks/README.md`.
 Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, decentralized mesh networks. The goal is to decouple business logic from the Android framework, enabling future expansion to iOS and other platforms while maintaining a high-performance native Android experience.
 
 - **Language:** Kotlin (primary), AIDL.
-- **Build System:** Gradle (Kotlin DSL). JDK 17 is REQUIRED.
+- **Build System:** Gradle (Kotlin DSL). JDK 21 is REQUIRED.
 - **Target SDK:** API 36. Min SDK: API 26 (Android 8.0).
 - **Flavors:**
   - `fdroid`: Open source only, no tracking/analytics.
@@ -96,7 +96,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 ## 4. Execution Protocol
 
 ### A. Environment Setup
-1. **JDK 17 MUST be used** to prevent Gradle sync/build failures.
+1. **JDK 21 MUST be used** to prevent Gradle sync/build failures.
 2. **Secrets:** You must copy `secrets.defaults.properties` to `local.properties`:
    ```properties
    MAPS_API_KEY=dummy_key
@@ -125,7 +125,7 @@ Always run commands in the following order to ensure reliability. Do not attempt
 ./gradlew testFdroidDebug testGoogleDebug # Flavor-specific unit tests
 ./gradlew lintFdroidDebug lintGoogleDebug # Flavor-specific lint checks
 ```
-*Note: If testing Compose UI on the JVM (Robolectric) with Java 17, pin your tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
+*Note: If testing Compose UI on the JVM (Robolectric) with Java 21, pin your tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 
 **CI workflow conventions (GitHub Actions):**
 - Reusable CI is split into a host job and an Android matrix job in `.github/workflows/reusable-check.yml`.
@@ -151,6 +151,6 @@ Update documentation continuously as part of the same change. If you modify arch
 ## 5. Troubleshooting
 -   **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.
 -   **Missing Secrets:** Check `local.properties`.
--   **JDK Version:** JDK 17 is required.
+-   **JDK Version:** JDK 21 is required.
 -   **Configuration Cache:** Add `--no-configuration-cache` flag if cache-related issues persist.
 -   **Koin Injection Failures:** Verify the KMP component is included in `app` root module wiring (`AppKoinModule`).
