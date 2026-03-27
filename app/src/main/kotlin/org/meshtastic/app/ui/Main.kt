@@ -28,13 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import co.touchlab.kermit.Logger
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
 import org.meshtastic.core.resources.must_update
@@ -53,12 +52,17 @@ import org.meshtastic.feature.settings.radio.channel.channelsGraph
 @Composable
 fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
-    val backStack = rememberNavBackStack(MeshtasticNavSavedStateConfig, NodesRoutes.NodesGraph as NavKey)
+    val multiBackstack = rememberMultiBackstack(NodesRoutes.NodesGraph)
+    val backStack = multiBackstack.activeBackStack
 
     AndroidAppVersionCheck(viewModel)
 
-    MeshtasticAppShell(backStack = backStack, uiViewModel = viewModel, hostModifier = Modifier) {
-        MeshtasticNavigationSuite(backStack = backStack, uiViewModel = viewModel, modifier = Modifier.fillMaxSize()) {
+    MeshtasticAppShell(multiBackstack = multiBackstack, uiViewModel = viewModel, hostModifier = Modifier) {
+        MeshtasticNavigationSuite(
+            multiBackstack = multiBackstack,
+            uiViewModel = viewModel,
+            modifier = Modifier.fillMaxSize()
+        ) {
             val provider =
                 entryProvider<NavKey> {
                     contactsGraph(backStack, viewModel.scrollToTopEventFlow)
@@ -74,7 +78,7 @@ fun MainScreen() {
                     firmwareGraph(backStack)
                 }
             MeshtasticNavDisplay(
-                backStack = backStack,
+                multiBackstack = multiBackstack,
                 entryProvider = provider,
                 modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
             )

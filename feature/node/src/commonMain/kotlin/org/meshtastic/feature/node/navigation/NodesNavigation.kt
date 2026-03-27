@@ -129,8 +129,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoutes.TracerouteLog>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
-        val metricsViewModel =
-            koinViewModel<MetricsViewModel>(key = "metrics-${args.destNum}") { parametersOf(args.destNum) }
+        val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(args.destNum) }
         metricsViewModel.setNodeId(args.destNum)
 
         TracerouteLogScreen(
@@ -186,7 +185,7 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
 ) {
     entry<R>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val destNum = getDestNum(args)
-        val metricsViewModel = koinViewModel<MetricsViewModel>(key = "metrics-$destNum") { parametersOf(destNum) }
+        val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(destNum) }
         metricsViewModel.setNodeId(destNum)
 
         routeInfo.screenComposable(metricsViewModel) { backStack.removeLastOrNull() }

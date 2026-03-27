@@ -152,6 +152,7 @@ dependencies {
     implementation(projects.core.di)
     implementation(projects.core.model)
     implementation(projects.core.navigation)
+    implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
     implementation(projects.core.repository)
     implementation(projects.core.domain)
     implementation(projects.core.data)
@@ -189,6 +190,7 @@ dependencies {
 
     // Navigation 3 (JetBrains fork — multiplatform)
     implementation(libs.jetbrains.navigation3.ui)
+    implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
     implementation(libs.jetbrains.lifecycle.viewmodel.compose)
     implementation(libs.jetbrains.lifecycle.runtime.compose)
 

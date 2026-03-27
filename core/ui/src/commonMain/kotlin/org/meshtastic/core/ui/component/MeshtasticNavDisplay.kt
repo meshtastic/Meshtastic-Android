@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -39,12 +40,10 @@ import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
+import org.meshtastic.core.navigation.MultiBackstack
 
 /**
  * Duration in milliseconds for the shared crossfade transition between navigation scenes.
- *
- * This is faster than the library's Android default (700 ms) and matches Material 3 motion guidance for medium-emphasis
- * container transforms (~300-400 ms).
  */
 private const val TRANSITION_DURATION_MS = 350
 
@@ -52,30 +51,31 @@ private const val TRANSITION_DURATION_MS = 350
  * Shared [NavDisplay] wrapper that configures the standard Meshtastic entry decorators, scene strategies, and
  * transition animations for all platform hosts.
  *
- * **Entry decorators** (applied to every backstack entry):
- * - [rememberSaveableStateHolderNavEntryDecorator] — saveable state per entry.
- * - [rememberViewModelStoreNavEntryDecorator] — entry-scoped `ViewModelStoreOwner` so that ViewModels obtained via
- *   `koinViewModel()` are automatically cleared when the entry is popped.
- *
- * **Scene strategies** (evaluated in order):
- * - [DialogSceneStrategy] — entries annotated with `metadata = DialogSceneStrategy.dialog()` render as overlay
- *   [Dialog][androidx.compose.ui.window.Dialog] windows with proper backstack lifecycle.
- * - [androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy] — entries annotated with `listPane()`,
- *   `detailPane()`, or `extraPane()` render in adaptive list-detail layout on wider screens.
- * - [androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy] — entries annotated with
- *   `mainPane()`, `supportingPane()`, or `extraPane()` render in adaptive supporting pane layout.
- * - [SinglePaneSceneStrategy] — default single-pane fallback.
- *
- * **Transitions**: A uniform 350 ms crossfade for both forward and pop navigation.
- *
- * @param backStack the navigation backstack, typically from [rememberNavBackStack].
- * @param entryProvider the entry provider built from feature navigation graphs.
- * @param modifier modifier applied to the underlying [NavDisplay].
+ * This version supports multiple backstacks by accepting a [MultiBackstack] state holder.
+ */
+@Composable
+fun MeshtasticNavDisplay(
+    multiBackstack: MultiBackstack,
+    entryProvider: (key: NavKey) -> NavEntry<NavKey>,
+    modifier: Modifier = Modifier,
+) {
+    val backStack = multiBackstack.activeBackStack
+    MeshtasticNavDisplay(
+        backStack = backStack,
+        onBack = { multiBackstack.goBack() },
+        entryProvider = entryProvider,
+        modifier = modifier
+    )
+}
+
+/**
+ * Shared [NavDisplay] wrapper for a single backstack.
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun MeshtasticNavDisplay(
-    backStack: List<NavKey>,
+    backStack: NavBackStack<NavKey>,
+    onBack: (() -> Unit)? = null,
     entryProvider: (key: NavKey) -> NavEntry<NavKey>,
     modifier: Modifier = Modifier,
 ) {
@@ -111,11 +111,23 @@ fun MeshtasticNavDisplay(
                 )
             },
         )
+
+    val saveableDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
+    val vmStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
+    
+    val activeDecorators = remember(backStack, saveableDecorator, vmStoreDecorator) {
+        listOf(saveableDecorator, vmStoreDecorator)
+    }
+
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider,
-        entryDecorators =
-        listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
+        entryDecorators = activeDecorators,
+        onBack = onBack ?: {
+             if (backStack.size > 1) {
+                 backStack.removeLastOrNull()
+             }
+        },
         sceneStrategies =
         listOf(
             DialogSceneStrategy(),
@@ -130,8 +142,7 @@ fun MeshtasticNavDisplay(
 }
 
 /**
- * Shared crossfade [ContentTransform] used for both forward and pop navigation. Returns a lambda compatible with
- * [NavDisplay]'s `transitionSpec` / `popTransitionSpec` parameters.
+ * Shared crossfade [ContentTransform] used for both forward and pop navigation.
  */
 private fun meshtasticTransitionSpec(): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
     ContentTransform(

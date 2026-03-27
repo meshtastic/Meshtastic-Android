@@ -24,8 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.ui.component.MeshtasticAppShell
 import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
@@ -34,26 +33,29 @@ import org.meshtastic.desktop.navigation.desktopNavGraph
 
 /** Desktop main screen — uses shared navigation components. */
 @Composable
-fun DesktopMainScreen(uiViewModel: UIViewModel) {
-    val backStack =
-        androidx.navigation3.runtime.rememberNavBackStack(
-            MeshtasticNavSavedStateConfig,
-            NodesRoutes.NodesGraph as NavKey,
-        )
-
+fun DesktopMainScreen(
+    uiViewModel: UIViewModel,
+    multiBackstack: MultiBackstack,
+) {
+    val backStack = multiBackstack.activeBackStack
+    
     Surface(modifier = Modifier.fillMaxSize()) {
         MeshtasticAppShell(
-            backStack = backStack,
+            multiBackstack = multiBackstack,
             uiViewModel = uiViewModel,
             hostModifier = Modifier.padding(bottom = 24.dp),
         ) {
             MeshtasticNavigationSuite(
-                backStack = backStack,
+                multiBackstack = multiBackstack,
                 uiViewModel = uiViewModel,
                 modifier = Modifier.fillMaxSize(),
             ) {
                 val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel) }
-                MeshtasticNavDisplay(backStack = backStack, entryProvider = provider, modifier = Modifier.fillMaxSize())
+                MeshtasticNavDisplay(
+                    multiBackstack = multiBackstack,
+                    entryProvider = provider,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }

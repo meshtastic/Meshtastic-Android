@@ -22,6 +22,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,15 +46,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.navigation.ContactsRoutes
+import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
-import org.meshtastic.core.navigation.navigateTopLevel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
@@ -65,14 +65,13 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 /**
  * Shared adaptive navigation shell using [NavigationSuiteScaffold].
  *
- * Automatically renders a [NavigationBar][androidx.compose.material3.NavigationBar] on compact screens and a
- * [NavigationRail][androidx.compose.material3.NavigationRail] on medium/expanded widths, without manual branching. Uses
- * [currentWindowAdaptiveInfo] with large-width breakpoint support for Desktop and External Display targets.
+ * This implementation uses the [MultiBackstack] state holder to manage independent histories for each tab,
+ * aligning with Navigation 3 best practices for state preservation during tab switching.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeshtasticNavigationSuite(
-    backStack: NavBackStack<NavKey>,
+    multiBackstack: MultiBackstack,
     uiViewModel: UIViewModel,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -82,20 +81,11 @@ fun MeshtasticNavigationSuite(
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
     val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
-    val currentKey = backStack.lastOrNull()
-    val rootKey = backStack.firstOrNull()
-    val topLevelDestination = TopLevelDestination.fromNavKey(rootKey)
+    
+    val currentTabRoute = multiBackstack.currentTabRoute
+    val topLevelDestination = TopLevelDestination.fromNavKey(currentTabRoute)
 
-    val onNavigate = { destination: TopLevelDestination ->
-        handleNavigation(destination, topLevelDestination, currentKey, backStack, uiViewModel)
-    }
-
-    // Cap the layout type at NavigationRail for expanded widths — we don't want a permanent
-    // NavigationDrawer. NavigationSuiteScaffoldDefaults resolves COMPACT → NavigationBar,
-    // MEDIUM/EXPANDED → NavigationRail already; passing the custom adaptiveInfo ensures the
-    // large-width (1200dp+) breakpoints are respected.
     val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo).coerceNavigationType()
-
     val showLabels = layoutType == NavigationSuiteType.NavigationRail
 
     NavigationSuiteScaffold(
@@ -103,13 +93,16 @@ fun MeshtasticNavigationSuite(
         layoutType = layoutType,
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
+                val isSelected = destination == topLevelDestination
                 item(
-                    selected = destination == topLevelDestination,
-                    onClick = { onNavigate(destination) },
+                    selected = isSelected,
+                    onClick = {
+                        handleNavigation(destination, topLevelDestination, multiBackstack, uiViewModel)
+                    },
                     icon = {
                         NavigationIconContent(
                             destination = destination,
-                            isSelected = destination == topLevelDestination,
+                            isSelected = isSelected,
                             connectionState = connectionState,
                             unreadMessageCount = unreadMessageCount,
                             selectedDevice = selectedDevice,
@@ -126,7 +119,7 @@ fun MeshtasticNavigationSuite(
             }
         },
     ) {
-        content()
+        Row { content() }
     }
 }
 
@@ -142,17 +135,17 @@ private fun NavigationSuiteType.coerceNavigationType(): NavigationSuiteType = wh
 private fun handleNavigation(
     destination: TopLevelDestination,
     topLevelDestination: TopLevelDestination?,
-    currentKey: NavKey?,
-    backStack: NavBackStack<NavKey>,
+    multiBackstack: MultiBackstack,
     uiViewModel: UIViewModel,
 ) {
     val isRepress = destination == topLevelDestination
     if (isRepress) {
+        val currentKey = multiBackstack.activeBackStack.lastOrNull()
         when (destination) {
             TopLevelDestination.Nodes -> {
                 val onNodesList = currentKey is NodesRoutes.NodesGraph || currentKey is NodesRoutes.Nodes
                 if (!onNodesList) {
-                    backStack.navigateTopLevel(destination.route)
+                    multiBackstack.navigateTopLevel(destination.route)
                 } else {
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                 }
@@ -161,19 +154,19 @@ private fun handleNavigation(
                 val onConversationsList =
                     currentKey is ContactsRoutes.ContactsGraph || currentKey is ContactsRoutes.Contacts
                 if (!onConversationsList) {
-                    backStack.navigateTopLevel(destination.route)
+                    multiBackstack.navigateTopLevel(destination.route)
                 } else {
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                 }
             }
             else -> {
                 if (currentKey != destination.route) {
-                    backStack.navigateTopLevel(destination.route)
+                    multiBackstack.navigateTopLevel(destination.route)
                 }
             }
         }
     } else {
-        backStack.navigateTopLevel(destination.route)
+        multiBackstack.navigateTopLevel(destination.route)
     }
 }
 
