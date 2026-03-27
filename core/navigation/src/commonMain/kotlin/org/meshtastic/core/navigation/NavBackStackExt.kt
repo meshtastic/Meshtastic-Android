@@ -36,8 +36,7 @@ fun MutableList<NavKey>.navigateTopLevel(route: NavKey) {
 }
 
 /**
- * Replaces the last entry in the back stack with the given route.
- * If the back stack is empty, it simply adds the route.
+ * Replaces the last entry in the back stack with the given route. If the back stack is empty, it simply adds the route.
  */
 fun MutableList<NavKey>.replaceLast(route: NavKey) {
     if (isNotEmpty()) {
@@ -50,8 +49,8 @@ fun MutableList<NavKey>.replaceLast(route: NavKey) {
 }
 
 /**
- * Replaces the entire back stack with the given routes in a way that minimizes structural changes
- * and prevents the back stack from temporarily becoming empty.
+ * Replaces the entire back stack with the given routes in a way that minimizes structural changes and prevents the back
+ * stack from temporarily becoming empty.
  */
 fun MutableList<NavKey>.replaceAll(routes: List<NavKey>) {
     if (routes.isEmpty()) {

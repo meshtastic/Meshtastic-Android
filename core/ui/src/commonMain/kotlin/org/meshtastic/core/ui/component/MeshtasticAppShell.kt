@@ -38,11 +38,7 @@ fun MeshtasticAppShell(
     hostModifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    LaunchedEffect(uiViewModel) {
-        uiViewModel.navigationDeepLink.collect { navKeys ->
-            backStack.replaceAll(navKeys)
-        }
-    }
+    LaunchedEffect(uiViewModel) { uiViewModel.navigationDeepLink.collect { navKeys -> backStack.replaceAll(navKeys) } }
 
     MeshtasticCommonAppSetup(
         uiViewModel = uiViewModel,

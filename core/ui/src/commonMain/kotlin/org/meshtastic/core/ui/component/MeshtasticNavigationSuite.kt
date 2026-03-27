@@ -116,7 +116,8 @@ fun MeshtasticNavigationSuite(
                             uiViewModel = uiViewModel,
                         )
                     },
-                    label = if (showLabels) {
+                    label =
+                    if (showLabels) {
                         { Text(stringResource(destination.label)) }
                     } else {
                         null

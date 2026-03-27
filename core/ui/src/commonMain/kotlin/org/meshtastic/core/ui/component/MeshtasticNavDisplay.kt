@@ -21,11 +21,16 @@ import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -55,10 +60,10 @@ private const val TRANSITION_DURATION_MS = 350
  * **Scene strategies** (evaluated in order):
  * - [DialogSceneStrategy] — entries annotated with `metadata = DialogSceneStrategy.dialog()` render as overlay
  *   [Dialog][androidx.compose.ui.window.Dialog] windows with proper backstack lifecycle.
- * - [androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy] — entries annotated with `listPane()`, `detailPane()`, or `extraPane()` render in adaptive list-detail
- *   layout on wider screens.
- * - [androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy] — entries annotated with `mainPane()`, `supportingPane()`, or `extraPane()` render in adaptive
- *   supporting pane layout.
+ * - [androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy] — entries annotated with `listPane()`,
+ *   `detailPane()`, or `extraPane()` render in adaptive list-detail layout on wider screens.
+ * - [androidx.compose.material3.adaptive.navigation3.SupportingPaneSceneStrategy] — entries annotated with
+ *   `mainPane()`, `supportingPane()`, or `extraPane()` render in adaptive supporting pane layout.
  * - [SinglePaneSceneStrategy] — default single-pane fallback.
  *
  * **Transitions**: A uniform 350 ms crossfade for both forward and pop navigation.
@@ -74,18 +79,49 @@ fun MeshtasticNavDisplay(
     entryProvider: (key: NavKey) -> NavEntry<NavKey>,
     modifier: Modifier = Modifier,
 ) {
-    val listDetailSceneStrategy = rememberListDetailSceneStrategy<NavKey>()
-    val supportingPaneSceneStrategy = rememberSupportingPaneSceneStrategy<NavKey>()
+    val listDetailSceneStrategy =
+        rememberListDetailSceneStrategy<NavKey>(
+            paneExpansionState = rememberPaneExpansionState(),
+            paneExpansionDragHandle = { state ->
+                val interactionSource = remember { MutableInteractionSource() }
+                VerticalDragHandle(
+                    modifier =
+                    Modifier.paneExpansionDraggable(
+                        state = state,
+                        minTouchTargetSize = 48.dp,
+                        interactionSource = interactionSource,
+                    ),
+                    interactionSource = interactionSource,
+                )
+            },
+        )
+    val supportingPaneSceneStrategy =
+        rememberSupportingPaneSceneStrategy<NavKey>(
+            paneExpansionState = rememberPaneExpansionState(),
+            paneExpansionDragHandle = { state ->
+                val interactionSource = remember { MutableInteractionSource() }
+                VerticalDragHandle(
+                    modifier =
+                    Modifier.paneExpansionDraggable(
+                        state = state,
+                        minTouchTargetSize = 48.dp,
+                        interactionSource = interactionSource,
+                    ),
+                    interactionSource = interactionSource,
+                )
+            },
+        )
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider,
         entryDecorators =
         listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
-        sceneStrategies = listOf(
+        sceneStrategies =
+        listOf(
             DialogSceneStrategy(),
             listDetailSceneStrategy,
             supportingPaneSceneStrategy,
-            SinglePaneSceneStrategy()
+            SinglePaneSceneStrategy(),
         ),
         transitionSpec = meshtasticTransitionSpec(),
         popTransitionSpec = meshtasticTransitionSpec(),
