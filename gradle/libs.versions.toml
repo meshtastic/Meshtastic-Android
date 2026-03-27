@@ -45,7 +45,7 @@ mlkit-barcode-scanning = "17.3.0"
 camerax = "1.6.0"
 
 # Networking
-ktor = "3.4.1"
+ktor = "3.4.2"
 
 # Other
 aboutlibraries = "13.2.1"
