@@ -247,6 +247,12 @@
       "title": "Refinement on support for Native ESP32 Ethernet and WT32-ETH01 board (LAN8720)",
       "page_url": "https://github.com/meshtastic/firmware/pull/9891",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9857",
+      "title": "Add PiMesh-1W V1/V2 Portduino LoRa config files",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9857",
+      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
