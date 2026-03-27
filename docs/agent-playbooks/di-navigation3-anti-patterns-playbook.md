@@ -37,6 +37,8 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 - Do use the official KMP `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose` for back gestures.
 - Don't parse deep links manually in platform code or push single routes without a backstack.
 - Do use `DeepLinkRouter.route()` in `core:navigation` to synthesize the correct typed backstack from RESTful paths.
+- **Don't use a single `NavBackStack` list for multiple tabs, nor reuse the same `NavEntryDecorator` instances across different backstacks.**
+- **Do** use `MultiBackstack` (from `core:navigation`) to manage independent `NavBackStack` instances per tab. When rendering the active tab in `MeshtasticNavDisplay`, you **must** supply a fresh set of decorators (using `remember(backStack) { ... }`) bound to the active backstack instance. Failure to swap decorators when swapping backstacks causes Navigation 3 to perceive the inactive entries as "popped", permanently destroying their `ViewModelStore` and saved UI state.
 
 ### Current code anchors (Navigation 3)
 

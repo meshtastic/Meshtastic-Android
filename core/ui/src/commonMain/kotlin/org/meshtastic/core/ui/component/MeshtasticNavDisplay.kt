@@ -67,6 +67,7 @@ fun MeshtasticNavDisplay(
 }
 
 /** Shared [NavDisplay] wrapper for a single backstack. */
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun MeshtasticNavDisplay(
