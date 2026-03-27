@@ -49,8 +49,13 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
             defaultConfig.targetSdk = targetSdkVersion
         }
 
-        compileOptions.sourceCompatibility = JavaVersion.VERSION_17
-        compileOptions.targetCompatibility = JavaVersion.VERSION_17
+        val javaVersion = if (project.name in listOf("api", "model", "proto")) {
+            JavaVersion.VERSION_17
+        } else {
+            JavaVersion.VERSION_21
+        }
+        compileOptions.sourceCompatibility = javaVersion
+        compileOptions.targetCompatibility = javaVersion
     }
 
     configureMokkery()
@@ -170,9 +175,10 @@ internal fun Project.configureKotlinJvm() {
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
     extensions.configure<T> {
-        // Using Java 17 for better compatibility with consumers (e.g. plugins, older environments)
-        // while still supporting modern Kotlin features.
-        jvmToolchain(17)
+        val javaVersion = if (project.name in listOf("api", "model", "proto")) 17 else 21
+        // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older environments),
+        // and Java 21 for the rest of the app.
+        jvmToolchain(javaVersion)
 
         if (this is KotlinMultiplatformExtension) {
             targets.configureEach {
@@ -201,7 +207,8 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            val isPublishedModule = project.name in listOf("api", "model", "proto")
+            jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
             allWarningsAsErrors.set(warningsAsErrors)
             freeCompilerArgs.addAll(
                 // Enable experimental coroutines APIs, including Flow

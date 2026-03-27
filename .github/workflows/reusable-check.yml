@@ -58,34 +58,24 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 60
+    outputs:
+      cache_read_only: ${{ steps.cache_config.outputs.cache_read_only }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          submodules: 'recursive'
+      - name: Determine cache read-only setting
+        id: cache_config
+        shell: bash
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]] || [[ "${{ github.event_name }}" == "merge_group" ]] || [[ "${{ github.ref }}" == gh-readonly-queue/* ]]; then
+            echo "cache_read_only=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "cache_read_only=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v6
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          token: ${{ github.token }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/gh-readonly-queue/') }}
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache-cleanup: on-success
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
-          add-job-summary: always
+          cache_read_only: ${{ steps.cache_config.outputs.cache_read_only }}
 
       - name: Code Style & Static Analysis
         if: inputs.run_lint == true
@@ -138,38 +128,17 @@ jobs:
     permissions:
       contents: read
     timeout-minutes: 60
+    needs: host-check
     strategy:
       fail-fast: true
       matrix:
         api_level: ${{ fromJson(inputs.api_levels) }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
         with:
-          fetch-depth: 0
-          submodules: 'recursive'
-
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v6
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          token: ${{ github.token }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/gh-readonly-queue/') }}
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache-cleanup: on-success
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
-          add-job-summary: always
+          cache_read_only: ${{ needs.host-check.outputs.cache_read_only }}
 
       - name: Determine matrix metadata
         id: matrix_meta
@@ -266,3 +235,28 @@ jobs:
             **/build/outputs/androidTest-results
           retention-days: 7
           if-no-files-found: ignore
+
+  build-desktop:
+    name: Build Desktop
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 60
+    needs: host-check
+
+    steps:
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          cache_read_only: ${{ needs.host-check.outputs.cache_read_only }}
+
+      - name: Build Desktop
+        run: ./gradlew :desktop:assemble -Pci=true --scan
+
+      - name: Upload Desktop artifact
+        if: ${{ inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-app
+          path: desktop/build/libs/*.jar
+          retention-days: 7

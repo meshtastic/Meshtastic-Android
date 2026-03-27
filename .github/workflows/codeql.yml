@@ -70,7 +70,7 @@ jobs:
       uses: actions/setup-java@v5
       with:
         distribution: 'temurin' # See 'Supported distributions' for available options
-        java-version: '17'
+        java-version: '21'
         token: ${{ github.token }}
 
     # Initializes the CodeQL tools for scanning.

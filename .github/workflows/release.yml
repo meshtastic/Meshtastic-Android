@@ -119,25 +119,10 @@ jobs:
         -Dorg.gradle.workers.max=4
         -Dkotlin.daemon.jvm.options=-Xmx2g -XX:+UseParallelGC
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
         with:
-          ref: ${{ inputs.tag_name }}
-          fetch-depth: 0
-          submodules: 'recursive'
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          token: ${{ github.token }}
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
+          cache_read_only: 'false'
 
       - name: Load secrets
         env:
@@ -216,25 +201,10 @@ jobs:
         -Dorg.gradle.workers.max=4
         -Dkotlin.daemon.jvm.options=-Xmx2g -XX:+UseParallelGC
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
         with:
-          ref: ${{ inputs.tag_name }}
-          fetch-depth: 0
-          submodules: 'recursive'
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          token: ${{ github.token }}
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
+          cache_read_only: 'false'
 
       - name: Load secrets
         env:
@@ -288,27 +258,10 @@ jobs:
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
         with:
-          ref: ${{ inputs.tag_name }}
-          fetch-depth: 0
-          submodules: 'recursive'
-          
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          token: ${{ github.token }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
+          cache_read_only: 'false'
 
       - name: Install dependencies for AppImage
         if: runner.os == 'Linux'
