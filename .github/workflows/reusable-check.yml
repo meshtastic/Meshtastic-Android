@@ -251,7 +251,7 @@ jobs:
           if-no-files-found: ignore
 
   build-desktop:
-    name: Build Desktop
+    name: Build Desktop Debug
     runs-on: ubuntu-latest
     permissions:
       contents: read
