@@ -48,7 +48,7 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
 
 - **Unit tests** are located in the `src/test/` directory of each module.
 - **Compose UI Tests (JVM)** are preferred for component testing and are also located in `src/test/` using **Robolectric**. 
-    - Note: If using Java 17, pin your Robolectric tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility issues.
+    - Note: If using Java 21, pin your Robolectric tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility issues.
 - **Instrumented tests** (including full E2E UI tests) are located in `src/androidTest/`. For Compose UI, use the [Jetpack Compose Testing APIs](https://developer.android.com/jetpack/compose/testing).
 
 #### Guidelines for Testing
