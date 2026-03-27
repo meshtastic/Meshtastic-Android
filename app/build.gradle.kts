@@ -219,6 +219,7 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.model)
     implementation(projects.core.navigation)
+    implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
     implementation(projects.core.network)
     implementation(projects.core.nfc)
     implementation(projects.core.prefs)

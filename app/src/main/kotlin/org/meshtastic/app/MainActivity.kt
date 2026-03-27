@@ -139,7 +139,7 @@ class MainActivity : ComponentActivity() {
                     ReportDrawnWhen { true }
 
                     if (appIntroCompleted) {
-                        MainScreen(uIViewModel = model)
+                        MainScreen()
                     } else {
                         val introViewModel = koinViewModel<IntroViewModel>()
                         AppIntroductionScreen(onDone = { model.onAppIntroCompleted() }, viewModel = introViewModel)
@@ -174,7 +174,7 @@ class MainActivity : ComponentActivity() {
             org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider provides
                 { destNum, requestId, logUuid, onNavigateUp ->
                     val metricsViewModel =
-                        koinViewModel<org.meshtastic.feature.node.metrics.MetricsViewModel>(key = "metrics-$destNum") {
+                        koinViewModel<org.meshtastic.feature.node.metrics.MetricsViewModel> {
                             org.koin.core.parameter.parametersOf(destNum)
                         }
                     metricsViewModel.setNodeId(destNum)

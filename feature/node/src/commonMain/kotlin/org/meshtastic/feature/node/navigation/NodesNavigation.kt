@@ -26,6 +26,8 @@ import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.PermScanWifi
 import androidx.compose.material.icons.rounded.Power
 import androidx.compose.material.icons.rounded.Router
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.EntryProviderScope
@@ -51,6 +53,9 @@ import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
+import org.meshtastic.feature.node.compass.CompassViewModel
+import org.meshtastic.feature.node.detail.NodeDetailScreen
+import org.meshtastic.feature.node.detail.NodeDetailViewModel
 import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
 import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
@@ -63,28 +68,25 @@ import org.meshtastic.feature.node.metrics.SignalMetricsScreen
 import org.meshtastic.feature.node.metrics.TracerouteLogScreen
 import kotlin.reflect.KClass
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
 fun EntryProviderScope<NavKey>.nodesGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
     onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
-    entry<NodesRoutes.NodesGraph> {
+    entry<NodesRoutes.NodesGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
-            onNavigate = { backStack.add(it) },
-            onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
             onHandleDeepLink = onHandleDeepLink,
         )
     }
 
-    entry<NodesRoutes.Nodes> {
+    entry<NodesRoutes.Nodes>(metadata = { ListDetailSceneStrategy.listPane() }) {
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
-            onNavigate = { backStack.add(it) },
-            onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
             onHandleDeepLink = onHandleDeepLink,
         )
     }
@@ -92,42 +94,42 @@ fun EntryProviderScope<NavKey>.nodesGraph(
     nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink)
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
 fun EntryProviderScope<NavKey>.nodeDetailGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
-    entry<NodesRoutes.NodeDetailGraph> { args ->
+    entry<NodesRoutes.NodeDetailGraph>(metadata = { ListDetailSceneStrategy.listPane() }) { args ->
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
-            initialNodeId = args.destNum,
-            onNavigate = { backStack.add(it) },
-            onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
             onHandleDeepLink = onHandleDeepLink,
         )
     }
 
-    entry<NodesRoutes.NodeDetail> { args ->
-        AdaptiveNodeListScreen(
-            backStack = backStack,
-            scrollToTopEvents = scrollToTopEvents,
-            initialNodeId = args.destNum,
+    entry<NodesRoutes.NodeDetail>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
+        val nodeDetailViewModel: NodeDetailViewModel = koinViewModel()
+        val compassViewModel: CompassViewModel = koinViewModel()
+        val destNum = args.destNum ?: 0 // Handle nullable destNum if needed
+        NodeDetailScreen(
+            nodeId = destNum,
+            viewModel = nodeDetailViewModel,
+            compassViewModel = compassViewModel,
+            navigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
             onNavigate = { backStack.add(it) },
-            onNavigateToMessages = { backStack.add(ContactsRoutes.Messages(it)) },
-            onHandleDeepLink = onHandleDeepLink,
+            onNavigateUp = { backStack.removeLastOrNull() },
         )
     }
 
-    entry<NodeDetailRoutes.NodeMap> { args ->
+    entry<NodeDetailRoutes.NodeMap>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val mapScreen = org.meshtastic.core.ui.util.LocalNodeMapScreenProvider.current
         mapScreen(args.destNum) { backStack.removeLastOrNull() }
     }
 
-    entry<NodeDetailRoutes.TracerouteLog> { args ->
-        val metricsViewModel =
-            koinViewModel<MetricsViewModel>(key = "metrics-${args.destNum}") { parametersOf(args.destNum) }
+    entry<NodeDetailRoutes.TracerouteLog>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
+        val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(args.destNum) }
         metricsViewModel.setNodeId(args.destNum)
 
         TracerouteLogScreen(
@@ -145,7 +147,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         )
     }
 
-    entry<NodeDetailRoutes.TracerouteMap> { args ->
+    entry<NodeDetailRoutes.TracerouteMap>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val tracerouteMapScreen = org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider.current
         tracerouteMapScreen(args.destNum, args.requestId, args.logUuid) { backStack.removeLastOrNull() }
     }
@@ -175,14 +177,15 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
 
 fun NavKey.isNodeDetailRoute(): Boolean = NodeDetailRoute.entries.any { this::class == it.routeClass }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailScreenComposable(
     backStack: NavBackStack<NavKey>,
     routeInfo: NodeDetailRoute,
     crossinline getDestNum: (R) -> Int,
 ) {
-    entry<R> { args ->
+    entry<R>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val destNum = getDestNum(args)
-        val metricsViewModel = koinViewModel<MetricsViewModel>(key = "metrics-$destNum") { parametersOf(destNum) }
+        val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(destNum) }
         metricsViewModel.setNodeId(destNum)
 
         routeInfo.screenComposable(metricsViewModel) { backStack.removeLastOrNull() }

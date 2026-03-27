@@ -42,7 +42,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
 | `core:navigation` | Shared navigation keys/routes for Navigation 3. |
-| `core:ui` | Shared Compose UI components (`AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
+| `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
 | `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
 | `core:api` | Public AIDL/API integration module for external clients. |
 | `core:prefs` | KMP preferences layer built on DataStore abstractions. |
@@ -79,7 +79,8 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **KMP file naming:** In KMP modules, `commonMain` and platform source sets (`androidMain`, `jvmMain`) share the same package namespace. If both contain a file with the same name (e.g., `LogExporter.kt`), the Kotlin/JVM compiler will produce a duplicate class error. Use distinct filenames: keep the `expect` declaration in `LogExporter.kt` and put shared helpers in a separate file like `LogFormatter.kt`.
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Dependency Injection:** Use **Koin Annotations** with the K2 compiler plugin (`koin-plugin` in version catalog). The `koin-annotations` library version is unified with `koin-core` (both use `version.ref = "koin"`). The `KoinConventionPlugin` uses the typed `KoinGradleExtension` to configure the K2 plugin (e.g., `compileSafety.set(false)`). Keep root graph assembly in `app`.
--   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`.
+-   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`. Both `app` and `desktop` use `MeshtasticNavDisplay` from `core:ui/commonMain`, which configures `ViewModelStoreNavEntryDecorator` + `SaveableStateHolderNavEntryDecorator`. ViewModels obtained via `koinViewModel()` inside `entry<T>` blocks are scoped to the entry's backstack lifetime and cleared on pop.
+-   **Navigation host:** Use `MeshtasticNavDisplay` from `core:ui/commonMain` instead of calling `NavDisplay` directly. It provides entry-scoped ViewModel decoration, `DialogSceneStrategy` for dialog entries, and a shared 350 ms crossfade transition. Host modules (`app`, `desktop`) should NOT configure `entryDecorators`, `sceneStrategies`, or `transitionSpec` themselves.
 -   **BLE:** All Bluetooth communication must route through `core:ble` using Kable.
 -   **Networking:** Pure **Ktor** — no OkHttp anywhere. Engines: `ktor-client-android` for Android, `ktor-client-java` for desktop/JVM. Use Ktor `Logging` plugin for HTTP debug logging (not OkHttp interceptors). `HttpClient` is provided via Koin in `app/di/NetworkModule` and `core:network/di/CoreNetworkAndroidModule`.
 -   **Image Loading (Coil):** Use `coil-network-ktor3` with `KtorNetworkFetcherFactory` on **all** platforms. `ImageLoader` is configured in host modules only (`app` via Koin `@Single`, `desktop` via `setSingletonImageLoaderFactory`). Feature modules depend only on `libs.coil` (coil-compose) for `AsyncImage` — never add `coil-network-*` or `coil-svg` to feature modules.

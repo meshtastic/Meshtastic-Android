@@ -16,13 +16,10 @@
  */
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavKey
+import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
@@ -34,22 +31,21 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
  */
 @Composable
 fun MeshtasticAppShell(
-    backStack: NavBackStack<NavKey>,
+    multiBackstack: MultiBackstack,
     uiViewModel: UIViewModel,
-    hostModifier: Modifier = Modifier.padding(bottom = 16.dp),
+    hostModifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     LaunchedEffect(uiViewModel) {
-        uiViewModel.navigationDeepLink.collect { navKeys ->
-            backStack.clear()
-            backStack.addAll(navKeys)
-        }
+        uiViewModel.navigationDeepLink.collect { navKeys -> multiBackstack.handleDeepLink(navKeys) }
     }
 
     MeshtasticCommonAppSetup(
         uiViewModel = uiViewModel,
         onNavigateToTracerouteMap = { destNum, requestId, logUuid ->
-            backStack.add(NodeDetailRoutes.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid))
+            multiBackstack.activeBackStack.add(
+                NodeDetailRoutes.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid),
+            )
         },
     )
 

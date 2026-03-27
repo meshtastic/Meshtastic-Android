@@ -59,6 +59,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive)
             implementation(libs.jetbrains.compose.material3.adaptive.layout)
             implementation(libs.jetbrains.compose.material3.adaptive.navigation)
+            implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
         }
 
         androidMain.dependencies {

@@ -19,16 +19,38 @@ package org.meshtastic.core.navigation
 import androidx.navigation3.runtime.NavKey
 
 /**
- * Replaces the current back stack with the given top-level route. Clears the back stack and sets the new route as the
- * root destination.
+ * Replaces the last entry in the back stack with the given route. If the back stack is empty, it simply adds the route.
  */
-fun MutableList<NavKey>.navigateTopLevel(route: NavKey) {
+fun MutableList<NavKey>.replaceLast(route: NavKey) {
     if (isNotEmpty()) {
-        this[0] = route
-        while (size > 1) {
-            removeAt(lastIndex)
+        if (this[lastIndex] != route) {
+            this[lastIndex] = route
         }
     } else {
         add(route)
+    }
+}
+
+/**
+ * Replaces the entire back stack with the given routes in a way that minimizes structural changes and prevents the back
+ * stack from temporarily becoming empty.
+ */
+fun MutableList<NavKey>.replaceAll(routes: List<NavKey>) {
+    if (routes.isEmpty()) {
+        clear()
+        return
+    }
+    for (i in routes.indices) {
+        if (i < size) {
+            // Only mutate if the route actually changed, protecting Nav3's internal state matching.
+            if (this[i] != routes[i]) {
+                this[i] = routes[i]
+            }
+        } else {
+            add(routes[i])
+        }
+    }
+    while (size > routes.size) {
+        removeAt(lastIndex)
     }
 }
