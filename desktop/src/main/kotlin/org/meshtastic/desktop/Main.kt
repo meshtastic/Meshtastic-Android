@@ -244,11 +244,11 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
             },
         ) {
             setSingletonImageLoaderFactory { context ->
-                val cacheDir = System.getProperty("user.home") + "/.meshtastic/image_cache"
+                val cacheDir = System.getProperty("user.home") + "/.meshtastic/image_cache_v3"
                 ImageLoader.Builder(context)
                     .components {
                         add(KtorNetworkFetcherFactory())
-                        add(SvgDecoder.Factory())
+                        add(SvgDecoder.Factory(renderToBitmap = false))
                     }
                     .memoryCache { MemoryCache.Builder().maxSizeBytes(MEMORY_CACHE_MAX_BYTES).build() }
                     .diskCache {
