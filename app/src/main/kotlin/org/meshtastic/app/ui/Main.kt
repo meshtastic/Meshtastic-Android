@@ -61,7 +61,7 @@ fun MainScreen() {
         MeshtasticNavigationSuite(
             multiBackstack = multiBackstack,
             uiViewModel = viewModel,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             val provider =
                 entryProvider<NavKey> {

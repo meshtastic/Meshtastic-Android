@@ -42,9 +42,7 @@ import androidx.navigation3.scene.SinglePaneSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import org.meshtastic.core.navigation.MultiBackstack
 
-/**
- * Duration in milliseconds for the shared crossfade transition between navigation scenes.
- */
+/** Duration in milliseconds for the shared crossfade transition between navigation scenes. */
 private const val TRANSITION_DURATION_MS = 350
 
 /**
@@ -64,13 +62,11 @@ fun MeshtasticNavDisplay(
         backStack = backStack,
         onBack = { multiBackstack.goBack() },
         entryProvider = entryProvider,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
-/**
- * Shared [NavDisplay] wrapper for a single backstack.
- */
+/** Shared [NavDisplay] wrapper for a single backstack. */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun MeshtasticNavDisplay(
@@ -114,20 +110,21 @@ fun MeshtasticNavDisplay(
 
     val saveableDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
     val vmStoreDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
-    
-    val activeDecorators = remember(backStack, saveableDecorator, vmStoreDecorator) {
-        listOf(saveableDecorator, vmStoreDecorator)
-    }
+
+    val activeDecorators =
+        remember(backStack, saveableDecorator, vmStoreDecorator) { listOf(saveableDecorator, vmStoreDecorator) }
 
     NavDisplay(
         backStack = backStack,
         entryProvider = entryProvider,
         entryDecorators = activeDecorators,
-        onBack = onBack ?: {
-             if (backStack.size > 1) {
-                 backStack.removeLastOrNull()
-             }
-        },
+        onBack =
+        onBack
+            ?: {
+                if (backStack.size > 1) {
+                    backStack.removeLastOrNull()
+                }
+            },
         sceneStrategies =
         listOf(
             DialogSceneStrategy(),
@@ -141,9 +138,7 @@ fun MeshtasticNavDisplay(
     )
 }
 
-/**
- * Shared crossfade [ContentTransform] used for both forward and pop navigation.
- */
+/** Shared crossfade [ContentTransform] used for both forward and pop navigation. */
 private fun meshtasticTransitionSpec(): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
     ContentTransform(
         fadeIn(animationSpec = tween(TRANSITION_DURATION_MS)),

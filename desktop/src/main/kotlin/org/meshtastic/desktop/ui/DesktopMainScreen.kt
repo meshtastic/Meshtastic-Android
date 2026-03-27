@@ -33,12 +33,9 @@ import org.meshtastic.desktop.navigation.desktopNavGraph
 
 /** Desktop main screen — uses shared navigation components. */
 @Composable
-fun DesktopMainScreen(
-    uiViewModel: UIViewModel,
-    multiBackstack: MultiBackstack,
-) {
+fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) {
     val backStack = multiBackstack.activeBackStack
-    
+
     Surface(modifier = Modifier.fillMaxSize()) {
         MeshtasticAppShell(
             multiBackstack = multiBackstack,
@@ -54,7 +51,7 @@ fun DesktopMainScreen(
                 MeshtasticNavDisplay(
                     multiBackstack = multiBackstack,
                     entryProvider = provider,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
         }

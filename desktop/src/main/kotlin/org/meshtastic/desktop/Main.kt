@@ -36,19 +36,16 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isMetaPressed
-import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
-import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
@@ -76,9 +73,7 @@ import org.meshtastic.desktop.ui.DesktopMainScreen
 import java.awt.Desktop
 import java.util.Locale
 
-/**
- * Meshtastic Desktop — the first non-Android target for the shared KMP module graph.
- */
+/** Meshtastic Desktop — the first non-Android target for the shared KMP module graph. */
 private val LocalAppLocale = staticCompositionLocalOf { "" }
 
 private const val MEMORY_CACHE_MAX_BYTES = 64L * 1024L * 1024L // 64 MiB
@@ -160,9 +155,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     val windowState = rememberWindowState()
 
     LaunchedEffect(Unit) {
-        notificationManager.notifications.collect { notification ->
-            trayState.sendNotification(notification)
-        }
+        notificationManager.notifications.collect { notification -> trayState.sendNotification(notification) }
     }
 
     LaunchedEffect(Unit) {

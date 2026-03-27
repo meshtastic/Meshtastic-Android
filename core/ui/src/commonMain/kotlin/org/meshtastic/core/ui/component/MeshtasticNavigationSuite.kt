@@ -46,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.NavKey
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -65,8 +64,8 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 /**
  * Shared adaptive navigation shell using [NavigationSuiteScaffold].
  *
- * This implementation uses the [MultiBackstack] state holder to manage independent histories for each tab,
- * aligning with Navigation 3 best practices for state preservation during tab switching.
+ * This implementation uses the [MultiBackstack] state holder to manage independent histories for each tab, aligning
+ * with Navigation 3 best practices for state preservation during tab switching.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +80,7 @@ fun MeshtasticNavigationSuite(
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
     val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
-    
+
     val currentTabRoute = multiBackstack.currentTabRoute
     val topLevelDestination = TopLevelDestination.fromNavKey(currentTabRoute)
 
@@ -96,9 +95,7 @@ fun MeshtasticNavigationSuite(
                 val isSelected = destination == topLevelDestination
                 item(
                     selected = isSelected,
-                    onClick = {
-                        handleNavigation(destination, topLevelDestination, multiBackstack, uiViewModel)
-                    },
+                    onClick = { handleNavigation(destination, topLevelDestination, multiBackstack, uiViewModel) },
                     icon = {
                         NavigationIconContent(
                             destination = destination,
