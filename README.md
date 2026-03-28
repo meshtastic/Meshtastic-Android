@@ -80,6 +80,8 @@ Developers can integrate with the Meshtastic Android app using our published API
 
 For detailed integration instructions, see [core/api/README.md](core/api/README.md).
 
+Additionally, the app includes a built-in **Local TAK Server** feature that can be enabled in settings. This runs a local TCP server on port 8089 to allow ATAK clients to connect directly and route their traffic over the mesh.
+
 ## Building the Android App
 > [!WARNING]
 > Debug and release builds can be installed concurrently. This is solely to enable smoother development, and you should avoid running both apps simultaneously. To ensure proper function, force quit the app not in use.

@@ -1261,6 +1261,8 @@
 
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK Configuration</string>
+    <string name="tak_server_enabled">Enable Local TAK Server</string>
+    <string name="tak_server_enabled_desc">Starts a TCP server on port 8089 for ATAK connections</string>
     <string name="tak_team">Team Color</string>
     <string name="tak_role">Member Role</string>
 

@@ -77,10 +77,10 @@ class ServiceBroadcasts(private val context: Context, private val serviceReposit
                 longitude = longitude,
                 altitude = position.altitude ?: 0,
                 time = position.time,
-                satellitesInView = position.sats_in_view ?: 0,
+                satellitesInView = position.sats_in_view,
                 groundSpeed = position.ground_speed ?: 0,
                 groundTrack = position.ground_track ?: 0,
-                precisionBits = position.precision_bits ?: 0,
+                precisionBits = position.precision_bits,
             )
             .takeIf { latitude != 0.0 || longitude != 0.0 },
         snr = snr,

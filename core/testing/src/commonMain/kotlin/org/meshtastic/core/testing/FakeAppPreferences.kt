@@ -262,4 +262,13 @@ class FakeAppPreferences : AppPreferences {
     override val mapTileProvider = FakeMapTileProviderPrefs()
     override val radio = FakeRadioPrefs()
     override val mesh = FakeMeshPrefs()
+    override val tak = FakeTakPrefs()
+}
+
+class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
+    override val isTakServerEnabled = MutableStateFlow(false)
+
+    override fun setTakServerEnabled(enabled: Boolean) {
+        isTakServerEnabled.value = enabled
+    }
 }

@@ -218,6 +218,13 @@ interface MeshPrefs {
     fun setStoreForwardLastRequest(address: String?, timestamp: Int)
 }
 
+/** Reactive interface for TAK server settings. */
+interface TakPrefs {
+    val isTakServerEnabled: StateFlow<Boolean>
+
+    fun setTakServerEnabled(enabled: Boolean)
+}
+
 /** Consolidated interface for all application preferences. */
 interface AppPreferences {
     val analytics: AnalyticsPrefs
@@ -231,4 +238,5 @@ interface AppPreferences {
     val mapTileProvider: MapTileProviderPrefs
     val radio: RadioPrefs
     val mesh: MeshPrefs
+    val tak: TakPrefs
 }

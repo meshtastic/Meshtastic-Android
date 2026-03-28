@@ -12,7 +12,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 
 ## Module Inventory
 
-### Core Modules (20 total)
+### Core Modules (21 total)
 
 | Module | KMP? | JVM target? | Notes |
 |---|:---:|:---:|---|
@@ -34,10 +34,11 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `core:service` | ✅ | ✅ | Service layer; Android bindings in androidMain |
 | `core:ui` | ✅ | ✅ | Shared Compose UI, pure KMP QR generator, `jvmAndroidMain` + `jvmMain` actuals |
 | `core:testing` | ✅ | ✅ | Shared test doubles, fakes, and utilities for `commonTest` |
+| `core:takserver` | ✅ | ✅ | TAK/ATAK integration, Fountain codec |
 | `core:api` | ❌ | — | Android-only (AIDL). Intentional. |
 | `core:barcode` | ❌ | — | Android-only (CameraX). Flavor split minimised to decoder factory only (ML Kit / ZXing). Shared contract in `core:ui`. |
 
-**18/20** core modules are KMP with JVM targets. The 2 Android-only modules are intentionally platform-specific, with shared contracts already abstracted into `core:ui/commonMain`.
+**19/21** core modules are KMP with JVM targets. The 2 Android-only modules are intentionally platform-specific, with shared contracts already abstracted into `core:ui/commonMain`.
 
 ### Feature Modules (8 total — 8 KMP with JVM, 1 Android-only widget)
 
