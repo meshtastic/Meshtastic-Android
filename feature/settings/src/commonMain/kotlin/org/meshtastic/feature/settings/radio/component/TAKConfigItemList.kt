@@ -43,6 +43,7 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.tak.TakPermissionHandler
 import org.meshtastic.feature.settings.tak.rememberPrefExporter
 import org.meshtastic.proto.ModuleConfig
 
@@ -59,7 +60,7 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 
     LaunchedEffect(takConfig) { formState.value = takConfig }
 
-    org.meshtastic.feature.settings.tak.TakPermissionHandler(
+    TakPermissionHandler(
         isTakServerEnabled = isTakServerEnabled,
         onPermissionResult = { granted ->
             if (!granted && isTakServerEnabled) {
@@ -98,7 +99,7 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 
 @Composable
 private fun TAKConfigCard(
-    formState: RadioConfigState<ModuleConfig.TAKConfig>,
+    formState: ConfigState<ModuleConfig.TAKConfig>,
     isTakServerEnabled: Boolean,
     isConnected: Boolean,
     onTakServerEnabledChange: (Boolean) -> Unit,
