@@ -53,7 +53,6 @@ import org.meshtastic.feature.firmware.ProgressState
 private const val RETRY_DELAY = 2000L
 private const val PERCENT_MAX = 100
 private const val KIB_DIVISOR = 1024f
-private const val MILLIS_PER_SECOND = 1000f
 
 // Time to wait for OTA reboot packet to be sent before disconnecting mesh service
 private const val PACKET_SEND_DELAY_MS = 2000L

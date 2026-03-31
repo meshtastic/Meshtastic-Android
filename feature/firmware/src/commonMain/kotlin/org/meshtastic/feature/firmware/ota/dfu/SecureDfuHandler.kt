@@ -57,6 +57,7 @@ private const val GATT_RELEASE_DELAY_MS = 1_500L
 private const val DFU_REBOOT_WAIT_MS = 3_000L
 private const val RETRY_DELAY_MS = 2_000L
 private const val CONNECT_ATTEMPTS = 4
+private const val MILLIS_PER_SECOND = 1000f
 
 /**
  * KMP [FirmwareUpdateHandler] for nRF52 devices using the Nordic Secure DFU protocol over Kable BLE.
@@ -150,7 +151,7 @@ class SecureDfuHandler(
                             throughputTracker.record(bytesSent)
 
                             val bytesPerSec = throughputTracker.bytesPerSecond()
-                            val speedBytesPerMs = bytesPerSec.toFloat() / 1000f
+                            val speedBytesPerMs = bytesPerSec.toFloat() / MILLIS_PER_SECOND
 
                             updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, progress, "$pct%")))
                             emit(DfuInternalState.Progress(target, pct, speedBytesPerMs, speedBytesPerMs, 1, 1))

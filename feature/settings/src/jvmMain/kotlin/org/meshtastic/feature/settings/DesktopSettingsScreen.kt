@@ -94,6 +94,7 @@ fun DesktopSettingsScreen(
     val homoglyphEnabled by radioConfigViewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
     val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
     val cacheLimit by settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle()
+    val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
 
     var showThemePickerDialog by remember { mutableStateOf(false) }
     var showLanguagePickerDialog by remember { mutableStateOf(false) }
@@ -138,7 +139,7 @@ fun DesktopSettingsScreen(
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security?.is_managed ?: false,
-                isOtaCapable = false, // OTA not supported on Desktop yet
+                isOtaCapable = isOtaCapable,
                 onRouteClick = { route ->
                     val navRoute =
                         when (route) {
