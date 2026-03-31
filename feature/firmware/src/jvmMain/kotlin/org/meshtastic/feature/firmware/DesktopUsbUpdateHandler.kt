@@ -16,12 +16,14 @@
  */
 package org.meshtastic.feature.firmware
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
 
+@Single
 class DesktopUsbUpdateHandler(
     private val fileHandler: FirmwareFileHandler,
     private val radioController: RadioController,

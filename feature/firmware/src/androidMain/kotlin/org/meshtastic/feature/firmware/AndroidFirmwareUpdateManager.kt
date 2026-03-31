@@ -26,12 +26,13 @@ import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
 import org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler
+import org.meshtastic.feature.firmware.ota.dfu.SecureDfuHandler
 
 /** Orchestrates the firmware update process by choosing the correct handler. */
 @Single
 class AndroidFirmwareUpdateManager(
     private val radioPrefs: RadioPrefs,
-    private val nordicDfuHandler: NordicDfuHandler,
+    private val secureDfuHandler: SecureDfuHandler,
     private val usbUpdateHandler: UsbUpdateHandler,
     private val esp32OtaUpdateHandler: Esp32OtaUpdateHandler,
 ) : FirmwareUpdateManager {
@@ -56,7 +57,7 @@ class AndroidFirmwareUpdateManager(
         )
     }
 
-    override fun dfuProgressFlow(): Flow<DfuInternalState> = nordicDfuHandler.progressFlow()
+    override fun dfuProgressFlow(): Flow<DfuInternalState> = secureDfuHandler.progressFlow
 
     private fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> {
@@ -69,7 +70,7 @@ class AndroidFirmwareUpdateManager(
             if (isEsp32Architecture(hardware.architecture)) {
                 esp32OtaUpdateHandler
             } else {
-                nordicDfuHandler
+                secureDfuHandler
             }
         }
         radioPrefs.isTcp() -> {

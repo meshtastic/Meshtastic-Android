@@ -26,6 +26,7 @@ import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import org.koin.core.annotation.Single
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.util.CommonUri
@@ -42,6 +43,7 @@ import java.util.zip.ZipInputStream
 private const val DOWNLOAD_BUFFER_SIZE = 8192
 
 @Suppress("TooManyFunctions")
+@Single
 class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandler {
     private val tempDir = File(System.getProperty("java.io.tmpdir"), "meshtastic/firmware_update")
 

@@ -17,7 +17,6 @@
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
-import com.juul.kable.characteristicOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -31,12 +30,12 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
+import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
-import org.meshtastic.core.ble.KableBleService
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
@@ -53,8 +52,8 @@ class BleOtaTransport(
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(transportScope, "BLE OTA")
 
-    private val otaChar = characteristicOf(OTA_SERVICE_UUID, OTA_WRITE_CHARACTERISTIC)
-    private val txChar = characteristicOf(OTA_SERVICE_UUID, OTA_NOTIFY_CHARACTERISTIC)
+    private val otaChar = BleCharacteristic(OTA_WRITE_CHARACTERISTIC)
+    private val txChar = BleCharacteristic(OTA_NOTIFY_CHARACTERISTIC)
 
     private val responseChannel = Channel<String>(Channel.UNLIMITED)
 
@@ -140,16 +139,13 @@ class BleOtaTransport(
         Logger.i { "BLE OTA: Connected to ${device.address}, discovering services..." }
 
         bleConnection.profile(OTA_SERVICE_UUID) { service ->
-            val kableService = service as KableBleService
-            val peripheral = kableService.peripheral
-
             // Log negotiated MTU for diagnostics
             val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
             Logger.i { "BLE OTA: Service ready. Max write value length: $maxLen bytes" }
 
             // Enable notifications and collect responses
             val subscribed = CompletableDeferred<Unit>()
-            peripheral
+            service
                 .observe(txChar)
                 .onEach { notifyBytes ->
                     try {
@@ -285,7 +281,7 @@ class BleOtaTransport(
     }
 
     private suspend fun sendCommand(command: OtaCommand): Int {
-        val data = command.toString().toByteArray()
+        val data = command.toString().encodeToByteArray()
         return writeData(data, BleWriteType.WITH_RESPONSE)
     }
 
@@ -299,15 +295,8 @@ class BleOtaTransport(
                 val chunkSize = minOf(data.size - offset, maxLen)
                 val packet = data.copyOfRange(offset, offset + chunkSize)
 
-                val kableWriteType =
-                    when (writeType) {
-                        BleWriteType.WITH_RESPONSE -> com.juul.kable.WriteType.WithResponse
-                        BleWriteType.WITHOUT_RESPONSE -> com.juul.kable.WriteType.WithoutResponse
-                    }
-
                 bleConnection.profile(OTA_SERVICE_UUID) { service ->
-                    val peripheral = (service as KableBleService).peripheral
-                    peripheral.write(otaChar, packet, kableWriteType)
+                    service.write(otaChar, packet, writeType)
                 }
 
                 offset += chunkSize

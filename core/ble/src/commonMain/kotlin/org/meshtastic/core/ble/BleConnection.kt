@@ -17,6 +17,7 @@
 package org.meshtastic.core.ble
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -27,6 +28,12 @@ enum class BleWriteType {
     WITH_RESPONSE,
     WITHOUT_RESPONSE,
 }
+
+/** Identifies a characteristic within a profiled BLE service. */
+data class BleCharacteristic(val uuid: Uuid)
+
+/** Safe ATT payload length when MTU negotiation is unavailable (23-byte ATT MTU minus 3-byte header). */
+const val DEFAULT_BLE_WRITE_VALUE_LENGTH = 20
 
 /** Encapsulates a BLE connection to a [BleDevice]. */
 interface BleConnection {
@@ -55,11 +62,27 @@ interface BleConnection {
         setup: suspend CoroutineScope.(BleService) -> T,
     ): T
 
-    /** Returns the maximum write value length for the given write type. */
+    /** Returns the maximum write value length for the given write type, or `null` if unknown. */
     fun maximumWriteValueLength(writeType: BleWriteType): Int?
 }
 
 /** Represents a BLE service for commonMain. */
 interface BleService {
-    // This will be expanded as needed, but for now we just need a common type to pass around.
+    /** Creates a handle for a characteristic belonging to this service. */
+    fun characteristic(uuid: Uuid): BleCharacteristic = BleCharacteristic(uuid)
+
+    /** Returns true when the characteristic is present on the connected device. */
+    fun hasCharacteristic(characteristic: BleCharacteristic): Boolean
+
+    /** Observes notifications/indications from the characteristic. */
+    fun observe(characteristic: BleCharacteristic): Flow<ByteArray>
+
+    /** Reads the characteristic value once. */
+    suspend fun read(characteristic: BleCharacteristic): ByteArray
+
+    /** Returns the preferred write type for the characteristic on this platform/device. */
+    fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType
+
+    /** Writes a value to the characteristic using the requested BLE write type. */
+    suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType)
 }

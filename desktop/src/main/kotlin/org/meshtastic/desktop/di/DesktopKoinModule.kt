@@ -178,13 +178,4 @@ private fun desktopPlatformStubsModule() = module {
             override fun loadBootloaderOtaQuirksFromJsonAsset(): List<BootloaderOtaQuirk> = emptyList()
         }
     }
-
-    // Firmware update stubs
-    single<org.meshtastic.feature.firmware.FirmwareUpdateManager> {
-        org.meshtastic.desktop.stub.NoopFirmwareUpdateManager()
-    }
-    single<org.meshtastic.feature.firmware.FirmwareUsbManager> { org.meshtastic.desktop.stub.NoopFirmwareUsbManager() }
-    single<org.meshtastic.feature.firmware.FirmwareFileHandler> {
-        org.meshtastic.desktop.stub.NoopFirmwareFileHandler()
-    }
 }

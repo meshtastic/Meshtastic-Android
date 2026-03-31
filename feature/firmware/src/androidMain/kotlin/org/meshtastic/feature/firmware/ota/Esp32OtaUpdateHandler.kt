@@ -19,10 +19,8 @@ package org.meshtastic.feature.firmware.ota
 import android.content.Context
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
@@ -142,7 +140,8 @@ class Esp32OtaUpdateHandler(
                 val localFirmwareFile = firmwareFile.toLocalFile()
 
                 // Step 2: Calculate Hash and Trigger Reboot
-                val sha256Bytes = FirmwareHashUtil.calculateSha256Bytes(localFirmwareFile)
+                val firmwareBytes = localFirmwareFile.readBytes()
+                val sha256Bytes = FirmwareHashUtil.calculateSha256Bytes(firmwareBytes)
                 val sha256Hash = FirmwareHashUtil.bytesToHex(sha256Bytes)
                 Logger.i { "ESP32 OTA: Firmware hash: $sha256Hash" }
                 triggerRebootOta(rebootMode, sha256Bytes)
@@ -224,13 +223,11 @@ class Esp32OtaUpdateHandler(
         tempFile.toFirmwareArtifact()
     }
 
-    private fun triggerRebootOta(mode: Int, hash: ByteArray?) {
+    private suspend fun triggerRebootOta(mode: Int, hash: ByteArray?) {
         val myInfo = nodeRepository.myNodeInfo.value ?: return
         val myNodeNum = myInfo.myNodeNum
         Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
-        CoroutineScope(Dispatchers.IO).launch {
-            radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
-        }
+        radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
     }
 
     /**
@@ -376,7 +373,7 @@ class Esp32OtaUpdateHandler(
                             val remainingBytes = firmwareData.size - bytesSent
                             val etaSeconds = if (kibPerSecond > 0) (remainingBytes / KIB_DIVISOR) / kibPerSecond else 0f
 
-                            String.format(java.util.Locale.US, "%.1f KiB/s, ETA: %ds", kibPerSecond, etaSeconds.toInt())
+                            "${"%.1f".format(kibPerSecond)} KiB/s, ETA: ${etaSeconds.toInt()}s"
                         } else {
                             ""
                         }

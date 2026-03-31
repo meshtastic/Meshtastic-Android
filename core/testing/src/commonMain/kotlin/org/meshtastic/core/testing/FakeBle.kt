@@ -17,13 +17,16 @@
 package org.meshtastic.core.testing
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -100,6 +103,14 @@ class FakeBleConnection :
     /** When non-null, [connectAndAwait] throws this exception instead of connecting. */
     var connectException: Exception? = null
 
+    /** Negotiated write length exposed to callers; `null` means unknown / not negotiated. */
+    var maxWriteValueLength: Int? = null
+
+    /** Number of times [disconnect] has been invoked. */
+    var disconnectCalls: Int = 0
+
+    val service = FakeBleService()
+
     override suspend fun connect(device: BleDevice) {
         _device.value = device
         _deviceFlow.emit(device)
@@ -124,6 +135,7 @@ class FakeBleConnection :
     }
 
     override suspend fun disconnect() {
+        disconnectCalls++
         val currentDevice = _device.value
         _connectionState.emit(BleConnectionState.Disconnected)
         if (currentDevice is FakeBleDevice) {
@@ -137,12 +149,58 @@ class FakeBleConnection :
         serviceUuid: Uuid,
         timeout: Duration,
         setup: suspend CoroutineScope.(BleService) -> T,
-    ): T = CoroutineScope(kotlinx.coroutines.Dispatchers.Unconfined).setup(FakeBleService())
+    ): T = CoroutineScope(Dispatchers.Unconfined).setup(service)
 
-    override fun maximumWriteValueLength(writeType: BleWriteType): Int = 512
+    override fun maximumWriteValueLength(writeType: BleWriteType): Int? = maxWriteValueLength
 }
 
-class FakeBleService : BleService
+class FakeBleWrite(val characteristic: BleCharacteristic, val data: ByteArray, val writeType: BleWriteType) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is FakeBleWrite) return false
+        return characteristic == other.characteristic && data.contentEquals(other.data) && writeType == other.writeType
+    }
+
+    override fun hashCode(): Int = 31 * (31 * characteristic.hashCode() + data.contentHashCode()) + writeType.hashCode()
+}
+
+class FakeBleService : BleService {
+    private val availableCharacteristics = mutableSetOf<Uuid>()
+    private val notificationFlows = mutableMapOf<Uuid, MutableSharedFlow<ByteArray>>()
+    private val readQueues = mutableMapOf<Uuid, MutableList<ByteArray>>()
+
+    val writes = mutableListOf<FakeBleWrite>()
+
+    override fun hasCharacteristic(characteristic: BleCharacteristic): Boolean =
+        availableCharacteristics.contains(characteristic.uuid)
+
+    override fun observe(characteristic: BleCharacteristic): Flow<ByteArray> =
+        notificationFlows.getOrPut(characteristic.uuid) { MutableSharedFlow(extraBufferCapacity = 16) }
+
+    override suspend fun read(characteristic: BleCharacteristic): ByteArray =
+        readQueues[characteristic.uuid]?.removeFirstOrNull() ?: ByteArray(0)
+
+    override fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType = BleWriteType.WITH_RESPONSE
+
+    override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
+        availableCharacteristics += characteristic.uuid
+        writes += FakeBleWrite(characteristic = characteristic, data = data.copyOf(), writeType = writeType)
+    }
+
+    fun addCharacteristic(uuid: Uuid) {
+        availableCharacteristics += uuid
+    }
+
+    fun emitNotification(uuid: Uuid, data: ByteArray) {
+        availableCharacteristics += uuid
+        notificationFlows.getOrPut(uuid) { MutableSharedFlow(extraBufferCapacity = 16) }.tryEmit(data)
+    }
+
+    fun enqueueRead(uuid: Uuid, data: ByteArray) {
+        availableCharacteristics += uuid
+        readQueues.getOrPut(uuid) { mutableListOf() }.add(data)
+    }
+}
 
 class FakeBleConnectionFactory(private val fakeConnection: FakeBleConnection = FakeBleConnection()) :
     BleConnectionFactory {
@@ -160,8 +218,7 @@ class FakeBluetoothRepository :
 
     override fun isValid(bleAddress: String): Boolean = bleAddress.isNotBlank()
 
-    override fun isBonded(address: String): Boolean =
-        _state.value.bondedDevices.any { it.address.equals(address, ignoreCase = true) }
+    override fun isBonded(address: String): Boolean = _state.value.bondedDevices.any { it.address == address }
 
     override suspend fun bond(device: BleDevice) {
         val currentState = _state.value

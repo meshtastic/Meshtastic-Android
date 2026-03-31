@@ -30,12 +30,8 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
     override val state: StateFlow<BleConnectionState> = _state
 
-    // Scanned devices can be connected directly without an explicit bonding step.
-    // On Android, Kable's connectGatt triggers the OS pairing dialog transparently
-    // when the firmware requires an encrypted link. On Desktop, btleplug delegates
-    // to the OS Bluetooth stack which handles pairing the same way.
-    // The BleRadioInterface.connect() reconnection path has a separate isBonded
-    // check for the case where a previously bonded device loses its bond.
+    // On desktop, bonding isn't strictly required before connecting via Kable,
+    // and we don't have a pairing flow. Defaulting to true lets the UI connect directly.
     override val isBonded: Boolean = true
 
     override val isConnected: Boolean
@@ -52,8 +48,7 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
     }
 
     override suspend fun bond() {
-        // Bonding for scanned devices is handled at the BluetoothRepository level
-        // (Android) or by the OS during GATT connection (Desktop/JVM).
+        // Not supported/needed on jvmMain desktop currently
     }
 
     internal fun updateState(newState: BleConnectionState) {

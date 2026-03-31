@@ -58,7 +58,6 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.androidx.appcompat)
-            implementation(libs.nordic.dfu)
             implementation(libs.markdown.renderer.android)
         }
 

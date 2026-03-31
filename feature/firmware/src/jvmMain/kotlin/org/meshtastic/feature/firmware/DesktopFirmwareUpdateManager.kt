@@ -25,8 +25,10 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
+import org.koin.core.annotation.Single
 import org.meshtastic.core.resources.UiText
 
+@Single
 class DesktopFirmwareUpdateManager(
     private val radioPrefs: RadioPrefs,
     private val usbUpdateHandler: DesktopUsbUpdateHandler,

@@ -45,7 +45,10 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     com.juul.kable.Peripheral(address.toIdentifier(), builderAction)
 
+/** ATT protocol header size (opcode + handle) subtracted from MTU to get the usable payload. */
+private const val ATT_HEADER_SIZE = 3
+
 internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? {
     val mtu = (this as? AndroidPeripheral)?.mtu?.value ?: return null
-    return (mtu - 3).takeIf { it > 0 }
+    return (mtu - ATT_HEADER_SIZE).takeIf { it > 0 }
 }

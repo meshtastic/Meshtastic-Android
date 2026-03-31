@@ -14,7 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.ble
+package org.meshtastic.feature.firmware.ota
 
-/** Extension to convert a [BleService] to a [MeshtasticRadioProfile]. */
-fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile = KableMeshtasticRadioProfile(this)
+import okio.ByteString.Companion.toByteString
+
+/** KMP utility functions for firmware hash calculation. */
+object FirmwareHashUtil {
+
+    /**
+     * Calculate SHA-256 hash of raw bytes.
+     *
+     * @param data Firmware bytes to hash
+     * @return 32-byte SHA-256 hash
+     */
+    fun calculateSha256Bytes(data: ByteArray): ByteArray =
+        data.toByteString().sha256().toByteArray()
+
+    /** Convert byte array to lowercase hex string. */
+    fun bytesToHex(bytes: ByteArray): String =
+        bytes.toByteString().hex()
+}
+

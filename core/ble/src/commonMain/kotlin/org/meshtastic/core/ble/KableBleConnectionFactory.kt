@@ -21,5 +21,5 @@ import org.koin.core.annotation.Single
 
 @Single
 class KableBleConnectionFactory : BleConnectionFactory {
-    override fun create(scope: CoroutineScope, tag: String): BleConnection = KableBleConnection(scope, tag)
+    override fun create(scope: CoroutineScope, tag: String): BleConnection = KableBleConnection(scope)
 }

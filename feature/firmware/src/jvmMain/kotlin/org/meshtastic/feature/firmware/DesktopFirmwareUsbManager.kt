@@ -18,7 +18,9 @@ package org.meshtastic.feature.firmware
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import org.koin.core.annotation.Single
 
+@Single
 class DesktopFirmwareUsbManager : FirmwareUsbManager {
     override fun deviceDetachFlow(): Flow<Unit> = emptyFlow()
 }
