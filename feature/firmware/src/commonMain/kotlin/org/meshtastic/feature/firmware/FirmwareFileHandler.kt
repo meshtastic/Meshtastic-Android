@@ -19,6 +19,7 @@ package org.meshtastic.feature.firmware
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
 
+@Suppress("TooManyFunctions")
 interface FirmwareFileHandler {
     fun cleanupAllTemporaryFiles()
 
@@ -41,6 +42,21 @@ interface FirmwareFileHandler {
     ): FirmwareArtifact?
 
     suspend fun getFileSize(file: FirmwareArtifact): Long
+
+    /** Read the raw bytes of a [FirmwareArtifact]. */
+    suspend fun readBytes(artifact: FirmwareArtifact): ByteArray
+
+    /**
+     * Copy a platform URI into a temporary [FirmwareArtifact] so it can be read with [readBytes]. Returns `null` when
+     * the URI cannot be resolved.
+     */
+    suspend fun importFromUri(uri: CommonUri): FirmwareArtifact?
+
+    /**
+     * Extract all entries from a zip [artifact] into a `Map<entryName, bytes>`. Used by the DFU handler to parse Nordic
+     * DFU packages.
+     */
+    suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray>
 
     suspend fun deleteFile(file: FirmwareArtifact)
 

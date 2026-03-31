@@ -27,11 +27,8 @@ object FirmwareHashUtil {
      * @param data Firmware bytes to hash
      * @return 32-byte SHA-256 hash
      */
-    fun calculateSha256Bytes(data: ByteArray): ByteArray =
-        data.toByteString().sha256().toByteArray()
+    fun calculateSha256Bytes(data: ByteArray): ByteArray = data.toByteString().sha256().toByteArray()
 
     /** Convert byte array to lowercase hex string. */
-    fun bytesToHex(bytes: ByteArray): String =
-        bytes.toByteString().hex()
+    fun bytesToHex(bytes: ByteArray): String = bytes.toByteString().hex()
 }
-

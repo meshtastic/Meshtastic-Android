@@ -25,11 +25,11 @@ import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import org.koin.core.annotation.Single
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileOutputStream
@@ -57,7 +57,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
             .onFailure { e -> Logger.w(e) { "Failed to cleanup temp directory" } }
     }
 
-    override suspend fun checkUrlExists(url: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun checkUrlExists(url: String): Boolean = withContext(ioDispatcher) {
         try {
             client.head(url).status.isSuccess()
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -67,7 +67,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
     }
 
     override suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): FirmwareArtifact? =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val response =
                 try {
                     client.get(url)
@@ -116,7 +116,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         hardware: DeviceHardware,
         fileExtension: String,
         preferredFilename: String?,
-    ): FirmwareArtifact? = withContext(Dispatchers.IO) {
+    ): FirmwareArtifact? = withContext(ioDispatcher) {
         val inputFile = uri.toLocalFileOrNull() ?: return@withContext null
         extractFromZipFile(inputFile, hardware, fileExtension, preferredFilename)
     }
@@ -126,15 +126,15 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         hardware: DeviceHardware,
         fileExtension: String,
         preferredFilename: String?,
-    ): FirmwareArtifact? = withContext(Dispatchers.IO) {
+    ): FirmwareArtifact? = withContext(ioDispatcher) {
         val inputFile = zipFile.toLocalFileOrNull() ?: return@withContext null
         extractFromZipFile(inputFile, hardware, fileExtension, preferredFilename)
     }
 
     override suspend fun getFileSize(file: FirmwareArtifact): Long =
-        withContext(Dispatchers.IO) { file.toLocalFileOrNull()?.takeIf { it.exists() }?.length() ?: 0L }
+        withContext(ioDispatcher) { file.toLocalFileOrNull()?.takeIf { it.exists() }?.length() ?: 0L }
 
-    override suspend fun deleteFile(file: FirmwareArtifact) = withContext(Dispatchers.IO) {
+    override suspend fun deleteFile(file: FirmwareArtifact) = withContext(ioDispatcher) {
         if (!file.isTemporary) return@withContext
         val localFile = file.toLocalFileOrNull() ?: return@withContext
         if (localFile.exists()) {
@@ -142,8 +142,40 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         }
     }
 
+    override suspend fun readBytes(artifact: FirmwareArtifact): ByteArray = withContext(ioDispatcher) {
+        val file =
+            artifact.toLocalFileOrNull() ?: throw IOException("Cannot resolve artifact to file: ${artifact.uri}")
+        file.readBytes()
+    }
+
+    override suspend fun importFromUri(uri: CommonUri): FirmwareArtifact? = withContext(ioDispatcher) {
+        val sourceFile = uri.toLocalFileOrNull() ?: return@withContext null
+        if (!sourceFile.exists()) return@withContext null
+        if (!tempDir.exists()) tempDir.mkdirs()
+        val dest = File(tempDir, "ota_firmware.bin")
+        sourceFile.copyTo(dest, overwrite = true)
+        dest.toFirmwareArtifact()
+    }
+
+    override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
+        withContext(ioDispatcher) {
+            val entries = mutableMapOf<String, ByteArray>()
+            val file = artifact.toLocalFileOrNull() ?: throw IOException("Cannot resolve artifact: ${artifact.uri}")
+            ZipInputStream(file.inputStream()).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    if (!entry.isDirectory) {
+                        entries[entry.name] = zip.readBytes()
+                    }
+                    zip.closeEntry()
+                    entry = zip.nextEntry
+                }
+            }
+            entries
+        }
+
     override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val sourceFile = source.toLocalFileOrNull() ?: throw IOException("Cannot open source URI")
             val destinationFile = destinationUri.toLocalFileOrNull() ?: throw IOException("Cannot open destination URI")
             destinationFile.parentFile?.mkdirs()

@@ -18,6 +18,7 @@ package org.meshtastic.feature.firmware
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
@@ -25,14 +26,11 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
-import org.koin.core.annotation.Single
 import org.meshtastic.core.resources.UiText
 
 @Single
-class DesktopFirmwareUpdateManager(
-    private val radioPrefs: RadioPrefs,
-    private val usbUpdateHandler: DesktopUsbUpdateHandler,
-) : FirmwareUpdateManager {
+class DesktopFirmwareUpdateManager(private val radioPrefs: RadioPrefs, private val usbUpdateHandler: UsbUpdateHandler) :
+    FirmwareUpdateManager {
     override suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,

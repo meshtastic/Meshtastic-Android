@@ -61,20 +61,20 @@ class AndroidFirmwareUpdateManager(
 
     private fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> {
-            if (isEsp32Architecture(hardware.architecture)) {
+            if (hardware.isEsp32Arc) {
                 error("Serial/USB firmware update not supported for ESP32 devices from the app")
             }
             usbUpdateHandler
         }
         radioPrefs.isBle() -> {
-            if (isEsp32Architecture(hardware.architecture)) {
+            if (hardware.isEsp32Arc) {
                 esp32OtaUpdateHandler
             } else {
                 secureDfuHandler
             }
         }
         radioPrefs.isTcp() -> {
-            if (isEsp32Architecture(hardware.architecture)) {
+            if (hardware.isEsp32Arc) {
                 esp32OtaUpdateHandler
             } else {
                 // Should be handled/validated before calling startUpdate
@@ -90,8 +90,6 @@ class AndroidFirmwareUpdateManager(
         radioPrefs.isTcp() -> extractIpFromAddress(radioPrefs.devAddr.value) ?: ""
         else -> ""
     }
-
-    private fun isEsp32Architecture(architecture: String): Boolean = architecture.startsWith("esp32", ignoreCase = true)
 
     private fun extractIpFromAddress(address: String?): String? =
         if (address != null && address.startsWith("t") && address.length > 1) {

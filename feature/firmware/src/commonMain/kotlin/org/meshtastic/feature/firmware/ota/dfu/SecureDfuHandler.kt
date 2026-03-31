@@ -18,20 +18,18 @@ package org.meshtastic.feature.firmware.ota.dfu
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
@@ -49,12 +47,11 @@ import org.meshtastic.core.resources.firmware_update_waiting_reboot
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.firmware.DfuInternalState
 import org.meshtastic.feature.firmware.FirmwareArtifact
+import org.meshtastic.feature.firmware.FirmwareFileHandler
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
-import java.io.File
-import java.util.zip.ZipInputStream
 
 private const val PERCENT_MAX = 100
 private const val GATT_RELEASE_DELAY_MS = 1_500L
@@ -62,15 +59,15 @@ private const val DFU_REBOOT_WAIT_MS = 3_000L
 private const val RETRY_DELAY_MS = 2_000L
 private const val CONNECT_ATTEMPTS = 4
 
-private val json = Json { ignoreUnknownKeys = true }
-
 /**
- * [FirmwareUpdateHandler] for nRF52 devices using a KMP-native implementation of the Nordic Secure DFU protocol over
- * Kable BLE.
+ * KMP [FirmwareUpdateHandler] for nRF52 devices using the Nordic Secure DFU protocol over Kable BLE.
+ *
+ * All platform I/O (zip extraction, file reading) is delegated to [FirmwareFileHandler].
  */
 @Single
 class SecureDfuHandler(
     private val firmwareRetriever: FirmwareRetriever,
+    private val firmwareFileHandler: FirmwareFileHandler,
     private val radioController: RadioController,
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
@@ -94,7 +91,7 @@ class SecureDfuHandler(
     ): FirmwareArtifact? {
         var cleanupArtifact: FirmwareArtifact? = null
         return try {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 // ── 1. Obtain the .zip file ──────────────────────────────────────
                 cleanupArtifact = obtainZipFile(release, hardware, firmwareUri, updateState)
                 val zipFile = cleanupArtifact ?: return@withContext null
@@ -105,7 +102,8 @@ class SecureDfuHandler(
                         ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu)),
                     ),
                 )
-                val pkg = extractDfuZip(zipFile.localPath())
+                val entries = firmwareFileHandler.extractZipEntries(zipFile)
+                val pkg = parseDfuZipEntries(entries)
 
                 // ── 3. Disconnect mesh service, trigger buttonless DFU ───────────
                 emit(DfuInternalState.EnablingDfuMode(target))
@@ -267,48 +265,4 @@ class SecureDfuHandler(
     private fun emit(state: DfuInternalState) {
         _progressFlow.tryEmit(state)
     }
-
-    private fun FirmwareArtifact.localPath(): String = uri.toPlatformUri().toString().removePrefix("file://")
-}
-
-// ── ZIP extraction (java.util.zip) ───────────────────────────────────────────
-
-/**
- * Extracts the init packet (.dat) and firmware binary (.bin) from a Nordic DFU zip.
- *
- * The zip must contain a `manifest.json` with at least one of: `application`, `softdevice_bootloader`, `bootloader`, or
- * `softdevice` entries pointing to the .bin and .dat files.
- */
-@Suppress("ThrowsCount")
-internal fun extractDfuZip(zipPath: String): DfuZipPackage {
-    val entries = mutableMapOf<String, ByteArray>()
-
-    ZipInputStream(File(zipPath).inputStream().buffered()).use { zip ->
-        var entry = zip.nextEntry
-        while (entry != null) {
-            if (!entry.isDirectory) {
-                entries[entry.name] = zip.readBytes()
-            }
-            zip.closeEntry()
-            entry = zip.nextEntry
-        }
-    }
-
-    val manifestBytes =
-        entries["manifest.json"] ?: throw DfuException.InvalidPackage("manifest.json not found in DFU zip")
-
-    val manifest =
-        runCatching { json.decodeFromString<DfuManifest>(manifestBytes.decodeToString()) }
-            .getOrElse { e -> throw DfuException.InvalidPackage("Failed to parse manifest.json: ${e.message}") }
-
-    val entry =
-        manifest.manifest.primaryEntry ?: throw DfuException.InvalidPackage("No firmware entry found in manifest.json")
-
-    val initPacket =
-        entries[entry.datFile] ?: throw DfuException.InvalidPackage("Init packet '${entry.datFile}' not found in zip")
-    val firmware =
-        entries[entry.binFile] ?: throw DfuException.InvalidPackage("Firmware '${entry.binFile}' not found in zip")
-
-    Logger.i { "DFU: Extracted zip — init packet ${initPacket.size}B, firmware ${firmware.size}B" }
-    return DfuZipPackage(initPacket = initPacket, firmware = firmware)
 }

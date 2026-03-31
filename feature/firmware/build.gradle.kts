@@ -52,6 +52,7 @@ kotlin {
             implementation(libs.kable.core)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.network)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
         }

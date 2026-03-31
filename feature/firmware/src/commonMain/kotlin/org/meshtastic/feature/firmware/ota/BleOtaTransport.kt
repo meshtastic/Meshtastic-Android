@@ -295,9 +295,7 @@ class BleOtaTransport(
                 val chunkSize = minOf(data.size - offset, maxLen)
                 val packet = data.copyOfRange(offset, offset + chunkSize)
 
-                bleConnection.profile(OTA_SERVICE_UUID) { service ->
-                    service.write(otaChar, packet, writeType)
-                }
+                bleConnection.profile(OTA_SERVICE_UUID) { service -> service.write(otaChar, packet, writeType) }
 
                 offset += chunkSize
                 packetsSent++
