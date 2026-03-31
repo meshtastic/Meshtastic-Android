@@ -37,7 +37,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
@@ -47,7 +46,8 @@ import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.DEFAULT_BLE_WRITE_VALUE_LENGTH
-import kotlin.time.Duration.Companion.seconds
+import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
+import org.meshtastic.feature.firmware.ota.scanForBleDevice
 
 /**
  * Kable-based transport for the Nordic Secure DFU (Secure DFU over BLE) protocol.
@@ -85,7 +85,7 @@ class SecureDfuTransport(
         Logger.i { "DFU: Scanning for device $address to trigger buttonless DFU..." }
 
         val device =
-            scanForDevice(address) { d -> d.address == address }
+            scanForDevice { d -> d.address == address }
                 ?: throw DfuException.ConnectionFailed("Device $address not found for buttonless DFU trigger")
 
         Logger.i { "DFU: Connecting to $address to trigger buttonless DFU..." }
@@ -111,12 +111,12 @@ class SecureDfuTransport(
      * notifications on the Control Point.
      */
     suspend fun connectToDfuMode(): Result<Unit> = runCatching {
-        val dfuAddress = calculateDfuAddress(address)
+        val dfuAddress = calculateMacPlusOne(address)
         val targetAddresses = setOf(address, dfuAddress)
         Logger.i { "DFU: Scanning for DFU mode device at $targetAddresses..." }
 
         val device =
-            scanForDevice(address) { d -> d.address in targetAddresses }
+            scanForDevice { d -> d.address in targetAddresses }
                 ?: throw DfuException.ConnectionFailed("DFU mode device not found. Tried: $targetAddresses")
 
         Logger.i { "DFU: Found DFU mode device at ${device.address}, connecting..." }
@@ -411,32 +411,20 @@ class SecureDfuTransport(
     // Scanning helpers
     // ---------------------------------------------------------------------------
 
-    private suspend fun scanForDevice(hint: String, predicate: (BleDevice) -> Boolean): BleDevice? {
-        repeat(SCAN_RETRY_COUNT) { attempt ->
-            Logger.d { "DFU: Scan attempt ${attempt + 1}/$SCAN_RETRY_COUNT (hint=$hint)" }
-            val device =
-                scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SecureDfuUuids.SERVICE).firstOrNull(predicate)
-            if (device != null) return device
-            if (attempt < SCAN_RETRY_COUNT - 1) delay(SCAN_RETRY_DELAY_MS)
-        }
-        return null
-    }
-
-    /** Nordic devices increment the last MAC byte when entering DFU mode. */
-    private fun calculateDfuAddress(mac: String): String {
-        val parts = mac.split(":")
-        if (parts.size != 6) return mac
-        val last = parts[5].toIntOrNull(16) ?: return mac
-        val incremented = ((last + 1) and 0xFF).toString(16).uppercase().padStart(2, '0')
-        return parts.take(5).joinToString(":") + ":" + incremented
-    }
+    private suspend fun scanForDevice(predicate: (BleDevice) -> Boolean): BleDevice? = scanForBleDevice(
+        scanner = scanner,
+        tag = "DFU",
+        serviceUuid = SecureDfuUuids.SERVICE,
+        retryCount = SCAN_RETRY_COUNT,
+        retryDelayMs = SCAN_RETRY_DELAY_MS,
+        predicate = predicate,
+    )
 
     // ---------------------------------------------------------------------------
     // Constants
     // ---------------------------------------------------------------------------
 
     companion object {
-        private val SCAN_TIMEOUT = 10.seconds
         private const val CONNECT_TIMEOUT_MS = 15_000L
         private const val COMMAND_TIMEOUT_MS = 30_000L
         private const val SUBSCRIPTION_SETTLE_MS = 500L

@@ -26,7 +26,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
@@ -39,7 +38,6 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
-import kotlin.time.Duration.Companion.seconds
 
 /** BLE transport implementation for ESP32 Unified OTA protocol using Kable. */
 class BleOtaTransport(
@@ -59,49 +57,21 @@ class BleOtaTransport(
 
     private var isConnected = false
 
-    /** Scan for the device by MAC address with retries. */
+    /** Scan for the device by MAC address (or MAC+1 for OTA mode) with retries. */
     private suspend fun scanForOtaDevice(): BleDevice? {
-        val otaAddress = calculateOtaAddress(macAddress = address)
+        val otaAddress = calculateMacPlusOne(address)
         val targetAddresses = setOf(address, otaAddress)
         Logger.i { "BLE OTA: Will match addresses: $targetAddresses" }
 
-        repeat(SCAN_RETRY_COUNT) { attempt ->
-            Logger.i { "BLE OTA: Scanning for device (attempt ${attempt + 1}/$SCAN_RETRY_COUNT)..." }
-
-            val foundDevices = mutableSetOf<String>()
-            val device =
-                scanner
-                    .scan(timeout = SCAN_TIMEOUT, serviceUuid = OTA_SERVICE_UUID)
-                    .onEach { d ->
-                        if (foundDevices.add(d.address)) {
-                            Logger.d { "BLE OTA: Scan found device: ${d.address} (name=${d.name})" }
-                        }
-                    }
-                    .firstOrNull { it.address in targetAddresses }
-
-            if (device != null) {
-                Logger.i { "BLE OTA: Found target device at ${device.address}" }
-                return device
-            }
-
-            Logger.w { "BLE OTA: Target addresses $targetAddresses not in ${foundDevices.size} devices found" }
-
-            if (attempt < SCAN_RETRY_COUNT - 1) {
-                Logger.i { "BLE OTA: Device not found, waiting ${SCAN_RETRY_DELAY_MS}ms before retry..." }
-                delay(SCAN_RETRY_DELAY_MS)
-            }
+        return scanForBleDevice(
+            scanner = scanner,
+            tag = "BLE OTA",
+            serviceUuid = OTA_SERVICE_UUID,
+            retryCount = SCAN_RETRY_COUNT,
+            retryDelayMs = SCAN_RETRY_DELAY_MS,
+        ) {
+            it.address in targetAddresses
         }
-        return null
-    }
-
-    @Suppress("ReturnCount", "MagicNumber")
-    private fun calculateOtaAddress(macAddress: String): String {
-        val parts = macAddress.split(":")
-        if (parts.size != 6) return macAddress
-
-        val lastByte = parts[5].toIntOrNull(16) ?: return macAddress
-        val incrementedByte = ((lastByte + 1) and 0xFF).toString(16).uppercase().padStart(2, '0')
-        return parts.take(5).joinToString(":") + ":" + incrementedByte
     }
 
     @Suppress("MagicNumber")
@@ -313,7 +283,6 @@ class BleOtaTransport(
     }
 
     companion object {
-        private val SCAN_TIMEOUT = 10.seconds
         private const val CONNECTION_TIMEOUT_MS = 15_000L
         private const val ERASING_TIMEOUT_MS = 60_000L
         private const val ACK_TIMEOUT_MS = 10_000L

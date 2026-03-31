@@ -49,7 +49,6 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.coil)
-            implementation(libs.kable.core)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.network)
