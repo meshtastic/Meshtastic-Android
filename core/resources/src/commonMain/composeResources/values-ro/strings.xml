@@ -134,7 +134,6 @@
     <string name="config_position_gps_update_interval_summary">Cât de des ar trebui să se încerce obținerea locației GPS (&lt;10 secunde menține GPS-ul activ).</string>
     <string name="config_position_flags_summary">Câmpuri opționale care trebuie incluse la asamblarea mesajelor de poziție. Cu cât sunt incluse mai multe câmpuri, cu atât mesajul va fi mai mare, ceea ce va duce la un timp de transmisie mai lung și la un risc mai mare de pierdere a pachetelor.</string>
     <string name="config_power_is_power_saving_summary">Va păstra totul în repaus cât mai mult posibil, pentru rolul de tracker și senzor, aceasta va include și radioul LoRa. Nu utilizați această setare dacă doriți să utilizați dispozitivul cu aplicațiile telefonului sau dacă utilizați un dispozitiv fără buton de utilizator.</string>
-    <string name="config_security_public_key">Generată din cheia publică și trimisă către alte noduri din rețea pentru a le permite să calculeze o cheie secretă comună.</string>
     <string name="config_security_private_key">Utilizat pentru a crea o cheie partajată cu un dispozitiv la distanță.</string>
     <string name="config_security_admin_key">Cheia publică autorizată să trimită mesaje de administrare către acest nod.</string>
     <string name="config_security_is_managed">Dispozitivul este gestionat de un administrator de rețea, utilizatorul neputând accesa niciuna dintre setările dispozitivului.</string>

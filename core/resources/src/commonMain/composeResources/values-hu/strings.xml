@@ -132,7 +132,6 @@
     <string name="config_position_gps_update_interval_summary">Milyen gyakran próbáljunk GPS-pozíciót szerezni (&lt; 10 mp alatti érték bekapcsolva tartja a GPS-t).</string>
     <string name="config_position_flags_summary">Opcionális mezők a pozícióüzenetek összeállításához. Minél több mezőt tartalmaz az üzenet, annál nagyobb lesz — hosszabb adásidővel és nagyobb csomagvesztési kockázattal.</string>
     <string name="config_power_is_power_saving_summary">Mindent a lehető legjobban alvó módba helyez; követő és érzékelő szerepkörben ez a LoRa-rádiót is érinti. Ne használd ezt a beállítást, ha telefonos alkalmazással szeretnéd használni az eszközt, vagy ha az eszközön nincs felhasználói gomb.</string>
-    <string name="config_security_public_key">A nyilvános kulcsodból generált érték, amelyet a hálózat többi csomópontjának kiküldünk, hogy közös titkos kulcsot számíthassanak.</string>
     <string name="config_security_private_key">Távoli eszközzel közös kulcs létrehozására használatos.</string>
     <string name="config_security_admin_key">Az a nyilvános kulcs, amely jogosult admin üzeneteket küldeni ehhez a csomóponthoz.</string>
     <string name="config_security_is_managed">Az eszközt hálózati adminisztrátor kezeli, a felhasználó nem fér hozzá az eszköz beállításaihoz.</string>

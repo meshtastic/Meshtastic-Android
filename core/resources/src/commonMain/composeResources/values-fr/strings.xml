@@ -140,7 +140,6 @@
     <string name="config_position_gps_update_interval_summary">À quelle fréquence devrions-nous essayer d'obtenir une position GPS (&lt;10sec le GPS est maintenu allumé).</string>
     <string name="config_position_flags_summary">Champs optionnels à inclure dans les messages de position. Plus il y en a, plus le message est grand, plus cela augmentant le temps d'occupation du réseau et le risque de perte.</string>
     <string name="config_power_is_power_saving_summary">Sera en veille profonde autant que possible, pour les rôles traqueur et capteur, cela inclura également la radio LoRa. N'utilisez pas ce paramètre si vous voulez utiliser votre appareil avec les applications de téléphone ou si vous utilisez un appareil sans bouton utilisateur.</string>
-    <string name="config_security_public_key">Généré à partir de votre clé publique et envoyé à d'autres nœuds sur le maillage pour leur permettre de calculer une clé secrète partagée.</string>
     <string name="config_security_private_key">Utilisée pour créer une clé partagée avec un appareil distant.</string>
     <string name="config_security_admin_key">Clé publique autorisée à envoyer des messages d’administration à ce nœud.</string>
     <string name="config_security_is_managed">L'appareil est géré par un administrateur de maillage, l'utilisateur ne peut accéder à aucun des paramètres de l'appareil.</string>

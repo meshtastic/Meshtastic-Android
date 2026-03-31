@@ -141,7 +141,7 @@
     <string name="config_position_gps_update_interval_summary">Как часто мы пытаемся получить местоположение GPS (&lt;10sec держит GPS включенным).</string>
     <string name="config_position_flags_summary">Необязательные поля для включения при сборке сообщений о местоположении. Чем больше полей будет включено, тем больше будет сообщение, что приведет к увеличению времени трансляции и повышению риска потери пакетов.</string>
     <string name="config_power_is_power_saving_summary">Все устройства будут работать в режиме ожидания, насколько это возможно, в качестве трекера и датчика также будет использоваться радиоприемник lora. Не используйте эту настройку, если вы хотите использовать свое устройство с приложениями для телефона или же устройство без кнопки взаимодействий.</string>
-    <string name="config_security_public_key">Сгенерирован из вашего открытого ключа и отправлен на другие ноды сети, чтобы они могли вычислить общий секретный ключ.</string>
+    <string name="config_security_public_key">Сгенерировано из вашего приватного ключа и отправлено другим нодам в сети, чтобы они могли вычислить общий секретный ключ.</string>
     <string name="config_security_private_key">Используется для создания общего ключа с удаленным устройством.</string>
     <string name="config_security_admin_key">Открытый ключ для отправки сообщения администратора на данную ноду.</string>
     <string name="config_security_is_managed">Устройство управляется администратором сетки, пользователь не может получить доступ к настройкам устройства.</string>
@@ -833,6 +833,11 @@
     <string name="show_waypoints">Показать путевые точки</string>
     <string name="show_precision_circle">Показывать точные круги</string>
     <string name="client_notification">Уведомления клиента</string>
+    <string name="key_verification_title">Проверка ключа</string>
+    <string name="key_verification_request_title">Запрос проверки ключа</string>
+    <string name="key_verification_final_title">Проверка ключа завершена</string>
+    <string name="duplicated_public_key_title">Обнаружен дубликат открытого ключа</string>
+    <string name="low_entropy_key_title">Обнаружен слабый ключ шифрования</string>
     <string name="compromised_keys">Обнаружены скомпрометированные ключи, нажмите OK для пересоздания.</string>
     <string name="regenerate_private_key">Пересоздать приватный ключ</string>
     <string name="regenerate_keys_confirmation">Вы уверены, что хотите пересоздать свой приватный ключ?\n\nНоды, которые ранее обменивались ключами с этой нодой, должны будут удалить её и повторно обменяться ключами для того, чтобы возобновить защищённую связь.</string>
@@ -1253,4 +1258,9 @@
     <string name="update_device">Обновление устройства</string>
     <string name="note">Примечание</string>
     <string name="firmware_charge_warning">Убедитесь, что ваше устройство полностью заряжено перед началом обновления прошивки. Не отключайте и не выключайте устройство во время процесса обновления.</string>
+    <string name="device_storage_ui_title">Хранилище устройства и UI (только для чтения)</string>
+    <string name="device_theme_language">Тема: %1$s, язык: %2$s</string>
+    <string name="files_available">Доступные файлы (%1$d):</string>
+    <string name="file_entry">- %1$s (%2$d байт)</string>
+    <string name="no_files_manifested">Файлы не отобразились.</string>
 </resources>

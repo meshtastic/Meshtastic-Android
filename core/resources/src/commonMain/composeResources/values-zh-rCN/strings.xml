@@ -140,7 +140,6 @@
     <string name="config_position_gps_update_interval_summary">我们应该多长时间尝试获取GPS位置(&lt;10秒将GPS保持开启)。</string>
     <string name="config_position_flags_summary">包含的字段越多，信息就越大，导致通讯时间更长，丢包风险更高.</string>
     <string name="config_power_is_power_saving_summary">尽可能让所有设备处于睡眠状态，对于跟踪器和传感器来说，这也包括 LoRa 无线电。如果您想将电台与手机 App 一起使用，或使用没有用户按钮的电台，请不要使用此设置。</string>
-    <string name="config_security_public_key">从您的公钥生成并发送到网格上的其他节点，让它们能够计算共享的密钥。</string>
     <string name="config_security_private_key">用来创建远程设备共享密钥</string>
     <string name="config_security_admin_key">授权向该节点发送管理员密钥</string>
     <string name="config_security_is_managed">设备由 Mesh 管理员管理，用户无法访问任何设备设置。</string>

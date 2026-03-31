@@ -125,7 +125,6 @@
     <string name="config_position_gps_update_interval_summary">Jak często powinniśmy próbować uzyskać pozycję GPS (&lt;10 sekund utrzymuje GPS włączony).</string>
     <string name="config_position_flags_summary">Opcjonalne pola dołączane do danych lokalizacji. Im więcej pól, tym większy rozmiar pakietu, co wydłuża czas transmisji i zwiększa ryzyko jego utraty.</string>
     <string name="config_power_is_power_saving_summary">Uśpij wszystko na tak długo, jak to możliwe, w przypadku funkcji trackera i czujnika obejmie to również radio lora. Nie używaj tego ustawienia, jeśli chcesz korzystać z urządzenia z aplikacjami na telefon lub używasz urządzenia bez przycisków.</string>
-    <string name="config_security_public_key">Generowany na podstawie klucza publicznego użytkownika i wysyłany do innych węzłów w sieci, aby umożliwić im obliczenie wspólnego klucza tajnego.</string>
     <string name="config_security_private_key">Używane do tworzenia klucza współdzielonego ze zdalnym urządzeniem.</string>
     <string name="config_security_admin_key">Klucz publiczny uprawniony do wysyłania wiadomości administracyjnych do tego węzła.</string>
     <string name="config_security_is_managed">Urządzenie jest zarządzane przez administratora sieci mesh, użytkownik nie ma dostępu do żadnych ustawień urządzenia.</string>

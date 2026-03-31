@@ -110,7 +110,6 @@
     <string name="config_position_gps_update_interval_summary">Jak často má zařízení zjišťovat polohu pomocí GPS (při intervalu kratším než 10 s zůstává GPS trvale zapnutá).</string>
     <string name="config_position_flags_summary">Volitelná pole, která se mají zahrnout při sestavování polohových zpráv. Čím více polí je zahrnuto, tím větší bude zpráva – to vede k delší době vysílání a vyššímu riziku ztráty paketů.</string>
     <string name="config_power_is_power_saving_summary">Uvede zařízení do co nejhlubšího spánku. U rolí tracker a sensor to zahrnuje i vypnutí LoRa rádia. Nepoužívejte toto nastavení, pokud chcete zařízení používat s mobilní aplikací nebo pokud vaše zařízení nemá uživatelské tlačítko.</string>
-    <string name="config_security_public_key">Je vytvořeno z tvého veřejného klíče a rozesláno ostatním uzlům v síti, aby mohly vypočítat společný (sdílený) tajný klíč.</string>
     <string name="config_security_private_key">Slouží k vytvoření sdíleného klíče se vzdáleným zařízením.</string>
     <string name="config_security_admin_key">Veřejný klíč oprávněný k odesílání administrátorských zpráv tomuto uzlu.</string>
     <string name="config_security_is_managed">Toto zařízení spravuje správce mesh sítě, uživatel nemůže měnit žádná jeho nastavení.</string>

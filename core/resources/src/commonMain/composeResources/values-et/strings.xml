@@ -141,7 +141,6 @@
     <string name="config_position_gps_update_interval_summary">Kui tihti peaksime proovima GPS asukohta määrata (&lt;10sekundit hoiab GPSi sisselülitatuna).</string>
     <string name="config_position_flags_summary">Valikulised väljad lisatakse asukohasõnumitele, mida rohkem välju, seda pikem sõnum – see pikendab eetriaega ja suurendab pakettide kadumise ohtu.</string>
     <string name="config_power_is_power_saving_summary">Unereziimis nii palju kui võimalik, jälgitava ja anduri rolli puhul hõlmab see ka Lora raadiot. Ärge kasutage seda sätet, kui soovite oma seadet kasutada telefonirakendustega või kui kasutate seadet ilma kasutajanuputa.</string>
-    <string name="config_security_public_key">Genereeritakse teie avalikust võtmest ja saadetakse teistele kärgvõrgu sõlmedele, et nad saaksid arvutada jagatud salajase võtme.</string>
     <string name="config_security_private_key">Kasutatakse jagatud võtme loomiseks kaugseadmega.</string>
     <string name="config_security_admin_key">Avalik võti, millel on õigus sellele sõlmele administraatori sõnumeid saata.</string>
     <string name="config_security_is_managed">Seadet haldab võrgusilma administraator, kasutajal pole juurdepääsu seadme sätetele.</string>

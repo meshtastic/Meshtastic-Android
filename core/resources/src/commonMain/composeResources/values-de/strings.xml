@@ -141,7 +141,6 @@
     <string name="config_position_gps_update_interval_summary">Intervall zur Erfassung der Position (&lt;10sek. = dauerhaft).</string>
     <string name="config_position_flags_summary">Optionale Felder, die bei der Zusammenstellung von Standortnachrichten enthalten sein sollen. Je mehr Optionen ausgewählt werden, desto größer wird die Nachricht und die längere Übertragungszeit erhöht das Risiko für einen Nachrichtenverlust.</string>
     <string name="config_power_is_power_saving_summary">Versetzt alles so weit wie möglich in den Ruhezustand. Für die Tracker- und Sensorfunktion umfasst dies auch das Lora Funkgerät. Verwenden Sie diese Einstellung nicht, wenn Sie Ihr Gerät mit den Telefon Apps verwenden möchten oder wenn Sie ein Gerät ohne Benutzertaste verwenden.</string>
-    <string name="config_security_public_key">Wird aus Ihrem öffentlichen Schlüssel generiert und an andere Knoten im Netzwerk gesendet, damit diese einen gemeinsamen geheimen Schlüssel berechnen können.</string>
     <string name="config_security_private_key">Wird verwendet, um einen gemeinsamen Schlüssel mit einem entfernten Gerät zu erstellen.</string>
     <string name="config_security_admin_key">Der öffentliche Schlüssel, der zum Senden von administrativen Nachrichten an diesen Knoten berechtigt ist.</string>
     <string name="config_security_is_managed">Das Gerät wird von einem Netzwerkadministrator verwaltet, der Benutzer kann auf keine der Geräteeinstellungen zugreifen.</string>

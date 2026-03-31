@@ -140,7 +140,6 @@
     <string name="config_position_gps_update_interval_summary">Quanto spesso si tenterà di recuperare una posizione dal GPS (se &lt;10sec il GPS rimarrà sempre attivo).</string>
     <string name="config_position_flags_summary">Dati facoltativi da includere nei messaggi di posizione. Più campi sono selezionati, più grande sarà il messaggio, che richiederà maggior tempo di trasmissione e aumenterà il rischio di perdita di pacchetti.</string>
     <string name="config_power_is_power_saving_summary">Verranno sospese tutte le funzioni per la maggior parte del tempo. Per i ruoli di tracker e sensor, è inclusa nella sospensione anche la radio lora. Questa configurazione è sconsigliata se il dispositivo viene utilizzato con le app del telefono o se il dispositivo è privo di pulsanti utente.</string>
-    <string name="config_security_public_key">Generata a partire dalla chiave pubblica e inviata agli altri nodi della mesh per permettere loro di calcolare una chiave segreta condivisa.</string>
     <string name="config_security_private_key">Usata per creare una chiave condivisa con un dispositivo remoto.</string>
     <string name="config_security_admin_key">La chiave pubblica che autorizza un nodo a inviare messaggi di amministrazione a questo nodo.</string>
     <string name="config_security_is_managed">Il dispositivo è gestito da un amministratore nella mesh, l'utente non è in grado di accedere a nessuna delle impostazioni del dispositivo.</string>
