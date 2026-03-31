@@ -113,7 +113,11 @@ class MQTTRepositoryImpl(
         // Using IO-dispatcher since we use blocking MQTTClient.run()
         clientJob =
             scope.launch(Dispatchers.IO) {
-                val baseDelay = 2_000L // Base backoff value
+                @Suppress("MagicNumber")
+                val baseDelay = 2_000L
+
+                // Base backoff value
+                @Suppress("MagicNumber")
                 val maxDelay = 64_000L // Maximal backoff value
 
                 // Reconnection loop
@@ -125,6 +129,7 @@ class MQTTRepositoryImpl(
                         }
 
                     // Exponential backoff
+                    @Suppress("MagicNumber")
                     val delayMs =
                         when {
                             attempt == 1 -> 0
@@ -139,6 +144,7 @@ class MQTTRepositoryImpl(
 
                     // Creating client on each iteration
                     var newClient: MQTTClient? = null
+                    @Suppress("TooGenericExceptionCaught")
                     try {
                         newClient =
                             MQTTClient(
@@ -255,6 +261,7 @@ class MQTTRepositoryImpl(
             }
 
             publishSemaphore.withPermit {
+                @Suppress("TooGenericExceptionCaught")
                 try {
                     c.publish(
                         retain = retained,
