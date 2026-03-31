@@ -445,18 +445,6 @@ class BleRadioInterface(
         // onDisconnect is handled by SharedRadioInterfaceService.stopInterfaceLocked() directly.
         serviceScope.launch {
             withContext(NonCancellable) {
-                // Send ToRadio.disconnect before dropping the BLE link. The firmware calls its
-                // own close() immediately on receipt, resetting the PhoneAPI state machine
-                // (config nonce, packet queue, observers) without waiting for the 6-second BLE
-                // supervision timeout. Best-effort: if the write fails we still disconnect below.
-                val currentService = radioService
-                if (currentService != null) {
-                    try {
-                        withTimeoutOrNull(2_000L) { currentService.sendToRadio(ToRadio(disconnect = true).encode()) }
-                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                        Logger.w(e) { "[$address] Failed to send disconnect signal" }
-                    }
-                }
                 try {
                     bleConnection.disconnect()
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
