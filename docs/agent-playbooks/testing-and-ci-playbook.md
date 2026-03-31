@@ -30,8 +30,8 @@ Notes:
 - `feature/commonMain logic` changes:
   - `spotlessCheck`, `detekt`, `test`, `assembleDebug`.
 - `navigation/DI wiring` changes (app graph, Koin module/wrapper changes):
-  - `spotlessCheck`, `detekt`, `assembleDebug`, `test`, plus `testDebugUnitTest` if available locally.
-  - If touching any KMP module, also run the relevant `:compileKotlinJvm` task. CI validates all 22 KMP modules + `desktop:test`.
+  - `spotlessCheck`, `detekt`, `assembleDebug`, `test`, plus `testFdroidDebugUnitTest` and `testGoogleDebugUnitTest` when available locally.
+  - If touching any KMP module, also run `kmpSmokeCompile`.
 - `worker/service/background` changes:
   - `spotlessCheck`, `detekt`, `assembleDebug`, `test`, and targeted tests around WorkManager/service behavior.
 - `BLE/networking/core repository` changes:
@@ -57,8 +57,8 @@ Current reusable check workflow includes:
   `app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug mesh_service_example:lintDebug`
 - Host tests plus coverage aggregation:
   `test koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug core:api:koverXmlReportDebug core:barcode:koverXmlReportFdroidDebug core:barcode:koverXmlReportGoogleDebug mesh_service_example:koverXmlReportDebug desktop:koverXmlReport`
-- JVM smoke compile for all KMP JVM targets (all compile-only modules remain explicit):
-  `:core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:nfc:compileKotlinJvm :core:service:compileKotlinJvm :core:testing:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:connections:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm`
+- KMP smoke compile lifecycle task (auto-discovers KMP modules and runs JVM + iOS simulator compile checks):
+  `kmpSmokeCompile`
 - Android build tasks:
   `app:assembleFdroidDebug app:assembleGoogleDebug mesh_service_example:assembleDebug`
 - Instrumented tests (when emulator tests are enabled):

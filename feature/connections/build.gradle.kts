@@ -50,9 +50,11 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
-        androidUnitTest.dependencies {
-            implementation(libs.androidx.test.core)
-            implementation(libs.robolectric)
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.androidx.test.core)
+                implementation(libs.robolectric)
+            }
         }
     }
 }

@@ -104,7 +104,6 @@ import org.meshtastic.core.resources.role_tracker_desc
 import org.meshtastic.core.resources.router_role_confirmation_text
 import org.meshtastic.core.resources.time_zone
 import org.meshtastic.core.resources.triple_click_adhoc_ping
-import org.meshtastic.core.resources.unrecognized
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
@@ -137,7 +136,6 @@ private val Config.DeviceConfig.Role.description: StringResource
             Config.DeviceConfig.Role.LOST_AND_FOUND -> Res.string.role_lost_and_found_desc
             Config.DeviceConfig.Role.TAK_TRACKER -> Res.string.role_tak_tracker_desc
             Config.DeviceConfig.Role.ROUTER_LATE -> Res.string.role_router_late_desc
-            else -> Res.string.unrecognized
         }
 
 private val Config.DeviceConfig.RebroadcastMode.description: StringResource
@@ -150,8 +148,6 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
             Config.DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
             Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY ->
                 Res.string.rebroadcast_mode_core_portnums_only_desc
-
-            else -> Res.string.unrecognized
         }
 
 @Suppress("DEPRECATION", "LongMethod")

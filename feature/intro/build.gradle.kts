@@ -39,13 +39,15 @@ kotlin {
             implementation(libs.jetbrains.navigation3.ui)
         }
 
-        androidUnitTest.dependencies {
-            implementation(libs.junit)
-            implementation(libs.robolectric)
-            implementation(project.dependencies.platform(libs.androidx.compose.bom))
-            implementation(libs.androidx.test.core)
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.androidx.compose.ui.test.junit4)
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+                implementation(project.dependencies.platform(libs.androidx.compose.bom))
+                implementation(libs.androidx.test.core)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.androidx.compose.ui.test.junit4)
+            }
         }
     }
 }

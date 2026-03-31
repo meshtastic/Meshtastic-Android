@@ -42,6 +42,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.baro_pressure
 import org.meshtastic.core.resources.env_metrics_log
+import org.meshtastic.core.resources.hardware_model
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.node_id
@@ -225,7 +226,7 @@ fun HardwareInfo(
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.HardwareModel,
-        contentDescription = "Hardware Model",
+        contentDescription = stringResource(Res.string.hardware_model),
         text = hwModel,
         style = MaterialTheme.typography.labelSmall,
         contentColor = contentColor,

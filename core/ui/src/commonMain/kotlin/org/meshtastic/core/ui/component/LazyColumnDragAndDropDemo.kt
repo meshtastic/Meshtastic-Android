@@ -58,6 +58,11 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.preview_footer
+import org.meshtastic.core.resources.preview_header
+import org.meshtastic.core.resources.preview_item
 
 // Derived in part from:
 // https://github.com/androidx/androidx/blob/c92ad2941368202b2d78b8d14c71bf81e9525944/compose/foundation/foundation/integration-tests/foundation-demos/src/main/java/androidx/compose/foundation/demos/LazyColumnDragAndDropDemo.kt
@@ -80,15 +85,15 @@ fun LazyColumnDragAndDropDemo() {
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { Text("Header", Modifier.fillMaxWidth().padding(20.dp)) }
+        item { Text(stringResource(Res.string.preview_header), Modifier.fillMaxWidth().padding(20.dp)) }
 
         itemsIndexed(list, key = { _, item -> item }) { index, item ->
-            DraggableItem(dragDropState, index + 1) { isDragging ->
-                Card { Text("Item $item", Modifier.fillMaxWidth().padding(20.dp)) }
+            DraggableItem(dragDropState, index + 1) {
+                Card { Text(stringResource(Res.string.preview_item, item), Modifier.fillMaxWidth().padding(20.dp)) }
             }
         }
 
-        item { Text("Footer", Modifier.fillMaxWidth().padding(20.dp)) }
+        item { Text(stringResource(Res.string.preview_footer), Modifier.fillMaxWidth().padding(20.dp)) }
     }
 }
 

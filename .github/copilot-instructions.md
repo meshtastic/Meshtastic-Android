@@ -18,7 +18,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
   - **UI:** Jetpack Compose Multiplatform (Material 3).
   - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` and `desktop`.
-  - **Navigation:** JetBrains Navigation 3 (Stable Scene-based architecture) with shared backstack state.
+  - **Navigation:** JetBrains Navigation 3 (Stable Scene-based architecture) with shared backstack state. Deep linking uses RESTful paths (e.g. `/nodes/1234`) parsed by `DeepLinkRouter` in `core:navigation`.
   - **Lifecycle:** JetBrains multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
   - **Adaptive UI:** Material 3 Adaptive (v1.3+) with support for Large (1200dp) and Extra-large (1600dp) breakpoints.
   - **Database:** Room KMP.
@@ -28,7 +28,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | Directory | Description |
 | :--- | :--- |
 | `app/` | Main application module. Contains `MainActivity`, Koin DI modules, and app-level logic. Uses package `org.meshtastic.app`. |
-| `build-logic/` | Convention plugins for shared build configuration (e.g., `meshtastic.kmp.feature`, `meshtastic.kmp.library`, `meshtastic.koin`). |
+| `build-logic/` | Convention plugins for shared build configuration (e.g., `meshtastic.kmp.feature`, `meshtastic.kmp.library`, `meshtastic.kmp.jvm.android`, `meshtastic.koin`). |
 | `config/` | Detekt static analysis rules (`config/detekt/detekt.yml`) and Spotless formatting config (`config/spotless/.editorconfig`). |
 | `docs/` | Architecture docs and agent playbooks. See `docs/agent-playbooks/README.md` for version baseline and task recipes. |
 | `core/model` | Domain models and common data structures. |
@@ -39,9 +39,9 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:repository` | High-level domain interfaces (e.g., `NodeRepository`, `LocationRepository`). |
 | `core:domain` | Pure KMP business logic and UseCases. |
 | `core:data` | Core manager implementations and data orchestration. |
-| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`). |
+| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`, `BleRadioInterface`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
-| `core:navigation` | Shared navigation keys/routes for Navigation 3. |
+| `core:navigation` | Shared navigation keys/routes for Navigation 3, `DeepLinkRouter` for typed backstack synthesis, and `MeshtasticNavSavedStateConfig` for backstack persistence. |
 | `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
 | `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
 | `core:api` | Public AIDL/API integration module for external clients. |
@@ -61,10 +61,10 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **Material 3:** The app uses Material 3.
 -   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). For ViewModels or non-composable Coroutines, use the asynchronous `getStringSuspend(Res.string.your_key)`. NEVER use hardcoded strings, and NEVER use the blocking `getString()` in a coroutine.
 -   **Dialogs:** Use centralized components in `core:ui` (e.g., `MeshtasticResourceDialog`).
--   **Alerts:** Use `AlertHost(alertManager)` from `core:ui/commonMain` in each platform host shell (`Main.kt`, `DesktopMainScreen.kt`). Do NOT duplicate inline alert-rendering boilerplate. For shared QR/contact dialogs, use the `SharedDialogs` composable.
+-   **Alerts:** Use `AlertHost(alertManager)` from `core:ui/commonMain` in each platform host shell (`Main.kt`, `DesktopMainScreen.kt`). For global responses like traceroute and firmware validation, use the specialized common handlers: `TracerouteAlertHandler(uiViewModel)` and `FirmwareVersionCheck(uiViewModel)`. Do NOT duplicate inline alert-rendering logic or trigger alerts directly during composition. For shared QR/contact dialogs, use the `SharedDialogs(uiViewModel)` composable.
 -   **Placeholders:** For desktop/JVM features not yet implemented, use `PlaceholderScreen(name)` from `core:ui/commonMain`. Do NOT define inline placeholder composables in feature modules.
 -   **Theme Picker:** Use `ThemePickerDialog` and `ThemeOption` from `feature:settings/commonMain`. Do NOT duplicate the theme dialog or enum in platform-specific source sets.
--   **Adaptive Layouts:** Use `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support the 2026 Desktop Experience breakpoints. Prioritize **higher information density** and mouse-precision interactions for Desktop and External Display (Android 16 QPR3) targets. **Investigate 3-pane "Power User" scenes** (e.g., Node List + Detail + Map/Charts) using Navigation 3 Scenes and `ThreePaneScaffold` for widths ≥ 1200dp.
+-   **Adaptive Layouts:** Use `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support the 2026 Desktop Experience breakpoints. Prioritize **higher information density** and mouse-precision interactions for Desktop and External Display (Android 16 QPR3) targets. **Investigate 3-pane "Power User" scenes** (e.g., Node List + Detail + Map/Charts) using Navigation 3 Scenes, `extraPane()`, and draggable dividers (`VerticalDragHandle` + `paneExpansionState`) for widths ≥ 1200dp.
 -   **Platform/Flavor UI:** Inject platform-specific behavior (e.g., map providers) via `CompositionLocal` from `app`.
 
 ### B. Logic & Data Layer
@@ -75,8 +75,12 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
     -   `java.util.concurrent.locks.*` → `kotlinx.coroutines.sync.Mutex`.
     -   `java.io.*` → Okio (`BufferedSource`/`BufferedSink`).
     -   `kotlinx.coroutines.Dispatchers.IO` → `org.meshtastic.core.common.util.ioDispatcher` (expect/actual).
--   **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract it to a function in `commonMain`. Examples: `formatLogsTo()` in `feature:settings`, `handleNodeAction()` in `feature:node`, `findNodeByNameSuffix()` in `feature:connections`.
+-   **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract it to a function in `commonMain`. Examples: `formatLogsTo()` in `feature:settings`, `handleNodeAction()` in `feature:node`, `findNodeByNameSuffix()` in `feature:connections`, `MeshtasticAppShell` in `core:ui/commonMain`, and `BaseRadioTransportFactory` in `core:network/commonMain`.
 -   **KMP file naming:** In KMP modules, `commonMain` and platform source sets (`androidMain`, `jvmMain`) share the same package namespace. If both contain a file with the same name (e.g., `LogExporter.kt`), the Kotlin/JVM compiler will produce a duplicate class error. Use distinct filenames: keep the `expect` declaration in `LogExporter.kt` and put shared helpers in a separate file like `LogFormatter.kt`.
+-   **`jvmAndroidMain` source set:** Modules that share JVM-specific code between Android and Desktop apply the `meshtastic.kmp.jvm.android` convention plugin. This creates a `jvmAndroidMain` source set via Kotlin's hierarchy template API. Used in `core:common`, `core:model`, `core:data`, `core:network`, and `core:ui`.
+-   **Hierarchy template first:** Prefer Kotlin's default hierarchy template and convention plugins over manual `dependsOn(...)` graphs. Manual source-set wiring should be reserved for cases the template cannot model.
+-   **`expect`/`actual` restraint:** Prefer interfaces + DI for platform capabilities; use `expect`/`actual` for small unavoidable platform primitives. Avoid broad expect/actual class hierarchies when an interface-based boundary is sufficient.
+-   **Feature navigation graphs:** Feature modules export Navigation 3 graph functions as extension functions on `EntryProviderScope<NavKey>` in `commonMain` (e.g., `fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>)`). Host shells (`app`, `desktop`) assemble these into a single `entryProvider<NavKey>` block. Do NOT define navigation graphs in platform-specific source sets.
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Dependency Injection:** Use **Koin Annotations** with the K2 compiler plugin (`koin-plugin` in version catalog). The `koin-annotations` library version is unified with `koin-core` (both use `version.ref = "koin"`). The `KoinConventionPlugin` uses the typed `KoinGradleExtension` to configure the K2 plugin (e.g., `compileSafety.set(false)`). Keep root graph assembly in `app`.
 -   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`. Both `app` and `desktop` use `MeshtasticNavDisplay` from `core:ui/commonMain`, which configures `ViewModelStoreNavEntryDecorator` + `SaveableStateHolderNavEntryDecorator`. ViewModels obtained via `koinViewModel()` inside `entry<T>` blocks are scoped to the entry's backstack lifetime and cleared on pop.
@@ -140,8 +144,8 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - PR `check-changes` path filtering lives in `.github/workflows/pull-request.yml` and must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.) so CI is not skipped for infra-only changes.
 - **Runner strategy (three tiers):**
   - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). These run only shell scripts or GitHub API calls and benefit from ARM runners' shorter queue times.
-  - **`ubuntu-24.04`** — Gradle-heavy jobs (CI host-check, android-check, release builds, Dokka, CodeQL, publish, dependency-submission). Pinned for reproducibility; avoid `ubuntu-latest` to prevent breakage when GitHub rolls the alias forward.
-  - **Desktop release matrix** — `[macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]` for cross-platform native packaging (DMG, MSI, deb/rpm/AppImage for x64 and ARM).
+  - **`ubuntu-24.04`** — Main Gradle-heavy jobs (CI `host-check`/`android-check`, release builds, Dokka, CodeQL, publish, dependency-submission). Pin where possible for reproducibility.
+  - **Desktop runners:** Reusable CI uses `ubuntu-latest` for the `build-desktop` job in `.github/workflows/reusable-check.yml`; release packaging matrix remains `[macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]`.
 - **CI JVM tuning:** `gradle.properties` is tuned for local dev (8g heap, 4g Kotlin daemon). CI workflows override via `GRADLE_OPTS` env var to fit the 7GB RAM budget of standard runners: `-Xmx4g` Gradle heap, `-Xmx2g` Kotlin daemon, VFS watching disabled, workers capped at 4.
 - **KMP Smoke Compile:** Use `./gradlew kmpSmokeCompile` instead of listing individual module compile tasks. The `kmpSmokeCompile` lifecycle task (registered in `RootConventionPlugin`) auto-discovers all KMP modules and depends on their `compileKotlinJvm` + `compileKotlinIosSimulatorArm64` tasks.
 - **`mavenLocal()` gated:** The `mavenLocal()` repository is disabled by default to prevent CI cache poisoning. For local JitPack testing, pass `-PuseMavenLocal` to Gradle.

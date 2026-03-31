@@ -44,7 +44,7 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 
 - Typed routes: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
 - Shared saved-state config: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/NavigationConfig.kt`
-- App root backstack + `NavDisplay`: `app/src/main/kotlin/org/meshtastic/app/ui/Main.kt`
+- App root backstack + `MeshtasticNavDisplay`: `app/src/main/kotlin/org/meshtastic/app/ui/Main.kt`
 - Shared graph entry provider pattern: `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
 - Desktop Navigation 3 shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
 - Desktop nav graph assembly: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`

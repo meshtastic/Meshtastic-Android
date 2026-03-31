@@ -1,24 +1,35 @@
 # `:core:navigation`
 
 ## Overview
-The `:core:navigation` module defines the type-safe navigation structure for the entire application using Kotlin Serialization and the Jetpack Navigation library.
+The `:core:navigation` module defines the type-safe Navigation 3 route model for Android and Desktop using Kotlin Serialization.
 
 ## Key Components
 
 ### 1. `Routes.kt`
-Contains all the serializable classes and objects that represent destinations in the app.
+Contains serializable `NavKey` route classes/objects used by shared feature graphs.
+
+### 2. `DeepLinkRouter.kt`
+Parses Meshtastic deep-link URIs and synthesizes a typed backstack (for example `/nodes/1234/device-metrics`).
+
+### 3. `NavigationConfig.kt`
+Defines `MeshtasticNavSavedStateConfig` so Navigation 3 backstacks can be persisted/restored safely.
 
 ## Features
-- **Type-Safety**: Leverages Kotlin Serialization to pass data between screens without fragile Bundle keys.
-- **Centralized Definition**: All routes are defined in one place to prevent circular dependencies between feature modules.
+- **Type-Safety**: Uses serializable `NavKey` routes instead of ad-hoc string routes.
+- **Deep-link synthesis**: Converts incoming URIs into typed backstacks via `DeepLinkRouter`.
+- **Centralized definition**: Routes and saved-state serializers are declared in one place to avoid feature-module cycles.
 
 ## Usage
-Feature modules depend on this module to define their entry points and navigate to other features.
+Feature modules depend on this module to define their entry points and navigate via `NavBackStack<NavKey>`.
 
 ```kotlin
-import org.meshtastic.core.navigation.MessagingRoutes
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import org.meshtastic.core.navigation.NodesRoutes
 
-navController.navigate(MessagingRoutes.Chat(nodeId = 12345))
+fun openNodeDetail(backStack: NavBackStack<NavKey>, destNum: Int) {
+    backStack.add(NodesRoutes.NodeDetail(destNum))
+}
 ```
 
 ## Module dependency graph

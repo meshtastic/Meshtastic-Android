@@ -50,7 +50,9 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.delete
+import org.meshtastic.core.resources.device_metrics_label_value
 import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.more_reactions
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.select
 
@@ -78,7 +80,9 @@ fun MessageActionsContent(
             val statusText = statusString?.second?.let { stringResource(it) }
 
             ListItem(
-                headlineContent = { Text("$title : $statusText") },
+                headlineContent = {
+                    Text(stringResource(Res.string.device_metrics_label_value, title, statusText.orEmpty()))
+                },
                 leadingContent = { MessageStatusIcon(status = status) },
                 modifier = Modifier.clickable(onClick = onStatus),
             )
@@ -140,7 +144,7 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
         ) {
             Icon(
                 Icons.Rounded.AddReaction,
-                contentDescription = "More reactions",
+                contentDescription = stringResource(Res.string.more_reactions),
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )

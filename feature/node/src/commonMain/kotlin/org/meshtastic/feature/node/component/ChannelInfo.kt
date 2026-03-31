@@ -22,6 +22,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.channel_label
 
 @Composable
 fun ChannelInfo(
@@ -32,7 +35,7 @@ fun ChannelInfo(
     IconInfo(
         modifier = modifier,
         icon = Icons.Rounded.Tsunami,
-        contentDescription = "Channel",
+        contentDescription = stringResource(Res.string.channel_label),
         text = channel.toString(),
         contentColor = contentColor,
     )

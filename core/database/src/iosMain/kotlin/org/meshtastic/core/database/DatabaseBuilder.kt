@@ -58,6 +58,7 @@ actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase
 actual fun getDatabaseDirectory(): Path = documentDirectory().toPath()
 
 /** Deletes the database and its Room-associated files on iOS. */
+@OptIn(ExperimentalForeignApi::class)
 actual fun deleteDatabase(dbName: String) {
     val dir = documentDirectory()
     NSFileManager.defaultManager.removeItemAtPath(dir + "/$dbName.db", null)
@@ -83,6 +84,7 @@ private object PreferencesSerializer : OkioSerializer<Preferences> {
 }
 
 /** Creates an iOS DataStore for database preferences. */
+@OptIn(ExperimentalForeignApi::class)
 actual fun createDatabaseDataStore(name: String): DataStore<Preferences> {
     val dir = documentDirectory() + "/datastore"
     NSFileManager.defaultManager.createDirectoryAtPath(dir, true, null, null)

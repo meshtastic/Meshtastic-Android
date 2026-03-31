@@ -107,7 +107,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | Navigation 3 parity model (shared `TopLevelDestination` + platform adapters) | ✅ Done | Both shells use shared enum + parity tests. See [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md) |
 | Hilt → Koin | ✅ Done | See [`decisions/koin-migration.md`](./decisions/koin-migration.md) |
 | BLE abstraction (Kable) | ✅ Done | See [`decisions/ble-strategy.md`](./decisions/ble-strategy.md) |
-| Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-alpha04`; supports Large (1200dp) and Extra-large (1600dp) breakpoints |
+| Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-beta01`; supports Large (1200dp) and Extra-large (1600dp) breakpoints |
 | JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
 | Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
 | Transport deduplication | ✅ Done | `StreamFrameCodec`, `TcpTransport`, and `SerialTransport` shared in `core:network` |
@@ -131,7 +131,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 
 All major ViewModels have now been extracted to `commonMain` and no longer rely on Android-specific subclasses. Platform-specific dependencies (like `android.net.Uri` or Location permissions) have been successfully isolated behind injected `core:repository` interfaces (e.g., `FileService`, `LocationService`).
 
-**The extraction of all feature-specific navigation graphs, background services, and widgets out of `:app` is complete.** The `:app` module now only serves as the root DI assembler and NavHost container.
+**The extraction of all feature-specific navigation graphs, background services, and widgets out of `:app` is complete.** The `:app` module now only serves as the root DI assembler and shared Navigation 3 host shell (`MeshtasticNavDisplay`) container.
 
 Extracted to shared `commonMain` (no longer app-only):
 - `SettingsViewModel` → `feature:settings/commonMain`

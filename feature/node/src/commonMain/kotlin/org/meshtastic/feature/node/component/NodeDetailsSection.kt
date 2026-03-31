@@ -57,6 +57,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.a11y_label_value
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.details
 import org.meshtastic.core.resources.encryption_error
@@ -323,6 +324,7 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
         }
     val label = stringResource(Res.string.public_key)
     val copyLabel = stringResource(Res.string.copy)
+    val contentDescriptionText = stringResource(Res.string.a11y_label_value, label, publicKeyBase64)
 
     Column(
         modifier =
@@ -339,7 +341,7 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
                 role = Role.Button,
             )
             .padding(horizontal = 20.dp, vertical = 8.dp)
-            .semantics(mergeDescendants = true) { contentDescription = "$label: $publicKeyBase64" },
+            .semantics(mergeDescendants = true) { contentDescription = contentDescriptionText },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(

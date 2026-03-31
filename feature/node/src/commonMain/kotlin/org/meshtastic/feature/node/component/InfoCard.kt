@@ -47,6 +47,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.a11y_label_value
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.thenIf
@@ -65,6 +66,7 @@ fun InfoCard(
     val coroutineScope = rememberCoroutineScope()
     val shape = MaterialTheme.shapes.medium
     val copyLabel = stringResource(Res.string.copy)
+    val contentDescriptionText = stringResource(Res.string.a11y_label_value, text, value)
 
     Card(
         modifier =
@@ -77,7 +79,7 @@ fun InfoCard(
                 onClick = {},
                 role = Role.Button,
             )
-            .semantics(mergeDescendants = true) { contentDescription = "$text: $value" },
+            .semantics(mergeDescendants = true) { contentDescription = contentDescriptionText },
         shape = shape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {

@@ -42,6 +42,7 @@ import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.speed
+import org.meshtastic.core.resources.speed_kmh
 import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.proto.Config
@@ -92,7 +93,7 @@ fun PositionItem(compactWidth: Boolean, position: Position, system: Config.Displ
         PositionText(position.sats_in_view.toString(), WEIGHT_10)
         PositionText((position.altitude ?: 0).metersIn(system).toString(system), WEIGHT_15)
         if (!compactWidth) {
-            PositionText("${position.ground_speed ?: 0} Km/h", WEIGHT_15)
+            PositionText(stringResource(Res.string.speed_kmh, position.ground_speed ?: 0), WEIGHT_15)
             PositionText(formatString("%.0f°", (position.ground_track ?: 0) * HEADING_DEG), WEIGHT_15)
         }
         PositionText(position.formatPositionTime(), WEIGHT_40)
