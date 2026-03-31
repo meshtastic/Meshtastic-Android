@@ -24,3 +24,9 @@ internal expect fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
 
 /** Platform-specific instantiation of a Peripheral by address. */
 internal expect fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral
+
+/**
+ * Returns the negotiated maximum write payload length in bytes (i.e. ATT MTU minus the 3-byte ATT header), or `null` if
+ * MTU has not yet been negotiated on this platform.
+ */
+internal expect fun Peripheral.negotiatedMaxWriteLength(): Int?

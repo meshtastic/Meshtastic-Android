@@ -102,7 +102,7 @@ fun PositionConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             updated
         }
     val formState = rememberConfigState(initialValue = sanitizedPositionConfig)
-    var locationInput by rememberSaveable { mutableStateOf(currentPosition) }
+    var locationInput by rememberSaveable(currentPosition) { mutableStateOf(currentPosition) }
 
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(

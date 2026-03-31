@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -43,4 +44,10 @@ interface MeshConfigHandler {
 
     /** Handles a received channel configuration. */
     fun handleChannel(channel: Channel)
+
+    /**
+     * Handles the [DeviceUIConfig] received during the config handshake (STATE_SEND_UIDATA). This arrives as the 2nd
+     * packet in every handshake, immediately after my_info.
+     */
+    fun handleDeviceUIConfig(config: DeviceUIConfig)
 }

@@ -852,6 +852,11 @@
     <string name="show_waypoints">Show Waypoints</string>
     <string name="show_precision_circle">Show Precision Circles</string>
     <string name="client_notification">Client Notification</string>
+    <string name="key_verification_title">Key Verification</string>
+    <string name="key_verification_request_title">Key Verification Request</string>
+    <string name="key_verification_final_title">Key Verification Complete</string>
+    <string name="duplicated_public_key_title">Duplicate Public Key Detected</string>
+    <string name="low_entropy_key_title">Weak Encryption Key Detected</string>
     <string name="compromised_keys">Compromised keys detected, select OK to regenerate.</string>
     <string name="regenerate_private_key">Regenerate Private Key</string>
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
@@ -1296,4 +1301,10 @@
     <string name="update_device">Update Device</string>
     <string name="note">Note</string>
     <string name="firmware_charge_warning">Ensure your device is fully charged before starting a firmware update. Do not disconnect or power off the device during the update process.</string>
+
+    <string name="device_storage_ui_title">Device Storage &amp; UI (Read-Only)</string>
+    <string name="device_theme_language">Theme: %1$s, Language: %2$s</string>
+    <string name="files_available">Files available (%1$d):</string>
+    <string name="file_entry">- %1$s (%2$d bytes)</string>
+    <string name="no_files_manifested">No files manifested.</string>
 </resources>

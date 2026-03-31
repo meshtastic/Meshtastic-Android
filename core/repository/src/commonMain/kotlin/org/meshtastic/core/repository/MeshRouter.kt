@@ -43,4 +43,7 @@ interface MeshRouter {
 
     /** Access to the action handler. */
     val actionHandler: MeshActionHandler
+
+    /** Access to the XModem file-transfer manager. */
+    val xmodemManager: XModemManager
 }

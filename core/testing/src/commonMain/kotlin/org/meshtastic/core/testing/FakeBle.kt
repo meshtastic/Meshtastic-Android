@@ -94,6 +94,12 @@ class FakeBleConnection :
     private val _connectionState = mutableSharedFlow<BleConnectionState>(replay = 1)
     override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
 
+    /** When > 0, the next [failNextN] calls to [connectAndAwait] return [BleConnectionState.Disconnected]. */
+    var failNextN: Int = 0
+
+    /** When non-null, [connectAndAwait] throws this exception instead of connecting. */
+    var connectException: Exception? = null
+
     override suspend fun connect(device: BleDevice) {
         _device.value = device
         _deviceFlow.emit(device)
@@ -107,13 +113,13 @@ class FakeBleConnection :
         }
     }
 
-    override suspend fun connectAndAwait(
-        device: BleDevice,
-        timeoutMs: Long,
-        onRegister: suspend () -> Unit,
-    ): BleConnectionState {
+    override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState {
+        connectException?.let { throw it }
+        if (failNextN > 0) {
+            failNextN--
+            return BleConnectionState.Disconnected
+        }
         connect(device)
-        onRegister()
         return BleConnectionState.Connected
     }
 
@@ -154,7 +160,8 @@ class FakeBluetoothRepository :
 
     override fun isValid(bleAddress: String): Boolean = bleAddress.isNotBlank()
 
-    override fun isBonded(address: String): Boolean = _state.value.bondedDevices.any { it.address == address }
+    override fun isBonded(address: String): Boolean =
+        _state.value.bondedDevices.any { it.address.equals(address, ignoreCase = true) }
 
     override suspend fun bond(device: BleDevice) {
         val currentState = _state.value

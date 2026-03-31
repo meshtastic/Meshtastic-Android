@@ -17,10 +17,14 @@
 package org.meshtastic.core.network.radio
 
 import dev.mokkery.MockMode
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
@@ -81,5 +85,43 @@ class BleRadioInterfaceTest {
                 address = address,
             )
         assertEquals(address, bleInterface.address)
+    }
+
+    /**
+     * After [RECONNECT_FAILURE_THRESHOLD] consecutive connection failures, [RadioInterfaceService.onDisconnect] must be
+     * called so the higher layers can react (e.g. start the device-sleep timeout in [MeshConnectionManagerImpl]).
+     *
+     * Virtual-time breakdown (RECONNECT_FAILURE_THRESHOLD = 3): t = 1 000 ms — iteration 1 settle delay elapses,
+     * connectAndAwait throws, backoff 5 s starts t = 6 000 ms — backoff ends t = 7 000 ms — iteration 2 settle delay
+     * elapses, connectAndAwait throws, backoff 10 s starts t = 17 000 ms — backoff ends t = 18 000 ms — iteration 3
+     * settle delay elapses, connectAndAwait throws → onDisconnect called
+     */
+    @Test
+    fun `onDisconnect is called after RECONNECT_FAILURE_THRESHOLD consecutive failures`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device) // skip BLE scan — device is already bonded
+
+        // Make every connectAndAwait call throw so each iteration counts as one failure.
+        connection.connectException = RadioNotConnectedException("simulated failure")
+
+        val bleInterface =
+            BleRadioInterface(
+                serviceScope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                service = service,
+                address = address,
+            )
+
+        // Advance through exactly 3 failure iterations (≈18 001 ms virtual time).
+        // The 4th iteration's backoff hasn't elapsed yet, so the coroutine is suspended
+        // and advanceTimeBy returns cleanly.
+        advanceTimeBy(18_001L)
+
+        verify { service.onDisconnect(any(), any()) }
+
+        // Cancel the reconnect loop so runTest can complete.
+        bleInterface.close()
     }
 }

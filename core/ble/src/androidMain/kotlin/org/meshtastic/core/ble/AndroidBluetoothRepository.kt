@@ -173,9 +173,23 @@ class AndroidBluetoothRepository(
     }
 
     @SuppressLint("MissingPermission")
-    private fun getBondedAppPeripherals(): List<BleDevice> = bluetoothAdapter?.bondedDevices?.map { device ->
-        deviceCache.getOrPut(device.address) { DirectBleDevice(device.address, device.name) }
-    } ?: emptyList()
+    private fun getBondedAppPeripherals(): List<BleDevice> {
+        val bonded = bluetoothAdapter?.bondedDevices ?: return emptyList()
+        val bondedAddresses = bonded.mapTo(mutableSetOf()) { it.address }
+        // Evict entries for devices that are no longer bonded and update names in case the
+        // user renamed the device in firmware since the cache was populated.
+        deviceCache.keys.retainAll(bondedAddresses)
+        return bonded.map { device ->
+            deviceCache
+                .getOrPut(device.address) { DirectBleDevice(device.address, device.name) }
+                .also { cached ->
+                    // Refresh name if it changed (firmware rename, etc.)
+                    if (cached.name != device.name) {
+                        deviceCache[device.address] = DirectBleDevice(device.address, device.name)
+                    }
+                }
+        }
+    }
 
     @SuppressLint("MissingPermission")
     override fun isBonded(address: String): Boolean = try {

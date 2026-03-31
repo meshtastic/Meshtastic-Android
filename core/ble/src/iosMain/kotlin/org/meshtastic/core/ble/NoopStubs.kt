@@ -26,3 +26,5 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
 
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     throw UnsupportedOperationException("iOS Peripheral not yet implemented")
+
+internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null

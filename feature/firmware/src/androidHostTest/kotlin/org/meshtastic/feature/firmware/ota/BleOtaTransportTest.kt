@@ -63,7 +63,7 @@ class BleOtaTransportTest {
         every { device.name } returns "Test Device"
 
         every { scanner.scan(any(), any()) } returns flowOf(device)
-        coEvery { connection.connectAndAwait(any(), any(), any()) } returns BleConnectionState.Disconnected
+        coEvery { connection.connectAndAwait(any(), any()) } returns BleConnectionState.Disconnected
 
         val result = transport.connect()
         assertTrue("Expected failure", result.isFailure)

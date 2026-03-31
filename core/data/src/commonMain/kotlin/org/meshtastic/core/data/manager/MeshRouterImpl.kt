@@ -26,6 +26,7 @@ import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.core.repository.XModemManager
 
 /** Implementation of [MeshRouter] that orchestrates specialized mesh packet handlers. */
 @Suppress("LongParameterList")
@@ -38,6 +39,7 @@ class MeshRouterImpl(
     private val configFlowManagerLazy: Lazy<MeshConfigFlowManager>,
     private val mqttManagerLazy: Lazy<MqttManager>,
     private val actionHandlerLazy: Lazy<MeshActionHandler>,
+    private val xmodemManagerLazy: Lazy<XModemManager>,
 ) : MeshRouter {
     override val dataHandler: MeshDataHandler
         get() = dataHandlerLazy.value
@@ -59,6 +61,9 @@ class MeshRouterImpl(
 
     override val actionHandler: MeshActionHandler
         get() = actionHandlerLazy.value
+
+    override val xmodemManager: XModemManager
+        get() = xmodemManagerLazy.value
 
     override fun start(scope: CoroutineScope) {
         dataHandler.start(scope)

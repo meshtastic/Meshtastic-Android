@@ -21,6 +21,8 @@ import com.juul.kable.Peripheral
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
 import com.juul.kable.writeWithoutResponse
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -41,7 +43,13 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
     private val fromNum = characteristicOf(SERVICE_UUID, FROMNUM_CHARACTERISTIC)
     private val logRadioChar = characteristicOf(SERVICE_UUID, LOGRADIO_CHARACTERISTIC)
 
-    private val triggerDrain = MutableSharedFlow<Unit>(extraBufferCapacity = 64)
+    // replay = 1: a seed emission placed here before the collector starts is replayed to the
+    // collector immediately on subscription. This is what drives the initial FROMRADIO poll
+    // during the config-handshake phase, where the firmware suppresses FROMNUM notifications
+    // (it only emits them in STATE_SEND_PACKETS). Without the initial replay the entire config
+    // stream would be silently skipped on devices that lack FROMRADIOSYNC.
+    private val triggerDrain =
+        MutableSharedFlow<Unit>(replay = 1, extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     init {
         val svc = peripheral.services.value?.find { it.serviceUuid == SERVICE_UUID }
@@ -68,13 +76,21 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
                 } else {
                     error("fromRadioSync missing")
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                // Fallback to legacy
+                // Fallback to legacy FROMNUM/FROMRADIO polling.
+                // Wire up FROMNUM notifications for steady-state packet delivery.
                 launch {
                     if (hasCharacteristic(FROMNUM_CHARACTERISTIC)) {
                         peripheral.observe(fromNum).collect { triggerDrain.tryEmit(Unit) }
                     }
                 }
+                // Seed the replay buffer so the collector below starts draining immediately.
+                // The firmware does NOT send FROMNUM notifications during the config handshake
+                // (it gates them on STATE_SEND_PACKETS). Without this seed the entire config
+                // stream would never be read on devices that lack FROMRADIOSYNC.
+                triggerDrain.tryEmit(Unit)
                 triggerDrain.collect {
                     var keepReading = true
                     while (keepReading) {

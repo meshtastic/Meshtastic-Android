@@ -258,7 +258,10 @@ class MeshDataHandlerImpl(
     private fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
         val u = AdminMessage.ADAPTER.decode(payload)
-        u.session_passkey.let { commandSender.setSessionPasskey(it) }
+        // Guard against clearing a valid passkey: firmware always embeds the key in every
+        // admin response, but a missing (default-empty) field must not reset the stored value.
+        val incomingPasskey = u.session_passkey
+        if (incomingPasskey.size > 0) commandSender.setSessionPasskey(incomingPasskey)
 
         val fromNum = packet.from
         u.get_module_config_response?.let {

@@ -31,6 +31,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceUIConfig
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -81,5 +82,9 @@ class MeshConfigHandlerImpl(
         } else {
             serviceRepository.setConnectionProgress("Channels (${index + 1})")
         }
+    }
+
+    override fun handleDeviceUIConfig(config: DeviceUIConfig) {
+        scope.handledLaunch { radioConfigRepository.setDeviceUIConfig(config) }
     }
 }

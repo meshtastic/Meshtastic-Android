@@ -26,15 +26,20 @@ import kotlin.uuid.Uuid
 class KableBleScanner : BleScanner {
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
         val scanner = Scanner {
+            // When both serviceUuid and address are provided (the findDevice reconnect path),
+            // filter by service UUID only. The caller applies address filtering post-collection.
+            // Using a single match{} with both creates an AND filter that silently drops results
+            // on some OEM BLE stacks (Samsung, Xiaomi) when the device uses a random resolvable
+            // private address. Using separate match{} blocks creates OR semantics which would
+            // return all Meshtastic devices, so we only filter by service UUID in that case.
             if (serviceUuid != null || address != null) {
                 filters {
-                    match {
-                        if (serviceUuid != null) {
-                            services = listOf(serviceUuid)
-                        }
-                        if (address != null) {
-                            this.address = address
-                        }
+                    if (serviceUuid != null) {
+                        match { services = listOf(serviceUuid) }
+                    } else if (address != null) {
+                        // Address-only scan (no service UUID filter). BLE MAC addresses are
+                        // normalized to uppercase on Android; uppercase() covers any edge cases.
+                        match { this.address = address.uppercase() }
                     }
                 }
             }

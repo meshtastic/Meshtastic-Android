@@ -184,12 +184,15 @@ class MeshConnectionManagerImpl(
         handshakeTimeout = scope.handledLaunch {
             delay(HANDSHAKE_TIMEOUT)
             if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
-                Logger.w { "Handshake stall detected! Retrying Stage $stage." }
+                // Attempt one retry. Note: the firmware silently drops identical consecutive
+                // writes (per-connection dedup). If the first want_config_id was received and
+                // the stall is on our side, the retry will be dropped and the reconnect below
+                // will trigger instead — which is the right recovery in that case.
+                Logger.w { "Handshake stall detected at Stage $stage — retrying, then reconnecting if still stalled." }
                 action()
-                // Recursive timeout for one more try
-                delay(HANDSHAKE_TIMEOUT)
+                delay(HANDSHAKE_RETRY_TIMEOUT)
                 if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
-                    Logger.e { "Handshake still stalled after retry. Resetting connection." }
+                    Logger.e { "Handshake still stalled after retry. Forcing reconnect." }
                     onConnectionChanged(ConnectionState.Disconnected)
                 }
             }
@@ -267,15 +270,23 @@ class MeshConnectionManagerImpl(
                 }
             }
         }
-
-        val myNodeNum = nodeManager.myNodeNum ?: 0
-        // Set time
-        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
     }
 
     override fun onNodeDbReady() {
         handshakeTimeout?.cancel()
         handshakeTimeout = null
+
+        val myNodeNum = nodeManager.myNodeNum ?: 0
+
+        // Set device time now that the full node picture is ready. Sending this during Stage 1
+        // (onRadioConfigLoaded) introduced GATT write contention with the Stage 2 node-info burst.
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
+
+        // Proactively seed the session passkey. The firmware embeds session_passkey in every
+        // admin *response* (wantResponse=true), but set_time_only has no response. A get_owner
+        // request is the lightest way to trigger a response and populate the passkey cache so
+        // that subsequent write operations don't fail with ADMIN_BAD_SESSION_KEY.
+        commandSender.sendAdmin(myNodeNum, wantResponse = true) { AdminMessage(get_owner_request = true) }
 
         // Start MQTT if enabled
         scope.handledLaunch {
@@ -289,7 +300,6 @@ class MeshConnectionManagerImpl(
 
         reportConnection()
 
-        val myNodeNum = nodeManager.myNodeNum ?: 0
         // Request history
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
@@ -328,6 +338,11 @@ class MeshConnectionManagerImpl(
     companion object {
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
         private val HANDSHAKE_TIMEOUT = 30.seconds
+
+        // Shorter window for the retry attempt: if the device genuinely didn't receive the
+        // first want_config_id the retry completes within a few seconds. Waiting another 30s
+        // before reconnecting just delays recovery unnecessarily.
+        private val HANDSHAKE_RETRY_TIMEOUT = 15.seconds
 
         private const val EVENT_CONNECTED_SECONDS = "connected_seconds"
         private const val EVENT_MESH_DISCONNECT = "mesh_disconnect"

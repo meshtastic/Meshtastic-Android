@@ -22,10 +22,13 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
 
+@Suppress("TooManyFunctions")
 interface RadioConfigRepository {
     /** Flow representing the [ChannelSet] data store. */
     val channelSetFlow: Flow<ChannelSet>
@@ -59,4 +62,30 @@ interface RadioConfigRepository {
 
     /** Flow representing the combined [DeviceProfile] protobuf. */
     val deviceProfileFlow: Flow<DeviceProfile>
+
+    /**
+     * Flow of the device's UI configuration, populated from [DeviceUIConfig] during the config handshake
+     * (STATE_SEND_UIDATA — 2nd packet in every handshake). Null until the first handshake completes or after
+     * [clearDeviceUIConfig] is called.
+     */
+    val deviceUIConfigFlow: Flow<DeviceUIConfig?>
+
+    /** Stores the [DeviceUIConfig] received from the device. */
+    suspend fun setDeviceUIConfig(config: DeviceUIConfig)
+
+    /** Clears the stored [DeviceUIConfig]; called at the start of each new handshake. */
+    suspend fun clearDeviceUIConfig()
+
+    /**
+     * Flow of [FileInfo] packets accumulated during STATE_SEND_FILEMANIFEST.
+     *
+     * Cleared at the start of each new handshake via [clearFileManifest].
+     */
+    val fileManifestFlow: Flow<List<FileInfo>>
+
+    /** Appends a single [FileInfo] entry to [fileManifestFlow]. */
+    suspend fun addFileInfo(info: FileInfo)
+
+    /** Clears the accumulated file manifest; called at the start of each new handshake. */
+    suspend fun clearFileManifest()
 }

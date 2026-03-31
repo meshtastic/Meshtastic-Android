@@ -71,6 +71,8 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -92,6 +94,8 @@ data class RadioConfigState(
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
     val deviceConnectionStatus: DeviceConnectionStatus? = null,
+    val deviceUIConfig: DeviceUIConfig? = null,
+    val fileManifest: List<FileInfo> = emptyList(),
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = false,
@@ -186,6 +190,14 @@ open class RadioConfigViewModel(
             .onEach { lmc ->
                 if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(moduleConfig = lmc) }
             }
+            .launchIn(viewModelScope)
+
+        radioConfigRepository.deviceUIConfigFlow
+            .onEach { uiConfig -> _radioConfigState.update { it.copy(deviceUIConfig = uiConfig) } }
+            .launchIn(viewModelScope)
+
+        radioConfigRepository.fileManifestFlow
+            .onEach { manifest -> _radioConfigState.update { it.copy(fileManifest = manifest) } }
             .launchIn(viewModelScope)
 
         serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
