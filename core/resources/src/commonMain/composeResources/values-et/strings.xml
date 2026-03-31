@@ -141,6 +141,7 @@
     <string name="config_position_gps_update_interval_summary">Kui tihti peaksime proovima GPS asukohta määrata (&lt;10sekundit hoiab GPSi sisselülitatuna).</string>
     <string name="config_position_flags_summary">Valikulised väljad lisatakse asukohasõnumitele, mida rohkem välju, seda pikem sõnum – see pikendab eetriaega ja suurendab pakettide kadumise ohtu.</string>
     <string name="config_power_is_power_saving_summary">Unereziimis nii palju kui võimalik, jälgitava ja anduri rolli puhul hõlmab see ka Lora raadiot. Ärge kasutage seda sätet, kui soovite oma seadet kasutada telefonirakendustega või kui kasutate seadet ilma kasutajanuputa.</string>
+    <string name="config_security_public_key">Genereeritakse privaatvõtmest ja saadetakse võrgusilma sõlmedele, et nad saaksid koostada jagatud salajase võtme.</string>
     <string name="config_security_private_key">Kasutatakse jagatud võtme loomiseks kaugseadmega.</string>
     <string name="config_security_admin_key">Avalik võti, millel on õigus sellele sõlmele administraatori sõnumeid saata.</string>
     <string name="config_security_is_managed">Seadet haldab võrgusilma administraator, kasutajal pole juurdepääsu seadme sätetele.</string>
@@ -824,6 +825,11 @@
     <string name="show_waypoints">Kuva teekonnapunktid</string>
     <string name="show_precision_circle">Näita täpsusringid</string>
     <string name="client_notification">Kliendi teated</string>
+    <string name="key_verification_title">Võtme kontrollimine</string>
+    <string name="key_verification_request_title">Võtme kinnitamise taotlus</string>
+    <string name="key_verification_final_title">Võtme kontrollimine on lõpule viidud</string>
+    <string name="duplicated_public_key_title">Tuvastati korduv avalik võti</string>
+    <string name="low_entropy_key_title">Tuvastati nõrk krüptovõti</string>
     <string name="compromised_keys">Tuvastati ohustatud võtmed, valige uuesti loomiseks OK.</string>
     <string name="regenerate_private_key">Loo uus privaatvõti</string>
     <string name="regenerate_keys_confirmation">Kas olete kindel, et soovite oma privaatvõtit uuesti luua?\n\nSõlmed, mis võisid selle sõlmega varem võtmeid vahetanud, peavad turvalise suhtluse jätkamiseks selle sõlme eemaldama ja võtmed uuesti vahetama.</string>
@@ -1236,4 +1242,9 @@
     <string name="update_device">Uuenda seade</string>
     <string name="note">Märkus</string>
     <string name="firmware_charge_warning">Enne püsivara värskendamist veendu, et seade on täielikult laetud. Ära värskendamise ajal seadet lahti ühenda ega välja lülita.</string>
+    <string name="device_storage_ui_title">Seadme salvestusruum &amp; UI (kirjutuskaitstud)</string>
+    <string name="device_theme_language">Teema: %1$s, Keel: %2$s</string>
+    <string name="files_available">Saadaval failid (%1$d):</string>
+    <string name="file_entry">- %1$s (%2$d baiti)</string>
+    <string name="no_files_manifested">Faile ei avaldatud.</string>
 </resources>
