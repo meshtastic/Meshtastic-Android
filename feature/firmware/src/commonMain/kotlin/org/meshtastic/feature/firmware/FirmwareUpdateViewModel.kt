@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -164,7 +165,7 @@ class FirmwareUpdateViewModel(
 
                     val releaseFlow =
                         if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
-                            kotlinx.coroutines.flow.flowOf(null)
+                            flowOf(null)
                         } else {
                             firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
                         }
@@ -494,15 +495,15 @@ private fun isValidBluetoothAddress(address: String?): Boolean =
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease
     FirmwareReleaseType.ALPHA -> alphaRelease
-    FirmwareReleaseType.LOCAL -> kotlinx.coroutines.flow.flowOf(null)
+    FirmwareReleaseType.LOCAL -> flowOf(null)
 }
 
 sealed class FirmwareUpdateMethod(val description: StringResource) {
-    object Usb : FirmwareUpdateMethod(Res.string.firmware_update_method_usb)
+    data object Usb : FirmwareUpdateMethod(Res.string.firmware_update_method_usb)
 
-    object Ble : FirmwareUpdateMethod(Res.string.firmware_update_method_ble)
+    data object Ble : FirmwareUpdateMethod(Res.string.firmware_update_method_ble)
 
-    object Wifi : FirmwareUpdateMethod(Res.string.firmware_update_method_wifi)
+    data object Wifi : FirmwareUpdateMethod(Res.string.firmware_update_method_wifi)
 
-    object Unknown : FirmwareUpdateMethod(Res.string.unknown)
+    data object Unknown : FirmwareUpdateMethod(Res.string.unknown)
 }

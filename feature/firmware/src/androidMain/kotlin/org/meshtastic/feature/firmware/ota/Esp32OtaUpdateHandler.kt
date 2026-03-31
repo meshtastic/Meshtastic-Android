@@ -19,10 +19,8 @@ package org.meshtastic.feature.firmware.ota
 import android.content.Context
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
@@ -217,13 +215,11 @@ class Esp32OtaUpdateHandler(
         tempFile.absolutePath
     }
 
-    private fun triggerRebootOta(mode: Int, hash: ByteArray?) {
+    private suspend fun triggerRebootOta(mode: Int, hash: ByteArray?) {
         val myInfo = nodeRepository.myNodeInfo.value ?: return
         val myNodeNum = myInfo.myNodeNum
         Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
-        CoroutineScope(Dispatchers.IO).launch {
-            radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
-        }
+        radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
     }
 
     /**

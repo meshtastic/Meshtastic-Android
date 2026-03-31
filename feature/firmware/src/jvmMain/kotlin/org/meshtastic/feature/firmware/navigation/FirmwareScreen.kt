@@ -17,9 +17,9 @@
 package org.meshtastic.feature.firmware.navigation
 
 import androidx.compose.runtime.Composable
-import org.meshtastic.feature.firmware.DesktopFirmwareScreen
+import org.meshtastic.core.ui.component.PlaceholderScreen
 
 @Composable
 actual fun FirmwareScreen(onNavigateUp: () -> Unit) {
-    DesktopFirmwareScreen()
+    PlaceholderScreen("Firmware Update")
 }
