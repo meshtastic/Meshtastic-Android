@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.isDebug
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.accept
 import org.meshtastic.core.resources.are_you_sure
@@ -116,7 +118,8 @@ import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
 
-@Composable expect fun rememberSystemTimeZonePosixString(): String
+@Composable
+expect fun rememberSystemTimeZonePosixString(): String
 
 @Suppress("DEPRECATION")
 private val Config.DeviceConfig.Role.description: StringResource
@@ -148,6 +151,7 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
             Config.DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
             Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY ->
                 Res.string.rebroadcast_mode_core_portnums_only_desc
+
             else -> Res.string.unrecognized
         }
 
@@ -159,7 +163,11 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
     val formState = rememberConfigState(initialValue = deviceConfig)
     var selectedRole by rememberSaveable(formState.value.role) { mutableStateOf(formState.value.role) }
     val infrastructureRoles =
-        listOf(Config.DeviceConfig.Role.ROUTER, Config.DeviceConfig.Role.ROUTER_LATE, Config.DeviceConfig.Role.REPEATER)
+        listOf(
+            Config.DeviceConfig.Role.ROUTER,
+            Config.DeviceConfig.Role.ROUTER_LATE,
+            Config.DeviceConfig.Role.REPEATER
+        )
     if (selectedRole != formState.value.role) {
         if (selectedRole in infrastructureRoles) {
             RouterRoleConfirmationDialog(
@@ -203,19 +211,25 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     title = stringResource(Res.string.rebroadcast_mode),
                     enabled = state.connected,
                     selectedItem = currentRebroadcastMode,
-                    onItemSelected = { formState.value = formState.value.copy(rebroadcast_mode = it) },
+                    onItemSelected = {
+                        formState.value = formState.value.copy(rebroadcast_mode = it)
+                    },
                     summary = stringResource(currentRebroadcastMode.description),
                 )
 
                 HorizontalDivider()
 
-                val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
+                val nodeInfoBroadcastIntervals =
+                    remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.nodeinfo_broadcast_interval),
                     selectedItem = formState.value.node_info_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy(node_info_broadcast_secs = it.toInt()) },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.copy(node_info_broadcast_secs = it.toInt())
+                    },
                 )
             }
         }
@@ -227,7 +241,9 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     summary = stringResource(Res.string.config_device_doubleTapAsButtonPress_summary),
                     checked = formState.value.double_tap_as_button_press,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(double_tap_as_button_press = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.copy(double_tap_as_button_press = it)
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
 
@@ -238,7 +254,9 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     summary = stringResource(Res.string.config_device_tripleClickAsAdHocPing_summary),
                     checked = !formState.value.disable_triple_click,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(disable_triple_click = !it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.copy(disable_triple_click = !it)
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
 
@@ -249,7 +267,9 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
                     checked = !formState.value.led_heartbeat_disabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(led_heartbeat_disabled = !it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.copy(led_heartbeat_disabled = !it)
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -266,11 +286,16 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     enabled = state.connected,
                     isError = false,
                     keyboardOptions =
-                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                        KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Done
+                        ),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(tzdef = it) },
                     trailingIcon = {
-                        IconButton(onClick = { formState.value = formState.value.copy(tzdef = "") }) {
+                        IconButton(onClick = {
+                            formState.value = formState.value.copy(tzdef = "")
+                        }) {
                             Icon(imageVector = Icons.Rounded.Clear, contentDescription = null)
                         }
                     },
@@ -315,26 +340,47 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
             }
         }
 
-        if (state.deviceUIConfig != null || state.fileManifest.isNotEmpty()) {
+        if ((state.deviceUIConfig != null || state.fileManifest.isNotEmpty()) && isDebug) {
             item {
-                TitledCard(title = stringResource(Res.string.device_storage_ui_title)) {
+                TitledCard(
+                    title = stringResource(Res.string.device_storage_ui_title),
+                ) {
                     state.deviceUIConfig?.let { uiConfig ->
                         Text(
-                            stringResource(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            text = stringResource(
                                 Res.string.device_theme_language,
                                 uiConfig.theme.toString(),
                                 uiConfig.language.toString(),
                             ),
                         )
-                        HorizontalDivider()
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        )
                     }
                     if (state.fileManifest.isNotEmpty()) {
-                        Text(stringResource(Res.string.files_available, state.fileManifest.size))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            text = stringResource(
+                                Res.string.files_available,
+                                state.fileManifest.size
+                            )
+                        )
                         state.fileManifest.forEach { file ->
-                            Text(stringResource(Res.string.file_entry, file.file_name, file.size_bytes))
+                            Text(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                text = stringResource(
+                                    Res.string.file_entry,
+                                    file.file_name,
+                                    file.size_bytes
+                                )
+                            )
                         }
                     } else {
-                        Text(stringResource(Res.string.no_files_manifested))
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            text = stringResource(Res.string.no_files_manifested)
+                        )
                     }
                 }
             }
@@ -369,7 +415,10 @@ fun RouterRoleConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onConfirm, enabled = confirmed) { Text(stringResource(Res.string.accept)) }
+            TextButton(
+                onClick = onConfirm,
+                enabled = confirmed
+            ) { Text(stringResource(Res.string.accept)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
