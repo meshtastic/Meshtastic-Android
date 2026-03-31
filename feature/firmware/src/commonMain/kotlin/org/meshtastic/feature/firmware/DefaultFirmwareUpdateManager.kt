@@ -28,16 +28,18 @@ import org.meshtastic.core.repository.isTcp
 import org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler
 import org.meshtastic.feature.firmware.ota.dfu.SecureDfuHandler
 
-/** Orchestrates the firmware update process by choosing the correct handler. */
+/**
+ * Default [FirmwareUpdateManager] that routes to the correct handler based on the current connection type and device
+ * architecture. All handlers are KMP-ready and work on Android, Desktop, and (future) iOS.
+ */
 @Single
-class AndroidFirmwareUpdateManager(
+class DefaultFirmwareUpdateManager(
     private val radioPrefs: RadioPrefs,
     private val secureDfuHandler: SecureDfuHandler,
     private val usbUpdateHandler: UsbUpdateHandler,
     private val esp32OtaUpdateHandler: Esp32OtaUpdateHandler,
 ) : FirmwareUpdateManager {
 
-    /** Start the update process based on the current connection and hardware. */
     override suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
@@ -62,10 +64,11 @@ class AndroidFirmwareUpdateManager(
     private fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> {
             if (hardware.isEsp32Arc) {
-                error("Serial/USB firmware update not supported for ESP32 devices from the app")
+                error("Serial/USB firmware update not supported for ESP32 devices")
             }
             usbUpdateHandler
         }
+
         radioPrefs.isBle() -> {
             if (hardware.isEsp32Arc) {
                 esp32OtaUpdateHandler
@@ -73,14 +76,15 @@ class AndroidFirmwareUpdateManager(
                 secureDfuHandler
             }
         }
+
         radioPrefs.isTcp() -> {
             if (hardware.isEsp32Arc) {
                 esp32OtaUpdateHandler
             } else {
-                // Should be handled/validated before calling startUpdate
                 error("WiFi OTA only supported for ESP32 devices")
             }
         }
+
         else -> error("Unknown connection type for firmware update")
     }
 
