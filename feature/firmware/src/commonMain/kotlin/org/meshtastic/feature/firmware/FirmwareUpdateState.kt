@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.firmware
 
-import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.resources.UiText
@@ -62,6 +61,5 @@ sealed interface FirmwareUpdateState {
 
     data object Success : FirmwareUpdateState
 
-    data class AwaitingFileSave(val uf2FilePath: String?, val fileName: String, val sourceUri: CommonUri? = null) :
-        FirmwareUpdateState
+    data class AwaitingFileSave(val uf2Artifact: FirmwareArtifact, val fileName: String) : FirmwareUpdateState
 }

@@ -30,7 +30,7 @@ interface FirmwareUpdateHandler {
      * @param target The target identifier (e.g., Bluetooth address, IP address, or empty for USB)
      * @param updateState Callback to report back state changes
      * @param firmwareUri Optional URI for a local firmware file (bypasses download)
-     * @return The downloaded/extracted firmware file path, or null if it was a local file or update finished
+     * @return A host-owned temporary artifact when cleanup is required, or null if the update used only external input
      */
     suspend fun startUpdate(
         release: FirmwareRelease,
@@ -38,5 +38,5 @@ interface FirmwareUpdateHandler {
         target: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri? = null,
-    ): String?
+    ): FirmwareArtifact?
 }

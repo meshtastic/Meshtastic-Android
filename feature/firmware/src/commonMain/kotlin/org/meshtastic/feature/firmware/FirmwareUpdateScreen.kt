@@ -18,9 +18,6 @@
 
 package org.meshtastic.feature.firmware
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
@@ -36,8 +33,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -60,7 +55,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -71,14 +65,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.mikepenz.markdown.m3.Markdown
@@ -146,6 +138,11 @@ import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.icon.Wifi
+import org.meshtastic.core.ui.util.KeepScreenOn
+import org.meshtastic.core.ui.util.PlatformBackHandler
+import org.meshtastic.core.ui.util.rememberOpenFileLauncher
+import org.meshtastic.core.ui.util.rememberOpenUrl
+import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 
 private const val CYCLE_DELAY_MS = 4500L
 
@@ -159,17 +156,15 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
     val selectedRelease by viewModel.selectedRelease.collectAsStateWithLifecycle()
 
     var showExitConfirmation by remember { mutableStateOf(false) }
-    val filePickerLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let { viewModel.startUpdateFromFile(CommonUri(it)) }
-        }
 
-    val createDocumentLauncher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.CreateDocument("application/octet-stream"),
-        ) { uri: Uri? ->
-            uri?.let { viewModel.saveDfuFile(CommonUri(it)) }
-        }
+    val filePickerLauncher = rememberOpenFileLauncher { uri: CommonUri? ->
+        uri?.let { viewModel.startUpdateFromFile(it) }
+    }
+
+    val saveFileLauncher = rememberSaveFileLauncher { meshtasticUri ->
+        viewModel.saveDfuFile(CommonUri.parse(meshtasticUri.uriString))
+    }
+
     val actions =
         remember(viewModel, onNavigateUp, state) {
             FirmwareUpdateActions(
@@ -182,13 +177,13 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                             readyState.updateMethod is FirmwareUpdateMethod.Ble ||
                             readyState.updateMethod is FirmwareUpdateMethod.Wifi
                         ) {
-                            filePickerLauncher.launch("*/*")
+                            filePickerLauncher("*/*")
                         } else if (readyState.updateMethod is FirmwareUpdateMethod.Usb) {
-                            filePickerLauncher.launch("*/*")
+                            filePickerLauncher("*/*")
                         }
                     }
                 },
-                onSaveFile = { fileName -> createDocumentLauncher.launch(fileName) },
+                onSaveFile = { fileName -> saveFileLauncher(fileName, "application/octet-stream") },
                 onRetry = viewModel::checkForUpdates,
                 onCancel = { showExitConfirmation = true },
                 onDone = { onNavigateUp() },
@@ -198,7 +193,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
 
     KeepScreenOn(shouldKeepFirmwareScreenOn(state))
 
-    androidx.activity.compose.BackHandler(enabled = shouldKeepFirmwareScreenOn(state)) { showExitConfirmation = true }
+    PlatformBackHandler(enabled = shouldKeepFirmwareScreenOn(state)) { showExitConfirmation = true }
 
     if (showExitConfirmation) {
         MeshtasticDialog(
@@ -485,10 +480,10 @@ private fun ChirpyCard() {
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = spacedBy(4.dp),
             ) {
-                BasicText(text = "🪜", modifier = Modifier.size(48.dp), autoSize = TextAutoSize.StepBased())
+                Text(text = "🪜", modifier = Modifier.size(48.dp), style = MaterialTheme.typography.headlineLarge)
                 AsyncImage(
                     model =
-                    ImageRequest.Builder(LocalContext.current)
+                    ImageRequest.Builder(LocalPlatformContext.current)
                         .data(Res.drawable.img_chirpy)
                         .crossfade(true)
                         .build(),
@@ -512,7 +507,7 @@ private fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifi
     val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
 
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current).data(imageUrl).crossfade(true).build(),
+        model = ImageRequest.Builder(LocalPlatformContext.current).data(imageUrl).crossfade(true).build(),
         contentScale = ContentScale.Fit,
         contentDescription = deviceHardware.displayName,
         modifier = modifier,
@@ -597,6 +592,8 @@ private fun DeviceInfoCard(
 
 @Composable
 private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDevice: () -> Unit) {
+    val openUrl = rememberOpenUrl()
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth().animateContentSize(),
         colors =
@@ -632,20 +629,7 @@ private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDe
             val infoUrl = deviceHardware.bootloaderInfoUrl
             if (!infoUrl.isNullOrEmpty()) {
                 Spacer(Modifier.height(8.dp))
-                val context = LocalContext.current
-                TextButton(
-                    onClick = {
-                        runCatching {
-                            val intent =
-                                android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                                    data = infoUrl.toUri()
-                                }
-                            context.startActivity(intent)
-                        }
-                    },
-                ) {
-                    Text(text = stringResource(Res.string.learn_more))
-                }
+                TextButton(onClick = { openUrl(infoUrl) }) { Text(text = stringResource(Res.string.learn_more)) }
             }
 
             Spacer(Modifier.height(8.dp))
@@ -878,21 +862,6 @@ private fun SuccessState(onDone: () -> Unit) {
         Spacer(Modifier.height(32.dp))
         Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(56.dp)) {
             Text(stringResource(Res.string.firmware_update_done))
-        }
-    }
-}
-
-@Composable
-private fun KeepScreenOn(enabled: Boolean) {
-    val view = LocalView.current
-    DisposableEffect(enabled) {
-        if (enabled) {
-            view.keepScreenOn = true
-        }
-        onDispose {
-            if (enabled) {
-                view.keepScreenOn = false
-            }
         }
     }
 }

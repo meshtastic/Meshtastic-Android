@@ -24,27 +24,25 @@ interface FirmwareFileHandler {
 
     suspend fun checkUrlExists(url: String): Boolean
 
-    suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): String?
+    suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): FirmwareArtifact?
 
     suspend fun extractFirmware(
         uri: CommonUri,
         hardware: DeviceHardware,
         fileExtension: String,
         preferredFilename: String? = null,
-    ): String?
+    ): FirmwareArtifact?
 
     suspend fun extractFirmwareFromZip(
-        zipFilePath: String,
+        zipFile: FirmwareArtifact,
         hardware: DeviceHardware,
         fileExtension: String,
         preferredFilename: String? = null,
-    ): String?
+    ): FirmwareArtifact?
 
-    suspend fun getFileSize(path: String): Long
+    suspend fun getFileSize(file: FirmwareArtifact): Long
 
-    suspend fun deleteFile(path: String)
+    suspend fun deleteFile(file: FirmwareArtifact)
 
-    suspend fun copyFileToUri(sourcePath: String, destinationUri: CommonUri): Long
-
-    suspend fun copyUriToUri(sourceUri: CommonUri, destinationUri: CommonUri): Long
+    suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long
 }

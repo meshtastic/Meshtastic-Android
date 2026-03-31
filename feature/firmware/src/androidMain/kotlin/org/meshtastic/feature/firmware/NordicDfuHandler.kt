@@ -62,7 +62,7 @@ class NordicDfuHandler(
         target: String, // Bluetooth address
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
-    ): String? =
+    ): FirmwareArtifact? =
         try {
             val downloadingMsg =
                 getString(Res.string.firmware_update_downloading_percent, 0)
@@ -79,7 +79,7 @@ class NordicDfuHandler(
                 initiateDfu(target, hardware, firmwareUri, updateState)
                 null
             } else {
-                val firmwareFile =
+                val artifact =
                     firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
                         val percent = (progress * PERCENT_MAX).toInt()
                         updateState(
@@ -93,13 +93,13 @@ class NordicDfuHandler(
                         )
                     }
 
-                if (firmwareFile == null) {
+                if (artifact == null) {
                     val errorMsg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
                     updateState(FirmwareUpdateState.Error(UiText.DynamicString(errorMsg)))
                     null
                 } else {
-                    initiateDfu(target, hardware, CommonUri.parse("file://$firmwareFile"), updateState)
-                    firmwareFile
+                    initiateDfu(target, hardware, artifact.uri, updateState)
+                    artifact
                 }
             }
         } catch (e: CancellationException) {

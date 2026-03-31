@@ -119,7 +119,7 @@ class FirmwareUpdateViewModel(
     val currentFirmwareVersion = _currentFirmwareVersion.asStateFlow()
 
     private var updateJob: Job? = null
-    private var tempFirmwareFile: String? = null
+    private var tempFirmwareFile: FirmwareArtifact? = null
     private var originalDeviceAddress: String? = null
 
     init {
@@ -235,6 +235,8 @@ class FirmwareUpdateViewModel(
 
                         if (_state.value is FirmwareUpdateState.Success) {
                             verifyUpdateResult(originalDeviceAddress)
+                        } else if (_state.value is FirmwareUpdateState.Error) {
+                            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                         }
                     } catch (e: CancellationException) {
                         Logger.i { "Firmware update cancelled" }
@@ -252,18 +254,13 @@ class FirmwareUpdateViewModel(
 
     fun saveDfuFile(uri: CommonUri) {
         val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return
-        val firmwareFile = currentState.uf2FilePath
-        val sourceUri = currentState.sourceUri
+        val firmwareArtifact = currentState.uf2Artifact
 
         viewModelScope.launch {
             try {
                 _state.value =
                     FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_copying)))
-                if (firmwareFile != null) {
-                    fileHandler.copyFileToUri(firmwareFile, uri)
-                } else if (sourceUri != null) {
-                    fileHandler.copyUriToUri(sourceUri, uri)
-                }
+                fileHandler.copyToUri(firmwareArtifact, uri)
 
                 _state.value =
                     FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_flashing)))
@@ -301,9 +298,9 @@ class FirmwareUpdateViewModel(
                 val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
 
                 tempFirmwareFile = extractedFile
-                val firmwareUri = if (extractedFile != null) CommonUri.parse("file://$extractedFile") else uri
+                val firmwareUri = extractedFile?.uri ?: uri
 
-                tempFirmwareFile =
+                val updateArtifact =
                     firmwareUpdateManager.startUpdate(
                         release = FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
                         hardware = currentState.deviceHardware,
@@ -311,9 +308,12 @@ class FirmwareUpdateViewModel(
                         updateState = { _state.value = it },
                         firmwareUri = firmwareUri,
                     )
+                tempFirmwareFile = updateArtifact ?: extractedFile
 
                 if (_state.value is FirmwareUpdateState.Success) {
                     verifyUpdateResult(originalDeviceAddress)
+                } else if (_state.value is FirmwareUpdateState.Error) {
+                    tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -480,9 +480,12 @@ class FirmwareUpdateViewModel(
     }
 }
 
-private suspend fun cleanupTemporaryFiles(fileHandler: FirmwareFileHandler, tempFirmwareFile: String?): String? {
+private suspend fun cleanupTemporaryFiles(
+    fileHandler: FirmwareFileHandler,
+    tempFirmwareFile: FirmwareArtifact?,
+): FirmwareArtifact? {
     runCatching {
-        tempFirmwareFile?.let { fileHandler.deleteFile(it) }
+        tempFirmwareFile?.takeIf { it.isTemporary }?.let { fileHandler.deleteFile(it) }
         fileHandler.cleanupAllTemporaryFiles()
     }
         .onFailure { e -> Logger.w(e) { "Failed to cleanup temp files" } }

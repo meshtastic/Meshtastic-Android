@@ -43,7 +43,7 @@ class AndroidFirmwareUpdateManager(
         address: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
-    ): String? {
+    ): FirmwareArtifact? {
         val handler = getHandler(hardware)
         val target = getTarget(address)
 

@@ -19,15 +19,29 @@ package org.meshtastic.feature.firmware
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.NodeRepository
 
-interface FirmwareUpdateManager {
-    suspend fun startUpdate(
+class DesktopUsbUpdateHandler(
+    private val fileHandler: FirmwareFileHandler,
+    private val radioController: RadioController,
+    private val nodeRepository: NodeRepository,
+) : FirmwareUpdateHandler {
+    override suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
-        address: String,
+        target: String,
         updateState: (FirmwareUpdateState) -> Unit,
-        firmwareUri: CommonUri? = null,
-    ): FirmwareArtifact?
-
-    fun dfuProgressFlow(): kotlinx.coroutines.flow.Flow<DfuInternalState>
+        firmwareUri: CommonUri?,
+    ): FirmwareArtifact? = performUsbUpdate(
+        release = release,
+        hardware = hardware,
+        firmwareUri = firmwareUri,
+        radioController = radioController,
+        nodeRepository = nodeRepository,
+        updateState = updateState,
+        retrieveUsbFirmware = { selectedRelease, selectedHardware, onProgress ->
+            retrieveUsbFirmware(fileHandler, selectedRelease, selectedHardware, onProgress)
+        },
+    )
 }

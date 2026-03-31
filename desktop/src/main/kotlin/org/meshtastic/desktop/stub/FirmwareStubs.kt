@@ -22,11 +22,13 @@ import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.feature.firmware.DfuInternalState
+import org.meshtastic.feature.firmware.FirmwareArtifact
 import org.meshtastic.feature.firmware.FirmwareFileHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateManager
 import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.FirmwareUsbManager
 
+@Deprecated("Use DesktopFirmwareUpdateManager from feature:firmware jvmMain instead")
 class NoopFirmwareUpdateManager : FirmwareUpdateManager {
     override suspend fun startUpdate(
         release: FirmwareRelease,
@@ -34,42 +36,43 @@ class NoopFirmwareUpdateManager : FirmwareUpdateManager {
         address: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
-    ): String? = null
+    ): FirmwareArtifact? = null
 
     override fun dfuProgressFlow(): Flow<DfuInternalState> = emptyFlow()
 }
 
+@Deprecated("Use DesktopFirmwareUsbManager from feature:firmware jvmMain instead")
 class NoopFirmwareUsbManager : FirmwareUsbManager {
     override fun deviceDetachFlow(): Flow<Unit> = emptyFlow()
 }
 
+@Deprecated("Use JvmFirmwareFileHandler from feature:firmware jvmMain instead")
 @Suppress("EmptyFunctionBlock")
 class NoopFirmwareFileHandler : FirmwareFileHandler {
     override fun cleanupAllTemporaryFiles() {}
 
     override suspend fun checkUrlExists(url: String): Boolean = false
 
-    override suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): String? = null
+    override suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): FirmwareArtifact? =
+        null
 
     override suspend fun extractFirmware(
         uri: CommonUri,
         hardware: DeviceHardware,
         fileExtension: String,
         preferredFilename: String?,
-    ): String? = null
+    ): FirmwareArtifact? = null
 
     override suspend fun extractFirmwareFromZip(
-        zipFilePath: String,
+        zipFile: FirmwareArtifact,
         hardware: DeviceHardware,
         fileExtension: String,
         preferredFilename: String?,
-    ): String? = null
+    ): FirmwareArtifact? = null
 
-    override suspend fun getFileSize(path: String): Long = 0L
+    override suspend fun getFileSize(file: FirmwareArtifact): Long = 0L
 
-    override suspend fun deleteFile(path: String) {}
+    override suspend fun deleteFile(file: FirmwareArtifact) {}
 
-    override suspend fun copyFileToUri(sourcePath: String, destinationUri: CommonUri): Long = 0L
-
-    override suspend fun copyUriToUri(sourceUri: CommonUri, destinationUri: CommonUri): Long = 0L
+    override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long = 0L
 }

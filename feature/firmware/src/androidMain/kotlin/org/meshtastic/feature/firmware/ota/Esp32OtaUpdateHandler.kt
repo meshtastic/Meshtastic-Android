@@ -19,10 +19,11 @@ package org.meshtastic.feature.firmware.ota
 import android.content.Context
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
@@ -45,6 +46,8 @@ import org.meshtastic.core.resources.firmware_update_ota_failed
 import org.meshtastic.core.resources.firmware_update_starting_ota
 import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.feature.firmware.FirmwareArtifact
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
@@ -83,7 +86,7 @@ class Esp32OtaUpdateHandler(
         target: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
-    ): String? = if (target.contains(":")) {
+    ): FirmwareArtifact? = if (target.contains(":")) {
         startBleUpdate(release, hardware, target, updateState, firmwareUri)
     } else {
         startWifiUpdate(release, hardware, target, updateState, firmwareUri)
@@ -95,7 +98,7 @@ class Esp32OtaUpdateHandler(
         address: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri? = null,
-    ): String? = performUpdate(
+    ): FirmwareArtifact? = performUpdate(
         release = release,
         hardware = hardware,
         updateState = updateState,
@@ -111,7 +114,7 @@ class Esp32OtaUpdateHandler(
         deviceIp: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri? = null,
-    ): String? = performUpdate(
+    ): FirmwareArtifact? = performUpdate(
         release = release,
         hardware = hardware,
         updateState = updateState,
@@ -129,53 +132,57 @@ class Esp32OtaUpdateHandler(
         transportFactory: () -> UnifiedOtaProtocol,
         rebootMode: Int,
         connectionAttempts: Int,
-    ): String? = try {
-        withContext(Dispatchers.IO) {
-            // Step 1: Get firmware file
-            val firmwareFile =
-                obtainFirmwareFile(release, hardware, firmwareUri, updateState) ?: return@withContext null
+    ): FirmwareArtifact? {
+        var cleanupArtifact: FirmwareArtifact? = null
+        return try {
+            withContext(Dispatchers.IO) {
+                // Step 1: Get firmware file
+                cleanupArtifact = obtainFirmwareFile(release, hardware, firmwareUri, updateState)
+                val firmwareFile = cleanupArtifact ?: return@withContext null
+                val localFirmwareFile = firmwareFile.toLocalFile()
 
-            // Step 2: Calculate Hash and Trigger Reboot
-            val sha256Bytes = FirmwareHashUtil.calculateSha256Bytes(java.io.File(firmwareFile))
-            val sha256Hash = FirmwareHashUtil.bytesToHex(sha256Bytes)
-            Logger.i { "ESP32 OTA: Firmware hash: $sha256Hash" }
-            triggerRebootOta(rebootMode, sha256Bytes)
+                // Step 2: Calculate Hash and Trigger Reboot
+                val sha256Bytes = FirmwareHashUtil.calculateSha256Bytes(localFirmwareFile)
+                val sha256Hash = FirmwareHashUtil.bytesToHex(sha256Bytes)
+                Logger.i { "ESP32 OTA: Firmware hash: $sha256Hash" }
+                triggerRebootOta(rebootMode, sha256Bytes)
 
-            // Step 3: Wait for packet to be sent, then disconnect mesh service
-            // The packet needs ~1-2 seconds to be written and acknowledged over BLE
-            delay(PACKET_SEND_DELAY_MS)
-            disconnectMeshService()
-            // Give BLE stack time to fully release the GATT connection
-            delay(GATT_RELEASE_DELAY_MS)
+                // Step 3: Wait for packet to be sent, then disconnect mesh service
+                // The packet needs ~1-2 seconds to be written and acknowledged over BLE
+                delay(PACKET_SEND_DELAY_MS)
+                disconnectMeshService()
+                // Give BLE stack time to fully release the GATT connection
+                delay(GATT_RELEASE_DELAY_MS)
 
-            val transport = transportFactory()
-            if (!connectToDevice(transport, connectionAttempts, updateState)) return@withContext null
+                val transport = transportFactory()
+                if (!connectToDevice(transport, connectionAttempts, updateState)) return@withContext null
 
-            try {
-                executeOtaSequence(transport, firmwareFile, sha256Hash, rebootMode, updateState)
-                firmwareFile
-            } finally {
-                transport.close()
+                try {
+                    executeOtaSequence(transport, firmwareFile, sha256Hash, rebootMode, updateState)
+                    firmwareFile
+                } finally {
+                    transport.close()
+                }
             }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: OtaProtocolException.HashRejected) {
+            Logger.e(e) { "ESP32 OTA: Hash rejected by device" }
+            updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_hash_rejected)))
+            cleanupArtifact
+        } catch (e: OtaProtocolException) {
+            Logger.e(e) { "ESP32 OTA: Protocol error" }
+            updateState(
+                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
+            )
+            cleanupArtifact
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.e(e) { "ESP32 OTA: Unexpected error" }
+            updateState(
+                FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
+            )
+            cleanupArtifact
         }
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: OtaProtocolException.HashRejected) {
-        Logger.e(e) { "ESP32 OTA: Hash rejected by device" }
-        updateState(FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_hash_rejected)))
-        null
-    } catch (e: OtaProtocolException) {
-        Logger.e(e) { "ESP32 OTA: Protocol error" }
-        updateState(
-            FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
-        )
-        null
-    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-        Logger.e(e) { "ESP32 OTA: Unexpected error" }
-        updateState(
-            FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_ota_failed, e.message ?: "")),
-        )
-        null
     }
 
     @Suppress("UnusedPrivateMember")
@@ -183,9 +190,11 @@ class Esp32OtaUpdateHandler(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         updateState: (FirmwareUpdateState) -> Unit,
-    ): String? {
+    ): FirmwareArtifact? {
         val downloadingMsg =
-            getString(Res.string.firmware_update_downloading_percent, 0).replace(Regex(":?\\s*%1\\\$d%?"), "").trim()
+            getStringSuspend(Res.string.firmware_update_downloading_percent, 0)
+                .replace(Regex(":?\\s*%1\\\$d%?"), "")
+                .trim()
         updateState(
             FirmwareUpdateState.Downloading(
                 ProgressState(message = UiText.DynamicString(downloadingMsg), progress = 0f),
@@ -205,21 +214,23 @@ class Esp32OtaUpdateHandler(
         }
     }
 
-    private suspend fun getFirmwareFromUri(uri: CommonUri): String? = withContext(Dispatchers.IO) {
+    private suspend fun getFirmwareFromUri(uri: CommonUri): FirmwareArtifact? = withContext(Dispatchers.IO) {
         val inputStream =
             context.contentResolver.openInputStream(uri.toPlatformUri() as android.net.Uri)
                 ?: return@withContext null
         val tempFile = java.io.File(context.cacheDir, "firmware_update/ota_firmware.bin")
         tempFile.parentFile?.mkdirs()
         inputStream.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
-        tempFile.absolutePath
+        tempFile.toFirmwareArtifact()
     }
 
-    private suspend fun triggerRebootOta(mode: Int, hash: ByteArray?) {
+    private fun triggerRebootOta(mode: Int, hash: ByteArray?) {
         val myInfo = nodeRepository.myNodeInfo.value ?: return
         val myNodeNum = myInfo.myNodeNum
         Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
-        radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
+        CoroutineScope(Dispatchers.IO).launch {
+            radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
+        }
     }
 
     /**
@@ -236,9 +247,11 @@ class Esp32OtaUpdateHandler(
         hardware: DeviceHardware,
         firmwareUri: CommonUri?,
         updateState: (FirmwareUpdateState) -> Unit,
-    ): String? {
+    ): FirmwareArtifact? {
         val downloadingMsg =
-            getString(Res.string.firmware_update_downloading_percent, 0).replace(Regex(":?\\s*%1\\\$d%?"), "").trim()
+            getStringSuspend(Res.string.firmware_update_downloading_percent, 0)
+                .replace(Regex(":?\\s*%1\\\$d%?"), "")
+                .trim()
 
         updateState(
             FirmwareUpdateState.Downloading(
@@ -311,12 +324,12 @@ class Esp32OtaUpdateHandler(
     @Suppress("LongMethod")
     private suspend fun executeOtaSequence(
         transport: UnifiedOtaProtocol,
-        firmwareFile: String,
+        firmwareFile: FirmwareArtifact,
         sha256Hash: String,
         rebootMode: Int,
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
-        val file = java.io.File(firmwareFile)
+        val file = firmwareFile.toLocalFile()
         // Step 5: Start OTA
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_ota))),
@@ -384,4 +397,9 @@ class Esp32OtaUpdateHandler(
 
         updateState(FirmwareUpdateState.Success)
     }
+
+    private fun java.io.File.toFirmwareArtifact(): FirmwareArtifact =
+        FirmwareArtifact(uri = CommonUri.parse(toURI().toString()), fileName = name, isTemporary = true)
+
+    private fun FirmwareArtifact.toLocalFile(): java.io.File = java.io.File(java.net.URI(uri.toString()))
 }

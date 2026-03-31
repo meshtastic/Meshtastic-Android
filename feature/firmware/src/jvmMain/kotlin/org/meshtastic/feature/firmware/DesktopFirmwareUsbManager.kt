@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.firmware.navigation
+package org.meshtastic.feature.firmware
 
-import androidx.compose.runtime.Composable
-import org.meshtastic.core.ui.component.PlaceholderScreen
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
-@Composable
-actual fun FirmwareScreen(onNavigateUp: () -> Unit) {
-    PlaceholderScreen("Firmware Update")
+class DesktopFirmwareUsbManager : FirmwareUsbManager {
+    override fun deviceDetachFlow(): Flow<Unit> = emptyFlow()
 }

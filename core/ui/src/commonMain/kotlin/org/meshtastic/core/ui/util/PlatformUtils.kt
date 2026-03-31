@@ -14,10 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.MeshtasticUri
 
 /** Returns a function to open the platform's NFC settings. */
 @Composable expect fun rememberOpenNfcSettings(): () -> Unit
@@ -37,8 +41,23 @@ import org.jetbrains.compose.resources.StringResource
 /** Returns a launcher function to prompt the user to save a file. The callback receives the saved file URI. */
 @Composable
 expect fun rememberSaveFileLauncher(
-    onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit,
+    onUriReceived: (MeshtasticUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit
+
+/** Returns a launcher function to prompt the user to open/pick a file. The callback receives the selected file URI. */
+@Composable expect fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit
+
+/**
+ * Returns a suspend function that reads up to [maxChars] characters of text from a [CommonUri]. Returns `null` if the
+ * file is empty or cannot be read.
+ */
+@Composable expect fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String?
+
+/** Keeps the screen awake while [enabled] is true. No-op on platforms that don't support it. */
+@Composable expect fun KeepScreenOn(enabled: Boolean)
+
+/** Intercepts the platform back gesture/button while [enabled] is true. No-op on platforms without a system back. */
+@Composable expect fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit)
 
 /** Returns a launcher to request location permissions. */
 @Composable expect fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit

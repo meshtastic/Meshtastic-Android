@@ -14,18 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.core.ui.util
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.MeshtasticUri
 import java.net.URLEncoder
 
 @Composable
@@ -114,6 +126,61 @@ actual fun rememberSaveFileLauncher(
             launcher.launch(intent)
         }
     }
+}
+
+@Composable
+actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit {
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            onUriReceived(uri?.let { CommonUri(it) })
+        }
+    return remember(launcher) { { mimeType -> launcher.launch(mimeType) } }
+}
+
+@Suppress("Wrapping")
+@Composable
+actual fun rememberReadTextFromUri(): suspend (CommonUri, Int) -> String? {
+    val context = LocalContext.current
+    return remember(context) {
+        { uri, maxChars ->
+            withContext(Dispatchers.IO) {
+                @Suppress("TooGenericExceptionCaught")
+                try {
+                    val androidUri = Uri.parse(uri.toString())
+                    context.contentResolver.openInputStream(androidUri)?.use { stream ->
+                        stream.bufferedReader().use { reader ->
+                            val buffer = CharArray(maxChars)
+                            val read = reader.read(buffer)
+                            if (read > 0) String(buffer, 0, read) else null
+                        }
+                    }
+                } catch (e: Exception) {
+                    Logger.e(e) { "Failed to read text from URI: $uri" }
+                    null
+                }
+            }
+        }
+    }
+}
+
+@Composable
+actual fun KeepScreenOn(enabled: Boolean) {
+    val view = LocalView.current
+    DisposableEffect(enabled) {
+        if (enabled) {
+            view.keepScreenOn = true
+        }
+        onDispose {
+            if (enabled) {
+                view.keepScreenOn = false
+            }
+        }
+    }
+}
+
+@Composable
+actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) {
+    BackHandler(enabled = enabled, onBack = onBack)
 }
 
 @Composable
