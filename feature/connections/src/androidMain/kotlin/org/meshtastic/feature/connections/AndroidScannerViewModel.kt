@@ -35,7 +35,7 @@ import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 
-@KoinViewModel
+@KoinViewModel(binds = [ScannerViewModel::class])
 @Suppress("LongParameterList", "TooManyFunctions")
 class AndroidScannerViewModel(
     serviceRepository: ServiceRepository,

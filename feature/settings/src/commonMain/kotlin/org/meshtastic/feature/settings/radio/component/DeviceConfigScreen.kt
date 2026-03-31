@@ -66,11 +66,16 @@ import org.meshtastic.core.resources.config_device_tripleClickAsAdHocPing_summar
 import org.meshtastic.core.resources.config_device_tzdef_summary
 import org.meshtastic.core.resources.config_device_use_phone_tz
 import org.meshtastic.core.resources.device
+import org.meshtastic.core.resources.device_storage_ui_title
+import org.meshtastic.core.resources.device_theme_language
 import org.meshtastic.core.resources.double_tap_as_button_press
+import org.meshtastic.core.resources.file_entry
+import org.meshtastic.core.resources.files_available
 import org.meshtastic.core.resources.gpio
 import org.meshtastic.core.resources.hardware
 import org.meshtastic.core.resources.i_know_what_i_m_doing
 import org.meshtastic.core.resources.led_heartbeat
+import org.meshtastic.core.resources.no_files_manifested
 import org.meshtastic.core.resources.nodeinfo_broadcast_interval
 import org.meshtastic.core.resources.options
 import org.meshtastic.core.resources.rebroadcast_mode
@@ -152,7 +157,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val deviceConfig = state.radioConfig.device ?: Config.DeviceConfig()
     val formState = rememberConfigState(initialValue = deviceConfig)
-    var selectedRole by rememberSaveable { mutableStateOf(formState.value.role) }
+    var selectedRole by rememberSaveable(formState.value.role) { mutableStateOf(formState.value.role) }
     val infrastructureRoles =
         listOf(Config.DeviceConfig.Role.ROUTER, Config.DeviceConfig.Role.ROUTER_LATE, Config.DeviceConfig.Role.REPEATER)
     if (selectedRole != formState.value.role) {
@@ -307,6 +312,31 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(buzzer_gpio = it) },
                 )
+            }
+        }
+
+        if (state.deviceUIConfig != null || state.fileManifest.isNotEmpty()) {
+            item {
+                TitledCard(title = stringResource(Res.string.device_storage_ui_title)) {
+                    state.deviceUIConfig?.let { uiConfig ->
+                        Text(
+                            stringResource(
+                                Res.string.device_theme_language,
+                                uiConfig.theme.toString(),
+                                uiConfig.language.toString(),
+                            ),
+                        )
+                        HorizontalDivider()
+                    }
+                    if (state.fileManifest.isNotEmpty()) {
+                        Text(stringResource(Res.string.files_available, state.fileManifest.size))
+                        state.fileManifest.forEach { file ->
+                            Text(stringResource(Res.string.file_entry, file.file_name, file.size_bytes))
+                        }
+                    } else {
+                        Text(stringResource(Res.string.no_files_manifested))
+                    }
+                }
             }
         }
     }

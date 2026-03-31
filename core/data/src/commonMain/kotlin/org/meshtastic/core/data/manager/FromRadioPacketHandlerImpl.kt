@@ -16,7 +16,12 @@
  */
 package org.meshtastic.core.data.manager
 
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MqttManager
@@ -26,7 +31,13 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
-import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.duplicated_public_key_title
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.key_verification_final_title
+import org.meshtastic.core.resources.key_verification_request_title
+import org.meshtastic.core.resources.key_verification_title
+import org.meshtastic.core.resources.low_entropy_key_title
+import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.FromRadio
 
 /** Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers. */
@@ -38,6 +49,11 @@ class FromRadioPacketHandlerImpl(
     private val packetHandler: PacketHandler,
     private val notificationManager: NotificationManager,
 ) : FromRadioPacketHandler {
+
+    // Application-scoped coroutine context for suspend work (e.g. getStringSuspend).
+    // This @Single lives for the entire app lifetime, so the SupervisorJob is never cancelled.
+    private val scope = CoroutineScope(ioDispatcher + SupervisorJob())
+
     @Suppress("CyclomaticComplexMethod")
     override fun handleFromRadio(proto: FromRadio) {
         val myInfo = proto.my_info
@@ -50,9 +66,15 @@ class FromRadioPacketHandlerImpl(
         val moduleConfig = proto.moduleConfig
         val channel = proto.channel
         val clientNotification = proto.clientNotification
+        val deviceUIConfig = proto.deviceuiConfig
+        val fileInfo = proto.fileInfo
+        val xmodemPacket = proto.xmodemPacket
 
         when {
             myInfo != null -> router.value.configFlowManager.handleMyInfo(myInfo)
+            // deviceuiConfig arrives immediately after my_info (STATE_SEND_UIDATA). It carries
+            // the device's display, theme, node-filter, and other UI preferences.
+            deviceUIConfig != null -> router.value.configHandler.handleDeviceUIConfig(deviceUIConfig)
             metadata != null -> router.value.configFlowManager.handleLocalMetadata(metadata)
             nodeInfo != null -> {
                 router.value.configFlowManager.handleNodeInfo(nodeInfo)
@@ -64,17 +86,48 @@ class FromRadioPacketHandlerImpl(
             config != null -> router.value.configHandler.handleDeviceConfig(config)
             moduleConfig != null -> router.value.configHandler.handleModuleConfig(moduleConfig)
             channel != null -> router.value.configHandler.handleChannel(channel)
-            clientNotification != null -> {
-                serviceRepository.setClientNotification(clientNotification)
-                notificationManager.dispatch(
-                    Notification(
-                        title = getString(Res.string.client_notification),
-                        message = clientNotification.message,
-                        category = Notification.Category.Alert,
-                    ),
-                )
-                packetHandler.removeResponse(0, complete = false)
-            }
+            fileInfo != null -> router.value.configFlowManager.handleFileInfo(fileInfo)
+            xmodemPacket != null -> router.value.xmodemManager.handleIncomingXModem(xmodemPacket)
+            clientNotification != null -> handleClientNotification(clientNotification)
+        }
+    }
+
+    private fun handleClientNotification(cn: ClientNotification) {
+        serviceRepository.setClientNotification(cn)
+
+        scope.handledLaunch {
+            val inform = cn.key_verification_number_inform
+            val request = cn.key_verification_number_request
+            val verificationFinal = cn.key_verification_final
+            val (title, type) =
+                when {
+                    inform != null -> {
+                        Logger.i { "Key verification inform from ${inform.remote_longname}" }
+                        Pair(getStringSuspend(Res.string.key_verification_title), Notification.Type.Info)
+                    }
+                    request != null -> {
+                        Logger.i { "Key verification request from ${request.remote_longname}" }
+                        Pair(getStringSuspend(Res.string.key_verification_request_title), Notification.Type.Info)
+                    }
+                    verificationFinal != null -> {
+                        Logger.i { "Key verification final from ${verificationFinal.remote_longname}" }
+                        Pair(getStringSuspend(Res.string.key_verification_final_title), Notification.Type.Info)
+                    }
+                    cn.duplicated_public_key != null -> {
+                        Logger.w { "Duplicated public key notification received" }
+                        Pair(getStringSuspend(Res.string.duplicated_public_key_title), Notification.Type.Warning)
+                    }
+                    cn.low_entropy_key != null -> {
+                        Logger.w { "Low entropy key notification received" }
+                        Pair(getStringSuspend(Res.string.low_entropy_key_title), Notification.Type.Warning)
+                    }
+                    else -> Pair(getStringSuspend(Res.string.client_notification), Notification.Type.Info)
+                }
+
+            notificationManager.dispatch(
+                Notification(title = title, type = type, message = cn.message, category = Notification.Category.Alert),
+            )
+            packetHandler.removeResponse(0, complete = false)
         }
     }
 }

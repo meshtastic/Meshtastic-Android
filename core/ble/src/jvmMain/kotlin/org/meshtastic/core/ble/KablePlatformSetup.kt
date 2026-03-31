@@ -26,3 +26,6 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
 
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     com.juul.kable.Peripheral(address.toIdentifier(), builderAction)
+
+// JVM/desktop Kable does not expose an MTU StateFlow; fall back to null so callers use their default.
+internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null

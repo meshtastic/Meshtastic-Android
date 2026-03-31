@@ -209,9 +209,10 @@ class SharedRadioInterfaceService(
     private fun startInterfaceLocked() {
         if (radioIf != null) return
 
-        val address =
-            getBondedDeviceAddress()
-                ?: if (isMockInterface()) transportFactory.toInterfaceAddress(InterfaceId.MOCK, "") else null
+        // Never autoconnect to the simulated node. The mock transport may be offered in the
+        // device-picker UI on debug builds, but it must only connect when the user explicitly
+        // selects it (i.e. its address is stored in radioPrefs).
+        val address = getBondedDeviceAddress()
 
         if (address == null) {
             Logger.w { "No valid address to connect to." }

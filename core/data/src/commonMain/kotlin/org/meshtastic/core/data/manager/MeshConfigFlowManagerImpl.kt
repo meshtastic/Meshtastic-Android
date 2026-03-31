@@ -37,6 +37,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.NodeInfo
@@ -152,6 +153,8 @@ class MeshConfigFlowManagerImpl(
             radioConfigRepository.clearChannelSet()
             radioConfigRepository.clearLocalConfig()
             radioConfigRepository.clearLocalModuleConfig()
+            radioConfigRepository.clearDeviceUIConfig()
+            radioConfigRepository.clearFileManifest()
         }
     }
 
@@ -163,6 +166,11 @@ class MeshConfigFlowManagerImpl(
 
     override fun handleNodeInfo(info: NodeInfo) {
         newNodes.add(info)
+    }
+
+    override fun handleFileInfo(info: FileInfo) {
+        Logger.d { "FileInfo received: ${info.file_name} (${info.size_bytes} bytes)" }
+        scope.handledLaunch { radioConfigRepository.addFileInfo(info) }
     }
 
     override fun triggerWantConfig() {

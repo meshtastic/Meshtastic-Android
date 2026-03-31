@@ -111,6 +111,12 @@ class RadioConfigViewModelTest {
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
         every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
+        every { radioConfigRepository.deviceUIConfigFlow } returns MutableStateFlow(null)
+        every { radioConfigRepository.fileManifestFlow } returns MutableStateFlow(emptyList())
+
+        every { analyticsPrefs.analyticsAllowed } returns MutableStateFlow(false)
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
+
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { serviceRepository.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)

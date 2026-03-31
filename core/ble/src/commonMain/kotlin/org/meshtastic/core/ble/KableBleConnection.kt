@@ -22,6 +22,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -49,6 +50,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
 
     private val _connectionState =
         MutableSharedFlow<BleConnectionState>(
+            replay = 1,
             extraBufferCapacity = 1,
             onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
         )
@@ -121,22 +123,19 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    override suspend fun connectAndAwait(
-        device: BleDevice,
-        timeoutMs: Long,
-        onRegister: suspend () -> Unit,
-    ): BleConnectionState {
-        onRegister()
-        return try {
-            kotlinx.coroutines.withTimeout(timeoutMs) {
-                connect(device)
-                BleConnectionState.Connected
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            BleConnectionState.Disconnected
+    override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState = try {
+        kotlinx.coroutines.withTimeout(timeoutMs) {
+            connect(device)
+            BleConnectionState.Connected
         }
+    } catch (e: TimeoutCancellationException) {
+        // Our own timeout expired — treat as a failed attempt so callers can retry.
+        BleConnectionState.Disconnected
+    } catch (e: CancellationException) {
+        // External cancellation (scope closed) — must propagate.
+        throw e
+    } catch (e: Exception) {
+        BleConnectionState.Disconnected
     }
 
     override suspend fun disconnect() = withContext(NonCancellable) {
@@ -164,8 +163,5 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         return cScope.setup(service)
     }
 
-    override fun maximumWriteValueLength(writeType: BleWriteType): Int? {
-        // Desktop MTU isn't always easily exposed, provide a safe default for Meshtastic
-        return 512
-    }
+    override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength() ?: 512
 }

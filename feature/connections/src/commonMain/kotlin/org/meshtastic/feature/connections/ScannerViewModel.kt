@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.RadioController
@@ -44,7 +43,6 @@ import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 
-@KoinViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
 open class ScannerViewModel(
     protected val serviceRepository: ServiceRepository,
@@ -118,9 +116,14 @@ open class ScannerViewModel(
                 val bonded = discovered?.bleDevices?.filterIsInstance<DeviceListEntry.Ble>() ?: emptyList()
                 val bondedAddresses = bonded.map { it.address }.toSet()
 
-                // Add scanned devices that aren't already in the bonded list
+                // Add scanned devices that aren't already in the bonded list.
+                // These are explicitly marked as unbonded so the UI routes through
+                // requestBonding() — which on Android triggers createBond() for the
+                // pairing dialog before connecting.
                 val unbondedScanned =
-                    scannedMap.values.filter { it.address !in bondedAddresses }.map { DeviceListEntry.Ble(it) }
+                    scannedMap.values
+                        .filter { it.address !in bondedAddresses }
+                        .map { DeviceListEntry.Ble(device = it, bonded = false) }
 
                 // Sort by name
                 (bonded + unbondedScanned).sortedBy { it.name }
@@ -231,8 +234,16 @@ open class ScannerViewModel(
         }
     }
 
-    /** Initiates the bonding process and connects to the device upon success. */
-    protected open fun requestBonding(entry: DeviceListEntry.Ble) {}
+    /**
+     * Initiates the bonding process and connects to the device upon success.
+     *
+     * The default implementation connects directly without explicit bonding, which is correct for Desktop/JVM where the
+     * OS Bluetooth stack handles pairing during the GATT connection. Android overrides this to call `createBond()`
+     * first.
+     */
+    protected open fun requestBonding(entry: DeviceListEntry.Ble) {
+        changeDeviceAddress(entry.fullAddress)
+    }
 
     protected open fun requestPermission(entry: DeviceListEntry.Usb) {}
 

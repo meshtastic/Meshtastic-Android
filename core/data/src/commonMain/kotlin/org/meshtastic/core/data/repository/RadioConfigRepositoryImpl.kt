@@ -17,6 +17,8 @@
 package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.ChannelSetDataSource
@@ -30,6 +32,8 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -101,6 +105,30 @@ open class RadioConfigRepositoryImpl(
      */
     override suspend fun setLocalModuleConfig(config: ModuleConfig) {
         moduleConfigDataSource.setLocalModuleConfig(config)
+    }
+
+    // DeviceUIConfig is session-scoped data received fresh in every handshake — no persistence needed.
+    private val _deviceUIConfigFlow = MutableStateFlow<DeviceUIConfig?>(null)
+    override val deviceUIConfigFlow: Flow<DeviceUIConfig?> = _deviceUIConfigFlow.asStateFlow()
+
+    override suspend fun setDeviceUIConfig(config: DeviceUIConfig) {
+        _deviceUIConfigFlow.value = config
+    }
+
+    override suspend fun clearDeviceUIConfig() {
+        _deviceUIConfigFlow.value = null
+    }
+
+    // FileInfo manifest is session-scoped: accumulated during STATE_SEND_FILEMANIFEST, cleared on each new handshake.
+    private val _fileManifestFlow = MutableStateFlow<List<FileInfo>>(emptyList())
+    override val fileManifestFlow: Flow<List<FileInfo>> = _fileManifestFlow.asStateFlow()
+
+    override suspend fun addFileInfo(info: FileInfo) {
+        _fileManifestFlow.value += info
+    }
+
+    override suspend fun clearFileManifest() {
+        _fileManifestFlow.value = emptyList()
     }
 
     /** Flow representing the combined [DeviceProfile] protobuf. */

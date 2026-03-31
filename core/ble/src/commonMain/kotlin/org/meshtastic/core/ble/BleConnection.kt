@@ -43,11 +43,7 @@ interface BleConnection {
     suspend fun connect(device: BleDevice)
 
     /** Connects to the given [BleDevice] and waits for a terminal state. */
-    suspend fun connectAndAwait(
-        device: BleDevice,
-        timeoutMs: Long,
-        onRegister: suspend () -> Unit = {},
-    ): BleConnectionState
+    suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState
 
     /** Disconnects from the current device. */
     suspend fun disconnect()
