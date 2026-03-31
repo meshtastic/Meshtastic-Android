@@ -433,7 +433,7 @@ open class RadioConfigViewModel(
     }
 
     fun setResponseStateLoading(route: Enum<*>) {
-        val destNum = destNode.value?.num ?: return
+        val destNum = destNumFlow.value ?: destNode.value?.num ?: return
 
         _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Loading()) }
 
