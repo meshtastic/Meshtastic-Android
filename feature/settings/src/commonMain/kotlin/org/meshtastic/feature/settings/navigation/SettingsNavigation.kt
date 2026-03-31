@@ -72,12 +72,13 @@ import kotlin.reflect.KClass
 @Composable
 fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewModel {
     val viewModel = koinViewModel<RadioConfigViewModel>()
-    val destNum = remember(backStack.toList()) {
-        backStack.lastOrNull { it is SettingsRoutes.Settings }?.let { (it as SettingsRoutes.Settings).destNum }
-            ?: backStack
-                .lastOrNull { it is SettingsRoutes.SettingsGraph }
-                ?.let { (it as SettingsRoutes.SettingsGraph).destNum }
-    }
+    val destNum =
+        remember(backStack.toList()) {
+            backStack.lastOrNull { it is SettingsRoutes.Settings }?.let { (it as SettingsRoutes.Settings).destNum }
+                ?: backStack
+                    .lastOrNull { it is SettingsRoutes.SettingsGraph }
+                    ?.let { (it as SettingsRoutes.SettingsGraph).destNum }
+        }
     SideEffect { viewModel.initDestNum(destNum) }
     return viewModel
 }

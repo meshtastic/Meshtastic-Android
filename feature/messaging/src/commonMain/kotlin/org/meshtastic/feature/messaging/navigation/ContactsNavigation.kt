@@ -84,10 +84,7 @@ fun EntryProviderScope<NavKey>.contactsGraph(
 }
 
 @Composable
-fun ContactsEntryContent(
-    backStack: NavBackStack<NavKey>,
-    scrollToTopEvents: Flow<ScrollToTopEvent>,
-) {
+fun ContactsEntryContent(backStack: NavBackStack<NavKey>, scrollToTopEvents: Flow<ScrollToTopEvent>) {
     val uiViewModel: org.meshtastic.core.ui.viewmodel.UIViewModel = koinViewModel()
     val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
     val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
