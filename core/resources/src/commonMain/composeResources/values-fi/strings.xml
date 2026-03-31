@@ -141,7 +141,7 @@
     <string name="config_position_gps_update_interval_summary">Kuinka usein yritetään hakea GPS-sijainti (&lt;10 sekuntia pitää GPS:n päällä).</string>
     <string name="config_position_flags_summary">Valinnaiset kentät, jotka sisällytetään sijaintiviesteihin. Mitä enemmän kenttiä sisällytetään, sitä suurempi viesti on, mikä pidentää lähetysaikaa ja lisää pakettihäviön riskiä.</string>
     <string name="config_power_is_power_saving_summary">Asetus laittaa kaiken mahdollisen lepotilaan. Seuranta- ja anturiroolissa tämä sisältää myös LoRa-radion. Älä käytä tätä asetusta, jos haluat käyttää laitetta puhelinsovellusten kanssa tai laitetta ilman käyttäjäpainiketta.</string>
-    <string name="config_security_public_key">Luodaan julkisesta avaimestasi ja lähetetään muille verkon solmuille, jotta ne voivat laskea jaetun salaisen avaimen.</string>
+    <string name="config_security_public_key">Luotu yksityisestä avaimestasi ja lähetetty muille verkon laitteille, jotta ne voivat laskea yhteisen salaisen avaimen.</string>
     <string name="config_security_private_key">Käytetään jaetun avaimen luomiseen etälaitteen kanssa.</string>
     <string name="config_security_admin_key">Julkinen avain, jolla on oikeus lähettää hallintaviestejä tälle laitteelle.</string>
     <string name="config_security_is_managed">Laite on verkon ylläpitäjän hallinnoima, eikä käyttäjä pääse muokkaamaan laitteen asetuksia.</string>
@@ -241,7 +241,7 @@
     <string name="debug_filter_clear">Tyhjennä kaikki suodattimet</string>
     <string name="debug_filter_add_custom">Lisää mukautettu suodatin</string>
     <string name="debug_filter_preset_title">Oletussuodattimet</string>
-    <string name="debug_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
+    <string name="debug_filter_show_ignored">Näytä vain huomioimattomat laitteet</string>
     <string name="debug_store_logs_title">Tallenna mesh-verkon lokitiedot</string>
     <string name="debug_store_logs_summary">Poista käytöstä, jos et halua kirjoittaa mesh-lokitietoja levylle</string>
     <string name="debug_clear">Tyhjennä lokitiedot</string>
@@ -825,6 +825,11 @@
     <string name="show_waypoints">Näytä reittipisteet</string>
     <string name="show_precision_circle">Näytä tarkkuuspiirit</string>
     <string name="client_notification">Sovellusilmoitukset</string>
+    <string name="key_verification_title">Avaimen varmennus</string>
+    <string name="key_verification_request_title">Avaimen varmennuspyyntö</string>
+    <string name="key_verification_final_title">Avaimen varmennus valmis</string>
+    <string name="duplicated_public_key_title">Päällekkäinen julkinen avain havaittu</string>
+    <string name="low_entropy_key_title">Heikko salausavain havaittu</string>
     <string name="compromised_keys">Turvallisuusriski havaittu: avaimet ovat vaarantuneet. Valitse OK luodaksesi uudet.</string>
     <string name="regenerate_private_key">Luo uusi yksityinen avain</string>
     <string name="regenerate_keys_confirmation">Haluatko varmasti luoda yksityisen avaimen uudelleen?\n\nLaitteet, jotka ovat aiemmin vaihtaneet avaimia tämän laitteen kanssa, joutuvat poistamaan kyseisen laitteen ja vaihtamaan avaimet uudelleen, jotta suojattu viestintä voi jatkua.</string>
@@ -1238,4 +1243,9 @@
     <string name="update_device">Päivitä laite</string>
     <string name="note">Merkintä</string>
     <string name="firmware_charge_warning">Varmista ennen firmware-päivityksen aloittamista, että laite on täysin ladattu. Älä irrota laitetta tai katkaise virtaa päivityksen aikana.</string>
+    <string name="device_storage_ui_title">Laitteen tallennustila &amp; käyttöliittymä (vain luku)</string>
+    <string name="device_theme_language">Teema: %1$s, Kieli: %2$s</string>
+    <string name="files_available">Saatavilla olevat tiedostot (%1$d):</string>
+    <string name="file_entry">- %1$s (%2$d bittiä)</string>
+    <string name="no_files_manifested">Tiedostoja ei löytynyt.</string>
 </resources>

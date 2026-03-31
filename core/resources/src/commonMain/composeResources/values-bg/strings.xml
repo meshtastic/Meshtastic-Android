@@ -104,7 +104,6 @@
     <string name="config_network_eth_enabled_summary">Активирането на Ethernet ще деактивира Bluetooth връзката с приложението. TCP връзки с възли не са налични на устройства на Apple.</string>
     <string name="config_position_broadcast_secs_summary">Максималният интервал, който може да изтече, без възела да излъчи позиция.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Най-бързо ще бъдат изпратени актуализации на позицията, ако е спазено минималното разстояние.</string>
-    <string name="config_security_public_key">Генерира се от вашия публичен ключ и се изпраща до други възли в мрежата, за да им позволи да изчислят споделен секретен ключ.</string>
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
     <string name="config_security_admin_key">Публичният ключ, оторизиран за изпращане на администраторски съобщения до този възел.</string>
     <string name="config_security_is_managed">Устройството се управлява от mesh администратор, потребителят няма достъп до никоя от настройките на устройството.</string>

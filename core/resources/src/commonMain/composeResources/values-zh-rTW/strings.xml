@@ -140,7 +140,6 @@
     <string name="config_position_gps_update_interval_summary">嘗試獲取 GPS 位置的頻率（&lt; 10 秒將保持 GPS 模組開啟）。</string>
     <string name="config_position_flags_summary">位置訊息可選的附加欄位。包含的欄位越多，訊息越大，將造成空中時間拉長和封包遺失的風險增加。</string>
     <string name="config_power_is_power_saving_summary">將盡可能使所有元件進入睡眠狀態。對於 tracker 和 sensor 角色，此模式將包含 LoRa 無線電。如果您想搭配手機應用程式使用設備，或正在使用沒有使用者按鈕的設備，請勿啟用此設定。</string>
-    <string name="config_security_public_key">從您的公鑰生成，並發送給網狀網路中的其他節點，以供它們計算出共享密鑰。</string>
     <string name="config_security_private_key">用於與遠端設備交換密鑰。</string>
     <string name="config_security_admin_key">被授權可對此節點發送管理訊息的公鑰。</string>
     <string name="config_security_is_managed">設備處於受管理狀態，使用者無法變更任何設備設定。</string>

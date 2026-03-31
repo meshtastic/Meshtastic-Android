@@ -119,7 +119,6 @@
     <string name="config_position_broadcast_smart_minimum_distance_summary">La distancia mínima de cambio en metros que se tendrá en cuenta para una transmisión inteligente de posición.</string>
     <string name="config_position_flags_summary">Campos opcionales a incluir al ensamblar mensajes de posición. Cuantos más campos se incluyan, mayor será el tamaño del mensaje, lo que provocará un mayor tiempo de transmisión y un mayor riesgo de pérdida de paquetes.</string>
     <string name="config_power_is_power_saving_summary">La opción dormirá todo lo posible; los roles de rastreador y sensores y también incluirá la radio LoRa. No uses esta configuración si quieres utilizar tu dispositivo con las aplicaciones del teléfono o si estás usando un dispositivo sin botón de usuario.</string>
-    <string name="config_security_public_key">Generado a partir de nuestra clave pública y enviado a otros nodos de la malla para permitirles calcular una clave secreta compartida.</string>
     <string name="config_security_private_key">Utilizado para crear una clave compartida con un dispositivo remoto.</string>
     <string name="config_security_admin_key">Clave pública autorizada para enviar mensajes de administración a este nodo.</string>
     <string name="config_security_is_managed">Dispositivo gestionado por administrador de la malla, el usuario no puede acceder a las configuraciones del dispositivo.</string>
