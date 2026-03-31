@@ -26,7 +26,6 @@ import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
@@ -318,22 +317,23 @@ class Esp32OtaUpdateHandler(
                 WifiOtaTransport.RECOMMENDED_CHUNK_SIZE
             }
 
-        val startTime = nowMillis
+        val throughputTracker = ThroughputTracker()
         transport
             .streamFirmware(
                 data = firmwareData,
                 chunkSize = chunkSize,
                 onProgress = { progress ->
-                    val currentTime = nowMillis
-                    val elapsedSeconds = (currentTime - startTime) / MILLIS_PER_SECOND
+                    val bytesSent = (progress * firmwareData.size).toLong()
+                    throughputTracker.record(bytesSent)
+
                     val percent = (progress * PERCENT_MAX).toInt()
+                    val bytesPerSecond = throughputTracker.bytesPerSecond()
 
                     val speedText =
-                        if (elapsedSeconds > 0) {
-                            val bytesSent = (progress * firmwareData.size).toLong()
-                            val kibPerSecond = (bytesSent / KIB_DIVISOR) / elapsedSeconds
+                        if (bytesPerSecond > 0) {
+                            val kibPerSecond = bytesPerSecond.toFloat() / KIB_DIVISOR
                             val remainingBytes = firmwareData.size - bytesSent
-                            val etaSeconds = if (kibPerSecond > 0) (remainingBytes / KIB_DIVISOR) / kibPerSecond else 0f
+                            val etaSeconds = remainingBytes.toFloat() / bytesPerSecond
 
                             "${NumberFormatter.format(kibPerSecond, 1)} KiB/s, ETA: ${etaSeconds.toInt()}s"
                         } else {

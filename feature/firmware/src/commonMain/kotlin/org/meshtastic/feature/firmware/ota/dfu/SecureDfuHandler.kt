@@ -29,7 +29,6 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
@@ -142,13 +141,17 @@ class SecureDfuHandler(
                     emit(DfuInternalState.Progress(target, 0, 0f, 0f, 1, 1))
 
                     val firmwareSize = pkg.firmware.size
-                    val startTimeMs = nowMillis
+                    val throughputTracker = org.meshtastic.feature.firmware.ota.ThroughputTracker()
 
                     transport
                         .transferFirmware(pkg.firmware) { progress ->
                             val pct = (progress * PERCENT_MAX).toInt()
-                            val elapsed = nowMillis - startTimeMs
-                            val speedBytesPerMs = if (elapsed > 0L) (progress * firmwareSize) / elapsed else 0f
+                            val bytesSent = (progress * firmwareSize).toLong()
+                            throughputTracker.record(bytesSent)
+
+                            val bytesPerSec = throughputTracker.bytesPerSecond()
+                            val speedBytesPerMs = bytesPerSec.toFloat() / 1000f
+
                             updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, progress, "$pct%")))
                             emit(DfuInternalState.Progress(target, pct, speedBytesPerMs, speedBytesPerMs, 1, 1))
                         }
