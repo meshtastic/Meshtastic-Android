@@ -130,7 +130,8 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
                 val currentChunkSize = minOf(chunkSize, remainingBytes)
 
                 // Write chunk directly to TCP stream — no per-chunk ACK needed over TCP.
-                wc.writeFully(data, sentBytes, currentChunkSize)
+                // Ktor writeFully uses (startIndex, endIndex), NOT (offset, length).
+                wc.writeFully(data, sentBytes, sentBytes + currentChunkSize)
                 wc.flush()
 
                 sentBytes += currentChunkSize

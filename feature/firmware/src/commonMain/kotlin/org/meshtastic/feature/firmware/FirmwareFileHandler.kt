@@ -25,6 +25,9 @@ interface FirmwareFileHandler {
 
     suspend fun checkUrlExists(url: String): Boolean
 
+    /** Fetch the UTF-8 text body of [url], returning `null` on any HTTP or network error. */
+    suspend fun fetchText(url: String): String?
+
     suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): FirmwareArtifact?
 
     suspend fun extractFirmware(

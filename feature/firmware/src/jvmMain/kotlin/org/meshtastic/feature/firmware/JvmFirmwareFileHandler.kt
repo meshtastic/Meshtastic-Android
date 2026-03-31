@@ -21,6 +21,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
@@ -63,6 +64,16 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.w(e) { "Failed to check URL existence: $url" }
             false
+        }
+    }
+
+    override suspend fun fetchText(url: String): String? = withContext(ioDispatcher) {
+        try {
+            val response = client.get(url)
+            if (response.status.isSuccess()) response.bodyAsText() else null
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.w(e) { "Failed to fetch text from: $url" }
+            null
         }
     }
 
@@ -227,6 +238,14 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
     }
 
     private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean {
+        // Exclude non-firmware binaries that share the same extension
+        if (filename.startsWith("littlefs-") ||
+            filename.startsWith("bleota") ||
+            filename.startsWith("mt-") ||
+            filename.contains(".factory.")
+        ) {
+            return false
+        }
         val regex = Regex(".*[\\-_]${Regex.escape(target)}[\\-_.].*")
         return filename.endsWith(fileExtension) &&
             filename.contains(target) &&
