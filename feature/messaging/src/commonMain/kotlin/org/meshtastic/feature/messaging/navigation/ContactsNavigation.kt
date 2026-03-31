@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.ContactsRoutes
+import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.replaceLast
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.QuickChatScreen
@@ -60,7 +61,7 @@ fun EntryProviderScope<NavKey>.contactsGraph(
             contactKey = contactKey,
             message = args.message,
             viewModel = messageViewModel,
-            navigateToNodeDetails = { backStack.add(org.meshtastic.core.navigation.NodesRoutes.NodeDetailGraph(it)) },
+            navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetail(it)) },
             navigateToQuickChatOptions = { backStack.add(org.meshtastic.core.navigation.ContactsRoutes.QuickChat) },
             onNavigateBack = { backStack.removeLastOrNull() },
         )
@@ -83,7 +84,10 @@ fun EntryProviderScope<NavKey>.contactsGraph(
 }
 
 @Composable
-fun ContactsEntryContent(backStack: NavBackStack<NavKey>, scrollToTopEvents: Flow<ScrollToTopEvent>) {
+fun ContactsEntryContent(
+    backStack: NavBackStack<NavKey>,
+    scrollToTopEvents: Flow<ScrollToTopEvent>,
+) {
     val uiViewModel: org.meshtastic.core.ui.viewmodel.UIViewModel = koinViewModel()
     val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
     val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()

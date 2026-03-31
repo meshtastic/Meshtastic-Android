@@ -26,8 +26,8 @@ fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
     entry<MapRoutes.Map> { args ->
         val mapScreen = org.meshtastic.core.ui.util.LocalMapMainScreenProvider.current
         mapScreen(
-            { backStack.add(NodesRoutes.NodeDetailGraph(it)) }, // onClickNodeChip
-            { backStack.add(NodesRoutes.NodeDetailGraph(it)) }, // navigateToNodeDetails
+            { backStack.add(NodesRoutes.NodeDetail(it)) }, // onClickNodeChip
+            { backStack.add(NodesRoutes.NodeDetail(it)) }, // navigateToNodeDetails
             args.waypointId,
         )
     }

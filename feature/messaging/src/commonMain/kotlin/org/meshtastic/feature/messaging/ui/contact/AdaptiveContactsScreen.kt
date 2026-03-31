@@ -47,9 +47,9 @@ fun AdaptiveContactsScreen(
         onClearSharedContactRequested = onClearSharedContactRequested,
         onClearRequestChannelUrl = onClearRequestChannelUrl,
         viewModel = contactsViewModel,
-        onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+        onClickNodeChip = { backStack.add(NodesRoutes.NodeDetail(it)) },
         onNavigateToMessages = { contactKey -> backStack.add(ContactsRoutes.Messages(contactKey)) },
-        onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+        onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetail(it)) },
         scrollToTopEvents = scrollToTopEvents,
         activeContactKey = null,
     )

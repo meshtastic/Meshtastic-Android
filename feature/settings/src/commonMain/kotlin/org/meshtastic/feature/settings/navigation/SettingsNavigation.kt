@@ -87,7 +87,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
             radioConfigViewModel = getRadioConfigViewModel(backStack),
-            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
         )
     }
@@ -96,7 +96,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
             radioConfigViewModel = getRadioConfigViewModel(backStack),
-            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
         )
     }
