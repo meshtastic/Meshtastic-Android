@@ -48,15 +48,15 @@ Source reviewed: Navigation 3 `1.1.0-beta01` (JetBrains fork), CMP `1.11.0-beta0
    - New `sharedTransitionScope: SharedTransitionScope?` parameter for shared element transitions.
    - Existing shell patterns in `app` and `desktop` remain valid using the default `SinglePaneSceneStrategy`.
 2. **Entry-scoped ViewModel lifecycle adopted.**
-   - Both `app` and `desktop` now pass `ViewModelStoreNavEntryDecorator` + `SaveableStateHolderNavEntryDecorator` as explicit `entryDecorators` to `NavDisplay`.
+   - Both `app` and `desktop` now use `MeshtasticNavDisplay` (`core:ui/commonMain`), which applies `ViewModelStoreNavEntryDecorator` + `SaveableStateHolderNavEntryDecorator` per active backstack.
    - ViewModels obtained via `koinViewModel()` inside `entry<T>` blocks are now scoped to the entry's backstack lifetime.
 3. **No direct Navigation 3 API breakage.**
    - Release is beta (API stabilized). No migration from alpha04 was required for existing usage patterns.
 4. **Primary risk is dependency wiring drift, not runtime behavior.**
    - JetBrains Navigation 3 currently publishes `navigation3-ui` coordinates (no separate `navigation3-runtime` artifact in Maven Central). The `jetbrains-navigation3-runtime` alias intentionally points to `navigation3-ui` and is documented in the version catalog.
    - Note: The `remember*` composable factory functions from `navigation3-runtime` are not visible in non-KMP Android modules due to Kotlin metadata resolution. Use direct class constructors instead (as done in `app/Main.kt`).
-5. **Saved-state and typed-route parity risk remains unchanged.**
-   - Desktop still uses manual serializer registration; this is an existing risk and not introduced by beta01.
+5. **Saved-state and typed-route parity improved.**
+   - Both hosts share `MeshtasticNavSavedStateConfig` from `core:navigation/commonMain` via `MultiBackstack`, reducing platform drift risk in serializer registration.
 6. **Updated active docs to reflect the current dependency baseline (`1.11.0-beta01`, `1.1.0-beta01`, `1.3.0-alpha06`, `2.11.0-alpha02`).**
 
 ### Actions Taken
@@ -66,7 +66,7 @@ Source reviewed: Navigation 3 `1.1.0-beta01` (JetBrains fork), CMP `1.11.0-beta0
   - `jetbrains-navigation3-runtime`, `jetbrains-navigation3-ui`
 - Documented in the version catalog that `jetbrains-navigation3-runtime` intentionally maps to `navigation3-ui` until a separate runtime artifact is published.
 - Migrated `core:data` `commonMain` from `androidx.lifecycle:lifecycle-runtime` (Google) to `org.jetbrains.androidx.lifecycle:lifecycle-runtime` (JetBrains fork) for full consistency.
-- Updated active docs to reflect the current dependency baseline (`1.11.0-alpha04`, `1.1.0-alpha04`, `1.3.0-alpha06`, `2.10.0-beta01`).
+- Updated active docs to reflect the current dependency baseline (`1.11.0-beta01`, `1.1.0-beta01`, `1.3.0-alpha06`, `2.11.0-alpha02`).
 - Consolidated `app` adaptive dependencies to JetBrains Material 3 Adaptive coordinates (`org.jetbrains.compose.material3.adaptive:*`) so Android and Desktop consume the same adaptive artifact family. The Android-only navigation suite remains on `androidx.compose.material3:material3-adaptive-navigation-suite`.
 
 ### Deferred Follow-ups

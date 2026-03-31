@@ -74,7 +74,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.search_emoji
 import org.meshtastic.core.ui.component.BottomSheetDialog
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -207,7 +211,7 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
         modifier = Modifier.fillMaxWidth().height(52.dp),
         placeholder = {
             Text(
-                text = "Search emoji\u2026",
+                text = stringResource(Res.string.search_emoji),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -221,7 +225,7 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
                 IconButton(onClick = { onQueryChange("") }) {
                     Icon(
                         imageVector = Icons.Rounded.Close,
-                        contentDescription = "Clear",
+                        contentDescription = stringResource(Res.string.clear),
                         modifier = Modifier.size(20.dp),
                     )
                 }

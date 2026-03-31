@@ -56,15 +56,6 @@ kotlin {
             implementation(libs.androidx.appcompat)
         }
 
-        androidUnitTest.dependencies {
-            implementation(libs.junit)
-            implementation(libs.robolectric)
-            implementation(libs.turbine)
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.androidx.compose.ui.test.junit4)
-            implementation(libs.androidx.test.ext.junit)
-        }
-
         commonTest.dependencies {
             implementation(project(":core:testing"))
             implementation(project(":core:datastore"))

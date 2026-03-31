@@ -29,7 +29,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
  * - System-wide alerts and snackbar hosts
  * - Deep link navigation interception logic
  *
- * Platform hosts (Main.kt) should invoke this at the root of their theme before rendering the main NavDisplay.
+ * Platform hosts should invoke this near the root before rendering `MeshtasticNavDisplay`.
  */
 @Composable
 fun MeshtasticCommonAppSetup(

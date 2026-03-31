@@ -62,6 +62,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.a11y_message_from
 import org.meshtastic.core.resources.filter_message_label
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.ui.component.AutoLinkText
@@ -209,6 +210,8 @@ fun MessageItem(
                     Modifier
                 },
             )
+    val senderName = if (message.fromLocal) ourNode.user.long_name else node.user.long_name
+    val messageA11yText = stringResource(Res.string.a11y_message_from, senderName, message.text)
     if (showUserName && !message.fromLocal) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp),
@@ -242,10 +245,7 @@ fun MessageItem(
                 onDoubleClick = onDoubleClick,
             )
             .then(messageModifier)
-            .semantics(mergeDescendants = true) {
-                val senderName = if (message.fromLocal) ourNode.user.long_name else node.user.long_name
-                contentDescription = "Message from $senderName: ${message.text}"
-            },
+            .semantics(mergeDescendants = true) { contentDescription = messageA11yText },
         color = containerColor,
         contentColor = contentColorFor(containerColor),
         shape = messageShape,

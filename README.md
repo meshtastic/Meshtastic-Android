@@ -51,10 +51,10 @@ You can generate the documentation locally to preview your changes.
 
 1.  **Run the Dokka task:**
     ```bash
-    ./gradlew :app:dokkaHtml
+    ./gradlew dokkaGeneratePublicationHtml
     ```
 2.  **View the output:**
-    The generated HTML files will be located in the `app/build/dokka/html` directory. You can open the `index.html` file in your browser to view the documentation.
+    The generated HTML files will be located in the `build/dokka/html` directory. You can open the `index.html` file in your browser to view the documentation.
 
 ## Architecture
 

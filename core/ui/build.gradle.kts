@@ -26,6 +26,7 @@ kotlin {
     android {
         namespace = "org.meshtastic.core.ui"
         androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets {
@@ -75,6 +76,6 @@ kotlin {
             implementation(libs.kotest.property)
         }
 
-        androidUnitTest.dependencies { implementation(libs.androidx.test.runner) }
+        val androidHostTest by getting { dependencies { implementation(libs.androidx.test.runner) } }
     }
 }

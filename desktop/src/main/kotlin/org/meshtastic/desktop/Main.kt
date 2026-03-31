@@ -48,12 +48,14 @@ import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
 import co.touchlab.kermit.Logger
 import coil3.ImageLoader
+import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
 import org.jetbrains.skia.Image
@@ -90,12 +92,14 @@ private fun classpathPainterResource(path: String): Painter {
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
+@OptIn(ExperimentalCoilApi::class)
 fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     Logger.i { "Meshtastic Desktop — Starting" }
 
     val koinApp = remember { startKoin { modules(desktopPlatformModule(), desktopModule()) } }
     val systemLocale = remember { Locale.getDefault() }
     val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+    val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
     LaunchedEffect(args) {
         args.forEach { arg ->
@@ -247,8 +251,10 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                 val cacheDir = System.getProperty("user.home") + "/.meshtastic/image_cache_v3"
                 ImageLoader.Builder(context)
                     .components {
-                        add(KtorNetworkFetcherFactory())
-                        add(SvgDecoder.Factory(renderToBitmap = false))
+                        add(KtorNetworkFetcherFactory(httpClient = httpClient))
+                        // Render SVGs to a bitmap on Desktop to avoid Skiko vector rendering artifacts
+                        // that show up as solid/black hardware images.
+                        add(SvgDecoder.Factory(renderToBitmap = true))
                     }
                     .memoryCache { MemoryCache.Builder().maxSizeBytes(MEMORY_CACHE_MAX_BYTES).build() }
                     .diskCache {

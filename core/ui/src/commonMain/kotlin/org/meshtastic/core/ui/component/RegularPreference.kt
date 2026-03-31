@@ -100,7 +100,7 @@ fun RegularPreference(
                 Box {
                     Icon(
                         imageVector = trailingIcon,
-                        contentDescription = "trailingIcon",
+                        contentDescription = null,
                         modifier = Modifier.padding(start = 8.dp).wrapContentWidth(Alignment.End),
                         tint = color,
                     )

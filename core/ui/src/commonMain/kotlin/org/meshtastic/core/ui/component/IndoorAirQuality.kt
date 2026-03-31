@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -54,6 +53,11 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_quality_icon
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.indoor_air_quality_iaq
+import org.meshtastic.core.resources.preview_dot
+import org.meshtastic.core.resources.preview_gauge
+import org.meshtastic.core.resources.preview_gradient
+import org.meshtastic.core.resources.preview_pill
+import org.meshtastic.core.resources.preview_text
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ThumbUp
 import org.meshtastic.core.ui.icon.Warning
@@ -112,8 +116,6 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
     }
     var isLegendOpen by remember { mutableStateOf(false) }
     val iaqEnum = getIaq(iaq)
-    val gradient = Brush.linearGradient(colors = Iaq.entries.map { it.color })
-
     if (iaqEnum != null) {
         Column {
             when (displayMode) {
@@ -166,7 +168,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                         strokeWidth = 8.dp,
                         color = iaqEnum.color,
                     )
-                    Text(text = "${iaqEnum.description}")
+                    Text(text = iaqEnum.description)
                 }
 
                 IaqDisplayMode.Gradient -> {
@@ -230,7 +232,7 @@ private fun IndoorAirQualityPreview() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Pill", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(Res.string.preview_pill), style = MaterialTheme.typography.titleLarge)
         Row {
             IndoorAirQuality(iaq = 6)
             IndoorAirQuality(iaq = 51)
@@ -244,7 +246,7 @@ private fun IndoorAirQualityPreview() {
             IndoorAirQuality(iaq = 351)
         }
 
-        Text("Dot", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(Res.string.preview_dot), style = MaterialTheme.typography.titleLarge)
         Row {
             IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Dot)
             IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Dot)
@@ -254,7 +256,7 @@ private fun IndoorAirQualityPreview() {
             IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Dot)
         }
 
-        Text("Text", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(Res.string.preview_text), style = MaterialTheme.typography.titleLarge)
         Row {
             IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Text)
             IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Text)
@@ -266,7 +268,7 @@ private fun IndoorAirQualityPreview() {
             IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Text)
         }
 
-        Text("Gauge", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(Res.string.preview_gauge), style = MaterialTheme.typography.titleLarge)
         Row {
             IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gauge)
             IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gauge)
@@ -284,7 +286,7 @@ private fun IndoorAirQualityPreview() {
             IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Gauge)
         }
 
-        Text("Gradient", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(Res.string.preview_gradient), style = MaterialTheme.typography.titleLarge)
         IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gradient)
         IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gradient)
         IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Gradient)
