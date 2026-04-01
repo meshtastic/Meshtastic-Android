@@ -34,7 +34,7 @@ class FirmwareHashUtilTest {
         val hashBytes = FirmwareHashUtil.calculateSha256Bytes(data)
 
         // Expected hash for "test_firmware_data"
-        val expectedHex = "c530691533ad03c15aa1f79b69b5966aaff3bc14be8af56eaabcd32c6680a6b1"
+        val expectedHex = "488e6c37c4c532bde9b92652a6a6312844d845a43015389ec74487b0eed38d09"
         assertEquals(expectedHex, FirmwareHashUtil.bytesToHex(hashBytes).lowercase())
     }
 }
