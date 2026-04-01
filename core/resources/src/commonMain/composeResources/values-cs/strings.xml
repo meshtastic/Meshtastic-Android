@@ -208,6 +208,8 @@
     <string name="debug_clear">Vymazat protokoly</string>
     <string name="debug_clear_logs_confirm">Tímto odstraníte všechny logované pakety a záznamy databáze ze zařízení – jde o úplný reset a je nevratný.</string>
     <string name="clear">Vymazat</string>
+    <string name="channel_label">Kanál</string>
+    <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="message_delivery_status">Stav doručení zprávy</string>
     <string name="new_messages_below">Nové zprávy</string>
     <string name="meshtastic_messages_notifications">Upozornění na přímou zprávu</string>

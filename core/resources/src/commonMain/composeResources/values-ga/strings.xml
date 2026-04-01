@@ -95,6 +95,7 @@
     <string name="channel_invalid">Tá an URL Cainéil seo neamhdhleathach agus ní féidir é a úsáid</string>
     <string name="debug_panel">Painéal Laige</string>
     <string name="clear">Glan</string>
+    <string name="channel_label">Cainéal</string>
     <string name="message_delivery_status">Stádas seachadta teachtaireachta</string>
     <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais.</string>
     <string name="firmware_old">Tá an firmware raidió ró-aoiseach chun cumarsáid a dhéanamh leis an aip seo. Chun tuilleadh eolais a fháil, féach <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ár gCúnamh Suiteála Firmware</a>.</string>

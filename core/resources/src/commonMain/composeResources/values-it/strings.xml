@@ -247,6 +247,7 @@
     <string name="match_all">Trova tutte le corrispondenze | Qualsiasi</string>
     <string name="debug_clear_logs_confirm">Verranno rimossi tutti i pacchetti dei log e le voci del database dal dispositivo - Si tratta di un ripristino completo ed irreversibile.</string>
     <string name="clear">Svuota</string>
+    <string name="channel_label">Canale</string>
     <string name="message_delivery_status">Stato di consegna messaggi</string>
     <string name="new_messages_below">Nuovi messaggi sotto</string>
     <string name="meshtastic_messages_notifications">Notifiche di messaggi diretti</string>

@@ -61,6 +61,7 @@
     <string name="channel_invalid">Αυτό το κανάλι URL δεν είναι ορθό και δεν μπορεί να χρησιμοποιηθεί</string>
     <string name="debug_panel">Πίνακας αποσφαλμάτωσης</string>
     <string name="clear">Καθαρό, Εκκαθάριση,</string>
+    <string name="channel_label">Κανάλι</string>
     <string name="message_delivery_status">Κατάσταση παράδοσης μηνύματος</string>
     <string name="firmware_too_old">Απαιτείται ενημέρωση υλικολογισμικού.</string>
     <string name="firmware_old">Το λογισμικό του πομποδεκτη είναι πολύ παλιό για να μιλήσει σε αυτήν την εφαρμογή. Για περισσότερες πληροφορίες σχετικά με αυτό ανατρέξτε στον <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">οδηγό εγκατάστασης του Firmware</a>.</string>

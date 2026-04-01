@@ -96,6 +96,7 @@
     <string name="channel_invalid">Kanal URL sa a pa valab e yo pa kapab itilize li</string>
     <string name="debug_panel">Panno Debug</string>
     <string name="clear">Netwaye</string>
+    <string name="channel_label">kanal</string>
     <string name="message_delivery_status">Eta livrezon mesaj</string>
     <string name="firmware_too_old">Nouvo mizajou mikwo lojisyèl obligatwa.</string>
     <string name="firmware_old">Mikwo lojisyèl radyo a twò ansyen pou li kominike ak aplikasyon sa a. Pou plis enfòmasyon sou sa, gade <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">gid enstalasyon mikwo lojisyèl nou an</a>.</string>

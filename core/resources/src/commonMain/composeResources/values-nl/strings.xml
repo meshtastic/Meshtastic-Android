@@ -108,6 +108,7 @@
     <string name="channel_invalid">Deze Kanaal URL is ongeldig en kan niet worden gebruikt</string>
     <string name="debug_panel">Debug-paneel</string>
     <string name="clear">Wis</string>
+    <string name="channel_label">Kanaal</string>
     <string name="message_delivery_status">Bericht afleverstatus</string>
     <string name="meshtastic_alerts_notifications">Waarschuwingsmeldingen</string>
     <string name="firmware_too_old">Firmware-update vereist.</string>

@@ -78,6 +78,7 @@
     <string name="app_too_old">مطلوب تحديث التطبيق</string>
     <string name="meshtastic_service_notifications">خدمة الإشعارات</string>
     <string name="clear">مسح</string>
+    <string name="channel_label">عربي</string>
     <string name="firmware_too_old">يجب عليك التحديث.</string>
     <string name="okay">حسنا</string>
     <string name="must_set_region">واجب إدخال المنطقة!</string>

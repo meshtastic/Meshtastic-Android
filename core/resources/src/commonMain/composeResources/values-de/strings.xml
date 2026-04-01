@@ -248,6 +248,8 @@
     <string name="match_all">Alle finden | Irgendwas</string>
     <string name="debug_clear_logs_confirm">Es werden alle Log- und Datenbankeinträge von Ihrem Gerät entfernt. Dies ist eine vollständige Löschung und sie ist dauerhaft.</string>
     <string name="clear">Leeren</string>
+    <string name="channel_label">Kanal</string>
+    <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="message_delivery_status">Zustellungsstatus für Nachrichten</string>
     <string name="new_messages_below">Neue Nachrichten unten</string>
     <string name="meshtastic_messages_notifications">Benachrichtigung direkte Nachrichten</string>

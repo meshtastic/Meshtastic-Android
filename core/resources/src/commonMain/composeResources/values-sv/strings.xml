@@ -237,6 +237,7 @@
     <string name="match_all">Matcha alla &lt;unk&gt; någon</string>
     <string name="debug_clear_logs_confirm">Detta kommer att ta bort alla loggpaket och databasposter från din enhet - Det är en fullständig återställning och är permanent.</string>
     <string name="clear">Rensa</string>
+    <string name="channel_label">Kanal</string>
     <string name="message_delivery_status">Meddelandets leveransstatus</string>
     <string name="new_messages_below">Nya meddelanden här nedan</string>
     <string name="meshtastic_messages_notifications">Direktmeddelandeaviseringar</string>

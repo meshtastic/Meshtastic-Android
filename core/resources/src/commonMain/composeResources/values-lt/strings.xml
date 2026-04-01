@@ -95,6 +95,7 @@
     <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
     <string name="debug_panel">Derinimo skydelis</string>
     <string name="clear">Išvalyti</string>
+    <string name="channel_label">Kanalas</string>
     <string name="message_delivery_status">Žinutės pristatymo statusas</string>
     <string name="firmware_too_old">Reikalingas įrangos Firmware atnaujinimas.</string>
     <string name="firmware_old">Radijo įrangos pfirmware yra per sena, kad galėtų bendrauti su šia programa. Daugiau informacijos apie tai rasite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">mūsų firmware diegimo vadove</a>.</string>

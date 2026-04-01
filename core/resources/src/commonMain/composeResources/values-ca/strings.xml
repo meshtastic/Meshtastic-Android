@@ -104,6 +104,7 @@
     <string name="channel_invalid">La URL d'aquest canal és invàlida i no es pot fer servir</string>
     <string name="debug_panel">Panell de depuració</string>
     <string name="clear">Netejar</string>
+    <string name="channel_label">Canal</string>
     <string name="message_delivery_status">Estat d'entrega del missatge</string>
     <string name="firmware_too_old">Actualització de firmware necessària.</string>
     <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació. Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>

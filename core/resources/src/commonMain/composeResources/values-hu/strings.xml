@@ -222,6 +222,7 @@
     <string name="match_all">Mind | Bármelyik</string>
     <string name="debug_clear_logs_confirm">Ez eltávolítja az összes naplócsomagot és adatbázis-bejegyzést az eszközről – teljes visszaállítás, amely végleges.</string>
     <string name="clear">Töröl</string>
+    <string name="channel_label">Csatorna</string>
     <string name="message_delivery_status">Üzenet kézbesítésének állapota</string>
     <string name="new_messages_below">Új üzenetek lent</string>
     <string name="meshtastic_messages_notifications">Közvetlen üzenet értesítések</string>

@@ -199,6 +199,8 @@
     <string name="debug_store_logs_summary">Деактивирайте, за да пропуснете записването на журналите на mesh мрежата на диска</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
+    <string name="channel_label">Канал</string>
+    <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="new_messages_below">Нови съобщения по-долу</string>
     <string name="meshtastic_messages_notifications">Известия за директни съобщения</string>

@@ -237,6 +237,7 @@
     <string name="match_all">符合全部條件</string>
     <string name="debug_clear_logs_confirm">這將完全移除裝置上的所有日誌封包與資料庫記錄 - 這是一個完整的重設，且無法復原。</string>
     <string name="clear">清除</string>
+    <string name="channel_label">頻道</string>
     <string name="message_delivery_status">訊息傳遞狀態</string>
     <string name="new_messages_below">下方有新的訊息</string>
     <string name="meshtastic_messages_notifications">私訊通知</string>

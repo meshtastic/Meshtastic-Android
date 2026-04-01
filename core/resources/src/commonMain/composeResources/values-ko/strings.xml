@@ -120,6 +120,7 @@
     <string name="debug_filters">필터</string>
     <string name="debug_clear">로그 지우기</string>
     <string name="clear">삭제</string>
+    <string name="channel_label">채널</string>
     <string name="message_delivery_status">메시지 전송 상태</string>
     <string name="meshtastic_messages_notifications">DM 알림</string>
     <string name="meshtastic_broadcast_notifications">메시지 발송 알림</string>

@@ -180,6 +180,7 @@
     <string name="debug_filter_preset_title">Prednastavené filtre</string>
     <string name="debug_filter_show_ignored">Zobraziť len ignorované Uzly</string>
     <string name="clear">Zmazať</string>
+    <string name="channel_label">Kanál</string>
     <string name="message_delivery_status">Stav doručenia správy</string>
     <string name="meshtastic_alerts_notifications">Notifikácie upozornení</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru.</string>

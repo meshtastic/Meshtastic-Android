@@ -151,6 +151,7 @@
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti.</string>
     <string name="debug_panel">Panel za otklanjanje grešaka</string>
     <string name="clear">Očisti</string>
+    <string name="channel_label">Kanal</string>
     <string name="message_delivery_status">Status prijema poruke</string>
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="firmware_too_old">Ажурирање фирмвера је неопходно.</string>

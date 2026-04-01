@@ -57,6 +57,7 @@
     <string name="channel_invalid">כתובת ערוץ זה אינו תקין ולא ניתן לעשות בו שימוש</string>
     <string name="debug_panel">פאנל דיבאג</string>
     <string name="clear">נקה</string>
+    <string name="channel_label">ערוץ</string>
     <string name="message_delivery_status">מצב שליחת הודעה</string>
     <string name="meshtastic_alerts_notifications">התראות</string>
     <string name="firmware_too_old">נדרש עדכון קושחה.</string>
