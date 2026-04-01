@@ -32,7 +32,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.TakPrefs
 
-@Single
+@Single(binds = [TakPrefs::class])
 class TakPrefsImpl(
     @Named("UiDataStore") private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,

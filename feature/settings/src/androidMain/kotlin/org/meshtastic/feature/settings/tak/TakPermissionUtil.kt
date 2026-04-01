@@ -29,21 +29,22 @@ private const val SDK_INT_ANDROID_16 = 37
 @Composable
 actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult: (Boolean) -> Unit) {
     if (Build.VERSION.SDK_INT >= SDK_INT_ANDROID_16) {
-        val permissionState = rememberPermissionState("android.permission.ACCESS_LOCAL_NETWORK")
+        val permissionState =
+            rememberPermissionState("android.permission.ACCESS_LOCAL_NETWORK") { granted ->
+                // Callback fires after the system dialog is dismissed — report the result
+                // directly so onPermissionResult is the single authority for grant/deny.
+                if (isTakServerEnabled) onPermissionResult(granted)
+            }
 
         LaunchedEffect(isTakServerEnabled) {
             if (isTakServerEnabled) {
-                if (!permissionState.status.isGranted) {
-                    permissionState.launchPermissionRequest()
-                } else {
+                if (permissionState.status.isGranted) {
+                    // Already granted — confirm immediately so the orchestrator may proceed.
                     onPermissionResult(true)
+                } else {
+                    // Show system dialog; result is delivered via the callback above.
+                    permissionState.launchPermissionRequest()
                 }
-            }
-        }
-
-        LaunchedEffect(permissionState.status.isGranted) {
-            if (isTakServerEnabled) {
-                onPermissionResult(permissionState.status.isGranted)
             }
         }
     } else {
