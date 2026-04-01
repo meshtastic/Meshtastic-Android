@@ -42,6 +42,7 @@ graph TB
   :app -.-> :core:resources
   :app -.-> :core:ui
   :app -.-> :core:barcode
+  :app -.-> :core:takserver
   :app -.-> :feature:intro
   :app -.-> :feature:messaging
   :app -.-> :feature:connections
