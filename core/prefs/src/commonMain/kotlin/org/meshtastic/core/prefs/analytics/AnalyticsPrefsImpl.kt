@@ -44,8 +44,8 @@ class AnalyticsPrefsImpl(
 
     override val analyticsAllowed: StateFlow<Boolean> =
         analyticsDataStore.data
-            .map { it[KEY_ANALYTICS_ALLOWED_PREF] ?: false }
-            .stateIn(scope, SharingStarted.Eagerly, false)
+            .map { it[KEY_ANALYTICS_ALLOWED_PREF] ?: true }
+            .stateIn(scope, SharingStarted.Eagerly, true)
 
     override fun setAnalyticsAllowed(allowed: Boolean) {
         scope.launch { analyticsDataStore.edit { prefs -> prefs[KEY_ANALYTICS_ALLOWED_PREF] = allowed } }

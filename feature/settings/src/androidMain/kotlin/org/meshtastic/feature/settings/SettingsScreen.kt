@@ -211,7 +211,7 @@ fun SettingsScreen(
             if (state.isLocal) {
                 PrivacySection(
                     analyticsAvailable = state.analyticsAvailable,
-                    analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false).value,
+                    analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
                     onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
                     provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
                     onToggleLocation = { settingsViewModel.setProvideLocation(it) },

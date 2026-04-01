@@ -98,7 +98,7 @@ data class RadioConfigState(
     val fileManifest: List<FileInfo> = emptyList(),
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
-    val analyticsEnabled: Boolean = false,
+    val analyticsEnabled: Boolean = true,
     val nodeDbResetPreserveFavorites: Boolean = false,
 )
 

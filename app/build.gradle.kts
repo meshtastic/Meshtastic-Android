@@ -285,6 +285,8 @@ dependencies {
     googleImplementation(libs.dd.sdk.android.compose)
     googleImplementation(libs.dd.sdk.android.logs)
     googleImplementation(libs.dd.sdk.android.rum)
+    googleImplementation(libs.dd.sdk.android.session.replay)
+    googleImplementation(libs.dd.sdk.android.session.replay.material)
     googleImplementation(libs.dd.sdk.android.timber)
     googleImplementation(libs.dd.sdk.android.trace)
     googleImplementation(libs.dd.sdk.android.trace.otel)
