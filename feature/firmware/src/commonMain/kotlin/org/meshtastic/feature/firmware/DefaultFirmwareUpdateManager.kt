@@ -58,7 +58,7 @@ class DefaultFirmwareUpdateManager(
         )
     }
 
-    private fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
+    internal fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> {
             if (hardware.isEsp32Arc) {
                 error("Serial/USB firmware update not supported for ESP32 devices")
@@ -85,7 +85,7 @@ class DefaultFirmwareUpdateManager(
         else -> error("Unknown connection type for firmware update")
     }
 
-    private fun getTarget(address: String): String = when {
+    internal fun getTarget(address: String): String = when {
         radioPrefs.isSerial() -> ""
         radioPrefs.isBle() -> address
         radioPrefs.isTcp() -> address

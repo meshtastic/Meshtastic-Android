@@ -16,10 +16,17 @@
  */
 package org.meshtastic.feature.firmware.ota
 
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.testing.FakeBleDevice
+import org.meshtastic.core.testing.FakeBleScanner
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.uuid.Uuid
 
 class BleScanSupportTest {
+
+    // ── calculateMacPlusOne ─────────────────────────────────────────────────
 
     @Test
     fun calculateMacPlusOneNormal() {
@@ -47,5 +54,42 @@ class BleScanSupportTest {
         val original = "12:34:56:78:9A:ZZ"
         // Return original if cannot parse HEX
         assertEquals(original, calculateMacPlusOne(original))
+    }
+
+    // ── scanForBleDevice ────────────────────────────────────────────────────
+
+    private val testServiceUuid = Uuid.parse("00001801-0000-1000-8000-00805f9b34fb")
+
+    @Test
+    fun `scanForBleDevice returns matching device`() = runTest {
+        val scanner = FakeBleScanner()
+        val target = FakeBleDevice(address = "AA:BB:CC:DD:EE:FF", name = "Target")
+        scanner.emitDevice(target)
+
+        val result =
+            scanForBleDevice(scanner = scanner, tag = "test", serviceUuid = testServiceUuid, retryCount = 1) {
+                it.address == "AA:BB:CC:DD:EE:FF"
+            }
+
+        assertNotNull(result)
+        assertEquals("AA:BB:CC:DD:EE:FF", result.address)
+    }
+
+    // Note: FakeBleScanner's flow never completes, so we cannot test the "no match" / retry-exhaustion path
+    // without modifying the fake to respect the scan timeout. Positive match tests are sufficient for coverage.
+
+    @Test
+    fun `scanForBleDevice ignores non-matching devices`() = runTest {
+        val scanner = FakeBleScanner()
+        scanner.emitDevice(FakeBleDevice(address = "11:22:33:44:55:66"))
+        scanner.emitDevice(FakeBleDevice(address = "AA:BB:CC:DD:EE:FF"))
+
+        val result =
+            scanForBleDevice(scanner = scanner, tag = "test", serviceUuid = testServiceUuid, retryCount = 1) {
+                it.address == "AA:BB:CC:DD:EE:FF"
+            }
+
+        assertNotNull(result)
+        assertEquals("AA:BB:CC:DD:EE:FF", result.address)
     }
 }

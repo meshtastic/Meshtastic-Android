@@ -39,7 +39,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-                testOptions.animationsDisabled = true
+                testOptions {
+                    animationsDisabled = true
+                    unitTests.isReturnDefaultValues = true
+                }
 
                 defaultConfig {
                     // When flavorless modules depend on flavored modules (like :core:data),

@@ -122,17 +122,37 @@ Always run commands in the following order to ensure reliability. Do not attempt
 ./gradlew spotlessApply
 ./gradlew detekt
 ./gradlew assembleDebug
-./gradlew test
+./gradlew test allTests
 ```
 
 **Testing:**
 ```bash
-./gradlew test                # Run local unit tests
-./gradlew testFdroidDebugUnitTest testGoogleDebugUnitTest # CI-aligned Android unit tests (flavor-explicit)
+# Full host-side unit test run (required — see note below):
+./gradlew test allTests
+
+# Pure-Android / pure-JVM modules only (app, desktop, core:api, core:barcode, feature:widget, mesh_service_example):
+./gradlew test
+
+# KMP modules only (all core:* KMP + all feature:* KMP modules — jvmTest + testAndroidHostTest + iosSimulatorArm64Test):
+./gradlew allTests
+
+# CI-aligned flavor-explicit Android unit tests:
+./gradlew testFdroidDebugUnitTest testGoogleDebugUnitTest
+
 ./gradlew connectedAndroidTest # Run instrumented tests
 ./gradlew testFdroidDebug testGoogleDebug # Flavor-specific unit tests
 ./gradlew lintFdroidDebug lintGoogleDebug # Flavor-specific lint checks
 ```
+
+> **Why `test allTests` and not just `test`:**
+> In KMP modules, the `test` task name is **ambiguous** — Gradle matches both `testAndroid` and
+> `testAndroidHostTest` and refuses to run either, silently skipping all 25 KMP modules.
+> `allTests` is the `KotlinTestReport` lifecycle task registered by the KMP Gradle plugin for each
+> KMP module. It runs `jvmTest`, `testAndroidHostTest` (where declared with `withHostTest {}`), and
+> `iosSimulatorArm64Test` (disabled at execution — iOS targets are compile-only). Conversely,
+> `allTests` does **not** cover the pure-Android modules (`:app`, `:core:api`, `:core:barcode`,
+> `:feature:widget`, `:mesh_service_example`, `:desktop`), which is why both are needed.
+
 *Note: If testing Compose UI on the JVM (Robolectric) with Java 21, pin your tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 
 **CI workflow conventions (GitHub Actions):**

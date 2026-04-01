@@ -31,10 +31,14 @@ import kotlin.test.assertTrue
 /**
  * Tests for [FirmwareRetriever] covering the manifest-first ESP32 firmware resolution strategy and fallback heuristics.
  * Uses [FakeFirmwareFileHandler] instead of MockK for KMP compatibility.
+ *
+ * This class is `abstract` because the Android `actual` of [CommonUri.parse] delegates to `android.net.Uri.parse()`,
+ * which requires Robolectric on the Android host-test target. Platform-specific subclasses in `androidHostTest` and
+ * `jvmTest` apply the necessary runner configuration.
  */
-class FirmwareRetrieverTest {
+abstract class CommonFirmwareRetrieverTest {
 
-    private companion object {
+    protected companion object {
         const val BASE_URL = "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
 
         val TEST_RELEASE = FirmwareRelease(id = "v2.7.17", zipUrl = "https://example.com/esp32-s3.zip")
@@ -312,7 +316,7 @@ class FirmwareRetrieverTest {
      * - [textResponses] — URL → text body for [fetchText]
      * - [zipDownloadResult] / [zipExtractionResult] — for zip fallback path
      */
-    private class FakeFirmwareFileHandler : FirmwareFileHandler {
+    protected class FakeFirmwareFileHandler : FirmwareFileHandler {
         /** URLs that [checkUrlExists] will return true for. */
         val existingUrls = mutableSetOf<String>()
 
