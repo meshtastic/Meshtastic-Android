@@ -1,7 +1,17 @@
 # `:core:api` (Meshtastic Android API)
 
+> **Deprecation notice**
+>
+> The AIDL-based service integration (`IMeshService`) is deprecated and will be removed in a future
+> release. The recommended integration path for ATAK and other external apps is the built-in
+> **Local TAK Server** introduced in `core:takserver`. Connect ATAK to `127.0.0.1:8087` (TCP) and
+> import the DataPackage exported from the TAK Config screen to complete setup. No AIDL binding or
+> JitPack dependency is required.
+
 ## Overview
-The `:core:api` module contains the stable AIDL interface and dependencies required for third-party applications to integrate with the Meshtastic Android app.
+The `:core:api` module contains the AIDL interface and dependencies for third-party applications
+that currently integrate with the Meshtastic Android app via service binding. New integrations
+should use the Local TAK Server instead (see deprecation notice above).
 
 ## Integration
 

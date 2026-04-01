@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("DEPRECATION")
+
 package com.meshtastic.android.meshserviceexample
 
 import android.content.BroadcastReceiver
@@ -44,7 +46,17 @@ import org.meshtastic.core.service.IMeshService
 
 private const val TAG: String = "MeshServiceExample"
 
-/** MainActivity for the MeshServiceExample application. */
+/**
+ * MainActivity for the MeshServiceExample application.
+ *
+ * **DEPRECATED.** This entire module (`mesh_service_example`) is scheduled for removal in a future release. Do not use
+ * it as a template for new integrations. See `:core:api` README for the current public API surface.
+ */
+@Deprecated(
+    message =
+    "mesh_service_example is deprecated and will be removed in a future release. " +
+        "See core/api/README.md for integration guidance.",
+)
 class MainActivity : ComponentActivity() {
 
     private var meshService: IMeshService? = null

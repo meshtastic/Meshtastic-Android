@@ -10,6 +10,10 @@ import org.meshtastic.core.model.MyNodeInfo;
 /**
 This is the public android API for talking to meshtastic radios.
 
+@deprecated The AIDL service integration is deprecated and will be removed in a future release.
+    New integrations should connect via the built-in Local TAK Server on 127.0.0.1:8087 (TCP).
+    Import the DataPackage from the TAK Config screen in the Meshtastic app to configure ATAK.
+
 To connect to meshtastic you should bind to it per https://developer.android.com/guide/components/bound-services
 
 The intent you use to reach the service should ideally use the action string:
@@ -156,20 +160,27 @@ interface IMeshService {
     */
     String connectionState();
 
-    /// If a macaddress we will try to talk to our device, if null we will be idle.
-    /// Any current connection will be dropped (even if the device address is the same) before reconnecting.
-    /// Users should not call this directly, only used internally by the MeshUtil activity
-    /// Returns true if the device address actually changed, or false if no change was needed
+    /**
+     * @deprecated For internal use only. External callers must not invoke this method;
+     *     it will be removed from the public API in a future release.
+     */
     boolean setDeviceAddress(String deviceAddr);
 
     /// Get basic device hardware info about our connected radio.  Will never return NULL.  Will return NULL
     /// if no my node info is available (i.e. it will not throw an exception)
     MyNodeInfo getMyNodeInfo();
 
-    /// Start updating the radios firmware
+    /**
+     * @deprecated No-op stub — firmware update is now handled entirely by the in-app OTA system.
+     *     This method will be removed from the public API in a future release.
+     */
     void startFirmwareUpdate();
 
-    /// Return a number 0-100 for firmware update progress. -1 for completed and success, -2 for failure
+    /**
+     * @deprecated Always returns {@code -4}, which is outside the documented range.
+     *     Firmware update progress is now tracked internally by the in-app OTA system.
+     *     This method will be removed from the public API in a future release.
+     */
     int getUpdateStatus();
 
     /// Start providing location (from phone GPS) to mesh

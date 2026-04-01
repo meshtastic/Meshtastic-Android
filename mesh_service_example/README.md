@@ -1,33 +1,20 @@
 # mesh_service_example
 
-This module provides an example implementation of an app that uses the [AIDL](https://developer.android.com/develop/background-work/services/aidl) Mesh Service provided by Meshtastic-Android project.
+> **DEPRECATED — scheduled for removal in a future release.**
+>
+> This module is no longer maintained and will be deleted once the new public API documentation is
+> available. Do not add new code here. Do not use it as a template for new integrations.
+>
+> For integrating with the Meshtastic service from your own app, refer to the `:core:api` module
+> README at [`core/api/README.md`](../core/api/README.md).
 
-## Overview
+## What this was
 
-The [AIDL](../core/api/src/main/aidl/org/meshtastic/core/service/IMeshService.aidl) is defined in the `core:api` module and is used to interact with the mesh network.
-
-`mesh_service_example` demonstrates how to build and integrate a custom mesh service within the Meshtastic ecosystem. It is intended as a reference for developers who want to extend or customize mesh-related functionality.
-
-## Features
-- Example service structure for mesh integration
-- Sample code for service registration and communication
-
-## Usage
-1. Clone the Meshtastic-Android repository.
-2. Open the project in Android Studio.
-3. Explore the `mesh_service_example` module source code under `mesh_service_example/src/`.
-4. Use this module as a template for your own mesh service implementations.
-
-## Development
-- To build the module, use the standard Gradle build commands:
-  ```sh
-  ./gradlew :mesh_service_example:build
-  ```
-- To run tests for this module:
-  ```sh
-  ./gradlew :mesh_service_example:test
-  ```
+`mesh_service_example` was a sample Android application demonstrating how to bind to the
+`IMeshService` AIDL interface and exchange data with the Meshtastic radio service. It is kept in
+the repository only to avoid breaking the CI assemble task (`mesh_service_example:assembleDebug`)
+and the JitPack publication that consumers may reference, until those are formally retired.
 
 ## License
-This example module is provided under the same license as the main Meshtastic-Android project. See the root `LICENSE` file for details.
 
+See the root `LICENSE` file.

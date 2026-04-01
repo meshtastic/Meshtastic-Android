@@ -101,12 +101,15 @@ open class FakeIMeshService : IMeshService.Stub() {
 
     override fun connectionState(): String = "CONNECTED"
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun setDeviceAddress(deviceAddr: String?): Boolean = true
 
     override fun getMyNodeInfo(): MyNodeInfo? = null
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun startFirmwareUpdate() {}
 
+    @Suppress("OVERRIDE_DEPRECATION")
     override fun getUpdateStatus(): Int = 0
 
     override fun startProvideLocation() {}
