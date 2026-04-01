@@ -32,8 +32,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -80,11 +82,7 @@ class MQTTRepositoryImpl(
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    /**
-     * Cold flow. MUST be collected by exactly one subscriber. Multiple collectors will create duplicate MQTT clients
-     * with same clientId, causing broker to disconnect previous connections.
-     */
-    override val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
+    private fun createProxyMessageFlow(): Flow<MqttClientProxyMessage> = callbackFlow {
         val ownerId = "MeshtasticAndroidMqttProxy-${nodeRepository.myId.value ?: "unknown"}"
         val channelSet = radioConfigRepository.channelSetFlow.first()
         val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
@@ -113,11 +111,7 @@ class MQTTRepositoryImpl(
         // Using IO-dispatcher since we use blocking MQTTClient.run()
         clientJob =
             scope.launch(Dispatchers.IO) {
-                @Suppress("MagicNumber")
-                val baseDelay = 2_000L
-
-                // Base backoff value
-                @Suppress("MagicNumber")
+                val baseDelay = 2_000L // Base backoff value
                 val maxDelay = 64_000L // Maximal backoff value
 
                 // Reconnection loop
@@ -129,7 +123,6 @@ class MQTTRepositoryImpl(
                         }
 
                     // Exponential backoff
-                    @Suppress("MagicNumber")
                     val delayMs =
                         when {
                             attempt == 1 -> 0
@@ -144,7 +137,6 @@ class MQTTRepositoryImpl(
 
                     // Creating client on each iteration
                     var newClient: MQTTClient? = null
-                    @Suppress("TooGenericExceptionCaught")
                     try {
                         newClient =
                             MQTTClient(
@@ -249,6 +241,38 @@ class MQTTRepositoryImpl(
         awaitClose { disconnect() }
     }
 
+    /**
+     * Cold flow that creates MQTT client and manages connection lifecycle.
+     *
+     * Single collector requirement:
+     * This flow MUST be collected by exactly one subscriber. Multiple collectors
+     * will create duplicate MQTT clients with the same clientId, causing the broker
+     * to disconnect previous connections (standard MQTT behavior).
+     *
+     * Lifecycle fix (shareIn wrapper):
+     * Originally, this callbackFlow would close when the collector stopped (e.g., UI
+     * lifecycle changes, configuration changes, collector errors). This triggered
+     * awaitClose { disconnect() }, which canceled the reconnect loop entirely.
+     *
+     * Symptoms observed:
+     * - "MQTT message dropped: flow channel closed" logs
+     * - No reconnection attempts after initial connection loss
+     * - MQTT permanently dead until app restart
+     *
+     * Possible solution: Wrap with shareIn() to create a hot SharedFlow that:
+     * - Survives temporary collector loss (30s timeout)
+     * - Keeps reconnect loop running independently of UI/collector lifecycle
+     * - Only stops when the application process terminates
+     */
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override val proxyMessageFlow: Flow<MqttClientProxyMessage> =
+        createProxyMessageFlow()
+            .shareIn(
+                scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+                started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 30_000),
+                replay = 0
+            )
+
     @OptIn(ExperimentalUnsignedTypes::class)
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {
         Logger.d { "MQTT publishing message to topic $topic (size: ${data.size} bytes, retained: $retained)" }
@@ -261,7 +285,6 @@ class MQTTRepositoryImpl(
             }
 
             publishSemaphore.withPermit {
-                @Suppress("TooGenericExceptionCaught")
                 try {
                     c.publish(
                         retain = retained,
