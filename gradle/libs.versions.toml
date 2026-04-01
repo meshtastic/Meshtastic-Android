@@ -1,5 +1,5 @@
 [versions]
-xmlutil = "0.90.2"
+xmlutil = "0.91.3"
 
 # Android
 agp = "9.1.0"
