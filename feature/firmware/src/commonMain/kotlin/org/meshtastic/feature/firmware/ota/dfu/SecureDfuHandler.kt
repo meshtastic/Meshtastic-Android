@@ -117,7 +117,7 @@ class SecureDfuHandler(
                     delay(DFU_REBOOT_WAIT_MS)
 
                     // ── 4. Connect to device in DFU mode ─────────────────────────────
-                    if (!connectWithRetry(transport, target, updateState)) return@withContext null
+                    if (!connectWithRetry(transport, updateState)) return@withContext null
 
                     // ── 5. Init packet ────────────────────────────────────────────
                     updateState(
@@ -199,7 +199,6 @@ class SecureDfuHandler(
 
     private suspend fun connectWithRetry(
         transport: SecureDfuTransport,
-        address: String,
         updateState: (FirmwareUpdateState) -> Unit,
     ): Boolean {
         updateState(

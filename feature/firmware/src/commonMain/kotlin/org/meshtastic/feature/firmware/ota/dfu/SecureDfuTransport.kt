@@ -291,7 +291,7 @@ class SecureDfuTransport(
         throw lastError ?: DfuException.TransferFailed("Object transfer failed after $OBJECT_RETRY_COUNT attempts")
     }
 
-    @Suppress("CyclomaticComplexMethod")
+    @Suppress("CyclomaticComplexMethod", "LongMethod", "NestedBlockDepth")
     private suspend fun transferObject(objectType: Byte, data: ByteArray, onProgress: (suspend (Float) -> Unit)?) {
         val selectResult = sendSelect(objectType)
         val maxObjectSize = selectResult.maxSize.takeIf { it > 0 } ?: DEFAULT_MAX_OBJECT_SIZE

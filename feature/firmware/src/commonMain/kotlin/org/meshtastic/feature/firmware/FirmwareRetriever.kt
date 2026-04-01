@@ -113,6 +113,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
 
     // ── Manifest resolution ──────────────────────────────────────────────────
 
+    @Suppress("ReturnCount")
     private suspend fun resolveFromManifest(
         version: String,
         target: String,

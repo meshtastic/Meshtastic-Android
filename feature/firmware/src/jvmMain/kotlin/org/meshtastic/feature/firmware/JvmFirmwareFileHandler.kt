@@ -240,6 +240,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
 
     private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean {
         // Exclude non-firmware binaries that share the same extension
+        @Suppress("ComplexCondition")
         if (
             filename.startsWith("littlefs-") ||
             filename.startsWith("bleota") ||
