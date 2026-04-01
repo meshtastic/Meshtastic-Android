@@ -14,15 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.tak
-
-import androidx.compose.runtime.Composable
+package org.meshtastic.core.takserver
 
 /**
- * Platform-specific composable that returns a launcher for exporting a TAK data package zip.
+ * Platform-specific zip archive creation.
  *
- * @param dataPackageProvider suspend function producing the zip [ByteArray]
- * @return a lambda accepting the suggested file name to trigger the export
+ * Each entry in [entries] is a mapping of zip entry name to its raw byte content.
  */
-@Composable
-expect fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit
+internal expect object ZipArchiver {
+    fun createZip(entries: Map<String, ByteArray>): ByteArray
+}

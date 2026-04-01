@@ -43,16 +43,17 @@ internal actual object ZlibCodec {
 
             val destBuffer = ByteArray(destLen.value.toInt())
 
-            val result = destBuffer.usePinned { destPin ->
-                data.usePinned { srcPin ->
-                    compress(
-                        destPin.addressOf(0).reinterpret(),
-                        destLen.ptr,
-                        srcPin.addressOf(0).reinterpret(),
-                        data.size.toULong(),
-                    )
+            val result =
+                destBuffer.usePinned { destPin ->
+                    data.usePinned { srcPin ->
+                        compress(
+                            destPin.addressOf(0).reinterpret(),
+                            destLen.ptr,
+                            srcPin.addressOf(0).reinterpret(),
+                            data.size.toULong(),
+                        )
+                    }
                 }
-            }
 
             if (result == Z_OK) {
                 destBuffer.copyOf(destLen.value.toInt())
@@ -76,16 +77,17 @@ internal actual object ZlibCodec {
 
                 val destBuffer = ByteArray(currentSize)
 
-                val result = destBuffer.usePinned { destPin ->
-                    data.usePinned { srcPin ->
-                        uncompress(
-                            destPin.addressOf(0).reinterpret(),
-                            destLen.ptr,
-                            srcPin.addressOf(0).reinterpret(),
-                            data.size.toULong(),
-                        )
+                val result =
+                    destBuffer.usePinned { destPin ->
+                        data.usePinned { srcPin ->
+                            uncompress(
+                                destPin.addressOf(0).reinterpret(),
+                                destLen.ptr,
+                                srcPin.addressOf(0).reinterpret(),
+                                data.size.toULong(),
+                            )
+                        }
                     }
-                }
 
                 if (result == Z_OK) {
                     return@memScoped destBuffer.copyOf(destLen.value.toInt())

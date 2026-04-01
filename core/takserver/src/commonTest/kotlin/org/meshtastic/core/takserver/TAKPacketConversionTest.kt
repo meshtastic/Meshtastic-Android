@@ -111,6 +111,7 @@ class TAKPacketConversionTest {
 
         assertNotNull(takPacket.chat)
         assertEquals("Hello World", takPacket.chat?.message)
+        assertEquals("All Chat Rooms", takPacket.chat?.to)
     }
 
     @Test

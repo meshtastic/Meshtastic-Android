@@ -111,11 +111,12 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
         acceptJob?.cancel()
         acceptJob = null
         serverScope?.launch {
-            val toClose = connectionsMutex.withLock {
-                val current = connections.values.toList()
-                connections.clear()
-                current
-            }
+            val toClose =
+                connectionsMutex.withLock {
+                    val current = connections.values.toList()
+                    connections.clear()
+                    current
+                }
             toClose.forEach { it.close() }
         }
 

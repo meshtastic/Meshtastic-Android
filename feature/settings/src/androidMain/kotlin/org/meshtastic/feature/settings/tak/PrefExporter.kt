@@ -27,29 +27,25 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.OutputStreamWriter
-import java.nio.charset.StandardCharsets
 
 @Composable
-actual fun rememberPrefExporter(prefContentProvider: suspend () -> String): (fileName: String) -> Unit {
+actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val exportLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/xml")) { createdUri ->
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { createdUri ->
             if (createdUri != null) {
-                scope.launch { exportPrefToUri(context, createdUri, prefContentProvider()) }
+                scope.launch { exportZipToUri(context, createdUri, dataPackageProvider()) }
             }
         }
     return { fileName -> exportLauncher.launch(fileName) }
 }
 
-private suspend fun exportPrefToUri(context: Context, targetUri: Uri, content: String) = withContext(Dispatchers.IO) {
+private suspend fun exportZipToUri(context: Context, targetUri: Uri, data: ByteArray) = withContext(Dispatchers.IO) {
     try {
-        context.contentResolver.openOutputStream(targetUri)?.use { os ->
-            OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer -> writer.write(content) }
-        }
-        Logger.i { "TAK Pref exported successfully to $targetUri" }
+        context.contentResolver.openOutputStream(targetUri)?.use { os -> os.write(data) }
+        Logger.i { "TAK data package exported successfully to $targetUri" }
     } catch (e: java.io.IOException) {
-        Logger.e(e) { "Failed to export pref to URI: $targetUri" }
+        Logger.e(e) { "Failed to export TAK data package to URI: $targetUri" }
     }
 }

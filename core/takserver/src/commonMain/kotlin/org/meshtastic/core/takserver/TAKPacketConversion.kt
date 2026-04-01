@@ -110,7 +110,12 @@ object TAKPacketConversion {
             toCallsign = localChat.chatroom
         }
 
-        val chat = GeoChat(message = chatMsg, to = toUid, to_callsign = toCallsign)
+        val chat =
+            GeoChat(
+                message = chatMsg,
+                to = toUid ?: if (toCallsign == null) "All Chat Rooms" else null,
+                to_callsign = toCallsign,
+            )
 
         return TAKPacket(is_compressed = false, contact = contact, group = group, status = status, chat = chat)
     }

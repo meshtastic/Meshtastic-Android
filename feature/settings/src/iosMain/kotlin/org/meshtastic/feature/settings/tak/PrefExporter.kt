@@ -19,6 +19,7 @@ package org.meshtastic.feature.settings.tak
 import androidx.compose.runtime.Composable
 
 @Composable
-actual fun rememberPrefExporter(prefContentProvider: suspend () -> String): (fileName: String) -> Unit = { _ ->
-    // No-op on iOS for now
-}
+actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit =
+    { _ ->
+        // No-op on iOS for now
+    }

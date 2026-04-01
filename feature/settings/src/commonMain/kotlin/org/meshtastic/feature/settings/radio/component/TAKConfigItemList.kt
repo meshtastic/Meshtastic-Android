@@ -38,13 +38,13 @@ import org.meshtastic.core.resources.tak_role
 import org.meshtastic.core.resources.tak_server_enabled
 import org.meshtastic.core.resources.tak_server_enabled_desc
 import org.meshtastic.core.resources.tak_team
-import org.meshtastic.core.takserver.TAKPrefGenerator
+import org.meshtastic.core.takserver.TAKDataPackageGenerator
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.tak.TakPermissionHandler
-import org.meshtastic.feature.settings.tak.rememberPrefExporter
+import org.meshtastic.feature.settings.tak.rememberDataPackageExporter
 import org.meshtastic.proto.ModuleConfig
 
 @Composable
@@ -56,7 +56,7 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val takPrefs: TakPrefs = koinInject()
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
 
-    val exportLauncher = rememberPrefExporter { TAKPrefGenerator.generateConfigPref() }
+    val exportLauncher = rememberDataPackageExporter { TAKDataPackageGenerator.generateDataPackage() }
 
     LaunchedEffect(takConfig) { formState.value = takConfig }
 
@@ -73,8 +73,8 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         title = stringResource(Res.string.tak),
         onBack = onBack,
         actions = {
-            IconButton(onClick = { exportLauncher("meshtastic-server.pref") }) {
-                Icon(imageVector = Icons.Default.Share, contentDescription = "Export TAK Pref")
+            IconButton(onClick = { exportLauncher("Meshtastic_TAK_Server.zip") }) {
+                Icon(imageVector = Icons.Default.Share, contentDescription = "Export TAK Data Package")
             }
         },
         configState = formState,

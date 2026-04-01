@@ -63,34 +63,39 @@ class TAKMeshIntegration(
         jobs += scope.launch { takServerManager.inboundMessages.collect { cotMessage -> sendCoTToMesh(cotMessage) } }
 
         // Forward incoming ATAK packets from mesh to TAK clients
-        jobs += scope.launch {
-            serviceRepository.meshPacketFlow
-                .filter { it.decoded?.portnum == PortNum.ATAK_PLUGIN || it.decoded?.portnum == PortNum.ATAK_FORWARDER }
-                .collect { packet -> handleMeshPacket(packet) }
-        }
+        jobs +=
+            scope.launch {
+                serviceRepository.meshPacketFlow
+                    .filter {
+                        it.decoded?.portnum == PortNum.ATAK_PLUGIN || it.decoded?.portnum == PortNum.ATAK_FORWARDER
+                    }
+                    .collect { packet -> handleMeshPacket(packet) }
+            }
 
         // Broadcast node positions to TAK clients
-        jobs += scope.launch {
-            nodeRepository.nodeDBbyNum.collect { nodes ->
-                nodes.forEach { (_, node) ->
-                    takServerManager.broadcastNode(
-                        node = node,
-                        team = currentTeam.toTakTeamName(),
-                        role = currentRole.toTakRoleName(),
-                    )
+        jobs +=
+            scope.launch {
+                nodeRepository.nodeDBbyNum.collect { nodes ->
+                    nodes.forEach { (_, node) ->
+                        takServerManager.broadcastNode(
+                            node = node,
+                            team = currentTeam.toTakTeamName(),
+                            role = currentRole.toTakRoleName(),
+                        )
+                    }
                 }
             }
-        }
 
-        jobs += scope.launch {
-            meshConfigHandler.moduleConfig
-                .map { it.tak }
-                .distinctUntilChanged()
-                .collect { takConfig ->
-                    currentTeam = takConfig?.team ?: Team.Unspecifed_Color
-                    currentRole = takConfig?.role ?: MemberRole.Unspecifed
-                }
-        }
+        jobs +=
+            scope.launch {
+                meshConfigHandler.moduleConfig
+                    .map { it.tak }
+                    .distinctUntilChanged()
+                    .collect { takConfig ->
+                        currentTeam = takConfig?.team ?: Team.Unspecifed_Color
+                        currentRole = takConfig?.role ?: MemberRole.Unspecifed
+                    }
+            }
 
         Logger.i { "TAK Mesh Integration started" }
     }

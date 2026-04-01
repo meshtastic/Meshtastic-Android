@@ -25,16 +25,15 @@ import kotlinx.coroutines.withContext
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
-import java.io.FileWriter
 
 @Composable
-actual fun rememberPrefExporter(prefContentProvider: suspend () -> String): (fileName: String) -> Unit {
+actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit {
     val scope = rememberCoroutineScope()
     return { fileName ->
         scope.launch {
             runCatching {
                 val fileDialog =
-                    FileDialog(null as Frame?, "Export ATAK Pref", FileDialog.SAVE).apply {
+                    FileDialog(null as Frame?, "Export TAK Data Package", FileDialog.SAVE).apply {
                         file = fileName
                         isVisible = true
                     }
@@ -44,12 +43,12 @@ actual fun rememberPrefExporter(prefContentProvider: suspend () -> String): (fil
 
                 if (directory != null && file != null) {
                     val targetFile = File(directory, file)
-                    val content = prefContentProvider()
-                    withContext(Dispatchers.IO) { FileWriter(targetFile).use { writer -> writer.write(content) } }
-                    Logger.i { "TAK Pref exported successfully to ${targetFile.absolutePath}" }
+                    val data = dataPackageProvider()
+                    withContext(Dispatchers.IO) { targetFile.writeBytes(data) }
+                    Logger.i { "TAK data package exported successfully to ${targetFile.absolutePath}" }
                 }
             }
-                .onFailure { e -> Logger.e(e) { "Failed to export pref file" } }
+                .onFailure { e -> Logger.e(e) { "Failed to export TAK data package" } }
         }
     }
 }
