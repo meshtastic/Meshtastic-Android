@@ -26,8 +26,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.CommandSender
@@ -53,7 +51,6 @@ class TAKMeshIntegration(
     private val cotHandler: CoTHandler,
 ) {
     @Volatile private var isRunning = false
-    private val jobsMutex = Mutex()
     private val jobs = mutableListOf<Job>()
     private var currentTeam: Team = Team.Unspecifed_Color
     private var currentRole: MemberRole = MemberRole.Unspecifed
@@ -105,7 +102,7 @@ class TAKMeshIntegration(
                 },
             )
 
-        scope.launch { jobsMutex.withLock { jobs.addAll(newJobs) } }
+        jobs.addAll(newJobs)
 
         Logger.i { "TAK Mesh Integration started" }
     }
@@ -113,10 +110,8 @@ class TAKMeshIntegration(
     fun stop() {
         if (!isRunning) return
         isRunning = false
-        // Cancel all tracked jobs synchronously
+        // Cancel all tracked jobs and clear the list
         val toCancel: List<Job>
-        // Snapshot without suspension — jobs list may be partially populated if start() hasn't
-        // completed its launch yet, but cancelling what we have is safe.
         toCancel = jobs.toList()
         jobs.clear()
         toCancel.forEach(Job::cancel)

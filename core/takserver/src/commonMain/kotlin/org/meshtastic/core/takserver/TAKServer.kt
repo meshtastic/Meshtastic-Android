@@ -22,6 +22,7 @@ import co.touchlab.kermit.Logger
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.ServerSocket
 import io.ktor.network.sockets.Socket
+import io.ktor.network.sockets.SocketAddress
 import io.ktor.network.sockets.aSocket
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -96,8 +97,15 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
 
     private fun handleConnection(clientSocket: Socket) {
         val scope = serverScope ?: return
-        val connectionId = Random.nextInt().toString(TAK_HEX_RADIX)
         val endpoint = clientSocket.remoteAddress.toString()
+
+        if (!clientSocket.remoteAddress.isLoopback()) {
+            Logger.w { "TAK server rejected non-loopback connection from $endpoint" }
+            clientSocket.close()
+            return
+        }
+
+        val connectionId = Random.nextInt().toString(TAK_HEX_RADIX)
         val clientInfo = TAKClientInfo(id = connectionId, endpoint = endpoint)
 
         val connection =
@@ -179,4 +187,16 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
     }
 
     suspend fun hasConnections(): Boolean = connectionsMutex.withLock { connections.isNotEmpty() }
+}
+
+/**
+ * Returns true if this [SocketAddress] represents a loopback address (IPv4 127.x.x.x or IPv6 ::1).
+ *
+ * Ktor's [SocketAddress.toString] returns strings like "/127.0.0.1:4242" (JVM) or "127.0.0.1:4242" on other platforms,
+ * so we strip any leading slash and check prefixes without parsing the host. This keeps the check in commonMain without
+ * an expect/actual.
+ */
+private fun SocketAddress.isLoopback(): Boolean {
+    val addr = toString().removePrefix("/")
+    return addr.startsWith("127.") || addr.startsWith("::1") || addr.startsWith("[::1]")
 }
