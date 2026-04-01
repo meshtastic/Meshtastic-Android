@@ -199,8 +199,15 @@
     <string name="debug_store_logs_summary">Деактивирайте, за да пропуснете записването на журналите на mesh мрежата на диска</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
+    <string name="search_emoji">Търсене на емоджи...</string>
+    <string name="more_reactions">Още реакции</string>
     <string name="channel_label">Канал</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
+    <string name="a11y_message_from">Съобщение от %1$s: %2$s</string>
+    <string name="preview_item">Елемент %1$d</string>
+    <string name="preview_dot">Точка</string>
+    <string name="preview_text">Текст</string>
+    <string name="preview_custom_composable_line_two">С множество линии и стилове</string>
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="new_messages_below">Нови съобщения по-долу</string>
     <string name="meshtastic_messages_notifications">Известия за директни съобщения</string>
@@ -598,6 +605,7 @@
     <string name="disk_free_indexed">Свободен диск %1$d</string>
     <string name="timestamp">Времево клеймо</string>
     <string name="speed">Скорост</string>
+    <string name="speed_kmh">%1$d Km/h</string>
     <string name="sats">Сат</string>
     <string name="alt">н.в.</string>
     <string name="freq">Чест.</string>
@@ -984,4 +992,6 @@
     <string name="update_device">Актуализиране на устройството</string>
     <string name="note">Забележка</string>
     <string name="firmware_charge_warning">Уверете се, че устройството ви е напълно заредено, преди да започнете актуализация на фърмуера. Не изключвайте устройството от контакта или захранването по време на процеса на актуализация.</string>
+    <string name="device_theme_language">Тема: %1$s, Език: %2$s</string>
+    <string name="files_available">Налични файлове (%1$d):</string>
 </resources>
