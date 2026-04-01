@@ -30,36 +30,42 @@
 
 ### 1. NavDisplay — Scene Architecture (available since `1.1.0-alpha04`, stable in `beta01`)
 
-**Remaining APIs we're NOT using broadly yet:**
+**Available APIs we're NOT using:**
 
 | API | Purpose | Status in project |
 |---|---|---|
-| `sceneStrategies: List<SceneStrategy<T>>` | Allows NavDisplay to render multi-pane Scenes | ⚠️ Partially used — `MeshtasticNavDisplay` applies dialog/list-detail/supporting/single strategies |
-| `SceneStrategy<T>` interface | Custom scene calculation from backstack entries | ❌ Not used |
-| `DialogSceneStrategy` | Renders `entry<T>(metadata = dialog())` entries as overlay Dialogs | ✅ Enabled in shared host wrapper |
+| `sceneStrategies: List<SceneStrategy<T>>` | Allows NavDisplay to render multi-pane Scenes | ✅ Used — `DialogSceneStrategy`, `ListDetailSceneStrategy`, `SupportingPaneSceneStrategy`, `SinglePaneSceneStrategy` |
+| `SceneStrategy<T>` interface | Custom scene calculation from backstack entries | ✅ Used via built-in strategies |
+| `DialogSceneStrategy` | Renders `entry<T>(metadata = dialog())` entries as overlay Dialogs | ✅ Adopted |
 | `SceneDecoratorStrategy<T>` | Wraps/decorates scenes with additional UI | ❌ Not used |
-| `NavEntry.metadata` | Attaches typed metadata to entries (transitions, dialog hints, Scene classification) | ❌ Not used |
+| `NavEntry.metadata` | Attaches typed metadata to entries (transitions, dialog hints, Scene classification) | ✅ Used — `ListDetailSceneStrategy.listPane()`, `.detailPane()`, `.extraPane()` |
 | `NavDisplay.TransitionKey` / `PopTransitionKey` / `PredictivePopTransitionKey` | Per-entry custom transitions via metadata | ❌ Not used |
-| `transitionSpec` / `popTransitionSpec` / `predictivePopTransitionSpec` params | Default transition animations for NavDisplay | ⚠️ Partially used — shared forward/pop crossfade adopted; predictive-pop custom spec not yet used |
+| `transitionSpec` / `popTransitionSpec` / `predictivePopTransitionSpec` params | Default transition animations for NavDisplay | ✅ Used — 350 ms crossfade |
 | `sharedTransitionScope: SharedTransitionScope?` | Shared element transitions between scenes | ❌ Not used |
-| `entryDecorators: List<NavEntryDecorator<T>>` | Wraps entry content with additional behavior | ✅ Used via `MeshtasticNavDisplay` (`SaveableStateHolder` + `ViewModelStore`) |
+| `entryDecorators: List<NavEntryDecorator<T>>` | Wraps entry content with additional behavior | ✅ Used — `SaveableStateHolderNavEntryDecorator` + `ViewModelStoreNavEntryDecorator` |
 
 **APIs we ARE using correctly:**
 
 | API | Usage |
 |---|---|
-| `MeshtasticNavDisplay(...)` wrapper around `NavDisplay` | Both `app/Main.kt` and `desktop/DesktopMainScreen.kt` |
+| `NavDisplay(backStack, entryProvider, modifier)` | Both `app/Main.kt` and `desktop/DesktopMainScreen.kt` |
 | `rememberNavBackStack(SavedStateConfiguration, startKey)` | Backstack persistence |
 | `entryProvider<NavKey> { entry<T> { ... } }` | All feature graph registrations |
-| `NavigationBackHandler` from `navigationevent-compose` | Used in `AdaptiveListDetailScaffold` |
+| `NavigationBackHandler` from `navigationevent-compose` | Used with `ListDetailSceneStrategy` |
 
 ### 2. ViewModel Scoping (`lifecycle-viewmodel-navigation3` `2.11.0-alpha02`)
 
-**Current status:** Adopted. `MeshtasticNavDisplay` applies `rememberViewModelStoreNavEntryDecorator()` with `rememberSaveableStateHolderNavEntryDecorator()`, so `koinViewModel()` instances are entry-scoped and clear on pop.
+**Key finding:** The `ViewModelStoreNavEntryDecorator` is available and provides automatic per-entry ViewModel scoping tied to backstack lifetime. The project passes it as an `entryDecorator` to `NavDisplay` via `MeshtasticNavDisplay` in `core:ui/commonMain`.
+
+ViewModels obtained via `koinViewModel()` inside `entry<T>` blocks are scoped to the entry's backstack lifetime and automatically cleared when the entry is popped.
 
 ### 3. Material 3 Adaptive — Nav3 Scene Integration
 
-**Current status:** Adopted for shared host-level strategies. `MeshtasticNavDisplay` uses adaptive Navigation 3 scene strategies (`rememberListDetailSceneStrategy`, `rememberSupportingPaneSceneStrategy`) with draggable pane expansion handles, while feature-level scaffold composition remains valid for route-specific layouts.
+**Key finding:** The JetBrains `adaptive-navigation3` artifact at `1.3.0-alpha06` includes `ListDetailSceneStrategy` and `SupportingPaneSceneStrategy`. The project uses both via `rememberListDetailSceneStrategy` and `rememberSupportingPaneSceneStrategy` in `MeshtasticNavDisplay`, with draggable pane dividers via `VerticalDragHandle` + `paneExpansionDraggable`.
+
+This means the project **successfully** uses the M3 Adaptive Scene bridge through `NavDisplay(sceneStrategies = ...)`. Feature entries annotate themselves with `ListDetailSceneStrategy.listPane()`, `.detailPane()`, or `.extraPane()` metadata.
+
+**When to revisit:** Monitor the JetBrains adaptive fork for `MaterialListDetailSceneStrategy` inclusion. It will likely arrive when the JetBrains fork catches up to the AndroidX `1.3.0-alpha09+` feature set.
 
 ### 4. NavigationSuiteScaffold (`1.11.0-alpha05`)
 
@@ -89,7 +95,7 @@
 
 **Status:** ✅ Adopted (2026-03-26). A new `MeshtasticNavDisplay` composable in `core:ui/commonMain` encapsulates the standard `NavDisplay` configuration:
 - Entry decorators: `rememberSaveableStateHolderNavEntryDecorator` + `rememberViewModelStoreNavEntryDecorator`
-- Scene strategies: `DialogSceneStrategy` + adaptive list-detail/supporting pane strategies + `SinglePaneSceneStrategy`
+- Scene strategies: `DialogSceneStrategy` + `SinglePaneSceneStrategy`
 - Transition specs: 350 ms crossfade (forward + pop)
 
 Both `app/Main.kt` and `desktop/DesktopMainScreen.kt` now call `MeshtasticNavDisplay` instead of configuring `NavDisplay` directly. The `lifecycle-viewmodel-navigation3` dependency was moved from host modules to `core:ui`.
@@ -100,9 +106,9 @@ Individual entries can declare custom transitions via `entry<T>(metadata = NavDi
 
 **Impact:** Polish improvement. Low priority until default transitions (P1) are established. Now unblocked by P1 adoption.
 
-### Deferred: Scene-based multi-pane layout
+### Deferred: Custom Scene strategies
 
-Additional route-level Scene metadata adoption is deferred. The project now applies shared adaptive scene strategies in `MeshtasticNavDisplay`, and feature-level `AdaptiveListDetailScaffold` remains valid for route-specific layouts. Revisit custom per-route `SceneStrategy` policies when multi-pane route classification needs expand.
+The `ListDetailSceneStrategy` and `SupportingPaneSceneStrategy` are adopted and working. Consider writing additional custom `SceneStrategy` implementations for specialized layouts (e.g., three-pane "Power User" scenes) as the Navigation 3 Scene API matures.
 
 ## Decision
 

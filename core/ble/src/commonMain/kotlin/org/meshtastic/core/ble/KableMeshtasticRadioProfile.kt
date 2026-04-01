@@ -16,11 +16,6 @@
  */
 package org.meshtastic.core.ble
 
-import co.touchlab.kermit.Logger
-import com.juul.kable.Peripheral
-import com.juul.kable.WriteType
-import com.juul.kable.characteristicOf
-import com.juul.kable.writeWithoutResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -31,17 +26,15 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIOSYNC_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
-import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
-import kotlin.uuid.Uuid
 
-class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : MeshtasticRadioProfile {
+class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticRadioProfile {
 
-    private val toRadio = characteristicOf(SERVICE_UUID, TORADIO_CHARACTERISTIC)
-    private val fromRadioChar = characteristicOf(SERVICE_UUID, FROMRADIO_CHARACTERISTIC)
-    private val fromRadioSync = characteristicOf(SERVICE_UUID, FROMRADIOSYNC_CHARACTERISTIC)
-    private val fromNum = characteristicOf(SERVICE_UUID, FROMNUM_CHARACTERISTIC)
-    private val logRadioChar = characteristicOf(SERVICE_UUID, LOGRADIO_CHARACTERISTIC)
+    private val toRadio = service.characteristic(TORADIO_CHARACTERISTIC)
+    private val fromRadioChar = service.characteristic(FROMRADIO_CHARACTERISTIC)
+    private val fromRadioSync = service.characteristic(FROMRADIOSYNC_CHARACTERISTIC)
+    private val fromNum = service.characteristic(FROMNUM_CHARACTERISTIC)
+    private val logRadioChar = service.characteristic(LOGRADIO_CHARACTERISTIC)
 
     // replay = 1: a seed emission placed here before the collector starts is replayed to the
     // collector immediately on subscription. This is what drives the initial FROMRADIO poll
@@ -51,19 +44,6 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
     private val triggerDrain =
         MutableSharedFlow<Unit>(replay = 1, extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
-    init {
-        val svc = peripheral.services.value?.find { it.serviceUuid == SERVICE_UUID }
-        Logger.i {
-            "KableMeshtasticRadioProfile init. Discovered characteristics: ${svc?.characteristics?.map {
-                it.characteristicUuid
-            }}"
-        }
-    }
-
-    private fun hasCharacteristic(uuid: Uuid): Boolean = peripheral.services.value?.any { svc ->
-        svc.serviceUuid == SERVICE_UUID && svc.characteristics.any { it.characteristicUuid == uuid }
-    } == true
-
     // Using observe() for fromRadioSync or legacy read loop for fromRadio
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override val fromRadio: Flow<ByteArray> = channelFlow {
@@ -71,19 +51,19 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
         // This mirrors the robust fallback logic originally established in the legacy Android Nordic implementation.
         launch {
             try {
-                if (hasCharacteristic(FROMRADIOSYNC_CHARACTERISTIC)) {
-                    peripheral.observe(fromRadioSync).collect { send(it) }
+                if (service.hasCharacteristic(fromRadioSync)) {
+                    service.observe(fromRadioSync).collect { send(it) }
                 } else {
                     error("fromRadioSync missing")
                 }
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Fallback to legacy FROMNUM/FROMRADIO polling.
                 // Wire up FROMNUM notifications for steady-state packet delivery.
                 launch {
-                    if (hasCharacteristic(FROMNUM_CHARACTERISTIC)) {
-                        peripheral.observe(fromNum).collect { triggerDrain.tryEmit(Unit) }
+                    if (service.hasCharacteristic(fromNum)) {
+                        service.observe(fromNum).collect { triggerDrain.tryEmit(Unit) }
                     }
                 }
                 // Seed the replay buffer so the collector below starts draining immediately.
@@ -95,13 +75,13 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
                     var keepReading = true
                     while (keepReading) {
                         try {
-                            if (!hasCharacteristic(FROMRADIO_CHARACTERISTIC)) {
+                            if (!service.hasCharacteristic(fromRadioChar)) {
                                 keepReading = false
                                 continue
                             }
-                            val packet = peripheral.read(fromRadioChar)
+                            val packet = service.read(fromRadioChar)
                             if (packet.isEmpty()) keepReading = false else send(packet)
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             keepReading = false
                         }
                     }
@@ -113,27 +93,16 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override val logRadio: Flow<ByteArray> = channelFlow {
         try {
-            if (hasCharacteristic(LOGRADIO_CHARACTERISTIC)) {
-                peripheral.observe(logRadioChar).collect { send(it) }
+            if (service.hasCharacteristic(logRadioChar)) {
+                service.observe(logRadioChar).collect { send(it) }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // logRadio is optional, ignore if not found
         }
     }
 
-    private val toRadioWriteType: WriteType by lazy {
-        val svc = peripheral.services.value?.find { it.serviceUuid == SERVICE_UUID }
-        val char = svc?.characteristics?.find { it.characteristicUuid == TORADIO_CHARACTERISTIC }
-
-        if (char?.properties?.writeWithoutResponse == true) {
-            WriteType.WithoutResponse
-        } else {
-            WriteType.WithResponse
-        }
-    }
-
     override suspend fun sendToRadio(packet: ByteArray) {
-        peripheral.write(toRadio, packet, toRadioWriteType)
+        service.write(toRadio, packet, service.preferredWriteType(toRadio))
         triggerDrain.tryEmit(Unit)
     }
 }

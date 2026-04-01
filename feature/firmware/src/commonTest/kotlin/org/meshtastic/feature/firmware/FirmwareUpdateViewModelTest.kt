@@ -35,7 +35,6 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -50,13 +49,17 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
+/**
+ * Tests for [FirmwareUpdateViewModel] covering initialization, update methods, error paths, and bootloader warnings.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class FirmwareUpdateViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
 
     private val firmwareReleaseRepository: FirmwareReleaseRepository = mock(MockMode.autofill)
     private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
@@ -103,9 +106,6 @@ class FirmwareUpdateViewModelTest {
         every { fileHandler.cleanupAllTemporaryFiles() } returns Unit
         everySuspend { fileHandler.deleteFile(any()) } returns Unit
 
-        // Setup manager
-        everySuspend { firmwareUpdateManager.dfuProgressFlow() } returns flowOf()
-
         viewModel = createViewModel()
     }
 
@@ -124,7 +124,6 @@ class FirmwareUpdateViewModelTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
-        dispatchers,
     )
 
     @Test
@@ -224,13 +223,10 @@ class FirmwareUpdateViewModelTest {
             )
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.success(hardware)
-        // Set connection to BLE so it's shown
-        // In ViewModel: radioPrefs.isBle()
-        // isBle is extension fun on RadioPrefs
-        // Mock connection state if needed, but isBle checks radioPrefs properties?
-        // Actually, let's check core/repository/RadioPrefsExtensions.kt
 
-        // Setup node info
+        // isBle() checks devAddr.value?.startsWith("x"), so use BLE-prefixed address
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+
         nodeRepository.setMyNodeInfo(
             TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "0.9.0", pioEnv = "tbeam"),
         )
@@ -241,10 +237,146 @@ class FirmwareUpdateViewModelTest {
         viewModel = createViewModel()
         advanceUntilIdle()
 
+        val readyState = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(readyState)
+        assertTrue(readyState.showBootloaderWarning, "Bootloader warning should be shown for nrf52 over BLE")
+
+        viewModel.dismissBootloaderWarningForCurrentDevice()
+        advanceUntilIdle()
+
+        val dismissedState = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(dismissedState)
+        assertFalse(dismissedState.showBootloaderWarning, "Bootloader warning should be dismissed")
+    }
+
+    @Test
+    fun `bootloader warning not shown for non-BLE connections`() = runTest {
+        val hardware =
+            DeviceHardware(
+                hwModel = 1,
+                architecture = "nrf52",
+                platformioTarget = "tbeam",
+                requiresBootloaderUpgradeForOta = true,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+
+        // TCP prefix: isBle() returns false
+        every { radioPrefs.devAddr } returns MutableStateFlow("t192.168.1.1")
+
+        nodeRepository.setMyNodeInfo(
+            TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "0.9.0", pioEnv = "tbeam"),
+        )
+
+        everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
         val state = viewModel.state.value
-        if (state is FirmwareUpdateState.Ready) {
-            // We need to ensure isBle() is true.
-            // I'll check the extension.
-        }
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertFalse(state.showBootloaderWarning, "Bootloader warning should not show over TCP")
+    }
+
+    @Test
+    fun `checkForUpdates sets error when address is null`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow(null)
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+    }
+
+    @Test
+    fun `checkForUpdates sets error when myNodeInfo is null`() = runTest {
+        nodeRepository.setMyNodeInfo(null)
+        nodeRepository.setOurNode(null)
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+    }
+
+    @Test
+    fun `checkForUpdates sets error when hardware lookup fails`() = runTest {
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.failure(IllegalStateException("Unknown hardware"))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        assertIs<FirmwareUpdateState.Error>(viewModel.state.value)
+    }
+
+    @Test
+    fun `update method is BLE for BLE-prefixed address`() = runTest {
+        every { radioPrefs.devAddr } returns MutableStateFlow("x1234abcd")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Ble>(state.updateMethod)
+    }
+
+    @Test
+    fun `update method is Wifi for TCP-prefixed address`() = runTest {
+        val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("t192.168.1.1")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Wifi>(state.updateMethod)
+    }
+
+    @Test
+    fun `update method is Usb for serial-prefixed nrf52 address`() = runTest {
+        val hardware = DeviceHardware(hwModel = 1, architecture = "nrf52", platformioTarget = "tbeam")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Usb>(state.updateMethod)
+    }
+
+    @Test
+    fun `update method is Unknown for serial ESP32`() = runTest {
+        // ESP32 over serial is not supported — should yield Unknown
+        val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
+            Result.success(hardware)
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertIs<FirmwareUpdateMethod.Unknown>(state.updateMethod)
+    }
+
+    @Test
+    fun `setReleaseType LOCAL produces null release in Ready`() = runTest {
+        advanceUntilIdle()
+
+        viewModel.setReleaseType(FirmwareReleaseType.LOCAL)
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertIs<FirmwareUpdateState.Ready>(state)
+        assertEquals(null, state.release)
     }
 }

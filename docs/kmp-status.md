@@ -1,6 +1,6 @@
 # KMP Migration Status
 
-> Last updated: 2026-03-21
+> Last updated: 2026-03-31
 
 Single source of truth for Kotlin Multiplatform migration progress. For the forward-looking roadmap, see [`roadmap.md`](./roadmap.md). For completed decision records, see [`decisions/`](./decisions/).
 
@@ -39,7 +39,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 
 **18/20** core modules are KMP with JVM targets. The 2 Android-only modules are intentionally platform-specific, with shared contracts already abstracted into `core:ui/commonMain`.
 
-### Feature Modules (8 total — 7 KMP with JVM)
+### Feature Modules (8 total — 8 KMP with JVM, 1 Android-only widget)
 
 | Module | UI in commonMain? | Desktop wired? |
 |---|:---:|:---:|
@@ -47,9 +47,9 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `feature:node` | ✅ | ✅ Adaptive list-detail; fully shared `nodesGraph`, `PositionLogScreen`, and `NodeContextMenu` |
 | `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; fully shared `contactsGraph`, `MessageScreen`, `ContactsScreen`, and `MessageListPaged` |
 | `feature:connections` | ✅ | ✅ Shared `ConnectionsScreen` with dynamic transport detection |
-| `feature:intro` | ✅ | — |
-| `feature:map` | ✅ | Placeholder; shared `NodeMapViewModel` |
-| `feature:firmware` | — | Placeholder; DFU is Android-only |
+| `feature:intro` | — | — | Screens remain in `androidMain`; shared ViewModel only |
+| `feature:map` | — | Placeholder; shared `NodeMapViewModel` and `BaseMapViewModel` only |
+| `feature:firmware` | ✅ | ✅ Fully KMP: Unified OTA, native Secure DFU, USB/UF2, FirmwareRetriever |
 | `feature:widget` | ❌ | — | Android-only (Glance appwidgets). Intentional. |
 
 ### Desktop Module
@@ -72,7 +72,7 @@ Working Compose Desktop application with:
 | Area | Score | Notes |
 |---|---|---|
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
-| Shared feature/UI logic | **9.5/10** | All 7 KMP; feature:connections unified; Navigation 3 Stable Scene-based architecture adopted; cross-platform deduplication complete |
+| Shared feature/UI logic | **9/10** | 8 KMP feature modules; firmware fully migrated; `feature:intro` and `feature:map` share ViewModels but UI remains in `androidMain` |
 | Android decoupling | **9/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation, connections, background services, and widgets extracted) |
 | Multi-target readiness | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
@@ -87,7 +87,7 @@ Working Compose Desktop application with:
 |---|---:|
 | Android-first structural KMP | ~100% |
 | Shared business logic | ~98% |
-| Shared feature/UI | ~97% |
+| Shared feature/UI | ~92% |
 | True multi-target readiness | ~85% |
 | "Add iOS without surprises" | ~100% |
 
@@ -96,17 +96,17 @@ Working Compose Desktop application with:
 Based on the latest codebase investigation, the following steps are proposed to complete the multi-target and iOS-readiness migrations:
 
 1. **Wire Desktop Features:** Complete desktop UI wiring for `feature:intro` and implement a shared fallback for `feature:map` (which is currently a placeholder on desktop).
-2. **Decouple Firmware DFU:** `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it into a separate plugin to allow the core `feature:firmware` module to be fully utilized on desktop/iOS.
-3. **Flesh out iOS Actuals:** Complete the actual implementations for iOS UI stubs (e.g., `AboutLibrariesLoader`, `rememberOpenMap`, `SettingsMainScreen`) that were recently added to unblock iOS compilation.
-4. **Boot iOS Target:** Set up an initial skeleton Xcode project to start running the now-compiling `iosSimulatorArm64` / `iosArm64` binaries on a real simulator/device.
+2. **Flesh out iOS Actuals:** Complete the actual implementations for iOS UI stubs (e.g., `AboutLibrariesLoader`, `rememberOpenMap`, `SettingsMainScreen`) that were recently added to unblock iOS compilation.
+3. **Boot iOS Target:** Set up an initial skeleton Xcode project to start running the now-compiling `iosSimulatorArm64` / `iosArm64` binaries on a real simulator/device.
 
 ## Key Architecture Decisions
 
 | Decision | Status | Details |
 |---|---|---|
-| Navigation 3 parity model (shared `TopLevelDestination` + platform adapters) | ✅ Done | Both shells use shared enum + parity tests. See [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md) |
+| Navigation 3 parity model (shared `TopLevelDestination` + platform adapters) | ✅ Done | See [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md) |
 | Hilt → Koin | ✅ Done | See [`decisions/koin-migration.md`](./decisions/koin-migration.md) |
 | BLE abstraction (Kable) | ✅ Done | See [`decisions/ble-strategy.md`](./decisions/ble-strategy.md) |
+| Firmware KMP migration (pure Secure DFU) | ✅ Done | Native Nordic Secure DFU protocol reimplemented in pure KMP using Kable; desktop is first-class target |
 | Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-beta01`; supports Large (1200dp) and Extra-large (1600dp) breakpoints |
 | JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
 | Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
@@ -114,12 +114,12 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | **Transport Lifecycle Unification** | ✅ Done | `SharedRadioInterfaceService` orchestrates auto-reconnect, connection state, and heartbeat uniformly across Android and Desktop. |
 | **Database Parity** | ✅ Done | `DatabaseManager` is pure KMP, giving iOS and Desktop support for multiple connected nodes with LRU caching. |
 | Emoji picker unification | ✅ Done | Single commonMain implementation replacing 3 platform variants |
-| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `AdaptiveListDetailScaffold`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BleRadioInterface`, and `BaseRadioTransportFactory` to `commonMain`; eliminated ~1,200 lines of duplicated Compose UI code across Android/desktop |
+| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `MeshtasticNavDisplay`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BleRadioInterface`, and `BaseRadioTransportFactory` to `commonMain`; eliminated ~1,200 lines of duplicated Compose UI code across Android/desktop |
 
 ## Navigation Parity Note
 
 - Desktop and Android both use the shared `TopLevelDestination` enum from `core:navigation/commonMain` — no separate `DesktopDestination` remains.
-- Both shells utilize the stable **Navigation 3 Scene-based architecture**, allowing for multi-pane layouts (e.g., three-pane on Large/XL displays) using shared routes.
+- Both shells utilize the **Navigation 3 Scene-based architecture**, allowing for multi-pane layouts (e.g., three-pane on Large/XL displays) using shared routes.
 - Both shells iterate `TopLevelDestination.entries` with shared icon mapping from `core:ui` (`TopLevelDestinationExt.icon`).
 - Desktop locale changes now trigger a full subtree recomposition from `Main.kt` without resetting the shared Navigation 3 backstack, so translated labels update in place.
 - Firmware remains available as an in-flow route instead of a top-level destination, matching Android information architecture.
@@ -131,7 +131,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 
 All major ViewModels have now been extracted to `commonMain` and no longer rely on Android-specific subclasses. Platform-specific dependencies (like `android.net.Uri` or Location permissions) have been successfully isolated behind injected `core:repository` interfaces (e.g., `FileService`, `LocationService`).
 
-**The extraction of all feature-specific navigation graphs, background services, and widgets out of `:app` is complete.** The `:app` module now only serves as the root DI assembler and shared Navigation 3 host shell (`MeshtasticNavDisplay`) container.
+**The extraction of all feature-specific navigation graphs, background services, and widgets out of `:app` is complete.** The `:app` module now only serves as the root DI assembler and NavHost container.
 
 Extracted to shared `commonMain` (no longer app-only):
 - `SettingsViewModel` → `feature:settings/commonMain`

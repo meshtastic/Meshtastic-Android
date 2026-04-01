@@ -49,16 +49,15 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.coil)
-            implementation(libs.kable.core)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.network)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
         }
 
         androidMain.dependencies {
             implementation(libs.androidx.appcompat)
-            implementation(libs.nordic.dfu)
             implementation(libs.markdown.renderer.android)
         }
 

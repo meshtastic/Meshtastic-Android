@@ -17,7 +17,8 @@ However, as Desktop integration advanced, we found the need for a unified BLE tr
 - We migrated all BLE transport logic across Android and Desktop to use Kable.
 - The `commonMain` interfaces (`BleConnection`, `BleScanner`, `BleDevice`, `BluetoothRepository`, etc.) remain, but their core implementations (`KableBleConnection`, `KableBleScanner`) are now entirely shared in `commonMain`.
 - The Android-specific Nordic dependencies (`no.nordicsemi.kotlin.ble:*`) and the Nordic DFU library were completely excised from the project.
-- OTA Firmware updates on Android were successfully refactored to use the Kable-based `BleOtaTransport`.
+- OTA Firmware updates were successfully refactored to use the Kable-based `BleOtaTransport`, shared across Android and Desktop in `commonMain`.
+- Nordic Secure DFU was reimplemented as a pure KMP protocol stack (`SecureDfuTransport`, `SecureDfuProtocol`, `SecureDfuHandler`) using Kable, with no dependency on the Nordic DFU library.
 
 ## Consequences
 

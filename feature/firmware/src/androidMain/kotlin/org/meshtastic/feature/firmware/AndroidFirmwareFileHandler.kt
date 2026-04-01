@@ -22,20 +22,22 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.URI
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
@@ -46,6 +48,7 @@ private const val DOWNLOAD_BUFFER_SIZE = 8192
  * extracting specific files from Zip archives.
  */
 @Single
+@Suppress("TooManyFunctions")
 class AndroidFirmwareFileHandler(private val context: Context, private val client: HttpClient) : FirmwareFileHandler {
     private val tempDir = File(context.cacheDir, "firmware_update")
 
@@ -59,7 +62,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
             .onFailure { e -> Logger.w(e) { "Failed to cleanup temp directory" } }
     }
 
-    override suspend fun checkUrlExists(url: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun checkUrlExists(url: String): Boolean = withContext(ioDispatcher) {
         try {
             client.head(url).status.isSuccess()
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -68,8 +71,18 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         }
     }
 
-    override suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): String? =
-        withContext(Dispatchers.IO) {
+    override suspend fun fetchText(url: String): String? = withContext(ioDispatcher) {
+        try {
+            val response = client.get(url)
+            if (response.status.isSuccess()) response.bodyAsText() else null
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.w(e) { "Failed to fetch text from: $url" }
+            null
+        }
+    }
+
+    override suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): FirmwareArtifact? =
+        withContext(ioDispatcher) {
             val response =
                 try {
                     client.get(url)
@@ -111,16 +124,16 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
                     }
                 }
             }
-            targetFile.absolutePath
+            targetFile.toFirmwareArtifact()
         }
 
     override suspend fun extractFirmwareFromZip(
-        zipFilePath: String,
+        zipFile: FirmwareArtifact,
         hardware: DeviceHardware,
         fileExtension: String,
         preferredFilename: String?,
-    ): String? = withContext(Dispatchers.IO) {
-        val zipFile = java.io.File(zipFilePath)
+    ): FirmwareArtifact? = withContext(ioDispatcher) {
+        val localZipFile = zipFile.toLocalFileOrNull() ?: return@withContext null
         val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
         if (target.isEmpty() && preferredFilename == null) return@withContext null
 
@@ -130,10 +143,11 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
 
         if (!tempDir.exists()) tempDir.mkdirs()
 
-        ZipInputStream(zipFile.inputStream()).use { zipInput ->
+        ZipInputStream(localZipFile.inputStream()).use { zipInput ->
             var entry = zipInput.nextEntry
             while (entry != null) {
                 val name = entry.name.lowercase()
+                // File(name).name strips directory components, mitigating ZipSlip attacks
                 val entryFileName = File(name).name
 
                 val isMatch =
@@ -149,13 +163,13 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
                     matchingEntries.add(entry to outFile)
 
                     if (preferredFilenameLower != null) {
-                        return@withContext outFile.absolutePath
+                        return@withContext outFile.toFirmwareArtifact()
                     }
                 }
                 entry = zipInput.nextEntry
             }
         }
-        matchingEntries.minByOrNull { it.first.name.length }?.second?.absolutePath
+        matchingEntries.minByOrNull { it.first.name.length }?.second?.toFirmwareArtifact()
     }
 
     override suspend fun extractFirmware(
@@ -163,7 +177,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         hardware: DeviceHardware,
         fileExtension: String,
         preferredFilename: String?,
-    ): String? = withContext(Dispatchers.IO) {
+    ): FirmwareArtifact? = withContext(ioDispatcher) {
         val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
         if (target.isEmpty() && preferredFilename == null) return@withContext null
 
@@ -180,6 +194,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
                 var entry = zipInput.nextEntry
                 while (entry != null) {
                     val name = entry.name.lowercase()
+                    // File(name).name strips directory components, mitigating ZipSlip attacks
                     val entryFileName = File(name).name
 
                     val isMatch =
@@ -195,7 +210,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
                         matchingEntries.add(entry to outFile)
 
                         if (preferredFilenameLower != null) {
-                            return@withContext outFile.absolutePath
+                            return@withContext outFile.toFirmwareArtifact()
                         }
                     }
                     entry = zipInput.nextEntry
@@ -205,29 +220,70 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
             Logger.w(e) { "Failed to extract firmware from URI" }
             return@withContext null
         }
-        matchingEntries.minByOrNull { it.first.name.length }?.second?.absolutePath
+        matchingEntries.minByOrNull { it.first.name.length }?.second?.toFirmwareArtifact()
     }
 
-    override suspend fun getFileSize(path: String): Long = withContext(Dispatchers.IO) {
-        val file = File(path)
-        if (file.exists()) file.length() else 0L
+    override suspend fun getFileSize(file: FirmwareArtifact): Long = withContext(ioDispatcher) {
+        file.toLocalFileOrNull()?.takeIf { it.exists() }?.length()
+            ?: context.contentResolver
+                .openAssetFileDescriptor(file.uri.toPlatformUri() as android.net.Uri, "r")
+                ?.use { descriptor -> descriptor.length.takeIf { it >= 0L } }
+            ?: 0L
     }
 
-    override suspend fun deleteFile(path: String) = withContext(Dispatchers.IO) {
-        val file = File(path)
-        if (file.exists()) file.delete()
+    override suspend fun deleteFile(file: FirmwareArtifact) = withContext(ioDispatcher) {
+        if (!file.isTemporary) return@withContext
+        val localFile = file.toLocalFileOrNull() ?: return@withContext
+        if (localFile.exists()) localFile.delete()
     }
 
-    private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean {
-        val regex = Regex(".*[\\-_]${Regex.escape(target)}[\\-_\\.].*")
-        return filename.endsWith(fileExtension) &&
-            filename.contains(target) &&
-            (regex.matches(filename) || filename.startsWith("$target-") || filename.startsWith("$target."))
+    override suspend fun readBytes(artifact: FirmwareArtifact): ByteArray = withContext(ioDispatcher) {
+        val localFile = artifact.toLocalFileOrNull()
+        if (localFile != null && localFile.exists()) {
+            localFile.readBytes()
+        } else {
+            context.contentResolver.openInputStream(artifact.uri.toPlatformUri() as android.net.Uri)?.use {
+                it.readBytes()
+            } ?: throw IOException("Cannot open artifact: ${artifact.uri}")
+        }
     }
 
-    override suspend fun copyFileToUri(sourcePath: String, destinationUri: CommonUri): Long =
-        withContext(Dispatchers.IO) {
-            val inputStream = java.io.FileInputStream(java.io.File(sourcePath))
+    override suspend fun importFromUri(uri: CommonUri): FirmwareArtifact? = withContext(ioDispatcher) {
+        val inputStream =
+            context.contentResolver.openInputStream(uri.toPlatformUri() as android.net.Uri)
+                ?: return@withContext null
+        val tempFile = File(context.cacheDir, "firmware_update/ota_firmware.bin")
+        tempFile.parentFile?.mkdirs()
+        inputStream.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
+        tempFile.toFirmwareArtifact()
+    }
+
+    override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
+        withContext(ioDispatcher) {
+            val entries = mutableMapOf<String, ByteArray>()
+            val bytes = readBytes(artifact)
+            ZipInputStream(bytes.inputStream()).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    if (!entry.isDirectory) {
+                        entries[entry.name] = zip.readBytes()
+                    }
+                    zip.closeEntry()
+                    entry = zip.nextEntry
+                }
+            }
+            entries
+        }
+
+    private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean =
+        org.meshtastic.feature.firmware.isValidFirmwareFile(filename, target, fileExtension)
+
+    override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long =
+        withContext(ioDispatcher) {
+            val inputStream =
+                source.toLocalFileOrNull()?.inputStream()
+                    ?: context.contentResolver.openInputStream(source.uri.toPlatformUri() as android.net.Uri)
+                    ?: throw IOException("Cannot open source URI")
             val outputStream =
                 context.contentResolver.openOutputStream(destinationUri.toPlatformUri() as android.net.Uri)
                     ?: throw IOException("Cannot open content URI for writing")
@@ -235,15 +291,15 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
             inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }
         }
 
-    override suspend fun copyUriToUri(sourceUri: CommonUri, destinationUri: CommonUri): Long =
-        withContext(Dispatchers.IO) {
-            val inputStream =
-                context.contentResolver.openInputStream(sourceUri.toPlatformUri() as android.net.Uri)
-                    ?: throw IOException("Cannot open source URI")
-            val outputStream =
-                context.contentResolver.openOutputStream(destinationUri.toPlatformUri() as android.net.Uri)
-                    ?: throw IOException("Cannot open destination URI")
+    private fun File.toFirmwareArtifact(): FirmwareArtifact =
+        FirmwareArtifact(uri = CommonUri.parse(toURI().toString()), fileName = name, isTemporary = true)
 
-            inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }
+    private fun FirmwareArtifact.toLocalFileOrNull(): File? {
+        val uriString = uri.toString()
+        return if (uriString.startsWith("file:")) {
+            runCatching { File(URI(uriString)) }.getOrNull()
+        } else {
+            null
         }
+    }
 }

@@ -20,14 +20,26 @@ import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 
+/**
+ * Routes firmware update requests to the appropriate platform-specific handler based on the active connection type
+ * (BLE, WiFi/TCP, or USB) and device architecture.
+ */
 interface FirmwareUpdateManager {
+    /**
+     * Begin a firmware update for the connected device.
+     *
+     * @param release The firmware release to install.
+     * @param hardware The target device's hardware descriptor.
+     * @param address The bare device address (MAC, IP, or serial path) with the transport prefix stripped.
+     * @param updateState Callback invoked as the update progresses through [FirmwareUpdateState] stages.
+     * @param firmwareUri Optional pre-selected firmware file URI (for "update from file" flows).
+     * @return A [FirmwareArtifact] that should be cleaned up by the caller, or `null` if the update was not started.
+     */
     suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         address: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri? = null,
-    ): String?
-
-    fun dfuProgressFlow(): kotlinx.coroutines.flow.Flow<DfuInternalState>
+    ): FirmwareArtifact?
 }

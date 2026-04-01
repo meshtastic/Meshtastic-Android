@@ -94,7 +94,7 @@ jobs:
 
       - name: Shared Unit Tests & Coverage
         if: inputs.run_unit_tests == true
-        run: ./gradlew test koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug core:api:koverXmlReportDebug core:barcode:koverXmlReportFdroidDebug core:barcode:koverXmlReportGoogleDebug mesh_service_example:koverXmlReportDebug desktop:koverXmlReport -Pci=true --continue --scan
+        run: ./gradlew test allTests koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug core:api:koverXmlReportDebug core:barcode:koverXmlReportFdroidDebug core:barcode:koverXmlReportGoogleDebug mesh_service_example:koverXmlReportDebug desktop:koverXmlReport -Pci=true --continue --scan
 
       - name: KMP Smoke Compile
         run: ./gradlew kmpSmokeCompile -Pci=true --continue --scan

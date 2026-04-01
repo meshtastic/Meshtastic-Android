@@ -158,11 +158,10 @@ private fun desktopPlatformStubsModule() = module {
     single<org.meshtastic.feature.node.compass.PhoneLocationProvider> { NoopPhoneLocationProvider() }
     single<org.meshtastic.feature.node.compass.MagneticFieldProvider> { NoopMagneticFieldProvider() }
 
-    // Desktop mesh service controller — replaces Android's MeshService lifecycle
     // Ktor HttpClient for JVM/Desktop (equivalent of CoreNetworkAndroidModule on Android)
     single<HttpClient> { HttpClient(Java) { install(ContentNegotiation) { json(get<Json>()) } } }
 
-    // Android asset-based JSON data sources (impls in core:data/androidMain)
+    // Desktop stubs for data sources that load from Android assets on mobile
     single<FirmwareReleaseJsonDataSource> {
         object : FirmwareReleaseJsonDataSource {
             override fun loadFirmwareReleaseFromJsonAsset() = NetworkFirmwareReleases()
@@ -177,14 +176,5 @@ private fun desktopPlatformStubsModule() = module {
         object : BootloaderOtaQuirksJsonDataSource {
             override fun loadBootloaderOtaQuirksFromJsonAsset(): List<BootloaderOtaQuirk> = emptyList()
         }
-    }
-
-    // Firmware update stubs
-    single<org.meshtastic.feature.firmware.FirmwareUpdateManager> {
-        org.meshtastic.desktop.stub.NoopFirmwareUpdateManager()
-    }
-    single<org.meshtastic.feature.firmware.FirmwareUsbManager> { org.meshtastic.desktop.stub.NoopFirmwareUsbManager() }
-    single<org.meshtastic.feature.firmware.FirmwareFileHandler> {
-        org.meshtastic.desktop.stub.NoopFirmwareFileHandler()
     }
 }

@@ -44,7 +44,10 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     vectorDrawables.useSupportLibrary = true
                 }
 
-                testOptions.animationsDisabled = true
+                testOptions {
+                    animationsDisabled = true
+                    unitTests.isReturnDefaultValues = true
+                }
 
                 buildTypes {
                     getByName("release") {

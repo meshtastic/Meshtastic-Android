@@ -1,7 +1,7 @@
 # Architecture Review — March 2026
 
 > Status: **Active**
-> Last updated: 2026-03-12
+> Last updated: 2026-03-31
 
 Re-evaluation of project modularity and architecture against modern KMP and Android best practices. Identifies gaps and actionable improvements across modularity, reusability, clean abstractions, DI, and testing.
 
@@ -65,7 +65,6 @@ The core transport abstraction was previously locked in `app/repository/radio/` 
 **Recommended next steps:**
 1. Move BLE transport to `core:ble/androidMain`
 2. Move Serial/USB transport to `core:service/androidMain`
-3. Retire Desktop's parallel `DesktopRadioInterfaceService` — use the shared `RadioTransport` + `TcpTransport`
 
 ### A3. No `feature:connections` module *(resolved 2026-03-12)*
 
@@ -176,7 +175,7 @@ Android uses `@Module`-annotated classes (`CoreDataModule`, `CoreBleAndroidModul
 
 ### D2. No shared test fixtures *(resolved 2026-03-12)*
 
-`core:testing` module established with shared fakes (`FakeNodeRepository`, `FakeServiceRepository`, `FakeRadioController`, `FakeRadioConfigRepository`, `FakePacketRepository`) and `TestDataFactory` builders. Used by all feature `commonTest` suites.
+`core:testing` module established with shared fakes (`FakeNodeRepository`, `FakeServiceRepository`, `FakeRadioController`, `FakePacketRepository`) and `TestDataFactory` builders. Used by all feature `commonTest` suites.
 
 ### D3. Core module test gaps
 
@@ -187,10 +186,9 @@ Android uses `@Module`-annotated classes (`CoreDataModule`, `CoreBleAndroidModul
 - `core:ble` (connection state machine)
 - `core:ui` (utility functions)
 
-### D4. Desktop has 6 tests
+### D4. Desktop has 2 tests
 
-`desktop/src/test/` contains `DemoScenarioTest.kt` and `DesktopKoinTest.kt`. Still needs:
-- `DesktopRadioInterfaceService` connection state tests
+`desktop/src/test/` contains `DesktopKoinTest.kt` and `DesktopTopLevelDestinationParityTest.kt`. Still needs:
 - Navigation graph coverage
 
 ---

@@ -286,8 +286,5 @@ tasks.withType<Test>().configureEach {
 ## Related Files
 
 - `AGENTS.md` - Development guidelines (Section 3.B testing, Section 4.A build protocol)
-- `docs/BUILD_LOGIC_INDEX.md` - Current build-logic doc entry point (with links to active references)
-
 - `build-logic/convention/build.gradle.kts` - Convention plugin build config
-- `.github/copilot-instructions.md` - Build & test commands
 

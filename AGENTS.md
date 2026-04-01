@@ -18,7 +18,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
   - **UI:** Jetpack Compose Multiplatform (Material 3).
   - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` and `desktop`.
-  - **Navigation:** JetBrains Navigation 3 (Stable Scene-based architecture) with shared backstack state. Deep linking uses RESTful paths (e.g. `/nodes/1234`) parsed by `DeepLinkRouter` in `core:navigation`.
+  - **Navigation:** JetBrains Navigation 3 (Scene-based architecture) with shared backstack state. Deep linking uses RESTful paths (e.g. `/nodes/1234`) parsed by `DeepLinkRouter` in `core:navigation`.
   - **Lifecycle:** JetBrains multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
   - **Adaptive UI:** Material 3 Adaptive (v1.3+) with support for Large (1200dp) and Extra-large (1600dp) breakpoints.
   - **Database:** Room KMP.
@@ -52,6 +52,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | **Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.** |
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `widget`). All are KMP with `jvm()` and `ios()` targets except `widget`. Use `meshtastic.kmp.feature` convention plugin. |
+| `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi via Kable/Ktor), native Nordic Secure DFU protocol (pure KMP, no Nordic library), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
 | `desktop/` | Compose Desktop application — first non-Android KMP target. Thin host shell relying entirely on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports with `want_config` handshake. |
 | `mesh_service_example/` | Sample app showing `core:api` service integration. |
 
@@ -73,8 +74,8 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
     -   `java.util.Locale` → Kotlin `uppercase()` / `lowercase()` or `expect`/`actual`.
     -   `java.util.concurrent.ConcurrentHashMap` → `atomicfu` or `Mutex`-guarded `mutableMapOf()`.
     -   `java.util.concurrent.locks.*` → `kotlinx.coroutines.sync.Mutex`.
-    -   `java.io.*` → Okio (`BufferedSource`/`BufferedSink`).
-    -   `kotlinx.coroutines.Dispatchers.IO` → `org.meshtastic.core.common.util.ioDispatcher` (expect/actual).
+    -   `java.io.*` → Okio (`BufferedSource`/`BufferedSink`). Note: JetBrains now recommends `kotlinx-io` as the official Kotlin I/O library (built on Okio). This project standardizes on Okio directly; do not migrate without explicit decision.
+    -   `kotlinx.coroutines.Dispatchers.IO` → `org.meshtastic.core.common.util.ioDispatcher` (expect/actual). Note: `Dispatchers.IO` is available in `commonMain` since kotlinx.coroutines 1.8.0, but this project uses the `ioDispatcher` wrapper for consistency.
 -   **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract it to a function in `commonMain`. Examples: `formatLogsTo()` in `feature:settings`, `handleNodeAction()` in `feature:node`, `findNodeByNameSuffix()` in `feature:connections`, `MeshtasticAppShell` in `core:ui/commonMain`, and `BaseRadioTransportFactory` in `core:network/commonMain`.
 -   **KMP file naming:** In KMP modules, `commonMain` and platform source sets (`androidMain`, `jvmMain`) share the same package namespace. If both contain a file with the same name (e.g., `LogExporter.kt`), the Kotlin/JVM compiler will produce a duplicate class error. Use distinct filenames: keep the `expect` declaration in `LogExporter.kt` and put shared helpers in a separate file like `LogFormatter.kt`.
 -   **`jvmAndroidMain` source set:** Modules that share JVM-specific code between Android and Desktop apply the `meshtastic.kmp.jvm.android` convention plugin. This creates a `jvmAndroidMain` source set via Kotlin's hierarchy template API. Used in `core:common`, `core:model`, `core:data`, `core:network`, and `core:ui`.
@@ -121,17 +122,37 @@ Always run commands in the following order to ensure reliability. Do not attempt
 ./gradlew spotlessApply
 ./gradlew detekt
 ./gradlew assembleDebug
-./gradlew test
+./gradlew test allTests
 ```
 
 **Testing:**
 ```bash
-./gradlew test                # Run local unit tests
-./gradlew testFdroidDebugUnitTest testGoogleDebugUnitTest # CI-aligned Android unit tests (flavor-explicit)
+# Full host-side unit test run (required — see note below):
+./gradlew test allTests
+
+# Pure-Android / pure-JVM modules only (app, desktop, core:api, core:barcode, feature:widget, mesh_service_example):
+./gradlew test
+
+# KMP modules only (all core:* KMP + all feature:* KMP modules — jvmTest + testAndroidHostTest + iosSimulatorArm64Test):
+./gradlew allTests
+
+# CI-aligned flavor-explicit Android unit tests:
+./gradlew testFdroidDebugUnitTest testGoogleDebugUnitTest
+
 ./gradlew connectedAndroidTest # Run instrumented tests
 ./gradlew testFdroidDebug testGoogleDebug # Flavor-specific unit tests
 ./gradlew lintFdroidDebug lintGoogleDebug # Flavor-specific lint checks
 ```
+
+> **Why `test allTests` and not just `test`:**
+> In KMP modules, the `test` task name is **ambiguous** — Gradle matches both `testAndroid` and
+> `testAndroidHostTest` and refuses to run either, silently skipping all 25 KMP modules.
+> `allTests` is the `KotlinTestReport` lifecycle task registered by the KMP Gradle plugin for each
+> KMP module. It runs `jvmTest`, `testAndroidHostTest` (where declared with `withHostTest {}`), and
+> `iosSimulatorArm64Test` (disabled at execution — iOS targets are compile-only). Conversely,
+> `allTests` does **not** cover the pure-Android modules (`:app`, `:core:api`, `:core:barcode`,
+> `:feature:widget`, `:mesh_service_example`, `:desktop`), which is why both are needed.
+
 *Note: If testing Compose UI on the JVM (Robolectric) with Java 21, pin your tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 
 **CI workflow conventions (GitHub Actions):**
@@ -153,7 +174,9 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - **Text Search:** Prefer using `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.
 
 ### C. Documentation Sync
-Update documentation continuously as part of the same change. If you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update the relevant docs (`AGENTS.md`, `.github/copilot-instructions.md`, `GEMINI.md`, `docs/agent-playbooks/*`, `docs/kmp-status.md`, and `docs/decisions/architecture-review-2026-03.md`).
+`AGENTS.md` is the single source of truth for agent instructions. `.github/copilot-instructions.md` and `GEMINI.md` are thin stubs that redirect here — do NOT duplicate content into them.
+
+When you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update `AGENTS.md`, `docs/agent-playbooks/*`, `docs/kmp-status.md`, and `docs/decisions/architecture-review-2026-03.md` as needed.
 
 ## 5. Troubleshooting
 -   **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.

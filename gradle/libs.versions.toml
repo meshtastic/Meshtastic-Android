@@ -23,7 +23,7 @@ kotlinx-coroutines-android = "1.10.2"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-serialization = "1.10.0"
 ktlint = "1.7.1"
-ktfmt = "0.62"
+ktfmt = "0.61"
 kover = "0.9.8"
 mokkery = "3.3.0"
 kotest = "6.1.10"
@@ -66,7 +66,6 @@ wire = "6.2.0"
 vico = "3.0.3"
 dependency-guard = "0.5.0"
 kable = "0.42.0"
-nordic-dfu = "2.11.0"
 kmqtt = "1.0.0"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
@@ -184,6 +183,7 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 # Testing
@@ -218,7 +218,6 @@ markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", v
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
 material = { module = "com.google.android.material:material", version = "1.13.0" }
-nordic-dfu = { module = "no.nordicsemi.android:dfu", version.ref = "nordic-dfu" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 kmqtt-client = { module = "io.github.davidepianca98:kmqtt-client", version.ref = "kmqtt" }

@@ -16,13 +16,19 @@
  */
 package org.meshtastic.core.ble
 
+import co.touchlab.kermit.Logger
 import com.juul.kable.Peripheral
 import com.juul.kable.State
+import com.juul.kable.WriteType
+import com.juul.kable.characteristicOf
+import com.juul.kable.writeWithoutResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -30,13 +36,44 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
-class KableBleService(val peripheral: Peripheral) : BleService
+class KableBleService(private val peripheral: Peripheral, private val serviceUuid: Uuid) : BleService {
+    override fun hasCharacteristic(characteristic: BleCharacteristic): Boolean = peripheral.services.value?.any { svc ->
+        svc.serviceUuid == serviceUuid && svc.characteristics.any { it.characteristicUuid == characteristic.uuid }
+    } == true
 
-@Suppress("UnusedPrivateProperty")
-class KableBleConnection(private val scope: CoroutineScope, private val tag: String) : BleConnection {
+    override fun observe(characteristic: BleCharacteristic) =
+        peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid))
+
+    override suspend fun read(characteristic: BleCharacteristic): ByteArray =
+        peripheral.read(characteristicOf(serviceUuid, characteristic.uuid))
+
+    override fun preferredWriteType(characteristic: BleCharacteristic): BleWriteType {
+        val service = peripheral.services.value?.find { it.serviceUuid == serviceUuid }
+        val char = service?.characteristics?.find { it.characteristicUuid == characteristic.uuid }
+        return if (char?.properties?.writeWithoutResponse == true) {
+            BleWriteType.WITHOUT_RESPONSE
+        } else {
+            BleWriteType.WITH_RESPONSE
+        }
+    }
+
+    override suspend fun write(characteristic: BleCharacteristic, data: ByteArray, writeType: BleWriteType) {
+        peripheral.write(
+            characteristicOf(serviceUuid, characteristic.uuid),
+            data,
+            when (writeType) {
+                BleWriteType.WITH_RESPONSE -> WriteType.WithResponse
+                BleWriteType.WITHOUT_RESPONSE -> WriteType.WithoutResponse
+            },
+        )
+    }
+}
+
+class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
     private var peripheral: Peripheral? = null
     private var stateJob: Job? = null
@@ -52,7 +89,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         MutableSharedFlow<BleConnectionState>(
             replay = 1,
             extraBufferCapacity = 1,
-            onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
     override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
 
@@ -64,14 +101,14 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                 is KableBleDevice ->
                     Peripheral(device.advertisement) {
                         observationExceptionHandler { cause ->
-                            co.touchlab.kermit.Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+                            Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
                         }
                         platformConfig(device) { autoConnect.value }
                     }
                 is DirectBleDevice ->
                     createPeripheral(device.address) {
                         observationExceptionHandler { cause ->
-                            co.touchlab.kermit.Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+                            Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
                         }
                         platformConfig(device) { autoConnect.value }
                     }
@@ -113,10 +150,10 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                     false
                 } catch (e: CancellationException) {
                     throw e
-                } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
+                } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") _: Exception) {
                     @Suppress("MagicNumber")
                     val retryDelayMs = 1000L
-                    kotlinx.coroutines.delay(retryDelayMs)
+                    delay(retryDelayMs)
                     true
                 }
         }
@@ -124,17 +161,17 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState = try {
-        kotlinx.coroutines.withTimeout(timeoutMs) {
+        withTimeout(timeoutMs) {
             connect(device)
             BleConnectionState.Connected
         }
-    } catch (e: TimeoutCancellationException) {
+    } catch (_: TimeoutCancellationException) {
         // Our own timeout expired — treat as a failed attempt so callers can retry.
         BleConnectionState.Disconnected
     } catch (e: CancellationException) {
         // External cancellation (scope closed) — must propagate.
         throw e
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         BleConnectionState.Disconnected
     }
 
@@ -159,9 +196,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     ): T {
         val p = peripheral ?: error("Not connected")
         val cScope = connectionScope ?: error("No active connection scope")
-        val service = KableBleService(p)
+        val service = KableBleService(p, serviceUuid)
         return cScope.setup(service)
     }
 
-    override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength() ?: 512
+    override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength()
 }

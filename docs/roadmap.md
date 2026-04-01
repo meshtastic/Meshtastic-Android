@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: 2026-03-23
+> Last updated: 2026-03-31
 
 Forward-looking priorities for the Meshtastic KMP multi-target effort. For current state, see [`kmp-status.md`](./kmp-status.md). For the full gap analysis, see [`decisions/architecture-review-2026-03.md`](./decisions/architecture-review-2026-03.md).
 
@@ -31,7 +31,7 @@ These items address structural gaps identified in the March 2026 architecture re
 - ✅ **Messaging:** Adaptive contacts with message view + send
 - ✅ **Connections:** Dynamic discovery of platform-supported transports (TCP, Serial/USB, BLE)
 - ❌ **Map:** Placeholder only, needs MapLibre or alternative
-- ⚠️ **Firmware:** Placeholder wired into nav graph; native DFU not applicable to desktop
+- ⚠️ **Firmware:** Fully KMP (Unified OTA + native Secure DFU + USB/UF2); desktop is first-class target
 - ⚠️ **Intro:** Onboarding flow (may not apply to desktop)
 
 **Implementation Steps:**
@@ -92,8 +92,6 @@ These items address structural gaps identified in the March 2026 architecture re
 1. **iOS proof target** — ✅ **Done (Stubbing):** Stubbed iOS target implementations (`NoopStubs.kt` equivalent) to successfully pass compile-time checks. **Next:** Setup an Xcode skeleton project and launch the iOS app.
 2. **Migrate to Navigation 3 Scene-based architecture** — leverage the first stable release of Nav 3 to support multi-pane layouts. **Investigate 3-pane "Power User" scenes** (e.g., Node List + Detail + Map/Charts) on Large (1200dp) and Extra-large (1600dp) displays (Android 16 QPR3).
 3. **`core:api` contract split** — separate transport-neutral service contracts from the Android AIDL packaging to support iOS/Desktop service layers.
-4. **Decouple Firmware DFU** — `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it to allow the core `feature:firmware` module to be utilized on desktop/iOS.
-5. ✅ **Adopt `WindowSizeClass.BREAKPOINTS_V2`** — Done: Updated `AdaptiveTwoPane.kt` and `Main.kt` components to call `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)`.
 
 ## Longer-Term (90+ days)
 

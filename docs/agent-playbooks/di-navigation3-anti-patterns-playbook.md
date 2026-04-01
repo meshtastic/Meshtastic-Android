@@ -23,7 +23,7 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 - App-level module scanning: `app/src/main/kotlin/org/meshtastic/app/MainKoinModule.kt`
 - App startup + Koin init: `app/src/main/kotlin/org/meshtastic/app/MeshUtilApplication.kt`
 - Shared ViewModel base: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt`
-- Shared base UI ViewModel: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/BaseUIViewModel.kt`
+- Shared base UI ViewModel: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/UIViewModel.kt`
 
 ## Navigation 3 anti-patterns
 

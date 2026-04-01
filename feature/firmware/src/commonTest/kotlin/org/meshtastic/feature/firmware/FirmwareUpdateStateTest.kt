@@ -38,4 +38,24 @@ class FirmwareUpdateStateTest {
         assertEquals(0.5f, state.progress)
         assertEquals("1MB/s", state.details)
     }
+
+    @Test
+    fun `stripFormatArgs removes positional format argument`() {
+        assertEquals("Battery low", "Battery low: %1\$d%".stripFormatArgs())
+    }
+
+    @Test
+    fun `stripFormatArgs removes format arg without colon prefix`() {
+        assertEquals("Battery low", "Battery low %1\$d".stripFormatArgs())
+    }
+
+    @Test
+    fun `stripFormatArgs leaves string without format args unchanged`() {
+        assertEquals("No args here", "No args here".stripFormatArgs())
+    }
+
+    @Test
+    fun `stripFormatArgs handles empty string`() {
+        assertEquals("", "".stripFormatArgs())
+    }
 }
