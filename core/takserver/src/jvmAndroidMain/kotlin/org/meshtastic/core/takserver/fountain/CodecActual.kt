@@ -22,42 +22,48 @@ import java.util.zip.Deflater
 import java.util.zip.Inflater
 
 internal actual object ZlibCodec {
-    actual fun compress(data: ByteArray): ByteArray? = try {
+    actual fun compress(data: ByteArray): ByteArray? {
         val deflater = Deflater(Deflater.DEFAULT_COMPRESSION, false)
-        deflater.setInput(data)
-        deflater.finish()
+        return try {
+            deflater.setInput(data)
+            deflater.finish()
 
-        val outputStream = ByteArrayOutputStream(data.size)
-        val buffer = ByteArray(1024)
-        while (!deflater.finished()) {
-            val count = deflater.deflate(buffer)
-            outputStream.write(buffer, 0, count)
+            val outputStream = ByteArrayOutputStream(data.size)
+            val buffer = ByteArray(1024)
+            while (!deflater.finished()) {
+                val count = deflater.deflate(buffer)
+                outputStream.write(buffer, 0, count)
+            }
+            outputStream.close()
+            outputStream.toByteArray()
+        } catch (e: Exception) {
+            null
+        } finally {
+            deflater.end()
         }
-        outputStream.close()
-        deflater.end()
-        outputStream.toByteArray()
-    } catch (e: Exception) {
-        null
     }
 
-    actual fun decompress(data: ByteArray): ByteArray? = try {
+    actual fun decompress(data: ByteArray): ByteArray? {
         val inflater = Inflater(false)
-        inflater.setInput(data)
+        return try {
+            inflater.setInput(data)
 
-        val outputStream = ByteArrayOutputStream(data.size * 2)
-        val buffer = ByteArray(1024)
-        while (!inflater.finished()) {
-            val count = inflater.inflate(buffer)
-            if (count == 0 && inflater.needsInput()) {
-                break
+            val outputStream = ByteArrayOutputStream(data.size * 2)
+            val buffer = ByteArray(1024)
+            while (!inflater.finished()) {
+                val count = inflater.inflate(buffer)
+                if (count == 0 && inflater.needsInput()) {
+                    break
+                }
+                outputStream.write(buffer, 0, count)
             }
-            outputStream.write(buffer, 0, count)
+            outputStream.close()
+            outputStream.toByteArray()
+        } catch (e: Exception) {
+            null
+        } finally {
+            inflater.end()
         }
-        outputStream.close()
-        inflater.end()
-        outputStream.toByteArray()
-    } catch (e: Exception) {
-        null
     }
 }
 

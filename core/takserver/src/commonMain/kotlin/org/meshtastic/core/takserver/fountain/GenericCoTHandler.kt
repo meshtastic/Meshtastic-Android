@@ -18,6 +18,8 @@ package org.meshtastic.core.takserver.fountain
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.CommandSender
@@ -36,6 +38,7 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
     }
 
     private val fountainCodec = FountainCodec()
+    private val pendingTransfersMutex = Mutex()
     private val pendingTransfers = mutableMapOf<Int, PendingTransfer>()
 
     private data class PendingTransfer(
@@ -102,7 +105,9 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
         val packets = fountainCodec.encode(payload, transferId)
         val hash = CryptoCodec.sha256Prefix8(payload)
 
-        pendingTransfers[transferId] = PendingTransfer(transferId, packets.size, hash)
+        pendingTransfersMutex.withLock {
+            pendingTransfers[transferId] = PendingTransfer(transferId, packets.size, hash)
+        }
 
         Logger.i { "Sending fountain-coded CoT: ${payload.size} bytes -> ${packets.size} blocks, xferId=$transferId" }
 
@@ -193,19 +198,21 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
         Logger.d { "Sent fountain ACK for transfer $transferId" }
     }
 
-    private fun handleIncomingAck(payload: ByteArray, senderNodeNum: Int) {
+    private suspend fun handleIncomingAck(payload: ByteArray, senderNodeNum: Int) {
         val ack = fountainCodec.parseAck(payload) ?: return
         Logger.d { "Received fountain ACK: xferId=${ack.transferId}, type=${ack.type}, from $senderNodeNum" }
 
-        val pending = pendingTransfers[ack.transferId]
-        if (pending != null) {
-            if (ack.type == FountainConstants.ACK_TYPE_COMPLETE) {
-                if (ack.dataHash.contentEquals(pending.dataHash)) {
-                    Logger.i { "Fountain transfer ${ack.transferId} acknowledged by node $senderNodeNum" }
-                } else {
-                    Logger.w { "Fountain ACK hash mismatch for transfer ${ack.transferId}" }
+        pendingTransfersMutex.withLock {
+            val pending = pendingTransfers[ack.transferId]
+            if (pending != null) {
+                if (ack.type == FountainConstants.ACK_TYPE_COMPLETE) {
+                    if (ack.dataHash.contentEquals(pending.dataHash)) {
+                        Logger.i { "Fountain transfer ${ack.transferId} acknowledged by node $senderNodeNum" }
+                    } else {
+                        Logger.w { "Fountain ACK hash mismatch for transfer ${ack.transferId}" }
+                    }
+                    pendingTransfers.remove(ack.transferId)
                 }
-                pendingTransfers.remove(ack.transferId)
             }
         }
     }

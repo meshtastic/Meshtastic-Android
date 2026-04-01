@@ -17,9 +17,15 @@
 package org.meshtastic.core.takserver
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCObjectVar
 import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
 import kotlinx.cinterop.usePinned
+import kotlinx.cinterop.value
 import platform.Foundation.NSData
+import platform.Foundation.NSError
 import platform.Foundation.NSFileCoordinator
 import platform.Foundation.NSFileCoordinatorReadingForUploading
 import platform.Foundation.NSFileManager
@@ -30,15 +36,28 @@ import platform.Foundation.dataWithContentsOfURL
 import platform.Foundation.writeToURL
 import platform.posix.memcpy
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, kotlinx.cinterop.BetaInteropApi::class)
 internal actual object ZipArchiver {
     actual fun createZip(entries: Map<String, ByteArray>): ByteArray {
         val fileManager = NSFileManager.defaultManager
         val tempDir = NSTemporaryDirectory() + "tak_data_package/"
 
-        // Clean up and create temp directory
+        // Clean up and create temp directory, propagating any NSFileManager errors
         fileManager.removeItemAtPath(tempDir, null)
-        fileManager.createDirectoryAtPath(tempDir, withIntermediateDirectories = true, attributes = null, error = null)
+        memScoped {
+            val errorPtr = alloc<ObjCObjectVar<NSError?>>()
+            val created =
+                fileManager.createDirectoryAtPath(
+                    path = tempDir,
+                    withIntermediateDirectories = true,
+                    attributes = null,
+                    error = errorPtr.ptr,
+                )
+            if (!created) {
+                val nsError = errorPtr.value
+                error("Failed to create temp directory: ${nsError?.localizedDescription ?: "unknown error"}")
+            }
+        }
 
         try {
             // Write each entry as a file in the temp directory
@@ -48,29 +67,45 @@ internal actual object ZipArchiver {
                     data.usePinned { pinned ->
                         NSData.create(bytes = pinned.addressOf(0), length = data.size.toULong())
                     }
-                nsData.writeToURL(fileUrl, atomically = true)
+                val written = nsData.writeToURL(fileUrl, atomically = true)
+                if (!written) {
+                    error("Failed to write entry '$name' to temp directory")
+                }
             }
 
             // Use NSFileCoordinator to create a zip from the directory
             val dirUrl = NSURL.fileURLWithPath(tempDir)
             var zipData: ByteArray? = null
+            var coordinatorError: String? = null
 
             val coordinator = NSFileCoordinator()
-            coordinator.coordinateReadingItemAtURL(
-                dirUrl,
-                options = NSFileCoordinatorReadingForUploading,
-                error = null,
-            ) { zipUrl ->
-                if (zipUrl != null) {
-                    val data = NSData.dataWithContentsOfURL(zipUrl)
-                    if (data != null) {
-                        zipData =
-                            ByteArray(data.length.toInt()).also { bytes ->
-                                bytes.usePinned { pinned -> memcpy(pinned.addressOf(0), data.bytes, data.length) }
-                            }
+            memScoped {
+                val errorPtr = alloc<ObjCObjectVar<NSError?>>()
+                coordinator.coordinateReadingItemAtURL(
+                    url = dirUrl,
+                    options = NSFileCoordinatorReadingForUploading,
+                    error = errorPtr.ptr,
+                ) { zipUrl ->
+                    if (zipUrl != null) {
+                        val data = NSData.dataWithContentsOfURL(zipUrl)
+                        if (data != null) {
+                            zipData =
+                                ByteArray(data.length.toInt()).also { bytes ->
+                                    bytes.usePinned { pinned -> memcpy(pinned.addressOf(0), data.bytes, data.length) }
+                                }
+                        } else {
+                            coordinatorError = "NSData.dataWithContentsOfURL returned null for $zipUrl"
+                        }
+                    } else {
+                        coordinatorError = "NSFileCoordinator provided null zip URL"
                     }
                 }
+                val nsError = errorPtr.value
+                if (nsError != null) {
+                    error("NSFileCoordinator error: ${nsError.localizedDescription}")
+                }
             }
+            if (coordinatorError != null) error(coordinatorError)
 
             return zipData ?: error("Failed to create zip archive")
         } finally {

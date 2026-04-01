@@ -28,7 +28,7 @@ data class CoTMessage(
     val uid: String,
     val type: String,
     val time: Instant = Clock.System.now(),
-    val start: Instant = Clock.System.now(),
+    val start: Instant = time,
     val stale: Instant,
     val how: String = "m-g",
     val latitude: Double = 0.0,

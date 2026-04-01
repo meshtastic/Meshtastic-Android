@@ -133,7 +133,10 @@ class MeshServiceOrchestrator(
         Logger.i { "Stopping mesh service orchestrator" }
         takJob?.cancel()
         takJob = null
-        takMeshIntegration.stop()
+        // Guard stop() so we don't emit a spurious "stopped" log when TAK was never started
+        if (takServerManager.isRunning.value) {
+            takMeshIntegration.stop()
+        }
         serviceJob?.cancel()
         serviceJob = null
         serviceScope = null

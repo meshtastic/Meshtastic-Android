@@ -18,14 +18,12 @@ package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -37,7 +35,8 @@ interface TAKServerManager {
     val connectionCount: StateFlow<Int>
     val inboundMessages: SharedFlow<CoTMessage>
 
-    fun start(scope: CoroutineScope, port: Int = DEFAULT_TAK_PORT)
+    /** Start the TAK server using [scope]. Port is fixed at [TAKServer] construction time. */
+    fun start(scope: CoroutineScope)
 
     fun stop()
 
@@ -54,15 +53,15 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
-    private val _connectionCount = MutableStateFlow(0)
-    override val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
+    // Mirror TAKServer's event-driven connection count — no polling needed
+    override val connectionCount: StateFlow<Int> = takServer.connectionCount
 
     private val _inboundMessages = MutableSharedFlow<CoTMessage>()
     override val inboundMessages: SharedFlow<CoTMessage> = _inboundMessages.asSharedFlow()
 
     private var lastBroadcastPositions = mutableMapOf<Int, Int>()
 
-    override fun start(scope: CoroutineScope, port: Int) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
         if (_isRunning.value) {
             Logger.w { "TAKServerManager already running" }
@@ -70,40 +69,34 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
         }
 
         scope.launch {
+            // Wire up inbound message handler BEFORE starting so no messages are lost
+            takServer.onMessage = { cotMessage -> scope.launch { _inboundMessages.emit(cotMessage) } }
+
             val result = takServer.start(scope)
             if (result.isSuccess) {
                 _isRunning.value = true
-                Logger.i { "TAK Server started on port $port" }
-
-                takServer.onMessage = { cotMessage -> scope.launch { _inboundMessages.emit(cotMessage) } }
-
-                monitorConnections()
+                Logger.i { "TAK Server started" }
             } else {
                 Logger.e(result.exceptionOrNull()) { "Failed to start TAK Server" }
-            }
-        }
-    }
-
-    private fun monitorConnections() {
-        scope?.launch {
-            while (_isRunning.value && isActive) {
-                _connectionCount.value = takServer.connectionCount()
-                delay(TAK_CONNECTION_POLL_INTERVAL_MS)
+                // Clear onMessage if start failed so we don't hold a reference unnecessarily
+                takServer.onMessage = null
             }
         }
     }
 
     override fun stop() {
         takServer.stop()
+        takServer.onMessage = null
         _isRunning.value = false
-        _connectionCount.value = 0
+        scope = null
         Logger.i { "TAK Server stopped" }
     }
 
     override fun broadcastNode(node: Node, team: String, role: String) {
         if (!_isRunning.value) return
+        val currentScope = scope ?: return
 
-        scope?.launch {
+        currentScope.launch {
             if (!takServer.hasConnections()) return@launch
 
             val position = node.validPosition
@@ -130,6 +123,7 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     }
 
     private fun broadcastNodeInfoOnly(node: Node, team: String, role: String) {
+        val currentScope = scope ?: return
         val cotMessage =
             node.user.toCoTMessage(
                 position = null,
@@ -138,7 +132,7 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
                 battery = node.deviceMetrics.battery_level ?: 100,
             )
 
-        scope?.launch {
+        currentScope.launch {
             if (!takServer.hasConnections()) return@launch
             takServer.broadcast(cotMessage)
         }

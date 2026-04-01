@@ -47,10 +47,8 @@ kotlin {
 
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.network)
-            implementation(libs.ktor.network.tls)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kermit)
-            implementation(libs.jetbrains.lifecycle.runtime)
         }
 
         jvmAndroidMain.dependencies {}

@@ -24,7 +24,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.CommandSender
@@ -39,6 +42,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.TAKPacket
 import org.meshtastic.proto.Team
+import kotlin.concurrent.Volatile
 
 class TAKMeshIntegration(
     private val takServerManager: TAKServerManager,
@@ -48,7 +52,8 @@ class TAKMeshIntegration(
     private val meshConfigHandler: MeshConfigHandler,
     private val cotHandler: CoTHandler,
 ) {
-    private var isRunning = false
+    @Volatile private var isRunning = false
+    private val jobsMutex = Mutex()
     private val jobs = mutableListOf<Job>()
     private var currentTeam: Team = Team.Unspecifed_Color
     private var currentRole: MemberRole = MemberRole.Unspecifed
@@ -59,51 +64,62 @@ class TAKMeshIntegration(
 
         takServerManager.start(scope)
 
-        // Forward incoming CoT from TAK clients to mesh
-        jobs += scope.launch { takServerManager.inboundMessages.collect { cotMessage -> sendCoTToMesh(cotMessage) } }
+        val newJobs =
+            listOf(
+                // Forward incoming CoT from TAK clients to mesh
+                scope.launch { takServerManager.inboundMessages.collect { cotMessage -> sendCoTToMesh(cotMessage) } },
 
-        // Forward incoming ATAK packets from mesh to TAK clients
-        jobs +=
-            scope.launch {
-                serviceRepository.meshPacketFlow
-                    .filter {
-                        it.decoded?.portnum == PortNum.ATAK_PLUGIN || it.decoded?.portnum == PortNum.ATAK_FORWARDER
-                    }
-                    .collect { packet -> handleMeshPacket(packet) }
-            }
+                // Forward incoming ATAK packets from mesh to TAK clients
+                scope.launch {
+                    serviceRepository.meshPacketFlow
+                        .filter {
+                            it.decoded?.portnum == PortNum.ATAK_PLUGIN || it.decoded?.portnum == PortNum.ATAK_FORWARDER
+                        }
+                        .collect { packet -> handleMeshPacket(packet) }
+                },
 
-        // Broadcast node positions to TAK clients
-        jobs +=
-            scope.launch {
-                nodeRepository.nodeDBbyNum.collect { nodes ->
-                    nodes.forEach { (_, node) ->
-                        takServerManager.broadcastNode(
-                            node = node,
-                            team = currentTeam.toTakTeamName(),
-                            role = currentRole.toTakRoleName(),
-                        )
-                    }
-                }
-            }
+                // Broadcast node positions to TAK clients.
+                // mapLatest cancels any in-flight broadcast loop when a new node-map emission arrives,
+                // preventing N×M fan-out from stacking up across rapid consecutive updates.
+                scope.launch {
+                    nodeRepository.nodeDBbyNum
+                        .mapLatest { nodes ->
+                            nodes.forEach { (_, node) ->
+                                takServerManager.broadcastNode(
+                                    node = node,
+                                    team = currentTeam.toTakTeamName(),
+                                    role = currentRole.toTakRoleName(),
+                                )
+                            }
+                        }
+                        .collect {}
+                },
+                scope.launch {
+                    meshConfigHandler.moduleConfig
+                        .map { it.tak }
+                        .distinctUntilChanged()
+                        .collect { takConfig ->
+                            currentTeam = takConfig?.team ?: Team.Unspecifed_Color
+                            currentRole = takConfig?.role ?: MemberRole.Unspecifed
+                        }
+                },
+            )
 
-        jobs +=
-            scope.launch {
-                meshConfigHandler.moduleConfig
-                    .map { it.tak }
-                    .distinctUntilChanged()
-                    .collect { takConfig ->
-                        currentTeam = takConfig?.team ?: Team.Unspecifed_Color
-                        currentRole = takConfig?.role ?: MemberRole.Unspecifed
-                    }
-            }
+        scope.launch { jobsMutex.withLock { jobs.addAll(newJobs) } }
 
         Logger.i { "TAK Mesh Integration started" }
     }
 
     fun stop() {
+        if (!isRunning) return
         isRunning = false
-        jobs.forEach(Job::cancel)
+        // Cancel all tracked jobs synchronously
+        val toCancel: List<Job>
+        // Snapshot without suspension — jobs list may be partially populated if start() hasn't
+        // completed its launch yet, but cancelling what we have is safe.
+        toCancel = jobs.toList()
         jobs.clear()
+        toCancel.forEach(Job::cancel)
         takServerManager.stop()
         Logger.i { "TAK Mesh Integration stopped" }
     }

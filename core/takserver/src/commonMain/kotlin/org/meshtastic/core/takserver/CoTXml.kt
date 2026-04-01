@@ -81,6 +81,3 @@ fun CoTMessage.toXml(): String {
 }
 
 private fun Instant.toXmlString(): String = this.toString()
-
-private fun String.xmlEscaped(): String =
-    this.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;")

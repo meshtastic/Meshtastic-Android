@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("TooGenericExceptionCaught", "SwallowedException")
+@file:Suppress("TooGenericExceptionCaught")
 
 package org.meshtastic.core.takserver
 
@@ -23,9 +23,13 @@ import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.ServerSocket
 import io.ktor.network.sockets.Socket
 import io.ktor.network.sockets.aSocket
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -43,19 +47,32 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
 
     private val connections = mutableMapOf<String, TAKClientConnection>()
 
+    private val _connectionCount = MutableStateFlow(0)
+    val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
+
     var onMessage: ((CoTMessage) -> Unit)? = null
 
-    suspend fun start(scope: CoroutineScope): Result<Unit> = try {
-        serverScope = scope
-        selectorManager = SelectorManager(dispatchers.default)
-        serverSocket = aSocket(selectorManager!!).tcp().bind(hostname = "127.0.0.1", port = port)
+    suspend fun start(scope: CoroutineScope): Result<Unit> {
+        // Double-start guard: prevents SelectorManager / ServerSocket leaks
+        if (running) {
+            Logger.w { "TAK Server already running on port $port" }
+            return Result.success(Unit)
+        }
 
-        running = true
-        acceptJob = scope.launch(dispatchers.io) { acceptLoop() }
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Logger.e(e) { "Failed to bind TAK Server to 127.0.0.1:$port" }
-        Result.failure(e)
+        return try {
+            serverScope = scope
+            // Close any stale SelectorManager before creating a new one
+            selectorManager?.close()
+            selectorManager = SelectorManager(dispatchers.default)
+            serverSocket = aSocket(selectorManager!!).tcp().bind(hostname = "127.0.0.1", port = port)
+
+            running = true
+            acceptJob = scope.launch(dispatchers.io) { acceptLoop() }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Logger.e(e) { "Failed to bind TAK Server to 127.0.0.1:$port" }
+            Result.failure(e)
+        }
     }
 
     private suspend fun acceptLoop() {
@@ -66,9 +83,12 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
                 if (clientSocket != null) {
                     handleConnection(clientSocket)
                 }
-                delay(TAK_ACCEPT_LOOP_DELAY_MS)
+                // No delay on the success path — accept() is already suspending
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.w(e) { "TAK server accept loop iteration failed" }
+                // Back-off only in the error path
                 delay(TAK_ACCEPT_LOOP_DELAY_MS)
             }
         }
@@ -89,7 +109,10 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
             )
 
         scope.launch {
-            connectionsMutex.withLock { connections[connectionId] = connection }
+            connectionsMutex.withLock {
+                connections[connectionId] = connection
+                _connectionCount.value = connections.size
+            }
             connection.start()
         }
     }
@@ -100,7 +123,21 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
                 onMessage?.invoke(event.cotMessage)
             }
             is TAKConnectionEvent.Disconnected -> {
-                serverScope?.launch { connectionsMutex.withLock { connections.remove(connectionId) } }
+                serverScope?.launch {
+                    connectionsMutex.withLock {
+                        connections.remove(connectionId)
+                        _connectionCount.value = connections.size
+                    }
+                }
+            }
+            is TAKConnectionEvent.Error -> {
+                Logger.w(event.error) { "TAK client connection error: $connectionId" }
+                serverScope?.launch {
+                    connectionsMutex.withLock {
+                        connections.remove(connectionId)
+                        _connectionCount.value = connections.size
+                    }
+                }
             }
             else -> {}
         }
@@ -110,15 +147,16 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
         running = false
         acceptJob?.cancel()
         acceptJob = null
-        serverScope?.launch {
-            val toClose =
-                connectionsMutex.withLock {
-                    val current = connections.values.toList()
-                    connections.clear()
-                    current
-                }
-            toClose.forEach { it.close() }
-        }
+
+        // Close connections synchronously — TAKClientConnection.close() is non-suspending,
+        // so we don't need to launch into the (possibly-cancelled) serverScope.
+        val toClose: List<TAKClientConnection>
+        // We can't use Mutex.withLock here (non-suspending context) so we swap & clear under a
+        // best-effort copy — worst case a connection added concurrently is closed by socket teardown.
+        toClose = connections.values.toList()
+        connections.clear()
+        _connectionCount.value = 0
+        toClose.forEach { it.close() }
 
         serverSocket?.close()
         serverSocket = null
@@ -140,7 +178,5 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
         }
     }
 
-    suspend fun connectionCount(): Int = connectionsMutex.withLock { connections.size }
-
-    suspend fun hasConnections(): Boolean = connectionCount() > 0
+    suspend fun hasConnections(): Boolean = connectionsMutex.withLock { connections.isNotEmpty() }
 }

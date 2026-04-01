@@ -18,7 +18,6 @@ package org.meshtastic.core.takserver
 
 import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.serialization.XML
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -45,7 +44,6 @@ object TAKDataPackageGenerator {
      *
      * @return zip file contents as a [ByteArray]
      */
-    @OptIn(ExperimentalUuidApi::class)
     fun generateDataPackage(
         serverHost: String = "127.0.0.1",
         port: Int = DEFAULT_TAK_PORT,
@@ -112,10 +110,4 @@ object TAKDataPackageGenerator {
         appendLine("  </Contents>")
         append("</MissionPackageManifest>")
     }
-
-    private fun String.xmlEscaped(): String = this.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace("\"", "&quot;")
-        .replace("'", "&apos;")
 }
