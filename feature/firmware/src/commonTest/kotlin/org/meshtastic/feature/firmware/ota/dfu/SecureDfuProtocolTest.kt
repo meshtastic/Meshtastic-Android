@@ -321,4 +321,102 @@ class SecureDfuProtocolTest {
         val b = DfuZipPackage(byteArrayOf(0x01), byteArrayOf(0x03))
         assertTrue(a != b)
     }
+
+    // ── Extended error codes ─────────────────────────────────────────────────
+
+    @Test
+    fun `parse returns Failure with extended error when result is EXT_ERROR`() {
+        // [RESPONSE_CODE, CREATE, EXT_ERROR, SD_VERSION_FAILURE]
+        val data =
+            byteArrayOf(
+                DfuOpcode.RESPONSE_CODE,
+                DfuOpcode.CREATE,
+                DfuResultCode.EXT_ERROR,
+                DfuExtendedError.SD_VERSION_FAILURE,
+            )
+        val result = DfuResponse.parse(data)
+        assertIs<DfuResponse.Failure>(result)
+        assertEquals(DfuOpcode.CREATE, result.opcode)
+        assertEquals(DfuResultCode.EXT_ERROR, result.resultCode)
+        assertEquals(DfuExtendedError.SD_VERSION_FAILURE, result.extendedError)
+    }
+
+    @Test
+    fun `parse returns Failure without extended error when EXT_ERROR but no extra byte`() {
+        // Only 3 bytes — no room for extended error byte
+        val data = byteArrayOf(DfuOpcode.RESPONSE_CODE, DfuOpcode.CREATE, DfuResultCode.EXT_ERROR)
+        val result = DfuResponse.parse(data)
+        assertIs<DfuResponse.Failure>(result)
+        assertEquals(DfuResultCode.EXT_ERROR, result.resultCode)
+        assertNull(result.extendedError)
+    }
+
+    @Test
+    fun `parse returns Failure without extended error for non-EXT_ERROR codes`() {
+        val data =
+            byteArrayOf(
+                DfuOpcode.RESPONSE_CODE,
+                DfuOpcode.CREATE,
+                DfuResultCode.INVALID_OBJECT,
+                0x07, // extra byte that should be ignored
+            )
+        val result = DfuResponse.parse(data)
+        assertIs<DfuResponse.Failure>(result)
+        assertEquals(DfuResultCode.INVALID_OBJECT, result.resultCode)
+        assertNull(result.extendedError)
+    }
+
+    @Test
+    fun `DfuExtendedError describe returns known descriptions`() {
+        assertEquals("SD version failure", DfuExtendedError.describe(DfuExtendedError.SD_VERSION_FAILURE))
+        assertEquals("Signature missing", DfuExtendedError.describe(DfuExtendedError.SIGNATURE_MISSING))
+        assertEquals("Verification failed", DfuExtendedError.describe(DfuExtendedError.VERIFICATION_FAILED))
+        assertEquals("Insufficient space", DfuExtendedError.describe(DfuExtendedError.INSUFFICIENT_SPACE))
+        assertEquals("Init command invalid", DfuExtendedError.describe(DfuExtendedError.INIT_COMMAND_INVALID))
+        assertEquals("FW version failure", DfuExtendedError.describe(DfuExtendedError.FW_VERSION_FAILURE))
+        assertEquals("HW version failure", DfuExtendedError.describe(DfuExtendedError.HW_VERSION_FAILURE))
+        assertEquals("Wrong hash type", DfuExtendedError.describe(DfuExtendedError.WRONG_HASH_TYPE))
+        assertEquals("Hash failed", DfuExtendedError.describe(DfuExtendedError.HASH_FAILED))
+        assertEquals("Wrong signature type", DfuExtendedError.describe(DfuExtendedError.WRONG_SIGNATURE_TYPE))
+    }
+
+    @Test
+    fun `DfuExtendedError describe returns hex for unknown code`() {
+        val desc = DfuExtendedError.describe(0x7F)
+        assertTrue(desc.contains("0x7f"), "Should contain hex code: $desc")
+    }
+
+    @Test
+    fun `DfuException ProtocolError includes extended error description in message`() {
+        val e =
+            DfuException.ProtocolError(
+                opcode = DfuOpcode.EXECUTE,
+                resultCode = DfuResultCode.EXT_ERROR,
+                extendedError = DfuExtendedError.SD_VERSION_FAILURE,
+            )
+        assertTrue(e.message!!.contains("SD version failure"), "Message should contain extended error: ${e.message}")
+        assertTrue(e.message!!.contains("0x0b"), "Message should contain result code 0x0b: ${e.message}")
+    }
+
+    @Test
+    fun `DfuException ProtocolError without extended error omits ext field`() {
+        val e = DfuException.ProtocolError(opcode = 0x01, resultCode = 0x05, extendedError = null)
+        assertTrue(!e.message!!.contains("ext="), "Message should not contain ext= when null: ${e.message}")
+    }
+
+    // ── DfuResponse Failure equality ─────────────────────────────────────────
+
+    @Test
+    fun `Failure with same extended error is equal`() {
+        val a = DfuResponse.Failure(0x01, 0x0B, 0x07)
+        val b = DfuResponse.Failure(0x01, 0x0B, 0x07)
+        assertEquals(a, b)
+    }
+
+    @Test
+    fun `Failure with null vs non-null extended error is not equal`() {
+        val a = DfuResponse.Failure(0x01, 0x0B, null)
+        val b = DfuResponse.Failure(0x01, 0x0B, 0x07)
+        assertTrue(a != b)
+    }
 }

@@ -74,6 +74,41 @@ internal object DfuResultCode {
     const val EXT_ERROR: Byte = 0x0B
 }
 
+/**
+ * Extended error codes returned when [DfuResultCode.EXT_ERROR] (0x0B) is the result code. An additional byte follows in
+ * the response payload.
+ */
+internal object DfuExtendedError {
+    const val WRONG_COMMAND_FORMAT: Byte = 0x02
+    const val UNKNOWN_COMMAND: Byte = 0x03
+    const val INIT_COMMAND_INVALID: Byte = 0x04
+    const val FW_VERSION_FAILURE: Byte = 0x05
+    const val HW_VERSION_FAILURE: Byte = 0x06
+    const val SD_VERSION_FAILURE: Byte = 0x07
+    const val SIGNATURE_MISSING: Byte = 0x08
+    const val WRONG_HASH_TYPE: Byte = 0x09
+    const val HASH_FAILED: Byte = 0x0A
+    const val WRONG_SIGNATURE_TYPE: Byte = 0x0B
+    const val VERIFICATION_FAILED: Byte = 0x0C
+    const val INSUFFICIENT_SPACE: Byte = 0x0D
+
+    fun describe(code: Byte): String = when (code) {
+        WRONG_COMMAND_FORMAT -> "Wrong command format"
+        UNKNOWN_COMMAND -> "Unknown command"
+        INIT_COMMAND_INVALID -> "Init command invalid"
+        FW_VERSION_FAILURE -> "FW version failure"
+        HW_VERSION_FAILURE -> "HW version failure"
+        SD_VERSION_FAILURE -> "SD version failure"
+        SIGNATURE_MISSING -> "Signature missing"
+        WRONG_HASH_TYPE -> "Wrong hash type"
+        HASH_FAILED -> "Hash failed"
+        WRONG_SIGNATURE_TYPE -> "Wrong signature type"
+        VERIFICATION_FAILED -> "Verification failed"
+        INSUFFICIENT_SPACE -> "Insufficient space"
+        else -> "Unknown extended error 0x${code.toUByte().toString(16).padStart(2, '0')}"
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Response parsing
 // ---------------------------------------------------------------------------
@@ -91,7 +126,7 @@ internal sealed class DfuResponse {
     data class ChecksumResult(val offset: Int, val crc32: Int) : DfuResponse()
 
     /** The device rejected the opcode with a non-success result code. */
-    data class Failure(val opcode: Byte, val resultCode: Byte) : DfuResponse()
+    data class Failure(val opcode: Byte, val resultCode: Byte, val extendedError: Byte? = null) : DfuResponse()
 
     /** Unrecognised bytes — logged, treated as an error. */
     data class Unknown(val raw: ByteArray) : DfuResponse() {
@@ -105,7 +140,11 @@ internal sealed class DfuResponse {
             if (data.size < 3 || data[0] != DfuOpcode.RESPONSE_CODE) return Unknown(data)
             val opcode = data[1]
             val result = data[2]
-            if (result != DfuResultCode.SUCCESS) return Failure(opcode, result)
+            if (result != DfuResultCode.SUCCESS) {
+                // Extract the extended error byte when present (result == 0x0B and byte at index 3).
+                val extError = if (result == DfuResultCode.EXT_ERROR && data.size >= 4) data[3] else null
+                return Failure(opcode, result, extError)
+            }
 
             return when (opcode) {
                 DfuOpcode.SELECT -> {
@@ -218,10 +257,15 @@ sealed class DfuException(message: String, cause: Throwable? = null) : Exception
 
     class InvalidPackage(message: String) : DfuException(message)
 
-    class ProtocolError(val opcode: Byte, val resultCode: Byte) :
+    class ProtocolError(val opcode: Byte, val resultCode: Byte, val extendedError: Byte? = null) :
         DfuException(
-            "DFU protocol error: opcode=0x${opcode.toUByte().toString(16).padStart(2, '0')} " +
-                "result=0x${resultCode.toUByte().toString(16).padStart(2, '0')}",
+            buildString {
+                append("DFU protocol error: opcode=0x${opcode.toUByte().toString(16).padStart(2, '0')} ")
+                append("result=0x${resultCode.toUByte().toString(16).padStart(2, '0')}")
+                if (extendedError != null) {
+                    append(" ext=${DfuExtendedError.describe(extendedError)}")
+                }
+            },
         )
 
     class ChecksumMismatch(expected: Int, actual: Int) :

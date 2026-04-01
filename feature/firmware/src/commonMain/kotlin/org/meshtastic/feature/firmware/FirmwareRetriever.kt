@@ -24,8 +24,7 @@ import org.meshtastic.core.model.DeviceHardware
 
 private val KNOWN_ARCHS = listOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", "rp2040", "stm32", "esp32")
 
-private const val FIRMWARE_BASE_URL =
-    "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
+private const val FIRMWARE_BASE_URL = "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
 
 /** OTA partition role in .mt.json manifests — the main application firmware. */
 private const val OTA_PART_NAME = "app0"
@@ -70,7 +69,9 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
 
         // ── Primary: .mt.json manifest (2.7.17+) ────────────────────────────
-        resolveFromManifest(version, target, release, hardware, onProgress)?.let { return it }
+        resolveFromManifest(version, target, release, hardware, onProgress)?.let {
+            return it
+        }
 
         // ── Fallback 1: current naming (2.7.17+) ────────────────────────────
         val currentFilename = "firmware-$target-$version.bin"
@@ -81,7 +82,10 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
             fileSuffix = ".bin",
             internalFileExtension = ".bin",
             preferredFilename = currentFilename,
-        )?.let { return it }
+        )
+            ?.let {
+                return it
+            }
 
         // ── Fallback 2: legacy naming (pre-2.7.17) ──────────────────────────
         val legacyFilename = "firmware-$target-$version-update.bin"
@@ -92,7 +96,10 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
             fileSuffix = "-update.bin",
             internalFileExtension = "-update.bin",
             preferredFilename = legacyFilename,
-        )?.let { return it }
+        )
+            ?.let {
+                return it
+            }
 
         // ── Fallback 3: any matching .bin from the release zip ───────────────
         return retrieveArtifact(
@@ -113,8 +120,7 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
     ): FirmwareArtifact? {
-        val manifestUrl =
-            "$FIRMWARE_BASE_URL/firmware-$version/firmware-$target-$version.mt.json"
+        val manifestUrl = "$FIRMWARE_BASE_URL/firmware-$version/firmware-$target-$version.mt.json"
 
         val text = fileHandler.fetchText(manifestUrl)
         if (text == null) {
@@ -122,12 +128,13 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
             return null
         }
 
-        val manifest = try {
-            manifestJson.decodeFromString<FirmwareManifest>(text)
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.w(e) { "Failed to parse manifest from $manifestUrl" }
-            return null
-        }
+        val manifest =
+            try {
+                manifestJson.decodeFromString<FirmwareManifest>(text)
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "Failed to parse manifest from $manifestUrl" }
+                return null
+            }
 
         val otaEntry = manifest.files.firstOrNull { it.partName == OTA_PART_NAME }
         if (otaEntry == null) {

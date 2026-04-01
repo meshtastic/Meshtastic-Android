@@ -79,6 +79,13 @@ class SecureDfuTransport(
      * Connects to the device running normal firmware and writes to the Buttonless DFU characteristic so the bootloader
      * takes over. The device disconnects and reboots.
      *
+     * Per the Nordic Secure DFU spec, indications **must** be enabled on the Buttonless DFU characteristic before
+     * writing the Enter DFU command. The device validates the CCCD and rejects the write with
+     * `ATTERR_CPS_CCCD_CONFIG_ERROR` if indications are not enabled.
+     *
+     * After writing the trigger, the device may disconnect before the indication response arrives — this race condition
+     * is expected and handled gracefully.
+     *
      * The caller must have already released the mesh-service BLE connection before calling this.
      */
     suspend fun triggerButtonlessDfu(): Result<Unit> = runCatching {
@@ -93,8 +100,40 @@ class SecureDfuTransport(
 
         bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
             val buttonlessChar = service.characteristic(SecureDfuUuids.BUTTONLESS_NO_BONDS)
+
+            // Enable indications by subscribing to the characteristic. The device-side firmware (BLEDfuSecure.cpp)
+            // checks that the CCCD is configured and returns ATTERR_CPS_CCCD_CONFIG_ERROR if not.
+            val indicationChannel = Channel<ByteArray>(Channel.UNLIMITED)
+            val indicationJob =
+                service
+                    .observe(buttonlessChar)
+                    .onEach { indicationChannel.trySend(it) }
+                    .catch { e -> Logger.d(e) { "DFU: Buttonless indication stream ended (expected on disconnect)" } }
+                    .launchIn(this)
+
+            delay(SUBSCRIPTION_SETTLE_MS)
+
             Logger.i { "DFU: Writing buttonless DFU trigger..." }
             service.write(buttonlessChar, byteArrayOf(0x01), BleWriteType.WITH_RESPONSE)
+
+            // Wait for the indication response (0x20-01-STATUS). The device may disconnect before we receive it —
+            // that's expected and treated as success, matching the Nordic DFU library's behavior.
+            try {
+                withTimeout(BUTTONLESS_RESPONSE_TIMEOUT_MS) {
+                    val response = indicationChannel.receive()
+                    if (response.size >= 3 && response[0] == BUTTONLESS_RESPONSE_CODE && response[2] != 0x01.toByte()) {
+                        Logger.w { "DFU: Buttonless DFU response indicates error: ${response.toHexString()}" }
+                    } else {
+                        Logger.i { "DFU: Buttonless DFU indication received successfully" }
+                    }
+                }
+            } catch (_: TimeoutCancellationException) {
+                Logger.d { "DFU: No buttonless indication received (device may have already disconnected)" }
+            } catch (_: Exception) {
+                Logger.d { "DFU: Buttonless indication wait interrupted (device disconnecting)" }
+            }
+
+            indicationJob.cancel()
         }
 
         // Device will disconnect and reboot — expected, not an error.
@@ -164,10 +203,13 @@ class SecureDfuTransport(
     /**
      * Sends the DFU init packet (`.dat` file). The device verifies this against the bootloader's security requirements
      * before accepting firmware.
+     *
+     * PRN is explicitly disabled (set to 0) for the init packet per the Nordic DFU library convention — the init packet
+     * is small (<512 bytes, fits in a single object) and does not benefit from flow control.
      */
     suspend fun transferInitPacket(initPacket: ByteArray): Result<Unit> = runCatching {
         Logger.i { "DFU: Transferring init packet (${initPacket.size} bytes)..." }
-        setPrn(PRN_INTERVAL)
+        setPrn(0)
         transferObjectWithRetry(DfuObjectType.COMMAND, initPacket, onProgress = null)
         Logger.i { "DFU: Init packet transferred and executed." }
     }
@@ -249,18 +291,49 @@ class SecureDfuTransport(
         throw lastError ?: DfuException.TransferFailed("Object transfer failed after $OBJECT_RETRY_COUNT attempts")
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private suspend fun transferObject(objectType: Byte, data: ByteArray, onProgress: (suspend (Float) -> Unit)?) {
         val selectResult = sendSelect(objectType)
         val maxObjectSize = selectResult.maxSize.takeIf { it > 0 } ?: DEFAULT_MAX_OBJECT_SIZE
         val totalBytes = data.size
         var offset = 0
+        var isFirstChunk = true
+        var currentPrnInterval = if (objectType == DfuObjectType.COMMAND) 0 else PRN_INTERVAL
 
-        // If the device already has a partial object with a matching CRC, resume.
+        // Resume logic — per Nordic DFU spec, distinguish between executed objects and partial current object.
         if (selectResult.offset in 1..totalBytes) {
             val expectedCrc = DfuCrc32.calculate(data, length = selectResult.offset)
             if (expectedCrc == selectResult.crc32) {
-                Logger.i { "DFU: Resuming at offset ${selectResult.offset} (CRC match)" }
-                offset = selectResult.offset
+                val executedBytes = maxObjectSize * (selectResult.offset / maxObjectSize)
+                val pendingBytes = selectResult.offset - executedBytes
+
+                if (selectResult.offset == totalBytes) {
+                    // Device already has the complete data. Just execute.
+                    Logger.i { "DFU: Device already has all $totalBytes bytes (CRC match), executing..." }
+                    sendExecute()
+                    onProgress?.invoke(1f)
+                    return
+                } else if (pendingBytes == 0 && executedBytes > 0) {
+                    // Offset is at an object boundary — last complete object may not be executed yet.
+                    Logger.i { "DFU: Resuming at object boundary $executedBytes, executing last object..." }
+                    try {
+                        sendExecute()
+                    } catch (e: DfuException.ProtocolError) {
+                        if (e.resultCode != DfuResultCode.OPERATION_NOT_PERMITTED) throw e
+                        Logger.d { "DFU: Execute returned OPERATION_NOT_PERMITTED (already executed), continuing..." }
+                    }
+                    offset = executedBytes
+                    isFirstChunk = false
+                } else if (pendingBytes > 0) {
+                    // Partial object in progress — skip to the start of the current object and resume from there.
+                    // We resume from the executed boundary because the partial object needs to be re-sent if we can't
+                    // verify the partial state cleanly. The Nordic library does the same thing.
+                    Logger.i {
+                        "DFU: Resuming at offset $executedBytes (executed=$executedBytes, pending=$pendingBytes)"
+                    }
+                    offset = executedBytes
+                    isFirstChunk = false
+                }
             } else {
                 Logger.w { "DFU: Offset ${selectResult.offset} CRC mismatch — restarting from 0" }
             }
@@ -270,22 +343,68 @@ class SecureDfuTransport(
             val objectSize = minOf(maxObjectSize, totalBytes - offset)
             sendCreate(objectType, objectSize)
 
+            // First-chunk delay: some older bootloaders need time to prepare flash after Create.
+            // The Nordic DFU library uses 400ms for the first chunk.
+            if (isFirstChunk) {
+                delay(FIRST_CHUNK_DELAY_MS)
+                isFirstChunk = false
+            }
+
             val objectEnd = offset + objectSize
-            writePackets(data, offset, objectEnd)
+            writePackets(data, offset, objectEnd, currentPrnInterval)
 
             val checksumResult = sendCalculateChecksum()
             val expectedCrc = DfuCrc32.calculate(data, length = objectEnd)
 
-            if (checksumResult.offset != objectEnd) {
+            // Bytes-lost detection: if the device reports fewer bytes than we sent, some packets were lost in
+            // the BLE stack. Rather than throwing immediately, tighten PRN to 1 and retry the remaining bytes.
+            if (checksumResult.offset < objectEnd) {
+                val bytesLost = objectEnd - checksumResult.offset
+                Logger.w {
+                    "DFU: $bytesLost bytes lost in BLE stack (sent to $objectEnd, device at ${checksumResult.offset})"
+                }
+                // Verify CRC up to the device's offset is valid
+                val partialCrc = DfuCrc32.calculate(data, length = checksumResult.offset)
+                if (checksumResult.crc32 != partialCrc) {
+                    throw DfuException.ChecksumMismatch(expected = partialCrc, actual = checksumResult.crc32)
+                }
+                // Tighten PRN to maximum flow control and resend the lost portion
+                currentPrnInterval = 1
+                Logger.i { "DFU: Forcing PRN=1 and resending from offset ${checksumResult.offset}" }
+                writePackets(data, checksumResult.offset, objectEnd, currentPrnInterval)
+
+                val recheckResult = sendCalculateChecksum()
+                if (recheckResult.offset != objectEnd || recheckResult.crc32 != expectedCrc) {
+                    val expectedHex = expectedCrc.toUInt().toString(16)
+                    val actualHex = recheckResult.crc32.toUInt().toString(16)
+                    throw DfuException.TransferFailed(
+                        "Recovery failed after bytes-lost: " +
+                            "expected offset=$objectEnd crc=0x$expectedHex, " +
+                            "got offset=${recheckResult.offset} crc=0x$actualHex",
+                    )
+                }
+                Logger.i { "DFU: Recovery successful, continuing with PRN=1" }
+            } else if (checksumResult.offset != objectEnd) {
                 throw DfuException.TransferFailed(
                     "Offset mismatch after object: expected $objectEnd, got ${checksumResult.offset}",
                 )
-            }
-            if (checksumResult.crc32 != expectedCrc) {
+            } else if (checksumResult.crc32 != expectedCrc) {
                 throw DfuException.ChecksumMismatch(expected = expectedCrc, actual = checksumResult.crc32)
             }
 
-            sendExecute()
+            // Execute with retry for INVALID_OBJECT — the SoftDevice may still be erasing flash.
+            try {
+                sendExecute()
+            } catch (e: DfuException.ProtocolError) {
+                if (e.resultCode == DfuResultCode.INVALID_OBJECT && offset + objectSize >= totalBytes) {
+                    Logger.w { "DFU: Execute returned INVALID_OBJECT on final object, retrying once..." }
+                    delay(RETRY_DELAY_MS)
+                    sendExecute()
+                } else {
+                    throw e
+                }
+            }
+
             offset = objectEnd
             onProgress?.invoke(offset.toFloat() / totalBytes)
             Logger.d { "DFU: Object complete. Progress: $offset/$totalBytes" }
@@ -299,11 +418,11 @@ class SecureDfuTransport(
     /**
      * Writes [data] from [from] to [until] as MTU-sized packets WITHOUT_RESPONSE.
      *
-     * PRN flow control: every [PRN_INTERVAL] packets we await a ChecksumResult notification from the device and
-     * validate the running CRC-32. This prevents the device's receive buffer from overflowing and detects corruption
-     * early.
+     * PRN flow control: every [prnInterval] packets we await a ChecksumResult notification from the device and validate
+     * the running CRC-32. This prevents the device's receive buffer from overflowing and detects corruption early. Pass
+     * 0 to disable PRN (used for init packets).
      */
-    private suspend fun writePackets(data: ByteArray, from: Int, until: Int) {
+    private suspend fun writePackets(data: ByteArray, from: Int, until: Int, prnInterval: Int) {
         val mtu = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE) ?: DEFAULT_BLE_WRITE_VALUE_LENGTH
         var packetsSincePrn = 0
 
@@ -319,7 +438,7 @@ class SecureDfuTransport(
 
                 // Wait for the device's PRN receipt notification, then validate CRC.
                 // Skip the wait on the last packet — the final CALCULATE_CHECKSUM covers it.
-                if (PRN_INTERVAL > 0 && packetsSincePrn >= PRN_INTERVAL && pos < until) {
+                if (prnInterval > 0 && packetsSincePrn >= prnInterval && pos < until) {
                     val response = awaitNotification(COMMAND_TIMEOUT_MS)
                     if (response is DfuResponse.ChecksumResult) {
                         val expectedCrc = DfuCrc32.calculate(data, length = pos)
@@ -353,7 +472,8 @@ class SecureDfuTransport(
         val response = sendCommand(byteArrayOf(DfuOpcode.SELECT, objectType))
         return when (response) {
             is DfuResponse.SelectResult -> response
-            is DfuResponse.Failure -> throw DfuException.ProtocolError(DfuOpcode.SELECT, response.resultCode)
+            is DfuResponse.Failure ->
+                throw DfuException.ProtocolError(DfuOpcode.SELECT, response.resultCode, response.extendedError)
             else -> throw DfuException.TransferFailed("Unexpected response to SELECT: $response")
         }
     }
@@ -370,7 +490,11 @@ class SecureDfuTransport(
         return when (response) {
             is DfuResponse.ChecksumResult -> response
             is DfuResponse.Failure ->
-                throw DfuException.ProtocolError(DfuOpcode.CALCULATE_CHECKSUM, response.resultCode)
+                throw DfuException.ProtocolError(
+                    DfuOpcode.CALCULATE_CHECKSUM,
+                    response.resultCode,
+                    response.extendedError,
+                )
             else -> throw DfuException.TransferFailed("Unexpected response to CALCULATE_CHECKSUM: $response")
         }
     }
@@ -399,7 +523,7 @@ class SecureDfuTransport(
                             "got 0x${opcode.toUByte().toString(16)}",
                     )
                 }
-            is DfuResponse.Failure -> throw DfuException.ProtocolError(opcode, resultCode)
+            is DfuResponse.Failure -> throw DfuException.ProtocolError(opcode, resultCode, extendedError)
             else ->
                 throw DfuException.TransferFailed(
                     "Unexpected response for opcode 0x${expectedOpcode.toUByte().toString(16)}: $this",
@@ -428,9 +552,14 @@ class SecureDfuTransport(
         private const val CONNECT_TIMEOUT_MS = 15_000L
         private const val COMMAND_TIMEOUT_MS = 30_000L
         private const val SUBSCRIPTION_SETTLE_MS = 500L
+        private const val BUTTONLESS_RESPONSE_TIMEOUT_MS = 3_000L
         private const val SCAN_RETRY_COUNT = 3
         private const val SCAN_RETRY_DELAY_MS = 2_000L
         private const val RETRY_DELAY_MS = 2_000L
+        private const val FIRST_CHUNK_DELAY_MS = 400L
+
+        /** Response code prefix for Buttonless DFU indications (0x20 = response). */
+        private const val BUTTONLESS_RESPONSE_CODE: Byte = 0x20
 
         /**
          * PRN interval: device sends a ChecksumResult notification every N packets. Provides flow control and early CRC

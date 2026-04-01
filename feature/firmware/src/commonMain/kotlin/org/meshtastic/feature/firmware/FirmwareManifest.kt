@@ -20,12 +20,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Kotlin model for `.mt.json` firmware manifest files published alongside each firmware binary
- * since v2.7.17.
+ * Kotlin model for `.mt.json` firmware manifest files published alongside each firmware binary since v2.7.17.
  *
- * The manifest is per-target, per-version and describes every partition image for a given device.
- * During ESP32 WiFi OTA we fetch the manifest on-demand, locate the `app0` partition entry, and
- * use its [FirmwareManifestFile.name] as the exact filename to download.
+ * The manifest is per-target, per-version and describes every partition image for a given device. During ESP32 WiFi OTA
+ * we fetch the manifest on-demand, locate the `app0` partition entry, and use its [FirmwareManifestFile.name] as the
+ * exact filename to download.
  *
  * Example URL:
  * ```
@@ -46,8 +45,8 @@ internal data class FirmwareManifest(
  * A single partition file entry inside a [FirmwareManifest].
  *
  * @property name Filename of the binary (e.g. `firmware-t-deck-2.7.17.bin`).
- * @property partName Partition role: `app0` (main firmware — the OTA target), `app1` (OTA loader),
- *   or `spiffs` (filesystem image).
+ * @property partName Partition role: `app0` (main firmware — the OTA target), `app1` (OTA loader), or `spiffs`
+ *   (filesystem image).
  * @property md5 MD5 hex digest of the binary content.
  * @property bytes Size of the binary in bytes.
  */
