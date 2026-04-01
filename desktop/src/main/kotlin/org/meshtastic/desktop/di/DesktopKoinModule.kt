@@ -72,6 +72,7 @@ import org.meshtastic.feature.map.di.module as featureMapModule
 import org.meshtastic.feature.messaging.di.module as featureMessagingModule
 import org.meshtastic.feature.node.di.module as featureNodeModule
 import org.meshtastic.feature.settings.di.module as featureSettingsModule
+import org.meshtastic.feature.wifiprovision.di.module as featureWifiProvisionModule
 
 /**
  * Koin module for the Desktop target.
@@ -106,6 +107,7 @@ fun desktopModule() = module {
         org.meshtastic.feature.map.di.FeatureMapModule().featureMapModule(),
         org.meshtastic.feature.firmware.di.FeatureFirmwareModule().featureFirmwareModule(),
         org.meshtastic.feature.intro.di.FeatureIntroModule().featureIntroModule(),
+        org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule().featureWifiProvisionModule(),
         org.meshtastic.desktop.di.DesktopDiModule().desktopDiModule(),
         desktopPlatformStubsModule(),
     )
