@@ -35,6 +35,7 @@ include(
     ":core:repository",
     ":core:service",
     ":core:resources",
+    ":core:takserver",
     ":core:testing",
     ":core:ui",
     ":feature:intro",

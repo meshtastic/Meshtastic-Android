@@ -23,17 +23,25 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.takserver.TAKMeshIntegration
+import org.meshtastic.core.takserver.TAKServerManager
+import org.meshtastic.core.takserver.fountain.CoTHandler
+import org.meshtastic.proto.LocalModuleConfig
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -44,11 +52,16 @@ class MeshServiceOrchestratorTest {
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val nodeManager: NodeManager = mock(MockMode.autofill)
+    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
     private val commandSender: CommandSender = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
     private val router: MeshRouter = mock(MockMode.autofill)
+    private val meshConfigHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
+    private val takServerManager: TAKServerManager = mock(MockMode.autofill)
+    private val takPrefs: TakPrefs = mock(MockMode.autofill)
+    private val cotHandler: CoTHandler = mock(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
@@ -57,6 +70,22 @@ class MeshServiceOrchestratorTest {
     fun testStartWiresComponents() {
         every { radioInterfaceService.receivedData } returns MutableSharedFlow()
         every { serviceRepository.serviceAction } returns MutableSharedFlow()
+        every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
+        every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
+        every { takPrefs.isTakServerEnabled } returns MutableStateFlow(false)
+        every { takServerManager.isRunning } returns MutableStateFlow(false)
+        every { takServerManager.inboundMessages } returns MutableSharedFlow()
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
+
+        val takMeshIntegration =
+            TAKMeshIntegration(
+                takServerManager = takServerManager,
+                commandSender = commandSender,
+                nodeRepository = nodeRepository,
+                serviceRepository = serviceRepository,
+                meshConfigHandler = meshConfigHandler,
+                cotHandler = cotHandler,
+            )
 
         val orchestrator =
             MeshServiceOrchestrator(
@@ -69,6 +98,9 @@ class MeshServiceOrchestratorTest {
                 connectionManager = connectionManager,
                 router = router,
                 serviceNotifications = serviceNotifications,
+                takServerManager = takServerManager,
+                takMeshIntegration = takMeshIntegration,
+                takPrefs = takPrefs,
                 dispatchers = dispatchers,
             )
 
@@ -82,5 +114,62 @@ class MeshServiceOrchestratorTest {
 
         orchestrator.stop()
         assertFalse(orchestrator.isRunning)
+    }
+
+    @Test
+    fun testTakServerStartsAndStopsWithPreference() {
+        val takEnabledFlow = MutableStateFlow(false)
+        val takRunningFlow = MutableStateFlow(false)
+
+        every { radioInterfaceService.receivedData } returns MutableSharedFlow()
+        every { serviceRepository.serviceAction } returns MutableSharedFlow()
+        every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
+        every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
+        every { takPrefs.isTakServerEnabled } returns takEnabledFlow
+        every { takServerManager.isRunning } returns takRunningFlow
+        every { takServerManager.inboundMessages } returns MutableSharedFlow()
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
+
+        val takMeshIntegration =
+            TAKMeshIntegration(
+                takServerManager = takServerManager,
+                commandSender = commandSender,
+                nodeRepository = nodeRepository,
+                serviceRepository = serviceRepository,
+                meshConfigHandler = meshConfigHandler,
+                cotHandler = cotHandler,
+            )
+
+        val orchestrator =
+            MeshServiceOrchestrator(
+                radioInterfaceService = radioInterfaceService,
+                serviceRepository = serviceRepository,
+                packetHandler = packetHandler,
+                nodeManager = nodeManager,
+                messageProcessor = messageProcessor,
+                commandSender = commandSender,
+                connectionManager = connectionManager,
+                router = router,
+                serviceNotifications = serviceNotifications,
+                takServerManager = takServerManager,
+                takMeshIntegration = takMeshIntegration,
+                takPrefs = takPrefs,
+                dispatchers = dispatchers,
+            )
+
+        orchestrator.start()
+
+        // Toggle on
+        takEnabledFlow.value = true
+        verify { takServerManager.start(any()) }
+
+        // Update mock state to reflect it's running
+        takRunningFlow.value = true
+
+        // Toggle off
+        takEnabledFlow.value = false
+        verify { takServerManager.stop() }
+
+        orchestrator.stop()
     }
 }

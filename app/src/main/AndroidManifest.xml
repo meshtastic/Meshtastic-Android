@@ -49,6 +49,9 @@
 
     <!-- This permission is required for analytics - and soon the MQTT gateway -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required for Android 17+ (API 37) Local Networking for TAK Server localhost loopback -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!--

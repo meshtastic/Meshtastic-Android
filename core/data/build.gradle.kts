@@ -43,6 +43,7 @@ kotlin {
             implementation(projects.core.network)
             implementation(projects.core.prefs)
             implementation(projects.core.proto)
+            implementation(projects.core.takserver)
 
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.androidx.paging.common)

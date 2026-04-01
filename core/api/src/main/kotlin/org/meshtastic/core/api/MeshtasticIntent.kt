@@ -37,7 +37,16 @@ object MeshtasticIntent {
     /** Broadcast when the mesh radio disconnects. */
     const val ACTION_MESH_DISCONNECTED = "$PREFIX.MESH_DISCONNECTED"
 
-    /** Legacy broadcast for connection changes. Extra: [EXTRA_CONNECTED] */
+    /**
+     * Legacy broadcast for connection changes. Extra: [EXTRA_CONNECTED]
+     *
+     * Prefer [ACTION_MESH_CONNECTED] / [ACTION_MESH_DISCONNECTED] instead. This constant will be removed from the
+     * public API in a future release.
+     */
+    @Deprecated(
+        message = "Use ACTION_MESH_CONNECTED / ACTION_MESH_DISCONNECTED instead.",
+        replaceWith = ReplaceWith("ACTION_MESH_CONNECTED"),
+    )
     const val ACTION_CONNECTION_CHANGED = "$PREFIX.CONNECTION_CHANGED"
 
     /** Broadcast for message status updates. Extras: [EXTRA_PACKET_ID], [EXTRA_STATUS] */

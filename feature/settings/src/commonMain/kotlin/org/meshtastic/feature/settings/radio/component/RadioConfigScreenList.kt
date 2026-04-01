@@ -53,6 +53,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
     enabled: Boolean,
     onSave: (T) -> Unit,
     modifier: Modifier = Modifier,
+    actions: @Composable () -> Unit = {},
     additionalDirtyCheck: () -> Boolean = { false },
     onDiscard: () -> Unit = {},
     content: LazyListScope.() -> Unit,
@@ -68,7 +69,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                     onNavigateUp = onBack,
                     ourNode = null,
                     showNodeChip = false,
-                    actions = {},
+                    actions = actions,
                     onClickChip = {},
                 )
             },

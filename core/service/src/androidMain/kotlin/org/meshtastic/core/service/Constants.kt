@@ -23,6 +23,8 @@ const val PREFIX = "com.geeksville.mesh"
 const val ACTION_NODE_CHANGE = MeshtasticIntent.ACTION_NODE_CHANGE
 const val ACTION_MESH_CONNECTED = MeshtasticIntent.ACTION_MESH_CONNECTED
 const val ACTION_MESH_DISCONNECTED = MeshtasticIntent.ACTION_MESH_DISCONNECTED
+
+@Suppress("DEPRECATION") // Intentionally re-exported for backward-compat broadcast in ServiceBroadcasts
 const val ACTION_CONNECTION_CHANGED = MeshtasticIntent.ACTION_CONNECTION_CHANGED
 const val ACTION_MESSAGE_STATUS = MeshtasticIntent.ACTION_MESSAGE_STATUS
 

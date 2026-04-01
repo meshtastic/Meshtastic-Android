@@ -85,6 +85,7 @@ class MeshService : Service() {
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)
 
         fun changeDeviceAddress(context: Context, service: IMeshService, address: String?) {
+            @Suppress("DEPRECATION") // Internal use: routes address change through AIDL binder
             service.setDeviceAddress(address)
             startService(context)
         }
@@ -185,6 +186,7 @@ class MeshService : Service() {
 
     private val binder =
         object : IMeshService.Stub() {
+            @Suppress("OVERRIDE_DEPRECATION")
             override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
                 Logger.d { "Passing through device change to radio service: ${deviceAddr?.take(8)}..." }
                 router.actionHandler.handleUpdateLastAddress(deviceAddr)
@@ -195,10 +197,12 @@ class MeshService : Service() {
                 serviceBroadcasts.subscribeReceiver(receiverName, packageName)
             }
 
+            @Suppress("OVERRIDE_DEPRECATION")
             override fun getUpdateStatus(): Int = -4
 
+            @Suppress("OVERRIDE_DEPRECATION")
             override fun startFirmwareUpdate() {
-                // Not implemented yet
+                // No-op: firmware update is handled by the in-app OTA system.
             }
 
             override fun getMyNodeInfo(): MyNodeInfo? = nodeManager.getMyNodeInfo()

@@ -55,12 +55,16 @@ Current reusable check workflow includes:
 - `spotlessCheck detekt`
 - Android lint for all directly runnable Android modules:
   `app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug mesh_service_example:lintDebug`
+  *(Note: `mesh_service_example:lintDebug` is temporary — the module is deprecated and will be
+  removed along with its CI tasks in a future release.)*
 - Host tests plus coverage aggregation:
   `test koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug core:api:koverXmlReportDebug core:barcode:koverXmlReportFdroidDebug core:barcode:koverXmlReportGoogleDebug mesh_service_example:koverXmlReportDebug desktop:koverXmlReport`
+  *(Note: `mesh_service_example:koverXmlReportDebug` is temporary — see above.)*
 - KMP smoke compile lifecycle task (auto-discovers KMP modules and runs JVM + iOS simulator compile checks):
   `kmpSmokeCompile`
 - Android build tasks:
   `app:assembleFdroidDebug app:assembleGoogleDebug mesh_service_example:assembleDebug`
+  *(Note: `mesh_service_example:assembleDebug` is temporary — see above.)*
 - Instrumented tests (when emulator tests are enabled):
   `app:connectedFdroidDebugAndroidTest app:connectedGoogleDebugAndroidTest core:barcode:connectedFdroidDebugAndroidTest core:barcode:connectedGoogleDebugAndroidTest`
 - Coverage uploads happen once from the host job; instrumented test results upload once from the first Android matrix API to avoid duplicate reporting.
@@ -70,7 +74,7 @@ Reference: `.github/workflows/reusable-check.yml`
 PR workflow note:
 
 - `.github/workflows/pull-request.yml` ignores docs-only changes (`**/*.md`, `docs/**`), so doc-only PRs may skip Android CI by design.
-- PR change detection includes workflow/build/config paths such as `.github/workflows/**`, `desktop/**`, `mesh_service_example/**`, `config/**`, `gradle/**`, `settings.gradle.kts`, and `test.gradle.kts`.
+- PR change detection includes workflow/build/config paths such as `.github/workflows/**`, `desktop/**`, `mesh_service_example/**` (deprecated, will be removed), `config/**`, `gradle/**`, `settings.gradle.kts`, and `test.gradle.kts`.
 - Android CI on PRs runs with `run_instrumented_tests: false`; merge queue keeps the full emulator matrix on API 26 and 35.
 - Gradle cache writes are enabled for trusted refs/events (`main`, `merge_group`, and `gh-readonly-queue/*`); other refs run in read-only cache mode.
 

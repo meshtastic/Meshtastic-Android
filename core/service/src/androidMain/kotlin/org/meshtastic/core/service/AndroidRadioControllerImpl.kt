@@ -196,6 +196,7 @@ class AndroidRadioControllerImpl(
     }
 
     override fun setDeviceAddress(address: String) {
+        @Suppress("DEPRECATION") // Internal use: routes address change through AIDL binder
         serviceRepository.meshService?.setDeviceAddress(address)
         // Ensure service is running/restarted to handle the new address
         val intent =
