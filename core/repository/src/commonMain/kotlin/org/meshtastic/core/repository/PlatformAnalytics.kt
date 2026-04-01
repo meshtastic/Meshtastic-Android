@@ -33,6 +33,26 @@ interface PlatformAnalytics {
     fun setDeviceAttributes(firmwareVersion: String, model: String)
 
     /**
+     * Tracks a successful device connection as a custom RUM action, aligned with the Meshtastic-Apple DataDog
+     * integration for cross-platform analytics comparison.
+     *
+     * @param firmwareVersion The firmware version of the connected device (major.minor).
+     * @param transportType The transport used for the connection (e.g., "BLE", "TCP", "USB").
+     * @param hardwareModel The hardware model name of the connected device.
+     * @param nodes The total number of nodes in the mesh network.
+     * @param connectionRestored True if this connection was restored from device sleep rather than a fresh connect.
+     */
+    fun trackConnect(
+        firmwareVersion: String?,
+        transportType: String?,
+        hardwareModel: String?,
+        nodes: Int,
+        connectionRestored: Boolean,
+    ) {
+        // Default no-op for platforms that don't support RUM (fdroid, desktop)
+    }
+
+    /**
      * Indicates whether platform-specific services (like Google Play Services or Datadog) are available and
      * initialized.
      */

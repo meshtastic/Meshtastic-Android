@@ -12,7 +12,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 - **Target SDK:** API 36. Min SDK: API 26 (Android 8.0).
 - **Flavors:**
   - `fdroid`: Open source only, no tracking/analytics.
-  - `google`: Includes Google Play Services (Maps) and DataDog analytics.
+  - `google`: Includes Google Play Services (Maps) and DataDog analytics (RUM, Session Replay, Compose action tracking, custom `connect` RUM action). 100% sampling, Apple-parity environments ("Local"/"Production").
 - **Core Architecture:** Modern Android Development (MAD) with KMP core.
   - **KMP Modules:** Most `core:*` modules. All declare `jvm()`, `iosArm64()`, and `iosSimulatorArm64()` targets and compile clean across all.
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.

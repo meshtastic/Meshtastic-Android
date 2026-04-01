@@ -33,6 +33,7 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
@@ -88,6 +89,7 @@ class MeshConnectionManagerImpl(
     private var locationRequestsJob: Job? = null
     private var handshakeTimeout: Job? = null
     private var connectTimeMsec = 0L
+    private var connectionRestored = false
 
     @OptIn(FlowPreview::class)
     override fun start(scope: CoroutineScope) {
@@ -169,6 +171,9 @@ class MeshConnectionManagerImpl(
     }
 
     private fun handleConnected() {
+        // Track whether this connection was restored from device sleep (vs. a fresh connect),
+        // matching Apple's "connectionRestored" attribute for cross-platform DataDog parity.
+        connectionRestored = serviceRepository.connectionState.value is ConnectionState.DeviceSleep
         // The service state remains 'Connecting' until config is fully loaded
         if (serviceRepository.connectionState.value != ConnectionState.Connected) {
             serviceRepository.setConnectionState(ConnectionState.Connecting)
@@ -181,22 +186,25 @@ class MeshConnectionManagerImpl(
 
     private fun startHandshakeStallGuard(stage: Int, action: () -> Unit) {
         handshakeTimeout?.cancel()
-        handshakeTimeout = scope.handledLaunch {
-            delay(HANDSHAKE_TIMEOUT)
-            if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
-                // Attempt one retry. Note: the firmware silently drops identical consecutive
-                // writes (per-connection dedup). If the first want_config_id was received and
-                // the stall is on our side, the retry will be dropped and the reconnect below
-                // will trigger instead — which is the right recovery in that case.
-                Logger.w { "Handshake stall detected at Stage $stage — retrying, then reconnecting if still stalled." }
-                action()
-                delay(HANDSHAKE_RETRY_TIMEOUT)
+        handshakeTimeout =
+            scope.handledLaunch {
+                delay(HANDSHAKE_TIMEOUT)
                 if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
-                    Logger.e { "Handshake still stalled after retry. Forcing reconnect." }
-                    onConnectionChanged(ConnectionState.Disconnected)
+                    // Attempt one retry. Note: the firmware silently drops identical consecutive
+                    // writes (per-connection dedup). If the first want_config_id was received and
+                    // the stall is on our side, the retry will be dropped and the reconnect below
+                    // will trigger instead — which is the right recovery in that case.
+                    Logger.w {
+                        "Handshake stall detected at Stage $stage — retrying, then reconnecting if still stalled."
+                    }
+                    action()
+                    delay(HANDSHAKE_RETRY_TIMEOUT)
+                    if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
+                        Logger.e { "Handshake still stalled after retry. Forcing reconnect." }
+                        onConnectionChanged(ConnectionState.Disconnected)
+                    }
                 }
             }
-        }
     }
 
     private fun handleDeviceSleep() {
@@ -215,18 +223,19 @@ class MeshConnectionManagerImpl(
             )
         }
 
-        sleepTimeout = scope.handledLaunch {
-            try {
-                val localConfig = radioConfigRepository.localConfigFlow.first()
-                val timeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
-                Logger.d { "Waiting for sleeping device, timeout=$timeout secs" }
-                delay(timeout.seconds)
-                Logger.w { "Device timeout out, setting disconnected" }
-                onConnectionChanged(ConnectionState.Disconnected)
-            } catch (_: CancellationException) {
-                Logger.d { "device sleep timeout cancelled" }
+        sleepTimeout =
+            scope.handledLaunch {
+                try {
+                    val localConfig = radioConfigRepository.localConfigFlow.first()
+                    val timeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
+                    Logger.d { "Waiting for sleeping device, timeout=$timeout secs" }
+                    delay(timeout.seconds)
+                    Logger.w { "Device timeout out, setting disconnected" }
+                    onConnectionChanged(ConnectionState.Disconnected)
+                } catch (_: CancellationException) {
+                    Logger.d { "device sleep timeout cancelled" }
+                }
             }
-        }
 
         serviceBroadcasts.broadcastConnection()
     }
@@ -321,6 +330,16 @@ class MeshConnectionManagerImpl(
             DataPair(KEY_NUM_NODES, nodeManager.nodeDBbyNodeNum.size),
             DataPair(KEY_NUM_ONLINE, nodeManager.nodeDBbyNodeNum.values.count { it.isOnline }),
             radioModel,
+        )
+
+        // DataDog RUM custom action matching Apple's "connect" event for cross-platform analytics.
+        val transportType = radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it)?.name }
+        analytics.trackConnect(
+            firmwareVersion = myNode?.firmwareVersion,
+            transportType = transportType,
+            hardwareModel = myNode?.model,
+            nodes = nodeManager.nodeDBbyNodeNum.size,
+            connectionRestored = connectionRestored,
         )
     }
 
