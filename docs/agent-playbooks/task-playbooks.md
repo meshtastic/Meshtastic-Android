@@ -28,7 +28,7 @@ Key files for discovering established patterns:
 5. Verify no hardcoded user-facing strings were introduced.
 
 Reference examples:
-- `feature/node/src/androidMain/kotlin/org/meshtastic/feature/node/list/NodeListScreen.kt`
+- `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/list/NodeListScreen.kt`
 - `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/AlertDialogs.kt`
 
 ## Playbook B: Add shared ViewModel logic in a feature module
@@ -36,13 +36,13 @@ Reference examples:
 1. Implement or extend base ViewModel logic in `feature/<name>/src/commonMain/...`.
 2. Keep shared class free of Android framework dependencies.
 3. Keep Android framework dependencies out of shared logic; if the module already uses Koin annotations in `commonMain`, keep patterns consistent and ensure app root inclusion.
-4. Update shared navigation entry points in `feature/*/src/commonMain/kotlin/org/meshtastic/feature/*/navigation/...` to resolve ViewModels with `koinViewModel()`.
+4. Update navigation entry points in `feature/*/src/androidMain/kotlin/org/meshtastic/feature/*/navigation/...` to resolve ViewModels with `koinViewModel()`.
 
 Reference examples:
 - Shared base: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt`
-- Shared base UI ViewModel: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/BaseUIViewModel.kt`
+- Shared base UI ViewModel: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/UIViewModel.kt`
 - Navigation usage: `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
-- Desktop navigation usage: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopSettingsNavigation.kt`
+- Desktop navigation usage: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
 
 ## Playbook C: Add a new dependency or service binding
 
@@ -67,8 +67,7 @@ Reference examples:
 
 Reference examples:
 - Shared graph wiring: `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
-- Shared graph content: `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
-- Android-specific content actual: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsMainScreen.kt`
+- Android specific content: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsMainScreen.kt`
 - Desktop specific content: `feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsMainScreen.kt`
 - Feature intro graph pattern: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/IntroNavGraph.kt`
 - Desktop nav shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
@@ -95,7 +94,7 @@ Reference examples:
 4. Add `kotlinx-coroutines-swing` (JVM/Desktop) or the equivalent platform coroutines dispatcher module. Without it, `Dispatchers.Main` is unavailable and any code using `lifecycle.coroutineScope` will crash at runtime.
 5. Progressively replace stubs with real implementations (e.g., serial transport for desktop, CoreBluetooth for iOS).
 6. Add `<platform>()` target to feature modules as needed (all `core:*` modules already declare `jvm()`).
-7. Ensure the new module applies the expected KMP convention plugin so root `kmpSmokeCompile` auto-discovers and validates it in CI.
+7. Update CI JVM smoke compile step in `.github/workflows/reusable-check.yml` to include new modules.
 8. If `commonMain` code fails to compile for the new target, it's a KMP migration debt — fix the shared code, not the target.
 
 Reference examples:

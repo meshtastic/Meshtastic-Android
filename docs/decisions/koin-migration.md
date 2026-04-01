@@ -8,7 +8,7 @@ Hilt (Dagger) was the strongest remaining barrier to KMP adoption — it require
 
 ## Decision
 
-Migrated to **Koin 4.2.0-RC1** with the **K2 Compiler Plugin** (`io.insert-koin.compiler.plugin`) and later upgraded to **0.4.0**.
+Migrated to **Koin 4.2.0-RC1** with the **K2 Compiler Plugin** (`io.insert-koin.compiler.plugin`) and later upgraded to **0.4.1**.
 
 Key choices:
 - `@KoinViewModel` replaces `@HiltViewModel`; `koinViewModel()` replaces `hiltViewModel()`
@@ -16,7 +16,7 @@ Key choices:
 - `@KoinWorker` replaces `@HiltWorker` for WorkManager
 - `@InjectedParam` replaces `@Assisted` for factory patterns
 - Root graph assembly centralized in `AppKoinModule`; shared modules expose annotated definitions
-- **Koin 0.4.0 A1 Compile Safety Disabled:** Meshtastic heavily utilizes dependency inversion across KMP modules (e.g., interfaces defined in `core:repository` are implemented in `core:data`). Koin 0.4.0's per-module A1 validation strictly enforces that all dependencies must be explicitly provided or included locally, breaking this clean architecture. We have globally disabled A1 `compileSafety` in `KoinConventionPlugin` to properly rely on Koin's A3 full-graph validation at the composition root (`startKoin`).
+- **Koin 0.4.1 A1 Compile Safety Disabled:** Meshtastic heavily utilizes dependency inversion across KMP modules (e.g., interfaces defined in `core:repository` are implemented in `core:data`). Koin 0.4.x's per-module A1 validation strictly enforces that all dependencies must be explicitly provided or included locally, breaking this clean architecture. We have globally disabled A1 `compileSafety` in `KoinConventionPlugin` to properly rely on Koin's A3 full-graph validation at the composition root (`startKoin`).
 
 ## Gotchas Discovered
 

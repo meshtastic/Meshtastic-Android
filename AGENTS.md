@@ -18,7 +18,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
   - **UI:** Jetpack Compose Multiplatform (Material 3).
   - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` and `desktop`.
-  - **Navigation:** JetBrains Navigation 3 (Stable Scene-based architecture) with shared backstack state. Deep linking uses RESTful paths (e.g. `/nodes/1234`) parsed by `DeepLinkRouter` in `core:navigation`.
+  - **Navigation:** JetBrains Navigation 3 (Scene-based architecture) with shared backstack state. Deep linking uses RESTful paths (e.g. `/nodes/1234`) parsed by `DeepLinkRouter` in `core:navigation`.
   - **Lifecycle:** JetBrains multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
   - **Adaptive UI:** Material 3 Adaptive (v1.3+) with support for Large (1200dp) and Extra-large (1600dp) breakpoints.
   - **Database:** Room KMP.
@@ -74,8 +74,8 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
     -   `java.util.Locale` → Kotlin `uppercase()` / `lowercase()` or `expect`/`actual`.
     -   `java.util.concurrent.ConcurrentHashMap` → `atomicfu` or `Mutex`-guarded `mutableMapOf()`.
     -   `java.util.concurrent.locks.*` → `kotlinx.coroutines.sync.Mutex`.
-    -   `java.io.*` → Okio (`BufferedSource`/`BufferedSink`).
-    -   `kotlinx.coroutines.Dispatchers.IO` → `org.meshtastic.core.common.util.ioDispatcher` (expect/actual).
+    -   `java.io.*` → Okio (`BufferedSource`/`BufferedSink`). Note: JetBrains now recommends `kotlinx-io` as the official Kotlin I/O library (built on Okio). This project standardizes on Okio directly; do not migrate without explicit decision.
+    -   `kotlinx.coroutines.Dispatchers.IO` → `org.meshtastic.core.common.util.ioDispatcher` (expect/actual). Note: `Dispatchers.IO` is available in `commonMain` since kotlinx.coroutines 1.8.0, but this project uses the `ioDispatcher` wrapper for consistency.
 -   **Shared helpers over duplicated lambdas:** When `androidMain` and `jvmMain` contain identical pure-Kotlin logic (formatting, action dispatch, validation), extract it to a function in `commonMain`. Examples: `formatLogsTo()` in `feature:settings`, `handleNodeAction()` in `feature:node`, `findNodeByNameSuffix()` in `feature:connections`, `MeshtasticAppShell` in `core:ui/commonMain`, and `BaseRadioTransportFactory` in `core:network/commonMain`.
 -   **KMP file naming:** In KMP modules, `commonMain` and platform source sets (`androidMain`, `jvmMain`) share the same package namespace. If both contain a file with the same name (e.g., `LogExporter.kt`), the Kotlin/JVM compiler will produce a duplicate class error. Use distinct filenames: keep the `expect` declaration in `LogExporter.kt` and put shared helpers in a separate file like `LogFormatter.kt`.
 -   **`jvmAndroidMain` source set:** Modules that share JVM-specific code between Android and Desktop apply the `meshtastic.kmp.jvm.android` convention plugin. This creates a `jvmAndroidMain` source set via Kotlin's hierarchy template API. Used in `core:common`, `core:model`, `core:data`, `core:network`, and `core:ui`.

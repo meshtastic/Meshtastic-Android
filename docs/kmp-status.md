@@ -47,8 +47,8 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `feature:node` | ✅ | ✅ Adaptive list-detail; fully shared `nodesGraph`, `PositionLogScreen`, and `NodeContextMenu` |
 | `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; fully shared `contactsGraph`, `MessageScreen`, `ContactsScreen`, and `MessageListPaged` |
 | `feature:connections` | ✅ | ✅ Shared `ConnectionsScreen` with dynamic transport detection |
-| `feature:intro` | ✅ | — |
-| `feature:map` | ✅ | Placeholder; shared `NodeMapViewModel` |
+| `feature:intro` | — | — | Screens remain in `androidMain`; shared ViewModel only |
+| `feature:map` | — | Placeholder; shared `NodeMapViewModel` and `BaseMapViewModel` only |
 | `feature:firmware` | ✅ | ✅ Fully KMP: Unified OTA, native Secure DFU, USB/UF2, FirmwareRetriever |
 | `feature:widget` | ❌ | — | Android-only (Glance appwidgets). Intentional. |
 
@@ -72,7 +72,7 @@ Working Compose Desktop application with:
 | Area | Score | Notes |
 |---|---|---|
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
-| Shared feature/UI logic | **9.5/10** | All 8 KMP feature modules share UI in commonMain; firmware fully migrated to pure KMP with native Secure DFU |
+| Shared feature/UI logic | **9/10** | 8 KMP feature modules; firmware fully migrated; `feature:intro` and `feature:map` share ViewModels but UI remains in `androidMain` |
 | Android decoupling | **9/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation, connections, background services, and widgets extracted) |
 | Multi-target readiness | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
@@ -87,7 +87,7 @@ Working Compose Desktop application with:
 |---|---:|
 | Android-first structural KMP | ~100% |
 | Shared business logic | ~98% |
-| Shared feature/UI | ~97% |
+| Shared feature/UI | ~92% |
 | True multi-target readiness | ~85% |
 | "Add iOS without surprises" | ~100% |
 
@@ -114,12 +114,12 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | **Transport Lifecycle Unification** | ✅ Done | `SharedRadioInterfaceService` orchestrates auto-reconnect, connection state, and heartbeat uniformly across Android and Desktop. |
 | **Database Parity** | ✅ Done | `DatabaseManager` is pure KMP, giving iOS and Desktop support for multiple connected nodes with LRU caching. |
 | Emoji picker unification | ✅ Done | Single commonMain implementation replacing 3 platform variants |
-| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `AdaptiveListDetailScaffold`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BleRadioInterface`, and `BaseRadioTransportFactory` to `commonMain`; eliminated ~1,200 lines of duplicated Compose UI code across Android/desktop |
+| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `MeshtasticNavDisplay`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BleRadioInterface`, and `BaseRadioTransportFactory` to `commonMain`; eliminated ~1,200 lines of duplicated Compose UI code across Android/desktop |
 
 ## Navigation Parity Note
 
 - Desktop and Android both use the shared `TopLevelDestination` enum from `core:navigation/commonMain` — no separate `DesktopDestination` remains.
-- Both shells utilize the stable **Navigation 3 Scene-based architecture**, allowing for multi-pane layouts (e.g., three-pane on Large/XL displays) using shared routes.
+- Both shells utilize the **Navigation 3 Scene-based architecture**, allowing for multi-pane layouts (e.g., three-pane on Large/XL displays) using shared routes.
 - Both shells iterate `TopLevelDestination.entries` with shared icon mapping from `core:ui` (`TopLevelDestinationExt.icon`).
 - Desktop locale changes now trigger a full subtree recomposition from `Main.kt` without resetting the shared Navigation 3 backstack, so translated labels update in place.
 - Firmware remains available as an in-flow route instead of a top-level destination, matching Android information architecture.
