@@ -75,7 +75,6 @@ import org.meshtastic.core.resources.firmware_update_updating
 import org.meshtastic.core.resources.firmware_update_validating
 import org.meshtastic.core.resources.unknown
 
-private const val DFU_RECONNECT_PREFIX = "x"
 private const val PERCENT_MAX_VALUE = 100f
 private const val DEVICE_DETACH_TIMEOUT = 30_000L
 private const val VERIFY_TIMEOUT = 60_000L
@@ -218,7 +217,7 @@ class FirmwareUpdateViewModel(
     fun startUpdate() {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
-        originalDeviceAddress = currentState.address
+        originalDeviceAddress = radioPrefs.devAddr.value
 
         viewModelScope.launch {
             if (checkBatteryLevel()) {
@@ -285,7 +284,7 @@ class FirmwareUpdateViewModel(
             _state.value = FirmwareUpdateState.Error(UiText.Resource(Res.string.firmware_update_no_device))
             return
         }
-        originalDeviceAddress = currentState.address
+        originalDeviceAddress = radioPrefs.devAddr.value
 
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
@@ -427,10 +426,10 @@ class FirmwareUpdateViewModel(
     private suspend fun verifyUpdateResult(address: String?) {
         _state.value = FirmwareUpdateState.Verifying
 
-        // Trigger a fresh connection attempt by MeshService
-        address?.let { currentAddr ->
-            Logger.i { "Post-update: Requesting MeshService to reconnect to $currentAddr" }
-            radioController.setDeviceAddress("$DFU_RECONNECT_PREFIX$currentAddr")
+        // Trigger a fresh connection attempt by MeshService using the original prefixed address
+        address?.let { fullAddr ->
+            Logger.i { "Post-update: Requesting MeshService to reconnect to $fullAddr" }
+            radioController.setDeviceAddress(fullAddr)
         }
 
         // Wait for device to reconnect and settle
