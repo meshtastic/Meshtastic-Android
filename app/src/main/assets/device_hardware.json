@@ -1237,6 +1237,22 @@
     ]
   },
   {
+    "hwModel": 112,
+    "hwModelSlug": "M5STACK_CARDPUTER_ADV",
+    "platformioTarget": "m5stack-cardputer-adv",
+    "architecture": "esp32s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Cardputer Adv",
+    "tags": [
+      "M5Stack"
+    ],
+    "images": [
+      "m5stack_cardputer.svg"
+    ],
+    "partitionScheme": "8MB"
+  },
+  {
     "hwModel": 113,
     "hwModelSlug": "HELTEC_WIRELESS_TRACKER_V2",
     "platformioTarget": "heltec-wireless-tracker-v2",
