@@ -128,6 +128,7 @@
     <string name="match_all">Corresponda a Todos | Qualquer</string>
     <string name="debug_clear_logs_confirm">Isto removerá todos os pacotes de log e entradas de banco de dados do seu dispositivo - É uma redefinição completa e permanente.</string>
     <string name="clear">Limpar</string>
+    <string name="channel_label">Canal</string>
     <string name="message_delivery_status">Status de entrega de mensagem</string>
     <string name="meshtastic_messages_notifications">Notificações de mensagem direta</string>
     <string name="meshtastic_broadcast_notifications">Notificações de mensagem transmitida</string>

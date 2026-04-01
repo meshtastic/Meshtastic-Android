@@ -184,6 +184,7 @@
     <string name="debug_filter_show_ignored">Показати лише ігноровані вузли</string>
     <string name="debug_clear">Очистити журнал</string>
     <string name="clear">Очистити</string>
+    <string name="channel_label">Канал</string>
     <string name="message_delivery_status">Статус доставки повідомлень</string>
     <string name="new_messages_below">Нові повідомлення нище</string>
     <string name="meshtastic_messages_notifications">Сповіщення особистих повідомлень</string>

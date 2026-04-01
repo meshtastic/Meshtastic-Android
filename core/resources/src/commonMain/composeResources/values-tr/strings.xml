@@ -120,6 +120,7 @@
     <string name="debug_search_clear">Aramayı sil</string>
     <string name="debug_filter_add">Filtre ekle</string>
     <string name="clear">Temizle</string>
+    <string name="channel_label">Kanal</string>
     <string name="message_delivery_status">Mesaj teslim durumu</string>
     <string name="meshtastic_alerts_notifications">Uyarı bildirimleri</string>
     <string name="firmware_too_old">Yazılım güncellemesi gerekiyor.</string>

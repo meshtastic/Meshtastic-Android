@@ -151,6 +151,7 @@
     <string name="channel_invalid">Ова URL адреса канала је неважећа и не може се користити</string>
     <string name="debug_panel">Панел за отклањање грешака</string>
     <string name="clear">Очисти</string>
+    <string name="channel_label">Канал</string>
     <string name="message_delivery_status">Статус пријема поруке</string>
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="firmware_too_old">Ажурирање фирмвера је неопходно.</string>

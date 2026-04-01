@@ -245,6 +245,8 @@
     <string name="match_all">匹配所有 | 任意</string>
     <string name="debug_clear_logs_confirm">这将从您的设备中移除所有日志数据包和数据库条目 - 完整重置，永久失去所有内容。</string>
     <string name="clear">清除</string>
+    <string name="channel_label">频道</string>
+    <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="message_delivery_status">消息传递状态</string>
     <string name="new_messages_below">新消息</string>
     <string name="meshtastic_messages_notifications">私信提醒</string>

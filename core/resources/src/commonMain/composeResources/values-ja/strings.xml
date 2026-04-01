@@ -206,6 +206,7 @@
     <string name="debug_store_logs_summary">無効にすると、メッシュログをファイルに保存することがスキップされます</string>
     <string name="debug_clear">ログをクリア</string>
     <string name="clear">削除</string>
+    <string name="channel_label">チャンネル</string>
     <string name="message_delivery_status">メッセージ配信状況</string>
     <string name="meshtastic_alerts_notifications">アラート通知</string>
     <string name="firmware_too_old">ファームウェアの更新が必要です。</string>

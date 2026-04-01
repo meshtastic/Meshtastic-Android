@@ -224,6 +224,7 @@
     <string name="match_all">Dopasuj Wszystkie | Dowolne</string>
     <string name="debug_clear_logs_confirm">Spowoduje to usunięcie wszystkich pakietów logów i wpisów do bazy danych z twojego urządzenia — jest to pełen reset i jest nieodwracalny.</string>
     <string name="clear">Czyść</string>
+    <string name="channel_label">Kanał</string>
     <string name="message_delivery_status">Status doręczenia wiadomości</string>
     <string name="new_messages_below">Nowe wiadomości poniżej</string>
     <string name="meshtastic_messages_notifications">Powiadomienia o bezpośredniej wiadomości</string>

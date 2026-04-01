@@ -240,6 +240,7 @@
     <string name="match_all">Correspondre à tout | N'importe quel</string>
     <string name="debug_clear_logs_confirm">Cela supprimera tous les paquets de journaux et les entrées de la base de données de votre appareil - c'est une réinitialisation complète, et est permanent.</string>
     <string name="clear">Effacer</string>
+    <string name="channel_label">Canal</string>
     <string name="message_delivery_status">Statut d'envoi du message</string>
     <string name="new_messages_below">Nouveaux messages au-dessous</string>
     <string name="meshtastic_messages_notifications">Notifications de message</string>

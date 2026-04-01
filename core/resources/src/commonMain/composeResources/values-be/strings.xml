@@ -116,6 +116,7 @@
     <string name="debug_active_filters">Уключаныя фільтры</string>
     <string name="debug_filter_add">Дадаць фільтр</string>
     <string name="clear">Скінуць</string>
+    <string name="channel_label">Канал</string>
     <string name="okay">Добра</string>
     <string name="must_set_region">Трэба наладзіць рэгіён!</string>
     <string name="reset">Скінуць</string>

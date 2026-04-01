@@ -235,6 +235,7 @@
     <string name="match_all">Potrivire toate | oricare</string>
     <string name="debug_clear_logs_confirm">Aceasta va șterge toate pachetele de jurnal și intrările din baza de date de pe dispozitivul dvs. - Este o resetare completă și este permanentă.</string>
     <string name="clear">Șterge</string>
+    <string name="channel_label">Canal</string>
     <string name="message_delivery_status">Status livrare mesaj</string>
     <string name="new_messages_below">Mesaje noi mai jos</string>
     <string name="meshtastic_messages_notifications">Notificări mesaje directe</string>

@@ -137,6 +137,7 @@
     <string name="channel_invalid">O Link Deste Canal é inválido e não pode ser usado</string>
     <string name="debug_panel">Painel de depuração</string>
     <string name="clear">Limpar</string>
+    <string name="channel_label">Canal</string>
     <string name="message_delivery_status">Estado da entrega</string>
     <string name="meshtastic_alerts_notifications">Notificações de alerta</string>
     <string name="firmware_too_old">Necessário atualização de firmware.</string>

@@ -207,6 +207,7 @@
     <string name="match_all">Coincidir todo | Cualquiera</string>
     <string name="debug_clear_logs_confirm">Esto eliminará todos los paquetes de registro y las entradas de la base de datos de su dispositivo - Es un reinicio completo, y es permanente.</string>
     <string name="clear">Limpiar</string>
+    <string name="channel_label">Canal</string>
     <string name="message_delivery_status">Estado de entrega del mensaje</string>
     <string name="new_messages_below">Nuevos mensajes abajo</string>
     <string name="meshtastic_messages_notifications">Notificaciones de mensajes directos</string>

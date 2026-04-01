@@ -1306,7 +1306,7 @@
     "hwModelSlug": "THINKNODE_M4",
     "platformioTarget": "thinknode_m4",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "ThinkNode M4",
     "tags": [
@@ -1322,7 +1322,7 @@
     "hwModelSlug": "THINKNODE_M6",
     "platformioTarget": "thinknode_m6",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "ThinkNode M6",
     "tags": [

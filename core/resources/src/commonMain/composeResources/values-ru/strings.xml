@@ -253,6 +253,8 @@
     <string name="match_all">Совпадение всех | Любой</string>
     <string name="debug_clear_logs_confirm">Это удалит все пакеты журналов и записи базы данных с вашего устройства. Это — полный сброс, и он необратим.</string>
     <string name="clear">Очистить</string>
+    <string name="channel_label">Канал</string>
+    <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="message_delivery_status">Статус доставки сообщения</string>
     <string name="new_messages_below">Новые сообщения ниже</string>
     <string name="meshtastic_messages_notifications">Уведомления о личных сообщениях</string>
