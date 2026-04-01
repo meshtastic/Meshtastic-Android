@@ -161,7 +161,7 @@ class MeshServiceOrchestratorTest {
 
         // Toggle on
         takEnabledFlow.value = true
-        verify { takServerManager.start(any(), any()) }
+        verify { takServerManager.start(any()) }
 
         // Update mock state to reflect it's running
         takRunningFlow.value = true
