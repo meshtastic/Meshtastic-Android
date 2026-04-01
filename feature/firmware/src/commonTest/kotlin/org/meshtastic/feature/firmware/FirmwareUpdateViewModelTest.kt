@@ -35,7 +35,6 @@ import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -56,7 +55,6 @@ import kotlin.test.assertTrue
 class FirmwareUpdateViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
 
     private val firmwareReleaseRepository: FirmwareReleaseRepository = mock(MockMode.autofill)
     private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
@@ -103,9 +101,6 @@ class FirmwareUpdateViewModelTest {
         every { fileHandler.cleanupAllTemporaryFiles() } returns Unit
         everySuspend { fileHandler.deleteFile(any()) } returns Unit
 
-        // Setup manager
-        everySuspend { firmwareUpdateManager.dfuProgressFlow() } returns flowOf()
-
         viewModel = createViewModel()
     }
 
@@ -124,7 +119,6 @@ class FirmwareUpdateViewModelTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
-        dispatchers,
     )
 
     @Test

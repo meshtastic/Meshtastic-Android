@@ -41,6 +41,7 @@ sealed interface FirmwareUpdateState {
     data class Ready(
         val release: FirmwareRelease?,
         val deviceHardware: DeviceHardware,
+        /** Bare device address with the `InterfaceId` transport prefix stripped (e.g. MAC or IP). */
         val address: String,
         val showBootloaderWarning: Boolean,
         val updateMethod: FirmwareUpdateMethod,
@@ -63,3 +64,8 @@ sealed interface FirmwareUpdateState {
 
     data class AwaitingFileSave(val uf2Artifact: FirmwareArtifact, val fileName: String) : FirmwareUpdateState
 }
+
+private val FORMAT_ARG_REGEX = Regex(":?\\s*%1\\\$d%?")
+
+/** Strip positional format arguments (e.g. `%1$d`) from a localized template to get a clean base message. */
+internal fun String.stripFormatArgs(): String = replace(FORMAT_ARG_REGEX, "").trim()

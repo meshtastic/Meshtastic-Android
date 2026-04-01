@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.firmware
 
-import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -59,8 +58,6 @@ class DefaultFirmwareUpdateManager(
         )
     }
 
-    override fun dfuProgressFlow(): Flow<DfuInternalState> = secureDfuHandler.progressFlow
-
     private fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> {
             if (hardware.isEsp32Arc) {
@@ -91,14 +88,7 @@ class DefaultFirmwareUpdateManager(
     private fun getTarget(address: String): String = when {
         radioPrefs.isSerial() -> ""
         radioPrefs.isBle() -> address
-        radioPrefs.isTcp() -> extractIpFromAddress(radioPrefs.devAddr.value) ?: ""
+        radioPrefs.isTcp() -> address
         else -> ""
     }
-
-    private fun extractIpFromAddress(address: String?): String? =
-        if (address != null && address.startsWith("t") && address.length > 1) {
-            address.substring(1)
-        } else {
-            null
-        }
 }

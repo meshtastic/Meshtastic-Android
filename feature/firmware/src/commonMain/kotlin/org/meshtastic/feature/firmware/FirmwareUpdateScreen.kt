@@ -166,7 +166,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
     }
 
     val actions =
-        remember(viewModel, onNavigateUp, state) {
+        remember(viewModel, onNavigateUp) {
             FirmwareUpdateActions(
                 onReleaseTypeSelect = viewModel::setReleaseType,
                 onStartUpdate = viewModel::startUpdate,
@@ -305,34 +305,33 @@ private fun FirmwareUpdateContent(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
-        content = {
-            when (state) {
-                is FirmwareUpdateState.Idle,
-                FirmwareUpdateState.Checking,
-                -> CheckingState()
+    ) {
+        when (state) {
+            is FirmwareUpdateState.Idle,
+            FirmwareUpdateState.Checking,
+            -> CheckingState()
 
-                is FirmwareUpdateState.Ready ->
-                    ReadyState(state = state, selectedReleaseType = selectedReleaseType, actions = actions)
+            is FirmwareUpdateState.Ready ->
+                ReadyState(state = state, selectedReleaseType = selectedReleaseType, actions = actions)
 
-                is FirmwareUpdateState.Downloading ->
-                    ProgressContent(state.progressState, onCancel = actions.onCancel, isDownloading = true)
+            is FirmwareUpdateState.Downloading ->
+                ProgressContent(state.progressState, onCancel = actions.onCancel, isDownloading = true)
 
-                is FirmwareUpdateState.Processing -> ProgressContent(state.progressState, onCancel = actions.onCancel)
+            is FirmwareUpdateState.Processing -> ProgressContent(state.progressState, onCancel = actions.onCancel)
 
-                is FirmwareUpdateState.Updating ->
-                    ProgressContent(state.progressState, onCancel = actions.onCancel, isUpdating = true)
+            is FirmwareUpdateState.Updating ->
+                ProgressContent(state.progressState, onCancel = actions.onCancel, isUpdating = true)
 
-                is FirmwareUpdateState.Verifying -> VerifyingState()
-                is FirmwareUpdateState.VerificationFailed ->
-                    VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
+            is FirmwareUpdateState.Verifying -> VerifyingState()
+            is FirmwareUpdateState.VerificationFailed ->
+                VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
 
-                is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
+            is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
 
-                is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
-                is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
-            }
-        },
-    )
+            is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
+            is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
+        }
+    }
 }
 
 @Composable

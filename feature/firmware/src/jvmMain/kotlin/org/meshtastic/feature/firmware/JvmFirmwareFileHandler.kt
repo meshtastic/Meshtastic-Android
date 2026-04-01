@@ -214,6 +214,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
             var entry = zipInput.nextEntry
             while (entry != null) {
                 val name = entry.name.lowercase()
+                // File(name).name strips directory components, mitigating ZipSlip attacks
                 val entryFileName = File(name).name
                 val isMatch =
                     if (preferredFilenameLower != null) {

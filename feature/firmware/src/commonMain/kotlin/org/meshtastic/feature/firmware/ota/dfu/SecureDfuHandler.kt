@@ -20,14 +20,12 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
@@ -44,13 +42,14 @@ import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_validating
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
 import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.feature.firmware.DfuInternalState
 import org.meshtastic.feature.firmware.FirmwareArtifact
 import org.meshtastic.feature.firmware.FirmwareFileHandler
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
+import org.meshtastic.feature.firmware.ota.ThroughputTracker
+import org.meshtastic.feature.firmware.stripFormatArgs
 
 private const val PERCENT_MAX = 100
 private const val GATT_RELEASE_DELAY_MS = 1_500L
@@ -58,6 +57,7 @@ private const val DFU_REBOOT_WAIT_MS = 3_000L
 private const val RETRY_DELAY_MS = 2_000L
 private const val CONNECT_ATTEMPTS = 4
 private const val MILLIS_PER_SECOND = 1000f
+private const val KIB_DIVISOR = 1024f
 
 /**
  * KMP [FirmwareUpdateHandler] for nRF52 devices using the Nordic Secure DFU protocol over Kable BLE.
@@ -72,14 +72,6 @@ class SecureDfuHandler(
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
 ) : FirmwareUpdateHandler {
-
-    private val _progressFlow = MutableSharedFlow<DfuInternalState>(extraBufferCapacity = 32)
-
-    /**
-     * Intermediate DFU states (connecting, enabling DFU mode, validating…). Terminal states (success / error) are
-     * reported via the `updateState` callback.
-     */
-    val progressFlow: Flow<DfuInternalState> = _progressFlow.asSharedFlow()
 
     @Suppress("LongMethod")
     override suspend fun startUpdate(
@@ -106,7 +98,6 @@ class SecureDfuHandler(
                 val pkg = parseDfuZipEntries(entries)
 
                 // ── 3. Disconnect mesh service, trigger buttonless DFU ───────────
-                emit(DfuInternalState.EnablingDfuMode(target))
                 updateState(
                     FirmwareUpdateState.Processing(
                         ProgressState(UiText.Resource(Res.string.firmware_update_enabling_dfu)),
@@ -139,10 +130,9 @@ class SecureDfuHandler(
                     // ── 6. Firmware ───────────────────────────────────────────────
                     val uploadMsg = UiText.Resource(Res.string.firmware_update_uploading)
                     updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f)))
-                    emit(DfuInternalState.Progress(target, 0, 0f, 0f, 1, 1))
 
                     val firmwareSize = pkg.firmware.size
-                    val throughputTracker = org.meshtastic.feature.firmware.ota.ThroughputTracker()
+                    val throughputTracker = ThroughputTracker()
 
                     transport
                         .transferFirmware(pkg.firmware) { progress ->
@@ -151,15 +141,25 @@ class SecureDfuHandler(
                             throughputTracker.record(bytesSent)
 
                             val bytesPerSec = throughputTracker.bytesPerSecond()
-                            val speedBytesPerMs = bytesPerSec.toFloat() / MILLIS_PER_SECOND
+                            val speedKib = bytesPerSec.toFloat() / MILLIS_PER_SECOND / KIB_DIVISOR
 
-                            updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, progress, "$pct%")))
-                            emit(DfuInternalState.Progress(target, pct, speedBytesPerMs, speedBytesPerMs, 1, 1))
+                            val details = buildString {
+                                append("$pct%")
+                                if (speedKib > 0f) {
+                                    val remainingBytes = firmwareSize - bytesSent
+                                    val etaSeconds = remainingBytes / (bytesPerSec.toFloat())
+                                    append(
+                                        " (${NumberFormatter.format(speedKib, 1)} " +
+                                            "KiB/s, ETA: ${etaSeconds.toInt()}s)",
+                                    )
+                                }
+                            }
+
+                            updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, progress, details)))
                         }
                         .getOrThrow()
 
                     // ── 7. Validate ───────────────────────────────────────────────
-                    emit(DfuInternalState.Validating(target))
                     updateState(
                         FirmwareUpdateState.Processing(
                             ProgressState(UiText.Resource(Res.string.firmware_update_validating)),
@@ -213,10 +213,8 @@ class SecureDfuHandler(
                     ),
                 ),
             )
-            emit(DfuInternalState.Connecting(address))
             val result = transport.connectToDfuMode()
             if (result.isSuccess) {
-                emit(DfuInternalState.Connected(address))
                 return true
             }
             Logger.w { "DFU: Connect attempt $attempt/$CONNECT_ATTEMPTS failed: ${result.exceptionOrNull()?.message}" }
@@ -235,10 +233,7 @@ class SecureDfuHandler(
             return FirmwareArtifact(uri = firmwareUri, fileName = firmwareUri.pathSegments.lastOrNull())
         }
 
-        val downloadingMsg =
-            getStringSuspend(Res.string.firmware_update_downloading_percent, 0)
-                .replace(Regex(":?\\s*%1\\\$d%?"), "")
-                .trim()
+        val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
 
         updateState(
             FirmwareUpdateState.Downloading(
@@ -264,9 +259,5 @@ class SecureDfuHandler(
             )
         }
         return path
-    }
-
-    private fun emit(state: DfuInternalState) {
-        _progressFlow.tryEmit(state)
     }
 }

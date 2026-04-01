@@ -47,10 +47,7 @@ internal suspend fun performUsbUpdate(
 ): FirmwareArtifact? {
     var cleanupArtifact: FirmwareArtifact? = null
     return try {
-        val downloadingMsg =
-            getStringSuspend(Res.string.firmware_update_downloading_percent, 0)
-                .replace(Regex(":?\\s*%1\\\$d%?"), "")
-                .trim()
+        val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
 
         updateState(
             FirmwareUpdateState.Downloading(

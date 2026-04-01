@@ -28,6 +28,4 @@ interface FirmwareUpdateManager {
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri? = null,
     ): FirmwareArtifact?
-
-    fun dfuProgressFlow(): kotlinx.coroutines.flow.Flow<DfuInternalState>
 }

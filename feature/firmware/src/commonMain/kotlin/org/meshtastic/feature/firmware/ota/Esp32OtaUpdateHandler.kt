@@ -49,6 +49,7 @@ import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
+import org.meshtastic.feature.firmware.stripFormatArgs
 
 private const val RETRY_DELAY = 2000L
 private const val PERCENT_MAX = 100
@@ -77,7 +78,7 @@ class Esp32OtaUpdateHandler(
     private val bleConnectionFactory: BleConnectionFactory,
 ) : FirmwareUpdateHandler {
 
-    /** Entry point for FirmwareUpdateHandler interface. Decides between BLE and WiFi based on target format. */
+    /** Entry point for FirmwareUpdateHandler interface. Routes to BLE (MAC with colons) or WiFi (IP without). */
     override suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
@@ -138,11 +139,11 @@ class Esp32OtaUpdateHandler(
                 cleanupArtifact = obtainFirmwareFile(release, hardware, firmwareUri, updateState)
                 val firmwareFile = cleanupArtifact ?: return@withContext null
 
-                // Step 2: Calculate Hash and Trigger Reboot
+                // Step 2: Read firmware once and calculate hash
                 val firmwareBytes = firmwareFileHandler.readBytes(firmwareFile)
                 val sha256Bytes = FirmwareHashUtil.calculateSha256Bytes(firmwareBytes)
                 val sha256Hash = FirmwareHashUtil.bytesToHex(sha256Bytes)
-                Logger.i { "ESP32 OTA: Firmware hash: $sha256Hash" }
+                Logger.i { "ESP32 OTA: Firmware hash: $sha256Hash (${firmwareBytes.size} bytes)" }
                 triggerRebootOta(rebootMode, sha256Bytes)
 
                 // Step 3: Wait for packet to be sent, then disconnect mesh service
@@ -156,7 +157,7 @@ class Esp32OtaUpdateHandler(
                 if (!connectToDevice(transport, connectionAttempts, updateState)) return@withContext null
 
                 try {
-                    executeOtaSequence(transport, firmwareFile, sha256Hash, rebootMode, updateState)
+                    executeOtaSequence(transport, firmwareBytes, sha256Hash, rebootMode, updateState)
                     firmwareFile
                 } finally {
                     transport.close()
@@ -205,10 +206,7 @@ class Esp32OtaUpdateHandler(
         firmwareUri: CommonUri?,
         updateState: (FirmwareUpdateState) -> Unit,
     ): FirmwareArtifact? {
-        val downloadingMsg =
-            getStringSuspend(Res.string.firmware_update_downloading_percent, 0)
-                .replace(Regex(":?\\s*%1\\\$d%?"), "")
-                .trim()
+        val downloadingMsg = getStringSuspend(Res.string.firmware_update_downloading_percent, 0).stripFormatArgs()
 
         updateState(
             FirmwareUpdateState.Downloading(
@@ -281,12 +279,12 @@ class Esp32OtaUpdateHandler(
     @Suppress("LongMethod")
     private suspend fun executeOtaSequence(
         transport: UnifiedOtaProtocol,
-        firmwareFile: FirmwareArtifact,
+        firmwareData: ByteArray,
         sha256Hash: String,
         rebootMode: Int,
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
-        val fileSize = firmwareFileHandler.getFileSize(firmwareFile)
+        val fileSize = firmwareData.size.toLong()
         // Step 5: Start OTA
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_ota))),
@@ -308,7 +306,6 @@ class Esp32OtaUpdateHandler(
         // Step 6: Stream
         val uploadingMsg = UiText.Resource(Res.string.firmware_update_uploading)
         updateState(FirmwareUpdateState.Updating(ProgressState(uploadingMsg, 0f)))
-        val firmwareData = firmwareFileHandler.readBytes(firmwareFile)
         val chunkSize =
             if (rebootMode == 1) {
                 BleOtaTransport.RECOMMENDED_CHUNK_SIZE

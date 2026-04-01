@@ -34,7 +34,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -56,7 +55,6 @@ import kotlin.test.assertTrue
 class FirmwareUpdateIntegrationTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
 
     private val firmwareReleaseRepository: FirmwareReleaseRepository = mock(MockMode.autofill)
     private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
@@ -87,7 +85,6 @@ class FirmwareUpdateIntegrationTest {
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
         every { fileHandler.cleanupAllTemporaryFiles() } returns Unit
         everySuspend { fileHandler.deleteFile(any()) } returns Unit
-        everySuspend { firmwareUpdateManager.dfuProgressFlow() } returns flowOf()
 
         nodeRepository.setMyNodeInfo(
             TestDataFactory.createMyNodeInfo(myNodeNum = 123, firmwareVersion = "2.4.0", pioEnv = "tbeam"),
@@ -111,7 +108,6 @@ class FirmwareUpdateIntegrationTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
-        dispatchers,
     )
 
     @Test
