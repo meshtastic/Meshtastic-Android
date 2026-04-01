@@ -2,6 +2,23 @@
 
 Use these as practical recipes. Keep edits minimal and aligned with existing module boundaries.
 
+For architecture rules and coding standards, see [`AGENTS.md`](../../AGENTS.md).
+
+## Code Anchor Quick Reference
+
+Key files for discovering established patterns:
+
+| Pattern | Reference File |
+|---|---|
+| App DI wiring | `app/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt` |
+| App startup / Koin bootstrap | `app/src/main/kotlin/org/meshtastic/app/MeshUtilApplication.kt` |
+| Shared ViewModel | `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt` |
+| `CompositionLocal` platform injection | `app/src/main/kotlin/org/meshtastic/app/MainActivity.kt` |
+| Platform abstraction contract | `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/MapViewProvider.kt` |
+| Shared strings resource | `core/resources/src/commonMain/composeResources/values/strings.xml` |
+| Okio shared I/O | `core/domain/src/commonMain/kotlin/org/meshtastic/core/domain/usecase/settings/ImportProfileUseCase.kt` |
+| `stateInWhileSubscribed` | `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/ViewModelExtensions.kt` |
+
 ## Playbook A: Add or update a user-visible string
 
 1. Add/update key in `core/resources/src/commonMain/composeResources/values/strings.xml`.

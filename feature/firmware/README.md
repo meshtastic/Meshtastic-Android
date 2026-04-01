@@ -64,7 +64,7 @@ sequenceDiagram
 ```
 
 #### 2. nRF52 BLE DFU
-The standard update method for nRF52-based devices (e.g., RAK4631). It leverages the **Nordic Semiconductor DFU library**.
+The standard update method for nRF52-based devices (e.g., RAK4631). Uses a **pure KMP Nordic Secure DFU implementation** built on Kable — no dependency on the Nordic DFU library. The protocol stack (`SecureDfuTransport`, `SecureDfuProtocol`, `SecureDfuHandler`) handles DFU ZIP parsing, init packet validation, firmware streaming with CRC verification, and PRN-based flow control.
 
 ```mermaid
 sequenceDiagram
@@ -101,8 +101,15 @@ sequenceDiagram
 
 ### Key Classes
 
-- `UpdateHandler.kt`: Entry point for choosing the correct handler.
-- `Esp32OtaUpdateHandler.kt`: Orchestrates the Unified OTA flow.
-- `WifiOtaTransport.kt`: Implements the TCP/UDP transport logic for ESP32.
-- `BleOtaTransport.kt`: Implements the BLE transport logic for ESP32 using the Kable BLE library.
-- `FirmwareRetriever.kt`: Handles downloading and extracting firmware assets (ZIP/BIN/UF2).
+- `FirmwareUpdateManager.kt`: Top-level orchestrator for all firmware update flows.
+- `FirmwareUpdateViewModel.kt`: UI state management (MVI pattern) for the firmware update screen.
+- `FirmwareRetriever.kt`: Handles downloading and extracting firmware assets (ZIP/BIN/UF2) with manifest-based ESP32 resolution.
+- `Esp32OtaUpdateHandler.kt`: Orchestrates the Unified OTA flow for ESP32 devices.
+- `WifiOtaTransport.kt`: Implements the TCP transport logic for ESP32 OTA.
+- `BleOtaTransport.kt`: Implements the BLE transport logic for ESP32 OTA using Kable.
+- `UnifiedOtaProtocol.kt`: Shared OTA protocol framing (handshake, streaming, acknowledgment).
+- `SecureDfuHandler.kt`: Orchestrates the nRF52 Secure DFU flow (bootloader entry, DFU ZIP parsing, firmware transfer).
+- `SecureDfuProtocol.kt`: Low-level Nordic Secure DFU protocol operations (init packet, data transfer, CRC verification).
+- `SecureDfuTransport.kt`: BLE transport layer for Secure DFU using Kable (control/data point characteristics, PRN flow control).
+- `DfuZipParser.kt`: Parses Nordic DFU ZIP archives (manifest, init packet, firmware binary).
+- `UsbUpdateHandler.kt`: Handles USB/UF2 firmware updates across platforms.

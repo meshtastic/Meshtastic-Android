@@ -52,7 +52,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | **Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.** |
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `widget`). All are KMP with `jvm()` and `ios()` targets except `widget`. Use `meshtastic.kmp.feature` convention plugin. |
-| `feature/firmware` | Unified OTA Protocol and Nordic Secure DFU logic, pure KMP using Kable for BLE and Ktor for WiFi. |
+| `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi via Kable/Ktor), native Nordic Secure DFU protocol (pure KMP, no Nordic library), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
 | `desktop/` | Compose Desktop application — first non-Android KMP target. Thin host shell relying entirely on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports with `want_config` handshake. |
 | `mesh_service_example/` | Sample app showing `core:api` service integration. |
 
@@ -154,7 +154,9 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - **Text Search:** Prefer using `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.
 
 ### C. Documentation Sync
-Update documentation continuously as part of the same change. If you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update the relevant docs (`AGENTS.md`, `.github/copilot-instructions.md`, `GEMINI.md`, `docs/agent-playbooks/*`, `docs/kmp-status.md`, and `docs/decisions/architecture-review-2026-03.md`).
+`AGENTS.md` is the single source of truth for agent instructions. `.github/copilot-instructions.md` and `GEMINI.md` are thin stubs that redirect here — do NOT duplicate content into them.
+
+When you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update `AGENTS.md`, `docs/agent-playbooks/*`, `docs/kmp-status.md`, and `docs/decisions/architecture-review-2026-03.md` as needed.
 
 ## 5. Troubleshooting
 -   **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.
