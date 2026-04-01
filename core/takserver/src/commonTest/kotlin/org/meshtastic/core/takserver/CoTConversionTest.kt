@@ -17,7 +17,6 @@
 package org.meshtastic.core.takserver
 
 import okio.ByteString.Companion.encodeUtf8
-import org.meshtastic.core.takserver.CoTConversion.toCoTMessage
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 import kotlin.test.Test

@@ -19,63 +19,54 @@ package org.meshtastic.core.takserver
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
-object CoTConversion {
+fun org.meshtastic.proto.Position.toCoTMessage(
+    uid: String,
+    callsign: String,
+    team: String = DEFAULT_TAK_TEAM_NAME,
+    role: String = DEFAULT_TAK_ROLE_NAME,
+    battery: Int = DEFAULT_TAK_BATTERY,
+): CoTMessage {
+    val lat = (latitude_i ?: 0).toDouble() / TAK_COORDINATE_SCALE
+    val lon = (longitude_i ?: 0).toDouble() / TAK_COORDINATE_SCALE
+    val altitude = (altitude ?: 0).toDouble()
+    val speed = (ground_speed ?: 0).toDouble()
+    val course = (ground_track ?: 0).toDouble()
 
-    fun org.meshtastic.proto.Position.toCoTMessage(
-        uid: String,
-        callsign: String,
-        team: String = DEFAULT_TAK_TEAM_NAME,
-        role: String = DEFAULT_TAK_ROLE_NAME,
-        battery: Int = 100,
-    ): CoTMessage {
-        val lat = (latitude_i ?: 0).toDouble() / TAK_COORDINATE_SCALE
-        val lon = (longitude_i ?: 0).toDouble() / TAK_COORDINATE_SCALE
-        val altitude = (altitude ?: 0).toDouble()
-        val speed = (ground_speed ?: 0).toDouble()
-        val course = (ground_track ?: 0).toDouble()
+    return CoTMessage.pli(
+        uid = uid,
+        callsign = callsign,
+        latitude = lat,
+        longitude = lon,
+        altitude = altitude,
+        speed = speed,
+        course = course,
+        team = team,
+        role = role,
+        battery = battery,
+        staleMinutes = DEFAULT_TAK_STALE_MINUTES,
+    )
+}
 
-        return CoTMessage.pli(
-            uid = uid,
-            callsign = callsign,
-            latitude = lat,
-            longitude = lon,
-            altitude = altitude,
-            speed = speed,
-            course = course,
-            team = team,
-            role = role,
-            battery = battery,
-            staleMinutes = DEFAULT_TAK_STALE_MINUTES,
-        )
-    }
-
-    fun org.meshtastic.proto.User.toCoTMessage(
-        position: org.meshtastic.proto.Position?,
-        team: String = DEFAULT_TAK_TEAM_NAME,
-        role: String = DEFAULT_TAK_ROLE_NAME,
-        battery: Int = 100,
-    ): CoTMessage = if (position != null) {
-        position.toCoTMessage(uid = id, callsign = toTakCallsign(), team = team, role = role, battery = battery)
-    } else {
-        val now = Clock.System.now()
-        CoTMessage(
-            uid = id,
-            type = "a-f-G-U-C",
-            time = now,
-            start = now,
-            stale = now + DEFAULT_TAK_STALE_MINUTES.minutes,
-            how = "m-g",
-            latitude = 0.0,
-            longitude = 0.0,
-            contact = CoTContact(callsign = toTakCallsign(), endpoint = DEFAULT_TAK_ENDPOINT),
-            group = CoTGroup(name = team, role = role),
-            status = CoTStatus(battery = battery),
-        )
-    }
-
-    fun CoTMessage.toDataPacketPayload(): ByteArray = toXml().encodeToByteArray()
-
-    fun CoTMessage.extractUid(): String = uid
-
-    fun CoTMessage.extractCalls(): String? = contact?.callsign
+fun org.meshtastic.proto.User.toCoTMessage(
+    position: org.meshtastic.proto.Position?,
+    team: String = DEFAULT_TAK_TEAM_NAME,
+    role: String = DEFAULT_TAK_ROLE_NAME,
+    battery: Int = DEFAULT_TAK_BATTERY,
+): CoTMessage = if (position != null) {
+    position.toCoTMessage(uid = id, callsign = toTakCallsign(), team = team, role = role, battery = battery)
+} else {
+    val now = Clock.System.now()
+    CoTMessage(
+        uid = id,
+        type = "a-f-G-U-C",
+        time = now,
+        start = now,
+        stale = now + DEFAULT_TAK_STALE_MINUTES.minutes,
+        how = "m-g",
+        latitude = 0.0,
+        longitude = 0.0,
+        contact = CoTContact(callsign = toTakCallsign(), endpoint = DEFAULT_TAK_ENDPOINT),
+        group = CoTGroup(name = team, role = role),
+        status = CoTStatus(battery = battery),
+    )
 }

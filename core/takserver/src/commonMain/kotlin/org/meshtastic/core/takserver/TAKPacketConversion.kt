@@ -33,8 +33,6 @@ import kotlin.time.Duration.Companion.minutes
 
 object TAKPacketConversion {
 
-    private const val EXPECTED_GEOCHAT_PARTS = 4
-
     fun CoTMessage.toTAKPacket(): TAKPacket? {
         val group =
             this.group?.let {
@@ -78,17 +76,13 @@ object TAKPacketConversion {
         var toUid: String? = null
         var toCallsign: String? = null
 
-        var messageId = ""
-        var actualDeviceUid = this.uid
-        val uidComponents = this.uid.split(".")
-        if (uidComponents.size >= EXPECTED_GEOCHAT_PARTS && uidComponents[0] == "GeoChat") {
-            actualDeviceUid = uidComponents[1]
-            messageId = uidComponents.last()
-        }
-
-        if (messageId.isEmpty()) {
-            messageId = Random.nextInt().toString(TAK_HEX_RADIX)
-        }
+        val actualDeviceUid = this.uid.geoChatSenderUid()
+        val messageId =
+            if (this.uid.startsWith("GeoChat.")) {
+                this.uid.geoChatMessageId()
+            } else {
+                Random.nextInt().toString(TAK_HEX_RADIX)
+            }
 
         val contact =
             this.contact?.let {

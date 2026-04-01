@@ -14,14 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress(
-    "MatchingDeclarationName",
-    "LongMethod",
-    "CyclomaticComplexMethod",
-    "MaxLineLength",
-    "TooGenericExceptionCaught",
-    "SwallowedException",
-)
+@file:Suppress("MatchingDeclarationName", "LongMethod", "CyclomaticComplexMethod", "MaxLineLength")
 
 package org.meshtastic.core.takserver
 
@@ -46,18 +39,8 @@ fun CoTMessage.toXml(): String {
     track?.let { sb.append("<track course='${it.course}' speed='${it.speed}'/>") }
 
     if (chat != null) {
-        val senderUid =
-            if (uid.startsWith("GeoChat.")) {
-                uid.split(".").getOrElse(1) { uid }
-            } else {
-                uid
-            }
-        val messageId =
-            if (uid.startsWith("GeoChat.")) {
-                uid.split(".").lastOrNull() ?: uid
-            } else {
-                uid
-            }
+        val senderUid = uid.geoChatSenderUid()
+        val messageId = uid.geoChatMessageId()
         sb.append(
             "<__chat parent='RootContactGroup' groupOwner='false' messageId='$messageId' chatroom='${chat.chatroom.xmlEscaped()}' id='${chat.chatroom.xmlEscaped()}' senderCallsign='${chat.senderCallsign?.xmlEscaped() ?: ""}'><chatgrp uid0='${senderUid.xmlEscaped()}' uid1='${chat.chatroom.xmlEscaped()}' id='${chat.chatroom.xmlEscaped()}'/></__chat>",
         )

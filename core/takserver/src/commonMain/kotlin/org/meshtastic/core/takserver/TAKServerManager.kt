@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.takserver.CoTConversion.toCoTMessage
 
 interface TAKServerManager {
     val isRunning: StateFlow<Boolean>
@@ -105,9 +104,17 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
                 return@launch
             }
 
-            val lastPositionTime = lastBroadcastPositionsMutex.withLock { lastBroadcastPositions[node.num] }
-            if (position.time == lastPositionTime) return@launch
-            lastBroadcastPositionsMutex.withLock { lastBroadcastPositions[node.num] = position.time }
+            val shouldBroadcast =
+                lastBroadcastPositionsMutex.withLock {
+                    val last = lastBroadcastPositions[node.num]
+                    if (position.time == last) {
+                        false
+                    } else {
+                        lastBroadcastPositions[node.num] = position.time
+                        true
+                    }
+                }
+            if (!shouldBroadcast) return@launch
 
             val cotMessage =
                 position.toCoTMessage(

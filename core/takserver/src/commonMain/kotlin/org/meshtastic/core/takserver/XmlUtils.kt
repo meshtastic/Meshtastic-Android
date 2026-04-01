@@ -19,3 +19,15 @@ package org.meshtastic.core.takserver
 /** Escapes XML special characters in attribute values and text content. */
 internal fun String.xmlEscaped(): String =
     replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;")
+
+/**
+ * Extracts the sender UID from a GeoChat-format UID string ("GeoChat.<senderUid>.<chatroom>.<messageId>"). Returns the
+ * original string unchanged for non-GeoChat UIDs.
+ */
+internal fun String.geoChatSenderUid(): String = if (startsWith("GeoChat.")) split(".").getOrElse(1) { "" } else this
+
+/**
+ * Extracts the message ID from a GeoChat-format UID string ("GeoChat.<senderUid>.<chatroom>.<messageId>"). Returns the
+ * original string unchanged for non-GeoChat UIDs.
+ */
+internal fun String.geoChatMessageId(): String = if (startsWith("GeoChat.")) split(".").lastOrNull() ?: this else this

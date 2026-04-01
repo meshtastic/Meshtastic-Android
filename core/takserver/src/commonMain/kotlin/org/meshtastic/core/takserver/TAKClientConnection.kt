@@ -36,6 +36,7 @@ import kotlin.concurrent.Volatile
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Instant
 import kotlinx.coroutines.isActive as coroutineIsActive
 
 class TAKClientConnection(
@@ -67,21 +68,14 @@ class TAKClientConnection(
         val serverUid = "Meshtastic-TAK-Server-${Random.nextInt().toString(TAK_HEX_RADIX)}"
         val now = Clock.System.now()
         val stale = now + TAK_KEEPALIVE_INTERVAL_MS.milliseconds
-
-        val xml =
+        val detail =
             """
-            <event version="2.0" uid="$serverUid" type="t-x-takp-v" time="$now" start="$now" stale="$stale" how="m-g">
-                <point lat="0" lon="0" hae="0" ce="$TAK_UNKNOWN_POINT_VALUE" le="$TAK_UNKNOWN_POINT_VALUE"/>
-                <detail>
-                    <TakControl>
-                        <TakProtocolSupport version="0"/>
-                    </TakControl>
-                </detail>
-            </event>
-        """
+            <TakControl>
+                <TakProtocolSupport version="0"/>
+            </TakControl>
+            """
                 .trimIndent()
-
-        sendXml(xml)
+        sendXml(buildEventXml(uid = serverUid, type = "t-x-takp-v", now = now, stale = stale, detail = detail))
     }
 
     private suspend fun readLoop() {
@@ -117,16 +111,7 @@ class TAKClientConnection(
     private fun sendKeepalive() {
         val now = Clock.System.now()
         val stale = now + TAK_KEEPALIVE_INTERVAL_MS.milliseconds
-        val xml =
-            """
-            <event version="2.0" uid="takPong" type="t-x-d-d" time="$now" start="$now" stale="$stale" how="m-g">
-                <point lat="0" lon="0" hae="0" ce="$TAK_UNKNOWN_POINT_VALUE" le="$TAK_UNKNOWN_POINT_VALUE"/>
-                <detail/>
-            </event>
-        """
-                .trimIndent()
-
-        sendXml(xml)
+        sendXml(buildEventXml(uid = "takPong", type = "t-x-d-d", now = now, stale = stale, detail = ""))
     }
 
     private fun processReceivedData(newData: ByteArray) {
@@ -170,36 +155,38 @@ class TAKClientConnection(
 
     private fun handleProtocolControl(type: String, xmlString: String) {
         if (type == "t-x-takp-q") {
-            sendProtocolResponse(true)
+            sendProtocolResponse()
         } else {
             Logger.d { "Unhandled protocol control type: $type (raw=$xmlString)" }
         }
     }
 
-    private fun sendProtocolResponse(accepted: Boolean) {
+    private fun sendProtocolResponse() {
         val serverUid = "Meshtastic-TAK-Server-${Random.nextInt().toString(TAK_HEX_RADIX)}"
         val now = Clock.System.now()
         val stale = now + TAK_KEEPALIVE_INTERVAL_MS.milliseconds
-
-        val xml =
+        val detail =
             """
-            <event version="2.0" uid="$serverUid" type="t-x-takp-r" time="$now" start="$now" stale="$stale" how="m-g">
-                <point lat="0" lon="0" hae="0" ce="$TAK_UNKNOWN_POINT_VALUE" le="$TAK_UNKNOWN_POINT_VALUE"/>
-                <detail>
-                    <TakControl>
-                        <TakResponse status="${if (accepted) "true" else "false"}"/>
-                    </TakControl>
-                </detail>
-            </event>
-        """
+            <TakControl>
+                <TakResponse status="true"/>
+            </TakControl>
+            """
                 .trimIndent()
-
-        sendXml(xml)
+        sendXml(buildEventXml(uid = serverUid, type = "t-x-takp-r", now = now, stale = stale, detail = detail))
     }
 
     fun send(cotMessage: CoTMessage) {
         val xml = cotMessage.toXml()
         sendXml(xml)
+    }
+
+    private fun buildEventXml(uid: String, type: String, now: Instant, stale: Instant, detail: String): String {
+        val detailContent = if (detail.isBlank()) "<detail/>" else "<detail>$detail</detail>"
+        val point = """<point lat="0" lon="0" hae="0" ce="$TAK_UNKNOWN_POINT_VALUE" le="$TAK_UNKNOWN_POINT_VALUE"/>"""
+        return """<event version="2.0" uid="$uid" type="$type" time="$now" start="$now" stale="$stale" how="m-g">""" +
+            point +
+            detailContent +
+            "</event>"
     }
 
     private fun sendXml(xml: String) {

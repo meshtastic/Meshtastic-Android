@@ -50,7 +50,7 @@ data class CoTMessage(
             callsign: String,
             latitude: Double,
             longitude: Double,
-            altitude: Double = 9999999.0,
+            altitude: Double = TAK_UNKNOWN_POINT_VALUE,
             speed: Double = 0.0,
             course: Double = 0.0,
             team: String = DEFAULT_TAK_TEAM_NAME,
@@ -123,10 +123,7 @@ data class TAKClientInfo(
     val callsign: String? = null,
     val uid: String? = null,
     val connectedAt: Long = Clock.System.now().toEpochMilliseconds(),
-) {
-    val displayName: String
-        get() = callsign ?: uid ?: endpoint
-}
+)
 
 sealed class TAKConnectionEvent {
     data class Connected(val clientInfo: TAKClientInfo) : TAKConnectionEvent()
@@ -139,5 +136,3 @@ sealed class TAKConnectionEvent {
 
     data class Error(val error: Throwable) : TAKConnectionEvent()
 }
-
-class TAKServerException : Exception("TAK Server Error")

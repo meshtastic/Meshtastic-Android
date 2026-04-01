@@ -35,6 +35,7 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
     companion object {
         private const val INTER_PACKET_DELAY_MS = 100L
         private const val ACK_RETRANSMIT_DELAY_MS = 50L
+        private const val PENDING_TRANSFER_TTL_MS = 60_000L
     }
 
     private val fountainCodec = FountainCodec()
@@ -203,6 +204,7 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
         Logger.d { "Received fountain ACK: xferId=${ack.transferId}, type=${ack.type}, from $senderNodeNum" }
 
         pendingTransfersMutex.withLock {
+            cleanupStalePendingTransfersLocked()
             val pending = pendingTransfers[ack.transferId]
             if (pending != null) {
                 if (ack.type == FountainConstants.ACK_TYPE_COMPLETE) {
@@ -214,6 +216,16 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
                     pendingTransfers.remove(ack.transferId)
                 }
             }
+        }
+    }
+
+    /** Must be called inside [pendingTransfersMutex]. */
+    private fun cleanupStalePendingTransfersLocked() {
+        val now = Clock.System.now().toEpochMilliseconds()
+        val stale = pendingTransfers.filter { (_, v) -> now - v.startTime > PENDING_TRANSFER_TTL_MS }.keys
+        stale.forEach { id ->
+            pendingTransfers.remove(id)
+            Logger.d { "Evicted stale outbound pending transfer: $id" }
         }
     }
 }

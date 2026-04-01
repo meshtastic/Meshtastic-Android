@@ -147,7 +147,12 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
                     }
                 }
             }
-            else -> {}
+            is TAKConnectionEvent.Connected -> {
+                /* no-op: logged by TAKClientConnection.start() */
+            }
+            is TAKConnectionEvent.ClientInfoUpdated -> {
+                /* no-op: TAKClientConnection tracks updated info locally */
+            }
         }
     }
 

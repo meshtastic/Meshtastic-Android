@@ -29,9 +29,7 @@ internal object FountainConstants {
     const val DATA_HEADER_SIZE = 11
     const val FOUNTAIN_THRESHOLD = 233
     const val TRANSFER_TYPE_COT: Byte = 0x00
-    const val TRANSFER_TYPE_FILE: Byte = 0x01
     const val ACK_TYPE_COMPLETE: Byte = 0x02
-    const val ACK_TYPE_NEED_MORE: Byte = 0x03
     const val ACK_PACKET_SIZE = 19
 }
 
