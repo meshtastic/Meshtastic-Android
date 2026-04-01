@@ -22,7 +22,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 
-private val KNOWN_ARCHS = listOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", "rp2040", "stm32", "esp32")
+private val KNOWN_ARCHS = setOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", "rp2040", "stm32", "esp32")
 
 private const val FIRMWARE_BASE_URL = "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
 
@@ -31,10 +31,15 @@ private const val OTA_PART_NAME = "app0"
 
 private val manifestJson = Json { ignoreUnknownKeys = true }
 
-/** Retrieves firmware files, either by direct download or by extracting from a release asset. */
+/** Retrieves firmware files, either by direct download or by extracting from a release asset zip. */
 @Single
 class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
 
+    /**
+     * Download the OTA firmware zip for a Nordic (nRF52) DFU update.
+     *
+     * @return The downloaded `-ota.zip` [FirmwareArtifact], or `null` if the file could not be resolved.
+     */
     suspend fun retrieveOtaFirmware(
         release: FirmwareRelease,
         hardware: DeviceHardware,
@@ -47,6 +52,11 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         internalFileExtension = ".zip",
     )
 
+    /**
+     * Download the UF2 firmware binary for a USB Mass Storage update (nRF52 / RP2040).
+     *
+     * @return The downloaded `.uf2` [FirmwareArtifact], or `null` if the file could not be resolved.
+     */
     suspend fun retrieveUsbFirmware(
         release: FirmwareRelease,
         hardware: DeviceHardware,
@@ -59,6 +69,15 @@ class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         internalFileExtension = ".uf2",
     )
 
+    /**
+     * Download the ESP32 OTA firmware binary. Tries in order:
+     * 1. `.mt.json` manifest resolution (2.7.17+)
+     * 2. Current naming convention (`firmware-<target>-<version>.bin`)
+     * 3. Legacy naming (`firmware-<target>-<version>-update.bin`)
+     * 4. Any matching `.bin` from the release zip
+     *
+     * @return The downloaded `.bin` [FirmwareArtifact], or `null` if the file could not be resolved.
+     */
     @Suppress("ReturnCount")
     suspend fun retrieveEsp32Firmware(
         release: FirmwareRelease,

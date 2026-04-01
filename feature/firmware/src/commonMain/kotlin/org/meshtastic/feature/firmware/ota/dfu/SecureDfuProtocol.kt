@@ -252,11 +252,15 @@ internal data class DfuManifestEntry(
 // Exceptions
 // ---------------------------------------------------------------------------
 
+/** Errors specific to the Nordic Secure DFU protocol. */
 sealed class DfuException(message: String, cause: Throwable? = null) : Exception(message, cause) {
+    /** BLE connection to the DFU target could not be established or was lost. */
     class ConnectionFailed(message: String, cause: Throwable? = null) : DfuException(message, cause)
 
+    /** The DFU zip package is malformed or missing required entries. */
     class InvalidPackage(message: String) : DfuException(message)
 
+    /** The device returned a DFU error response for a given opcode. */
     class ProtocolError(val opcode: Byte, val resultCode: Byte, val extendedError: Byte? = null) :
         DfuException(
             buildString {
@@ -268,13 +272,16 @@ sealed class DfuException(message: String, cause: Throwable? = null) : Exception
             },
         )
 
+    /** CRC-32 of the transferred data does not match the device's computed checksum. */
     class ChecksumMismatch(expected: Int, actual: Int) :
         DfuException(
             "CRC-32 mismatch: expected 0x${expected.toUInt().toString(16).padStart(8, '0')} " +
                 "got 0x${actual.toUInt().toString(16).padStart(8, '0')}",
         )
 
+    /** A DFU operation did not complete within the expected time window. */
     class Timeout(message: String) : DfuException(message)
 
+    /** Data transfer to the device failed for a non-protocol reason (e.g. BLE write error). */
     class TransferFailed(message: String, cause: Throwable? = null) : DfuException(message, cause)
 }

@@ -72,6 +72,10 @@ private const val MIN_BATTERY_LEVEL = 10
 
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
+/**
+ * ViewModel driving the firmware update screen. Coordinates release checking, file retrieval, transport-specific update
+ * execution, and post-update device verification.
+ */
 @Suppress("LongParameterList", "TooManyFunctions")
 @KoinViewModel
 class FirmwareUpdateViewModel(
@@ -162,7 +166,7 @@ class FirmwareUpdateViewModel(
                             val firmwareUpdateMethod =
                                 when {
                                     radioPrefs.isSerial() -> {
-                                        // ESP32 Serial updates are not supported from the app yet.
+                                        // Serial OTA is not yet supported for ESP32 — only nRF52/RP2040 UF2.
                                         if (deviceHardware.isEsp32Arc) {
                                             FirmwareUpdateMethod.Unknown
                                         } else {
@@ -398,6 +402,7 @@ private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType):
     FirmwareReleaseType.LOCAL -> flowOf(null)
 }
 
+/** The transport mechanism used to deliver firmware to the device, determined by the active radio connection. */
 sealed class FirmwareUpdateMethod(val description: StringResource) {
     data object Usb : FirmwareUpdateMethod(Res.string.firmware_update_method_usb)
 

@@ -56,7 +56,6 @@ private const val GATT_RELEASE_DELAY_MS = 1_500L
 private const val DFU_REBOOT_WAIT_MS = 3_000L
 private const val RETRY_DELAY_MS = 2_000L
 private const val CONNECT_ATTEMPTS = 4
-private const val MILLIS_PER_SECOND = 1000f
 private const val KIB_DIVISOR = 1024f
 
 /**
@@ -77,7 +76,7 @@ class SecureDfuHandler(
     override suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
-        target: String, // Bluetooth MAC address
+        target: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
     ): FirmwareArtifact? {
@@ -140,14 +139,14 @@ class SecureDfuHandler(
                             val bytesSent = (progress * firmwareSize).toLong()
                             throughputTracker.record(bytesSent)
 
-                            val bytesPerSec = throughputTracker.bytesPerSecond()
-                            val speedKib = bytesPerSec.toFloat() / MILLIS_PER_SECOND / KIB_DIVISOR
+                            val bytesPerSecond = throughputTracker.bytesPerSecond()
+                            val speedKib = bytesPerSecond.toFloat() / KIB_DIVISOR
 
                             val details = buildString {
                                 append("$pct%")
                                 if (speedKib > 0f) {
                                     val remainingBytes = firmwareSize - bytesSent
-                                    val etaSeconds = remainingBytes / (bytesPerSec.toFloat())
+                                    val etaSeconds = remainingBytes.toFloat() / bytesPerSecond
                                     append(
                                         " (${NumberFormatter.format(speedKib, 1)} " +
                                             "KiB/s, ETA: ${etaSeconds.toInt()}s)",

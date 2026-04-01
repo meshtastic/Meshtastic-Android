@@ -172,15 +172,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
                 onStartUpdate = viewModel::startUpdate,
                 onPickFile = {
                     if (state is FirmwareUpdateState.Ready) {
-                        val readyState = state as FirmwareUpdateState.Ready
-                        if (
-                            readyState.updateMethod is FirmwareUpdateMethod.Ble ||
-                            readyState.updateMethod is FirmwareUpdateMethod.Wifi
-                        ) {
-                            filePickerLauncher("*/*")
-                        } else if (readyState.updateMethod is FirmwareUpdateMethod.Usb) {
-                            filePickerLauncher("*/*")
-                        }
+                        filePickerLauncher("*/*")
                     }
                 },
                 onSaveFile = { fileName -> saveFileLauncher(fileName, "application/octet-stream") },

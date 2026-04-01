@@ -285,7 +285,7 @@ class Esp32OtaUpdateHandler(
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
         val fileSize = firmwareData.size.toLong()
-        // Step 5: Start OTA
+        // Start OTA handshake
         updateState(
             FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_starting_ota))),
         )
@@ -303,7 +303,7 @@ class Esp32OtaUpdateHandler(
             }
             .getOrThrow()
 
-        // Step 6: Stream
+        // Stream firmware data
         val uploadingMsg = UiText.Resource(Res.string.firmware_update_uploading)
         updateState(FirmwareUpdateState.Updating(ProgressState(uploadingMsg, 0f)))
         val chunkSize =

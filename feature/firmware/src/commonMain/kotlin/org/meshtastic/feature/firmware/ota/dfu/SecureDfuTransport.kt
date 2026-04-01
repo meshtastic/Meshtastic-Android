@@ -257,6 +257,7 @@ class SecureDfuTransport(
             .onFailure { Logger.w(it) { "DFU: Failed to send abort (device may have disconnected)" } }
     }
 
+    /** Disconnect from the DFU target and cancel the transport coroutine scope. */
     suspend fun close() {
         runCatching { bleConnection.disconnect() }.onFailure { Logger.w(it) { "DFU: Error during disconnect" } }
         transportScope.cancel()

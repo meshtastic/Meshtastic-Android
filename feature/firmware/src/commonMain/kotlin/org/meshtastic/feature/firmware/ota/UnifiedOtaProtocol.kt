@@ -129,17 +129,23 @@ interface UnifiedOtaProtocol {
 
 /** Exception thrown during OTA protocol operations. */
 sealed class OtaProtocolException(message: String, cause: Throwable? = null) : Exception(message, cause) {
+    /** Transport-level connection to the device failed or was lost. */
     class ConnectionFailed(message: String, cause: Throwable? = null) : OtaProtocolException(message, cause)
 
+    /** The device returned an error response for a specific OTA command. */
     class CommandFailed(val command: OtaCommand, val response: OtaResponse.Error) :
         OtaProtocolException("Command $command failed: ${response.message}")
 
+    /** The device rejected the firmware hash (e.g. NVS partition mismatch). */
     class HashRejected(val providedHash: String) :
         OtaProtocolException("Device rejected hash: $providedHash (NVS mismatch)")
 
+    /** Firmware data transfer did not complete successfully. */
     class TransferFailed(message: String, cause: Throwable? = null) : OtaProtocolException(message, cause)
 
+    /** Post-transfer firmware verification failed on the device side. */
     class VerificationFailed(message: String) : OtaProtocolException(message)
 
+    /** An OTA operation did not complete within the expected time window. */
     class Timeout(message: String) : OtaProtocolException(message)
 }

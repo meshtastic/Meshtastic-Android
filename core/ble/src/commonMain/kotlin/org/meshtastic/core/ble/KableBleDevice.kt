@@ -30,8 +30,7 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
     override val state: StateFlow<BleConnectionState> = _state
 
-    // On desktop, bonding isn't strictly required before connecting via Kable,
-    // and we don't have a pairing flow. Defaulting to true lets the UI connect directly.
+    // Bonding is handled by the OS pairing dialog on Android; on desktop Kable connects directly.
     override val isBonded: Boolean = true
 
     override val isConnected: Boolean
@@ -48,7 +47,7 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
     }
 
     override suspend fun bond() {
-        // Not supported/needed on jvmMain desktop currently
+        // No-op: bonding is OS-managed on Android and not required on desktop.
     }
 
     internal fun updateState(newState: BleConnectionState) {

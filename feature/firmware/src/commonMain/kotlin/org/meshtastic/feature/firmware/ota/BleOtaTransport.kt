@@ -136,10 +136,8 @@ class BleOtaTransport(
                 }
                 .launchIn(this)
 
-            // Kable's observe doesn't provide a way to know when subscription is finished,
-            // but usually first value or just waiting a bit works.
-            // For Meshtastic, it might not emit immediately.
-            delay(500)
+            // Allow time for the BLE subscription to be established before proceeding.
+            delay(SUBSCRIPTION_SETTLE_MS)
             if (!subscribed.isCompleted) subscribed.complete(Unit)
 
             subscribed.await()
@@ -284,6 +282,7 @@ class BleOtaTransport(
 
     companion object {
         private const val CONNECTION_TIMEOUT_MS = 15_000L
+        private const val SUBSCRIPTION_SETTLE_MS = 500L
         private const val ERASING_TIMEOUT_MS = 60_000L
         private const val ACK_TIMEOUT_MS = 10_000L
         private const val VERIFICATION_TIMEOUT_MS = 10_000L

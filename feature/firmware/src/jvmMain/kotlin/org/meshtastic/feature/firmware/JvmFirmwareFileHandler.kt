@@ -238,22 +238,8 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         return matchingEntries.minByOrNull { it.first.name.length }?.second?.toFirmwareArtifact()
     }
 
-    private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean {
-        // Exclude non-firmware binaries that share the same extension
-        @Suppress("ComplexCondition")
-        if (
-            filename.startsWith("littlefs-") ||
-            filename.startsWith("bleota") ||
-            filename.startsWith("mt-") ||
-            filename.contains(".factory.")
-        ) {
-            return false
-        }
-        val regex = Regex(".*[\\-_]${Regex.escape(target)}[\\-_.].*")
-        return filename.endsWith(fileExtension) &&
-            filename.contains(target) &&
-            (regex.matches(filename) || filename.startsWith("$target-") || filename.startsWith("$target."))
-    }
+    private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean =
+        org.meshtastic.feature.firmware.isValidFirmwareFile(filename, target, fileExtension)
 
     private fun File.toFirmwareArtifact(): FirmwareArtifact =
         FirmwareArtifact(uri = CommonUri.parse(toURI().toString()), fileName = name, isTemporary = true)

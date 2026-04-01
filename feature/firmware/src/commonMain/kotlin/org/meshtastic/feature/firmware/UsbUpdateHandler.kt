@@ -33,17 +33,16 @@ class UsbUpdateHandler(
     override suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
-        target: String, // Unused for USB
+        target: String,
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
-    ): FirmwareArtifact? =
-        performUsbUpdate(
-            release = release,
-            hardware = hardware,
-            firmwareUri = firmwareUri,
-            radioController = radioController,
-            nodeRepository = nodeRepository,
-            updateState = updateState,
-            retrieveUsbFirmware = firmwareRetriever::retrieveUsbFirmware,
-        )
+    ): FirmwareArtifact? = performUsbUpdate(
+        release = release,
+        hardware = hardware,
+        firmwareUri = firmwareUri,
+        radioController = radioController,
+        nodeRepository = nodeRepository,
+        updateState = updateState,
+        retrieveUsbFirmware = firmwareRetriever::retrieveUsbFirmware,
+    )
 }
