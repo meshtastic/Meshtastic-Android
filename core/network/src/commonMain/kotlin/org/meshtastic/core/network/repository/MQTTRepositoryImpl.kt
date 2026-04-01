@@ -82,6 +82,7 @@ class MQTTRepositoryImpl(
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
+    @Suppress("LongMethod", "CyclomaticComplexMethod")
     private fun createProxyMessageFlow(): Flow<MqttClientProxyMessage> = callbackFlow {
         val ownerId = "MeshtasticAndroidMqttProxy-${nodeRepository.myId.value ?: "unknown"}"
         val channelSet = radioConfigRepository.channelSetFlow.first()
@@ -91,6 +92,7 @@ class MQTTRepositoryImpl(
 
         val (host, port) =
             (mqttConfig?.address ?: DEFAULT_SERVER_ADDRESS).split(":", limit = 2).let {
+                @Suppress("MagicNumber")
                 it[0] to (it.getOrNull(1)?.toIntOrNull() ?: if (mqttConfig?.tls_enabled == true) 8883 else 1883)
             }
 
@@ -109,6 +111,7 @@ class MQTTRepositoryImpl(
         subscriptions.add(Subscription("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)))
 
         // Using IO-dispatcher since we use blocking MQTTClient.run()
+        @Suppress("MagicNumber")
         clientJob =
             scope.launch(Dispatchers.IO) {
                 val baseDelay = 2_000L // Base backoff value
@@ -116,11 +119,10 @@ class MQTTRepositoryImpl(
 
                 // Reconnection loop
                 while (isActive) {
-                    val attempt =
-                        reconnectMutex.withLock {
-                            ++reconnectAttempt // Don't really think we will ever get overflow here since it will take
-                            // 4300 years
-                        }
+                    val attempt = reconnectMutex.withLock {
+                        ++reconnectAttempt // Don't really think we will ever get overflow here since it will take
+                        // 4300 years
+                    }
 
                     // Exponential backoff
                     val delayMs =
@@ -137,6 +139,7 @@ class MQTTRepositoryImpl(
 
                     // Creating client on each iteration
                     var newClient: MQTTClient? = null
+                    @Suppress("TooGenericExceptionCaught")
                     try {
                         newClient =
                             MQTTClient(
@@ -244,15 +247,13 @@ class MQTTRepositoryImpl(
     /**
      * Cold flow that creates MQTT client and manages connection lifecycle.
      *
-     * Single collector requirement:
-     * This flow MUST be collected by exactly one subscriber. Multiple collectors
-     * will create duplicate MQTT clients with the same clientId, causing the broker
-     * to disconnect previous connections (standard MQTT behavior).
+     * Single collector requirement: This flow MUST be collected by exactly one subscriber. Multiple collectors will
+     * create duplicate MQTT clients with the same clientId, causing the broker to disconnect previous connections
+     * (standard MQTT behavior).
      *
-     * Lifecycle fix (shareIn wrapper):
-     * Originally, this callbackFlow would close when the collector stopped (e.g., UI
-     * lifecycle changes, configuration changes, collector errors). This triggered
-     * awaitClose { disconnect() }, which canceled the reconnect loop entirely.
+     * Lifecycle fix (shareIn wrapper): Originally, this callbackFlow would close when the collector stopped (e.g., UI
+     * lifecycle changes, configuration changes, collector errors). This triggered awaitClose { disconnect() }, which
+     * canceled the reconnect loop entirely.
      *
      * Symptoms observed:
      * - "MQTT message dropped: flow channel closed" logs
@@ -270,7 +271,7 @@ class MQTTRepositoryImpl(
             .shareIn(
                 scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
                 started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 30_000),
-                replay = 0
+                replay = 0,
             )
 
     @OptIn(ExperimentalUnsignedTypes::class)
@@ -285,6 +286,7 @@ class MQTTRepositoryImpl(
             }
 
             publishSemaphore.withPermit {
+                @Suppress("TooGenericExceptionCaught")
                 try {
                     c.publish(
                         retain = retained,
