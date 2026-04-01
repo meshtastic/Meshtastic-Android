@@ -62,8 +62,7 @@ import kotlin.time.Duration.Companion.milliseconds
  * - Reassemble newline-terminated JSON responses from notification packets.
  * - Parse the nymea JSON protocol into typed Kotlin results.
  *
- * Lifecycle: create once per provisioning session, call [connect], use [scanNetworks] / [provision],
- * then [close].
+ * Lifecycle: create once per provisioning session, call [connect], use [scanNetworks] / [provision], then [close].
  */
 class NymeaWifiService(
     private val scanner: BleScanner,
@@ -92,22 +91,21 @@ class NymeaWifiService(
     suspend fun connect(address: String? = null): Result<Unit> = runCatching {
         Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=$address)…" }
 
-        val device = withTimeout(SCAN_TIMEOUT_MS) {
-            scanner
-                .scan(
-                    timeout = SCAN_TIMEOUT_MS.milliseconds,
-                    serviceUuid = WIRELESS_SERVICE_UUID,
-                    address = address,
-                )
-                .first()
-        }
+        val device =
+            withTimeout(SCAN_TIMEOUT_MS) {
+                scanner
+                    .scan(
+                        timeout = SCAN_TIMEOUT_MS.milliseconds,
+                        serviceUuid = WIRELESS_SERVICE_UUID,
+                        address = address,
+                    )
+                    .first()
+            }
 
         Logger.i { "$TAG: Found device: ${device.name} @ ${device.address}" }
 
         val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT_MS)
-        check(state is BleConnectionState.Connected) {
-            "Failed to connect to ${device.address} — final state: $state"
-        }
+        check(state is BleConnectionState.Connected) { "Failed to connect to ${device.address} — final state: $state" }
 
         Logger.i { "$TAG: Connected. Discovering wireless service…" }
 
@@ -171,8 +169,8 @@ class NymeaWifiService(
     /**
      * Provision the device with the given WiFi credentials.
      *
-     * Sends CMD_CONNECT (1) or CMD_CONNECT_HIDDEN (2) with the SSID and password. The response
-     * error code is mapped to a [ProvisionResult].
+     * Sends CMD_CONNECT (1) or CMD_CONNECT_HIDDEN (2) with the SSID and password. The response error code is mapped to
+     * a [ProvisionResult].
      *
      * @param ssid The target network SSID.
      * @param password The network password. Pass an empty string for open networks.
@@ -180,12 +178,10 @@ class NymeaWifiService(
      */
     suspend fun provision(ssid: String, password: String, hidden: Boolean = false): ProvisionResult {
         val cmd = if (hidden) CMD_CONNECT_HIDDEN else CMD_CONNECT
-        val json = NymeaJson.encodeToString(
-            NymeaConnectCommand(
-                command = cmd,
-                params = NymeaConnectParams(ssid = ssid, password = password),
-            ),
-        )
+        val json =
+            NymeaJson.encodeToString(
+                NymeaConnectCommand(command = cmd, params = NymeaConnectParams(ssid = ssid, password = password)),
+            )
 
         return runCatching {
             sendCommand(json)
@@ -195,10 +191,11 @@ class NymeaWifiService(
             } else {
                 ProvisionResult.Failure(response.responseCode, nymeaErrorMessage(response.responseCode))
             }
-        }.getOrElse { e ->
-            Logger.e(e) { "$TAG: Provision failed" }
-            ProvisionResult.Failure(-1, e.message ?: "Unknown error")
         }
+            .getOrElse { e ->
+                Logger.e(e) { "$TAG: Provision failed" }
+                ProvisionResult.Failure(-1, e.message ?: "Unknown error")
+            }
     }
 
     /** Disconnect and cancel the service scope. */
@@ -212,10 +209,7 @@ class NymeaWifiService(
 
     // region Internal helpers
 
-    /**
-     * Encode [json] into ≤20-byte packets and write each one WITH_RESPONSE to the commander
-     * characteristic.
-     */
+    /** Encode [json] into ≤20-byte packets and write each one WITH_RESPONSE to the commander characteristic. */
     private suspend fun sendCommand(json: String) {
         Logger.d { "$TAG: → $json" }
         val packets = NymeaPacketCodec.encode(json)
@@ -226,12 +220,8 @@ class NymeaWifiService(
         }
     }
 
-    /**
-     * Wait up to [RESPONSE_TIMEOUT_MS] for a complete JSON response from the notification channel.
-     */
-    private suspend fun waitForResponse(): String = withTimeout(RESPONSE_TIMEOUT_MS) {
-        responseChannel.receive()
-    }
+    /** Wait up to [RESPONSE_TIMEOUT_MS] for a complete JSON response from the notification channel. */
+    private suspend fun waitForResponse(): String = withTimeout(RESPONSE_TIMEOUT_MS) { responseChannel.receive() }
 
     // endregion
 

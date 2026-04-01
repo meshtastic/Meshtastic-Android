@@ -88,14 +88,10 @@ fun WifiProvisionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Show errors in a snackbar
-    LaunchedEffect(uiState.errorMessage) {
-        uiState.errorMessage?.let { snackbarHostState.showSnackbar(it) }
-    }
+    LaunchedEffect(uiState.errorMessage) { uiState.errorMessage?.let { snackbarHostState.showSnackbar(it) } }
 
     // Kick off the BLE scan when the screen first appears; forward any deep-link address
-    LaunchedEffect(Unit) {
-        viewModel.connectAndScanNetworks(address)
-    }
+    LaunchedEffect(Unit) { viewModel.connectAndScanNetworks(address) }
 
     Scaffold(
         topBar = {
@@ -112,27 +108,21 @@ fun WifiProvisionScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when {
                 uiState.provisionSuccess -> SuccessContent(onNavigateUp)
 
                 uiState.phase != WifiProvisionUiState.Phase.Idle -> LoadingContent(uiState.phase)
 
-                uiState.selectedNetwork != null -> PasswordContent(
-                    network = uiState.selectedNetwork!!,
-                    onBack = { viewModel.selectNetwork(uiState.selectedNetwork!!) /* clear by re-selecting */ },
-                    onConfirm = { password -> viewModel.provision(password) },
-                    onCancel = { viewModel.reset() },
-                )
+                uiState.selectedNetwork != null ->
+                    PasswordContent(
+                        network = uiState.selectedNetwork!!,
+                        onConfirm = { password -> viewModel.provision(password) },
+                        onCancel = { viewModel.reset() },
+                    )
 
-                uiState.networks.isNotEmpty() -> NetworkListContent(
-                    networks = uiState.networks,
-                    onSelect = viewModel::selectNetwork,
-                )
+                uiState.networks.isNotEmpty() ->
+                    NetworkListContent(networks = uiState.networks, onSelect = viewModel::selectNetwork)
 
                 else -> EmptyContent(onRetry = viewModel::refreshNetworks)
             }
@@ -146,12 +136,13 @@ fun WifiProvisionScreen(
 
 @Composable
 private fun LoadingContent(phase: WifiProvisionUiState.Phase) {
-    val label = when (phase) {
-        WifiProvisionUiState.Phase.ConnectingBle -> stringResource(Res.string.connecting)
-        WifiProvisionUiState.Phase.LoadingNetworks -> "Scanning WiFi networks…"
-        WifiProvisionUiState.Phase.Provisioning -> "Sending credentials…"
-        WifiProvisionUiState.Phase.Idle -> ""
-    }
+    val label =
+        when (phase) {
+            WifiProvisionUiState.Phase.ConnectingBle -> stringResource(Res.string.connecting)
+            WifiProvisionUiState.Phase.LoadingNetworks -> "Scanning WiFi networks…"
+            WifiProvisionUiState.Phase.Provisioning -> "Sending credentials…"
+            WifiProvisionUiState.Phase.Idle -> ""
+        }
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -164,10 +155,7 @@ private fun LoadingContent(phase: WifiProvisionUiState.Phase) {
 }
 
 @Composable
-private fun NetworkListContent(
-    networks: List<WifiNetwork>,
-    onSelect: (WifiNetwork) -> Unit,
-) {
+private fun NetworkListContent(networks: List<WifiNetwork>, onSelect: (WifiNetwork) -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
             text = stringResource(Res.string.network),
@@ -200,21 +188,11 @@ private fun NetworkRow(network: WifiNetwork, onClick: () -> Unit) {
 
 @Suppress("LongMethod")
 @Composable
-private fun PasswordContent(
-    network: WifiNetwork,
-    onBack: () -> Unit,
-    onConfirm: (String) -> Unit,
-    onCancel: () -> Unit,
-) {
+private fun PasswordContent(network: WifiNetwork, onConfirm: (String) -> Unit, onCancel: () -> Unit) {
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Connect to \"${network.ssid}\"", style = MaterialTheme.typography.titleMedium)
 
         if (network.isProtected) {
@@ -223,44 +201,36 @@ private fun PasswordContent(
                 onValueChange = { password = it },
                 label = { Text("Password") },
                 singleLine = true,
-                visualTransformation = if (passwordVisible) {
+                visualTransformation =
+                if (passwordVisible) {
                     VisualTransformation.None
                 } else {
                     PasswordVisualTransformation()
                 },
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        val label = if (passwordVisible) {
-                            stringResource(Res.string.hide_password)
-                        } else {
-                            stringResource(Res.string.show_password)
-                        }
+                        val label =
+                            if (passwordVisible) {
+                                stringResource(Res.string.hide_password)
+                            } else {
+                                stringResource(Res.string.show_password)
+                            }
                         Text(if (passwordVisible) "Hide" else "Show", style = MaterialTheme.typography.labelSmall)
                         // Accessibility description only; icon handled above
-                        @Suppress("UNUSED_VARIABLE") val a11y = label
+                        @Suppress("UNUSED_VARIABLE")
+                        val a11y = label
                     }
                 },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done,
-                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
                 modifier = Modifier.fillMaxWidth(),
             )
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
-                onClick = { onConfirm(password) },
-                modifier = Modifier.weight(1f),
-            ) {
+            Button(onClick = { onConfirm(password) }, modifier = Modifier.weight(1f)) {
                 Text(stringResource(Res.string.connected))
             }
-            Button(
-                onClick = onCancel,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text("Cancel")
-            }
+            Button(onClick = onCancel, modifier = Modifier.weight(1f)) { Text("Cancel") }
         }
     }
 }
@@ -268,16 +238,11 @@ private fun PasswordContent(
 @Composable
 private fun EmptyContent(onRetry: () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier = Modifier.fillMaxSize().padding(32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            stringResource(Res.string.bluetooth_disabled),
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        Text(stringResource(Res.string.bluetooth_disabled), style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(16.dp))
         Button(onClick = onRetry) { Text("Retry") }
     }
@@ -286,9 +251,7 @@ private fun EmptyContent(onRetry: () -> Unit) {
 @Composable
 private fun SuccessContent(onDone: () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier = Modifier.fillMaxSize().padding(32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -301,10 +264,7 @@ private fun SuccessContent(onDone: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Text("WiFi credentials sent!", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
-        Text(
-            "The device will connect to the network shortly.",
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        Text("The device will connect to the network shortly.", style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(24.dp))
         Button(onClick = onDone) { Text("Done") }
     }

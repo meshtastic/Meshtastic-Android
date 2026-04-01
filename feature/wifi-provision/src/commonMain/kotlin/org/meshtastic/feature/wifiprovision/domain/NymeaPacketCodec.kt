@@ -22,20 +22,20 @@ import org.meshtastic.feature.wifiprovision.NymeaBleConstants.STREAM_TERMINATOR
 /**
  * Codec for the nymea-networkmanager BLE framing protocol.
  *
- * The protocol transfers JSON over BLE using packets capped at [MAX_PACKET_SIZE] bytes (20).
- * A complete message is terminated by a newline character (`\n`) at the end of the final packet.
+ * The protocol transfers JSON over BLE using packets capped at [MAX_PACKET_SIZE] bytes (20). A complete message is
+ * terminated by a newline character (`\n`) at the end of the final packet.
  *
- * **Sending:** call [encode] to split a compact JSON string into an ordered list of byte-array
- * packets, each ≤ [maxPacketSize] bytes. The last packet always ends with `\n`.
+ * **Sending:** call [encode] to split a compact JSON string into an ordered list of byte-array packets, each ≤
+ * [maxPacketSize] bytes. The last packet always ends with `\n`.
  *
- * **Receiving:** feed incoming BLE notification bytes into [Reassembler]. It accumulates UTF-8
- * chunks and emits a complete JSON string once it sees the `\n` terminator.
+ * **Receiving:** feed incoming BLE notification bytes into [Reassembler]. It accumulates UTF-8 chunks and emits a
+ * complete JSON string once it sees the `\n` terminator.
  */
 internal object NymeaPacketCodec {
 
     /**
-     * Encodes [json] (without trailing newline) into a list of BLE packets, each ≤ [maxPacketSize]
-     * bytes. The `\n` terminator is appended before chunking so it lands inside the final packet.
+     * Encodes [json] (without trailing newline) into a list of BLE packets, each ≤ [maxPacketSize] bytes. The `\n`
+     * terminator is appended before chunking so it lands inside the final packet.
      */
     fun encode(json: String, maxPacketSize: Int = MAX_PACKET_SIZE): List<ByteArray> {
         val payload = (json + STREAM_TERMINATOR).encodeToByteArray()
@@ -52,9 +52,8 @@ internal object NymeaPacketCodec {
     /**
      * Stateful reassembler for inbound BLE notification packets.
      *
-     * Feed each raw notification into [feed]. When a packet ending with `\n` is received the
-     * accumulated UTF-8 string (minus the terminator) is returned; otherwise `null` is returned
-     * and the partial data is buffered.
+     * Feed each raw notification into [feed]. When a packet ending with `\n` is received the accumulated UTF-8 string
+     * (minus the terminator) is returned; otherwise `null` is returned and the partial data is buffered.
      *
      * Not thread-safe — callers must serialise access (e.g., collect in a single coroutine).
      */

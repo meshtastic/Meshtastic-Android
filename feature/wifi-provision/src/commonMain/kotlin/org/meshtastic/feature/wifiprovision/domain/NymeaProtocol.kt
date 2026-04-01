@@ -23,8 +23,8 @@ import kotlinx.serialization.json.Json
 /**
  * kotlinx.serialization models for the nymea-networkmanager JSON-over-BLE protocol.
  *
- * All messages are compact JSON objects terminated with a newline (`\n`) and chunked into
- * ≤20-byte BLE notification/write packets.
+ * All messages are compact JSON objects terminated with a newline (`\n`) and chunked into ≤20-byte BLE
+ * notification/write packets.
  *
  * Reference: https://github.com/nymea/nymea-networkmanager#bluetooth-gatt-profile
  */
@@ -43,10 +43,7 @@ internal val NymeaJson = Json {
 // ---------------------------------------------------------------------------
 
 /** A command with no parameters (e.g. GetNetworks, TriggerScan). */
-@Serializable
-internal data class NymeaSimpleCommand(
-    @SerialName("c") val command: Int,
-)
+@Serializable internal data class NymeaSimpleCommand(@SerialName("c") val command: Int)
 
 /** The parameter payload for the Connect / ConnectHidden commands. */
 @Serializable

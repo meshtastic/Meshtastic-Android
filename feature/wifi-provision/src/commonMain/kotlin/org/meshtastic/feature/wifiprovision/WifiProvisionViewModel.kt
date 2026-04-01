@@ -45,10 +45,13 @@ data class WifiProvisionUiState(
     enum class Phase {
         /** No operation running. */
         Idle,
+
         /** Scanning BLE for a nymea device. */
         ConnectingBle,
+
         /** Fetching visible WiFi networks from the device. */
         LoadingNetworks,
+
         /** Sending WiFi credentials to the device. */
         Provisioning,
     }
@@ -79,8 +82,8 @@ class WifiProvisionViewModel(
     // region Public actions (called from UI)
 
     /**
-     * Scan for the nearest nymea-networkmanager device and connect to it, then immediately
-     * fetch the list of available WiFi networks.
+     * Scan for the nearest nymea-networkmanager device and connect to it, then immediately fetch the list of available
+     * WiFi networks.
      *
      * @param address Optional MAC address to target a specific device.
      */
@@ -94,10 +97,7 @@ class WifiProvisionViewModel(
             nymeaService.connect(address).onFailure { e ->
                 Logger.e(e) { "$TAG: BLE connect failed" }
                 _uiState.update {
-                    it.copy(
-                        phase = WifiProvisionUiState.Phase.Idle,
-                        errorMessage = "Could not connect: ${e.message}",
-                    )
+                    it.copy(phase = WifiProvisionUiState.Phase.Idle, errorMessage = "Could not connect: ${e.message}")
                 }
                 return@launch
             }
@@ -126,21 +126,11 @@ class WifiProvisionViewModel(
             when (val result = nymeaService.provision(network.ssid, password)) {
                 is ProvisionResult.Success -> {
                     Logger.i { "$TAG: Provisioned successfully" }
-                    _uiState.update {
-                        it.copy(
-                            phase = WifiProvisionUiState.Phase.Idle,
-                            provisionSuccess = true,
-                        )
-                    }
+                    _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.Idle, provisionSuccess = true) }
                 }
                 is ProvisionResult.Failure -> {
                     Logger.w { "$TAG: Provision failed: ${result.message}" }
-                    _uiState.update {
-                        it.copy(
-                            phase = WifiProvisionUiState.Phase.Idle,
-                            errorMessage = result.message,
-                        )
-                    }
+                    _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.Idle, errorMessage = result.message) }
                 }
             }
         }
@@ -148,10 +138,12 @@ class WifiProvisionViewModel(
 
     /** Re-scan networks without re-connecting. */
     fun refreshNetworks() {
-        val nymeaService = service ?: run {
-            connectAndScanNetworks()
-            return
-        }
+        val nymeaService =
+            service
+                ?: run {
+                    connectAndScanNetworks()
+                    return
+                }
         viewModelScope.launch { loadNetworks(nymeaService) }
     }
 
@@ -176,7 +168,8 @@ class WifiProvisionViewModel(
     private suspend fun loadNetworks(nymeaService: NymeaWifiService) {
         _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.LoadingNetworks) }
 
-        nymeaService.scanNetworks()
+        nymeaService
+            .scanNetworks()
             .onSuccess { networks ->
                 _uiState.update {
                     it.copy(

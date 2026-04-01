@@ -30,14 +30,14 @@ internal object NymeaBleConstants {
     val WIRELESS_SERVICE_UUID: Uuid = Uuid.parse("e081fec0-f757-4449-b9c9-bfa83133f7fc")
 
     /**
-     * Write JSON commands (chunked into ≤20-byte packets, newline-terminated) to this
-     * characteristic. Each command generates a response on [COMMANDER_RESPONSE_UUID].
+     * Write JSON commands (chunked into ≤20-byte packets, newline-terminated) to this characteristic. Each command
+     * generates a response on [COMMANDER_RESPONSE_UUID].
      */
     val WIRELESS_COMMANDER_UUID: Uuid = Uuid.parse("e081fec1-f757-4449-b9c9-bfa83133f7fc")
 
     /**
-     * Subscribe (notify) to receive JSON responses. Uses the same 20-byte chunked,
-     * newline-terminated framing as the commander.
+     * Subscribe (notify) to receive JSON responses. Uses the same 20-byte chunked, newline-terminated framing as the
+     * commander.
      */
     val COMMANDER_RESPONSE_UUID: Uuid = Uuid.parse("e081fec2-f757-4449-b9c9-bfa83133f7fc")
 
@@ -46,6 +46,7 @@ internal object NymeaBleConstants {
     // endregion
 
     // region Network Service
+
     /** Service for enabling/disabling networking and wireless. */
     val NETWORK_SERVICE_UUID: Uuid = Uuid.parse("ef6d6610-b8af-49e0-9eca-ab343513641c")
 
@@ -54,6 +55,7 @@ internal object NymeaBleConstants {
     // endregion
 
     // region Protocol framing
+
     /** Maximum ATT payload per packet when MTU negotiation is unavailable. */
     const val MAX_PACKET_SIZE = 20
 
@@ -71,6 +73,7 @@ internal object NymeaBleConstants {
     // endregion
 
     // region Wireless Commander command codes
+
     /** Request the list of visible WiFi networks. */
     const val CMD_GET_NETWORKS = 0
 

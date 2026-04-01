@@ -232,10 +232,7 @@ fun SettingsScreen(
                 )
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
-                    ListItem(
-                        text = stringResource(Res.string.wifi_devices),
-                        leadingIcon = Icons.Rounded.Wifi,
-                    ) {
+                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = Icons.Rounded.Wifi) {
                         onNavigate(WifiProvisionRoutes.WifiProvision())
                     }
                 }
