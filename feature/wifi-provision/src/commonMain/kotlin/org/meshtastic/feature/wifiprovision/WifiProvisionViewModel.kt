@@ -38,22 +38,36 @@ import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 data class WifiProvisionUiState(
     val phase: Phase = Phase.Idle,
     val networks: List<WifiNetwork> = emptyList(),
-    val selectedNetwork: WifiNetwork? = null,
     val errorMessage: String? = null,
-    val provisionSuccess: Boolean = false,
+    /** Name of the BLE device we connected to, shown in the DeviceFound confirmation. */
+    val deviceName: String? = null,
+    /** Provisioning outcome shown as inline status (matches web flasher pattern). */
+    val provisionStatus: ProvisionStatus = ProvisionStatus.Idle,
 ) {
     enum class Phase {
-        /** No operation running. */
+        /** No operation running — initial state before BLE connect. */
         Idle,
 
         /** Scanning BLE for a nymea device. */
         ConnectingBle,
 
+        /** BLE device found and connected; waiting for user to proceed. */
+        DeviceFound,
+
         /** Fetching visible WiFi networks from the device. */
         LoadingNetworks,
 
+        /** Connected and networks loaded — the main configuration screen. */
+        Connected,
+
         /** Sending WiFi credentials to the device. */
         Provisioning,
+    }
+
+    enum class ProvisionStatus {
+        Idle,
+        Success,
+        Failed,
     }
 }
 
@@ -82,73 +96,93 @@ class WifiProvisionViewModel(
     // region Public actions (called from UI)
 
     /**
-     * Scan for the nearest nymea-networkmanager device and connect to it, then immediately fetch the list of available
-     * WiFi networks.
+     * Scan for the nearest nymea-networkmanager device and connect to it. Pauses at the
+     * [WifiProvisionUiState.Phase.DeviceFound] phase so the user can confirm before proceeding — this is the Android
+     * analog of the web flasher's native BLE pairing dialog.
      *
      * @param address Optional MAC address to target a specific device.
      */
-    fun connectAndScanNetworks(address: String? = null) {
+    fun connectToDevice(address: String? = null) {
         _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, errorMessage = null) }
 
         viewModelScope.launch {
             val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory)
             service = nymeaService
 
-            nymeaService.connect(address).onFailure { e ->
-                Logger.e(e) { "$TAG: BLE connect failed" }
-                _uiState.update {
-                    it.copy(phase = WifiProvisionUiState.Phase.Idle, errorMessage = "Could not connect: ${e.message}")
+            nymeaService
+                .connect(address)
+                .onSuccess { deviceName ->
+                    Logger.i { "$TAG: BLE connected to: $deviceName" }
+                    _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.DeviceFound, deviceName = deviceName) }
                 }
-                return@launch
-            }
-
-            loadNetworks(nymeaService)
+                .onFailure { e ->
+                    Logger.e(e) { "$TAG: BLE connect failed" }
+                    _uiState.update {
+                        it.copy(
+                            phase = WifiProvisionUiState.Phase.Idle,
+                            errorMessage = "Could not connect: ${e.message}",
+                        )
+                    }
+                }
         }
     }
 
-    /** Select a network from the scanned list (called when the user taps a row). */
-    fun selectNetwork(network: WifiNetwork) {
-        _uiState.update { it.copy(selectedNetwork = network, errorMessage = null) }
-    }
-
-    /**
-     * Send WiFi credentials for the [WifiProvisionUiState.selectedNetwork] to the device.
-     *
-     * @param password The network password (empty string for open networks).
-     */
-    fun provision(password: String) {
-        val network = _uiState.value.selectedNetwork ?: return
-        val nymeaService = service ?: return
-
-        _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.Provisioning, errorMessage = null) }
-
-        viewModelScope.launch {
-            when (val result = nymeaService.provision(network.ssid, password)) {
-                is ProvisionResult.Success -> {
-                    Logger.i { "$TAG: Provisioned successfully" }
-                    _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.Idle, provisionSuccess = true) }
-                }
-                is ProvisionResult.Failure -> {
-                    Logger.w { "$TAG: Provision failed: ${result.message}" }
-                    _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.Idle, errorMessage = result.message) }
-                }
-            }
-        }
-    }
-
-    /** Re-scan networks without re-connecting. */
-    fun refreshNetworks() {
+    /** Called when the user confirms they want to scan networks after device discovery. */
+    fun scanNetworks() {
         val nymeaService =
             service
                 ?: run {
-                    connectAndScanNetworks()
+                    connectToDevice()
                     return
                 }
         viewModelScope.launch { loadNetworks(nymeaService) }
     }
 
-    /** Reset to initial state and close any active BLE connection. */
-    fun reset() {
+    /**
+     * Send WiFi credentials to the device.
+     *
+     * @param ssid The target network SSID.
+     * @param password The network password (empty string for open networks).
+     */
+    fun provisionWifi(ssid: String, password: String) {
+        if (ssid.isBlank()) return
+        val nymeaService = service ?: return
+
+        _uiState.update {
+            it.copy(
+                phase = WifiProvisionUiState.Phase.Provisioning,
+                errorMessage = null,
+                provisionStatus = WifiProvisionUiState.ProvisionStatus.Idle,
+            )
+        }
+
+        viewModelScope.launch {
+            when (val result = nymeaService.provision(ssid, password)) {
+                is ProvisionResult.Success -> {
+                    Logger.i { "$TAG: Provisioned successfully" }
+                    _uiState.update {
+                        it.copy(
+                            phase = WifiProvisionUiState.Phase.Connected,
+                            provisionStatus = WifiProvisionUiState.ProvisionStatus.Success,
+                        )
+                    }
+                }
+                is ProvisionResult.Failure -> {
+                    Logger.w { "$TAG: Provision failed: ${result.message}" }
+                    _uiState.update {
+                        it.copy(
+                            phase = WifiProvisionUiState.Phase.Connected,
+                            provisionStatus = WifiProvisionUiState.ProvisionStatus.Failed,
+                            errorMessage = result.message,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /** Disconnect and close any active BLE connection. */
+    fun disconnect() {
         viewModelScope.launch {
             service?.close()
             service = null
@@ -172,17 +206,14 @@ class WifiProvisionViewModel(
             .scanNetworks()
             .onSuccess { networks ->
                 _uiState.update {
-                    it.copy(
-                        phase = WifiProvisionUiState.Phase.Idle,
-                        networks = networks.sortedByDescending { n -> n.signalStrength },
-                    )
+                    it.copy(phase = WifiProvisionUiState.Phase.Connected, networks = deduplicateBySsid(networks))
                 }
             }
             .onFailure { e ->
                 Logger.e(e) { "$TAG: scanNetworks failed" }
                 _uiState.update {
                     it.copy(
-                        phase = WifiProvisionUiState.Phase.Idle,
+                        phase = WifiProvisionUiState.Phase.Connected,
                         errorMessage = "Failed to load networks: ${e.message}",
                     )
                 }
@@ -193,5 +224,14 @@ class WifiProvisionViewModel(
 
     companion object {
         private const val TAG = "WifiProvisionViewModel"
+
+        /**
+         * Deduplicate networks by SSID, keeping the entry with the strongest signal for each. Since we only send SSID
+         * (not BSSID) to the device, showing duplicates is confusing.
+         */
+        internal fun deduplicateBySsid(networks: List<WifiNetwork>): List<WifiNetwork> = networks
+            .groupBy { it.ssid }
+            .map { (_, entries) -> entries.maxBy { it.signalStrength } }
+            .sortedByDescending { it.signalStrength }
     }
 }

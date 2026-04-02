@@ -86,9 +86,10 @@ class NymeaWifiService(
      * Scan for a device advertising the nymea wireless service and connect to it.
      *
      * @param address Optional MAC address filter. If null, the first advertising device is used.
+     * @return The discovered device's advertised name on success.
      * @throws IllegalStateException if no device is found within [SCAN_TIMEOUT_MS].
      */
-    suspend fun connect(address: String? = null): Result<Unit> = runCatching {
+    suspend fun connect(address: String? = null): Result<String> = runCatching {
         Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=$address)…" }
 
         val device =
@@ -102,6 +103,7 @@ class NymeaWifiService(
                     .first()
             }
 
+        val deviceName = device.name ?: device.address
         Logger.i { "$TAG: Found device: ${device.name} @ ${device.address}" }
 
         val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT_MS)
@@ -134,6 +136,8 @@ class NymeaWifiService(
 
             Logger.i { "$TAG: Wireless service ready" }
         }
+
+        deviceName
     }
 
     /**

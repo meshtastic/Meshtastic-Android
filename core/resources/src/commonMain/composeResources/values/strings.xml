@@ -1323,4 +1323,28 @@
     <string name="files_available">Files available (%1$d):</string>
     <string name="file_entry">- %1$s (%2$d bytes)</string>
     <string name="no_files_manifested">No files manifested.</string>
+
+    <string name="connect">Connect</string>
+    <string name="done">Done</string>
+    <string name="wifi_provisioning">WiFi Provisioning</string>
+    <string name="wifi_provision_description">Provision WiFi credentials to your Meshtastic device via Bluetooth.</string>
+    <string name="wifi_provision_scanning_ble">Searching for device…</string>
+    <string name="wifi_provision_device_found">Device found</string>
+    <string name="wifi_provision_device_found_detail">Ready to scan for WiFi networks.</string>
+    <string name="wifi_provision_scan_networks">Scan for Networks</string>
+    <string name="wifi_provision_scanning_wifi">Scanning…</string>
+    <string name="wifi_provision_sending_credentials">Applying WiFi configuration…</string>
+    <string name="wifi_provision_success">WiFi configured successfully!</string>
+    <string name="wifi_provision_success_detail">WiFi credentials applied. The device will connect to the network shortly.</string>
+    <string name="wifi_provision_no_networks">No networks found</string>
+    <string name="wifi_provision_no_networks_detail">Make sure the device is powered on and within range.</string>
+    <string name="wifi_provision_connect_failed">Could not connect: %1$s</string>
+    <string name="wifi_provision_scan_failed">Failed to scan for WiFi networks.</string>
+    <string name="wifi_provision_refresh">Refresh</string>
+    <string name="wifi_provision_signal_strength">%1$d%%</string>
+    <string name="wifi_provision_available_networks">Available Networks</string>
+    <string name="wifi_provision_ssid_label">Network Name (SSID)</string>
+    <string name="wifi_provision_ssid_placeholder">Enter or select a network</string>
+    <string name="wifi_provision_status_applied">WiFi configured successfully!</string>
+    <string name="wifi_provision_status_failed">Failed to apply WiFi configuration</string>
 </resources>
