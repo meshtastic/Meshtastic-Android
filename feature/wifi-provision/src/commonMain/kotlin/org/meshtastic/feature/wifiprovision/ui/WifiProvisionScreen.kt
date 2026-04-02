@@ -200,7 +200,7 @@ private val Phase.isLoading: Boolean
 
 /** BLE scanning spinner — shown while searching for a device. */
 @Composable
-private fun ScanningBleContent() {
+internal fun ScanningBleContent() {
     CenteredStatusContent {
         CircularProgressIndicator(modifier = Modifier.size(48.dp))
         Spacer(Modifier.height(24.dp))
@@ -213,7 +213,7 @@ private fun ScanningBleContent() {
  * prompt. Gives the user a clear "device found" moment before proceeding.
  */
 @Composable
-private fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCancel: () -> Unit) {
+internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCancel: () -> Unit) {
     CenteredStatusContent {
         Icon(
             Icons.Rounded.Bluetooth,
@@ -253,7 +253,7 @@ private fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCan
 
 /** Network scanning spinner — shown during the initial scan when no networks are loaded yet. */
 @Composable
-private fun ScanningNetworksContent() {
+internal fun ScanningNetworksContent() {
     CenteredStatusContent {
         CircularProgressIndicator(modifier = Modifier.size(48.dp))
         Spacer(Modifier.height(24.dp))
@@ -267,7 +267,7 @@ private fun ScanningNetworksContent() {
  */
 @Suppress("LongMethod", "LongParameterList")
 @Composable
-private fun ConnectedContent(
+internal fun ConnectedContent(
     networks: List<WifiNetwork>,
     provisionStatus: ProvisionStatus,
     isProvisioning: Boolean,
@@ -385,8 +385,9 @@ private fun ConnectedContent(
             ProvisionStatusCard(provisionStatus = provisionStatus, isProvisioning = isProvisioning)
         }
 
-        // Action buttons
+        // Action buttons — cancel left, primary action right (app convention)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(onClick = onDisconnect) { Text(stringResource(Res.string.cancel)) }
             Button(
                 onClick = { onProvision(ssid, password) },
                 enabled = ssid.isNotBlank() && !isProvisioning,
@@ -406,13 +407,12 @@ private fun ConnectedContent(
                     Text(stringResource(Res.string.apply))
                 }
             }
-            OutlinedButton(onClick = onDisconnect) { Text(stringResource(Res.string.cancel)) }
         }
     }
 }
 
 @Composable
-private fun NetworkRow(network: WifiNetwork, isSelected: Boolean, onClick: () -> Unit) {
+internal fun NetworkRow(network: WifiNetwork, isSelected: Boolean, onClick: () -> Unit) {
     val containerColor =
         if (isSelected) {
             MaterialTheme.colorScheme.primaryContainer
