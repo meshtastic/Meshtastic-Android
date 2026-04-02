@@ -125,6 +125,7 @@ jobs:
               :core:prefs:allTests
               :core:repository:allTests
               :core:service:allTests
+              :core:takserver:allTests
               :core:testing:allTests
               :core:ui:allTests
             kover: >-
@@ -139,6 +140,7 @@ jobs:
               :core:prefs:koverXmlReport
               :core:repository:koverXmlReport
               :core:service:koverXmlReport
+              :core:takserver:koverXmlReport
               :core:testing:koverXmlReport
               :core:ui:koverXmlReport
           - name: shard-feature
@@ -173,7 +175,6 @@ jobs:
               :core:barcode:koverXmlReportGoogleDebug
               :desktop:koverXmlReport
               :mesh_service_example:koverXmlReportDebug
-              :core:api:koverXmlReportDebug
 
     steps:
       - name: Checkout code
@@ -188,12 +189,8 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
-      - name: Run Tests (${{ matrix.shard.name }})
-        run: ./gradlew ${{ matrix.shard.tasks }} -Pci=true --continue --scan
-
-      - name: Generate Coverage (${{ matrix.shard.name }})
-        if: ${{ !cancelled() }}
-        run: ./gradlew ${{ matrix.shard.kover }} -Pci=true --continue --scan
+      - name: Run Tests & Coverage (${{ matrix.shard.name }})
+        run: ./gradlew ${{ matrix.shard.tasks }} ${{ matrix.shard.kover }} -Pci=true --continue --scan
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}

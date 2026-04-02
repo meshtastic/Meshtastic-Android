@@ -21,11 +21,13 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 
 fun Project.configureKover() {
+    val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
     extensions.configure<KoverProjectExtension> {
         reports {
             total {
-                xml { onCheck.set(true) }
-                html { onCheck.set(true) }
+                // In CI, reports are generated explicitly per-shard; skip automatic generation on check.
+                xml { onCheck.set(!isCi) }
+                html { onCheck.set(!isCi) }
             }
             filters {
                 excludes {
