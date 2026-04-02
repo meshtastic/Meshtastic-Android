@@ -35,7 +35,8 @@ import org.meshtastic.core.common.util.CommonUri
  * - `/messages/{contactKey}` -> Specific conversation
  * - `/settings` -> Settings root
  * - `/settings/{destNum}/{page}` -> Specific settings page for a node
- * - `/share?message={text}` -> Share message screen
+ * - `/wifi-provision` -> WiFi provisioning screen
+ * - `/wifi-provision?address={mac}` -> WiFi provisioning targeting a specific device MAC address
  */
 object DeepLinkRouter {
     /**
@@ -64,6 +65,7 @@ object DeepLinkRouter {
             "settings" -> routeSettings(pathSegments)
             "channels" -> listOf(ChannelsRoutes.ChannelsGraph)
             "firmware" -> routeFirmware(pathSegments)
+            "wifi-provision" -> routeWifiProvision(uri)
             else -> {
                 Logger.w { "Unrecognized deep link segment: $firstSegment" }
                 null
@@ -149,6 +151,11 @@ object DeepLinkRouter {
         } else {
             listOf(SettingsRoutes.SettingsGraph(destNum))
         }
+    }
+
+    private fun routeWifiProvision(uri: CommonUri): List<NavKey> {
+        val address = uri.getQueryParameter("address")
+        return listOf(WifiProvisionRoutes.WifiProvision(address))
     }
 
     private fun routeFirmware(segments: List<String>): List<NavKey> {

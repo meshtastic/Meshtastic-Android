@@ -62,6 +62,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactSettings
@@ -368,10 +369,11 @@ private fun MuteNotificationsDialog(
                                     val remaining = settings.muteUntil - now
                                     if (remaining > 0) {
                                         val (days, hours) = formatMuteRemainingTime(remaining)
+                                        val hoursFormatted = NumberFormatter.format(hours, 1)
                                         if (days >= 1) {
-                                            stringResource(Res.string.mute_status_muted_for_days, days, hours)
+                                            stringResource(Res.string.mute_status_muted_for_days, days, hoursFormatted)
                                         } else {
-                                            stringResource(Res.string.mute_status_muted_for_hours, hours)
+                                            stringResource(Res.string.mute_status_muted_for_hours, hoursFormatted)
                                         }
                                     } else {
                                         stringResource(Res.string.mute_status_unmuted)

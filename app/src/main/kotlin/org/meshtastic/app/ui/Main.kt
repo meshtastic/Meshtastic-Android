@@ -48,6 +48,7 @@ import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
+import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 
 @Composable
 fun MainScreen() {
@@ -76,6 +77,7 @@ fun MainScreen() {
                     connectionsGraph(backStack)
                     settingsGraph(backStack)
                     firmwareGraph(backStack)
+                    wifiProvisionGraph(backStack)
                 }
             MeshtasticNavDisplay(
                 multiBackstack = multiBackstack,

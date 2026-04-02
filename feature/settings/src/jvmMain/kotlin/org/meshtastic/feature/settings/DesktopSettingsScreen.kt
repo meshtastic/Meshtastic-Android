@@ -29,6 +29,7 @@ import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Memory
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +47,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.WifiProvisionRoutes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.acknowledgements
 import org.meshtastic.core.resources.app_settings
@@ -59,6 +61,7 @@ import org.meshtastic.core.resources.modules_unlocked
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.theme
+import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
@@ -195,6 +198,12 @@ fun DesktopSettingsScreen(
                         onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
                         summary = stringResource(Res.string.device_db_cache_limit_summary),
                     )
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
+                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = Icons.Rounded.Wifi) {
+                        onNavigate(WifiProvisionRoutes.WifiProvision())
+                    }
                 }
 
                 NotificationSection(

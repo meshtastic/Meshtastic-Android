@@ -26,6 +26,7 @@ import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
+import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 
 /**
  * Registers entry providers for all top-level desktop destinations.
@@ -63,4 +64,7 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(
 
     // Connections — shared screen
     connectionsGraph(backStack)
+
+    // WiFi Provisioning — nymea-networkmanager BLE protocol
+    wifiProvisionGraph(backStack)
 }

@@ -177,6 +177,7 @@ dependencies {
     implementation(projects.feature.connections)
     implementation(projects.feature.map)
     implementation(projects.feature.firmware)
+    implementation(projects.feature.wifiProvision)
     implementation(projects.feature.intro)
 
     // Compose Desktop

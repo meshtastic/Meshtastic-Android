@@ -176,3 +176,9 @@ object FirmwareRoutes {
 
     @Serializable data object FirmwareUpdate : Route
 }
+
+object WifiProvisionRoutes {
+    @Serializable data object WifiProvisionGraph : Graph
+
+    @Serializable data class WifiProvision(val address: String? = null) : Route
+}

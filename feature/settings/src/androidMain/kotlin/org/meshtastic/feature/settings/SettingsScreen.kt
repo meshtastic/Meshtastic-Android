@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,17 +44,20 @@ import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.WifiProvisionRoutes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
+import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
+import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.PersistenceSection
 import org.meshtastic.feature.settings.component.PrivacySection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
@@ -225,6 +230,12 @@ fun SettingsScreen(
                     onShowLanguagePicker = { showLanguagePickerDialog = true },
                     onShowThemePicker = { showThemePickerDialog = true },
                 )
+
+                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
+                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = Icons.Rounded.Wifi) {
+                        onNavigate(WifiProvisionRoutes.WifiProvision())
+                    }
+                }
 
                 PersistenceSection(
                     cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,

@@ -54,6 +54,7 @@ import org.meshtastic.feature.messaging.di.FeatureMessagingModule
 import org.meshtastic.feature.node.di.FeatureNodeModule
 import org.meshtastic.feature.settings.di.FeatureSettingsModule
 import org.meshtastic.feature.widget.di.FeatureWidgetModule
+import org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule
 
 @Module(
     includes =
@@ -87,6 +88,7 @@ import org.meshtastic.feature.widget.di.FeatureWidgetModule
         FeatureFirmwareModule::class,
         FeatureIntroModule::class,
         FeatureWidgetModule::class,
+        FeatureWifiProvisionModule::class,
         NetworkModule::class,
         FlavorModule::class,
     ],

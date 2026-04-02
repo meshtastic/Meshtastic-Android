@@ -7,14 +7,14 @@ Re-evaluation of project modularity and architecture against modern KMP and Andr
 
 ## Executive Summary
 
-The codebase is **~98% structurally KMP** — 18/20 core modules and 7/7 feature modules declare `jvm()` targets and cross-compile in CI. Shared `commonMain` code accounts for ~52K LOC vs ~18K platform-specific LOC (a 74/26 split). This is strong.
+The codebase is **~98% structurally KMP** — 18/20 core modules and 8/8 feature modules declare `jvm()` targets and cross-compile in CI. Shared `commonMain` code accounts for ~52K LOC vs ~18K platform-specific LOC (a 74/26 split). This is strong.
 
 Of the five structural gaps originally identified, four are resolved and one remains in progress:
 
 1. **`app` is a God module** — originally 90 files / ~11K LOC of transport, service, UI, and ViewModel code that should live in core/feature modules. *(✅ Resolved — app module reduced to 6 files: `MainActivity`, `MeshUtilApplication`, Nav shell, and DI config)*
 2. ~~**Radio transport layer is app-locked**~~ — ✅ Resolved: `RadioTransport` interface in `core:repository/commonMain`; shared `StreamFrameCodec` + `TcpTransport` in `core:network`.
 3. ~~**`java.*` APIs leak into `commonMain`**~~ — ✅ Resolved: `Locale`, `ConcurrentHashMap`, `ReentrantLock` purged.
-4. ~~**Zero feature-level `commonTest`**~~ — ✅ Resolved: 131 shared tests across all 7 features; `core:testing` module established.
+4. ~~**Zero feature-level `commonTest`**~~ — ✅ Resolved: 193 shared tests across all 8 features; `core:testing` module established.
 5. ~~**No `feature:connections` module**~~ — ✅ Resolved: KMP module with shared UI and dynamic transport detection.
 
 ## Source Code Distribution
@@ -168,10 +168,9 @@ Android uses `@Module`-annotated classes (`CoreDataModule`, `CoreBleAndroidModul
 | `feature:messaging` | 18 | 5 | 3 |
 | `feature:connections` | 27 | 0 | 0 |
 | `feature:firmware` | 15 | 25 | 0 |
-| `feature:intro` | 14 | 7 | 0 |
-| `feature:map` | 11 | 4 | 0 |
+| `feature:wifi-provision` | 62 | 0 | 0 |
 
-**Outcome:** All 7 feature modules now have `commonTest` coverage (131 shared tests). Combined with 70 platform unit tests and 18 instrumented tests, feature modules have 219 tests total.
+**Outcome:** All 8 feature modules now have `commonTest` coverage (193 shared tests). Combined with 70 platform unit tests and 18 instrumented tests, feature modules have 281 tests total.
 
 ### D2. No shared test fixtures *(resolved 2026-03-12)*
 
@@ -217,12 +216,12 @@ Ordered by impact × effort:
 | Area | Previous | Current | Notes |
 |---|---:|---:|---|
 | Shared business/data logic | 8.5/10 | **9/10** | RadioTransport interface unified; all core layers shared |
-| Shared feature/UI logic | 9.5/10 | **9/10** | All 7 KMP features; connections unified; cross-platform deduplication complete |
+| Shared feature/UI logic | 9.5/10 | **9/10** | All 8 KMP features; connections unified; cross-platform deduplication complete |
 | Android decoupling | 8.5/10 | **9/10** | Connections, Navigation, Services, & Widgets extracted; GMS purged; app ~40->target 20 files |
 | Multi-target readiness | 8/10 | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
-| CI confidence | 8.5/10 | **9/10** | 25 modules validated; feature:connections + desktop in CI; native release installers |
+| CI confidence | 8.5/10 | **9/10** | 26 modules validated; feature:connections + feature:wifi-provision + desktop in CI; native release installers |
 | DI portability | 7/10 | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
-| Test maturity | — | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 8 features |
+| Test maturity | — | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 9 features |
 
 ---
 
