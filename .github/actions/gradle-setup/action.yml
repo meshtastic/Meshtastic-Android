@@ -33,5 +33,4 @@ runs:
         cache-read-only: ${{ inputs.cache_read_only }}
         cache-encryption-key: ${{ inputs.gradle_encryption_key }}
         cache-cleanup: on-success
-        cache-terms-of-use-accepted: true
         add-job-summary: always
