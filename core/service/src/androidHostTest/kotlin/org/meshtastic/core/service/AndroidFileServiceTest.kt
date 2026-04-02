@@ -17,7 +17,7 @@
 package org.meshtastic.core.service
 
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNotNull
+import kotlin.test.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

@@ -156,8 +156,18 @@ Always run commands in the following order to ensure reliability. Do not attempt
 *Note: If testing Compose UI on the JVM (Robolectric) with Java 21, pin your tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 
 **CI workflow conventions (GitHub Actions):**
-- Reusable CI is split into a host job and an Android matrix job in `.github/workflows/reusable-check.yml`.
-- Host job runs style/static checks, explicit Android lint tasks, unit tests, and Kover XML coverage uploads once.
+- Reusable CI in `.github/workflows/reusable-check.yml` is structured as four parallel job groups:
+  1. **`lint-check`** — Runs spotless, detekt, Android lint, and KMP smoke compile. Produces `cache_read_only` output for downstream jobs.
+  2. **`test-shards`** — A 3-shard matrix that runs unit tests in parallel (depends on `lint-check`):
+     - `shard-core`: `allTests` for all `core:*` KMP modules.
+     - `shard-feature`: `allTests` for all `feature:*` KMP modules.
+     - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`, `mesh_service_example`).
+     Each shard generates its own Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
+  3. **`android-check`** — Builds APKs and runs instrumented tests (depends on `lint-check`).
+  4. **`build-desktop`** — Desktop packaging (depends on `lint-check`).
+- Test sharding uses `fail-fast: false` so a failure in one shard does not cancel the others.
+- JUnit Platform parallel execution is enabled project-wide: test *classes* run concurrently within each Gradle fork (`junit.jupiter.execution.parallel.mode.classes.default=concurrent`), while test *methods* within a class run sequentially (`mode.default=same_thread`).
+- `test-retry` plugin (maxRetries=2, maxFailures=10) is applied to all module types: `AndroidApplicationConventionPlugin`, `AndroidLibraryConventionPlugin`, and `KmpLibraryConventionPlugin`.
 - Android matrix job runs explicit assemble tasks for `app` and `mesh_service_example`; instrumentation is enabled by input and matrix API.
 - Prefer explicit Gradle task paths in CI (for example `app:lintFdroidDebug`, `app:connectedGoogleDebugAndroidTest`) instead of shorthand tasks like `lintDebug`.
 - Pull request CI is main-only (`.github/workflows/pull-request.yml` targets `main` branch).
@@ -165,7 +175,7 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - PR `check-changes` path filtering lives in `.github/workflows/pull-request.yml` and must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.) so CI is not skipped for infra-only changes.
 - **Runner strategy (three tiers):**
   - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). These run only shell scripts or GitHub API calls and benefit from ARM runners' shorter queue times.
-  - **`ubuntu-24.04`** — Main Gradle-heavy jobs (CI `host-check`/`android-check`, release builds, Dokka, CodeQL, publish, dependency-submission). Pin where possible for reproducibility.
+  - **`ubuntu-24.04`** — Main Gradle-heavy jobs (CI `lint-check`/`test-shards`/`android-check`, release builds, Dokka, CodeQL, publish, dependency-submission). Pin where possible for reproducibility.
   - **Desktop runners:** Reusable CI uses `ubuntu-latest` for the `build-desktop` job in `.github/workflows/reusable-check.yml`; release packaging matrix remains `[macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]`.
 - **CI JVM tuning:** `gradle.properties` is tuned for local dev (8g heap, 4g Kotlin daemon). CI workflows override via `GRADLE_OPTS` env var to fit the 7GB RAM budget of standard runners: `-Xmx4g` Gradle heap, `-Xmx2g` Kotlin daemon, VFS watching disabled, workers capped at 4.
 - **KMP Smoke Compile:** Use `./gradlew kmpSmokeCompile` instead of listing individual module compile tasks. The `kmpSmokeCompile` lifecycle task (registered in `RootConventionPlugin`) auto-discovers all KMP modules and depends on their `compileKotlinJvm` + `compileKotlinIosSimulatorArm64` tasks.

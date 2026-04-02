@@ -17,8 +17,8 @@
 package org.meshtastic.core.ui.timezone
 
 import kotlinx.datetime.TimeZone
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import org.meshtastic.core.model.util.toPosixString
 
 class ZoneIdExtensionsTest {

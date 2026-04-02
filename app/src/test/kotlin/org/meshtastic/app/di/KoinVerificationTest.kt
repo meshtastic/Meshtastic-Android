@@ -25,7 +25,7 @@ import androidx.work.WorkerParameters
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineDispatcher
-import org.junit.Test
+import kotlin.test.Test
 import org.koin.test.verify.definition
 import org.koin.test.verify.injectedParameters
 import org.koin.test.verify.verify

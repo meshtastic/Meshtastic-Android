@@ -17,7 +17,7 @@
 package org.meshtastic.feature.map
 
 import android.database.sqlite.SQLiteDatabase
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder

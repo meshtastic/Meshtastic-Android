@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.model
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import org.meshtastic.proto.HardwareModel
 
 class NodeTest {

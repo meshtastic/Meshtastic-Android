@@ -56,10 +56,38 @@ val Project.configProperties: Properties
 
 /** Configure common test options like parallel execution and logging. */
 internal fun Project.configureTestOptions() {
+    // Gradle 9 requires junit-platform-launcher on every test runtime classpath when
+    // useJUnitPlatform() is active.  Add it lazily to all *UnitTestRuntimeClasspath and
+    // *TestRuntimeClasspath configurations so all Android and JVM test tasks get it
+    // without requiring per-module declarations.
+    configurations.matching {
+        it.name.endsWith("UnitTestRuntimeClasspath") || it.name.endsWith("TestRuntimeClasspath")
+    }.configureEach {
+        val launcher = libs.library("junit-platform-launcher")
+        project.dependencies.add(name, launcher)
+    }
+
     tasks.withType<Test>().configureEach {
-        // Parallelize unit tests
+        // JUnit 5: activate JUnit Platform — but NOT for androidHostTest (Robolectric) tasks
+        // in KMP modules.  Those tasks run JUnit 4 natively; applying useJUnitPlatform()
+        // would force kotlin-test-junit5 selection which conflicts with the kotlin-test-junit
+        // that Kotlin auto-selects for Robolectric @RunWith tests when Platform is absent.
+        if (name != "testAndroidHostTest") {
+            useJUnitPlatform()
+        }
+        // Parallelize unit tests at the Gradle fork level
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
         maxHeapSize = "2g"
+
+        // JUnit Jupiter parallel execution: run test classes concurrently within each fork.
+        // "same_thread" for methods keeps individual test classes sequential (safe default),
+        // while "concurrent" for classes runs multiple test classes in parallel.
+        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+        systemProperty("junit.jupiter.execution.parallel.mode.default", "same_thread")
+        systemProperty("junit.jupiter.execution.parallel.mode.classes.default", "concurrent")
+        systemProperty("junit.jupiter.execution.parallel.config.strategy", "dynamic")
+        systemProperty("junit.jupiter.execution.parallel.config.dynamic.factor", "1")
+
         // Allow modules with no discovered tests to pass without failing the build
         filter { isFailOnNoMatchingTests = false }
 
@@ -75,7 +103,7 @@ internal fun Project.configureTestOptions() {
 
     // Configure test retry if the plugin is applied
     pluginManager.withPlugin("org.gradle.test-retry") {
-        tasks.withType<AbstractTestTask>().configureEach {
+        tasks.withType<Test>().configureEach {
             extensions.configure<TestRetryTaskExtension> {
                 maxRetries.set(2)
                 maxFailures.set(10)

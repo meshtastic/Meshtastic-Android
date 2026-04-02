@@ -53,11 +53,12 @@ env:
     -Dkotlin.daemon.jvm.options=-Xmx2g -XX:+UseParallelGC
 
 jobs:
-  host-check:
+  # ── Lint & Static Analysis ──────────────────────────────────────────
+  lint-check:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
-    timeout-minutes: 60
+    timeout-minutes: 30
     outputs:
       cache_read_only: ${{ steps.cache_config.outputs.cache_read_only }}
 
@@ -92,50 +93,146 @@ jobs:
         if: inputs.run_lint == true
         run: ./gradlew app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug mesh_service_example:lintDebug -Pci=true --continue --scan
 
-      - name: Shared Unit Tests & Coverage
-        if: inputs.run_unit_tests == true
-        run: ./gradlew test allTests koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug core:api:koverXmlReportDebug core:barcode:koverXmlReportFdroidDebug core:barcode:koverXmlReportGoogleDebug mesh_service_example:koverXmlReportDebug desktop:koverXmlReport -Pci=true --continue --scan
-
       - name: KMP Smoke Compile
         run: ./gradlew kmpSmokeCompile -Pci=true --continue --scan
 
-      - name: Upload coverage results to Codecov
-        if: ${{ !cancelled() && inputs.run_unit_tests }}
-        uses: codecov/codecov-action@v6
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: meshtastic/Meshtastic-Android
-          flags: host-unit
-          fail_ci_if_error: false
-          files: "**/build/reports/kover/report*.xml"
+  # ── Sharded Unit Tests ──────────────────────────────────────────────
+  # Tests are split into 3 shards that run in parallel:
+  #   shard-core:    core:* KMP module tests (allTests)
+  #   shard-feature: feature:* KMP module tests (allTests)
+  #   shard-app:     Pure-Android/JVM tests (app, desktop, core:barcode, etc.)
+  test-shards:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 45
+    needs: lint-check
+    if: inputs.run_unit_tests == true
+    strategy:
+      fail-fast: false
+      matrix:
+        shard:
+          - name: shard-core
+            tasks: >-
+              :core:ble:allTests
+              :core:common:allTests
+              :core:data:allTests
+              :core:database:allTests
+              :core:domain:allTests
+              :core:model:allTests
+              :core:navigation:allTests
+              :core:network:allTests
+              :core:prefs:allTests
+              :core:repository:allTests
+              :core:service:allTests
+              :core:testing:allTests
+              :core:ui:allTests
+            kover: >-
+              :core:ble:koverXmlReport
+              :core:common:koverXmlReport
+              :core:data:koverXmlReport
+              :core:database:koverXmlReport
+              :core:domain:koverXmlReport
+              :core:model:koverXmlReport
+              :core:navigation:koverXmlReport
+              :core:network:koverXmlReport
+              :core:prefs:koverXmlReport
+              :core:repository:koverXmlReport
+              :core:service:koverXmlReport
+              :core:testing:koverXmlReport
+              :core:ui:koverXmlReport
+          - name: shard-feature
+            tasks: >-
+              :feature:connections:allTests
+              :feature:firmware:allTests
+              :feature:intro:allTests
+              :feature:map:allTests
+              :feature:messaging:allTests
+              :feature:node:allTests
+              :feature:settings:allTests
+            kover: >-
+              :feature:connections:koverXmlReport
+              :feature:firmware:koverXmlReport
+              :feature:intro:koverXmlReport
+              :feature:map:koverXmlReport
+              :feature:messaging:koverXmlReport
+              :feature:node:koverXmlReport
+              :feature:settings:koverXmlReport
+          - name: shard-app
+            tasks: >-
+              :app:testFdroidDebugUnitTest
+              :app:testGoogleDebugUnitTest
+              :desktop:test
+              :core:barcode:testFdroidDebugUnitTest
+              :core:barcode:testGoogleDebugUnitTest
+              :mesh_service_example:test
+            kover: >-
+              :app:koverXmlReportFdroidDebug
+              :app:koverXmlReportGoogleDebug
+              :core:barcode:koverXmlReportFdroidDebug
+              :core:barcode:koverXmlReportGoogleDebug
+              :desktop:koverXmlReport
+              :mesh_service_example:koverXmlReportDebug
+              :core:api:koverXmlReportDebug
 
-      - name: Upload unit test results to Codecov
-        if: ${{ !cancelled() && inputs.run_unit_tests }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
+
+      - name: Run Tests (${{ matrix.shard.name }})
+        run: ./gradlew ${{ matrix.shard.tasks }} -Pci=true --continue --scan
+
+      - name: Generate Coverage (${{ matrix.shard.name }})
+        if: ${{ !cancelled() }}
+        run: ./gradlew ${{ matrix.shard.kover }} -Pci=true --continue --scan
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          flags: host-unit
+          flags: ${{ matrix.shard.name }}
           fail_ci_if_error: false
           report_type: test_results
           files: "**/build/test-results/**/*.xml"
 
-      - name: Upload host reports
+      - name: Upload coverage to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v6
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: ${{ matrix.shard.name }}
+          fail_ci_if_error: false
+          files: "**/build/reports/kover/report*.xml"
+
+      - name: Upload shard reports
         if: ${{ always() && inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
-          name: reports-host
+          name: reports-${{ matrix.shard.name }}
           path: |
             **/build/reports
             **/build/test-results
           retention-days: 7
 
+  # ── Android Build & Instrumented Tests ──────────────────────────────
   android-check:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 60
-    needs: host-check
+    needs: lint-check
     strategy:
       fail-fast: true
       matrix:
@@ -152,7 +249,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: ${{ needs.host-check.outputs.cache_read_only }}
+          cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
       - name: Determine matrix metadata
         id: matrix_meta
@@ -235,7 +332,7 @@ jobs:
       - name: Report App Size
         if: ${{ always() && steps.matrix_meta.outputs.is_first_api == 'true' }}
         run: |
-          echo "### 📦 App Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "### App Size Report" >> $GITHUB_STEP_SUMMARY
           echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           find app/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
@@ -250,13 +347,14 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # ── Desktop Build ───────────────────────────────────────────────────
   build-desktop:
     name: Build Desktop Debug
     runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 60
-    needs: host-check
+    needs: lint-check
 
     steps:
       - name: Checkout code
@@ -269,7 +367,7 @@ jobs:
         uses: ./.github/actions/gradle-setup
         with:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: ${{ needs.host-check.outputs.cache_read_only }}
+          cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
       - name: Build Desktop
         run: ./gradlew :desktop:packageDistributionForCurrentOS -Pci=true --scan

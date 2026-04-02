@@ -31,7 +31,7 @@ import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
-import org.junit.Assert.assertEquals
+import kotlin.test.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
