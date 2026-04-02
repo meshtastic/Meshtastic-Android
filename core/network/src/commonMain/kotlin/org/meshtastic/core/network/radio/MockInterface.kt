@@ -25,6 +25,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getInitials
+import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.proto.AdminMessage
@@ -39,6 +40,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.Neighbor
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.NodeInfo
+import org.meshtastic.proto.NodeInfoBatch
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.Routing
@@ -301,58 +303,79 @@ class MockInterface(private val service: RadioInterfaceService, val address: Str
         service.handleFromRadio(makeAck(MY_NODE + 1, packet.from, packet.id).encode())
     }
 
+    // / Generate a fake NodeInfo for a simulated node
+    @Suppress("MagicNumber")
+    private fun makeSimNodeInfo(numIn: Int, lat: Double, lon: Double) = NodeInfo(
+        num = numIn,
+        user =
+        User(
+            id = DataPacket.nodeNumToDefaultId(numIn),
+            long_name = "Sim " + numIn.toString(16),
+            short_name = getInitials("Sim " + numIn.toString(16)),
+            hw_model = HardwareModel.ANDROID_SIM,
+        ),
+        position =
+        ProtoPosition(
+            latitude_i = org.meshtastic.core.model.Position.degI(lat),
+            longitude_i = org.meshtastic.core.model.Position.degI(lon),
+            altitude = 35,
+            time = nowSeconds.toInt(),
+            precision_bits = Random.nextInt(10, 19),
+        ),
+    )
+
     private fun sendConfigResponse(configId: Int) {
-        Logger.d { "Sending mock config response" }
+        Logger.d { "Sending mock config response for nonce=$configId" }
+        when (configId) {
+            HandshakeConstants.CONFIG_NONCE -> sendStage1ConfigResponse(configId)
+            HandshakeConstants.BATCH_NODE_INFO_NONCE,
+            HandshakeConstants.NODE_INFO_NONCE,
+            -> sendStage2NodeInfoResponse(configId)
+            else -> Logger.w { "Unknown config nonce $configId — ignoring" }
+        }
+    }
 
-        // / Generate a fake node info entry
-        @Suppress("MagicNumber")
-        fun makeNodeInfo(numIn: Int, lat: Double, lon: Double) = FromRadio(
-            node_info =
-            NodeInfo(
-                num = numIn,
-                user =
-                User(
-                    id = DataPacket.nodeNumToDefaultId(numIn),
-                    long_name = "Sim " + numIn.toString(16),
-                    short_name = getInitials("Sim " + numIn.toString(16)),
-                    hw_model = HardwareModel.ANDROID_SIM,
-                ),
-                position =
-                ProtoPosition(
-                    latitude_i = org.meshtastic.core.model.Position.degI(lat),
-                    longitude_i = org.meshtastic.core.model.Position.degI(lon),
-                    altitude = 35,
-                    time = nowSeconds.toInt(),
-                    precision_bits = Random.nextInt(10, 19),
-                ),
-            ),
-        )
-
-        // Simulated network data to feed to our app
+    /** Stage 1: send my_info, metadata, config, channels, then config_complete_id. No nodes. */
+    private fun sendStage1ConfigResponse(configId: Int) {
         val packets =
             arrayOf(
-                // MyNodeInfo
                 FromRadio(my_info = ProtoMyNodeInfo(my_node_num = MY_NODE)),
                 FromRadio(
                     metadata = DeviceMetadata(firmware_version = "9.9.9.abcdefg", hw_model = HardwareModel.ANDROID_SIM),
                 ),
-
-                // Fake NodeDB
-                makeNodeInfo(MY_NODE, 32.776665, -96.796989), // dallas
-                makeNodeInfo(MY_NODE + 1, 32.960758, -96.733521), // richardson
                 FromRadio(config = Config(lora = defaultLoRaConfig)),
                 FromRadio(config = Config(lora = defaultLoRaConfig)),
                 FromRadio(channel = defaultChannel),
                 FromRadio(config_complete_id = configId),
+            )
+        packets.forEach { p -> service.handleFromRadio(p.encode()) }
+    }
 
-                // Done with config response, now pretend to receive some text messages
+    /**
+     * Stage 2: send all nodes as a single [NodeInfoBatch], then config_complete_id. After the handshake completes,
+     * simulate live traffic.
+     */
+    private fun sendStage2NodeInfoResponse(configId: Int) {
+        val batch =
+            NodeInfoBatch(
+                items =
+                listOf(
+                    makeSimNodeInfo(MY_NODE, 32.776665, -96.796989), // dallas
+                    makeSimNodeInfo(MY_NODE + 1, 32.960758, -96.733521), // richardson
+                ),
+            )
+        val packets =
+            arrayOf(
+                FromRadio(node_info_batch = batch),
+                FromRadio(config_complete_id = configId),
+
+                // Simulate live traffic after handshake
                 makeTextMessage(MY_NODE + 1),
                 makeNeighborInfo(MY_NODE + 1),
                 makePosition(MY_NODE + 1),
                 makeTelemetry(MY_NODE + 1),
                 makeNodeStatus(MY_NODE + 1),
             )
-
         packets.forEach { p -> service.handleFromRadio(p.encode()) }
     }
 }

@@ -59,6 +59,7 @@ class FromRadioPacketHandlerImpl(
         val myInfo = proto.my_info
         val metadata = proto.metadata
         val nodeInfo = proto.node_info
+        val nodeInfoBatch = proto.node_info_batch
         val configCompleteId = proto.config_complete_id
         val mqttProxyMessage = proto.mqttClientProxyMessage
         val queueStatus = proto.queueStatus
@@ -78,6 +79,10 @@ class FromRadioPacketHandlerImpl(
             metadata != null -> router.value.configFlowManager.handleLocalMetadata(metadata)
             nodeInfo != null -> {
                 router.value.configFlowManager.handleNodeInfo(nodeInfo)
+                serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
+            }
+            nodeInfoBatch != null -> {
+                nodeInfoBatch.items.forEach { info -> router.value.configFlowManager.handleNodeInfo(info) }
                 serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
             }
             configCompleteId != null -> router.value.configFlowManager.handleConfigComplete(configCompleteId)

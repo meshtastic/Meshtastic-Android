@@ -19,8 +19,8 @@ package org.meshtastic.core.repository
 /**
  * Shared constants for the two-stage mesh handshake protocol.
  *
- * Stage 1 (`CONFIG_NONCE`): requests device config, module config, and channels. Stage 2 (`NODE_INFO_NONCE`): requests
- * the full node database.
+ * Stage 1 (`CONFIG_NONCE`): requests device config, module config, and channels. Stage 2 (`BATCH_NODE_INFO_NONCE`):
+ * requests the full node database with batched NodeInfo delivery.
  *
  * Both [MeshConfigFlowManager] (consumer) and [MeshConnectionManager] (sender) reference these.
  */
@@ -28,6 +28,9 @@ object HandshakeConstants {
     /** Nonce sent in `want_config_id` to request config-only (Stage 1). */
     const val CONFIG_NONCE = 69420
 
-    /** Nonce sent in `want_config_id` to request node info only (Stage 2). */
+    /** Nonce sent in `want_config_id` to request node info only — unbatched legacy (Stage 2). */
     const val NODE_INFO_NONCE = 69421
+
+    /** Nonce sent in `want_config_id` to request node info only — batched (Stage 2). */
+    const val BATCH_NODE_INFO_NONCE = 69423
 }
