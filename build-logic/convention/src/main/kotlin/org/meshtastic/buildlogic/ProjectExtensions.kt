@@ -75,8 +75,14 @@ internal fun Project.configureTestOptions() {
         if (name != "testAndroidHostTest") {
             useJUnitPlatform()
         }
-        // Parallelize unit tests at the Gradle fork level
-        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+        // Parallelize unit tests at the Gradle fork level.
+        // In CI, use all available processors; locally use half to keep the machine responsive.
+        val isCi = project.findProperty("ci") == "true"
+        maxParallelForks = if (isCi) {
+            Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
+        } else {
+            (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+        }
         maxHeapSize = "2g"
 
         // JUnit Jupiter parallel execution within each Gradle fork.
