@@ -26,8 +26,9 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ import org.meshtastic.core.resources.wifi_provision_status_failed
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
 
 /** Inline status card matching the web flasher's colored status feedback. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ProvisionStatusCard(provisionStatus: ProvisionStatus, isProvisioning: Boolean) {
     val colors = statusCardColors(provisionStatus, isProvisioning)
@@ -60,7 +62,7 @@ internal fun ProvisionStatusCard(provisionStatus: ProvisionStatus, isProvisionin
             StatusIcon(provisionStatus = provisionStatus, isProvisioning = isProvisioning, tint = colors.second)
             Text(
                 text = statusText(provisionStatus, isProvisioning),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMediumEmphasized,
                 color = colors.second,
             )
         }
@@ -78,10 +80,11 @@ private fun statusCardColors(provisionStatus: ProvisionStatus, isProvisioning: B
     else -> MaterialTheme.colorScheme.surfaceContainerHigh to MaterialTheme.colorScheme.onSurface
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StatusIcon(provisionStatus: ProvisionStatus, isProvisioning: Boolean, tint: Color) {
     when {
-        isProvisioning -> CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = tint)
+        isProvisioning -> LoadingIndicator(modifier = Modifier.size(20.dp), color = tint)
         provisionStatus == ProvisionStatus.Success ->
             Icon(Icons.Rounded.CheckCircle, contentDescription = null, modifier = Modifier.size(20.dp), tint = tint)
         provisionStatus == ProvisionStatus.Failed ->

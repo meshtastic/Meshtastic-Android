@@ -16,8 +16,13 @@
  */
 package org.meshtastic.feature.wifiprovision.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,13 +52,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -112,7 +119,7 @@ import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 
 private const val NETWORK_LIST_MAX_HEIGHT_DP = 240
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")
 @Composable
 fun WifiProvisionScreen(
@@ -216,10 +223,11 @@ private val Phase.isLoading: Boolean
 // ---------------------------------------------------------------------------
 
 /** BLE scanning spinner — shown while searching for a device. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ScanningBleContent() {
     CenteredStatusContent {
-        CircularProgressIndicator(modifier = Modifier.size(48.dp))
+        LoadingIndicator(modifier = Modifier.size(48.dp))
         Spacer(Modifier.height(24.dp))
         Text(stringResource(Res.string.wifi_provision_scanning_ble), style = MaterialTheme.typography.bodyLarge)
     }
@@ -229,6 +237,7 @@ internal fun ScanningBleContent() {
  * Confirmation step shown after BLE device discovery — the Android analog of the web flasher's native BLE pairing
  * prompt. Gives the user a clear "device found" moment before proceeding.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCancel: () -> Unit) {
     CenteredStatusContent {
@@ -241,7 +250,7 @@ internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCa
         Spacer(Modifier.height(24.dp))
         Text(
             stringResource(Res.string.wifi_provision_device_found),
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineSmallEmphasized,
             textAlign = TextAlign.Center,
         )
         if (deviceName != null) {
@@ -269,10 +278,11 @@ internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCa
 }
 
 /** Network scanning spinner — shown during the initial scan when no networks are loaded yet. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ScanningNetworksContent() {
     CenteredStatusContent {
-        CircularProgressIndicator(modifier = Modifier.size(48.dp))
+        LoadingIndicator(modifier = Modifier.size(48.dp))
         Spacer(Modifier.height(24.dp))
         Text(stringResource(Res.string.wifi_provision_scanning_wifi), style = MaterialTheme.typography.bodyLarge)
     }
@@ -282,6 +292,7 @@ internal fun ScanningNetworksContent() {
  * Main configuration screen shown after BLE connection — mirrors the web flasher's connected state. All controls (scan
  * button, network list, SSID/password fields, Apply, status) are on one screen.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "LongParameterList")
 @Composable
 internal fun ConnectedContent(
@@ -315,14 +326,14 @@ internal fun ConnectedContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        // Scan button
-        OutlinedButton(
+        // Scan button — FilledTonalButton for prominent secondary action
+        FilledTonalButton(
             onClick = onScanNetworks,
             enabled = !isScanning && !isProvisioning,
             modifier = Modifier.fillMaxWidth(),
         ) {
             if (isScanning) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                LoadingIndicator(modifier = Modifier.size(18.dp))
             } else {
                 Icon(Icons.Rounded.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
             }
@@ -336,8 +347,12 @@ internal fun ConnectedContent(
             )
         }
 
-        // Network list (scrollable, capped height)
-        if (networks.isNotEmpty()) {
+        // Network list (scrollable, capped height) — animated entrance
+        AnimatedVisibility(
+            visible = networks.isNotEmpty(),
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically(),
+        ) {
             Column {
                 Text(
                     stringResource(Res.string.wifi_provision_available_networks),
@@ -360,7 +375,9 @@ internal fun ConnectedContent(
                     }
                 }
             }
-        } else if (!isScanning) {
+        }
+
+        AnimatedVisibility(visible = networks.isEmpty() && !isScanning, enter = fadeIn(), exit = fadeOut()) {
             Text(
                 stringResource(Res.string.wifi_provision_no_networks),
                 style = MaterialTheme.typography.bodyMedium,
@@ -405,8 +422,12 @@ internal fun ConnectedContent(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // Inline provision status (matches web flasher's status chip)
-        if (provisionStatus != ProvisionStatus.Idle || isProvisioning) {
+        // Inline provision status (matches web flasher's status chip) — animated entrance
+        AnimatedVisibility(
+            visible = provisionStatus != ProvisionStatus.Idle || isProvisioning,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically(),
+        ) {
             ProvisionStatusCard(provisionStatus = provisionStatus, isProvisioning = isProvisioning)
         }
 
@@ -419,11 +440,7 @@ internal fun ConnectedContent(
                 modifier = Modifier.weight(1f),
             ) {
                 if (isProvisioning) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
+                    LoadingIndicator(modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(Res.string.wifi_provision_sending_credentials))
                 } else {
