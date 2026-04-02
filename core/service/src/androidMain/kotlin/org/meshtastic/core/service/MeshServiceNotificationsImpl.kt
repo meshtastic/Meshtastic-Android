@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
@@ -667,7 +668,7 @@ class MeshServiceNotificationsImpl(
     }
 
     private fun createNewNodeSeenNotification(name: String, message: String, nodeNum: Int): Notification {
-        val title = getString(Res.string.new_node_seen).format(name)
+        val title = getString(Res.string.new_node_seen, name)
         val builder =
             commonBuilder(NotificationType.NewNode, createOpenNodeDetailIntent(nodeNum))
                 .setCategory(Notification.CATEGORY_STATUS)
@@ -683,7 +684,7 @@ class MeshServiceNotificationsImpl(
 
     private fun createLowBatteryNotification(node: Node, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
-        val title = getString(Res.string.low_battery_title).format(node.user.short_name)
+        val title = getString(Res.string.low_battery_title, node.user.short_name)
         val batteryLevel = node.deviceMetrics.battery_level ?: 0
         val message = getString(Res.string.low_battery_message, node.user.long_name, batteryLevel)
 
@@ -879,41 +880,45 @@ class MeshServiceNotificationsImpl(
                 parts.add(BULLET + getString(Res.string.local_stats_battery, it))
             }
         }
-        parts.add(BULLET + getString(Res.string.local_stats_nodes).format(num_online_nodes, num_total_nodes))
-        parts.add(BULLET + getString(Res.string.local_stats_uptime).format(formatUptime(uptime_seconds)))
-        parts.add(BULLET + getString(Res.string.local_stats_utilization).format(channel_utilization, air_util_tx))
+        parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
+        parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
+        parts.add(
+            BULLET +
+                getString(
+                    Res.string.local_stats_utilization,
+                    NumberFormatter.format(channel_utilization.toDouble(), 2),
+                    NumberFormatter.format(air_util_tx.toDouble(), 2),
+                ),
+        )
 
         if (heap_free_bytes > 0 || heap_total_bytes > 0) {
             parts.add(
                 BULLET +
                     getString(Res.string.local_stats_heap) +
                     ": " +
-                    getString(Res.string.local_stats_heap_value).format(heap_free_bytes, heap_total_bytes),
+                    getString(Res.string.local_stats_heap_value, heap_free_bytes, heap_total_bytes),
             )
         }
 
         // Traffic Stats
         if (num_packets_tx > 0 || num_packets_rx > 0) {
-            parts.add(
-                BULLET + getString(Res.string.local_stats_traffic).format(num_packets_tx, num_packets_rx, num_rx_dupe),
-            )
+            parts.add(BULLET + getString(Res.string.local_stats_traffic, num_packets_tx, num_packets_rx, num_rx_dupe))
         }
         if (num_tx_relay > 0) {
-            parts.add(BULLET + getString(Res.string.local_stats_relays).format(num_tx_relay, num_tx_relay_canceled))
+            parts.add(BULLET + getString(Res.string.local_stats_relays, num_tx_relay, num_tx_relay_canceled))
         }
 
         // Diagnostic Fields
         val diagnosticParts = mutableListOf<String>()
-        if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise).format(noise_floor))
+        if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise, noise_floor))
         if (num_packets_rx_bad > 0) {
-            diagnosticParts.add(getString(Res.string.local_stats_bad).format(num_packets_rx_bad))
+            diagnosticParts.add(getString(Res.string.local_stats_bad, num_packets_rx_bad))
         }
-        if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped).format(num_tx_dropped))
+        if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped, num_tx_dropped))
 
         if (diagnosticParts.isNotEmpty()) {
             parts.add(
-                BULLET +
-                    getString(Res.string.local_stats_diagnostics_prefix).format(diagnosticParts.joinToString(" | ")),
+                BULLET + getString(Res.string.local_stats_diagnostics_prefix, diagnosticParts.joinToString(" | ")),
             )
         }
 
@@ -923,11 +928,15 @@ class MeshServiceNotificationsImpl(
     private fun DeviceMetrics.formatToString(): String {
         val parts = mutableListOf<String>()
         battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
-        uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime).format(formatUptime(it))) }
+        uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(it))) }
         if (channel_utilization != null || air_util_tx != null) {
             parts.add(
                 BULLET +
-                    getString(Res.string.local_stats_utilization).format(channel_utilization ?: 0f, air_util_tx ?: 0f),
+                    getString(
+                        Res.string.local_stats_utilization,
+                        NumberFormatter.format((channel_utilization ?: 0f).toDouble(), 2),
+                        NumberFormatter.format((air_util_tx ?: 0f).toDouble(), 2),
+                    ),
             )
         }
         return parts.joinToString("\n")

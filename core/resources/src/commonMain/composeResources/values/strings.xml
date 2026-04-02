@@ -29,7 +29,7 @@
 
     <string name="default_mqtt_address" translatable="false">mqtt.meshtastic.org</string>
 
-    <string name="fallback_node_name">Meshtastic</string>
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_title">Filter by</string>
@@ -186,7 +186,6 @@
     <string name="debug">Debug</string>
 
     <string name="elevation_suffix" translatable="false">MSL</string>
-    <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
     <string name="channel">Ch</string>
     <string name="channel_name">Channel Name</string>
@@ -405,8 +404,8 @@
     <string name="currently">Currently:</string>
     <string name="mute_status_always">Always muted</string>
     <string name="mute_status_unmuted">Not muted</string>
-    <string name="mute_status_muted_for_days">Muted for %1$d days, %2$.1f hours</string>
-    <string name="mute_status_muted_for_hours">Muted for %1$.1f hours</string>
+    <string name="mute_status_muted_for_days">Muted for %1$d days, %2$s hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %1$s hours</string>
     <string name="mute_status_label">Mute status</string>
     <string name="mute_add">Mute notifications for '%1$s'?</string>
     <string name="mute_remove">Unmute notifications for '%1$s'?</string>
@@ -1233,7 +1232,7 @@
     <string name="local_stats_battery">Battery: %1$d%</string>
     <string name="local_stats_nodes">Nodes: %1$d online / %2$d total</string>
     <string name="local_stats_uptime">Uptime: %1$s</string>
-    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
+    <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="local_stats_traffic">Traffic: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">Relays: %1$d (Canceled: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnostics: %1$s</string>
