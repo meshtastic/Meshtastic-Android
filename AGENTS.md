@@ -157,13 +157,14 @@ Always run commands in the following order to ensure reliability. Do not attempt
 
 **CI workflow conventions (GitHub Actions):**
 - Reusable CI in `.github/workflows/reusable-check.yml` is structured as four parallel job groups:
-  1. **`lint-check`** — Runs spotless, detekt, Android lint, and KMP smoke compile. Produces `cache_read_only` output for downstream jobs.
+  1. **`lint-check`** — Runs spotless, detekt, Android lint, and KMP smoke compile in a single Gradle invocation. Uses `fetch-depth: 0` (full clone) for spotless ratcheting and version code calculation. Produces `cache_read_only` output and computed `version_code` for downstream jobs.
   2. **`test-shards`** — A 3-shard matrix that runs unit tests in parallel (depends on `lint-check`):
      - `shard-core`: `allTests` for all `core:*` KMP modules.
      - `shard-feature`: `allTests` for all `feature:*` KMP modules.
-     - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`, `mesh_service_example`).
-     Each shard generates its own Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
-  3. **`android-check`** — Builds APKs and runs instrumented tests (depends on `lint-check`).
+      - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`, `mesh_service_example`).
+      Each shard generates its own Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
+      Downstream jobs (test-shards, android-check, build-desktop) use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
+   3. **`android-check`** — Builds APKs and runs instrumented tests (depends on `lint-check`).
   4. **`build-desktop`** — Desktop packaging (depends on `lint-check`).
 - Test sharding uses `fail-fast: false` so a failure in one shard does not cancel the others.
 - JUnit Platform parallel execution is enabled project-wide with classes running sequentially (`junit.jupiter.execution.parallel.mode.classes.default=same_thread`) to avoid `Dispatchers.setMain()` races (JVM-global singleton used by 19+ ViewModel test classes). Cross-module parallelism comes from Gradle forks (`maxParallelForks`).
@@ -177,7 +178,14 @@ Always run commands in the following order to ensure reliability. Do not attempt
   - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). These run only shell scripts or GitHub API calls and benefit from ARM runners' shorter queue times.
   - **`ubuntu-24.04`** — Main Gradle-heavy jobs (CI `lint-check`/`test-shards`/`android-check`, release builds, Dokka, CodeQL, publish, dependency-submission). Pin where possible for reproducibility.
   - **Desktop runners:** Reusable CI uses `ubuntu-24.04` for the `build-desktop` job in `.github/workflows/reusable-check.yml`; release packaging matrix remains `[macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]`.
-- **CI Gradle properties:** `gradle.properties` is tuned for local dev (8g heap, 4g Kotlin daemon). CI uses `.github/ci-gradle.properties`, which the `gradle-setup` composite action copies to `~/.gradle/gradle.properties` before any Gradle invocation. Key CI overrides: `org.gradle.daemon=false` (single-use runners), `kotlin.incremental=false` (fresh checkouts), `-Xmx4g` Gradle heap, `-Xmx2g` Kotlin daemon, VFS watching disabled, workers capped at 4. This follows the nowinandroid `ci-gradle.properties` pattern.
+- **CI Gradle properties:** `gradle.properties` is tuned for local dev (8g heap, 4g Kotlin daemon). CI uses `.github/ci-gradle.properties`, which the `gradle-setup` composite action copies to `~/.gradle/gradle.properties` before any Gradle invocation. Key CI overrides: `org.gradle.daemon=false` (single-use runners), `kotlin.incremental=false` (fresh checkouts), `-Xmx4g` Gradle heap, `-Xmx2g` Kotlin daemon, VFS watching disabled, workers capped at 4, `org.gradle.isolated-projects=true` for better parallelism. Disables unused Android build features (`resvalues`, `shaders`). This follows the nowinandroid `ci-gradle.properties` pattern.
+- **CI optimization strategies (2026):** Applied comprehensive CI optimizations (P0-P3):
+  - **P0 (merged Gradle invocations):** `lint-check` merges spotlessCheck, detekt, android lint, and kmpSmokeCompile into a single Gradle invocation to avoid 3x cold-start overhead. Uses `filter: 'blob:none'` for blobless git clone. Switches submodules from `'recursive'` to boolean (saves overhead on nested submodule discovery).
+  - **P1 (reduced PR overhead):** Added `run_coverage` workflow input (default: true); PRs skip Kover reports via conditional tasks in test-shards matrix. Increased `maxParallelForks` in CI to use all available processors (4 on standard runners) when `ci=true` property is set, vs. half locally for system responsiveness.
+  - **P2 (build feature optimization):** Detekt disables non-essential report formats in CI (html, txt, md); retains only xml + sarif for GitHub annotations. Disables unused Android build features (resvalues, shaders) in `ci-gradle.properties`.
+  - **P3 (structural improvement):** Removed `verify-check-changes-filter` from `validate-and-build` dependencies; it now runs in parallel as a standalone required check instead of gating the main build.
+- **`maxParallelForks` CI logic:** ProjectExtensions.kt line ~79 checks `project.findProperty("ci") == "true"` and uses full available processors in CI (4 forks on std runners) vs. half locally. All CI invocations pass `-Pci=true` to enable this.
+- **Detekt report formats:** Detekt.kt line ~44 checks `project.findProperty("ci") == "true"` and disables html, txt, md reports in CI; only xml + sarif are required for GitHub reporting.
 - **KMP Smoke Compile:** Use `./gradlew kmpSmokeCompile` instead of listing individual module compile tasks. The `kmpSmokeCompile` lifecycle task (registered in `RootConventionPlugin`) auto-discovers all KMP modules and depends on their `compileKotlinJvm` + `compileKotlinIosSimulatorArm64` tasks.
 - **`mavenLocal()` gated:** The `mavenLocal()` repository is disabled by default to prevent CI cache poisoning. For local JitPack testing, pass `-PuseMavenLocal` to Gradle.
 - **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent the agent from getting stuck in an interactive prompt.
