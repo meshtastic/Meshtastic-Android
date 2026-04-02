@@ -179,6 +179,11 @@ configure<ApplicationExtension> {
     bundle { language { enableSplit = false } }
 
     testOptions { unitTests { isIncludeAndroidResources = true } }
+
+    // Handle duplicate META-INF/LICENSE.md files from JUnit Platform libraries
+    packaging {
+        resources.excludes.add("META-INF/LICENSE.md")
+    }
 }
 
 secrets {

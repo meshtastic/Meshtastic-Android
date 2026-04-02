@@ -61,7 +61,7 @@ class FountainCodecTest {
 
         var decodedResult: Pair<ByteArray, Int>? = null
 
-        // Drop the 2nd and 4th packets
+        // Drop the 2nd and 4th packets (simulating packet loss)
         val receivedPackets = packets.filterIndexed { index, _ -> index != 1 && index != 3 }.toMutableList()
 
         for (packet in receivedPackets) {
@@ -72,22 +72,21 @@ class FountainCodecTest {
             }
         }
 
-        // If it didn't decode yet, the fountain codec needs more packets.
-        // In a real scenario it would keep receiving new encoded blocks.
-        // We will encode a few extra blocks manually by simulating what the sender does.
-        // Since encode() generates 'blocksToSend' we just feed them all. If it decodes, great!
-
+        // If we haven't decoded yet, feed all remaining packets we dropped earlier as retransmits
         if (decodedResult == null) {
-            // Let's feed the remaining packets we dropped earlier as "retransmits" or extra blocks
-            val result1 = codec.handleIncomingPacket(packets[1])
-            if (result1 != null) decodedResult = result1
-
-            if (decodedResult == null) {
-                decodedResult = codec.handleIncomingPacket(packets[3])
+            for (i in listOf(1, 3)) {
+                if (i < packets.size) {
+                    val result = codec.handleIncomingPacket(packets[i])
+                    if (result != null) {
+                        decodedResult = result
+                        break
+                    }
+                }
             }
         }
 
         assertNotNull(decodedResult, "Should successfully decode payload after receiving enough packets")
+        assertEquals(transferId, decodedResult.second, "Transfer ID should match")
         assertContentEquals(originalData, decodedResult.first, "Decoded data should match original")
     }
 
