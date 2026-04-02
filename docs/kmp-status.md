@@ -39,7 +39,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 
 **18/20** core modules are KMP with JVM targets. The 2 Android-only modules are intentionally platform-specific, with shared contracts already abstracted into `core:ui/commonMain`.
 
-### Feature Modules (8 total — 8 KMP with JVM, 1 Android-only widget)
+### Feature Modules (9 total — 9 KMP with JVM, 1 Android-only widget)
 
 | Module | UI in commonMain? | Desktop wired? |
 |---|:---:|:---:|
@@ -50,6 +50,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `feature:intro` | — | — | Screens remain in `androidMain`; shared ViewModel only |
 | `feature:map` | — | Placeholder; shared `NodeMapViewModel` and `BaseMapViewModel` only |
 | `feature:firmware` | ✅ | ✅ Fully KMP: Unified OTA, native Secure DFU, USB/UF2, FirmwareRetriever |
+| `feature:wifi-provision` | ✅ | ✅ KMP WiFi provisioning via BLE (Nymea protocol); shared UI and ViewModel |
 | `feature:widget` | ❌ | — | Android-only (Glance appwidgets). Intentional. |
 
 ### Desktop Module
@@ -72,12 +73,12 @@ Working Compose Desktop application with:
 | Area | Score | Notes |
 |---|---|---|
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
-| Shared feature/UI logic | **9/10** | 8 KMP feature modules; firmware fully migrated; `feature:intro` and `feature:map` share ViewModels but UI remains in `androidMain` |
+| Shared feature/UI logic | **9/10** | 9 KMP feature modules; firmware fully migrated; wifi-provision added; `feature:intro` and `feature:map` share ViewModels but UI remains in `androidMain` |
 | Android decoupling | **9/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation, connections, background services, and widgets extracted) |
 | Multi-target readiness | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
-| CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
+| CI confidence | **9/10** | 26 modules validated (including feature:wifi-provision); native release installers automated |
 | DI portability | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
-| Test maturity | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 8 features |
+| Test maturity | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 9 features |
 
 > See [`decisions/architecture-review-2026-03.md`](./decisions/architecture-review-2026-03.md) for the full gap analysis.
 

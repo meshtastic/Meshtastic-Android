@@ -49,6 +49,7 @@ graph TB
   :app -.-> :feature:node
   :app -.-> :feature:settings
   :app -.-> :feature:firmware
+  :app -.-> :feature:wifi-provision
   :app -.-> :feature:widget
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
