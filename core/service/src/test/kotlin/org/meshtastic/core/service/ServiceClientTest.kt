@@ -32,14 +32,14 @@ import dev.mokkery.verify
 import dev.mokkery.verify.exactly
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.fail
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ServiceClientTest {
@@ -88,9 +88,7 @@ class ServiceClientTest {
     @Test
     fun `connect throws exception after two failures`() = runTest {
         every { context.bindService(any(), any(), any()) } returns false
-        assertFailsWith<BindFailedException> {
-            client.connect(context, intent, 0)
-        }
+        assertFailsWith<BindFailedException> { client.connect(context, intent, 0) }
     }
 
     @Test

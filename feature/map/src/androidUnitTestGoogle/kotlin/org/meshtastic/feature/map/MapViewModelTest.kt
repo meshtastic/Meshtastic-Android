@@ -31,8 +31,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -47,6 +45,8 @@ import org.meshtastic.feature.map.model.CustomTileProviderConfig
 import org.meshtastic.feature.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.feature.map.repository.CustomTileProviderRepository
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)

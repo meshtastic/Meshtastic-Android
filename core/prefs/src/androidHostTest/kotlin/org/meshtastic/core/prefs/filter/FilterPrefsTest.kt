@@ -22,9 +22,9 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import java.io.File
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FilterPrefs
+import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -44,10 +44,11 @@ class FilterPrefsTest {
 
     @BeforeTest
     fun setup() {
-        tmpFolder = File.createTempFile("filterPrefsTest", null).apply {
-            delete()
-            mkdirs()
-        }
+        tmpFolder =
+            File.createTempFile("filterPrefsTest", null).apply {
+                delete()
+                mkdirs()
+            }
         dataStore =
             PreferenceDataStoreFactory.create(
                 scope = testScope,
@@ -65,9 +66,8 @@ class FilterPrefsTest {
     @Test fun `filterEnabled defaults to false`() = testScope.runTest { assertFalse(filterPrefs.filterEnabled.value) }
 
     @Test
-    fun `filterWords defaults to empty set`() = testScope.runTest {
-        assertTrue(filterPrefs.filterWords.value.isEmpty())
-    }
+    fun `filterWords defaults to empty set`() =
+        testScope.runTest { assertTrue(filterPrefs.filterWords.value.isEmpty()) }
 
     @Test
     fun `setting filterEnabled updates preference`() = testScope.runTest {

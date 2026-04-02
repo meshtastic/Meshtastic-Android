@@ -17,13 +17,13 @@
 package org.meshtastic.feature.map
 
 import android.database.sqlite.SQLiteDatabase
-import kotlin.test.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.File
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class MBTilesProviderTest {

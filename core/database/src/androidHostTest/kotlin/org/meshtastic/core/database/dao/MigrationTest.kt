@@ -22,7 +22,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okio.ByteString.Companion.toByteString
-import kotlin.test.assertEquals
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -36,6 +35,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
 import org.robolectric.annotation.Config
+import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])

@@ -16,9 +16,9 @@
  */
 package org.meshtastic.app.ui
 
+import org.meshtastic.core.model.util.getInitials
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.meshtastic.core.model.util.getInitials
 
 class UIUnitTest {
     @Test

@@ -16,12 +16,12 @@
  */
 package org.meshtastic.app.ui.metrics
 
-import kotlin.math.abs
-import kotlin.test.Test
-import kotlin.test.assertTrue
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Telemetry
+import kotlin.math.abs
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class EnvironmentMetricsTest {
 
@@ -67,14 +67,11 @@ class EnvironmentMetricsTest {
         val resultTelemetry = processedTelemetries.first()
 
         assertTrue(
-            abs(
-                expectedTemperatureFahrenheit - (resultTelemetry.environment_metrics?.temperature ?: 0f),
-            ) < 0.01f,
+            abs(expectedTemperatureFahrenheit - (resultTelemetry.environment_metrics?.temperature ?: 0f)) < 0.01f,
         )
         assertTrue(
-            abs(
-                expectedSoilTemperatureFahrenheit - (resultTelemetry.environment_metrics?.soil_temperature ?: 0f),
-            ) < 0.01f,
+            abs(expectedSoilTemperatureFahrenheit - (resultTelemetry.environment_metrics?.soil_temperature ?: 0f)) <
+                0.01f,
         )
     }
 }

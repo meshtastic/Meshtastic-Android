@@ -22,9 +22,9 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import java.io.File
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NotificationPrefs
+import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -43,10 +43,11 @@ class NotificationPrefsTest {
 
     @BeforeTest
     fun setup() {
-        tmpFolder = File.createTempFile("notificationPrefsTest", null).apply {
-            delete()
-            mkdirs()
-        }
+        tmpFolder =
+            File.createTempFile("notificationPrefsTest", null).apply {
+                delete()
+                mkdirs()
+            }
         dataStore =
             PreferenceDataStoreFactory.create(
                 scope = testScope,
@@ -65,14 +66,12 @@ class NotificationPrefsTest {
     fun `messagesEnabled defaults to true`() = testScope.runTest { assertTrue(notificationPrefs.messagesEnabled.value) }
 
     @Test
-    fun `nodeEventsEnabled defaults to true`() = testScope.runTest {
-        assertTrue(notificationPrefs.nodeEventsEnabled.value)
-    }
+    fun `nodeEventsEnabled defaults to true`() =
+        testScope.runTest { assertTrue(notificationPrefs.nodeEventsEnabled.value) }
 
     @Test
-    fun `lowBatteryEnabled defaults to true`() = testScope.runTest {
-        assertTrue(notificationPrefs.lowBatteryEnabled.value)
-    }
+    fun `lowBatteryEnabled defaults to true`() =
+        testScope.runTest { assertTrue(notificationPrefs.lowBatteryEnabled.value) }
 
     @Test
     fun `setting messagesEnabled updates preference`() = testScope.runTest {
