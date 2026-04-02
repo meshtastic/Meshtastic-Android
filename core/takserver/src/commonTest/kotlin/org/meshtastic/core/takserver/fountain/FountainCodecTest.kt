@@ -26,10 +26,11 @@ import kotlin.test.assertTrue
 
 class FountainCodecTest {
 
-    private val codec = FountainCodec()
+    private fun createCodec() = FountainCodec()
 
     @Test
     fun `test encode and decode small payload`() {
+        val codec = createCodec()
         val originalData = "Hello, TAK! This is a test payload.".encodeToByteArray()
         val transferId = codec.generateTransferId()
 
@@ -52,6 +53,7 @@ class FountainCodecTest {
 
     @Test
     fun `test encode and decode larger payload with packet loss`() {
+        val codec = createCodec()
         // Create a payload larger than BLOCK_SIZE (220 bytes)
         val originalData = ByteArray(1024) { (it % 256).toByte() }
         val transferId = codec.generateTransferId()
@@ -78,6 +80,7 @@ class FountainCodecTest {
 
     @Test
     fun `test build and parse ACK`() {
+        val codec = createCodec()
         val transferId = 123456
         val type = FountainConstants.ACK_TYPE_COMPLETE
         val received = 5
@@ -98,6 +101,7 @@ class FountainCodecTest {
 
     @Test
     fun `test invalid packet handling`() {
+        val codec = createCodec()
         val invalidPacket = byteArrayOf(0x00, 0x01, 0x02, 0x03)
         assertFalse(codec.isFountainPacket(invalidPacket), "Should reject invalid magic bytes")
         assertNull(codec.parseDataHeader(invalidPacket), "Should not parse invalid header")
