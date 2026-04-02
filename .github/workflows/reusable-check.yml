@@ -44,13 +44,9 @@ env:
   GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
   GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
   GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
-  # CI JVM tuning: override gradle.properties values (8g heap + 4g Kotlin daemon)
-  # that exceed the 7GB RAM on ubuntu-24.04 standard runners.
-  GRADLE_OPTS: >-
-    -Dorg.gradle.jvmargs=-Xmx4g -XX:+UseParallelGC -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8
-    -Dorg.gradle.vfs.watch=false
-    -Dorg.gradle.workers.max=4
-    -Dkotlin.daemon.jvm.options=-Xmx2g -XX:+UseParallelGC
+  # Fallback VERSION_CODE for the lint-check job itself (which computes the real
+  # value from git). Downstream jobs override this with the git-derived value.
+  VERSION_CODE: ${{ github.run_number }}
 
 jobs:
   # ── Lint & Static Analysis ──────────────────────────────────────────
@@ -61,6 +57,7 @@ jobs:
     timeout-minutes: 30
     outputs:
       cache_read_only: ${{ steps.cache_config.outputs.cache_read_only }}
+      version_code: ${{ steps.version_code.outputs.version_code }}
 
     steps:
       - name: Checkout code
@@ -78,6 +75,15 @@ jobs:
           else
             echo "cache_read_only=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Calculate version code from git commit count
+        id: version_code
+        shell: bash
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2 || echo 0)
+          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -108,6 +114,8 @@ jobs:
     timeout-minutes: 45
     needs: lint-check
     if: inputs.run_unit_tests == true
+    env:
+      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
     strategy:
       fail-fast: false
       matrix:
@@ -180,7 +188,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: 'recursive'
 
       - name: Gradle Setup
@@ -230,6 +238,8 @@ jobs:
       contents: read
     timeout-minutes: 60
     needs: lint-check
+    env:
+      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
     strategy:
       fail-fast: true
       matrix:
@@ -239,7 +249,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: 'recursive'
 
       - name: Gradle Setup
@@ -347,17 +357,19 @@ jobs:
   # ── Desktop Build ───────────────────────────────────────────────────
   build-desktop:
     name: Build Desktop Debug
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 60
     needs: lint-check
+    env:
+      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           submodules: 'recursive'
 
       - name: Gradle Setup

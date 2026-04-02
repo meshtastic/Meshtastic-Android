@@ -13,6 +13,10 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Copy CI Gradle properties
+      shell: bash
+      run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+
     - name: Validate Gradle Wrapper
       uses: gradle/actions/wrapper-validation@v6
 
