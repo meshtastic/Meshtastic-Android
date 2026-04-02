@@ -685,7 +685,7 @@ class MeshServiceNotificationsImpl(
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
         val title = getString(Res.string.low_battery_title).format(node.user.short_name)
         val batteryLevel = node.deviceMetrics.battery_level ?: 0
-        val message = getString(Res.string.low_battery_message).format(node.user.long_name, batteryLevel)
+        val message = getString(Res.string.low_battery_message, node.user.long_name, batteryLevel)
 
         return commonBuilder(type, createOpenNodeDetailIntent(node.num))
             .setCategory(Notification.CATEGORY_STATUS)
@@ -876,7 +876,7 @@ class MeshServiceNotificationsImpl(
             if (it > MAX_BATTERY_LEVEL) {
                 parts.add(BULLET + getString(Res.string.powered))
             } else {
-                parts.add(BULLET + getString(Res.string.local_stats_battery).format(it))
+                parts.add(BULLET + getString(Res.string.local_stats_battery, it))
             }
         }
         parts.add(BULLET + getString(Res.string.local_stats_nodes).format(num_online_nodes, num_total_nodes))
@@ -922,7 +922,7 @@ class MeshServiceNotificationsImpl(
 
     private fun DeviceMetrics.formatToString(): String {
         val parts = mutableListOf<String>()
-        battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery).format(it)) }
+        battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
         uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime).format(formatUptime(it))) }
         if (channel_utilization != null || air_util_tx != null) {
             parts.add(

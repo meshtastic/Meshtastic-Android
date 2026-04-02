@@ -38,7 +38,7 @@ import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 data class WifiProvisionUiState(
     val phase: Phase = Phase.Idle,
     val networks: List<WifiNetwork> = emptyList(),
-    val errorMessage: String? = null,
+    val error: WifiProvisionError? = null,
     /** Name of the BLE device we connected to, shown in the DeviceFound confirmation. */
     val deviceName: String? = null,
     /** Provisioning outcome shown as inline status (matches web flasher pattern). */
@@ -69,6 +69,26 @@ data class WifiProvisionUiState(
         Success,
         Failed,
     }
+}
+
+/**
+ * Typed error categories for the WiFi provisioning flow.
+ *
+ * Formatted into user-visible strings in the UI layer using string resources, keeping the ViewModel free of
+ * locale-specific text.
+ */
+sealed interface WifiProvisionError {
+    /** Detail message from the underlying exception (language-agnostic, typically from the BLE stack). */
+    val detail: String
+
+    /** BLE connection to the provisioning device failed. */
+    data class ConnectFailed(override val detail: String) : WifiProvisionError
+
+    /** WiFi network scan on the device failed. */
+    data class ScanFailed(override val detail: String) : WifiProvisionError
+
+    /** Sending WiFi credentials to the device failed. */
+    data class ProvisionFailed(override val detail: String) : WifiProvisionError
 }
 
 // ---------------------------------------------------------------------------
@@ -103,7 +123,7 @@ class WifiProvisionViewModel(
      * @param address Optional MAC address to target a specific device.
      */
     fun connectToDevice(address: String? = null) {
-        _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, errorMessage = null) }
+        _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, error = null) }
 
         viewModelScope.launch {
             val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory)
@@ -120,7 +140,7 @@ class WifiProvisionViewModel(
                     _uiState.update {
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Idle,
-                            errorMessage = "Could not connect: ${e.message}",
+                            error = WifiProvisionError.ConnectFailed(e.message ?: "Unknown error"),
                         )
                     }
                 }
@@ -151,7 +171,7 @@ class WifiProvisionViewModel(
         _uiState.update {
             it.copy(
                 phase = WifiProvisionUiState.Phase.Provisioning,
-                errorMessage = null,
+                error = null,
                 provisionStatus = WifiProvisionUiState.ProvisionStatus.Idle,
             )
         }
@@ -173,7 +193,7 @@ class WifiProvisionViewModel(
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Connected,
                             provisionStatus = WifiProvisionUiState.ProvisionStatus.Failed,
-                            errorMessage = result.message,
+                            error = WifiProvisionError.ProvisionFailed(result.message),
                         )
                     }
                 }
@@ -194,7 +214,7 @@ class WifiProvisionViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.launch { service?.close() }
+        service?.cancel()
     }
 
     // region Private helpers
@@ -214,7 +234,7 @@ class WifiProvisionViewModel(
                 _uiState.update {
                     it.copy(
                         phase = WifiProvisionUiState.Phase.Connected,
-                        errorMessage = "Failed to load networks: ${e.message}",
+                        error = WifiProvisionError.ScanFailed(e.message ?: "Unknown error"),
                     )
                 }
             }

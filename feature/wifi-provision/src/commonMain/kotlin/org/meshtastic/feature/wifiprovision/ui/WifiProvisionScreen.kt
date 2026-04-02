@@ -40,6 +40,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -83,12 +85,16 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.apply
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.hide_password
 import org.meshtastic.core.resources.password
+import org.meshtastic.core.resources.show_password
 import org.meshtastic.core.resources.wifi_provision_available_networks
+import org.meshtastic.core.resources.wifi_provision_connect_failed
 import org.meshtastic.core.resources.wifi_provision_description
 import org.meshtastic.core.resources.wifi_provision_device_found
 import org.meshtastic.core.resources.wifi_provision_device_found_detail
 import org.meshtastic.core.resources.wifi_provision_no_networks
+import org.meshtastic.core.resources.wifi_provision_scan_failed
 import org.meshtastic.core.resources.wifi_provision_scan_networks
 import org.meshtastic.core.resources.wifi_provision_scanning_ble
 import org.meshtastic.core.resources.wifi_provision_scanning_wifi
@@ -97,6 +103,7 @@ import org.meshtastic.core.resources.wifi_provision_signal_strength
 import org.meshtastic.core.resources.wifi_provision_ssid_label
 import org.meshtastic.core.resources.wifi_provision_ssid_placeholder
 import org.meshtastic.core.resources.wifi_provisioning
+import org.meshtastic.feature.wifiprovision.WifiProvisionError
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.ProvisionStatus
@@ -116,7 +123,17 @@ fun WifiProvisionScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(uiState.errorMessage) { uiState.errorMessage?.let { snackbarHostState.showSnackbar(it) } }
+    val errorMessage =
+        uiState.error?.let { error ->
+            when (error) {
+                is WifiProvisionError.ConnectFailed ->
+                    stringResource(Res.string.wifi_provision_connect_failed, error.detail)
+                is WifiProvisionError.ScanFailed -> stringResource(Res.string.wifi_provision_scan_failed, error.detail)
+                is WifiProvisionError.ProvisionFailed -> error.detail
+            }
+        }
+
+    LaunchedEffect(uiState.error) { errorMessage?.let { snackbarHostState.showSnackbar(it) } }
     LaunchedEffect(Unit) { viewModel.connectToDevice(address) }
 
     Scaffold(
@@ -372,7 +389,15 @@ internal fun ConnectedContent(
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Text(if (passwordVisible) "Hide" else "Show", style = MaterialTheme.typography.labelSmall)
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                        contentDescription =
+                        if (passwordVisible) {
+                            stringResource(Res.string.hide_password)
+                        } else {
+                            stringResource(Res.string.show_password)
+                        },
+                    )
                 }
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),

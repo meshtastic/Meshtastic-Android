@@ -64,7 +64,7 @@ internal object NymeaPacketCodec {
         fun feed(bytes: ByteArray): String? {
             buffer.append(bytes.decodeToString())
             return if (buffer.endsWith(STREAM_TERMINATOR)) {
-                val message = buffer.trimEnd(STREAM_TERMINATOR).toString()
+                val message = buffer.dropLast(1).toString()
                 buffer.clear()
                 message
             } else {

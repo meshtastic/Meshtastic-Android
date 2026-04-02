@@ -209,6 +209,17 @@ class NymeaWifiService(
         serviceScope.cancel()
     }
 
+    /**
+     * Synchronous teardown — cancels the service scope (and its child BLE connection) without suspending.
+     *
+     * Use this from `ViewModel.onCleared()` where `viewModelScope` is already cancelled and launching a new coroutine
+     * is not possible.
+     */
+    fun cancel() {
+        reassembler.reset()
+        serviceScope.cancel()
+    }
+
     // endregion
 
     // region Internal helpers
@@ -226,8 +237,6 @@ class NymeaWifiService(
 
     /** Wait up to [RESPONSE_TIMEOUT_MS] for a complete JSON response from the notification channel. */
     private suspend fun waitForResponse(): String = withTimeout(RESPONSE_TIMEOUT_MS) { responseChannel.receive() }
-
-    // endregion
 
     private fun nymeaErrorMessage(code: Int): String = when (code) {
         NymeaBleConstants.RESPONSE_INVALID_COMMAND -> "Invalid command"

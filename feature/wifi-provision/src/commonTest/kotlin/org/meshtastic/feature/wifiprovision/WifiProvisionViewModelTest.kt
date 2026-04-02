@@ -36,6 +36,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -78,7 +79,7 @@ class WifiProvisionViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(Phase.Idle, state.phase)
         assertTrue(state.networks.isEmpty())
-        assertNull(state.errorMessage)
+        assertNull(state.error)
         assertNull(state.deviceName)
         assertEquals(ProvisionStatus.Idle, state.provisionStatus)
     }
@@ -105,7 +106,7 @@ class WifiProvisionViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(Phase.DeviceFound, state.phase)
         assertEquals("mpwrd-nm-1234", state.deviceName)
-        assertNull(state.errorMessage)
+        assertNull(state.error)
     }
 
     @Test
@@ -128,7 +129,7 @@ class WifiProvisionViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(Phase.Idle, state.phase)
-        assertTrue(state.errorMessage != null, "Error message should be set")
+        assertIs<WifiProvisionError.ConnectFailed>(state.error)
     }
 
     @Test
@@ -140,7 +141,8 @@ class WifiProvisionViewModelTest {
 
         val state = viewModel.uiState.value
         assertEquals(Phase.Idle, state.phase)
-        assertTrue(state.errorMessage?.contains("BLE unavailable") == true)
+        val error = assertIs<WifiProvisionError.ConnectFailed>(state.error)
+        assertTrue(error.detail.contains("BLE unavailable"))
     }
 
     // -----------------------------------------------------------------------
@@ -250,7 +252,7 @@ class WifiProvisionViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(Phase.Connected, state.phase)
         assertEquals(ProvisionStatus.Failed, state.provisionStatus)
-        assertTrue(state.errorMessage != null)
+        assertIs<WifiProvisionError.ProvisionFailed>(state.error)
     }
 
     @Test

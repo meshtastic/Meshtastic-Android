@@ -504,7 +504,7 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
     <string name="i_know_what_i_m_doing">I know what I'm doing.</string>
-    <string name="low_battery_message">Node %1$s has a low battery (%2$d%%)</string>
+    <string name="low_battery_message">Node %1$s has a low battery (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
     <string name="low_battery_title">Low battery: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
@@ -1081,7 +1081,7 @@
     <string name="firmware_update_stable">Stable</string>
     <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_disconnect_warning">Note: This will temporarily disconnect your device during the update.</string>
-    <string name="firmware_update_downloading_percent">Downloading firmware... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Downloading firmware... %1$d%</string>
     <string name="firmware_update_error">Error: %1$s</string>
     <string name="firmware_update_retry">Retry</string>
     <string name="firmware_update_success">Update Successful!</string>
@@ -1132,7 +1132,7 @@
     <string name="firmware_update_dfu_error">DFU Error: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU Aborted</string>
     <string name="firmware_update_node_info_missing">Node user information is missing.</string>
-    <string name="firmware_update_battery_low">Battery too low (%1$d%%). Please charge your device before updating.</string>
+    <string name="firmware_update_battery_low">Battery too low (%1$d%). Please charge your device before updating.</string>
     <string name="firmware_update_retrieval_failed">Could not retrieve firmware file.</string>
     <string name="firmware_update_nordic_failed">Nordic DFU Update failed</string>
     <string name="firmware_update_usb_failed">USB Update failed</string>
@@ -1144,7 +1144,7 @@
     <string name="firmware_update_checking_version">Checking device version...</string>
     <string name="firmware_update_starting_ota">Starting OTA update...</string>
     <string name="firmware_update_uploading">Uploading firmware...</string>
-    <string name="firmware_update_uploading_progress">Uploading firmware... %1$d%% (%2$s)</string>
+    <string name="firmware_update_uploading_progress">Uploading firmware... %1$d% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Rebooting device...</string>
     <string name="firmware_update_channel_name">Firmware Update</string>
     <string name="firmware_update_channel_description">Firmware update status</string>
@@ -1230,7 +1230,7 @@
 
     <string name="map_style_selection">Map style selection</string>
 
-    <string name="local_stats_battery">Battery: %1$d%%</string>
+    <string name="local_stats_battery">Battery: %1$d%</string>
     <string name="local_stats_nodes">Nodes: %1$d online / %2$d total</string>
     <string name="local_stats_uptime">Uptime: %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
@@ -1339,9 +1339,9 @@
     <string name="wifi_provision_no_networks">No networks found</string>
     <string name="wifi_provision_no_networks_detail">Make sure the device is powered on and within range.</string>
     <string name="wifi_provision_connect_failed">Could not connect: %1$s</string>
-    <string name="wifi_provision_scan_failed">Failed to scan for WiFi networks.</string>
+    <string name="wifi_provision_scan_failed">Failed to scan for WiFi networks: %1$s</string>
     <string name="wifi_provision_refresh">Refresh</string>
-    <string name="wifi_provision_signal_strength">%1$d%%</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_available_networks">Available Networks</string>
     <string name="wifi_provision_ssid_label">Network Name (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Enter or select a network</string>
