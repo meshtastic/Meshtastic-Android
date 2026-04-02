@@ -79,12 +79,14 @@ internal fun Project.configureTestOptions() {
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
         maxHeapSize = "2g"
 
-        // JUnit Jupiter parallel execution: run test classes concurrently within each fork.
-        // "same_thread" for methods keeps individual test classes sequential (safe default),
-        // while "concurrent" for classes runs multiple test classes in parallel.
+        // JUnit Jupiter parallel execution within each Gradle fork.
+        // Classes run sequentially ("same_thread") because 19+ ViewModel test classes use
+        // Dispatchers.setMain() — a JVM-global singleton that races when classes execute
+        // concurrently in the same JVM. Cross-module parallelism via Gradle forks (above)
+        // already provides the primary test speedup.
         systemProperty("junit.jupiter.execution.parallel.enabled", "true")
         systemProperty("junit.jupiter.execution.parallel.mode.default", "same_thread")
-        systemProperty("junit.jupiter.execution.parallel.mode.classes.default", "concurrent")
+        systemProperty("junit.jupiter.execution.parallel.mode.classes.default", "same_thread")
         systemProperty("junit.jupiter.execution.parallel.config.strategy", "dynamic")
         systemProperty("junit.jupiter.execution.parallel.config.dynamic.factor", "1")
 

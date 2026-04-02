@@ -166,7 +166,7 @@ Always run commands in the following order to ensure reliability. Do not attempt
   3. **`android-check`** — Builds APKs and runs instrumented tests (depends on `lint-check`).
   4. **`build-desktop`** — Desktop packaging (depends on `lint-check`).
 - Test sharding uses `fail-fast: false` so a failure in one shard does not cancel the others.
-- JUnit Platform parallel execution is enabled project-wide: test *classes* run concurrently within each Gradle fork (`junit.jupiter.execution.parallel.mode.classes.default=concurrent`), while test *methods* within a class run sequentially (`mode.default=same_thread`).
+- JUnit Platform parallel execution is enabled project-wide with classes running sequentially (`junit.jupiter.execution.parallel.mode.classes.default=same_thread`) to avoid `Dispatchers.setMain()` races (JVM-global singleton used by 19+ ViewModel test classes). Cross-module parallelism comes from Gradle forks (`maxParallelForks`).
 - `test-retry` plugin (maxRetries=2, maxFailures=10) is applied to all module types: `AndroidApplicationConventionPlugin`, `AndroidLibraryConventionPlugin`, and `KmpLibraryConventionPlugin`.
 - Android matrix job runs explicit assemble tasks for `app` and `mesh_service_example`; instrumentation is enabled by input and matrix API.
 - Prefer explicit Gradle task paths in CI (for example `app:lintFdroidDebug`, `app:connectedGoogleDebugAndroidTest`) instead of shorthand tasks like `lintDebug`.
