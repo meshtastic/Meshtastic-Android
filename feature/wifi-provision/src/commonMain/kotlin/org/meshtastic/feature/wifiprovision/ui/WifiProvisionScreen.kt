@@ -23,6 +23,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -77,6 +79,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.ImeAction
@@ -86,6 +89,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
@@ -93,6 +97,7 @@ import org.meshtastic.core.resources.apply
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.hide_password
+import org.meshtastic.core.resources.img_mpwrd_logo
 import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.show_password
 import org.meshtastic.core.resources.wifi_provision_available_networks
@@ -100,6 +105,7 @@ import org.meshtastic.core.resources.wifi_provision_connect_failed
 import org.meshtastic.core.resources.wifi_provision_description
 import org.meshtastic.core.resources.wifi_provision_device_found
 import org.meshtastic.core.resources.wifi_provision_device_found_detail
+import org.meshtastic.core.resources.wifi_provision_mpwrd_disclaimer
 import org.meshtastic.core.resources.wifi_provision_no_networks
 import org.meshtastic.core.resources.wifi_provision_scan_failed
 import org.meshtastic.core.resources.wifi_provision_scan_networks
@@ -110,6 +116,7 @@ import org.meshtastic.core.resources.wifi_provision_signal_strength
 import org.meshtastic.core.resources.wifi_provision_ssid_label
 import org.meshtastic.core.resources.wifi_provision_ssid_placeholder
 import org.meshtastic.core.resources.wifi_provisioning
+import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.feature.wifiprovision.WifiProvisionError
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
@@ -163,6 +170,8 @@ fun WifiProvisionScreen(
             } else {
                 Spacer(Modifier.height(4.dp))
             }
+
+            MpwrdDisclaimerBanner()
 
             Crossfade(targetState = screenKey(uiState), label = "wifi_provision") { key ->
                 when (key) {
@@ -479,6 +488,40 @@ internal fun NetworkRow(network: WifiNetwork, isSelected: Boolean, onClick: () -
         colors = ListItemDefaults.colors(containerColor = containerColor),
         modifier = Modifier.clickable(onClick = onClick),
     )
+}
+
+// ---------------------------------------------------------------------------
+// mPWRD-OS disclaimer banner
+// ---------------------------------------------------------------------------
+
+private const val MPWRD_LOGO_SIZE_DP = 40
+
+/** Branded disclaimer banner shown at the top of the provisioning screen. */
+@Composable
+internal fun MpwrdDisclaimerBanner() {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.img_mpwrd_logo),
+                contentDescription = "mPWRD-OS",
+                modifier = Modifier.size(MPWRD_LOGO_SIZE_DP.dp).clip(RoundedCornerShape(8.dp)),
+            )
+            AutoLinkText(
+                text = stringResource(Res.string.wifi_provision_mpwrd_disclaimer),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

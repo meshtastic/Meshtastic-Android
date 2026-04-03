@@ -940,7 +940,7 @@
     <string name="pax_metrics_log">PAX Metrics</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
-    <string name="wifi_devices">WiFi Devices</string>
+    <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
     <string name="ble_devices">Bluetooth Devices</string>
     <string name="bluetooth_paired_devices">Paired devices</string>
     <string name="connected_device">Connected Device</string>
@@ -1327,8 +1327,9 @@
 
     <string name="connect">Connect</string>
     <string name="done">Done</string>
-    <string name="wifi_provisioning">WiFi Provisioning</string>
-    <string name="wifi_provision_description">Provision WiFi credentials to your Meshtastic device via Bluetooth.</string>
+    <string name="wifi_provisioning">Wi-Fi Provisioning for mPWRD-OS</string>
+    <string name="wifi_provision_description">Provision Wi-Fi credentials to your mPWRD-OS device via Bluetooth.</string>
+    <string name="wifi_provision_mpwrd_disclaimer">Learn more about the mPWRD-OS project\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_scanning_ble">Searching for device…</string>
     <string name="wifi_provision_device_found">Device found</string>
     <string name="wifi_provision_device_found_detail">Ready to scan for WiFi networks.</string>
