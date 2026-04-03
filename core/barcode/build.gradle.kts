@@ -26,9 +26,6 @@ configure<LibraryExtension> {
     namespace = "org.meshtastic.core.barcode"
 
     testOptions { unitTests { isIncludeAndroidResources = true } }
-
-    // Handle duplicate META-INF/LICENSE.md files from JUnit Platform libraries
-    packaging { resources.excludes.add("META-INF/LICENSE.md") }
 }
 
 dependencies {

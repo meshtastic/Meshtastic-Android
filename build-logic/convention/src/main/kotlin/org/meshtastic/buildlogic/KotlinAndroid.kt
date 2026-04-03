@@ -56,6 +56,14 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
         }
         compileOptions.sourceCompatibility = javaVersion
         compileOptions.targetCompatibility = javaVersion
+
+        // Exclude duplicate META-INF license files shipped by JUnit Platform JARs
+        packaging.resources.excludes.addAll(
+            listOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+            ),
+        )
     }
 
     configureMokkery()
