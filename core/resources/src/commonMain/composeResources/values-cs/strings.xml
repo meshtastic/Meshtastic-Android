@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
     <string name="node_filter_title">Filtrovat podle</string>
@@ -325,8 +324,6 @@
     <string name="mute_always">Vždy</string>
     <string name="mute_status_always">Trvale ztlumeno</string>
     <string name="mute_status_unmuted">Neztlumeno</string>
-    <string name="mute_status_muted_for_days">Ztlumeno na %1$d dní, %2$.1f hodiny</string>
-    <string name="mute_status_muted_for_hours">Ztlumeno na %1$.1f hodin</string>
     <string name="mute_status_label">Stav ztlumení</string>
     <string name="mute_add">Ztlumit oznámení pro '%1$s'?</string>
     <string name="mute_remove">Zrušit ztlumení oznámení pro '%1$s'?</string>
@@ -418,7 +415,6 @@
     <string name="are_you_sure">Jste si jistý?</string>
     <string name="router_role_confirmation_text"><![CDATA[Přečetl jsem si <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">dokumentaci o rolích zařízení</a> a blogový příspěvek o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">výběru správné role zařízení</a>.]]></string>
     <string name="i_know_what_i_m_doing">Vím co dělám.</string>
-    <string name="low_battery_message">Uzel %1$s má nízký stav baterie (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Upozornění na nízký stav baterie</string>
     <string name="low_battery_title">Nízký stav baterie: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornění na nízký stav baterie (oblíbené uzly)</string>
@@ -791,7 +787,6 @@
     <string name="clear_selection">Zrušit výběr</string>
     <string name="message_input_label">Zpráva</string>
     <string name="type_a_message">Napište zprávu</string>
-    <string name="wifi_devices">WiFi zařízení</string>
     <string name="ble_devices">Zařízení bluetooth</string>
     <string name="bluetooth_paired_devices">Spárovaná zařízení</string>
     <string name="connected_device">Připojená zařízení</string>
@@ -901,7 +896,7 @@
     <string name="firmware_update_stable">Stabilní</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_disconnect_warning">Poznámka: Během aktualizace dojde dočasně k odpojení vašeho zařízení.</string>
-    <string name="firmware_update_downloading_percent">Stahování firmware... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Stahování firmware... %1$d%</string>
     <string name="firmware_update_error">Chyba: %1$s</string>
     <string name="firmware_update_retry">Zkusit znovu</string>
     <string name="firmware_update_success">Aktualizace byla úspěšná!</string>
@@ -950,7 +945,6 @@
     <string name="firmware_update_dfu_error">Chyba DFU: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU přerušena</string>
     <string name="firmware_update_node_info_missing">Chybí informace o uživateli uzlu.</string>
-    <string name="firmware_update_battery_low">Baterie je příliš nízká (%1$d%%). Před aktualizací nabijte zařízení.</string>
     <string name="firmware_update_retrieval_failed">Nelze načíst soubor firmwaru.</string>
     <string name="firmware_update_nordic_failed">Aktualizace Nordic DFU selhala</string>
     <string name="firmware_update_usb_failed">Aktualizace přes USB selhala</string>
@@ -962,7 +956,6 @@
     <string name="firmware_update_checking_version">Kontroluji verzi zařízení...</string>
     <string name="firmware_update_starting_ota">Spouštění aktualizace OTA...</string>
     <string name="firmware_update_uploading">Nahrávám firmware...</string>
-    <string name="firmware_update_uploading_progress">Nahrávám firmware... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Restartuji zařízení...</string>
     <string name="firmware_update_channel_name">Aktualizace firmware</string>
     <string name="firmware_update_channel_description">Stav aktualizace firmware</string>
@@ -1031,10 +1024,8 @@
     <string name="bluetooth_feature_discovery_description">Najděte a identifikujte zařízení Meshtastic ve svém okolí.</string>
     <string name="bluetooth_feature_config">Nastavení</string>
     <string name="bluetooth_feature_config_description">Bezdrátová správa nastavení a kanálů zařízení.</string>
-    <string name="local_stats_battery">Baterie: %1$d %%</string>
     <string name="local_stats_nodes">Uzly: %1$d online / %2$d celkem</string>
     <string name="local_stats_uptime">Doba provozu: %1$s</string>
-    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
     <string name="local_stats_traffic">Provoz: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
     <string name="local_stats_bad">Poškozené %1$d</string>
@@ -1054,4 +1045,6 @@
     <string name="ready_for_firmware_update">Připraveno k aktualizaci firmware</string>
     <string name="note">Poznámka</string>
     <string name="firmware_charge_warning">Ujistěte se, že je vaše zařízení plně nabito před spuštěním aktualizace firmware. Během aktualizace zařízení neodpojujte nebo nevypínejte.</string>
+    <string name="connect">Připojit</string>
+    <string name="done">Hotovo</string>
 </resources>

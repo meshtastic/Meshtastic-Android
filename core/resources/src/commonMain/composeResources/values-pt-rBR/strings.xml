@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">limpar filtro de dispositivos</string>
     <string name="node_filter_include_unknown">Incluir desconhecido</string>
@@ -288,7 +287,6 @@
     <string name="are_you_sure">Você tem certeza?</string>
     <string name="router_role_confirmation_text"><![CDATA[Eu li a documentação <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">do papel do dispositivo</a> e o post do ‘blog’ sobre <a href="http://meshtastic.org/‘blog’/choosing-the-right-device-role">Escolha do papel correto do dispositivo </a>.]]></string>
     <string name="i_know_what_i_m_doing">Eu sei o que estou fazendo.</string>
-    <string name="low_battery_message">O nó %1$s está com bateria fraca (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notificações de bateria fraca</string>
     <string name="low_battery_title">Bateria fraca: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificações de bateria fraca (nós favoritos)</string>
@@ -622,7 +620,6 @@
     <string name="message_input_label">Mensagem</string>
     <string name="type_a_message">Digite uma mensagem</string>
     <string name="pax">PAX</string>
-    <string name="wifi_devices">Dispositivos WiFi</string>
     <string name="connected_device">Dispositivo Conectado</string>
     <string name="routing_error_rate_limit_exceeded">Limite excedido. Por favor, tente novamente mais tarde.</string>
     <string name="view_release">Ver Lançamento</string>
@@ -710,4 +707,5 @@
     <string name="tak_team_red">Vermelho</string>
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
+    <string name="done">Concluído</string>
 </resources>

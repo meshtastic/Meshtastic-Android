@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtru</string>
     <string name="desc_node_filter_clear">ștergeți filtrul nodurilor</string>
     <string name="node_filter_title">Filtrare după</string>
@@ -349,8 +348,6 @@
     <string name="currently">În prezent:</string>
     <string name="mute_status_always">Mereu silențios</string>
     <string name="mute_status_unmuted">Nu este silențios</string>
-    <string name="mute_status_muted_for_days">Silențios pentru %1$d zile, %2$.1f ore</string>
-    <string name="mute_status_muted_for_hours">Silențios pentru %1$.1f ore</string>
     <string name="mute_status_label">Stare silențios</string>
     <string name="mute_add">Dezactivați notificările pentru „%1$s”?</string>
     <string name="mute_remove">Activați notificările pentru '%1$s'?</string>
@@ -443,7 +440,6 @@
     <string name="are_you_sure">Sunteți sigur?</string>
     <string name="router_role_confirmation_text"><![CDATA[Am citit <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentația privind rolul dispozitivului</a> și articolul de blog despre <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Alegerea rolului potrivit pentru dispozitiv</a>.]]></string>
     <string name="i_know_what_i_m_doing">Știu ce fac.</string>
-    <string name="low_battery_message">Nodul %1$s are bateria descărcată (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notificări pentru baterii descărcate</string>
     <string name="low_battery_title">Baterie descărcată: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificări pentru baterii descărcate (noduri favorite)</string>

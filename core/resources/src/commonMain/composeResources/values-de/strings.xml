@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">Knotenfilter löschen</string>
     <string name="node_filter_title">Filtern nach</string>
@@ -141,6 +140,7 @@
     <string name="config_position_gps_update_interval_summary">Intervall zur Erfassung der Position (&lt;10sek. = dauerhaft).</string>
     <string name="config_position_flags_summary">Optionale Felder, die bei der Zusammenstellung von Standortnachrichten enthalten sein sollen. Je mehr Optionen ausgewählt werden, desto größer wird die Nachricht und die längere Übertragungszeit erhöht das Risiko für einen Nachrichtenverlust.</string>
     <string name="config_power_is_power_saving_summary">Versetzt alles so weit wie möglich in den Ruhezustand. Für die Tracker- und Sensorfunktion umfasst dies auch das Lora Funkgerät. Verwenden Sie diese Einstellung nicht, wenn Sie Ihr Gerät mit den Telefon Apps verwenden möchten oder wenn Sie ein Gerät ohne Benutzertaste verwenden.</string>
+    <string name="config_security_public_key">Wird aus Ihrem privaten Schlüssel generiert und an andere Knoten im Netzwerk gesendet, damit diese einen gemeinsamen geheimen Schlüssel berechnen können.</string>
     <string name="config_security_private_key">Wird verwendet, um einen gemeinsamen Schlüssel mit einem entfernten Gerät zu erstellen.</string>
     <string name="config_security_admin_key">Der öffentliche Schlüssel, der zum Senden von administrativen Nachrichten an diesen Knoten berechtigt ist.</string>
     <string name="config_security_is_managed">Das Gerät wird von einem Netzwerkadministrator verwaltet, der Benutzer kann auf keine der Geräteeinstellungen zugreifen.</string>
@@ -248,8 +248,21 @@
     <string name="match_all">Alle finden | Irgendwas</string>
     <string name="debug_clear_logs_confirm">Es werden alle Log- und Datenbankeinträge von Ihrem Gerät entfernt. Dies ist eine vollständige Löschung und sie ist dauerhaft.</string>
     <string name="clear">Leeren</string>
+    <string name="search_emoji">Emojis suchen...</string>
+    <string name="more_reactions">Weitere Reaktionen</string>
     <string name="channel_label">Kanal</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
+    <string name="a11y_message_from">Nachricht von %1$s: %2$s</string>
+    <string name="preview_header">Kopfzeile</string>
+    <string name="preview_item">Element %1$d</string>
+    <string name="preview_footer">Fußzeile</string>
+    <string name="preview_pill">Kapsel</string>
+    <string name="preview_dot">Punkt</string>
+    <string name="preview_text">Text</string>
+    <string name="preview_gauge">Anzeige</string>
+    <string name="preview_gradient">Farbverlauf</string>
+    <string name="preview_custom_composable_line_one">Dies ist eine benutzerdefinierte Komponente</string>
+    <string name="preview_custom_composable_line_two">Mit mehreren Zeilen und Stilen</string>
     <string name="message_delivery_status">Zustellungsstatus für Nachrichten</string>
     <string name="new_messages_below">Neue Nachrichten unten</string>
     <string name="meshtastic_messages_notifications">Benachrichtigung direkte Nachrichten</string>
@@ -364,8 +377,6 @@
     <string name="currently">Aktuell:</string>
     <string name="mute_status_always">Immer stumm</string>
     <string name="mute_status_unmuted">Nicht stumm</string>
-    <string name="mute_status_muted_for_days">Stumm für %1$d Tage, %2$.1f Stunden</string>
-    <string name="mute_status_muted_for_hours">Stumm für %1$.1f Stunden</string>
     <string name="mute_status_label">Stummschalten</string>
     <string name="mute_add">Benachrichtigungen für '%1$s ' stumm schalten?</string>
     <string name="mute_remove">Benachrichtigungen für '%1$s ' einschalten?</string>
@@ -463,7 +474,6 @@
     <string name="are_you_sure">Sind Sie sicher?</string>
     <string name="router_role_confirmation_text"><![CDATA[Ich habe die <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Dokumentation der Geräterollen </a> und den dazugehörigen Blogeintrag <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> über die Auswahl der richtigen Geräterolle</a> gelesen.]]></string>
     <string name="i_know_what_i_m_doing">Ich weiß was ich tue.</string>
-    <string name="low_battery_message">Knoten %1$s hat einen niedrigen Ladezustand (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Benachrichtigung leerer Akku</string>
     <string name="low_battery_title">Leerer Akku: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akkustands Warnung (für Favoriten)</string>
@@ -757,6 +767,7 @@
     <string name="timestamp">Zeitstempel</string>
     <string name="heading">Überschrift</string>
     <string name="speed">Geschwindigkeit</string>
+    <string name="speed_kmh">%1$d km/h</string>
     <string name="sats">Satelliten</string>
     <string name="alt">Höhe</string>
     <string name="freq">Frequenz</string>
@@ -826,6 +837,11 @@
     <string name="show_waypoints">Zeige Wegpunkte</string>
     <string name="show_precision_circle">Präzise Bereiche anzeigen</string>
     <string name="client_notification">Warnmeldung</string>
+    <string name="key_verification_title">Schlüsselprüfung</string>
+    <string name="key_verification_request_title">Anfrage zur Schlüsselprüfung</string>
+    <string name="key_verification_final_title">Schlüsselprüfung abgeschlossen</string>
+    <string name="duplicated_public_key_title">Doppelter öffentlicher Schlüssel erkannt</string>
+    <string name="low_entropy_key_title">Schwacher Schlüssel erkannt</string>
     <string name="compromised_keys">Kompromittierte Schlüssel erkannt, wählen Sie OK, um diese neu zu erstellen.</string>
     <string name="regenerate_private_key">Privaten Schlüssel neu erstellen</string>
     <string name="regenerate_keys_confirmation">Sind Sie sicher, dass Sie den privaten Schlüssel neu erstellen möchten?\n\nAndere Knoten, die bereits Schlüssel mit diesem Knoten ausgetauscht haben, müssen diesen entfernen und erneut austauschen, um eine sichere Kommunikation fortzusetzen.</string>
@@ -886,7 +902,6 @@
     <string name="pax_metrics_log">Benutzerzählerdaten</string>
     <string name="pax">Besucher</string>
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
-    <string name="wifi_devices">WLAN Geräte</string>
     <string name="ble_devices">Bluetooth Geräte</string>
     <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
     <string name="connected_device">Verbundene Geräte</string>
@@ -1016,7 +1031,7 @@
     <string name="firmware_update_stable">Stabil</string>
     <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_disconnect_warning">Hinweis: während der Aktualisierung wird das Gerät zeitweise getrennt.</string>
-    <string name="firmware_update_downloading_percent">Firmware herunterladen... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Firmware herunterladen... %1$d%</string>
     <string name="firmware_update_error">Fehler: %1$s</string>
     <string name="firmware_update_retry">Erneut versuchen</string>
     <string name="firmware_update_success">Aktualisierung erfolgreich!</string>
@@ -1067,7 +1082,6 @@
     <string name="firmware_update_dfu_error">DFU Fehler: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU abgebrochen</string>
     <string name="firmware_update_node_info_missing">Benutzerinformationen des Knotens fehlen.</string>
-    <string name="firmware_update_battery_low">Batterie zu niedrig (%1$d%%). Bitte laden Sie Ihr Gerät vor der Aktualisierung.</string>
     <string name="firmware_update_retrieval_failed">Konnte Firmware Datei nicht abrufen.</string>
     <string name="firmware_update_nordic_failed">Nordic DFU Aktualisierung fehlgeschlagen</string>
     <string name="firmware_update_usb_failed">USB Aktualisierung fehlgeschlagen</string>
@@ -1079,7 +1093,6 @@
     <string name="firmware_update_checking_version">Geräteversion wird geprüft...</string>
     <string name="firmware_update_starting_ota">OTA Update wird gestartet...</string>
     <string name="firmware_update_uploading">Firmware aktualisieren...</string>
-    <string name="firmware_update_uploading_progress">Firmware wird hochgeladen... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Gerät neu starten...</string>
     <string name="firmware_update_channel_name">Firmware Aktualisierung</string>
     <string name="firmware_update_channel_description">Status Firmware Aktualisierung</string>
@@ -1158,10 +1171,8 @@
     <string name="permission_granted">Berechtigung gewährt</string>
     <string name="permission_denied">Berechtigung verweigert</string>
     <string name="map_style_selection">Auswahl Kartenstil</string>
-    <string name="local_stats_battery">Akku: %1$d%%</string>
     <string name="local_stats_nodes">Knoten: %1$d online / %2$d gesamt</string>
     <string name="local_stats_uptime">Laufzeit: %1$s</string>
-    <string name="local_stats_utilization">Kanalauslastung: %1$.2f%% | Sendezeit: %2$.2f%%</string>
     <string name="local_stats_traffic">Datenverkehr: TX %1$d / RX %2$d (Duplikate: %3$d)</string>
     <string name="local_stats_relays">Weiterleitungen: %1$d (Abgebrochen: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnose %1$s</string>
@@ -1185,6 +1196,8 @@
     <string name="error_copy_mbtiles_failed">Fehler beim Kopieren der MB Kacheldatei in den internen Speicher.</string>
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK Konfiguration</string>
+    <string name="tak_server_enabled">Lokalen TAK Server aktivieren</string>
+    <string name="tak_server_enabled_desc">Startet einen TCP Server auf Port 8089 für ATAK Verbindungen</string>
     <string name="tak_team">Teamfarbe</string>
     <string name="tak_role">Mitgliedsrolle</string>
     <string name="tak_team_unspecified_color">Unspecified</string>
@@ -1238,4 +1251,12 @@
     <string name="update_device">Gerät aktualisieren</string>
     <string name="note">Anmerkung</string>
     <string name="firmware_charge_warning">Stellen Sie sicher, dass Ihr Gerät vollständig geladen ist, bevor Sie eine Firmware Aktualisierung starten. Trennen Sie das Gerät nicht während der Aktualisierung.</string>
+    <string name="device_storage_ui_title">Gerätespeicher &amp; UI (schreibgeschützt)</string>
+    <string name="device_theme_language">Design %1$s, Sprache %2$s</string>
+    <string name="files_available">Verfügbare Dateien (%1$d):</string>
+    <string name="file_entry">- %1$s (%2$d Bytes)</string>
+    <string name="no_files_manifested">Keine Dateien vorhanden.</string>
+    <string name="connect">Verbindung herstellen</string>
+    <string name="done">Fertig</string>
+    <string name="wifi_provision_refresh">Aktualisieren</string>
 </resources>

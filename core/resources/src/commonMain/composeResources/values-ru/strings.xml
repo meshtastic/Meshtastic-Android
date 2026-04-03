@@ -18,7 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Фильтр</string>
     <string name="desc_node_filter_clear">очистить фильтр нод</string>
     <string name="node_filter_title">Фильтр по</string>
@@ -143,7 +143,7 @@
     <string name="config_power_is_power_saving_summary">Все устройства будут работать в режиме ожидания, насколько это возможно, в качестве трекера и датчика также будет использоваться радиоприемник lora. Не используйте эту настройку, если вы хотите использовать свое устройство с приложениями для телефона или же устройство без кнопки взаимодействий.</string>
     <string name="config_security_public_key">Сгенерировано из вашего приватного ключа и отправлено другим нодам в сети, чтобы они могли вычислить общий секретный ключ.</string>
     <string name="config_security_private_key">Используется для создания общего ключа с удаленным устройством.</string>
-    <string name="config_security_admin_key">Открытый ключ для отправки сообщения администратора на данную ноду.</string>
+    <string name="config_security_admin_key">Открытый ключ для отправки сообщения администратора на данную ноду</string>
     <string name="config_security_is_managed">Устройство управляется администратором сетки, пользователь не может получить доступ к настройкам устройства.</string>
     <string name="config_security_serial_enabled">Последовательная консоль через Stream API.</string>
     <string name="config_security_debug_log_api_enabled">Выводите журнал отладки в режиме реального времени по последовательному каналу, просматривайте и экспортируйте журналы устройств с измененным местоположением по Bluetooth.</string>
@@ -384,8 +384,8 @@
     <string name="currently">Сейчас:</string>
     <string name="mute_status_always">Всегда заглушен</string>
     <string name="mute_status_unmuted">Не заглушен</string>
-    <string name="mute_status_muted_for_days">Заглушен на %1$d дней, %2$.1f часов</string>
-    <string name="mute_status_muted_for_hours">Заглушен на %1$.1f часов</string>
+    <string name="mute_status_muted_for_days">Обеззвучен на %1$d дней, %2$s часов</string>
+    <string name="mute_status_muted_for_hours">Обеззвучен на %1$s часов</string>
     <string name="mute_status_label">Статус заглушки</string>
     <string name="mute_add">Включить уведомления для '%1$s'?</string>
     <string name="mute_remove">Откл. уведомления для '%1$s?</string>
@@ -485,7 +485,7 @@
     <string name="are_you_sure">Вы уверены?</string>
     <string name="router_role_confirmation_text"><![CDATA[Я прочитал <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">документацию о ролях устройств</a> и пост в блоге, а именно <a href="http://meshtastic.org/blog/choosing-the-right-device-role">выбор правильной роли устройства</a>.]]></string>
     <string name="i_know_what_i_m_doing">Я знаю, что делаю.</string>
-    <string name="low_battery_message">Нода %1$s имеет низкий заряд батареи (%2$d%%)</string>
+    <string name="low_battery_message">У ноды %1$s низкий заряд (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Уведомление о низком уровне заряда</string>
     <string name="low_battery_title">Низкий заряд батареи: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (избранные ноды)</string>
@@ -914,7 +914,6 @@
     <string name="pax_metrics_log">Метрика прохожих</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Метрики прохожих недоступны</string>
-    <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">Устройства Bluetooth</string>
     <string name="bluetooth_paired_devices">Сопряженные устройства</string>
     <string name="connected_device">Подключённые устройства</string>
@@ -1046,7 +1045,7 @@
     <string name="firmware_update_stable">Стабильная</string>
     <string name="firmware_update_alpha">Альфа</string>
     <string name="firmware_update_disconnect_warning">Примечание: Во время обновления устройство временно отключится.</string>
-    <string name="firmware_update_downloading_percent">Загрузка прошивки... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Загрузка прошивки... %1$d%</string>
     <string name="firmware_update_error">Ошибка: %1$s</string>
     <string name="firmware_update_retry">Повторить</string>
     <string name="firmware_update_success">Обновлено успешно!</string>
@@ -1097,7 +1096,7 @@
     <string name="firmware_update_dfu_error">Ошибка DFU: %1$s</string>
     <string name="firmware_update_dfu_aborted">Отменено DFU</string>
     <string name="firmware_update_node_info_missing">Отсутствует информация о пользователе ноды.</string>
-    <string name="firmware_update_battery_low">Слишком низкий заряд батареи (%1$d%%). Пожалуйста, зарядите устройство перед обновлением.</string>
+    <string name="firmware_update_battery_low">Слишком низкий заряд (%1$d%). Пожалуйста, зарядите устройство перед обновлением.</string>
     <string name="firmware_update_retrieval_failed">Не удалось получить файл прошивки.</string>
     <string name="firmware_update_nordic_failed">Ошибка обновления DFU</string>
     <string name="firmware_update_usb_failed">Ошибка обновления USB</string>
@@ -1109,7 +1108,7 @@
     <string name="firmware_update_checking_version">Проверка версии устройства...</string>
     <string name="firmware_update_starting_ota">Запуск OTA обновления...</string>
     <string name="firmware_update_uploading">Загрузка прошивки...</string>
-    <string name="firmware_update_uploading_progress">Загрузка прошивки... %1$d%% (%2$s)</string>
+    <string name="firmware_update_uploading_progress">Загрузка прошивки... %1$d% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Перезагрузка устройства...</string>
     <string name="firmware_update_channel_name">Обновление прошивки</string>
     <string name="firmware_update_channel_description">Статус обновления прошивки</string>
@@ -1194,10 +1193,10 @@
     <string name="permission_granted">Разрешение получено</string>
     <string name="permission_denied">Доступ запрещён</string>
     <string name="map_style_selection">Выбор стиля карты</string>
-    <string name="local_stats_battery">Батарея: %1$d%%</string>
+    <string name="local_stats_battery">Батарея: %1$d</string>
     <string name="local_stats_nodes">Нод: %1$d онлайн / %2$d всего</string>
     <string name="local_stats_uptime">Время работы: %1$s</string>
-    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
+    <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="local_stats_traffic">Traffic: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">Передано: %1$d (Отменено: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Диагностика: %1$s</string>
@@ -1221,6 +1220,8 @@
     <string name="error_copy_mbtiles_failed">Не удалось скопировать файл MBTiles во внутреннее хранилище.</string>
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Настройка TAK</string>
+    <string name="tak_server_enabled">Включить локальный сервер TAK</string>
+    <string name="tak_server_enabled_desc">Запустить TCP-сервер на порту 8089 для подключений ATAK</string>
     <string name="tak_team">Цвет команды</string>
     <string name="tak_role">Роль участника</string>
     <string name="tak_team_unspecified_color">Не указан</string>
@@ -1279,4 +1280,25 @@
     <string name="files_available">Доступные файлы (%1$d):</string>
     <string name="file_entry">- %1$s (%2$d байт)</string>
     <string name="no_files_manifested">Файлы не отобразились.</string>
+    <string name="connect">Подключить</string>
+    <string name="done">Готово</string>
+    <string name="wifi_provision_scanning_ble">Поиск устройства…</string>
+    <string name="wifi_provision_device_found">Найденное устройство</string>
+    <string name="wifi_provision_device_found_detail">Готов к сканированию Wi-Fi сетей.</string>
+    <string name="wifi_provision_scan_networks">Поиск сетей</string>
+    <string name="wifi_provision_scanning_wifi">Поиск...</string>
+    <string name="wifi_provision_sending_credentials">Применение настроек Wi-Fi…</string>
+    <string name="wifi_provision_success">Wi-Fi успешно настроен!</string>
+    <string name="wifi_provision_success_detail">Применены учетные данные Wi-Fi. Устройство вскоре подключится к сети.</string>
+    <string name="wifi_provision_no_networks">Сети не найдены</string>
+    <string name="wifi_provision_no_networks_detail">Убедитесь, что устройство включено и находится в пределах досягаемости.</string>
+    <string name="wifi_provision_connect_failed">Не удалось подключиться: %1$s</string>
+    <string name="wifi_provision_scan_failed">Не удалось просканировать сети Wi-Fi: %1$s</string>
+    <string name="wifi_provision_refresh">Обновить</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_available_networks">Доступные сети</string>
+    <string name="wifi_provision_ssid_label">Имя сети (SSID)</string>
+    <string name="wifi_provision_ssid_placeholder">Введите или выберите сеть</string>
+    <string name="wifi_provision_status_applied">Wi-Fi успешно настроен!</string>
+    <string name="wifi_provision_status_failed">Не удалось применить настройку Wi-Fi</string>
 </resources>

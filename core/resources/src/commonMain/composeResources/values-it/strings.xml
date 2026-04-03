@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">elimina filtro nodi</string>
     <string name="node_filter_title">Filtra per</string>
@@ -362,8 +361,6 @@
     <string name="currently">Attualmente:</string>
     <string name="mute_status_always">Sempre mutato</string>
     <string name="mute_status_unmuted">Non mutato</string>
-    <string name="mute_status_muted_for_days">Mutato per %1$d giorni, %2$.1f ore</string>
-    <string name="mute_status_muted_for_hours">Mutato per %1$.1f ore</string>
     <string name="mute_status_label">Stato silenziato</string>
     <string name="mute_add">Silenziare le notifiche per '%1$s'?</string>
     <string name="mute_remove">Ripristinare le notifiche per '%1$s'?</string>
@@ -456,7 +453,6 @@
     <string name="are_you_sure">Sei sicuro?</string>
     <string name="router_role_confirmation_text"><![CDATA[Ho letto la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentazione sui ruoli dei dispositivi </a> e il post del blog su <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> Scegliere il ruolo giusto del dispositivo </a>.]]></string>
     <string name="i_know_what_i_m_doing">So cosa sto facendo.</string>
-    <string name="low_battery_message">Il nodo %1$s ha la batteria quasi scarica (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notifica di batteria scarica</string>
     <string name="low_battery_title">Poca energia rimanente nella batteria: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifiche batteria scarica (nodi preferiti)</string>
@@ -876,7 +872,6 @@
     <string name="pax_metrics_log">Metriche PAX</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Nessun log delle metriche PAX disponibile.</string>
-    <string name="wifi_devices">Dispositivi WiFi</string>
     <string name="ble_devices">Dispositivi Bluetooth</string>
     <string name="bluetooth_paired_devices">Dispositivi associati</string>
     <string name="connected_device">Dispositivo connesso</string>
@@ -996,7 +991,7 @@
     <string name="firmware_update_stable">Stabile</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_disconnect_warning">Nota: Questa procedura scollegherà temporaneamente il dispositivo durante l'aggiornamento.</string>
-    <string name="firmware_update_downloading_percent">Scaricamento in corso del firmware... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Scaricamento in corso del firmware... %1$d%</string>
     <string name="firmware_update_error">Errore: %1$s</string>
     <string name="firmware_update_retry">Riprova</string>
     <string name="firmware_update_success">Aggiornamento Riuscito!</string>
@@ -1052,4 +1047,6 @@
     <string name="no_device_connected">Nessun dispositivo connesso</string>
     <string name="download_firmware">Scarica Firmware</string>
     <string name="note">Note</string>
+    <string name="connect">Connetti</string>
+    <string name="done">Fatto</string>
 </resources>

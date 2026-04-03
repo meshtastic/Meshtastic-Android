@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">düğüm filtresini kaldır</string>
     <string name="node_filter_include_unknown">Bilinmeyenleri dahil et</string>
@@ -268,7 +267,6 @@
     <string name="are_you_sure">Emin misiniz?</string>
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Cihaz Rolü Dokümantasyonu</a> ve <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Doğru Cihaz Rolünü Seçme</a> hakkındaki blog yazılarını okudum.]]></string>
     <string name="i_know_what_i_m_doing">Ne yaptığımı biliyorum.</string>
-    <string name="low_battery_message">%1$s Düğümünün pili düşük (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Düşük pil bildirimleri</string>
     <string name="low_battery_title">Düşük pil: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Düşük pil bildirimleri (favori düğümler)</string>
@@ -581,4 +579,5 @@
     <string name="tak_team_red">Kırmızı</string>
     <string name="tak_team_blue">Mavi</string>
     <string name="tak_team_green">Yeşil</string>
+    <string name="connect">Bağlan</string>
 </resources>

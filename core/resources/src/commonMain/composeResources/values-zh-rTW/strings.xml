@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">過濾器</string>
     <string name="desc_node_filter_clear">清除節點過濾器</string>
     <string name="node_filter_title">篩選條件</string>
@@ -351,8 +350,6 @@
     <string name="currently">目前：</string>
     <string name="mute_status_always">永久靜音</string>
     <string name="mute_status_unmuted">未靜音</string>
-    <string name="mute_status_muted_for_days">已靜音 %1$d 天 %2$.1f 小時</string>
-    <string name="mute_status_muted_for_hours">已靜音 %1$.1f 小時</string>
     <string name="mute_status_label">靜音狀態</string>
     <string name="mute_add">將「%1$s」的通知設為靜音？</string>
     <string name="mute_remove">取消「%1$s」的通知靜音？</string>
@@ -445,7 +442,6 @@
     <string name="are_you_sure">你確定嗎？</string>
     <string name="router_role_confirmation_text"><![CDATA[我已經閱讀了<a href=“ https://meshtastic.org/docs/configuration/radio/device/#roles “>設備角色檔案</a>和關於<a href=”http://meshtastic.org/blog/choosing-the-right-device-role “>選擇正確的設備角色的博客文章 </a>。]]></string>
     <string name="i_know_what_i_m_doing">我知道我在做什麼。</string>
-    <string name="low_battery_message">節點 %1$s 電量過低 (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">低電量通知</string>
     <string name="low_battery_title">低電量：%1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低電量通知(收藏節點)</string>
@@ -868,7 +864,6 @@
     <string name="pax_metrics_log">PAX 人流計量</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">無可用的 PAX 人流計量資料。</string>
-    <string name="wifi_devices">Wi-Fi 裝置</string>
     <string name="ble_devices">藍牙裝置</string>
     <string name="bluetooth_paired_devices">已配對的裝置</string>
     <string name="connected_device">連接裝置</string>
@@ -998,7 +993,6 @@
     <string name="firmware_update_stable">穩定版</string>
     <string name="firmware_update_alpha">Alpha 測試版</string>
     <string name="firmware_update_disconnect_warning">注意：更新期間將會暫時中斷您的裝置連線。</string>
-    <string name="firmware_update_downloading_percent">正在下載韌體⋯⋯ %1$d%</string>
     <string name="firmware_update_error">錯誤: %1$s</string>
     <string name="firmware_update_retry">重試</string>
     <string name="firmware_update_success">更新成功！</string>
@@ -1049,7 +1043,6 @@
     <string name="firmware_update_dfu_error">DFU錯誤: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU 已中止</string>
     <string name="firmware_update_node_info_missing">缺少節點使用者資訊。</string>
-    <string name="firmware_update_battery_low">電量過低 (%1$d%%)，請在更新前為您的裝置充電。</string>
     <string name="firmware_update_retrieval_failed">無法取得韌體檔案。</string>
     <string name="firmware_update_nordic_failed">Nordic DFU 更新失敗</string>
     <string name="firmware_update_usb_failed">USB 更新失敗</string>
@@ -1061,7 +1054,6 @@
     <string name="firmware_update_checking_version">正在檢查裝置版本⋯⋯</string>
     <string name="firmware_update_starting_ota">正在啟動 OTA 更新⋯⋯</string>
     <string name="firmware_update_uploading">正在上傳韌體⋯⋯</string>
-    <string name="firmware_update_uploading_progress">正在上傳韌體⋯⋯ %1$d% (%2$s)</string>
     <string name="firmware_update_rebooting_device">正在重新啟動裝置⋯⋯</string>
     <string name="firmware_update_channel_name">韌體更新</string>
     <string name="firmware_update_channel_description">韌體更新狀態</string>
@@ -1137,10 +1129,8 @@
     <string name="permission_granted">已授予權限</string>
     <string name="permission_denied">已拒絕權限</string>
     <string name="map_style_selection">地圖樣式選擇</string>
-    <string name="local_stats_battery">電量：%1$d%%</string>
     <string name="local_stats_nodes">線上 %1$d / 總計 %2$d</string>
     <string name="local_stats_uptime">上線時間: %1$s</string>
-    <string name="local_stats_utilization">頻道使用率: %1$.2f% | 空中傳輸佔用率: %2$.2f%</string>
     <string name="local_stats_traffic">流量: 傳送 %1$d / 接收 %2$d (丟棄: %3$d)</string>
     <string name="local_stats_relays">中繼: %1$d (取消: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">診斷: %1$s</string>
@@ -1209,4 +1199,7 @@
     <string name="no_device_connected">尚未連線裝置</string>
     <string name="download_firmware">下載 Firmware</string>
     <string name="note">注意</string>
+    <string name="connect">連線</string>
+    <string name="done">完成</string>
+    <string name="wifi_provision_refresh">重新整理</string>
 </resources>

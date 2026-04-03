@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Kärgvõrgustik</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Kärgvõrgustik</string>
     <string name="node_filter_placeholder">Filtreeri</string>
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
     <string name="node_filter_title">Filtreeri </string>
@@ -378,8 +377,6 @@
     <string name="currently">Praegu:</string>
     <string name="mute_status_always">Alati vaigistatud</string>
     <string name="mute_status_unmuted">Mitte vaigistatud</string>
-    <string name="mute_status_muted_for_days">Vaigistatud %1$d päeva ja %2$.1f tundi</string>
-    <string name="mute_status_muted_for_hours">Vaigistatud %1$.1f tundi</string>
     <string name="mute_status_label">Vaigistatud olek</string>
     <string name="mute_add">Vaigista kasutaja '%1$s' teated?</string>
     <string name="mute_remove">Tühistada '%1$s' teadete vaigistus?</string>
@@ -477,7 +474,6 @@
     <string name="are_you_sure">Oled kindel?</string>
     <string name="router_role_confirmation_text"><![CDATA[Olen lugenud <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">seadme rollide juhendit </a> ja blogi postitust <a href="http://meshtastic.org/blog/choosing-the-right-device-role">valin õige seadme rolli</a>.]]></string>
     <string name="i_know_what_i_m_doing">Ma tean mida teen.</string>
-    <string name="low_battery_message">Sõlmel %1$s on akupinge madal (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Madala akupinge hoiatus</string>
     <string name="low_battery_title">Madal akupinge: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Madala akupinge teated (lemmik sõlmed)</string>
@@ -906,7 +902,6 @@
     <string name="pax_metrics_log">Pax mõõdiku logi</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Pax mõõdikut pole saadaval.</string>
-    <string name="wifi_devices">WiFi seadmed</string>
     <string name="ble_devices">Sinihamba seade</string>
     <string name="bluetooth_paired_devices">Seotud seadmed</string>
     <string name="connected_device">Ühendatud seadmed</string>
@@ -1036,7 +1031,7 @@
     <string name="firmware_update_stable">Stabiilne</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_disconnect_warning">Märkus. See katkestab ajutiselt seadme ühenduse värskendamise ajal.</string>
-    <string name="firmware_update_downloading_percent">Laen püsivara... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Laen püsivara... %1$d%</string>
     <string name="firmware_update_error">Viga: %1$s</string>
     <string name="firmware_update_retry">Proovi uuesti</string>
     <string name="firmware_update_success">Värskendus õnnestus!</string>
@@ -1087,7 +1082,6 @@
     <string name="firmware_update_dfu_error">DFU viga: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU katkestatud</string>
     <string name="firmware_update_node_info_missing">Sõlmel puudub kasutajateave.</string>
-    <string name="firmware_update_battery_low">Aku on liiga tühi (%1$d%%). Palun lae seade enne värskendamist.</string>
     <string name="firmware_update_retrieval_failed">Püsivara faili ei õnnestunud hankida.</string>
     <string name="firmware_update_nordic_failed">Nordic DFU värskendus nurjus</string>
     <string name="firmware_update_usb_failed">USB-värskendus ebaõnnestus</string>
@@ -1099,7 +1093,6 @@
     <string name="firmware_update_checking_version">Seadme versiooni kontrollimine...</string>
     <string name="firmware_update_starting_ota">Alustan üle-õhu värskendust...</string>
     <string name="firmware_update_uploading">Laen püsivara...</string>
-    <string name="firmware_update_uploading_progress">Laen püsivara... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Seadme taaskäivitamine...</string>
     <string name="firmware_update_channel_name">Püsivara uuendus</string>
     <string name="firmware_update_channel_description">Püsivara värskenduse olek</string>
@@ -1178,10 +1171,8 @@
     <string name="permission_granted">Luba antud</string>
     <string name="permission_denied">Luba mitte antud</string>
     <string name="map_style_selection">Kaardi stiilis valik</string>
-    <string name="local_stats_battery">Aku: %1$d%%</string>
     <string name="local_stats_nodes">Sõlmed: %1$d võrgus / %2$d kokku</string>
     <string name="local_stats_uptime">Töös: %1$s</string>
-    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
     <string name="local_stats_traffic">Liiklus: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">Vahendatud: %1$d (Tühistatud: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
@@ -1205,6 +1196,8 @@
     <string name="error_copy_mbtiles_failed">MB-paanifaili kopeerimine sisemällu ebaõnnestus.</string>
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK-i sätted</string>
+    <string name="tak_server_enabled">Kohaliku TAK-serveri lubamine</string>
+    <string name="tak_server_enabled_desc">Käivitab TCP-serveri pordil 8089 ATAK-ühenduste jaoks</string>
     <string name="tak_team">Meeskonna värv</string>
     <string name="tak_role">Liikme roll</string>
     <string name="tak_team_unspecified_color">Määramata</string>
@@ -1263,4 +1256,7 @@
     <string name="files_available">Saadaval failid (%1$d):</string>
     <string name="file_entry">- %1$s (%2$d baiti)</string>
     <string name="no_files_manifested">Faile ei avaldatud.</string>
+    <string name="connect">Ühenda</string>
+    <string name="done">Valmis</string>
+    <string name="wifi_provision_refresh">Värskenda</string>
 </resources>
