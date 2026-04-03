@@ -81,8 +81,8 @@ class CoTXmlTest {
 
         assertEquals("b-t-f", roundTripped.type)
         assertNotNull(roundTripped.chat)
-        assertEquals("Hello World", roundTripped.chat?.message)
-        assertEquals("Alice", roundTripped.chat?.senderCallsign)
+        assertEquals("Hello World", roundTripped.chat.message)
+        assertEquals("Alice", roundTripped.chat.senderCallsign)
     }
 
     // ── XML escaping ─────────────────────────────────────────────────────────

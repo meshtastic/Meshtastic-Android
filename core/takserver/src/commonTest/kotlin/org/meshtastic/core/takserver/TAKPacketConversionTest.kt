@@ -92,8 +92,8 @@ class TAKPacketConversionTest {
         assertEquals(85, cot.status?.battery)
 
         assertNotNull(cot.track)
-        assertEquals(5.0, cot.track?.speed)
-        assertEquals(90.0, cot.track?.course)
+        assertEquals(5.0, cot.track.speed)
+        assertEquals(90.0, cot.track.course)
     }
 
     @Test

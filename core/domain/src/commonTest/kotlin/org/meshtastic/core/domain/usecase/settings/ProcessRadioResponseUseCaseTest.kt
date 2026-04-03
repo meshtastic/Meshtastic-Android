@@ -77,7 +77,7 @@ class ProcessRadioResponseUseCaseTest {
 
         // Assert
         assertTrue(result is RadioResponseResult.Metadata)
-        assertEquals("2.5.0", (result as RadioResponseResult.Metadata).metadata.firmware_version)
+        assertEquals("2.5.0", result.metadata.firmware_version)
     }
 
     @Test
@@ -99,7 +99,7 @@ class ProcessRadioResponseUseCaseTest {
 
         // Assert
         assertTrue(result is RadioResponseResult.CannedMessages)
-        assertEquals("Hello World", (result as RadioResponseResult.CannedMessages).messages)
+        assertEquals("Hello World", result.messages)
     }
 
     @Test
@@ -133,7 +133,7 @@ class ProcessRadioResponseUseCaseTest {
             )
         val result = useCase(packet, 123, setOf(42))
         assertTrue(result is RadioResponseResult.Owner)
-        assertEquals("Owner", (result as RadioResponseResult.Owner).user.long_name)
+        assertEquals("Owner", result.user.long_name)
     }
 
     @Test
@@ -186,7 +186,7 @@ class ProcessRadioResponseUseCaseTest {
             )
         val result = useCase(packet, 123, setOf(42))
         assertTrue(result is RadioResponseResult.ChannelResponse)
-        assertEquals("Main", (result as RadioResponseResult.ChannelResponse).channel.settings?.name)
+        assertEquals("Main", result.channel.settings?.name)
     }
 
     private fun ByteArray.toByteString() = okio.ByteString.of(*this)
