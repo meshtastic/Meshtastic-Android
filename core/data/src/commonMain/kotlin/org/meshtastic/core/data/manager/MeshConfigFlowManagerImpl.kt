@@ -120,17 +120,18 @@ class MeshConfigFlowManagerImpl(
 
     private fun handleNodeInfoComplete() {
         Logger.i { "NodeInfo complete (Stage 2)" }
-        val entities = newNodes.map { info ->
-            nodeManager.installNodeInfo(info, withBroadcast = false)
-            nodeManager.nodeDBbyNodeNum[info.num]!!
-        }
+        val entities =
+            newNodes.map { info ->
+                nodeManager.installNodeInfo(info, withBroadcast = false)
+                nodeManager.nodeDBbyNodeNum[info.num]!!
+            }
         newNodes.clear()
 
         scope.handledLaunch {
             myNodeInfo?.let {
                 nodeRepository.installConfig(it, entities)
                 sendAnalytics(it)
-            }
+            } ?: Logger.w { "handleNodeInfoComplete: myNodeInfo is NULL, skipping installConfig!" }
             nodeManager.setNodeDbReady(true)
             nodeManager.setAllowNodeDbWrites(true)
             serviceRepository.setConnectionState(ConnectionState.Connected)

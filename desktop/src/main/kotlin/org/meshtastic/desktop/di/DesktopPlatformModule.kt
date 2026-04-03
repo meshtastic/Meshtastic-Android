@@ -34,6 +34,7 @@ import okio.Path.Companion.toPath
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
@@ -42,16 +43,6 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
-
-/**
- * Resolves the desktop data directory for persistent storage (DataStore files, Room database). Defaults to
- * `~/.meshtastic/`. Override via `MESHTASTIC_DATA_DIR` environment variable.
- */
-private fun desktopDataDir(): String {
-    val override = System.getenv("MESHTASTIC_DATA_DIR")
-    if (!override.isNullOrBlank()) return override
-    return System.getProperty("user.home") + "/.meshtastic"
-}
 
 /** Creates a file-backed [DataStore]<[Preferences]> at the given path under the data directory. */
 private fun createPreferencesDataStore(name: String, scope: CoroutineScope): DataStore<Preferences> {
@@ -90,7 +81,14 @@ private class DesktopProcessLifecycleOwner : LifecycleOwner {
  */
 @Suppress("InjectDispatcher")
 fun desktopPlatformModule() = module {
-    includes(desktopPreferencesDataStoreModule(), desktopProtoDataStoreModule())
+    // Application-lifetime scope shared by all DataStore instances. Per the DataStore docs:
+    // "The Job within this context dictates the lifecycle of the DataStore's internal operations.
+    // Ensure it is an application-scoped context that is not canceled by UI lifecycle events."
+    // DataStore has no close() API — the in-memory cache is released only when this Job is cancelled
+    // (at process exit). Using SupervisorJob so a single store's failure doesn't cascade.
+    val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    includes(desktopPreferencesDataStoreModule(dataStoreScope), desktopProtoDataStoreModule(dataStoreScope))
 
     // -- Build config --
     single<BuildConfigProvider> {
@@ -109,10 +107,7 @@ fun desktopPlatformModule() = module {
 }
 
 /** Named [DataStore]<[Preferences]> instances for all preference domains. */
-@Suppress("InjectDispatcher")
-private fun desktopPreferencesDataStoreModule() = module {
-    val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
+private fun desktopPreferencesDataStoreModule(scope: CoroutineScope) = module {
     single<DataStore<Preferences>>(named("AnalyticsDataStore")) { createPreferencesDataStore("analytics", scope) }
     single<DataStore<Preferences>>(named("HomoglyphEncodingDataStore")) {
         createPreferencesDataStore("homoglyph_encoding", scope)
@@ -135,9 +130,7 @@ private fun desktopPreferencesDataStoreModule() = module {
 }
 
 /** Proto [DataStore] instances (OkioStorage-backed). */
-@Suppress("InjectDispatcher")
-private fun desktopProtoDataStoreModule() = module {
-    val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+private fun desktopProtoDataStoreModule(scope: CoroutineScope) = module {
     val protoDir = desktopDataDir() + "/datastore"
 
     single<DataStore<LocalConfig>>(named("CoreLocalConfigDataStore")) {

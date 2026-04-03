@@ -194,6 +194,7 @@ fun ConnectionsScreen(
 
                         1 ->
                             ConnectingDeviceContent(
+                                connectionState = connectionState,
                                 selectedDevice = selectedDevice,
                                 persistedDeviceName = persistedDeviceName,
                                 bleDevices = bleDevices,
@@ -328,6 +329,7 @@ private fun ConnectedDeviceContent(
 /** Content shown when connecting or a device is selected but node info is not yet available. */
 @Composable
 private fun ConnectingDeviceContent(
+    connectionState: ConnectionState,
     selectedDevice: String,
     persistedDeviceName: String?,
     bleDevices: List<DeviceListEntry>,
@@ -348,7 +350,12 @@ private fun ConnectingDeviceContent(
     val address = selectedEntry?.address ?: selectedDevice
 
     TitledCard(title = stringResource(Res.string.connected_device)) {
-        ConnectingDeviceInfo(deviceName = name, deviceAddress = address, onClickDisconnect = onClickDisconnect)
+        ConnectingDeviceInfo(
+            connectionState = connectionState,
+            deviceName = name,
+            deviceAddress = address,
+            onClickDisconnect = onClickDisconnect,
+        )
     }
 }
 

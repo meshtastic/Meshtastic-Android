@@ -25,6 +25,7 @@ import dev.mokkery.verify
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
@@ -62,6 +63,7 @@ class MeshServiceOrchestratorTest {
     private val takServerManager: TAKServerManager = mock(MockMode.autofill)
     private val takPrefs: TakPrefs = mock(MockMode.autofill)
     private val cotHandler: CoTHandler = mock(MockMode.autofill)
+    private val databaseManager: DatabaseManager = mock(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
@@ -102,6 +104,7 @@ class MeshServiceOrchestratorTest {
                 takMeshIntegration = takMeshIntegration,
                 takPrefs = takPrefs,
                 dispatchers = dispatchers,
+                databaseManager = databaseManager,
             )
 
         assertFalse(orchestrator.isRunning)
@@ -155,6 +158,7 @@ class MeshServiceOrchestratorTest {
                 takMeshIntegration = takMeshIntegration,
                 takPrefs = takPrefs,
                 dispatchers = dispatchers,
+                databaseManager = databaseManager,
             )
 
         orchestrator.start()

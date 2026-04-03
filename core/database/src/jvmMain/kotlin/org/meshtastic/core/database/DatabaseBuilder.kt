@@ -17,8 +17,10 @@
 package org.meshtastic.core.database
 
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
@@ -31,8 +33,10 @@ import java.io.File
 /**
  * Resolves the desktop data directory for persistent storage (DataStore files, Room database). Defaults to
  * `~/.meshtastic/`. Override via `MESHTASTIC_DATA_DIR` environment variable.
+ *
+ * Shared between `core:database` and `desktop` module to ensure all persistent data is co-located.
  */
-private fun desktopDataDir(): String {
+fun desktopDataDir(): String {
     val override = System.getenv("MESHTASTIC_DATA_DIR")
     if (!override.isNullOrBlank()) return override
     return System.getProperty("user.home") + "/.meshtastic"
@@ -74,5 +78,8 @@ actual fun getFileSystem(): FileSystem = FileSystem.SYSTEM
 actual fun createDatabaseDataStore(name: String): DataStore<Preferences> {
     val dir = desktopDataDir() + "/datastore"
     File(dir).mkdirs()
-    return PreferenceDataStoreFactory.create(produceFile = { File(dir, "$name.preferences_pb") })
+    return PreferenceDataStoreFactory.create(
+        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
+        produceFile = { File(dir, "$name.preferences_pb") },
+    )
 }

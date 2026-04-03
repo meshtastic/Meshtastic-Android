@@ -22,6 +22,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
@@ -60,6 +61,7 @@ class MeshServiceOrchestrator(
     private val takMeshIntegration: TAKMeshIntegration,
     private val takPrefs: TakPrefs,
     private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
+    private val databaseManager: DatabaseManager,
 ) {
     private var serviceJob: Job? = null
     private var takJob: Job? = null
@@ -113,7 +115,16 @@ class MeshServiceOrchestrator(
                 }
                 .launchIn(scope)
 
-        scope.handledLaunch { radioInterfaceService.connect() }
+        scope.handledLaunch {
+            // Ensure the per-device database is active before the radio connects.
+            // On Android this is handled by MeshUtilApplication.init(); on Desktop (and any
+            // future KMP host) the orchestrator is the first entry point, so it must initialize
+            // the database here. Without this, DatabaseManager._currentDb stays null and all
+            // Room writes via withDb() are silently dropped — causing ourNodeInfo to remain null
+            // after the handshake completes.
+            databaseManager.switchActiveDatabase(radioInterfaceService.getDeviceAddress())
+            radioInterfaceService.connect()
+        }
 
         radioInterfaceService.receivedData
             .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum) }

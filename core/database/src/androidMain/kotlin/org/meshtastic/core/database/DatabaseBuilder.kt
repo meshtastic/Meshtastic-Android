@@ -17,8 +17,10 @@
 package org.meshtastic.core.database
 
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
@@ -63,5 +65,7 @@ actual fun deleteDatabase(dbName: String) {
 actual fun getFileSystem(): FileSystem = FileSystem.SYSTEM
 
 /** Creates an Android DataStore for database preferences. */
-actual fun createDatabaseDataStore(name: String): DataStore<Preferences> =
-    PreferenceDataStoreFactory.create(produceFile = { ContextServices.app.preferencesDataStoreFile(name) })
+actual fun createDatabaseDataStore(name: String): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+    corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
+    produceFile = { ContextServices.app.preferencesDataStoreFile(name) },
+)

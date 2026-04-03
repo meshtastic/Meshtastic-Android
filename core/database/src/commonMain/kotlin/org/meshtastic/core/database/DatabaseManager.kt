@@ -62,7 +62,6 @@ open class DatabaseManager(
 
     private fun lastUsedKey(dbName: String) = longPreferencesKey("db_last_used:$dbName")
 
-    // Expose the DB cache limit as a reactive stream so UI can observe changes.
     override val cacheLimit: StateFlow<Int> =
         datastore.data
             .map { it[cacheLimitKey] ?: DatabaseConstants.DEFAULT_CACHE_LIMIT }
@@ -81,25 +80,34 @@ open class DatabaseManager(
         }
     }
 
+    private val dbCache = mutableMapOf<String, MeshtasticDatabase>()
+
     private val _currentDb = MutableStateFlow<MeshtasticDatabase?>(null)
+
+    /**
+     * The currently active database, built lazily on first access. Room's `onOpen` callback is itself lazy (not invoked
+     * until the first query), so construction only allocates the builder and connection pool — actual I/O is deferred.
+     */
     override val currentDb: StateFlow<MeshtasticDatabase> =
         _currentDb
             .filterNotNull()
-            .stateIn(
-                managerScope,
-                SharingStarted.Eagerly,
-                getDatabaseBuilder(DatabaseConstants.DEFAULT_DB_NAME).build(),
-            )
+            .stateIn(managerScope, SharingStarted.Eagerly, getOrOpenDatabase(DatabaseConstants.DEFAULT_DB_NAME))
 
     private val _currentAddress = MutableStateFlow<String?>(null)
     val currentAddress: StateFlow<String?> = _currentAddress
-
-    private val dbCache = mutableMapOf<String, MeshtasticDatabase>() // key = dbName
 
     /** Initialize the active database for [address]. */
     suspend fun init(address: String?) {
         switchActiveDatabase(address)
     }
+
+    /**
+     * Returns a cached [MeshtasticDatabase] or builds a new one for [dbName]. The caller must hold [mutex] when
+     * modifying [dbCache] concurrently; however, this helper is also used from [currentDb]'s `initialValue` where the
+     * mutex is not yet relevant (single-threaded construction).
+     */
+    private fun getOrOpenDatabase(dbName: String): MeshtasticDatabase =
+        dbCache.getOrPut(dbName) { getDatabaseBuilder(dbName).build() }
 
     /** Switch active database to the one associated with [address]. Serialized via mutex. */
     override suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
@@ -115,9 +123,11 @@ open class DatabaseManager(
         }
 
         // Build/open Room DB off the main thread
-        val db =
-            dbCache[dbName]
-                ?: withContext(dispatchers.io) { getDatabaseBuilder(dbName).build() }.also { dbCache[dbName] = it }
+        val db = withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
+
+        if (previousDbName != null && previousDbName != dbName) {
+            closeCachedDatabase(previousDbName)
+        }
 
         _currentDb.value = db
         _currentAddress.value = address
@@ -132,6 +142,21 @@ open class DatabaseManager(
         managerScope.launch(dispatchers.io) { cleanupLegacyDbIfNeeded(activeDbName = dbName) }
 
         Logger.i { "Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}" }
+    }
+
+    /**
+     * Closes and removes a cached database by name. Safe to call even if the database was already closed or not in the
+     * cache. Does NOT delete the underlying file — the database can be re-opened on next access.
+     *
+     * On JVM/Desktop, Room KMP has no auto-close timeout (Android-only API), so idle databases hold open SQLite
+     * connections (5 per WAL-mode DB) indefinitely until explicitly closed. This method is the primary mechanism for
+     * releasing those connections when a database is no longer the active target.
+     */
+    private fun closeCachedDatabase(dbName: String) {
+        val removed = dbCache.remove(dbName) ?: return
+        runCatching { removed.close() }
+            .onFailure { Logger.w(it) { "Failed to close cached database ${anonymizeDbName(dbName)}" } }
+        Logger.d { "Closed inactive database ${anonymizeDbName(dbName)} to free connections" }
     }
 
     private val limitedIo = dispatchers.io.limitedParallelism(4)
@@ -184,9 +209,8 @@ open class DatabaseManager(
         val limit = getCurrentCacheLimit()
         val all = listExistingDbNames()
         // Only enforce the limit over device-specific DBs; exclude legacy and default DBs
-        val deviceDbs = all.filterNot {
-            it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME
-        }
+        val deviceDbs =
+            all.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
 
         if (deviceDbs.size <= limit) return@withLock
         val usageSnapshot = deviceDbs.associateWith { lastUsed(it) }
@@ -194,7 +218,7 @@ open class DatabaseManager(
 
         victims.forEach { name ->
             runCatching {
-                dbCache.remove(name)?.close()
+                closeCachedDatabase(name)
                 deleteDatabase(name)
                 datastore.edit { it.remove(lastUsedKey(name)) }
             }
@@ -219,7 +243,7 @@ open class DatabaseManager(
 
         if (fs.exists(legacyPath)) {
             runCatching {
-                dbCache.remove(legacy)?.close()
+                closeCachedDatabase(legacy)
                 deleteDatabase(legacy)
             }
                 .onFailure { Logger.w(it) { "Failed to close legacy database $legacy before deletion" } }

@@ -61,6 +61,7 @@ import okio.Path.Companion.toPath
 import org.jetbrains.skia.Image
 import org.koin.core.context.startKoin
 import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
@@ -248,7 +249,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
             },
         ) {
             setSingletonImageLoaderFactory { context ->
-                val cacheDir = System.getProperty("user.home") + "/.meshtastic/image_cache_v3"
+                val cacheDir = desktopDataDir() + "/image_cache_v3"
                 ImageLoader.Builder(context)
                     .components {
                         add(KtorNetworkFetcherFactory(httpClient = httpClient))
