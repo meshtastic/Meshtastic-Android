@@ -150,7 +150,7 @@ configure<ApplicationExtension> {
             includeInBundle = false
         }
 
-        testInstrumentationRunner = "org.meshtastic.app.TestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // Configure existing product flavors (defined by convention plugin)

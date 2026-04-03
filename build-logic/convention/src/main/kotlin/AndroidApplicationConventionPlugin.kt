@@ -40,7 +40,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 configureKotlinAndroid(this)
                 
                 defaultConfig {
-                    testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
+                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                     vectorDrawables.useSupportLibrary = true
                 }
 
