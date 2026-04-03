@@ -23,9 +23,9 @@ classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 ```
 <!--endregion-->
 
-## WiFi Provisioning System
+## WiFi Provisioning System — for mPWRD-OS
 
-The `:feature:wifi-provision` module provides BLE-based WiFi provisioning for Meshtastic devices using the Nymea network manager protocol. It scans for provisioning-capable devices, retrieves available WiFi networks, and applies credentials — all over BLE via the Kable multiplatform library.
+The `:feature:wifi-provision` module provides BLE-based WiFi provisioning for [mPWRD-OS](https://github.com/mPWRD-OS/mPWRD-OS) devices using the Nymea network manager protocol. mPWRD-OS is a community project that combines Armbian and Meshtastic for Linux-native mesh networking hardware. This module scans for provisioning-capable devices, retrieves available WiFi networks, and applies credentials — all over BLE via the Kable multiplatform library.
 
 ### Architecture
 

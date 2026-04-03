@@ -346,3 +346,13 @@ private fun NetworkRowLongSsidPreview() {
         }
     }
 }
+
+// ---------------------------------------------------------------------------
+// mPWRD-OS disclaimer banner
+// ---------------------------------------------------------------------------
+
+@PreviewLightDark
+@Composable
+private fun MpwrdDisclaimerBannerPreview() {
+    AppTheme { Surface { Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) { MpwrdDisclaimerBanner() } } }
+}
