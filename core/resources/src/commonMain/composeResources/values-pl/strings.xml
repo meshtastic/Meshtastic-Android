@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">Wyczyść filtr</string>
     <string name="node_filter_title">Filtry</string>
@@ -339,8 +338,6 @@
     <string name="currently">Obecnie:</string>
     <string name="mute_status_always">Zawsze wyciszony</string>
     <string name="mute_status_unmuted">Nie wyciszony</string>
-    <string name="mute_status_muted_for_days">Wyciszono na %1$d dni, %2$.1f godzin</string>
-    <string name="mute_status_muted_for_hours">Wyciszono na %1$.1f godzin</string>
     <string name="mute_status_label">Status wyciszenia</string>
     <string name="mute_add">Wyciszyć powiadomienia dla '%1$s'?</string>
     <string name="mute_remove">Wyłączyć wyciszenie powiadomień dla '%1$s'?</string>
@@ -427,7 +424,6 @@
     <string name="are_you_sure">Czy jesteś pewien?</string>
     <string name="router_role_confirmation_text"><![CDATA[Przeczytałem <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Dokumentacja roli urządzenia</a> oraz post na blogu o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Wybranie odpowiedniej roli urządzenia</a>.]]></string>
     <string name="i_know_what_i_m_doing">Wiem, co robię.</string>
-    <string name="low_battery_message">Węzeł %1$s ma niski poziom baterii (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Powiadomienia o niskim poziomie baterii</string>
     <string name="low_battery_title">Niski poziom baterii: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Powiadomienia o niskim poziomie baterii (ulubione węzły)</string>
@@ -690,7 +686,6 @@
     <string name="confirm_forget_connection">Czy na pewno zapomnieć to połączenie?</string>
     <string name="delete_messages_title">Usunąć wiadomość?</string>
     <string name="message_input_label">Wiadomość</string>
-    <string name="wifi_devices">Urządzenia WiFi</string>
     <string name="bluetooth_paired_devices">Sparowane urządzenia</string>
     <string name="connected_device">Połączone urządzenia</string>
     <string name="download">Pobierz</string>
@@ -743,7 +738,6 @@
     <string name="firmware_update_currently_installed">Aktualnie zainstalowano: %1$s</string>
     <string name="firmware_update_stable">Stabilna</string>
     <string name="firmware_update_alpha">Alpha</string>
-    <string name="firmware_update_downloading_percent">Pobieranie firmware... %1$d%%</string>
     <string name="firmware_update_error">Błąd: %1$s</string>
     <string name="firmware_update_retry">Ponów próbę</string>
     <string name="firmware_update_success">Aktualizacja zakończona sukcesem!</string>
@@ -762,7 +756,6 @@
     <string name="firmware_update_waiting_reconnect">Oczekiwanie na ponowne połączenie urządzenia...</string>
     <string name="firmware_update_release_notes">Informacje o wersji</string>
     <string name="firmware_update_unknown_error">Nieznany błąd</string>
-    <string name="firmware_update_battery_low">Zbyt niski poziom baterii (%1$d%%). Proszę naładować urządzenie przed aktualizacją.</string>
     <string name="firmware_update_retrieval_failed">Nie można pobrać pliku oprogramowania.</string>
     <string name="firmware_update_usb_failed">Aktualizacja przez USB nie powiodła się</string>
     <string name="firmware_update_ota_failed">Aktualizacja OTA nie powiodła się: %1$s</string>
@@ -772,7 +765,6 @@
     <string name="firmware_update_checking_version">Sprawdzanie wersji urządzenia...</string>
     <string name="firmware_update_starting_ota">Uruchamianie aktualizacji OTA...</string>
     <string name="firmware_update_uploading">Wgrywanie firmware...</string>
-    <string name="firmware_update_uploading_progress">Przesyłanie firmware... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Ponowne uruchamianie urządzenia...</string>
     <string name="firmware_update_channel_name">Aktualizacja oprogramowania</string>
     <string name="firmware_update_channel_description">Status aktualizacji oprogramowania</string>
@@ -817,4 +809,6 @@
     <string name="tak_team_green">Zielony</string>
     <string name="traffic_management_enabled">Moduł Włączony</string>
     <string name="no_device_connected">Brak podłączonych urządzeń</string>
+    <string name="connect">Połącz</string>
+    <string name="done">Wykonano</string>
 </resources>

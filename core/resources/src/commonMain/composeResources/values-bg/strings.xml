@@ -18,7 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Филтър</string>
     <string name="desc_node_filter_clear">изчистване на филтъра за възли</string>
     <string name="node_filter_title">Филтриране по</string>
@@ -320,8 +320,8 @@
     <string name="currently">В момента:</string>
     <string name="mute_status_always">Винаги заглушен</string>
     <string name="mute_status_unmuted">Не е заглушен</string>
-    <string name="mute_status_muted_for_days">Изключване на звука за %1$d дни, %2$.1f часа</string>
-    <string name="mute_status_muted_for_hours">Изключване на звука за %1$.1f часа</string>
+    <string name="mute_status_muted_for_days">Без звук за %1$d дни, %2$s часа</string>
+    <string name="mute_status_muted_for_hours">Без звук за %1$s часа</string>
     <string name="mute_add">Да се ​​заглушат ли известията за '%1$s'?</string>
     <string name="mute_remove">Да се ​​включат ли известията за '%1$s'?</string>
     <string name="replace">Замяна</string>
@@ -406,7 +406,7 @@
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="router_role_confirmation_text"><![CDATA[Прочетох <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Документацията за ролите на устройствата</a> и публикацията в блога за <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Избор на правилната роля на устройството</a>.]]></string>
     <string name="i_know_what_i_m_doing">Знам какво правя.</string>
-    <string name="low_battery_message">Възелът %1$s има изтощена батерия (%2$d%%)</string>
+    <string name="low_battery_message">Възела %1$s има слаба батерия (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Известия за изтощена батерия</string>
     <string name="low_battery_title">Батерията е изтощена: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Известия за изтощена батерия (любими възли)</string>
@@ -718,7 +718,6 @@
     <string name="message_input_label">Съобщение</string>
     <string name="type_a_message">Въведете съобщение</string>
     <string name="pax">PAX</string>
-    <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">Bluetooth устройства</string>
     <string name="bluetooth_paired_devices">Сдвоени устройства</string>
     <string name="connected_device">Свързано устройство</string>
@@ -823,7 +822,7 @@
     <string name="firmware_update_stable">Стабилен</string>
     <string name="firmware_update_alpha">Алфа</string>
     <string name="firmware_update_disconnect_warning">Забележка: Това временно ще прекъсне връзката с устройството ви по време на актуализацията.</string>
-    <string name="firmware_update_downloading_percent">Изтегляне на фърмуера... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Изтегляне на фърмуера... %1$d%</string>
     <string name="firmware_update_error">Грешка: %1$s</string>
     <string name="firmware_update_retry">Опитайте отново</string>
     <string name="firmware_update_success">Актуализацията е успешна!</string>
@@ -868,7 +867,6 @@
     <string name="firmware_update_local_failed">Локалната актуализация не е успешна</string>
     <string name="firmware_update_dfu_error">DFU грешка: %1$s</string>
     <string name="firmware_update_node_info_missing">Липсва информация за потребителя на възела.</string>
-    <string name="firmware_update_battery_low">Батерията е твърде изтощена (%1$d%%). Моля, заредете устройството си преди актуализиране.</string>
     <string name="firmware_update_usb_failed">Актуализацията през USB не е успешна</string>
     <string name="firmware_update_ota_failed">OTA актуализацията не е успешна: %1$s</string>
     <string name="firmware_update_loading">Зареждане на фърмуера...</string>
@@ -877,7 +875,6 @@
     <string name="firmware_update_checking_version">Проверка на версията на устройството...</string>
     <string name="firmware_update_starting_ota">Стартиране на OTA актуализация...</string>
     <string name="firmware_update_uploading">Качване на фърмуера...</string>
-    <string name="firmware_update_uploading_progress">Качване на фърмуера... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Рестартиране на устройството...</string>
     <string name="firmware_update_channel_name">Актуализация на фърмуера</string>
     <string name="firmware_update_channel_description">Състояние на актуализацията на фърмуера</string>
@@ -936,7 +933,6 @@
     <string name="bluetooth_feature_config">Конфигурация</string>
     <string name="bluetooth_feature_config_description">Управлявайте безжично настройките и каналите на вашето устройство.</string>
     <string name="map_style_selection">Избор на стил на картата</string>
-    <string name="local_stats_battery">Батерия: %1$d%%</string>
     <string name="local_stats_nodes">Възли: %1$d онлайн / %2$d общо</string>
     <string name="local_stats_uptime">Време на работа: %1$s</string>
     <string name="local_stats_traffic">Трафик: TX %1$d / RX %2$d (D: %3$d)</string>
@@ -994,4 +990,7 @@
     <string name="firmware_charge_warning">Уверете се, че устройството ви е напълно заредено, преди да започнете актуализация на фърмуера. Не изключвайте устройството от контакта или захранването по време на процеса на актуализация.</string>
     <string name="device_theme_language">Тема: %1$s, Език: %2$s</string>
     <string name="files_available">Налични файлове (%1$d):</string>
+    <string name="connect">Свързване</string>
+    <string name="done">Готово</string>
+    <string name="wifi_provision_refresh">Опресняване</string>
 </resources>

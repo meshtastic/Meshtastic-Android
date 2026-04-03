@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">Effacer le filtre de nœud</string>
     <string name="node_filter_title">Filtrer par</string>
@@ -354,8 +353,6 @@
     <string name="currently">Actuellement :</string>
     <string name="mute_status_always">Toujours muet</string>
     <string name="mute_status_unmuted">Non muet</string>
-    <string name="mute_status_muted_for_days">Muet pour %1$d jours, %2$.1f heures</string>
-    <string name="mute_status_muted_for_hours">Muet pour %1$.1f heures</string>
     <string name="mute_status_label">Statut muet</string>
     <string name="mute_add">Désactiver les notifications pour '%1$s' ?</string>
     <string name="mute_remove">Réactiver les notifications pour '%1$s' ?</string>
@@ -449,7 +446,6 @@
     <string name="are_you_sure">Êtes-vous sûr ?</string>
     <string name="router_role_confirmation_text"><![CDATA[J'ai lu la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentation du rôle de l'appareil</a> et le billet de blog sur comment <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choisir le rôle de l'appareil approprié</a>.]]></string>
     <string name="i_know_what_i_m_doing">Je sais ce que je fais.</string>
-    <string name="low_battery_message">La batterie du nœud %1$s est faible (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notifications de batterie faible</string>
     <string name="low_battery_title">Batterie faible : %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifications de batterie faible (nœuds favoris)</string>
@@ -872,7 +868,6 @@
     <string name="pax_metrics_log">Métriques de PAX</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Aucune métrique PAX disponible.</string>
-    <string name="wifi_devices">Périphériques WiFi</string>
     <string name="ble_devices">Appareils Bluetooth</string>
     <string name="bluetooth_paired_devices">Périphériques appairés</string>
     <string name="connected_device">Périphérique connecté</string>
@@ -993,7 +988,7 @@
     <string name="firmware_update_stable">Stable</string>
     <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_disconnect_warning">Note : cette opération va temporairement déconnecter votre appareil durant la mise à jour.</string>
-    <string name="firmware_update_downloading_percent">Téléchargement du firmware... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Téléchargement du firmware... %1$d%</string>
     <string name="firmware_update_error">Erreur : %1$s</string>
     <string name="firmware_update_retry">Réessayer</string>
     <string name="firmware_update_success">Mise à jour réussie !</string>
@@ -1044,7 +1039,6 @@
     <string name="firmware_update_dfu_error">Erreur DFU : %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU interrompue</string>
     <string name="firmware_update_node_info_missing">Les informations de l'utilisateur du nœud sont manquantes.</string>
-    <string name="firmware_update_battery_low">Batterie trop faible (%1$d%%). Veuillez charger votre appareil avant de mettre à jour.</string>
     <string name="firmware_update_retrieval_failed">Impossible de récupérer le fichier firmware.</string>
     <string name="firmware_update_nordic_failed">Échec de la mise à jour Nordic DFU</string>
     <string name="firmware_update_usb_failed">Échec de la mise à jour USB</string>
@@ -1056,7 +1050,6 @@
     <string name="firmware_update_checking_version">Vérification de la version de l'appareil...</string>
     <string name="firmware_update_starting_ota">Démarrage de la mise à jour OTA...</string>
     <string name="firmware_update_uploading">Transfert du Firmware...</string>
-    <string name="firmware_update_uploading_progress">Transfert du firmware... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Redémarrage de l'appareil...</string>
     <string name="firmware_update_channel_name">Mise à jour du firmware</string>
     <string name="firmware_update_channel_description">Statut de mise à jour du firmware</string>
@@ -1135,10 +1128,8 @@
     <string name="permission_granted">Autorisation accordée</string>
     <string name="permission_denied">Autorisation refusée</string>
     <string name="map_style_selection">Sélection du style de carte</string>
-    <string name="local_stats_battery">Batterie: %1$d%%</string>
     <string name="local_stats_nodes">Nœuds : %1$d en ligne / %2$d au total</string>
     <string name="local_stats_uptime">Temps de disponibilité : %1$s</string>
-    <string name="local_stats_utilization">UtilCanal: %1$.2f%% | UtilAir: %2$.2f%%</string>
     <string name="local_stats_traffic">Trafic : TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">Relais : %1$d (annulé: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnostiques : %1$s</string>
@@ -1158,4 +1149,7 @@
     <string name="tak_team_green">Vert</string>
     <string name="traffic_management_enabled">Module activé</string>
     <string name="no_device_connected">Aucun appareil connecté</string>
+    <string name="connect">Connecter</string>
+    <string name="done">Terminé</string>
+    <string name="wifi_provision_refresh">Actualiser</string>
 </resources>

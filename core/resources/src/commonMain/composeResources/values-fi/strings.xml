@@ -18,7 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Suodatus</string>
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
     <string name="node_filter_title">Suodata otsikon mukaan</string>
@@ -378,8 +378,8 @@
     <string name="currently">Tällä hetkellä:</string>
     <string name="mute_status_always">Pysyvästi mykistetty</string>
     <string name="mute_status_unmuted">Ei mykistetty</string>
-    <string name="mute_status_muted_for_days">Mykistetty %1$d päiväksi, %2$.1f tunniksi</string>
-    <string name="mute_status_muted_for_hours">Mykistetty %1$.1f tunniksi</string>
+    <string name="mute_status_muted_for_days">Mykistetty %1$d päiväksi, %2$s tunniksi</string>
+    <string name="mute_status_muted_for_hours">Mykistetty %1$s tunniksi</string>
     <string name="mute_status_label">Mykistä tilaviestit</string>
     <string name="mute_add">Mykistetäänkö ‘%1$s’ ilmoitukset?</string>
     <string name="mute_remove">Poistetaanko ‘%1$s’ mykistys?</string>
@@ -477,7 +477,7 @@
     <string name="are_you_sure">Oletko varma?</string>
     <string name="router_role_confirmation_text"><![CDATA[Olen lukenut <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Laitteen roolit ohjeen</a> ja blogikirjoituksen <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> valitakseni laitteelle oikean roolin</a>.]]></string>
     <string name="i_know_what_i_m_doing">Tiedän mitä olen tekemässä.</string>
-    <string name="low_battery_message">Laitteen %1$s akun varaustila on vähissä (%2$d%%)</string>
+    <string name="low_battery_message">Laitteen %1$s akun varaus on alhainen (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Akun vähäisen varauksen ilmoitukset</string>
     <string name="low_battery_title">Akku vähissä: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akun vähäisen varauksen ilmoitukset (suosikkilaitteet)</string>
@@ -906,7 +906,6 @@
     <string name="pax_metrics_log">Pax mittarit</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">PAX mittareita ei ole saatavilla.</string>
-    <string name="wifi_devices">WiFi-laitteet</string>
     <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="bluetooth_paired_devices">Paritetut laitteet</string>
     <string name="connected_device">Yhdistetty laite</string>
@@ -1036,7 +1035,7 @@
     <string name="firmware_update_stable">Vakaa</string>
     <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_disconnect_warning">Huomio: Tämä katkaisee laitteesi yhteyden tilapäisesti päivityksen aikana.</string>
-    <string name="firmware_update_downloading_percent">Ladataan laiteohjelmistoa... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Ladataan laiteohjelmistoa... %1$d%</string>
     <string name="firmware_update_error">Virhe: %1$s</string>
     <string name="firmware_update_retry">Yritä uudelleen</string>
     <string name="firmware_update_success">Päivitys onnistui!</string>
@@ -1088,7 +1087,7 @@
     <string name="firmware_update_dfu_error">DFU virhe: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU-tila keskeytetty</string>
     <string name="firmware_update_node_info_missing">Laitteen käyttäjätiedot puuttuvat.</string>
-    <string name="firmware_update_battery_low">Akun varaus on liian alhainen (%1$d%%). Ole hyvä ja lataa laite ennen päivittämistä.</string>
+    <string name="firmware_update_battery_low">Akun varaus liian alhainen (%1$d%). Lataa laite ennen päivitystä.</string>
     <string name="firmware_update_retrieval_failed">Laiteohjelmistotiedostoa ei voitu noutaa.</string>
     <string name="firmware_update_nordic_failed">Nordic DFU-laiteohjelmistopäivitys epäonnistui</string>
     <string name="firmware_update_usb_failed">USB-päivitys epäonnistui</string>
@@ -1100,7 +1099,7 @@
     <string name="firmware_update_checking_version">Tarkistetaan laitteen versiota...</string>
     <string name="firmware_update_starting_ota">Käynnistetään OTA-päivitys...</string>
     <string name="firmware_update_uploading">Lähetetään laiteohjelmistostoa...</string>
-    <string name="firmware_update_uploading_progress">Lähetetään laiteohjelmistooa... %1$d%% (%2$s)</string>
+    <string name="firmware_update_uploading_progress">Ladataan laiteohjelmistoa... %1$d% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Käynnistetään laitetta uudelleen...</string>
     <string name="firmware_update_channel_name">Laiteohjelmiston päivitys</string>
     <string name="firmware_update_channel_description">Laiteohjelmiston päivityksen tila</string>
@@ -1179,10 +1178,10 @@
     <string name="permission_granted">Lupa myönnetty</string>
     <string name="permission_denied">Lupa evätty</string>
     <string name="map_style_selection">Karttatyylin valinta</string>
-    <string name="local_stats_battery">Akku: %1$d%%</string>
+    <string name="local_stats_battery">Akku: %1$d%</string>
     <string name="local_stats_nodes">Laitteet: %1$d verkossa / %2$d yhteensä</string>
     <string name="local_stats_uptime">Käyttöaika: %1$s</string>
-    <string name="local_stats_utilization">Kanavan käytöaste: %1$.2f%% | Lähetysajan käyttöaste: %2$.2f%%</string>
+    <string name="local_stats_utilization">Kanavan käyttöaste: %1$s% | Lähetysajan käyttöaste: %2$s%</string>
     <string name="local_stats_traffic">Liikenne: Lähetetty %1$d / Vastaanotettu %2$d (Hylätty: %3$d)</string>
     <string name="local_stats_relays">Välitetyt: %1$d (Peruutetut: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Vianmääritys: %1$s</string>
@@ -1206,6 +1205,8 @@
     <string name="error_copy_mbtiles_failed">MBTiles-tiedoston kopiointi sisäiseen tallennustilaan epäonnistui.</string>
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK-asetukset</string>
+    <string name="tak_server_enabled">Ota paikallinen TAK-palvelin käyttöön</string>
+    <string name="tak_server_enabled_desc">Käynnistää TCP-palvelimen porttiin 8089 ATAK-yhteyksiä varten</string>
     <string name="tak_team">Tiimin väri</string>
     <string name="tak_role">Jäsenen rooli</string>
     <string name="tak_team_unspecified_color">Määrittelemätön</string>
@@ -1264,4 +1265,25 @@
     <string name="files_available">Saatavilla olevat tiedostot (%1$d):</string>
     <string name="file_entry">- %1$s (%2$d bittiä)</string>
     <string name="no_files_manifested">Tiedostoja ei löytynyt.</string>
+    <string name="connect">Yhdistä</string>
+    <string name="done">Valmis</string>
+    <string name="wifi_provision_scanning_ble">Etsitään laitetta…</string>
+    <string name="wifi_provision_device_found">Laite löytyi</string>
+    <string name="wifi_provision_device_found_detail">Valmis etsimään WiFi-verkkoja.</string>
+    <string name="wifi_provision_scan_networks">Etsi verkkoja</string>
+    <string name="wifi_provision_scanning_wifi">Etsitään…</string>
+    <string name="wifi_provision_sending_credentials">Otetaan WiFi-asetukset käyttöön…</string>
+    <string name="wifi_provision_success">WiFi määritetty onnistuneesti!</string>
+    <string name="wifi_provision_success_detail">WiFi-tunnukset otettu käyttöön. Laite yhdistyy verkkoon pian.</string>
+    <string name="wifi_provision_no_networks">Verkkoja ei löytynyt</string>
+    <string name="wifi_provision_no_networks_detail">Varmista, että laite on päällä ja kantaman sisällä.</string>
+    <string name="wifi_provision_connect_failed">Yhteyden muodostaminen epäonnistui: %1$s</string>
+    <string name="wifi_provision_scan_failed">WiFi-verkkojen haku epäonnistui: %1$s</string>
+    <string name="wifi_provision_refresh">Päivitä</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_available_networks">Saatavilla olevat verkot</string>
+    <string name="wifi_provision_ssid_label">Verkon nimi (SSID)</string>
+    <string name="wifi_provision_ssid_placeholder">Syötä tai valitse verkko</string>
+    <string name="wifi_provision_status_applied">WiFi määritetty onnistuneesti!</string>
+    <string name="wifi_provision_status_failed">WiFi-asetusten käyttöönotto epäonnistui</string>
 </resources>

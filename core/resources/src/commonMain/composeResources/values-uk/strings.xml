@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Фільтри</string>
     <string name="desc_node_filter_clear">очистити фільтр вузлів</string>
     <string name="node_filter_title">Фільтрувати за</string>
@@ -353,7 +352,6 @@
     <string name="are_you_sure">Ви впевнені?</string>
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">]]></string>
     <string name="i_know_what_i_m_doing">Я знаю, що роблю.</string>
-    <string name="low_battery_message">Вузол %1$s має низький заряд акумулятора (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Сповіщення про низький рівень заряду</string>
     <string name="low_battery_title">Низький заряд батареї: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Сповіщення про низький рівень заряду акумулятора (улюблені вузли)</string>
@@ -624,7 +622,6 @@
     <string name="pax_metrics_log">Показники PAX</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Немає доступних показників PAX.</string>
-    <string name="wifi_devices">Wi-Fi пристрої</string>
     <string name="bluetooth_paired_devices">Прив'язані пристрої</string>
     <string name="connected_device">Під'єднаний пристрій</string>
     <string name="view_release">Переглянути реліз</string>
@@ -703,7 +700,7 @@
     <string name="firmware_update_stable">Стабільна</string>
     <string name="firmware_update_alpha">Альфа</string>
     <string name="firmware_update_disconnect_warning">Примітка: це тимчасово від'єднає ваш пристрій на час оновлення.</string>
-    <string name="firmware_update_downloading_percent">Завантаження прошивки... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Завантаження прошивки... %1$d%</string>
     <string name="firmware_update_error">Помилка: %1$s</string>
     <string name="firmware_update_retry">Повторити спробу</string>
     <string name="firmware_update_success">Оновлення успішне!</string>
@@ -748,14 +745,12 @@
     <string name="firmware_update_release_notes">Примітки до релізу</string>
     <string name="firmware_update_unknown_error">Невідома помилка</string>
     <string name="firmware_update_dfu_error">Помилка DFU: %1$s</string>
-    <string name="firmware_update_battery_low">Низький заряд акумулятора (%1$d%%). Будь ласка, зарядіть пристрій перед оновленням.</string>
     <string name="firmware_update_retrieval_failed">Не вдалося отримати файл прошивки.</string>
     <string name="firmware_update_loading">Завантаження прошивки...</string>
     <string name="firmware_update_connecting_attempt">Підключення до пристрою (спроба %1$d/%2$d)...</string>
     <string name="firmware_update_checking_version">Перевірка версії пристрою...</string>
     <string name="firmware_update_starting_ota">Запуск OTA оновлення...</string>
     <string name="firmware_update_uploading">Завантаження прошивки...</string>
-    <string name="firmware_update_uploading_progress">Завантаження прошивки... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Перезавантаження пристрою...</string>
     <string name="firmware_update_channel_name">Оновити прошивку</string>
     <string name="firmware_update_channel_description">Статус оновлення прошивки</string>
@@ -800,4 +795,6 @@
     <string name="tak_team_blue">Синій</string>
     <string name="tak_team_green">Зелений</string>
     <string name="no_device_connected">Немає під'єднаних пристроїв</string>
+    <string name="connect">Під’єднатися</string>
+    <string name="done">Готово</string>
 </resources>

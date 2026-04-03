@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">絞り込み</string>
     <string name="desc_node_filter_clear">ノードフィルターをクリアします</string>
     <string name="node_filter_title">絞り込み</string>
@@ -352,7 +351,6 @@
     <string name="are_you_sure">よろしいですか？</string>
     <string name="router_role_confirmation_text"><![CDATA[私はすでに<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">デバイスロールドキュメント</a>と <a href="http://meshtastic.org/blog/choosing-the-right-device-role> 正しいデバイスのロールを選択</a>についてのブログ記事を読んでいます。]]></string>
     <string name="i_know_what_i_m_doing">はい、了承します</string>
-    <string name="low_battery_message">ノード %1$s のバッテリー残量が少なくなっています (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">バッテリー残量低下通知</string>
     <string name="low_battery_title">バッテリー低残量: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">バッテリー残量低下通知 (お気に入りノード)</string>
@@ -667,9 +665,7 @@
     <string name="permission_granted">許可が与えられました</string>
     <string name="permission_denied">許可が拒否されました</string>
     <string name="map_style_selection">マップスタイルの選択</string>
-    <string name="local_stats_battery">バッテリー：%1$d%%</string>
     <string name="local_stats_uptime">稼働時間： %1$s</string>
-    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
     <string name="local_stats_traffic">トラフィック: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">リレー： %1$d (キャンセル済み: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">診断： %1$s</string>
@@ -721,4 +717,6 @@
     <string name="traffic_management">トラフィック管理</string>
     <string name="traffic_management_config">トラフィック管理設定</string>
     <string name="traffic_management_enabled">モジュール有効</string>
+    <string name="connect">接続</string>
+    <string name="wifi_provision_refresh">更新</string>
 </resources>

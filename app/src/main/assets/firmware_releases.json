@@ -229,24 +229,6 @@
       "title": "Fix intermittent busyRx on Portduino SX1262 (stale preamble IRQ)",
       "page_url": "https://github.com/meshtastic/firmware/pull/9939",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9903",
-      "title": "feat: Support INA219/INA226 as primary battery sensor without ADC pin",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9903",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9895",
-      "title": "fix(native): implement BinarySemaphorePosix with proper pthread synchronization",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9895",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9891",
-      "title": "Refinement on support for Native ESP32 Ethernet and WT32-ETH01 board (LAN8720)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9891",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }

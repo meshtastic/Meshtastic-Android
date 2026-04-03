@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="node_filter_title">Filtrar por</string>
@@ -318,8 +317,6 @@
     <string name="currently">Actualmente:</string>
     <string name="mute_status_always">Siempre silenciado</string>
     <string name="mute_status_unmuted">No silenciado</string>
-    <string name="mute_status_muted_for_days">Silenciado por %1$d días, %2$.1f horas</string>
-    <string name="mute_status_muted_for_hours">Silenciado por %1$.1f horas</string>
     <string name="replace">Reemplazar</string>
     <string name="wifi_qr_code_scan">Escanear código QR WiFi</string>
     <string name="wifi_qr_code_error">Formato de código QR de credencial wifi inválido</string>
@@ -393,7 +390,6 @@ Rango de Valores 0 - 500.</string>
     <string name="are_you_sure">¿Estás seguro?</string>
     <string name="router_role_confirmation_text"><![CDATA[He leído la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Documentación para los Roles de los dispositivos</a> y el blog sobre <a href="http://meshtastic.org/blog/choosing-the-right-device-role">como elegir el correcto rol</a>.]]></string>
     <string name="i_know_what_i_m_doing">Sé lo que estoy haciendo</string>
-    <string name="low_battery_message">El nodo %1$s tiene poca batería (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notificaciones de batería baja</string>
     <string name="low_battery_title">Batería baja: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificaciones de batería baja (nodos favoritos)</string>
@@ -783,7 +779,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="clear_selection">Limpiar selección</string>
     <string name="message_input_label">Mensaje</string>
     <string name="type_a_message">Escribe un mensaje</string>
-    <string name="wifi_devices">Dispositivos WiFi</string>
     <string name="bluetooth_paired_devices">Dispositivos emparejados</string>
     <string name="connected_device">Dispositivo conectado</string>
     <string name="routing_error_rate_limit_exceeded">Límite de tasa excedido. Por favor intente de nuevo más tarde.</string>
@@ -878,7 +873,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="firmware_update_device">Dispositivo: %1$s</string>
     <string name="firmware_update_currently_installed">Actualmente instalado: %1$s</string>
     <string name="firmware_update_stable">Estable</string>
-    <string name="firmware_update_downloading_percent">Descargando firmware... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Descargando firmware... %1$d%</string>
     <string name="firmware_update_retry">Volver a intentar</string>
     <string name="firmware_update_success">¡Actualización exitosa!</string>
     <string name="firmware_update_done">Hecho</string>
@@ -915,4 +910,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="no_device_connected">No hay dispositivos conectados</string>
+    <string name="connect">Conectar</string>
+    <string name="done">Hecho</string>
 </resources>

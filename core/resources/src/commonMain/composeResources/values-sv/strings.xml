@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">rensa filtrering av noder</string>
     <string name="node_filter_title">Filtrera på</string>
@@ -350,8 +349,6 @@
     <string name="currently">Nuvarande:</string>
     <string name="mute_status_always">Alltid tystad</string>
     <string name="mute_status_unmuted">Inte tystad</string>
-    <string name="mute_status_muted_for_days">Tystad i %1$d dagar och %2$.1f timmar</string>
-    <string name="mute_status_muted_for_hours">Tystad i %1$.1f timmar</string>
     <string name="mute_add">Tysta aviseringar i '%1$s'?</string>
     <string name="mute_remove">Aktivera aviseringar i '%1$s'?</string>
     <string name="replace">Ersätt</string>
@@ -441,7 +438,6 @@
     <string name="are_you_sure">Är du säker?</string>
     <string name="router_role_confirmation_text"><![CDATA[Jag har läst <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> och blogginlägget om <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
     <string name="i_know_what_i_m_doing">Jag vet vad jag håller på med.</string>
-    <string name="low_battery_message">Noden %1$s har ett lågt batteri (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Avisering vid låg batterinivå</string>
     <string name="low_battery_title">Lågt batteri: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Meddelanden om lågt batteri (favoritnoder)</string>
@@ -827,7 +823,6 @@
     <string name="message_input_label">Meddelande</string>
     <string name="type_a_message">Skriv ett meddelande</string>
     <string name="pax">PAX</string>
-    <string name="wifi_devices">WiFi-enheter</string>
     <string name="ble_devices">Blåtandsenheter</string>
     <string name="bluetooth_paired_devices">Parkopplade enheter</string>
     <string name="connected_device">Ansluten enhet</string>
@@ -943,7 +938,7 @@
     <string name="firmware_update_stable">Stabil version</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_disconnect_warning">Obs: Under uppdateringen kommer enheten att tillfälligt kopplas bort.</string>
-    <string name="firmware_update_downloading_percent">Hämtar fast programvara... %1$d%%</string>
+    <string name="firmware_update_downloading_percent">Hämtar fast programvara... %1$d%</string>
     <string name="firmware_update_error">Fel: %1$s</string>
     <string name="firmware_update_retry">Försök igen</string>
     <string name="firmware_update_success">Uppdatering lyckades!</string>
@@ -978,7 +973,6 @@
     <string name="firmware_update_loading">Laddar fast programvara...</string>
     <string name="firmware_update_checking_version">Kontrollerar enhetsversion...</string>
     <string name="firmware_update_uploading">Laddar upp fast programvara...</string>
-    <string name="firmware_update_uploading_progress">Laddar upp fast programvara ... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Startar om enhet...</string>
     <string name="firmware_update_channel_name">Uppdatering av fast programvara</string>
     <string name="firmware_update_channel_description">Status för uppdatering av programvara</string>
@@ -1038,4 +1032,6 @@
     <string name="traffic_management_enabled">Modul aktiverad</string>
     <string name="no_device_connected">Ingen ansluten enhet</string>
     <string name="download_firmware">Laddar ner programvara</string>
+    <string name="connect">Anslut</string>
+    <string name="done">Klart</string>
 </resources>

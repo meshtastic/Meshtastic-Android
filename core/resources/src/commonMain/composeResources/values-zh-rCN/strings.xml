@@ -18,7 +18,6 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">筛选器csvfganw</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_title">筛选条件</string>
@@ -362,8 +361,6 @@
     <string name="currently">当前:</string>
     <string name="mute_status_always">始终静音</string>
     <string name="mute_status_unmuted">非静音</string>
-    <string name="mute_status_muted_for_days">%1$d 天静音， %2$.1f 小时</string>
-    <string name="mute_status_muted_for_hours">%1$.1f 小时静音</string>
     <string name="mute_status_label">静默状态</string>
     <string name="mute_add">是否静音通知 '%1$s？</string>
     <string name="mute_remove">是否静音通知 '%1$s？</string>
@@ -460,7 +457,6 @@
     <string name="are_you_sure">你确定吗？</string>
     <string name="router_role_confirmation_text"><![CDATA[我已经阅读 <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">设备角色文档</a> 以及关于 <a href="http://meshtastic.org/blog/choosing-the-right-device-role">选择正确设备角色</a>的博客文章。]]></string>
     <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
-    <string name="low_battery_message">节点 %1$s 电量低(%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">低电量通知</string>
     <string name="low_battery_title">电池电量低: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低电量通知 (收藏节点)</string>
@@ -883,7 +879,6 @@
     <string name="pax_metrics_log">PAX 计量日志</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">无可用的 PAX 计量.</string>
-    <string name="wifi_devices">WiFi 设备</string>
     <string name="ble_devices">蓝牙设备</string>
     <string name="bluetooth_paired_devices">已配对设备</string>
     <string name="connected_device">已连设备</string>
@@ -1068,7 +1063,6 @@
     <string name="firmware_update_dfu_error">DFU 错误: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU 已中止</string>
     <string name="firmware_update_node_info_missing">节点用户信息缺失</string>
-    <string name="firmware_update_battery_low">电池电量过低（%1$d%%）。请在更新前给设备充电。</string>
     <string name="firmware_update_retrieval_failed">无法获取固件文件</string>
     <string name="firmware_update_nordic_failed">Nordic DFU 更新失败</string>
     <string name="firmware_update_usb_failed">USB 更新失败</string>
@@ -1080,7 +1074,6 @@
     <string name="firmware_update_checking_version">正在检查设备版本...</string>
     <string name="firmware_update_starting_ota">正在开始 OTA更新...</string>
     <string name="firmware_update_uploading">正在上传固件……</string>
-    <string name="firmware_update_uploading_progress">上传固件中...</string>
     <string name="firmware_update_rebooting_device">重启设备...</string>
     <string name="firmware_update_channel_name">固件更新</string>
     <string name="firmware_update_channel_description">固件更新状态</string>
@@ -1156,10 +1149,8 @@
     <string name="permission_granted">权限已授予</string>
     <string name="permission_denied">权限不足</string>
     <string name="map_style_selection">地图样式选择</string>
-    <string name="local_stats_battery">电量: %1$d%%</string>
     <string name="local_stats_nodes">节点： %1$d 在线 / %2$d 总计</string>
     <string name="local_stats_uptime">运行时间： %1$s</string>
-    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
     <string name="local_stats_traffic">流量：TX %1$d / RX %2$d (D： %3$d)</string>
     <string name="local_stats_relays">转发: %1$d (取消: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">诊断： %1$s</string>
@@ -1236,4 +1227,7 @@
     <string name="update_device">更新设备</string>
     <string name="note">备注</string>
     <string name="firmware_charge_warning">在启动固件更新之前确认您的设备已完全充电。在更新过程中不要断开连接或断开设备。</string>
+    <string name="connect">连接</string>
+    <string name="done">完成</string>
+    <string name="wifi_provision_refresh">刷新</string>
 </resources>
