@@ -163,20 +163,19 @@ class FromRadioPacketHandlerImplTest {
     }
 
     @Test
-    fun `handleFromRadio routes NODE_INFO_BATCH items to configFlowManager and updates status`() {
+    fun `handleFromRadio routes NODE_INFO_BATCH to handleNodeInfoBatch and updates status`() {
         val node1 = ProtoNodeInfo(num = 1111)
         val node2 = ProtoNodeInfo(num = 2222)
         val node3 = ProtoNodeInfo(num = 3333)
-        val batch = NodeInfoBatch(items = listOf(node1, node2, node3))
+        val items = listOf(node1, node2, node3)
+        val batch = NodeInfoBatch(items = items)
         val proto = FromRadio(node_info_batch = batch)
 
         every { configFlowManager.newNodeCount } returns 3
 
         handler.handleFromRadio(proto)
 
-        verify { configFlowManager.handleNodeInfo(node1) }
-        verify { configFlowManager.handleNodeInfo(node2) }
-        verify { configFlowManager.handleNodeInfo(node3) }
+        verify { configFlowManager.handleNodeInfoBatch(items) }
         verify { serviceRepository.setConnectionProgress("Nodes (3)") }
     }
 

@@ -82,7 +82,7 @@ class FromRadioPacketHandlerImpl(
                 serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
             }
             nodeInfoBatch != null -> {
-                nodeInfoBatch.items.forEach { info -> router.value.configFlowManager.handleNodeInfo(info) }
+                router.value.configFlowManager.handleNodeInfoBatch(nodeInfoBatch.items)
                 serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
             }
             configCompleteId != null -> router.value.configFlowManager.handleConfigComplete(configCompleteId)

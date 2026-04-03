@@ -35,6 +35,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -54,6 +55,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.ToRadio
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -151,17 +153,6 @@ class MeshConnectionManagerImplTest {
 
     @Test
     fun `Disconnected state stops services`() = runTest(testDispatcher) {
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
-        every { locationManager.stop() } returns Unit
-        every { mqttManager.stop() } returns Unit
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
-        every { locationManager.stop() } returns Unit
-        every { mqttManager.stop() } returns Unit
-        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         manager.start(backgroundScope)
         // Transition to Connected first so that Disconnected actually does something
         radioConnectionState.value = ConnectionState.Connected
@@ -266,5 +257,26 @@ class MeshConnectionManagerImplTest {
 
         verify { mqttManager.start(any(), true, true) }
         verify { historyManager.requestHistoryReplay(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `startNodeInfoOnly sends BATCH_NODE_INFO_NONCE not the legacy nonce`() = runTest(testDispatcher) {
+        val sentPackets = mutableListOf<ToRadio>()
+        every { packetHandler.sendToRadio(any<ToRadio>()) } calls
+            { call ->
+                sentPackets.add(call.arg(0))
+                Unit
+            }
+
+        manager.start(backgroundScope)
+        manager.startNodeInfoOnly()
+        advanceUntilIdle()
+
+        val nodeInfoPacket = sentPackets.firstOrNull { (it.want_config_id ?: 0) != 0 }
+        assertEquals(
+            HandshakeConstants.BATCH_NODE_INFO_NONCE,
+            nodeInfoPacket?.want_config_id,
+            "startNodeInfoOnly must use BATCH_NODE_INFO_NONCE, not the legacy NODE_INFO_NONCE",
+        )
     }
 }

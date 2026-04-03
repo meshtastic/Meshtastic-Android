@@ -352,8 +352,9 @@ class MockInterface(private val service: RadioInterfaceService, val address: Str
     }
 
     /**
-     * Stage 2: send all nodes as a single [NodeInfoBatch], then config_complete_id. After the handshake completes,
-     * simulate live traffic.
+     * Stage 2: send all nodes as a single [NodeInfoBatch], then config_complete_id. Live traffic is simulated in a
+     * separate coroutine after a short delay so it arrives *after* the handshake completion coroutine has had a chance
+     * to commit the node DB — matching real-world ordering.
      */
     private fun sendStage2NodeInfoResponse(configId: Int) {
         val batch =
@@ -364,18 +365,22 @@ class MockInterface(private val service: RadioInterfaceService, val address: Str
                     makeSimNodeInfo(MY_NODE + 1, 32.960758, -96.733521), // richardson
                 ),
             )
-        val packets =
-            arrayOf(
-                FromRadio(node_info_batch = batch),
-                FromRadio(config_complete_id = configId),
+        listOf(FromRadio(node_info_batch = batch), FromRadio(config_complete_id = configId)).forEach { p ->
+            service.handleFromRadio(p.encode())
+        }
 
-                // Simulate live traffic after handshake
+        // Simulate live traffic after the handshake has completed. Launched in a separate
+        // coroutine with a small delay so these packets arrive after onNodeDbReady() runs.
+        service.serviceScope.handledLaunch {
+            delay(200)
+            listOf(
                 makeTextMessage(MY_NODE + 1),
                 makeNeighborInfo(MY_NODE + 1),
                 makePosition(MY_NODE + 1),
                 makeTelemetry(MY_NODE + 1),
                 makeNodeStatus(MY_NODE + 1),
             )
-        packets.forEach { p -> service.handleFromRadio(p.encode()) }
+                .forEach { p -> service.handleFromRadio(p.encode()) }
+        }
     }
 }

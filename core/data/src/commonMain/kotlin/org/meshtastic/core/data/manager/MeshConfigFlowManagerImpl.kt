@@ -77,8 +77,8 @@ class MeshConfigFlowManagerImpl(
     override fun handleConfigComplete(configCompleteId: Int) {
         when (configCompleteId) {
             HandshakeConstants.CONFIG_NONCE -> handleConfigOnlyComplete()
-            HandshakeConstants.NODE_INFO_NONCE,
             HandshakeConstants.BATCH_NODE_INFO_NONCE,
+            HandshakeConstants.NODE_INFO_NONCE,
             -> handleNodeInfoComplete()
             else -> Logger.w { "Config complete id mismatch: $configCompleteId" }
         }
@@ -169,6 +169,10 @@ class MeshConfigFlowManagerImpl(
 
     override fun handleNodeInfo(info: NodeInfo) {
         newNodes.add(info)
+    }
+
+    override fun handleNodeInfoBatch(items: List<NodeInfo>) {
+        newNodes.addAll(items)
     }
 
     override fun handleFileInfo(info: FileInfo) {

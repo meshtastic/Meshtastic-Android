@@ -37,6 +37,16 @@ interface MeshConfigFlowManager {
     fun handleNodeInfo(info: NodeInfo)
 
     /**
+     * Handles a batch of node information records delivered in a single [NodeInfoBatch] message.
+     *
+     * The default implementation simply delegates to [handleNodeInfo] for each item. Implementations should override
+     * this with a bulk `addAll` to avoid per-item overhead on large meshes.
+     */
+    fun handleNodeInfoBatch(items: List<NodeInfo>) {
+        items.forEach { handleNodeInfo(it) }
+    }
+
+    /**
      * Handles a [FileInfo] packet received during STATE_SEND_FILEMANIFEST.
      *
      * Each packet describes one file available on the device. Accumulated into [RadioConfigRepository.fileManifestFlow]
