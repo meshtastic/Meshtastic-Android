@@ -19,7 +19,6 @@ package org.meshtastic.core.service
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.repository.Location
@@ -27,6 +26,7 @@ import org.meshtastic.core.repository.LocationRepository
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])

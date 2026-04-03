@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.camera.viewfinder.compose)
 
     testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.compose.ui.test.junit4)
 

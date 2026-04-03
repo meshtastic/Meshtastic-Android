@@ -49,5 +49,6 @@ dependencies {
     implementation(libs.material)
 
     testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.kotlinx.coroutines.test)
 }

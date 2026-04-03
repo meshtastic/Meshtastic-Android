@@ -16,10 +16,10 @@
  */
 package org.meshtastic.core.service
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Test
 import org.meshtastic.core.service.testing.FakeIMeshService
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 /** Test to verify that the AIDL contract is correctly implemented by our test harness. */
 class IMeshServiceContractTest {

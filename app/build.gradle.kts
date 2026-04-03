@@ -150,7 +150,7 @@ configure<ApplicationExtension> {
             includeInBundle = false
         }
 
-        testInstrumentationRunner = "org.meshtastic.app.TestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // Configure existing product flavors (defined by convention plugin)
@@ -305,9 +305,10 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.koin.test)
 
+    testImplementation(kotlin("test-junit"))
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.koin.test)
-    testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)

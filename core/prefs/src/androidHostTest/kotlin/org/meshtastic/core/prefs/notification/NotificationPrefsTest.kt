@@ -22,17 +22,17 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NotificationPrefs
+import java.io.File
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class NotificationPrefsTest {
-    @get:Rule val tmpFolder: TemporaryFolder = TemporaryFolder.builder().assureDeletion().build()
+    private lateinit var tmpFolder: File
 
     private lateinit var dataStore: DataStore<Preferences>
     private lateinit var notificationPrefs: NotificationPrefs
@@ -43,27 +43,35 @@ class NotificationPrefsTest {
 
     @BeforeTest
     fun setup() {
+        tmpFolder =
+            File.createTempFile("notificationPrefsTest", null).apply {
+                delete()
+                mkdirs()
+            }
         dataStore =
             PreferenceDataStoreFactory.create(
                 scope = testScope,
-                produceFile = { tmpFolder.newFile("test.preferences_pb") },
+                produceFile = { File(tmpFolder, "test.preferences_pb").also { it.createNewFile() } },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
         notificationPrefs = NotificationPrefsImpl(dataStore, dispatchers)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        tmpFolder.deleteRecursively()
     }
 
     @Test
     fun `messagesEnabled defaults to true`() = testScope.runTest { assertTrue(notificationPrefs.messagesEnabled.value) }
 
     @Test
-    fun `nodeEventsEnabled defaults to true`() = testScope.runTest {
-        assertTrue(notificationPrefs.nodeEventsEnabled.value)
-    }
+    fun `nodeEventsEnabled defaults to true`() =
+        testScope.runTest { assertTrue(notificationPrefs.nodeEventsEnabled.value) }
 
     @Test
-    fun `lowBatteryEnabled defaults to true`() = testScope.runTest {
-        assertTrue(notificationPrefs.lowBatteryEnabled.value)
-    }
+    fun `lowBatteryEnabled defaults to true`() =
+        testScope.runTest { assertTrue(notificationPrefs.lowBatteryEnabled.value) }
 
     @Test
     fun `setting messagesEnabled updates preference`() = testScope.runTest {

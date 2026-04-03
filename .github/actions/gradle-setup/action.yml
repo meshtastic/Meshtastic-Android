@@ -13,6 +13,10 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Copy CI Gradle properties
+      shell: bash
+      run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+
     - name: Validate Gradle Wrapper
       uses: gradle/actions/wrapper-validation@v6
 
@@ -29,7 +33,4 @@ runs:
         cache-read-only: ${{ inputs.cache_read_only }}
         cache-encryption-key: ${{ inputs.gradle_encryption_key }}
         cache-cleanup: on-success
-        build-scan-publish: true
-        build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-        build-scan-terms-of-use-agree: 'yes'
         add-job-summary: always

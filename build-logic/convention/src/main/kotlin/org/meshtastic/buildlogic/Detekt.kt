@@ -42,12 +42,15 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
     )
 
     tasks.named<Detekt>("detekt") {
+        val isCi = project.findProperty("ci") == "true"
         reports {
             xml.required.set(true)
-            html.required.set(true)
-            txt.required.set(true)
+            // In CI, only generate xml and sarif (needed for GitHub reporting).
+            // Skip html, txt, md to save processing time.
+            html.required.set(!isCi)
+            txt.required.set(!isCi)
             sarif.required.set(true)
-            md.required.set(true)
+            md.required.set(!isCi)
         }
         // Use project-specific build directory for reports to avoid conflicts
         reports.xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.xml"))

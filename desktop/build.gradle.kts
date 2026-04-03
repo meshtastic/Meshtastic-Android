@@ -222,7 +222,7 @@ dependencies {
     implementation(libs.koin.annotations)
     implementation(libs.kotlinx.collections.immutable)
 
-    testImplementation(libs.junit)
+    testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.koin.test)
     testImplementation(kotlin("test"))
 }

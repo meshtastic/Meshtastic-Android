@@ -17,12 +17,12 @@
 package org.meshtastic.core.service
 
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
+import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])

@@ -56,10 +56,46 @@ val Project.configProperties: Properties
 
 /** Configure common test options like parallel execution and logging. */
 internal fun Project.configureTestOptions() {
+    // Gradle 9 requires junit-platform-launcher on every test runtime classpath when
+    // useJUnitPlatform() is active.  Add it lazily to all *UnitTestRuntimeClasspath and
+    // *TestRuntimeClasspath configurations so all Android and JVM test tasks get it
+    // without requiring per-module declarations.
+    configurations.matching {
+        it.name.endsWith("UnitTestRuntimeClasspath") || it.name.endsWith("TestRuntimeClasspath")
+    }.configureEach {
+        val launcher = libs.library("junit-platform-launcher")
+        project.dependencies.add(name, launcher)
+    }
+
     tasks.withType<Test>().configureEach {
-        // Parallelize unit tests
-        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+        // JUnit 5: activate JUnit Platform — but NOT for androidHostTest (Robolectric) tasks
+        // in KMP modules.  Those tasks run JUnit 4 natively; applying useJUnitPlatform()
+        // would force kotlin-test-junit5 selection which conflicts with the kotlin-test-junit
+        // that Kotlin auto-selects for Robolectric @RunWith tests when Platform is absent.
+        if (name != "testAndroidHostTest") {
+            useJUnitPlatform()
+        }
+        // Parallelize unit tests at the Gradle fork level.
+        // In CI, use all available processors; locally use half to keep the machine responsive.
+        val isCi = project.findProperty("ci") == "true"
+        maxParallelForks = if (isCi) {
+            Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
+        } else {
+            (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+        }
         maxHeapSize = "2g"
+
+        // JUnit Jupiter parallel execution within each Gradle fork.
+        // Classes run sequentially ("same_thread") because 19+ ViewModel test classes use
+        // Dispatchers.setMain() — a JVM-global singleton that races when classes execute
+        // concurrently in the same JVM. Cross-module parallelism via Gradle forks (above)
+        // already provides the primary test speedup.
+        systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+        systemProperty("junit.jupiter.execution.parallel.mode.default", "same_thread")
+        systemProperty("junit.jupiter.execution.parallel.mode.classes.default", "same_thread")
+        systemProperty("junit.jupiter.execution.parallel.config.strategy", "dynamic")
+        systemProperty("junit.jupiter.execution.parallel.config.dynamic.factor", "1")
+
         // Allow modules with no discovered tests to pass without failing the build
         filter { isFailOnNoMatchingTests = false }
 
@@ -75,7 +111,7 @@ internal fun Project.configureTestOptions() {
 
     // Configure test retry if the plugin is applied
     pluginManager.withPlugin("org.gradle.test-retry") {
-        tasks.withType<AbstractTestTask>().configureEach {
+        tasks.withType<Test>().configureEach {
             extensions.configure<TestRetryTaskExtension> {
                 maxRetries.set(2)
                 maxFailures.set(10)

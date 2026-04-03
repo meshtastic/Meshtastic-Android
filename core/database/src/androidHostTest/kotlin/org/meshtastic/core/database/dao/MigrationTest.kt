@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okio.ByteString.Companion.toByteString
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,6 +35,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
 import org.robolectric.annotation.Config
+import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
@@ -99,7 +99,7 @@ class MigrationTest {
 
         // Check packet channel
         val p = getFirstPacket()
-        assertEquals("Packet should remain on channel 0", 0, p.data.channel)
+        assertEquals(0, p.data.channel, "Packet should remain on channel 0")
     }
 
     @Test
@@ -136,8 +136,8 @@ class MigrationTest {
         packetDao.migrateChannelsByPSK(oldSettings, newSettings)
 
         val packets = getAllPackets()
-        assertEquals("Msg A1 should move to index 1", 1, packets.find { it.data.text == "Msg A1" }?.data?.channel)
-        assertEquals("Msg A2 should move to index 0", 0, packets.find { it.data.text == "Msg A2" }?.data?.channel)
+        assertEquals(1, packets.find { it.data.text == "Msg A1" }?.data?.channel, "Msg A1 should move to index 1")
+        assertEquals(0, packets.find { it.data.text == "Msg A2" }?.data?.channel, "Msg A2 should move to index 0")
     }
 
     @Test
@@ -154,7 +154,7 @@ class MigrationTest {
         packetDao.migrateChannelsByPSK(oldSettings, newSettings)
 
         val p = getFirstPacket()
-        assertEquals("Should prefer keeping same index 0", 0, p.data.channel)
+        assertEquals(0, p.data.channel, "Should prefer keeping same index 0")
     }
 
     private suspend fun insertPacket(channel: Int, text: String) {

@@ -22,10 +22,10 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FilterPrefs
+import java.io.File
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,7 +33,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class FilterPrefsTest {
-    @get:Rule val tmpFolder: TemporaryFolder = TemporaryFolder.builder().assureDeletion().build()
+    private lateinit var tmpFolder: File
 
     private lateinit var dataStore: DataStore<Preferences>
     private lateinit var filterPrefs: FilterPrefs
@@ -44,21 +44,30 @@ class FilterPrefsTest {
 
     @BeforeTest
     fun setup() {
+        tmpFolder =
+            File.createTempFile("filterPrefsTest", null).apply {
+                delete()
+                mkdirs()
+            }
         dataStore =
             PreferenceDataStoreFactory.create(
                 scope = testScope,
-                produceFile = { tmpFolder.newFile("test.preferences_pb") },
+                produceFile = { File(tmpFolder, "test.preferences_pb").also { it.createNewFile() } },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
         filterPrefs = FilterPrefsImpl(dataStore, dispatchers)
     }
 
+    @AfterTest
+    fun tearDown() {
+        tmpFolder.deleteRecursively()
+    }
+
     @Test fun `filterEnabled defaults to false`() = testScope.runTest { assertFalse(filterPrefs.filterEnabled.value) }
 
     @Test
-    fun `filterWords defaults to empty set`() = testScope.runTest {
-        assertTrue(filterPrefs.filterWords.value.isEmpty())
-    }
+    fun `filterWords defaults to empty set`() =
+        testScope.runTest { assertTrue(filterPrefs.filterWords.value.isEmpty()) }
 
     @Test
     fun `setting filterEnabled updates preference`() = testScope.runTest {

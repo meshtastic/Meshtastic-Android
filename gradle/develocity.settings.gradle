@@ -43,7 +43,13 @@ develocity {
         capture {
             fileFingerprints = true
         }
-        publishing.onlyIf { false }
+        // Publish scans in CI for build failure debugging and performance profiling.
+        // Uses scans.gradle.com free tier (public scans). Disabled locally.
+        def isCi = System.getenv("CI") != null
+        publishing.onlyIf { isCi }
+        uploadInBackground = !isCi
+        termsOfUseUrl = "https://gradle.com/help/legal-terms-of-use"
+        termsOfUseAgree = "yes"
     }
     buildCache {
         local {

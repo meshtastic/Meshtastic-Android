@@ -56,6 +56,14 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
         }
         compileOptions.sourceCompatibility = javaVersion
         compileOptions.targetCompatibility = javaVersion
+
+        // Exclude duplicate META-INF license files shipped by JUnit Platform JARs
+        packaging.resources.excludes.addAll(
+            listOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+            ),
+        )
     }
 
     configureMokkery()
@@ -149,20 +157,30 @@ internal fun Project.configureKmpTestDependencies() {
                 implementation(libs.library("turbine"))
             }
 
-            // Configure androidHostTest if it exists
-            val androidHostTest = findByName("androidHostTest")
-            androidHostTest?.dependencies {
-                implementation(kotlin("test"))
-                implementation(libs.library("kotest-assertions"))
-                implementation(libs.library("kotest-property"))
-                implementation(libs.library("turbine"))
-                implementation(libs.library("robolectric"))
-                implementation(libs.library("androidx-test-core"))
+            // Configure androidHostTest lazily — the source set is created when the
+            // module's build script calls `withHostTest { }`, which runs *after* the
+            // convention plugin's `apply`.  Using `matching + configureEach` defers
+            // configuration until the source set actually materialises.
+            matching { it.name == "androidHostTest" }.configureEach {
+                dependencies {
+                    // kotlin.test auto-selects kotlin-test-junit because testAndroidHostTest
+                    // does NOT use useJUnitPlatform() (see configureTestOptions).
+                    // No explicit kotlin("test") or kotlin("test-junit") override needed —
+                    // adding them would conflict with auto-selection and break resource merging.
+                    implementation(libs.library("kotest-assertions"))
+                    implementation(libs.library("kotest-property"))
+                    implementation(libs.library("turbine"))
+                    implementation(libs.library("robolectric"))
+                    implementation(libs.library("androidx-test-core"))
+                }
             }
 
-            // Configure jvmTest if it exists
-            val jvmTest = findByName("jvmTest")
-            jvmTest?.dependencies { implementation(libs.library("kotest-runner-junit6")) }
+            // Configure jvmTest lazily for the same reason.
+            matching { it.name == "jvmTest" }.configureEach {
+                dependencies {
+                    implementation(libs.library("kotest-runner-junit6"))
+                }
+            }
         }
     }
 }
