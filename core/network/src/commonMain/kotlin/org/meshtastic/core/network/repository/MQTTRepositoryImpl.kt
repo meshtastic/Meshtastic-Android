@@ -119,10 +119,11 @@ class MQTTRepositoryImpl(
 
                 // Reconnection loop
                 while (isActive) {
-                    val attempt = reconnectMutex.withLock {
-                        ++reconnectAttempt // Don't really think we will ever get overflow here since it will take
-                        // 4300 years
-                    }
+                    val attempt =
+                        reconnectMutex.withLock {
+                            ++reconnectAttempt // Don't really think we will ever get overflow here since it will take
+                            // 4300 years
+                        }
 
                     // Exponential backoff
                     val delayMs =
