@@ -914,6 +914,7 @@
     <string name="pax_metrics_log">Метрика прохожих</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Метрики прохожих недоступны</string>
+    <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>
     <string name="ble_devices">Устройства Bluetooth</string>
     <string name="bluetooth_paired_devices">Сопряженные устройства</string>
     <string name="connected_device">Подключённые устройства</string>
@@ -1282,6 +1283,9 @@
     <string name="no_files_manifested">Файлы не отобразились.</string>
     <string name="connect">Подключить</string>
     <string name="done">Готово</string>
+    <string name="wifi_provisioning">Настройка Wi-Fi для mPWRD-OS</string>
+    <string name="wifi_provision_description">Предоставьте учетные данные для доступа к Wi-Fi на вашем устройстве с mPWRD-OS через Bluetooth.</string>
+    <string name="wifi_provision_mpwrd_disclaimer">Узнайте больше о проекте mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_scanning_ble">Поиск устройства…</string>
     <string name="wifi_provision_device_found">Найденное устройство</string>
     <string name="wifi_provision_device_found_detail">Готов к сканированию Wi-Fi сетей.</string>
