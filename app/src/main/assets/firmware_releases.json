@@ -223,12 +223,6 @@
       "title": "fix: preserve higher-quality RTC time on system-time refresh",
       "page_url": "https://github.com/meshtastic/firmware/pull/9949",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9939",
-      "title": "Fix intermittent busyRx on Portduino SX1262 (stale preamble IRQ)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9939",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
