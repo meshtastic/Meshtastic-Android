@@ -98,9 +98,9 @@ class CommandSenderImpl(
     /**
      * Resolves the correct channel index for sending a packet to [toNum].
      *
-     * When both the local node and the destination support PKC, returns [DataPacket.PKC_CHANNEL_INDEX]
-     * so that [buildMeshPacket] enables PKI encryption. Otherwise falls back to the node's heard-on
-     * channel (for general packets) or the dedicated admin channel (for admin packets).
+     * When both the local node and the destination support PKC, returns [DataPacket.PKC_CHANNEL_INDEX] so that
+     * [buildMeshPacket] enables PKI encryption. Otherwise falls back to the node's heard-on channel (for general
+     * packets) or the dedicated admin channel (for admin packets).
      */
     private fun getChannelIndex(toNum: Int, isAdmin: Boolean = false): Int {
         val myNum = nodeManager.myNodeNum.value ?: return 0
