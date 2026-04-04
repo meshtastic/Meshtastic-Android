@@ -71,16 +71,24 @@ class SendMessageUseCaseImpl(
         val ourNode = nodeRepository.ourNodeInfo.value
         val fromId = ourNode?.user?.id ?: DataPacket.ID_LOCAL
 
-        // logic for direct messages
-        if (channel == null) {
+        // Direct message side-effects: share the contact's public key (PKI) or
+        // favorite the node (legacy) before sending the first message.  PKI DMs use
+        // channel == PKC_CHANNEL_INDEX (8); legacy DMs have no channel prefix
+        // (channel == null).  Both formats target a specific node.
+        val isDirectMessage = channel == null || channel == DataPacket.PKC_CHANNEL_INDEX
+        if (isDirectMessage) {
             val destNode = nodeRepository.getNode(dest)
             val fwVersion = ourNode?.metadata?.firmware_version
             val isClientBase = ourNode?.user?.role == Config.DeviceConfig.Role.CLIENT_BASE
             val capabilities = Capabilities(fwVersion)
 
             if (capabilities.canSendVerifiedContacts) {
+                // Best-effort: inform firmware of the destination's public key
+                // for its NodeDB cache.  The MeshPacket itself carries the key
+                // directly, so the message can be encrypted regardless.
                 sendSharedContact(destNode)
-            } else {
+            } else if (channel == null) {
+                // Legacy favoriting only applies to old-style DMs without PKI
                 if (!destNode.isFavorite && !isClientBase) {
                     favoriteNode(destNode)
                 }

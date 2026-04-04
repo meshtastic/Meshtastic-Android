@@ -103,7 +103,9 @@ class NodeManagerImpl(
             val byId = mutableMapOf<String, Node>()
             nodes.values.forEach { byId[it.user.id] = it }
             _nodeDBbyID.value = persistentMapOf<String, Node>().putAll(byId)
-            myNodeNum.value = nodeRepository.myNodeInfo.value?.myNodeNum
+            if (myNodeNum.value == null) {
+                myNodeNum.value = nodeRepository.myNodeInfo.value?.myNodeNum
+            }
         }
     }
 
@@ -195,7 +197,12 @@ class NodeManagerImpl(
                 } else {
                     val keyMatch = !node.hasPKC || node.user.public_key == p.public_key
                     val newUser = if (keyMatch) p else p.copy(public_key = ByteString.EMPTY)
-                    node.copy(user = newUser, channel = channel, manuallyVerified = manuallyVerified)
+                    node.copy(
+                        user = newUser,
+                        publicKey = newUser.public_key,
+                        channel = channel,
+                        manuallyVerified = manuallyVerified,
+                    )
                 }
             if (newNode && !shouldPreserve) {
                 scope.handledLaunch {
@@ -278,7 +285,7 @@ class NodeManagerImpl(
                     if (info.via_mqtt) {
                         newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
                     }
-                    next = next.copy(user = newUser)
+                    next = next.copy(user = newUser, publicKey = newUser.public_key)
                 }
             }
             val position = info.position
