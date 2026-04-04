@@ -21,8 +21,9 @@ package org.meshtastic.core.network.radio
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
@@ -36,7 +37,6 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
@@ -84,6 +84,7 @@ internal fun computeReconnectBackoffMs(consecutiveFailures: Int): Long {
 private const val CCCD_SETTLE_MS = 50L
 
 private val SCAN_TIMEOUT = 5.seconds
+private val GATT_CLEANUP_TIMEOUT = 5.seconds
 
 /**
  * A [RadioTransport] implementation for BLE devices using the common BLE abstractions (which are powered by Kable).
@@ -182,106 +183,107 @@ class BleRadioInterface(
 
     @Suppress("LongMethod")
     private fun connect() {
-        connectionJob = connectionScope.launch {
-            while (isActive) {
-                try {
-                    // Allow any pending background disconnects to complete and the Android BLE stack
-                    // to settle before we attempt a new connection.
-                    @Suppress("MagicNumber")
-                    val connectDelayMs = 1000L
-                    delay(connectDelayMs)
-
-                    connectionStartTime = nowMillis
-                    Logger.i { "[$address] BLE connection attempt started" }
-
-                    val device = findDevice()
-
-                    // Ensure the device is bonded before connecting. On Android, the
-                    // firmware may require an encrypted link (pairing mode != NO_PIN).
-                    // Without an explicit bond the GATT connection will fail with
-                    // insufficient-authentication (status 5) or the dreaded status 133.
-                    // On Desktop/JVM this is a no-op since the OS handles pairing during
-                    // the GATT connection when the peripheral requires it.
-                    if (!bluetoothRepository.isBonded(address)) {
-                        Logger.i { "[$address] Device not bonded, initiating bonding..." }
-                        @Suppress("TooGenericExceptionCaught")
-                        try {
-                            bluetoothRepository.bond(device)
-                            Logger.i { "[$address] Bonding successful" }
-                        } catch (e: Exception) {
-                            Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
-                        }
-                    }
-
-                    var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
-
-                    if (state !is BleConnectionState.Connected) {
-                        // Kable on Android occasionally fails the first connection attempt with
-                        // NotConnectedException if the previous peripheral wasn't fully cleaned
-                        // up by the OS. A quick retry resolves it.
-                        Logger.w { "[$address] First connection attempt failed, retrying in 1.5s..." }
+        connectionJob =
+            connectionScope.launch {
+                while (isActive) {
+                    try {
+                        // Allow any pending background disconnects to complete and the Android BLE stack
+                        // to settle before we attempt a new connection.
                         @Suppress("MagicNumber")
-                        delay(1500L)
-                        state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
-                    }
+                        val connectDelayMs = 1000L
+                        delay(connectDelayMs)
 
-                    if (state !is BleConnectionState.Connected) {
-                        throw RadioNotConnectedException("Failed to connect to device at address $address")
-                    }
+                        connectionStartTime = nowMillis
+                        Logger.i { "[$address] BLE connection attempt started" }
 
-                    // Connection succeeded — reset failure counter
-                    consecutiveFailures = 0
-                    isFullyConnected = true
-                    onConnected()
+                        val device = findDevice()
 
-                    // Use coroutineScope so that the connectionState listener is scoped to this
-                    // iteration only. When the inner scope exits (on disconnect), the listener is
-                    // cancelled automatically before the next reconnect cycle starts a fresh one.
-                    coroutineScope {
-                        bleConnection.connectionState
-                            .onEach { s ->
-                                if (s is BleConnectionState.Disconnected && isFullyConnected) {
-                                    isFullyConnected = false
-                                    onDisconnected()
-                                }
+                        // Ensure the device is bonded before connecting. On Android, the
+                        // firmware may require an encrypted link (pairing mode != NO_PIN).
+                        // Without an explicit bond the GATT connection will fail with
+                        // insufficient-authentication (status 5) or the dreaded status 133.
+                        // On Desktop/JVM this is a no-op since the OS handles pairing during
+                        // the GATT connection when the peripheral requires it.
+                        if (!bluetoothRepository.isBonded(address)) {
+                            Logger.i { "[$address] Device not bonded, initiating bonding..." }
+                            @Suppress("TooGenericExceptionCaught")
+                            try {
+                                bluetoothRepository.bond(device)
+                                Logger.i { "[$address] Bonding successful" }
+                            } catch (e: Exception) {
+                                Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
                             }
-                            .catch { e -> Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" } }
-                            .launchIn(this)
+                        }
 
-                        discoverServicesAndSetupCharacteristics()
+                        var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
 
-                        // Suspend here until Kable drops the connection
-                        bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+                        if (state !is BleConnectionState.Connected) {
+                            // Kable on Android occasionally fails the first connection attempt with
+                            // NotConnectedException if the previous peripheral wasn't fully cleaned
+                            // up by the OS. A quick retry resolves it.
+                            Logger.w { "[$address] First connection attempt failed, retrying in 1.5s..." }
+                            @Suppress("MagicNumber")
+                            delay(1500L)
+                            state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                        }
+
+                        if (state !is BleConnectionState.Connected) {
+                            throw RadioNotConnectedException("Failed to connect to device at address $address")
+                        }
+
+                        // Connection succeeded — reset failure counter
+                        consecutiveFailures = 0
+                        isFullyConnected = true
+                        onConnected()
+
+                        // Use coroutineScope so that the connectionState listener is scoped to this
+                        // iteration only. When the inner scope exits (on disconnect), the listener is
+                        // cancelled automatically before the next reconnect cycle starts a fresh one.
+                        coroutineScope {
+                            bleConnection.connectionState
+                                .onEach { s ->
+                                    if (s is BleConnectionState.Disconnected && isFullyConnected) {
+                                        isFullyConnected = false
+                                        onDisconnected()
+                                    }
+                                }
+                                .catch { e -> Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" } }
+                                .launchIn(this)
+
+                            discoverServicesAndSetupCharacteristics()
+
+                            // Suspend here until Kable drops the connection
+                            bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+                        }
+
+                        Logger.i { "[$address] BLE connection dropped, preparing to reconnect..." }
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        Logger.d { "[$address] BLE connection coroutine cancelled" }
+                        throw e
+                    } catch (e: Exception) {
+                        val failureTime = nowMillis - connectionStartTime
+                        consecutiveFailures++
+                        Logger.w(e) {
+                            "[$address] Failed to connect to device after ${failureTime}ms " +
+                                "(consecutive failures: $consecutiveFailures)"
+                        }
+
+                        // At the failure threshold, signal DeviceSleep so MeshConnectionManagerImpl can
+                        // start its sleep timeout. Use == (not >=) to fire exactly once; repeated
+                        // onDisconnect signals would reset upstream state machines unnecessarily.
+                        if (consecutiveFailures == RECONNECT_FAILURE_THRESHOLD) {
+                            handleFailure(e)
+                        }
+
+                        // Exponential backoff: 5s → 10s → 20s → 40s → capped at 60s.
+                        // Reduces BLE stack pressure and battery drain when the device is genuinely
+                        // out of range, while still recovering quickly from transient drops.
+                        val backoffMs = computeReconnectBackoffMs(consecutiveFailures)
+                        Logger.d { "[$address] Retrying in ${backoffMs}ms (failure #$consecutiveFailures)" }
+                        delay(backoffMs)
                     }
-
-                    Logger.i { "[$address] BLE connection dropped, preparing to reconnect..." }
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    Logger.d { "[$address] BLE connection coroutine cancelled" }
-                    throw e
-                } catch (e: Exception) {
-                    val failureTime = nowMillis - connectionStartTime
-                    consecutiveFailures++
-                    Logger.w(e) {
-                        "[$address] Failed to connect to device after ${failureTime}ms " +
-                            "(consecutive failures: $consecutiveFailures)"
-                    }
-
-                    // At the failure threshold, signal DeviceSleep so MeshConnectionManagerImpl can
-                    // start its sleep timeout. Use == (not >=) to fire exactly once; repeated
-                    // onDisconnect signals would reset upstream state machines unnecessarily.
-                    if (consecutiveFailures == RECONNECT_FAILURE_THRESHOLD) {
-                        handleFailure(e)
-                    }
-
-                    // Exponential backoff: 5s → 10s → 20s → 40s → capped at 60s.
-                    // Reduces BLE stack pressure and battery drain when the device is genuinely
-                    // out of range, while still recovering quickly from transient drops.
-                    val backoffMs = computeReconnectBackoffMs(consecutiveFailures)
-                    Logger.d { "[$address] Retrying in ${backoffMs}ms (failure #$consecutiveFailures)" }
-                    delay(backoffMs)
                 }
             }
-        }
     }
 
     private suspend fun onConnected() {
@@ -437,19 +439,18 @@ class BleRadioInterface(
         }
         // Cancel the connection scope to break the while(isActive) reconnect loop.
         connectionScope.cancel("close() called")
-        // GATT cleanup must run regardless of serviceScope lifecycle. SharedRadioInterfaceService
-        // cancels serviceScope immediately after calling close(), so launching on serviceScope is
-        // not reliable — the coroutine may never start. We use withContext(NonCancellable) inside
-        // a serviceScope.launch to guarantee cleanup completes even if the scope is cancelled
-        // mid-flight, preventing leaked BluetoothGatt objects (GATT 133 errors).
+        // GATT cleanup must survive serviceScope cancellation. SharedRadioInterfaceService calls
+        // close() and then immediately cancels serviceScope — a coroutine launched on serviceScope
+        // may never be dispatched, leaving the BluetoothGatt object leaked (causes GATT 133 on the
+        // next connect attempt). GlobalScope is the correct tool here: the cleanup is short-lived,
+        // fire-and-forget, and must outlive any application-managed scope.
         // onDisconnect is handled by SharedRadioInterfaceService.stopInterfaceLocked() directly.
-        serviceScope.launch {
-            withContext(NonCancellable) {
-                try {
-                    bleConnection.disconnect()
-                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                    Logger.w(e) { "[$address] Failed to disconnect in close()" }
-                }
+        @OptIn(DelicateCoroutinesApi::class)
+        GlobalScope.launch {
+            try {
+                withTimeoutOrNull(GATT_CLEANUP_TIMEOUT) { bleConnection.disconnect() }
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "[$address] Failed to disconnect in close()" }
             }
         }
     }

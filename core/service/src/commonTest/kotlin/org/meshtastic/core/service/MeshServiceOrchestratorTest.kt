@@ -71,6 +71,7 @@ class MeshServiceOrchestratorTest {
     @Test
     fun testStartWiresComponents() {
         every { radioInterfaceService.receivedData } returns MutableSharedFlow()
+        every { radioInterfaceService.connectionError } returns MutableSharedFlow()
         every { serviceRepository.serviceAction } returns MutableSharedFlow()
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
@@ -125,6 +126,7 @@ class MeshServiceOrchestratorTest {
         val takRunningFlow = MutableStateFlow(false)
 
         every { radioInterfaceService.receivedData } returns MutableSharedFlow()
+        every { radioInterfaceService.connectionError } returns MutableSharedFlow()
         every { serviceRepository.serviceAction } returns MutableSharedFlow()
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())

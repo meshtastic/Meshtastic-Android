@@ -47,6 +47,17 @@ fun ignoreException(silent: Boolean = false, inner: () -> Unit) {
     }
 }
 
+/** Suspend-compatible variant of [ignoreException]. */
+suspend fun ignoreExceptionSuspend(silent: Boolean = false, inner: suspend () -> Unit) {
+    try {
+        inner()
+    } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
+        if (!silent) {
+            Logger.w(ex) { "Ignoring exception" }
+        }
+    }
+}
+
 /**
  * Wraps and discards exceptions, but reports them to the crash reporter before logging. Use this for operations that
  * should not crash the process but are still unexpected.

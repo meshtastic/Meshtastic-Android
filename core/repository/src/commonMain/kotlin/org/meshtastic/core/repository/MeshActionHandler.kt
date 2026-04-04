@@ -29,7 +29,7 @@ interface MeshActionHandler {
     fun start(scope: CoroutineScope)
 
     /** Processes a service action from the UI. */
-    fun onServiceAction(action: ServiceAction)
+    suspend fun onServiceAction(action: ServiceAction)
 
     /** Sets the owner of the local node. */
     fun handleSetOwner(u: MeshUser, myNodeNum: Int)

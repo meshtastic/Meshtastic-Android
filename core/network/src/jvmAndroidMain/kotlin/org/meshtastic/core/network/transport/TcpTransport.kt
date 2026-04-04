@@ -33,6 +33,7 @@ import java.io.OutputStream
 import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Shared JVM TCP transport for Meshtastic radios.
@@ -235,12 +236,11 @@ class TcpTransport(
     }
 
     // Guards against recursive disconnects triggered by listener callbacks.
-    @Volatile private var isDisconnecting: Boolean = false
+    private val isDisconnecting = AtomicBoolean(false)
 
     private fun disconnectSocket() {
-        if (isDisconnecting) return
+        if (!isDisconnecting.compareAndSet(false, true)) return
 
-        isDisconnecting = true
         try {
             val s = socket
             val hadConnection = s != null || outStream != null
@@ -265,7 +265,7 @@ class TcpTransport(
                 listener.onDisconnected()
             }
         } finally {
-            isDisconnecting = false
+            isDisconnecting.set(false)
         }
     }
 

@@ -68,6 +68,9 @@ interface RadioInterfaceService {
     /** Called by an interface when it has received raw data from the radio. */
     fun handleFromRadio(bytes: ByteArray)
 
+    /** Flow of user-facing connection error messages (e.g. permission failures). */
+    val connectionError: SharedFlow<String>
+
     /** The scope in which interface-related coroutines should run. */
     val serviceScope: CoroutineScope
 }

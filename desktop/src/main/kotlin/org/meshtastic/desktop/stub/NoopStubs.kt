@@ -75,6 +75,7 @@ class NoopRadioInterfaceService : RadioInterfaceService {
 
     override val receivedData = MutableSharedFlow<ByteArray>()
     override val meshActivity = MutableSharedFlow<MeshActivity>()
+    override val connectionError = MutableSharedFlow<String>()
 
     override fun sendToRadio(bytes: ByteArray) {
         logWarn("NoopRadioInterfaceService.sendToRadio(${bytes.size} bytes)")

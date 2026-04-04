@@ -130,7 +130,10 @@ class SendMessageUseCaseImpl(
 
     private suspend fun sendSharedContact(node: Node) {
         try {
-            radioController.sendSharedContact(node.num)
+            val accepted = radioController.sendSharedContact(node.num)
+            if (!accepted) {
+                Logger.w { "Shared contact for node ${node.num} was not acknowledged by the radio" }
+            }
         } catch (ex: Exception) {
             Logger.e(ex) { "Send shared contact error" }
         }

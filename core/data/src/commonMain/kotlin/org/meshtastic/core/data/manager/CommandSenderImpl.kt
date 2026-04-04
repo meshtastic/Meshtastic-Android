@@ -169,6 +169,18 @@ class CommandSenderImpl(
         packetHandler.sendToRadio(packet)
     }
 
+    override suspend fun sendAdminAwait(
+        destNum: Int,
+        requestId: Int,
+        wantResponse: Boolean,
+        initFn: () -> AdminMessage,
+    ): Boolean {
+        val adminMsg = initFn().copy(session_passkey = sessionPasskey.value)
+        val packet =
+            buildAdminPacket(to = destNum, id = requestId, wantResponse = wantResponse, adminMessage = adminMsg)
+        return packetHandler.sendToRadioAndAwait(packet)
+    }
+
     override fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {
         val myNum = nodeManager.myNodeNum ?: return
         val idNum = destNum ?: myNum

@@ -22,7 +22,7 @@ import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.ignoreException
+import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
@@ -77,9 +77,9 @@ class MeshActionHandlerImpl(
         private const val EMOJI_INDICATOR = 1
     }
 
-    override fun onServiceAction(action: ServiceAction) {
-        ignoreException {
-            val myNodeNum = nodeManager.myNodeNum ?: return@ignoreException
+    override suspend fun onServiceAction(action: ServiceAction) {
+        ignoreExceptionSuspend {
+            val myNodeNum = nodeManager.myNodeNum ?: return@ignoreExceptionSuspend
             when (action) {
                 is ServiceAction.Favorite -> handleFavorite(action, myNodeNum)
                 is ServiceAction.Ignore -> handleIgnore(action, myNodeNum)
@@ -87,7 +87,12 @@ class MeshActionHandlerImpl(
                 is ServiceAction.Reaction -> handleReaction(action, myNodeNum)
                 is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
                 is ServiceAction.SendContact -> {
-                    commandSender.sendAdmin(myNodeNum) { AdminMessage(add_contact = action.contact) }
+                    val accepted =
+                        runCatching {
+                            commandSender.sendAdminAwait(myNodeNum) { AdminMessage(add_contact = action.contact) }
+                        }
+                            .getOrDefault(false)
+                    action.result.complete(accepted)
                 }
                 is ServiceAction.GetDeviceMetadata -> {
                     commandSender.sendAdmin(action.destNum, wantResponse = true) {

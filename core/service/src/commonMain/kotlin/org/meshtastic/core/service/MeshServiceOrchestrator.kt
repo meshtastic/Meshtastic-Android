@@ -17,6 +17,7 @@
 package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
@@ -130,7 +131,16 @@ class MeshServiceOrchestrator(
             .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum) }
             .launchIn(scope)
 
-        serviceRepository.serviceAction.onEach(router.actionHandler::onServiceAction).launchIn(scope)
+        radioInterfaceService.connectionError
+            .onEach { errorMessage -> serviceRepository.setErrorMessage(errorMessage, Severity.Warn) }
+            .launchIn(scope)
+
+        // Each action is dispatched in its own supervised coroutine so that a failure in one
+        // action (e.g. a timeout in sendAdminAwait) cannot terminate the collector and silently
+        // drop all subsequent service actions for the rest of the session.
+        serviceRepository.serviceAction
+            .onEach { action -> scope.handledLaunch { router.actionHandler.onServiceAction(action) } }
+            .launchIn(scope)
 
         nodeManager.loadCachedNodeDB()
     }

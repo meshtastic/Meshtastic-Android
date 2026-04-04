@@ -65,40 +65,88 @@ class MeshConfigFlowManagerImpl(
         this.scope = scope
     }
 
+    /**
+     * Tracks which phase of the two-stage handshake we are currently in.
+     *
+     * Guards [handleConfigComplete] so that duplicate or out-of-order `config_complete_id` signals from the firmware
+     * cannot trigger the wrong stage handler or drive the state machine backward.
+     */
+    private enum class HandshakePhase {
+        IDLE,
+        STAGE_1,
+        STAGE_2,
+        COMPLETE,
+    }
+
+    private var handshakePhase = HandshakePhase.IDLE
+
     private val newNodes = mutableListOf<NodeInfo>()
     override val newNodeCount: Int
         get() = newNodes.size
 
+    // The two inputs to MyNodeInfo construction. Both are set during Stage 1 and consumed
+    // together at Stage 1 complete by buildMyNodeInfo(). rawMyNodeInfo arrives first
+    // (my_info packet); metadata arrives shortly after (metadata packet). Neither is needed
+    // outside Stage 1, so we hold the raw protos rather than rebuilding an intermediate
+    // SharedMyNodeInfo every time one of them changes.
     private var rawMyNodeInfo: ProtoMyNodeInfo? = null
     private var lastMetadata: DeviceMetadata? = null
-    private var newMyNodeInfo: SharedMyNodeInfo? = null
+
+    // Committed at Stage 1 complete, consumed at Stage 2 complete.
     private var myNodeInfo: SharedMyNodeInfo? = null
 
     override fun handleConfigComplete(configCompleteId: Int) {
         when (configCompleteId) {
-            HandshakeConstants.CONFIG_NONCE -> handleConfigOnlyComplete()
-            HandshakeConstants.NODE_INFO_NONCE -> handleNodeInfoComplete()
+            HandshakeConstants.CONFIG_NONCE -> {
+                if (handshakePhase != HandshakePhase.STAGE_1) {
+                    Logger.w { "Ignoring Stage 1 config_complete in phase=$handshakePhase" }
+                    return
+                }
+                handleConfigOnlyComplete()
+            }
+            HandshakeConstants.NODE_INFO_NONCE -> {
+                if (handshakePhase != HandshakePhase.STAGE_2) {
+                    Logger.w { "Ignoring Stage 2 config_complete in phase=$handshakePhase" }
+                    return
+                }
+                handleNodeInfoComplete()
+            }
             else -> Logger.w { "Config complete id mismatch: $configCompleteId" }
         }
     }
 
     private fun handleConfigOnlyComplete() {
         Logger.i { "Config-only complete (Stage 1)" }
-        if (newMyNodeInfo == null) {
-            Logger.w {
-                "newMyNodeInfo is still null at Stage 1 complete, attempting final regen with last known metadata"
+
+        val raw = rawMyNodeInfo
+        if (raw == null) {
+            // my_info is the very first packet the firmware sends; if it never arrived
+            // something is fundamentally wrong. Proceeding to Stage 2 would leave the app
+            // Connected but with no node info. Retry Stage 1 instead.
+            Logger.e { "Stage 1 failed: my_info never received. Retrying Stage 1." }
+            handshakePhase = HandshakePhase.IDLE
+            scope.handledLaunch {
+                delay(wantConfigDelay)
+                connectionManager.value.startConfigOnly()
             }
-            regenMyNodeInfo(lastMetadata)
+            return
         }
 
-        val finalizedInfo = newMyNodeInfo
+        val finalizedInfo = buildMyNodeInfo(raw, lastMetadata)
         if (finalizedInfo == null) {
-            Logger.e { "Handshake stall: Did not receive a valid MyNodeInfo before Stage 1 complete" }
-        } else {
-            myNodeInfo = finalizedInfo
-            Logger.i { "myNodeInfo committed successfully (nodeNum=${finalizedInfo.myNodeNum})" }
-            connectionManager.value.onRadioConfigLoaded()
+            Logger.e { "Stage 1 failed: could not build MyNodeInfo. Retrying Stage 1." }
+            handshakePhase = HandshakePhase.IDLE
+            scope.handledLaunch {
+                delay(wantConfigDelay)
+                connectionManager.value.startConfigOnly()
+            }
+            return
         }
+
+        myNodeInfo = finalizedInfo
+        handshakePhase = HandshakePhase.STAGE_2
+        Logger.i { "myNodeInfo committed (nodeNum=${finalizedInfo.myNodeNum})" }
+        connectionManager.value.onRadioConfigLoaded()
 
         scope.handledLaunch {
             delay(wantConfigDelay)
@@ -120,18 +168,38 @@ class MeshConfigFlowManagerImpl(
 
     private fun handleNodeInfoComplete() {
         Logger.i { "NodeInfo complete (Stage 2)" }
-        val entities =
-            newNodes.map { info ->
-                nodeManager.installNodeInfo(info, withBroadcast = false)
-                nodeManager.nodeDBbyNodeNum[info.num]!!
-            }
+
+        val info = myNodeInfo
+        if (info == null) {
+            Logger.e { "handleNodeInfoComplete: myNodeInfo is NULL — cannot complete handshake" }
+            // Stay in STAGE_2 so a firmware retry can still be accepted. Do NOT
+            // transition to COMPLETE or Connected without a valid node identity.
+            return
+        }
+
+        // Transition phase immediately (synchronously) to prevent duplicate handling.
+        // The async work below (DB writes, broadcasts) proceeds without the guard.
+        handshakePhase = HandshakePhase.COMPLETE
+
+        // Snapshot and clear immediately so that a concurrent stall-guard retry (which
+        // resends want_config_id and causes the firmware to restart the node_info burst)
+        // starts accumulating into a fresh list rather than doubling this batch.
+        val nodesToProcess = newNodes.toList()
         newNodes.clear()
 
+        val entities =
+            nodesToProcess.mapNotNull { nodeInfo ->
+                nodeManager.installNodeInfo(nodeInfo, withBroadcast = false)
+                nodeManager.nodeDBbyNodeNum[nodeInfo.num]
+                    ?: run {
+                        Logger.w { "Node ${nodeInfo.num} missing from DB after installNodeInfo; skipping" }
+                        null
+                    }
+            }
+
         scope.handledLaunch {
-            myNodeInfo?.let {
-                nodeRepository.installConfig(it, entities)
-                sendAnalytics(it)
-            } ?: Logger.w { "handleNodeInfoComplete: myNodeInfo is NULL, skipping installConfig!" }
+            nodeRepository.installConfig(info, entities)
+            analytics.setDeviceAttributes(info.firmwareVersion ?: "unknown", info.model ?: "unknown")
             nodeManager.setNodeDbReady(true)
             nodeManager.setAllowNodeDbWrites(true)
             serviceRepository.setConnectionState(ConnectionState.Connected)
@@ -140,16 +208,26 @@ class MeshConfigFlowManagerImpl(
         }
     }
 
-    private fun sendAnalytics(mi: SharedMyNodeInfo) {
-        analytics.setDeviceAttributes(mi.firmwareVersion ?: "unknown", mi.model ?: "unknown")
-    }
-
     override fun handleMyInfo(myInfo: ProtoMyNodeInfo) {
         Logger.i { "MyNodeInfo received: ${myInfo.my_node_num}" }
+
+        // Reset all per-handshake state so stale data from a prior interrupted handshake
+        // cannot carry over into this one. newNodes may hold partial Stage 2 data if the
+        // previous connection dropped mid-way through Stage 2.
+        newNodes.clear()
+        rawMyNodeInfo = null
+        lastMetadata = null
+        myNodeInfo = null
+        handshakePhase = HandshakePhase.STAGE_1
+
         rawMyNodeInfo = myInfo
         nodeManager.myNodeNum = myInfo.my_node_num
-        regenMyNodeInfo(lastMetadata)
 
+        // Clear persisted radio config so the new handshake starts from a clean slate.
+        // DataStore serializes its own writes, so the clear will precede subsequent
+        // setLocalConfig / updateChannelSettings calls dispatched by later packets in this
+        // session (handleFromRadio processes packets sequentially, so later dispatches always
+        // occur after this one returns).
         scope.handledLaunch {
             radioConfigRepository.clearChannelSet()
             radioConfigRepository.clearLocalConfig()
@@ -162,7 +240,13 @@ class MeshConfigFlowManagerImpl(
     override fun handleLocalMetadata(metadata: DeviceMetadata) {
         Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
         lastMetadata = metadata
-        regenMyNodeInfo(metadata)
+        // Persist the metadata immediately — buildMyNodeInfo() reads it at Stage 1 complete,
+        // but the DB write does not need to wait until then.
+        rawMyNodeInfo?.let { raw ->
+            if (metadata != DeviceMetadata()) {
+                scope.handledLaunch { nodeRepository.insertMetadata(raw.my_node_num, metadata) }
+            }
+        }
     }
 
     override fun handleNodeInfo(info: NodeInfo) {
@@ -178,46 +262,38 @@ class MeshConfigFlowManagerImpl(
         connectionManager.value.startConfigOnly()
     }
 
-    private fun regenMyNodeInfo(metadata: DeviceMetadata? = null) {
-        val myInfo = rawMyNodeInfo
-        if (myInfo != null) {
-            try {
-                val mi =
-                    with(myInfo) {
-                        SharedMyNodeInfo(
-                            myNodeNum = my_node_num,
-                            hasGPS = false,
-                            model =
-                            when (val hwModel = metadata?.hw_model) {
-                                null,
-                                HardwareModel.UNSET,
-                                -> null
-                                else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
-                            },
-                            firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
-                            couldUpdate = false,
-                            shouldUpdate = false,
-                            currentPacketId = commandSender.getCurrentPacketId() and 0xffffffffL,
-                            messageTimeoutMsec = 300000,
-                            minAppVersion = min_app_version,
-                            maxChannels = 8,
-                            hasWifi = metadata?.hasWifi == true,
-                            channelUtilization = 0f,
-                            airUtilTx = 0f,
-                            deviceId = device_id.utf8(),
-                            pioEnv = myInfo.pio_env.ifEmpty { null },
-                        )
-                    }
-                if (metadata != null && metadata != DeviceMetadata()) {
-                    scope.handledLaunch { nodeRepository.insertMetadata(mi.myNodeNum, metadata) }
-                }
-                newMyNodeInfo = mi
-                Logger.d { "newMyNodeInfo updated: nodeNum=${mi.myNodeNum} model=${mi.model} fw=${mi.firmwareVersion}" }
-            } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
-                Logger.e(ex) { "Failed to regenMyNodeInfo" }
-            }
-        } else {
-            Logger.v { "regenMyNodeInfo skipped: rawMyNodeInfo is null" }
+    /**
+     * Builds a [SharedMyNodeInfo] from the raw proto and optional firmware metadata. Pure function — no side effects.
+     * Returns null only if construction throws.
+     */
+    private fun buildMyNodeInfo(raw: ProtoMyNodeInfo, metadata: DeviceMetadata?): SharedMyNodeInfo? = try {
+        with(raw) {
+            SharedMyNodeInfo(
+                myNodeNum = my_node_num,
+                hasGPS = false,
+                model =
+                when (val hwModel = metadata?.hw_model) {
+                    null,
+                    HardwareModel.UNSET,
+                    -> null
+                    else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+                },
+                firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
+                couldUpdate = false,
+                shouldUpdate = false,
+                currentPacketId = commandSender.getCurrentPacketId() and 0xffffffffL,
+                messageTimeoutMsec = 300000,
+                minAppVersion = min_app_version,
+                maxChannels = 8,
+                hasWifi = metadata?.hasWifi == true,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = device_id.utf8(),
+                pioEnv = pio_env.ifEmpty { null },
+            )
         }
+    } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
+        Logger.e(ex) { "Failed to build MyNodeInfo" }
+        null
     }
 }

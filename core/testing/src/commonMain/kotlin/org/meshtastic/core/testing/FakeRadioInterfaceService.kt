@@ -46,6 +46,9 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
     override val meshActivity: SharedFlow<MeshActivity> = _meshActivity
 
+    private val _connectionError = MutableSharedFlow<String>()
+    override val connectionError: SharedFlow<String> = _connectionError
+
     val sentToRadio = mutableListOf<ByteArray>()
     var connectCalled = false
 

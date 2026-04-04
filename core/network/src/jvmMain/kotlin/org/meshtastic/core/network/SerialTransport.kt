@@ -25,12 +25,17 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.meshtastic.core.network.radio.StreamInterface
 import org.meshtastic.core.repository.RadioInterfaceService
+import java.io.File
 
 /**
  * JVM-specific implementation of [RadioTransport] using jSerialComm. Uses [StreamInterface] for START1/START2 packet
  * framing.
+ *
+ * Use the [open] factory method instead of the constructor directly to ensure the serial port is opened and the read
+ * loop is started.
  */
-class SerialTransport(
+class SerialTransport
+private constructor(
     private val portName: String,
     private val baudRate: Int = DEFAULT_BAUD_RATE,
     service: RadioInterfaceService,
@@ -39,7 +44,7 @@ class SerialTransport(
     private var readJob: Job? = null
 
     /** Attempts to open the serial port and starts the read loop. Returns true if successful, false otherwise. */
-    fun startConnection(): Boolean {
+    private fun startConnection(): Boolean {
         return try {
             val port = SerialPort.getCommPort(portName) ?: return false
             port.setComPortParameters(baudRate, DATA_BITS, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY)
@@ -150,9 +155,63 @@ class SerialTransport(
         private const val READ_TIMEOUT_MS = 100
 
         /**
+         * Creates and opens a [SerialTransport]. If the port cannot be opened, the transport signals a permanent
+         * disconnect to the [service] and returns the (non-connected) instance.
+         */
+        fun open(portName: String, baudRate: Int = DEFAULT_BAUD_RATE, service: RadioInterfaceService): SerialTransport {
+            val transport = SerialTransport(portName, baudRate, service)
+            if (!transport.startConnection()) {
+                val errorMessage = diagnoseOpenFailure(portName)
+                Logger.w { "Serial port $portName could not be opened; signalling disconnect. $errorMessage" }
+                service.onDisconnect(isPermanent = true, errorMessage = errorMessage)
+            }
+            return transport
+        }
+
+        /**
          * Discovers and returns a list of available serial ports. Returns a list of the system port names (e.g.,
          * "COM3", "/dev/ttyUSB0").
          */
         fun getAvailablePorts(): List<String> = SerialPort.getCommPorts().map { it.systemPortName }
+
+        /**
+         * Diagnoses why a serial port could not be opened and returns a user-facing error message. On Linux, checks
+         * file permissions and suggests the appropriate group fix.
+         */
+        @Suppress("ReturnCount")
+        private fun diagnoseOpenFailure(portName: String): String {
+            val osName = System.getProperty("os.name", "").lowercase()
+            if (!osName.contains("linux")) {
+                return "Could not open serial port: $portName"
+            }
+
+            // jSerialComm resolves bare names like "ttyUSB0" to "/dev/ttyUSB0"
+            val devPath = if (portName.startsWith("/")) portName else "/dev/$portName"
+            val portFile = File(devPath)
+            if (!portFile.exists()) {
+                return "Serial port $portName not found. Is the device still connected?"
+            }
+            if (!portFile.canRead() || !portFile.canWrite()) {
+                val group = detectSerialGroup(devPath)
+                val user = System.getProperty("user.name", "your_user")
+                return "Permission denied for $devPath. " +
+                    "Run: sudo usermod -aG $group $user  — then log out and back in."
+            }
+            return "Could not open serial port: $portName"
+        }
+
+        /**
+         * Attempts to detect the group that owns the serial device file. Falls back to "dialout" (Debian/Ubuntu
+         * default) if detection fails.
+         */
+        @Suppress("SwallowedException", "TooGenericExceptionCaught")
+        private fun detectSerialGroup(devPath: String): String = try {
+            val process = ProcessBuilder("stat", "-c", "%G", devPath).redirectErrorStream(true).start()
+            val group = process.inputStream.bufferedReader().readText().trim()
+            process.waitFor()
+            group.ifEmpty { "dialout" }
+        } catch (e: Exception) {
+            "dialout"
+        }
     }
 }

@@ -127,22 +127,20 @@ class MeshConnectionManagerImpl(
             .launchIn(scope)
     }
 
-    private fun onRadioConnectionState(newState: ConnectionState) {
-        scope.handledLaunch {
-            val localConfig = radioConfigRepository.localConfigFlow.first()
-            val isRouter = localConfig.device?.role == Config.DeviceConfig.Role.ROUTER
-            val lsEnabled = localConfig.power?.is_power_saving == true || isRouter
+    private suspend fun onRadioConnectionState(newState: ConnectionState) {
+        val localConfig = radioConfigRepository.localConfigFlow.first()
+        val isRouter = localConfig.device?.role == Config.DeviceConfig.Role.ROUTER
+        val lsEnabled = localConfig.power?.is_power_saving == true || isRouter
 
-            val effectiveState =
-                when (newState) {
-                    is ConnectionState.Connected -> ConnectionState.Connected
-                    is ConnectionState.DeviceSleep ->
-                        if (lsEnabled) ConnectionState.DeviceSleep else ConnectionState.Disconnected
-                    is ConnectionState.Connecting -> ConnectionState.Connecting
-                    is ConnectionState.Disconnected -> ConnectionState.Disconnected
-                }
-            onConnectionChanged(effectiveState)
-        }
+        val effectiveState =
+            when (newState) {
+                is ConnectionState.Connected -> ConnectionState.Connected
+                is ConnectionState.DeviceSleep ->
+                    if (lsEnabled) ConnectionState.DeviceSleep else ConnectionState.Disconnected
+                is ConnectionState.Connecting -> ConnectionState.Connecting
+                is ConnectionState.Disconnected -> ConnectionState.Disconnected
+            }
+        onConnectionChanged(effectiveState)
     }
 
     private fun onConnectionChanged(c: ConnectionState) {
@@ -207,11 +205,15 @@ class MeshConnectionManagerImpl(
             }
     }
 
-    private fun handleDeviceSleep() {
-        serviceRepository.setConnectionState(ConnectionState.DeviceSleep)
+    private fun tearDownConnection() {
         packetHandler.stopPacketQueue()
         locationManager.stop()
         mqttManager.stop()
+    }
+
+    private fun handleDeviceSleep() {
+        serviceRepository.setConnectionState(ConnectionState.DeviceSleep)
+        tearDownConnection()
 
         if (connectTimeMsec != 0L) {
             val now = nowMillis
@@ -242,9 +244,7 @@ class MeshConnectionManagerImpl(
 
     private fun handleDisconnected() {
         serviceRepository.setConnectionState(ConnectionState.Disconnected)
-        packetHandler.stopPacketQueue()
-        locationManager.stop()
-        mqttManager.stop()
+        tearDownConnection()
 
         analytics.track(
             EVENT_MESH_DISCONNECT,

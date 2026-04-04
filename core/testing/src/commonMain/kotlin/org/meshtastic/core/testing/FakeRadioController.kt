@@ -73,8 +73,9 @@ class FakeRadioController :
         favoritedNodes.add(nodeNum)
     }
 
-    override suspend fun sendSharedContact(nodeNum: Int) {
+    override suspend fun sendSharedContact(nodeNum: Int): Boolean {
         sentSharedContacts.add(nodeNum)
+        return true
     }
 
     override suspend fun setLocalConfig(config: org.meshtastic.proto.Config) {}

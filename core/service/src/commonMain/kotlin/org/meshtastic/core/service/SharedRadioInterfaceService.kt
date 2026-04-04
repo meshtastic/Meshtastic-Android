@@ -93,7 +93,7 @@ class SharedRadioInterfaceService(
     override val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
 
     private val _connectionError = MutableSharedFlow<String>(extraBufferCapacity = 64)
-    val connectionError: SharedFlow<String> = _connectionError.asSharedFlow()
+    override val connectionError: SharedFlow<String> = _connectionError.asSharedFlow()
 
     override val serviceScope: CoroutineScope
         get() = _serviceScope
@@ -245,12 +245,13 @@ class SharedRadioInterfaceService(
 
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
-        heartbeatJob = serviceScope.launch {
-            while (true) {
-                delay(HEARTBEAT_INTERVAL_MILLIS)
-                keepAlive()
+        heartbeatJob =
+            serviceScope.launch {
+                while (true) {
+                    delay(HEARTBEAT_INTERVAL_MILLIS)
+                    keepAlive()
+                }
             }
-        }
     }
 
     fun keepAlive(now: Long = nowMillis) {
@@ -278,11 +279,13 @@ class SharedRadioInterfaceService(
     }
 
     override fun onConnect() {
+        // MutableStateFlow.value is thread-safe (backed by atomics) — assign directly rather than
+        // launching a coroutine. The async launch pattern introduced a window where a concurrent
+        // onDisconnect launch could execute AFTER an onConnect launch, leaving the service stuck
+        // in Connected while the transport was actually disconnected.
         if (_connectionState.value != ConnectionState.Connected) {
             Logger.d { "Broadcasting connection state change to Connected" }
-            processLifecycle.coroutineScope.launch(dispatchers.default) {
-                _connectionState.emit(ConnectionState.Connected)
-            }
+            _connectionState.value = ConnectionState.Connected
         }
     }
 
@@ -293,7 +296,7 @@ class SharedRadioInterfaceService(
         val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
         if (_connectionState.value != newTargetState) {
             Logger.d { "Broadcasting connection state change to $newTargetState" }
-            processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionState.emit(newTargetState) }
+            _connectionState.value = newTargetState
         }
     }
 }
