@@ -77,7 +77,9 @@ class MeshConfigFlowManagerImpl(
     override fun handleConfigComplete(configCompleteId: Int) {
         when (configCompleteId) {
             HandshakeConstants.CONFIG_NONCE -> handleConfigOnlyComplete()
-            HandshakeConstants.NODE_INFO_NONCE -> handleNodeInfoComplete()
+            HandshakeConstants.BATCH_NODE_INFO_NONCE,
+            HandshakeConstants.NODE_INFO_NONCE,
+            -> handleNodeInfoComplete()
             else -> Logger.w { "Config complete id mismatch: $configCompleteId" }
         }
     }
@@ -120,10 +122,11 @@ class MeshConfigFlowManagerImpl(
 
     private fun handleNodeInfoComplete() {
         Logger.i { "NodeInfo complete (Stage 2)" }
-        val entities = newNodes.map { info ->
-            nodeManager.installNodeInfo(info, withBroadcast = false)
-            nodeManager.nodeDBbyNodeNum[info.num]!!
-        }
+        val entities =
+            newNodes.map { info ->
+                nodeManager.installNodeInfo(info, withBroadcast = false)
+                nodeManager.nodeDBbyNodeNum[info.num]!!
+            }
         newNodes.clear()
 
         scope.handledLaunch {
@@ -166,6 +169,10 @@ class MeshConfigFlowManagerImpl(
 
     override fun handleNodeInfo(info: NodeInfo) {
         newNodes.add(info)
+    }
+
+    override fun handleNodeInfoBatch(items: List<NodeInfo>) {
+        newNodes.addAll(items)
     }
 
     override fun handleFileInfo(info: FileInfo) {

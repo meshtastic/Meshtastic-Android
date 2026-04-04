@@ -36,6 +36,7 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.NodeInfoBatch
 import org.meshtastic.proto.QueueStatus
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -159,6 +160,23 @@ class FromRadioPacketHandlerImplTest {
         handler.handleFromRadio(proto)
 
         verify { mqttManager.handleMqttProxyMessage(proxyMsg) }
+    }
+
+    @Test
+    fun `handleFromRadio routes NODE_INFO_BATCH to handleNodeInfoBatch and updates status`() {
+        val node1 = ProtoNodeInfo(num = 1111)
+        val node2 = ProtoNodeInfo(num = 2222)
+        val node3 = ProtoNodeInfo(num = 3333)
+        val items = listOf(node1, node2, node3)
+        val batch = NodeInfoBatch(items = items)
+        val proto = FromRadio(node_info_batch = batch)
+
+        every { configFlowManager.newNodeCount } returns 3
+
+        handler.handleFromRadio(proto)
+
+        verify { configFlowManager.handleNodeInfoBatch(items) }
+        verify { serviceRepository.setConnectionProgress("Nodes (3)") }
     }
 
     @Test

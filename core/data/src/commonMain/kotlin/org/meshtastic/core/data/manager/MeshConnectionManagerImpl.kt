@@ -263,7 +263,7 @@ class MeshConnectionManagerImpl(
     }
 
     override fun startNodeInfoOnly() {
-        val action = { packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE)) }
+        val action = { packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.BATCH_NODE_INFO_NONCE)) }
         startHandshakeStallGuard(2, action)
         action()
     }
