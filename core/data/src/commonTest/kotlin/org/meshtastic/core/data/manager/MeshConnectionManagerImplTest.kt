@@ -255,7 +255,7 @@ class MeshConnectionManagerImplTest {
             )
         moduleConfigFlow.value = moduleConfig
         every { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
-        every { nodeManager.myNodeNum } returns 123
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         every { mqttManager.start(any(), any(), any()) } returns Unit
         every { historyManager.requestHistoryReplay(any(), any(), any(), any()) } returns Unit
         every { nodeManager.getMyNodeInfo() } returns null

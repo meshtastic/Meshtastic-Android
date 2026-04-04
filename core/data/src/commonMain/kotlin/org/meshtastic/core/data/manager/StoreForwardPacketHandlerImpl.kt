@@ -18,12 +18,10 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
 import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.SfppHasher
@@ -48,7 +46,7 @@ class StoreForwardPacketHandlerImpl(
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,
 ) : StoreForwardPacketHandler {
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+    private lateinit var scope: CoroutineScope
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -116,7 +114,7 @@ class StoreForwardPacketHandlerImpl(
 
         Logger.d {
             "SFPP updateStatus: packetId=${sfpp.encapsulated_id} from=${sfpp.encapsulated_from} " +
-                "to=${sfpp.encapsulated_to} myNodeNum=${nodeManager.myNodeNum} status=$status"
+                "to=${sfpp.encapsulated_to} myNodeNum=${nodeManager.myNodeNum.value} status=$status"
         }
         scope.handledLaunch {
             packetRepository.value.updateSFPPStatus(
@@ -126,7 +124,7 @@ class StoreForwardPacketHandlerImpl(
                 hash = hash,
                 status = status,
                 rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
-                myNodeNum = nodeManager.myNodeNum ?: 0,
+                myNodeNum = nodeManager.myNodeNum.value ?: 0,
             )
             serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulated_id, status)
         }
@@ -145,10 +143,8 @@ class StoreForwardPacketHandlerImpl(
     }
 
     private fun handleReceivedStoreAndForward(dataPacket: DataPacket, s: StoreAndForward, myNodeNum: Int) {
-        Logger.d { "StoreAndForward: variant from ${dataPacket.from}" }
-        val h = s.history
-        val lastRequest = h?.last_request ?: 0
-        Logger.d { "rxStoreForward from=${dataPacket.from} lastRequest=$lastRequest" }
+        val lastRequest = s.history?.last_request ?: 0
+        Logger.d { "StoreAndForward from=${dataPacket.from} lastRequest=$lastRequest" }
         when {
             s.stats != null -> {
                 val text = s.stats.toString()
@@ -159,7 +155,8 @@ class StoreForwardPacketHandlerImpl(
                     )
                 dataHandler.value.rememberDataPacket(u, myNodeNum)
             }
-            h != null -> {
+            s.history != null -> {
+                val h = s.history!!
                 val text =
                     "Total messages: ${h.history_messages}\n" +
                         "History window: ${h.window.milliseconds.inWholeMinutes} min\n" +

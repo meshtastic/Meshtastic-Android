@@ -93,7 +93,7 @@ class SharedRadioInterfaceService(
     override val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
 
     private val _connectionError = MutableSharedFlow<String>(extraBufferCapacity = 64)
-    val connectionError: SharedFlow<String> = _connectionError.asSharedFlow()
+    override val connectionError: SharedFlow<String> = _connectionError.asSharedFlow()
 
     override val serviceScope: CoroutineScope
         get() = _serviceScope
@@ -142,7 +142,7 @@ class SharedRadioInterfaceService(
                             }
                         }
                     }
-                    .catch { Logger.e(it) { "bluetoothRepository.state flow crashed!" } }
+                    .catch { Logger.e(it) { "bluetoothRepository.state flow crashed" } }
                     .launchIn(processLifecycle.coroutineScope)
 
                 networkRepository.networkAvailable
@@ -155,7 +155,7 @@ class SharedRadioInterfaceService(
                             }
                         }
                     }
-                    .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed!" } }
+                    .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed" } }
                     .launchIn(processLifecycle.coroutineScope)
             }
         }
@@ -215,7 +215,7 @@ class SharedRadioInterfaceService(
         val address = getBondedDeviceAddress()
 
         if (address == null) {
-            Logger.w { "No valid address to connect to." }
+            Logger.d { "No valid address to connect to" }
             return
         }
 
@@ -245,12 +245,13 @@ class SharedRadioInterfaceService(
 
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
-        heartbeatJob = serviceScope.launch {
-            while (true) {
-                delay(HEARTBEAT_INTERVAL_MILLIS)
-                keepAlive()
+        heartbeatJob =
+            serviceScope.launch {
+                while (true) {
+                    delay(HEARTBEAT_INTERVAL_MILLIS)
+                    keepAlive()
+                }
             }
-        }
     }
 
     fun keepAlive(now: Long = nowMillis) {
@@ -273,16 +274,18 @@ class SharedRadioInterfaceService(
             processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(bytes) }
             _meshActivity.tryEmit(MeshActivity.Receive)
         } catch (t: Throwable) {
-            Logger.e(t) { "RadioInterfaceService.handleFromRadio failed while emitting data" }
+            Logger.e(t) { "handleFromRadio failed while emitting data" }
         }
     }
 
     override fun onConnect() {
+        // MutableStateFlow.value is thread-safe (backed by atomics) — assign directly rather than
+        // launching a coroutine. The async launch pattern introduced a window where a concurrent
+        // onDisconnect launch could execute AFTER an onConnect launch, leaving the service stuck
+        // in Connected while the transport was actually disconnected.
         if (_connectionState.value != ConnectionState.Connected) {
             Logger.d { "Broadcasting connection state change to Connected" }
-            processLifecycle.coroutineScope.launch(dispatchers.default) {
-                _connectionState.emit(ConnectionState.Connected)
-            }
+            _connectionState.value = ConnectionState.Connected
         }
     }
 
@@ -293,7 +296,7 @@ class SharedRadioInterfaceService(
         val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
         if (_connectionState.value != newTargetState) {
             Logger.d { "Broadcasting connection state change to $newTargetState" }
-            processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionState.emit(newTargetState) }
+            _connectionState.value = newTargetState
         }
     }
 }

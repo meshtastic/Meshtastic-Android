@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
+import co.touchlab.kermit.Logger
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.model.TelemetryType
@@ -34,7 +35,11 @@ class RefreshLocalStatsAction :
     private val nodeManager: NodeManager by inject()
 
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val myNodeNum = nodeManager.myNodeNum ?: return
+        val myNodeNum = nodeManager.myNodeNum.value
+        if (myNodeNum == null) {
+            Logger.w { "RefreshLocalStatsAction: myNodeNum is null, skipping telemetry request" }
+            return
+        }
 
         commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
         commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.DEVICE.ordinal)

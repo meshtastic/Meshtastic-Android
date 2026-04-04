@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
@@ -34,12 +33,14 @@ import java.io.OutputStream
 import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Shared JVM TCP transport for Meshtastic radios.
  *
- * Manages the TCP socket lifecycle (connect, read loop, reconnect with backoff, heartbeat) and uses [StreamFrameCodec]
- * for the START1/START2 stream framing protocol.
+ * Manages the TCP socket lifecycle (connect, read loop, reconnect with backoff) and uses [StreamFrameCodec] for the
+ * START1/START2 stream framing protocol. Heartbeat scheduling is owned by [SharedRadioInterfaceService]; this class
+ * only exposes [sendHeartbeat] for external callers.
  *
  * Used by Android and Desktop via the shared `SharedRadioInterfaceService`.
  */
@@ -69,18 +70,24 @@ class TcpTransport(
         const val MAX_BACKOFF_MILLIS = 5 * 60 * 1_000L
         const val SOCKET_TIMEOUT_MS = 5_000
         const val SOCKET_RETRIES = 18 // 18 * 5s = 90s inactivity before disconnect
-        const val HEARTBEAT_INTERVAL_MILLIS = 30_000L
         const val TIMEOUT_LOG_INTERVAL = 5
         private const val MILLIS_PER_SECOND = 1_000L
     }
 
-    private val codec = StreamFrameCodec(onPacketReceived = { listener.onPacketReceived(it) }, logTag = logTag)
+    private val codec =
+        StreamFrameCodec(
+            onPacketReceived = {
+                packetsReceived++
+                listener.onPacketReceived(it)
+            },
+            logTag = logTag,
+        )
 
     // TCP socket state
     private var socket: Socket? = null
     private var outStream: OutputStream? = null
     private var connectionJob: Job? = null
-    private var heartbeatJob: Job? = null
+    private var currentAddress: String? = null
 
     // Metrics
     private var connectionStartTime: Long = 0
@@ -101,6 +108,7 @@ class TcpTransport(
      */
     fun start(address: String) {
         stop()
+        currentAddress = address
         connectionJob = scope.handledLaunch { connectWithRetry(address) }
     }
 
@@ -109,6 +117,7 @@ class TcpTransport(
         connectionJob?.cancel()
         connectionJob = null
         disconnectSocket()
+        currentAddress = null
     }
 
     /**
@@ -134,14 +143,25 @@ class TcpTransport(
         var backoff = MIN_BACKOFF_MILLIS
 
         while (retryCount <= MAX_RECONNECT_RETRIES) {
-            try {
-                connectAndRead(address)
-            } catch (ex: IOException) {
-                Logger.w { "$logTag: [$address] TCP connection error - ${ex.message}" }
-                disconnectSocket()
-            } catch (@Suppress("TooGenericExceptionCaught") ex: Throwable) {
-                Logger.e(ex) { "$logTag: [$address] TCP exception - ${ex.message}" }
-                disconnectSocket()
+            val hadData =
+                try {
+                    connectAndRead(address)
+                } catch (ex: IOException) {
+                    Logger.w { "$logTag: [$address] TCP connection error" }
+                    disconnectSocket()
+                    false
+                } catch (@Suppress("TooGenericExceptionCaught") ex: Throwable) {
+                    Logger.e(ex) { "$logTag: [$address] TCP exception" }
+                    disconnectSocket()
+                    false
+                }
+
+            // Reset backoff after a connection that successfully exchanged data,
+            // so transient firmware-side disconnects recover quickly.
+            if (hadData) {
+                Logger.d { "$logTag: [$address] Resetting backoff after successful data exchange" }
+                retryCount = 1
+                backoff = MIN_BACKOFF_MILLIS
             }
 
             val delaySec = backoff / MILLIS_PER_SECOND
@@ -152,13 +172,17 @@ class TcpTransport(
         }
     }
 
+    /**
+     * Connect to the given address, read data until the connection is lost, and return whether any bytes were
+     * successfully received (used by [connectWithRetry] to decide whether to reset backoff).
+     */
     @Suppress("NestedBlockDepth")
-    private suspend fun connectAndRead(address: String) = withContext(dispatchers.io) {
+    private suspend fun connectAndRead(address: String): Boolean = withContext(dispatchers.io) {
         val parts = address.split(":", limit = 2)
         val host = parts[0]
         val port = parts.getOrNull(1)?.toIntOrNull() ?: StreamFrameCodec.DEFAULT_TCP_PORT
 
-        Logger.i { "$logTag: [$address] Connecting to $host:$port..." }
+        Logger.i { "$logTag: [$address] Connecting to $host:$port" }
         val attemptStart = nowMillis
 
         Socket(InetAddress.getByName(host), port).use { sock ->
@@ -181,7 +205,6 @@ class TcpTransport(
                     // Send wake bytes and signal connected
                     sendBytesRaw(StreamFrameCodec.WAKE_BYTES)
                     listener.onConnected()
-                    startHeartbeat(address)
 
                     // Read loop
                     var timeoutCount = 0
@@ -189,7 +212,7 @@ class TcpTransport(
                         try {
                             val c = input.read()
                             if (c == -1) {
-                                Logger.w { "$logTag: [$address] EOF after $packetsReceived packets" }
+                                Logger.i { "$logTag: [$address] EOF after $packetsReceived packets" }
                                 break
                             }
                             timeoutCount = 0
@@ -209,27 +232,25 @@ class TcpTransport(
                     }
                 }
             }
+            val hadData = bytesReceived > 0
             disconnectSocket()
+            hadData
         }
     }
 
     // Guards against recursive disconnects triggered by listener callbacks.
-    private var isDisconnecting: Boolean = false
+    private val isDisconnecting = AtomicBoolean(false)
 
     private fun disconnectSocket() {
-        if (isDisconnecting) return
+        if (!isDisconnecting.compareAndSet(false, true)) return
 
-        isDisconnecting = true
         try {
-            heartbeatJob?.cancel()
-            heartbeatJob = null
-
             val s = socket
             val hadConnection = s != null || outStream != null
             if (s != null) {
                 val uptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
                 Logger.i {
-                    "$logTag: Disconnecting - Uptime: ${uptime}ms, " +
+                    "$logTag: [$currentAddress] Disconnecting - Uptime: ${uptime}ms, " +
                         "RX: $packetsReceived ($bytesReceived bytes), " +
                         "TX: $packetsSent ($bytesSent bytes)"
                 }
@@ -247,7 +268,7 @@ class TcpTransport(
                 listener.onDisconnected()
             }
         } finally {
-            isDisconnecting = false
+            isDisconnecting.set(false)
         }
     }
 
@@ -259,7 +280,7 @@ class TcpTransport(
         val stream =
             outStream
                 ?: run {
-                    Logger.w { "$logTag: Cannot send ${p.size} bytes: not connected" }
+                    Logger.w { "$logTag: [$currentAddress] Cannot send ${p.size} bytes: not connected" }
                     return
                 }
         packetsSent++
@@ -267,7 +288,7 @@ class TcpTransport(
         try {
             stream.write(p)
         } catch (ex: IOException) {
-            Logger.w(ex) { "$logTag: TCP write error: ${ex.message}" }
+            Logger.w(ex) { "$logTag: [$currentAddress] TCP write error" }
             disconnectSocket()
         }
     }
@@ -277,23 +298,8 @@ class TcpTransport(
         try {
             stream.flush()
         } catch (ex: IOException) {
-            Logger.w(ex) { "$logTag: TCP flush error: ${ex.message}" }
+            Logger.w(ex) { "$logTag: [$currentAddress] TCP flush error" }
             disconnectSocket()
-        }
-    }
-
-    // endregion
-
-    // region Heartbeat
-
-    private fun startHeartbeat(address: String) {
-        heartbeatJob?.cancel()
-        heartbeatJob = scope.launch {
-            while (true) {
-                delay(HEARTBEAT_INTERVAL_MILLIS)
-                Logger.d { "$logTag: [$address] Sending heartbeat" }
-                sendHeartbeat()
-            }
         }
     }
 

@@ -34,18 +34,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 @Composable
 fun ConnectingDeviceInfo(
+    connectionState: ConnectionState,
     deviceName: String,
     deviceAddress: String,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val statusText =
+        if (connectionState.isConnected()) {
+            stringResource(Res.string.connected)
+        } else {
+            stringResource(Res.string.connecting)
+        }
     Column(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -58,7 +67,7 @@ fun ConnectingDeviceInfo(
                 Text(text = deviceName, style = MaterialTheme.typography.headlineSmall)
                 Text(text = deviceAddress, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    text = stringResource(Res.string.connecting),
+                    text = statusText,
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )

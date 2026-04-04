@@ -16,17 +16,24 @@
  */
 package org.meshtastic.core.service
 
+import co.touchlab.kermit.Severity
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.exactly
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -57,25 +64,35 @@ class MeshServiceOrchestratorTest {
     private val commandSender: CommandSender = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
     private val router: MeshRouter = mock(MockMode.autofill)
+    private val actionHandler: MeshActionHandler = mock(MockMode.autofill)
     private val meshConfigHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
     private val takServerManager: TAKServerManager = mock(MockMode.autofill)
     private val takPrefs: TakPrefs = mock(MockMode.autofill)
     private val cotHandler: CoTHandler = mock(MockMode.autofill)
+    private val databaseManager: DatabaseManager = mock(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
 
-    @Test
-    fun testStartWiresComponents() {
-        every { radioInterfaceService.receivedData } returns MutableSharedFlow()
-        every { serviceRepository.serviceAction } returns MutableSharedFlow()
+    /** Stubs the shared flow dependencies used by every test and returns an orchestrator. */
+    private fun createOrchestrator(
+        receivedData: MutableSharedFlow<ByteArray> = MutableSharedFlow(),
+        connectionError: MutableSharedFlow<String> = MutableSharedFlow(),
+        serviceAction: MutableSharedFlow<ServiceAction> = MutableSharedFlow(),
+        takEnabledFlow: MutableStateFlow<Boolean> = MutableStateFlow(false),
+        takRunningFlow: MutableStateFlow<Boolean> = MutableStateFlow(false),
+    ): MeshServiceOrchestrator {
+        every { radioInterfaceService.receivedData } returns receivedData
+        every { radioInterfaceService.connectionError } returns connectionError
+        every { serviceRepository.serviceAction } returns serviceAction
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
-        every { takPrefs.isTakServerEnabled } returns MutableStateFlow(false)
-        every { takServerManager.isRunning } returns MutableStateFlow(false)
+        every { takPrefs.isTakServerEnabled } returns takEnabledFlow
+        every { takServerManager.isRunning } returns takRunningFlow
         every { takServerManager.inboundMessages } returns MutableSharedFlow()
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
+        every { router.actionHandler } returns actionHandler
 
         val takMeshIntegration =
             TAKMeshIntegration(
@@ -87,22 +104,27 @@ class MeshServiceOrchestratorTest {
                 cotHandler = cotHandler,
             )
 
-        val orchestrator =
-            MeshServiceOrchestrator(
-                radioInterfaceService = radioInterfaceService,
-                serviceRepository = serviceRepository,
-                packetHandler = packetHandler,
-                nodeManager = nodeManager,
-                messageProcessor = messageProcessor,
-                commandSender = commandSender,
-                connectionManager = connectionManager,
-                router = router,
-                serviceNotifications = serviceNotifications,
-                takServerManager = takServerManager,
-                takMeshIntegration = takMeshIntegration,
-                takPrefs = takPrefs,
-                dispatchers = dispatchers,
-            )
+        return MeshServiceOrchestrator(
+            radioInterfaceService = radioInterfaceService,
+            serviceRepository = serviceRepository,
+            packetHandler = packetHandler,
+            nodeManager = nodeManager,
+            messageProcessor = messageProcessor,
+            commandSender = commandSender,
+            connectionManager = connectionManager,
+            router = router,
+            serviceNotifications = serviceNotifications,
+            takServerManager = takServerManager,
+            takMeshIntegration = takMeshIntegration,
+            takPrefs = takPrefs,
+            dispatchers = dispatchers,
+            databaseManager = databaseManager,
+        )
+    }
+
+    @Test
+    fun testStartWiresComponents() {
+        val orchestrator = createOrchestrator()
 
         assertFalse(orchestrator.isRunning)
         orchestrator.start()
@@ -121,41 +143,7 @@ class MeshServiceOrchestratorTest {
         val takEnabledFlow = MutableStateFlow(false)
         val takRunningFlow = MutableStateFlow(false)
 
-        every { radioInterfaceService.receivedData } returns MutableSharedFlow()
-        every { serviceRepository.serviceAction } returns MutableSharedFlow()
-        every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
-        every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
-        every { takPrefs.isTakServerEnabled } returns takEnabledFlow
-        every { takServerManager.isRunning } returns takRunningFlow
-        every { takServerManager.inboundMessages } returns MutableSharedFlow()
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
-
-        val takMeshIntegration =
-            TAKMeshIntegration(
-                takServerManager = takServerManager,
-                commandSender = commandSender,
-                nodeRepository = nodeRepository,
-                serviceRepository = serviceRepository,
-                meshConfigHandler = meshConfigHandler,
-                cotHandler = cotHandler,
-            )
-
-        val orchestrator =
-            MeshServiceOrchestrator(
-                radioInterfaceService = radioInterfaceService,
-                serviceRepository = serviceRepository,
-                packetHandler = packetHandler,
-                nodeManager = nodeManager,
-                messageProcessor = messageProcessor,
-                commandSender = commandSender,
-                connectionManager = connectionManager,
-                router = router,
-                serviceNotifications = serviceNotifications,
-                takServerManager = takServerManager,
-                takMeshIntegration = takMeshIntegration,
-                takPrefs = takPrefs,
-                dispatchers = dispatchers,
-            )
+        val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
 
         orchestrator.start()
 
@@ -171,5 +159,68 @@ class MeshServiceOrchestratorTest {
         verify { takServerManager.stop() }
 
         orchestrator.stop()
+    }
+
+    @Test
+    fun testStartCallsSwitchActiveDatabase() {
+        every { radioInterfaceService.getDeviceAddress() } returns "tcp:192.168.1.100"
+
+        val orchestrator = createOrchestrator()
+        orchestrator.start()
+
+        verifySuspend { databaseManager.switchActiveDatabase("tcp:192.168.1.100") }
+        verify { radioInterfaceService.connect() }
+
+        orchestrator.stop()
+    }
+
+    @Test
+    fun testConnectionErrorForwardedToServiceRepository() {
+        val connectionError = MutableSharedFlow<String>(extraBufferCapacity = 1)
+
+        val orchestrator = createOrchestrator(connectionError = connectionError)
+        orchestrator.start()
+
+        // Emit an error into the radio interface's connectionError flow
+        connectionError.tryEmit("BLE connection lost")
+
+        verify { serviceRepository.setErrorMessage("BLE connection lost", Severity.Warn) }
+
+        orchestrator.stop()
+    }
+
+    @Test
+    fun testServiceActionDispatchedToActionHandler() {
+        val serviceAction = MutableSharedFlow<ServiceAction>(extraBufferCapacity = 1)
+
+        val orchestrator = createOrchestrator(serviceAction = serviceAction)
+        orchestrator.start()
+
+        val action = ServiceAction.Favorite(Node(num = 42))
+        serviceAction.tryEmit(action)
+
+        verifySuspend { actionHandler.onServiceAction(action) }
+
+        orchestrator.stop()
+    }
+
+    @Test
+    fun testStartIsIdempotent() {
+        val orchestrator = createOrchestrator()
+
+        orchestrator.start()
+        assertTrue(orchestrator.isRunning)
+
+        // Second call should be a no-op
+        orchestrator.start()
+        assertTrue(orchestrator.isRunning)
+
+        // Components should only be initialized once
+        verify(exactly(1)) { serviceNotifications.initChannels() }
+        verify(exactly(1)) { packetHandler.start(any()) }
+        verify(exactly(1)) { nodeManager.loadCachedNodeDB() }
+
+        orchestrator.stop()
+        assertFalse(orchestrator.isRunning)
     }
 }

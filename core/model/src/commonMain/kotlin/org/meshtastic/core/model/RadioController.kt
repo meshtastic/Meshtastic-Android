@@ -56,11 +56,15 @@ interface RadioController {
     suspend fun favoriteNode(nodeNum: Int)
 
     /**
-     * Sends our shared contact information (identity and public key) to a remote node.
+     * Sends our shared contact information (identity and public key) to the firmware's NodeDB.
+     *
+     * This ensures the firmware has the correct public key for the destination node before a PKI-encrypted direct
+     * message is sent. The method suspends until the radio acknowledges the admin packet.
      *
      * @param nodeNum The destination node number.
+     * @return `true` if the radio accepted the contact, `false` on timeout or failure.
      */
-    suspend fun sendSharedContact(nodeNum: Int)
+    suspend fun sendSharedContact(nodeNum: Int): Boolean
 
     /**
      * Updates the local radio configuration.

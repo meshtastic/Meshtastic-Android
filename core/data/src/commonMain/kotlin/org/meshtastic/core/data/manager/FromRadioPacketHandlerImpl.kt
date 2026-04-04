@@ -127,7 +127,6 @@ class FromRadioPacketHandlerImpl(
             notificationManager.dispatch(
                 Notification(title = title, type = type, message = cn.message, category = Notification.Category.Alert),
             )
-            packetHandler.removeResponse(0, complete = false)
         }
     }
 }

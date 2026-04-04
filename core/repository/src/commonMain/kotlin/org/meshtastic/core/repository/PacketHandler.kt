@@ -32,6 +32,17 @@ interface PacketHandler {
     /** Adds a mesh packet to the queue for sending. */
     fun sendToRadio(packet: MeshPacket)
 
+    /**
+     * Adds a mesh packet to the queue and suspends until the radio acknowledges it via [QueueStatus].
+     *
+     * Unlike [sendToRadio], which is fire-and-forget, this method provides back-pressure so the caller can ensure a
+     * packet has been accepted by the radio before proceeding. This is critical for operations where ordering matters
+     * (e.g., sending a shared contact before the first DM).
+     *
+     * @return `true` if the radio accepted the packet, `false` on timeout or failure.
+     */
+    suspend fun sendToRadioAndAwait(packet: MeshPacket): Boolean
+
     /** Processes queue status updates from the radio. */
     fun handleQueueStatus(queueStatus: QueueStatus)
 

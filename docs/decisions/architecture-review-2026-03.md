@@ -225,6 +225,27 @@ Ordered by impact × effort:
 
 ---
 
+## F. JVM/Desktop Database Lifecycle
+
+Room KMP's `setAutoCloseTimeout` API is Android-only. On JVM/Desktop, once a Room database is built, its SQLite connections (5 per WAL-mode DB: 4 readers + 1 writer) remain open indefinitely until explicitly closed via `RoomDatabase.close()`.
+
+### Problem
+
+When a user switches between multiple mesh devices, the previous device's database remained open in the in-memory cache. Each idle database consumed ~32 MB (connection pool + prepared statement caches), leading to unbounded memory growth proportional to the number of devices ever connected in a session.
+
+### Solution
+
+`DatabaseManager.switchActiveDatabase()` now explicitly closes the previously active database via `closeCachedDatabase()` before activating the new one. The closed database is removed from the in-memory cache but its file is preserved, allowing transparent re-opening on next access.
+
+Additional fixes applied:
+1. **Init-order bug**: `dbCache` was declared after `currentDb`, causing NPE during `stateIn`'s `initialValue` evaluation. Reordered to ensure `dbCache` is initialized first.
+2. **Corruption handlers**: `ReplaceFileCorruptionHandler` added to `createDatabaseDataStore()` on both JVM and Android, preventing DataStore corruption from crashing the app.
+3. **`desktopDataDir()` deduplication**: Made public in `core:database/jvmMain` and removed the duplicate from `DesktopPlatformModule`, establishing a single source of truth for the desktop data directory.
+4. **DataStore scope consolidation**: Replaced two separate `CoroutineScope` instances with a single shared `dataStoreScope` in `DesktopPlatformModule`.
+5. **Coil cache path**: Desktop `Main.kt` updated to use `desktopDataDir()` instead of hardcoded `user.home`.
+
+---
+
 ## References
 
 - Current migration status: [`kmp-status.md`](./kmp-status.md)

@@ -188,7 +188,7 @@ class NodeManagerImplTest {
 
         assertTrue(nodeManager.nodeDBbyNodeNum.isEmpty())
         assertTrue(nodeManager.nodeDBbyID.isEmpty())
-        assertNull(nodeManager.myNodeNum)
+        assertNull(nodeManager.myNodeNum.value)
     }
 
     @Test

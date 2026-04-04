@@ -17,11 +17,13 @@
 package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
@@ -60,6 +62,7 @@ class MeshServiceOrchestrator(
     private val takMeshIntegration: TAKMeshIntegration,
     private val takPrefs: TakPrefs,
     private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
+    private val databaseManager: DatabaseManager,
 ) {
     private var serviceJob: Job? = null
     private var takJob: Job? = null
@@ -80,7 +83,7 @@ class MeshServiceOrchestrator(
      */
     fun start() {
         if (isRunning) {
-            Logger.w { "MeshServiceOrchestrator.start() called while already running" }
+            Logger.d { "start() called while already running, ignoring" }
             return
         }
 
@@ -104,22 +107,41 @@ class MeshServiceOrchestrator(
             takPrefs.isTakServerEnabled
                 .onEach { isEnabled ->
                     if (isEnabled && !takServerManager.isRunning.value) {
-                        Logger.i { "TAK Server enabled by preference, starting integration..." }
+                        Logger.i { "TAK Server enabled by preference, starting integration" }
                         takMeshIntegration.start(scope)
                     } else if (!isEnabled && takServerManager.isRunning.value) {
-                        Logger.i { "TAK Server disabled by preference, stopping integration..." }
+                        Logger.i { "TAK Server disabled by preference, stopping integration" }
                         takMeshIntegration.stop()
                     }
                 }
                 .launchIn(scope)
 
-        scope.handledLaunch { radioInterfaceService.connect() }
+        scope.handledLaunch {
+            // Ensure the per-device database is active before the radio connects.
+            // On Android this is handled by MeshUtilApplication.init(); on Desktop (and any
+            // future KMP host) the orchestrator is the first entry point, so it must initialize
+            // the database here. Without this, DatabaseManager._currentDb stays null and all
+            // Room writes via withDb() are silently dropped — causing ourNodeInfo to remain null
+            // after the handshake completes.
+            databaseManager.switchActiveDatabase(radioInterfaceService.getDeviceAddress())
+            Logger.i { "Per-device database initialized, connecting radio" }
+            radioInterfaceService.connect()
+        }
 
         radioInterfaceService.receivedData
-            .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum) }
+            .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum.value) }
             .launchIn(scope)
 
-        serviceRepository.serviceAction.onEach(router.actionHandler::onServiceAction).launchIn(scope)
+        radioInterfaceService.connectionError
+            .onEach { errorMessage -> serviceRepository.setErrorMessage(errorMessage, Severity.Warn) }
+            .launchIn(scope)
+
+        // Each action is dispatched in its own supervised coroutine so that a failure in one
+        // action (e.g. a timeout in sendAdminAwait) cannot terminate the collector and silently
+        // drop all subsequent service actions for the rest of the session.
+        serviceRepository.serviceAction
+            .onEach { action -> scope.handledLaunch { router.actionHandler.onServiceAction(action) } }
+            .launchIn(scope)
 
         nodeManager.loadCachedNodeDB()
     }

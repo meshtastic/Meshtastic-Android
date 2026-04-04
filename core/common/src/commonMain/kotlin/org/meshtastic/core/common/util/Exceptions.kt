@@ -31,13 +31,24 @@ object Exceptions {
      */
     fun report(exception: Throwable, tag: String? = null, message: String? = null) {
         // Log locally first
-        Logger.e(exception) { "Exceptions.report: $tag $message" }
+        Logger.e(exception) { "Exceptions.report: ${tag ?: "no-tag"} ${message ?: "no-message"}" }
         reporter?.invoke(exception, tag, message)
     }
 }
 
 /** Wraps and discards exceptions, optionally logging them. */
 fun ignoreException(silent: Boolean = false, inner: () -> Unit) {
+    try {
+        inner()
+    } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
+        if (!silent) {
+            Logger.w(ex) { "Ignoring exception" }
+        }
+    }
+}
+
+/** Suspend-compatible variant of [ignoreException]. */
+suspend fun ignoreExceptionSuspend(silent: Boolean = false, inner: suspend () -> Unit) {
     try {
         inner()
     } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {

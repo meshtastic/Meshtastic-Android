@@ -20,14 +20,10 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
@@ -37,11 +33,8 @@ import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
-import org.meshtastic.core.repository.MeshConfigFlowManager
-import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MessageFilter
@@ -56,38 +49,33 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
+import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
 import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.core.resources.low_battery_message
-import org.meshtastic.core.resources.low_battery_title
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.waypoint_received
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.StatusMessage
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Implementation of [MeshDataHandler] that decodes and routes incoming mesh data packets.
  *
  * This class handles the complexity of:
  * 1. Mapping raw [MeshPacket] objects to domain-friendly [DataPacket] objects.
- * 2. Routing packets to specialized handlers (e.g., Traceroute, NeighborInfo, SFPP).
+ * 2. Routing packets to specialized handlers (e.g., Traceroute, NeighborInfo, Telemetry, Admin, SFPP).
  * 3. Managing message history and persistence.
- * 4. Triggering notifications for various packet types (Text, Waypoints, Battery).
- * 5. Tracking received telemetry for node updates.
+ * 4. Triggering notifications for various packet types (Text, Waypoints).
  */
-@Suppress("LongParameterList", "TooManyFunctions", "LargeClass", "CyclomaticComplexMethod")
+@Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod")
 @Single
 class MeshDataHandlerImpl(
     private val nodeManager: NodeManager,
@@ -99,24 +87,20 @@ class MeshDataHandlerImpl(
     private val serviceNotifications: MeshServiceNotifications,
     private val analytics: PlatformAnalytics,
     private val dataMapper: MeshDataMapper,
-    private val configHandler: Lazy<MeshConfigHandler>,
-    private val configFlowManager: Lazy<MeshConfigFlowManager>,
-    private val commandSender: CommandSender,
-    private val connectionManager: Lazy<MeshConnectionManager>,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val radioConfigRepository: RadioConfigRepository,
     private val messageFilter: MessageFilter,
     private val storeForwardHandler: StoreForwardPacketHandler,
+    private val telemetryHandler: TelemetryPacketHandler,
+    private val adminPacketHandler: AdminPacketHandler,
 ) : MeshDataHandler {
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
-
-    private val batteryMutex = Mutex()
-    private val batteryPercentCooldowns = mutableMapOf<Int, Long>()
+    private lateinit var scope: CoroutineScope
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope
         storeForwardHandler.start(scope)
+        telemetryHandler.start(scope)
     }
 
     private val rememberDataType =
@@ -157,7 +141,7 @@ class MeshDataHandlerImpl(
             PortNum.WAYPOINT_APP -> handleWaypoint(packet, dataPacket, myNodeNum)
             PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum)
             PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet)
-            PortNum.TELEMETRY_APP -> handleTelemetry(packet, dataPacket, myNodeNum)
+            PortNum.TELEMETRY_APP -> telemetryHandler.handleTelemetry(packet, dataPacket, myNodeNum)
             else ->
                 shouldBroadcast =
                     handleSpecializedDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
@@ -198,7 +182,7 @@ class MeshDataHandlerImpl(
             }
 
             PortNum.ADMIN_APP -> {
-                handleAdminMessage(packet, myNodeNum)
+                adminPacketHandler.handleAdminMessage(packet, myNodeNum)
             }
 
             PortNum.NEIGHBORINFO_APP -> {
@@ -255,37 +239,6 @@ class MeshDataHandlerImpl(
         rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond)
     }
 
-    private fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int) {
-        val payload = packet.decoded?.payload ?: return
-        val u = AdminMessage.ADAPTER.decode(payload)
-        // Guard against clearing a valid passkey: firmware always embeds the key in every
-        // admin response, but a missing (default-empty) field must not reset the stored value.
-        val incomingPasskey = u.session_passkey
-        if (incomingPasskey.size > 0) commandSender.setSessionPasskey(incomingPasskey)
-
-        val fromNum = packet.from
-        u.get_module_config_response?.let {
-            if (fromNum == myNodeNum) {
-                configHandler.value.handleModuleConfig(it)
-            } else {
-                it.statusmessage?.node_status?.let { nodeManager.updateNodeStatus(fromNum, it) }
-            }
-        }
-
-        if (fromNum == myNodeNum) {
-            u.get_config_response?.let { configHandler.value.handleDeviceConfig(it) }
-            u.get_channel_response?.let { configHandler.value.handleChannel(it) }
-        }
-
-        u.get_device_metadata_response?.let {
-            if (fromNum == myNodeNum) {
-                configFlowManager.value.handleLocalMetadata(it)
-            } else {
-                nodeManager.insertMetadata(fromNum, it)
-            }
-        }
-    }
-
     private fun handleTextMessage(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val decoded = packet.decoded ?: return
         if (decoded.reply_id != 0 && decoded.emoji != 0) {
@@ -309,107 +262,6 @@ class MeshDataHandlerImpl(
         val s = StatusMessage.ADAPTER.decodeOrNull(payload, Logger) ?: return
         nodeManager.handleReceivedNodeStatus(packet.from, s)
         rememberDataPacket(dataPacket, myNodeNum)
-    }
-
-    @Suppress("LongMethod")
-    private fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
-        val payload = packet.decoded?.payload ?: return
-        val t =
-            (Telemetry.ADAPTER.decodeOrNull(payload, Logger) ?: return).let {
-                if (it.time == 0) it.copy(time = (dataPacket.time.milliseconds.inWholeSeconds).toInt()) else it
-            }
-        Logger.d { "Telemetry from ${packet.from}: ${Telemetry.ADAPTER.toOneLiner(t)}" }
-        val fromNum = packet.from
-        val isRemote = (fromNum != myNodeNum)
-        if (!isRemote) {
-            connectionManager.value.updateTelemetry(t)
-        }
-
-        nodeManager.updateNode(fromNum) { node: Node ->
-            val metrics = t.device_metrics
-            val environment = t.environment_metrics
-            val power = t.power_metrics
-
-            var nextNode = node
-            when {
-                metrics != null -> {
-                    nextNode = nextNode.copy(deviceMetrics = metrics)
-                    if (fromNum == myNodeNum || (isRemote && node.isFavorite)) {
-                        if (
-                            (metrics.voltage ?: 0f) > BATTERY_PERCENT_UNSUPPORTED &&
-                            (metrics.battery_level ?: 0) <= BATTERY_PERCENT_LOW_THRESHOLD
-                        ) {
-                            scope.launch {
-                                if (shouldBatteryNotificationShow(fromNum, t, myNodeNum)) {
-                                    notificationManager.dispatch(
-                                        Notification(
-                                            title =
-                                            getStringSuspend(
-                                                Res.string.low_battery_title,
-                                                nextNode.user.short_name,
-                                            ),
-                                            message =
-                                            getStringSuspend(
-                                                Res.string.low_battery_message,
-                                                nextNode.user.long_name,
-                                                nextNode.deviceMetrics.battery_level ?: 0,
-                                            ),
-                                            category = Notification.Category.Battery,
-                                        ),
-                                    )
-                                }
-                            }
-                        } else {
-                            scope.launch {
-                                batteryMutex.withLock {
-                                    if (batteryPercentCooldowns.containsKey(fromNum)) {
-                                        batteryPercentCooldowns.remove(fromNum)
-                                    }
-                                }
-                                notificationManager.cancel(nextNode.num)
-                            }
-                        }
-                    }
-                }
-                environment != null -> nextNode = nextNode.copy(environmentMetrics = environment)
-                power != null -> nextNode = nextNode.copy(powerMetrics = power)
-            }
-
-            val telemetryTime = if (t.time != 0) t.time else nextNode.lastHeard
-            val newLastHeard = maxOf(nextNode.lastHeard, telemetryTime)
-            nextNode.copy(lastHeard = newLastHeard)
-        }
-    }
-
-    @Suppress("ReturnCount")
-    private suspend fun shouldBatteryNotificationShow(fromNum: Int, t: Telemetry, myNodeNum: Int): Boolean {
-        val isRemote = (fromNum != myNodeNum)
-        var shouldDisplay = false
-        var forceDisplay = false
-        val metrics = t.device_metrics ?: return false
-        val batteryLevel = metrics.battery_level ?: 0
-        when {
-            batteryLevel <= BATTERY_PERCENT_CRITICAL_THRESHOLD -> {
-                shouldDisplay = true
-                forceDisplay = true
-            }
-
-            batteryLevel == BATTERY_PERCENT_LOW_THRESHOLD -> shouldDisplay = true
-            batteryLevel.mod(BATTERY_PERCENT_LOW_DIVISOR) == 0 && !isRemote -> shouldDisplay = true
-
-            isRemote -> shouldDisplay = true
-        }
-        if (shouldDisplay) {
-            val now = nowSeconds
-            batteryMutex.withLock {
-                if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0L
-                if ((now - batteryPercentCooldowns[fromNum]!!) >= BATTERY_PERCENT_COOLDOWN_SECONDS || forceDisplay) {
-                    batteryPercentCooldowns[fromNum] = now
-                    return true
-                }
-            }
-        }
-        return false
     }
 
     private fun handleRouting(packet: MeshPacket, dataPacket: DataPacket) {
@@ -628,12 +480,13 @@ class MeshDataHandlerImpl(
             return@handledLaunch
         }
 
-        packetRepository.value.insertReaction(reaction, nodeManager.myNodeNum ?: 0)
+        packetRepository.value.insertReaction(reaction, nodeManager.myNodeNum.value ?: 0)
 
         // Find the original packet to get the contactKey
         packetRepository.value.getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
             // Skip notification if the original message was filtered
-            val targetId = if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
+            val targetId =
+                if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
             val contactKey = "${originalPacket.channel}$targetId"
             val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
@@ -642,7 +495,11 @@ class MeshDataHandlerImpl(
             if (!isSilent) {
                 val channelName =
                     if (originalPacket.to == DataPacket.ID_BROADCAST) {
-                        radioConfigRepository.channelSetFlow.first().settings.getOrNull(originalPacket.channel)?.name
+                        radioConfigRepository.channelSetFlow
+                            .first()
+                            .settings
+                            .getOrNull(originalPacket.channel)
+                            ?.name
                     } else {
                         null
                     }
@@ -660,11 +517,5 @@ class MeshDataHandlerImpl(
 
     companion object {
         private const val HOPS_AWAY_UNAVAILABLE = -1
-
-        private const val BATTERY_PERCENT_UNSUPPORTED = 0.0
-        private const val BATTERY_PERCENT_LOW_THRESHOLD = 20
-        private const val BATTERY_PERCENT_LOW_DIVISOR = 5
-        private const val BATTERY_PERCENT_CRITICAL_THRESHOLD = 5
-        private const val BATTERY_PERCENT_COOLDOWN_SECONDS = 1500
     }
 }
