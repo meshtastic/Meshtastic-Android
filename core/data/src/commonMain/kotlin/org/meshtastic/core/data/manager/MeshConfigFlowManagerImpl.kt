@@ -18,12 +18,10 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import okio.IOException
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
@@ -58,7 +56,7 @@ class MeshConfigFlowManagerImpl(
     private val commandSender: CommandSender,
     private val packetHandler: PacketHandler,
 ) : MeshConfigFlowManager {
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+    private lateinit var scope: CoroutineScope
     private val wantConfigDelay = 100L
 
     override fun start(scope: CoroutineScope) {
@@ -66,76 +64,73 @@ class MeshConfigFlowManagerImpl(
     }
 
     /**
-     * Tracks which phase of the two-stage handshake we are currently in.
+     * Type-safe handshake state machine. Each state carries exactly the data that is valid during that phase,
+     * eliminating the possibility of accessing stale or uninitialized fields.
      *
      * Guards [handleConfigComplete] so that duplicate or out-of-order `config_complete_id` signals from the firmware
      * cannot trigger the wrong stage handler or drive the state machine backward.
      */
-    private enum class HandshakePhase {
-        IDLE,
-        STAGE_1,
-        STAGE_2,
-        COMPLETE,
+    private sealed class HandshakeState {
+        /** No handshake in progress. */
+        data object Idle : HandshakeState()
+
+        /**
+         * Stage 1: receiving device config, module config, channels, and metadata.
+         *
+         * [rawMyNodeInfo] arrives first (my_info packet); [metadata] may arrive shortly after. Both are consumed
+         * together by [buildMyNodeInfo] at Stage 1 completion.
+         */
+        data class ReceivingConfig(val rawMyNodeInfo: ProtoMyNodeInfo, var metadata: DeviceMetadata? = null) :
+            HandshakeState()
+
+        /**
+         * Stage 2: receiving node-info packets from the firmware.
+         *
+         * [myNodeInfo] was committed at the Stage 1→2 transition. [nodes] accumulates [NodeInfo] packets until
+         * `config_complete_id` arrives.
+         */
+        data class ReceivingNodeInfo(
+            val myNodeInfo: SharedMyNodeInfo,
+            val nodes: MutableList<NodeInfo> = mutableListOf(),
+        ) : HandshakeState()
+
+        /** Both stages finished. The app is fully connected. */
+        data class Complete(val myNodeInfo: SharedMyNodeInfo) : HandshakeState()
     }
 
-    private var handshakePhase = HandshakePhase.IDLE
+    private var handshakeState: HandshakeState = HandshakeState.Idle
 
-    private val newNodes = mutableListOf<NodeInfo>()
     override val newNodeCount: Int
-        get() = newNodes.size
-
-    // The two inputs to MyNodeInfo construction. Both are set during Stage 1 and consumed
-    // together at Stage 1 complete by buildMyNodeInfo(). rawMyNodeInfo arrives first
-    // (my_info packet); metadata arrives shortly after (metadata packet). Neither is needed
-    // outside Stage 1, so we hold the raw protos rather than rebuilding an intermediate
-    // SharedMyNodeInfo every time one of them changes.
-    private var rawMyNodeInfo: ProtoMyNodeInfo? = null
-    private var lastMetadata: DeviceMetadata? = null
-
-    // Committed at Stage 1 complete, consumed at Stage 2 complete.
-    private var myNodeInfo: SharedMyNodeInfo? = null
+        get() = (handshakeState as? HandshakeState.ReceivingNodeInfo)?.nodes?.size ?: 0
 
     override fun handleConfigComplete(configCompleteId: Int) {
+        val state = handshakeState
         when (configCompleteId) {
             HandshakeConstants.CONFIG_NONCE -> {
-                if (handshakePhase != HandshakePhase.STAGE_1) {
-                    Logger.w { "Ignoring Stage 1 config_complete in phase=$handshakePhase" }
+                if (state !is HandshakeState.ReceivingConfig) {
+                    Logger.w { "Ignoring Stage 1 config_complete in state=$state" }
                     return
                 }
-                handleConfigOnlyComplete()
+                handleConfigOnlyComplete(state)
             }
             HandshakeConstants.NODE_INFO_NONCE -> {
-                if (handshakePhase != HandshakePhase.STAGE_2) {
-                    Logger.w { "Ignoring Stage 2 config_complete in phase=$handshakePhase" }
+                if (state !is HandshakeState.ReceivingNodeInfo) {
+                    Logger.w { "Ignoring Stage 2 config_complete in state=$state" }
                     return
                 }
-                handleNodeInfoComplete()
+                handleNodeInfoComplete(state)
             }
             else -> Logger.w { "Config complete id mismatch: $configCompleteId" }
         }
     }
 
-    private fun handleConfigOnlyComplete() {
+    private fun handleConfigOnlyComplete(state: HandshakeState.ReceivingConfig) {
         Logger.i { "Config-only complete (Stage 1)" }
 
-        val raw = rawMyNodeInfo
-        if (raw == null) {
-            // my_info is the very first packet the firmware sends; if it never arrived
-            // something is fundamentally wrong. Proceeding to Stage 2 would leave the app
-            // Connected but with no node info. Retry Stage 1 instead.
-            Logger.e { "Stage 1 failed: my_info never received. Retrying Stage 1." }
-            handshakePhase = HandshakePhase.IDLE
-            scope.handledLaunch {
-                delay(wantConfigDelay)
-                connectionManager.value.startConfigOnly()
-            }
-            return
-        }
-
-        val finalizedInfo = buildMyNodeInfo(raw, lastMetadata)
+        val finalizedInfo = buildMyNodeInfo(state.rawMyNodeInfo, state.metadata)
         if (finalizedInfo == null) {
-            Logger.e { "Stage 1 failed: could not build MyNodeInfo. Retrying Stage 1." }
-            handshakePhase = HandshakePhase.IDLE
+            Logger.w { "Stage 1 failed: could not build MyNodeInfo, retrying Stage 1" }
+            handshakeState = HandshakeState.Idle
             scope.handledLaunch {
                 delay(wantConfigDelay)
                 connectionManager.value.startConfigOnly()
@@ -143,8 +138,7 @@ class MeshConfigFlowManagerImpl(
             return
         }
 
-        myNodeInfo = finalizedInfo
-        handshakePhase = HandshakePhase.STAGE_2
+        handshakeState = HandshakeState.ReceivingNodeInfo(myNodeInfo = finalizedInfo)
         Logger.i { "myNodeInfo committed (nodeNum=${finalizedInfo.myNodeNum})" }
         connectionManager.value.onRadioConfigLoaded()
 
@@ -166,26 +160,20 @@ class MeshConfigFlowManagerImpl(
         }
     }
 
-    private fun handleNodeInfoComplete() {
+    private fun handleNodeInfoComplete(state: HandshakeState.ReceivingNodeInfo) {
         Logger.i { "NodeInfo complete (Stage 2)" }
 
-        val info = myNodeInfo
-        if (info == null) {
-            Logger.e { "handleNodeInfoComplete: myNodeInfo is NULL — cannot complete handshake" }
-            // Stay in STAGE_2 so a firmware retry can still be accepted. Do NOT
-            // transition to COMPLETE or Connected without a valid node identity.
-            return
-        }
+        val info = state.myNodeInfo
 
-        // Transition phase immediately (synchronously) to prevent duplicate handling.
+        // Transition state immediately (synchronously) to prevent duplicate handling.
         // The async work below (DB writes, broadcasts) proceeds without the guard.
-        handshakePhase = HandshakePhase.COMPLETE
+        handshakeState = HandshakeState.Complete(myNodeInfo = info)
 
         // Snapshot and clear immediately so that a concurrent stall-guard retry (which
         // resends want_config_id and causes the firmware to restart the node_info burst)
         // starts accumulating into a fresh list rather than doubling this batch.
-        val nodesToProcess = newNodes.toList()
-        newNodes.clear()
+        val nodesToProcess = state.nodes.toList()
+        state.nodes.clear()
 
         val entities =
             nodesToProcess.mapNotNull { nodeInfo ->
@@ -211,17 +199,9 @@ class MeshConfigFlowManagerImpl(
     override fun handleMyInfo(myInfo: ProtoMyNodeInfo) {
         Logger.i { "MyNodeInfo received: ${myInfo.my_node_num}" }
 
-        // Reset all per-handshake state so stale data from a prior interrupted handshake
-        // cannot carry over into this one. newNodes may hold partial Stage 2 data if the
-        // previous connection dropped mid-way through Stage 2.
-        newNodes.clear()
-        rawMyNodeInfo = null
-        lastMetadata = null
-        myNodeInfo = null
-        handshakePhase = HandshakePhase.STAGE_1
-
-        rawMyNodeInfo = myInfo
-        nodeManager.myNodeNum = myInfo.my_node_num
+        // Transition to Stage 1, discarding any stale data from a prior interrupted handshake.
+        handshakeState = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
+        nodeManager.setMyNodeNum(myInfo.my_node_num)
 
         // Clear persisted radio config so the new handshake starts from a clean slate.
         // DataStore serializes its own writes, so the clear will precede subsequent
@@ -239,18 +219,26 @@ class MeshConfigFlowManagerImpl(
 
     override fun handleLocalMetadata(metadata: DeviceMetadata) {
         Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
-        lastMetadata = metadata
-        // Persist the metadata immediately — buildMyNodeInfo() reads it at Stage 1 complete,
-        // but the DB write does not need to wait until then.
-        rawMyNodeInfo?.let { raw ->
+        val state = handshakeState
+        if (state is HandshakeState.ReceivingConfig) {
+            state.metadata = metadata
+            // Persist the metadata immediately — buildMyNodeInfo() reads it at Stage 1 complete,
+            // but the DB write does not need to wait until then.
             if (metadata != DeviceMetadata()) {
-                scope.handledLaunch { nodeRepository.insertMetadata(raw.my_node_num, metadata) }
+                scope.handledLaunch { nodeRepository.insertMetadata(state.rawMyNodeInfo.my_node_num, metadata) }
             }
+        } else {
+            Logger.w { "Ignoring metadata outside Stage 1 (state=$state)" }
         }
     }
 
     override fun handleNodeInfo(info: NodeInfo) {
-        newNodes.add(info)
+        val state = handshakeState
+        if (state is HandshakeState.ReceivingNodeInfo) {
+            state.nodes.add(info)
+        } else {
+            Logger.w { "Ignoring NodeInfo outside Stage 2 (state=$state)" }
+        }
     }
 
     override fun handleFileInfo(info: FileInfo) {

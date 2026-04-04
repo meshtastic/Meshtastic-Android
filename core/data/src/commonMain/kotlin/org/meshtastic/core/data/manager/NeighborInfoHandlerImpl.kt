@@ -21,10 +21,8 @@ import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
@@ -39,7 +37,7 @@ class NeighborInfoHandlerImpl(
     private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
 ) : NeighborInfoHandler {
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+    private lateinit var scope: CoroutineScope
 
     private val startTimes = atomic(persistentMapOf<Int, Long>())
 
@@ -59,7 +57,7 @@ class NeighborInfoHandlerImpl(
 
         // Store the last neighbor info from our connected radio
         val from = packet.from
-        if (from == nodeManager.myNodeNum) {
+        if (from == nodeManager.myNodeNum.value) {
             lastNeighborInfo = ni
             Logger.d { "Stored last neighbor info from connected radio" }
         }

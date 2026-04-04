@@ -142,7 +142,7 @@ class SharedRadioInterfaceService(
                             }
                         }
                     }
-                    .catch { Logger.e(it) { "bluetoothRepository.state flow crashed!" } }
+                    .catch { Logger.e(it) { "bluetoothRepository.state flow crashed" } }
                     .launchIn(processLifecycle.coroutineScope)
 
                 networkRepository.networkAvailable
@@ -155,7 +155,7 @@ class SharedRadioInterfaceService(
                             }
                         }
                     }
-                    .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed!" } }
+                    .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed" } }
                     .launchIn(processLifecycle.coroutineScope)
             }
         }
@@ -215,7 +215,7 @@ class SharedRadioInterfaceService(
         val address = getBondedDeviceAddress()
 
         if (address == null) {
-            Logger.w { "No valid address to connect to." }
+            Logger.d { "No valid address to connect to" }
             return
         }
 
@@ -274,7 +274,7 @@ class SharedRadioInterfaceService(
             processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(bytes) }
             _meshActivity.tryEmit(MeshActivity.Receive)
         } catch (t: Throwable) {
-            Logger.e(t) { "RadioInterfaceService.handleFromRadio failed while emitting data" }
+            Logger.e(t) { "handleFromRadio failed while emitting data" }
         }
     }
 

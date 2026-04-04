@@ -21,9 +21,7 @@ import android.app.Application
 import androidx.core.location.LocationCompat
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.core.annotation.Single
@@ -37,7 +35,7 @@ import org.meshtastic.proto.Position as ProtoPosition
 @Single
 class AndroidMeshLocationManager(private val context: Application, private val locationRepository: LocationRepository) :
     MeshLocationManager {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private lateinit var scope: CoroutineScope
     private var locationFlow: Job? = null
 
     @SuppressLint("MissingPermission")

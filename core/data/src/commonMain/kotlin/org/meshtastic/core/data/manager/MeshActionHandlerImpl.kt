@@ -16,14 +16,13 @@
  */
 package org.meshtastic.core.data.manager
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshUser
@@ -66,7 +65,7 @@ class MeshActionHandlerImpl(
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     private val radioConfigRepository: RadioConfigRepository,
 ) : MeshActionHandler {
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+    private lateinit var scope: CoroutineScope
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -78,8 +77,9 @@ class MeshActionHandlerImpl(
     }
 
     override suspend fun onServiceAction(action: ServiceAction) {
+        Logger.d { "ServiceAction dispatched: ${action::class.simpleName}" }
         ignoreExceptionSuspend {
-            val myNodeNum = nodeManager.myNodeNum ?: return@ignoreExceptionSuspend
+            val myNodeNum = nodeManager.myNodeNum.value ?: return@ignoreExceptionSuspend
             when (action) {
                 is ServiceAction.Favorite -> handleFavorite(action, myNodeNum)
                 is ServiceAction.Ignore -> handleIgnore(action, myNodeNum)
@@ -185,6 +185,7 @@ class MeshActionHandlerImpl(
     }
 
     override fun handleSetOwner(u: MeshUser, myNodeNum: Int) {
+        Logger.d { "Setting owner: longName=${u.longName}, shortName=${u.shortName}" }
         val newUser = User(id = u.id, long_name = u.longName, short_name = u.shortName, is_licensed = u.isLicensed)
         commandSender.sendAdmin(myNodeNum) { AdminMessage(set_owner = newUser) }
         nodeManager.handleReceivedUser(myNodeNum, newUser)
@@ -258,7 +259,7 @@ class MeshActionHandlerImpl(
         c.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
         // Optimistically persist module config locally so the UI reflects the
         // new values immediately instead of waiting for the next want_config handshake.
-        if (destNum == nodeManager.myNodeNum) {
+        if (destNum == nodeManager.myNodeNum.value) {
             scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(c) }
         }
     }
@@ -334,6 +335,7 @@ class MeshActionHandlerImpl(
     }
 
     override fun handleRequestReboot(requestId: Int, destNum: Int) {
+        Logger.i { "Reboot requested for node $destNum" }
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(reboot_seconds = DEFAULT_REBOOT_DELAY) }
     }
 
@@ -345,6 +347,7 @@ class MeshActionHandlerImpl(
     }
 
     override fun handleRequestFactoryReset(requestId: Int, destNum: Int) {
+        Logger.i { "Factory reset requested for node $destNum" }
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(factory_reset_device = 1) }
     }
 
@@ -361,6 +364,7 @@ class MeshActionHandlerImpl(
     override fun handleUpdateLastAddress(deviceAddr: String?) {
         val currentAddr = meshPrefs.deviceAddress.value
         if (deviceAddr != currentAddr) {
+            Logger.i { "Device address changed, switching database and clearing node DB" }
             meshPrefs.setDeviceAddress(deviceAddr)
             scope.handledLaunch {
                 nodeManager.clear()

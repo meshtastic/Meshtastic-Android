@@ -21,13 +21,11 @@ import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import okio.ByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceMetrics
 import org.meshtastic.core.model.EnvironmentMetrics
@@ -62,7 +60,7 @@ class NodeManagerImpl(
     private val serviceBroadcasts: ServiceBroadcasts,
     private val notificationManager: NotificationManager,
 ) : NodeManager {
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+    private lateinit var scope: CoroutineScope
 
     private val _nodeDBbyNodeNum = atomic(persistentMapOf<Int, Node>())
     private val _nodeDBbyID = atomic(persistentMapOf<String, Node>())
@@ -84,7 +82,11 @@ class NodeManagerImpl(
         allowNodeDbWrites.value = allowed
     }
 
-    override var myNodeNum: Int? = null
+    override val myNodeNum = MutableStateFlow<Int?>(null)
+
+    override fun setMyNodeNum(num: Int?) {
+        myNodeNum.value = num
+    }
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -101,7 +103,7 @@ class NodeManagerImpl(
             val byId = mutableMapOf<String, Node>()
             nodes.values.forEach { byId[it.user.id] = it }
             _nodeDBbyID.value = persistentMapOf<String, Node>().putAll(byId)
-            myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
+            myNodeNum.value = nodeRepository.myNodeInfo.value?.myNodeNum
         }
     }
 
@@ -110,7 +112,7 @@ class NodeManagerImpl(
         _nodeDBbyID.value = persistentMapOf()
         isNodeDbReady.value = false
         allowNodeDbWrites.value = false
-        myNodeNum = null
+        myNodeNum.value = null
     }
 
     override fun getMyNodeInfo(): MyNodeInfo? {
@@ -135,7 +137,7 @@ class NodeManagerImpl(
     }
 
     override fun getMyId(): String {
-        val num = myNodeNum ?: nodeRepository.myNodeInfo.value?.myNodeNum ?: return ""
+        val num = myNodeNum.value ?: nodeRepository.myNodeInfo.value?.myNodeNum ?: return ""
         return _nodeDBbyNodeNum.value[num]?.user?.id ?: ""
     }
 
@@ -271,9 +273,8 @@ class NodeManagerImpl(
                 if (shouldPreserveExistingUser(node.user, user)) {
                     // keep existing names
                 } else {
-                    var newUser = user.let {
-                        if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it
-                    }
+                    var newUser =
+                        user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
                     if (info.via_mqtt) {
                         newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
                     }

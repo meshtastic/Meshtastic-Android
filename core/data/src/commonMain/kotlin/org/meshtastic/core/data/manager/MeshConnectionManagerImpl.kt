@@ -21,7 +21,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
@@ -84,7 +82,7 @@ class MeshConnectionManagerImpl(
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
 ) : MeshConnectionManager {
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+    private lateinit var scope: CoroutineScope
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
     private var handshakeTimeout: Job? = null
@@ -193,12 +191,12 @@ class MeshConnectionManagerImpl(
                     // the stall is on our side, the retry will be dropped and the reconnect below
                     // will trigger instead — which is the right recovery in that case.
                     Logger.w {
-                        "Handshake stall detected at Stage $stage — retrying, then reconnecting if still stalled."
+                        "Handshake stall detected at Stage $stage — retrying, then reconnecting if still stalled"
                     }
                     action()
                     delay(HANDSHAKE_RETRY_TIMEOUT)
                     if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
-                        Logger.e { "Handshake still stalled after retry. Forcing reconnect." }
+                        Logger.e { "Handshake still stalled after retry, forcing reconnect" }
                         onConnectionChanged(ConnectionState.Disconnected)
                     }
                 }
@@ -232,7 +230,7 @@ class MeshConnectionManagerImpl(
                     val timeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
                     Logger.d { "Waiting for sleeping device, timeout=$timeout secs" }
                     delay(timeout.seconds)
-                    Logger.w { "Device timeout out, setting disconnected" }
+                    Logger.w { "Device timed out, setting disconnected" }
                     onConnectionChanged(ConnectionState.Disconnected)
                 } catch (_: CancellationException) {
                     Logger.d { "device sleep timeout cancelled" }
@@ -285,7 +283,7 @@ class MeshConnectionManagerImpl(
         handshakeTimeout?.cancel()
         handshakeTimeout = null
 
-        val myNodeNum = nodeManager.myNodeNum ?: 0
+        val myNodeNum = nodeManager.myNodeNum.value ?: 0
 
         // Set device time now that the full node picture is ready. Sending this during Stage 1
         // (onRadioConfigLoaded) introduced GATT write contention with the Stage 2 node-info burst.

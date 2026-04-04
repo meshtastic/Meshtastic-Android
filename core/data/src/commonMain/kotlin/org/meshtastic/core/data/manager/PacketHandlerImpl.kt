@@ -30,7 +30,6 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -68,7 +67,7 @@ class PacketHandlerImpl(
     }
 
     private var queueJob: Job? = null
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher)
+    private lateinit var scope: CoroutineScope
 
     private val queueMutex = Mutex()
     private val queuedPackets = mutableListOf<MeshPacket>()

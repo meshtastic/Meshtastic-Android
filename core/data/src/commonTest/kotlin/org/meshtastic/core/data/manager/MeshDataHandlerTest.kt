@@ -35,10 +35,7 @@ import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.MeshDataMapper
-import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.MeshConfigFlowManager
-import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
@@ -51,6 +48,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
+import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Data
@@ -79,15 +77,13 @@ class MeshDataHandlerTest {
     private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
     private val analytics: PlatformAnalytics = mock(MockMode.autofill)
     private val dataMapper: MeshDataMapper = mock(MockMode.autofill)
-    private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
-    private val configFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
-    private val commandSender: CommandSender = mock(MockMode.autofill)
-    private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
     private val tracerouteHandler: TracerouteHandler = mock(MockMode.autofill)
     private val neighborInfoHandler: NeighborInfoHandler = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val messageFilter: MessageFilter = mock(MockMode.autofill)
     private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
+    private val telemetryHandler: TelemetryPacketHandler = mock(MockMode.autofill)
+    private val adminPacketHandler: AdminPacketHandler = mock(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -105,15 +101,13 @@ class MeshDataHandlerTest {
                 serviceNotifications = serviceNotifications,
                 analytics = analytics,
                 dataMapper = dataMapper,
-                configHandler = lazy { configHandler },
-                configFlowManager = lazy { configFlowManager },
-                commandSender = commandSender,
-                connectionManager = lazy { connectionManager },
                 tracerouteHandler = tracerouteHandler,
                 neighborInfoHandler = neighborInfoHandler,
                 radioConfigRepository = radioConfigRepository,
                 messageFilter = messageFilter,
                 storeForwardHandler = storeForwardHandler,
+                telemetryHandler = telemetryHandler,
+                adminPacketHandler = adminPacketHandler,
             )
         handler.start(testScope)
 
@@ -428,7 +422,7 @@ class MeshDataHandlerTest {
     // --- Telemetry handling ---
 
     @Test
-    fun `telemetry packet updates node via nodeManager`() {
+    fun `telemetry packet delegates to telemetryHandler`() {
         val telemetry =
             Telemetry(
                 time = 2000,
@@ -451,11 +445,11 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, 123)
 
-        verify { nodeManager.updateNode(456, any(), any(), any()) }
+        verify { telemetryHandler.handleTelemetry(packet, any(), 123) }
     }
 
     @Test
-    fun `telemetry from local node also updates connectionManager`() {
+    fun `telemetry from local node delegates to telemetryHandler`() {
         val myNodeNum = 123
         val telemetry =
             Telemetry(
@@ -479,7 +473,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, myNodeNum)
 
-        verify { connectionManager.updateTelemetry(any()) }
+        verify { telemetryHandler.handleTelemetry(packet, any(), myNodeNum) }
     }
 
     // --- Text message handling ---
@@ -490,10 +484,8 @@ class MeshDataHandlerTest {
             MeshPacket(
                 id = 42,
                 from = 456,
-                decoded = Data(
-                    portnum = PortNum.TEXT_MESSAGE_APP,
-                    payload = "hello".encodeToByteArray().toByteString(),
-                ),
+                decoded =
+                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
             )
         val dataPacket =
             DataPacket(
@@ -510,7 +502,8 @@ class MeshDataHandlerTest {
         // Provide sender node so getSenderName() doesn't fall back to getString (requires Skiko)
         every { nodeManager.nodeDBbyID } returns
             mapOf(
-                "!remote" to Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
+                "!remote" to
+                    Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
             )
 
         handler.handleReceivedData(packet, 123)
@@ -525,10 +518,8 @@ class MeshDataHandlerTest {
             MeshPacket(
                 id = 42,
                 from = 456,
-                decoded = Data(
-                    portnum = PortNum.TEXT_MESSAGE_APP,
-                    payload = "hello".encodeToByteArray().toByteString(),
-                ),
+                decoded =
+                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
             )
         val dataPacket =
             DataPacket(
@@ -583,7 +574,7 @@ class MeshDataHandlerTest {
                 123 to Node(num = 123, user = User(id = "!local")),
             )
         everySuspend { packetRepository.findReactionsWithId(99) } returns emptyList()
-        every { nodeManager.myNodeNum } returns 123
+        every { nodeManager.myNodeNum } returns MutableStateFlow(123)
         everySuspend { packetRepository.getPacketByPacketId(42) } returns null
 
         handler.handleReceivedData(packet, 123)
@@ -600,7 +591,8 @@ class MeshDataHandlerTest {
             MeshPacket(
                 id = 55,
                 from = 456,
-                decoded = Data(portnum = PortNum.RANGE_TEST_APP, payload = "test".encodeToByteArray().toByteString()),
+                decoded =
+                Data(portnum = PortNum.RANGE_TEST_APP, payload = "test".encodeToByteArray().toByteString()),
             )
         val dataPacket =
             DataPacket(
@@ -616,7 +608,8 @@ class MeshDataHandlerTest {
         every { messageFilter.shouldFilter(any(), any()) } returns false
         every { nodeManager.nodeDBbyID } returns
             mapOf(
-                "!remote" to Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
+                "!remote" to
+                    Node(num = 456, user = User(id = "!remote", long_name = "Remote User", short_name = "RU")),
             )
 
         handler.handleReceivedData(packet, 123)
@@ -629,7 +622,7 @@ class MeshDataHandlerTest {
     // --- Admin message handling ---
 
     @Test
-    fun `admin message sets session passkey`() {
+    fun `admin message delegates to adminPacketHandler`() {
         val admin = org.meshtastic.proto.AdminMessage(session_passkey = okio.ByteString.of(1, 2, 3))
         val packet =
             MeshPacket(from = 123, decoded = Data(portnum = PortNum.ADMIN_APP, payload = admin.encode().toByteString()))
@@ -644,7 +637,7 @@ class MeshDataHandlerTest {
 
         handler.handleReceivedData(packet, 123)
 
-        verify { commandSender.setSessionPasskey(any()) }
+        verify { adminPacketHandler.handleAdminMessage(packet, 123) }
     }
 
     // --- Message filtering ---
@@ -688,10 +681,8 @@ class MeshDataHandlerTest {
             MeshPacket(
                 id = 88,
                 from = 456,
-                decoded = Data(
-                    portnum = PortNum.TEXT_MESSAGE_APP,
-                    payload = "hello".encodeToByteArray().toByteString(),
-                ),
+                decoded =
+                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
             )
         val dataPacket =
             DataPacket(

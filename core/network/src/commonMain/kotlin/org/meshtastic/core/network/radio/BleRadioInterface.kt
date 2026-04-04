@@ -158,7 +158,7 @@ class BleRadioInterface(
                 return it
             }
 
-        Logger.i { "[$address] Device not found in bonded list, scanning..." }
+        Logger.i { "[$address] Device not found in bonded list, scanning" }
 
         repeat(SCAN_RETRY_COUNT) { attempt ->
             try {
@@ -170,7 +170,7 @@ class BleRadioInterface(
                     }
                 if (d != null) return d
             } catch (e: Exception) {
-                Logger.v(e) { "Scan attempt failed or timed out" }
+                Logger.v(e) { "[$address] Scan attempt failed or timed out" }
             }
 
             if (attempt < SCAN_RETRY_COUNT - 1) {
@@ -205,7 +205,7 @@ class BleRadioInterface(
                         // On Desktop/JVM this is a no-op since the OS handles pairing during
                         // the GATT connection when the peripheral requires it.
                         if (!bluetoothRepository.isBonded(address)) {
-                            Logger.i { "[$address] Device not bonded, initiating bonding..." }
+                            Logger.i { "[$address] Device not bonded, initiating bonding" }
                             @Suppress("TooGenericExceptionCaught")
                             try {
                                 bluetoothRepository.bond(device)
@@ -221,7 +221,7 @@ class BleRadioInterface(
                             // Kable on Android occasionally fails the first connection attempt with
                             // NotConnectedException if the previous peripheral wasn't fully cleaned
                             // up by the OS. A quick retry resolves it.
-                            Logger.w { "[$address] First connection attempt failed, retrying in 1.5s..." }
+                            Logger.d { "[$address] First connection attempt failed, retrying in 1.5s" }
                             @Suppress("MagicNumber")
                             delay(1500L)
                             state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
@@ -247,7 +247,7 @@ class BleRadioInterface(
                                         onDisconnected()
                                     }
                                 }
-                                .catch { e -> Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" } }
+                                .catch { e -> Logger.w(e) { "[$address] bleConnection.connectionState flow crashed" } }
                                 .launchIn(this)
 
                             discoverServicesAndSetupCharacteristics()
@@ -256,7 +256,7 @@ class BleRadioInterface(
                             bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
                         }
 
-                        Logger.i { "[$address] BLE connection dropped, preparing to reconnect..." }
+                        Logger.i { "[$address] BLE connection dropped, preparing to reconnect" }
                     } catch (e: kotlinx.coroutines.CancellationException) {
                         Logger.d { "[$address] BLE connection coroutine cancelled" }
                         throw e
@@ -306,8 +306,8 @@ class BleRadioInterface(
             } else {
                 0
             }
-        Logger.w {
-            "[$address] BLE disconnected, " +
+        Logger.i {
+            "[$address] BLE disconnected - " +
                 "Uptime: ${uptime}ms, " +
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
@@ -326,7 +326,7 @@ class BleRadioInterface(
                 // Wire up notifications
                 radioService.fromRadio
                     .onEach { packet ->
-                        Logger.d { "[$address] Received packet fromRadio (${packet.size} bytes)" }
+                        Logger.v { "[$address] Received packet fromRadio (${packet.size} bytes)" }
                         dispatchPacket(packet)
                     }
                     .catch { e ->
@@ -337,7 +337,7 @@ class BleRadioInterface(
 
                 radioService.logRadio
                     .onEach { packet ->
-                        Logger.d { "[$address] Received packet logRadio (${packet.size} bytes)" }
+                        Logger.v { "[$address] Received packet logRadio (${packet.size} bytes)" }
                         dispatchPacket(packet)
                     }
                     .catch { e ->
@@ -395,10 +395,9 @@ class BleRadioInterface(
                         retryBleOperation(tag = address) { currentService.sendToRadio(p) }
                         packetsSent++
                         bytesSent += p.size
-                        Logger.d {
-                            "[$address] Successfully wrote packet #$packetsSent " +
-                                "to toRadioCharacteristic - " +
-                                "${p.size} bytes (Total TX: $bytesSent bytes)"
+                        Logger.v {
+                            "[$address] Wrote packet #$packetsSent " +
+                                "to toRadio (${p.size} bytes, total TX: $bytesSent bytes)"
                         }
                     } catch (e: Exception) {
                         Logger.w(e) {
@@ -424,7 +423,7 @@ class BleRadioInterface(
         // Each heartbeat uses a distinct nonce to vary the wire bytes, preventing the
         // firmware's per-connection duplicate-write filter from silently dropping it.
         val nonce = heartbeatNonce.fetchAndAdd(1)
-        Logger.d { "[$address] BLE keepAlive — sending ToRadio heartbeat (nonce=$nonce)" }
+        Logger.v { "[$address] BLE keepAlive — sending ToRadio heartbeat (nonce=$nonce)" }
         handleSendToRadio(ToRadio(heartbeat = Heartbeat(nonce = nonce)).encode())
     }
 
@@ -458,9 +457,9 @@ class BleRadioInterface(
     private fun dispatchPacket(packet: ByteArray) {
         packetsReceived++
         bytesReceived += packet.size
-        Logger.d {
-            "[$address] Dispatching packet to service.handleFromRadio() - " +
-                "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
+        Logger.v {
+            "[$address] Dispatching packet #$packetsReceived " +
+                "(${packet.size} bytes, total RX: $bytesReceived bytes)"
         }
         service.handleFromRadio(packet)
     }

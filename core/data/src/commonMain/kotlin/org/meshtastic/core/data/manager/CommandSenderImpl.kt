@@ -19,14 +19,12 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -62,7 +60,7 @@ class CommandSenderImpl(
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
 ) : CommandSender {
-    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
+    private lateinit var scope: CoroutineScope
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
     private val sessionPasskey = atomic(ByteString.EMPTY)
 
@@ -98,7 +96,7 @@ class CommandSenderImpl(
     private fun computeHopLimit(): Int = (localConfig.value.lora?.hop_limit ?: 0).takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
 
     private fun getAdminChannelIndex(toNum: Int): Int {
-        val myNum = nodeManager.myNodeNum ?: return 0
+        val myNum = nodeManager.myNodeNum.value ?: return 0
         val myNode = nodeManager.nodeDBbyNodeNum[myNum]
         val destNode = nodeManager.nodeDBbyNodeNum[toNum]
 
@@ -182,7 +180,7 @@ class CommandSenderImpl(
     }
 
     override fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {
-        val myNum = nodeManager.myNodeNum ?: return
+        val myNum = nodeManager.myNodeNum.value ?: return
         val idNum = destNum ?: myNum
         Logger.d { "Sending our position/time to=$idNum $pos" }
 
@@ -242,11 +240,11 @@ class CommandSenderImpl(
                 AdminMessage(remove_fixed_position = true)
             }
         }
-        nodeManager.handleReceivedPosition(destNum, nodeManager.myNodeNum ?: 0, meshPos, nowMillis)
+        nodeManager.handleReceivedPosition(destNum, nodeManager.myNodeNum.value ?: 0, meshPos, nowMillis)
     }
 
     override fun requestUserInfo(destNum: Int) {
-        val myNum = nodeManager.myNodeNum ?: return
+        val myNum = nodeManager.myNodeNum.value ?: return
         val myNode = nodeManager.nodeDBbyNodeNum[myNum] ?: return
         packetHandler.sendToRadio(
             buildMeshPacket(
@@ -315,7 +313,7 @@ class CommandSenderImpl(
 
     override fun requestNeighborInfo(requestId: Int, destNum: Int) {
         neighborInfoHandler.recordStartTime(requestId)
-        val myNum = nodeManager.myNodeNum ?: 0
+        val myNum = nodeManager.myNodeNum.value ?: 0
         if (destNum == myNum) {
             val neighborInfoToSend =
                 neighborInfoHandler.lastNeighborInfo
@@ -404,7 +402,7 @@ class CommandSenderImpl(
         }
 
         return MeshPacket(
-            from = nodeManager.myNodeNum ?: 0,
+            from = nodeManager.myNodeNum.value ?: 0,
             to = to,
             id = id,
             want_ack = wantAck,

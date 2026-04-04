@@ -37,6 +37,7 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioNotConnectedException
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
@@ -73,7 +74,7 @@ class MeshService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
     private val myNodeNum: Int
-        get() = nodeManager.myNodeNum ?: throw RadioNotConnectedException()
+        get() = nodeManager.myNodeNum.value ?: throw RadioNotConnectedException()
 
     companion object {
         fun actionReceived(portNum: Int): String {
@@ -98,11 +99,11 @@ class MeshService : Service() {
         try {
             super.onCreate()
         } catch (e: IllegalStateException) {
-            // Hilt can throw IllegalStateException in tests if the component is not created.
+            // Koin can throw IllegalStateException in tests if the component is not created.
             // This can happen if the service is started by the system (e.g. after a crash or on boot)
             // before the test rule has a chance to create the component.
-            if (e.message?.contains("HiltAndroidRule") == true) {
-                Logger.w(e) { "MeshService created before Hilt component was ready in test. Stopping service." }
+            if (e.message?.contains("HiltAndroidRule") == true || e.message?.contains("Koin") == true) {
+                Logger.w(e) { "MeshService created before DI component was ready in test, stopping service" }
                 stopSelf()
                 return
             }
@@ -188,7 +189,7 @@ class MeshService : Service() {
         object : IMeshService.Stub() {
             @Suppress("OVERRIDE_DEPRECATION")
             override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
-                Logger.d { "Passing through device change to radio service: ${deviceAddr?.take(8)}..." }
+                Logger.d { "Passing through device change to radio service: ${deviceAddr?.anonymize}" }
                 router.actionHandler.handleUpdateLastAddress(deviceAddr)
                 radioInterfaceService.setDeviceAddress(deviceAddr)
             }
@@ -300,7 +301,7 @@ class MeshService : Service() {
             }
 
             override fun removeByNodenum(requestId: Int, nodeNum: Int) = toRemoteExceptions {
-                val myNodeNum = nodeManager.myNodeNum
+                val myNodeNum = nodeManager.myNodeNum.value
                 if (myNodeNum != null) {
                     router.actionHandler.handleRemoveByNodenum(nodeNum, requestId, myNodeNum)
                 } else {

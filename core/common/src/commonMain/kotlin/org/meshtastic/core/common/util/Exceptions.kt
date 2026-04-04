@@ -31,7 +31,7 @@ object Exceptions {
      */
     fun report(exception: Throwable, tag: String? = null, message: String? = null) {
         // Log locally first
-        Logger.e(exception) { "Exceptions.report: $tag $message" }
+        Logger.e(exception) { "Exceptions.report: ${tag ?: "no-tag"} ${message ?: "no-message"}" }
         reporter?.invoke(exception, tag, message)
     }
 }

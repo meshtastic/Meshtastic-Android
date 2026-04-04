@@ -53,20 +53,23 @@ private constructor(
                 serialPort = port
                 port.setDTR()
                 port.setRTS()
+                Logger.i { "[$portName] Serial port opened (baud=$baudRate)" }
                 super.connect() // Sends WAKE_BYTES and signals service.onConnect()
                 startReadLoop(port)
                 true
             } else {
+                Logger.w { "[$portName] Serial port openPort() returned false" }
                 false
             }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.e(e) { "Serial connection failed" }
+            Logger.w(e) { "[$portName] Serial connection failed" }
             false
         }
     }
 
     @Suppress("CyclomaticComplexMethod")
     private fun startReadLoop(port: SerialPort) {
+        Logger.d { "[$portName] Starting serial read loop" }
         readJob =
             service.serviceScope.launch(Dispatchers.IO) {
                 val input = port.inputStream
@@ -89,9 +92,9 @@ private constructor(
                             throw e
                         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                             if (isActive) {
-                                Logger.e(e) { "Serial read IOException: ${e.message}" }
+                                Logger.w(e) { "[$portName] Serial read error" }
                             } else {
-                                Logger.d { "Serial read interrupted by cancellation: ${e.message}" }
+                                Logger.d { "[$portName] Serial read interrupted by cancellation" }
                             }
                             reading = false
                         }
@@ -100,11 +103,12 @@ private constructor(
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     if (isActive) {
-                        Logger.e(e) { "Serial read loop outer error: ${e.message}" }
+                        Logger.w(e) { "[$portName] Serial read loop outer error" }
                     } else {
-                        Logger.d { "Serial read loop outer interrupted by cancellation: ${e.message}" }
+                        Logger.d { "[$portName] Serial read loop interrupted by cancellation" }
                     }
                 } finally {
+                    Logger.d { "[$portName] Serial read loop exiting" }
                     try {
                         input.close()
                     } catch (_: Exception) {
@@ -142,6 +146,7 @@ private constructor(
     }
 
     override fun close() {
+        Logger.d { "[$portName] Closing serial transport" }
         readJob?.cancel()
         readJob = null
         closePortResources()
@@ -162,7 +167,7 @@ private constructor(
             val transport = SerialTransport(portName, baudRate, service)
             if (!transport.startConnection()) {
                 val errorMessage = diagnoseOpenFailure(portName)
-                Logger.w { "Serial port $portName could not be opened; signalling disconnect. $errorMessage" }
+                Logger.w { "[$portName] Serial port could not be opened; signalling disconnect. $errorMessage" }
                 service.onDisconnect(isPermanent = true, errorMessage = errorMessage)
             }
             return transport

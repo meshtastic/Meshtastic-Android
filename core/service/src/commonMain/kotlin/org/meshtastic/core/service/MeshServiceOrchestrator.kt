@@ -83,7 +83,7 @@ class MeshServiceOrchestrator(
      */
     fun start() {
         if (isRunning) {
-            Logger.w { "MeshServiceOrchestrator.start() called while already running" }
+            Logger.d { "start() called while already running, ignoring" }
             return
         }
 
@@ -107,10 +107,10 @@ class MeshServiceOrchestrator(
             takPrefs.isTakServerEnabled
                 .onEach { isEnabled ->
                     if (isEnabled && !takServerManager.isRunning.value) {
-                        Logger.i { "TAK Server enabled by preference, starting integration..." }
+                        Logger.i { "TAK Server enabled by preference, starting integration" }
                         takMeshIntegration.start(scope)
                     } else if (!isEnabled && takServerManager.isRunning.value) {
-                        Logger.i { "TAK Server disabled by preference, stopping integration..." }
+                        Logger.i { "TAK Server disabled by preference, stopping integration" }
                         takMeshIntegration.stop()
                     }
                 }
@@ -124,11 +124,12 @@ class MeshServiceOrchestrator(
             // Room writes via withDb() are silently dropped — causing ourNodeInfo to remain null
             // after the handshake completes.
             databaseManager.switchActiveDatabase(radioInterfaceService.getDeviceAddress())
+            Logger.i { "Per-device database initialized, connecting radio" }
             radioInterfaceService.connect()
         }
 
         radioInterfaceService.receivedData
-            .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum) }
+            .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum.value) }
             .launchIn(scope)
 
         radioInterfaceService.connectionError

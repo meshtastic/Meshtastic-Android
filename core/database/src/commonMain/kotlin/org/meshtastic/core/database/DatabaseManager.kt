@@ -222,8 +222,8 @@ open class DatabaseManager(
                 deleteDatabase(name)
                 datastore.edit { it.remove(lastUsedKey(name)) }
             }
-                .onFailure { Logger.w(it) { "Failed to evict database $name" } }
-            Logger.i { "Evicted cached DB ${anonymizeDbName(name)}" }
+                .onSuccess { Logger.i { "Evicted cached DB ${anonymizeDbName(name)}" } }
+                .onFailure { Logger.w(it) { "Failed to evict database ${anonymizeDbName(name)}" } }
         }
     }
 
@@ -246,8 +246,8 @@ open class DatabaseManager(
                 closeCachedDatabase(legacy)
                 deleteDatabase(legacy)
             }
-                .onFailure { Logger.w(it) { "Failed to close legacy database $legacy before deletion" } }
-            Logger.i { "Deleted legacy DB ${anonymizeDbName(legacy)}" }
+                .onSuccess { Logger.i { "Deleted legacy DB ${anonymizeDbName(legacy)}" } }
+                .onFailure { Logger.w(it) { "Failed to delete legacy database ${anonymizeDbName(legacy)}" } }
         }
         datastore.edit { it[legacyCleanedKey] = true }
     }

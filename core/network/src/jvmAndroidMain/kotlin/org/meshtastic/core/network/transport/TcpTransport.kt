@@ -87,6 +87,7 @@ class TcpTransport(
     private var socket: Socket? = null
     private var outStream: OutputStream? = null
     private var connectionJob: Job? = null
+    private var currentAddress: String? = null
 
     // Metrics
     private var connectionStartTime: Long = 0
@@ -107,6 +108,7 @@ class TcpTransport(
      */
     fun start(address: String) {
         stop()
+        currentAddress = address
         connectionJob = scope.handledLaunch { connectWithRetry(address) }
     }
 
@@ -115,6 +117,7 @@ class TcpTransport(
         connectionJob?.cancel()
         connectionJob = null
         disconnectSocket()
+        currentAddress = null
     }
 
     /**
@@ -144,11 +147,11 @@ class TcpTransport(
                 try {
                     connectAndRead(address)
                 } catch (ex: IOException) {
-                    Logger.w { "$logTag: [$address] TCP connection error - ${ex.message}" }
+                    Logger.w { "$logTag: [$address] TCP connection error" }
                     disconnectSocket()
                     false
                 } catch (@Suppress("TooGenericExceptionCaught") ex: Throwable) {
-                    Logger.e(ex) { "$logTag: [$address] TCP exception - ${ex.message}" }
+                    Logger.e(ex) { "$logTag: [$address] TCP exception" }
                     disconnectSocket()
                     false
                 }
@@ -179,7 +182,7 @@ class TcpTransport(
         val host = parts[0]
         val port = parts.getOrNull(1)?.toIntOrNull() ?: StreamFrameCodec.DEFAULT_TCP_PORT
 
-        Logger.i { "$logTag: [$address] Connecting to $host:$port..." }
+        Logger.i { "$logTag: [$address] Connecting to $host:$port" }
         val attemptStart = nowMillis
 
         Socket(InetAddress.getByName(host), port).use { sock ->
@@ -209,7 +212,7 @@ class TcpTransport(
                         try {
                             val c = input.read()
                             if (c == -1) {
-                                Logger.w { "$logTag: [$address] EOF after $packetsReceived packets" }
+                                Logger.i { "$logTag: [$address] EOF after $packetsReceived packets" }
                                 break
                             }
                             timeoutCount = 0
@@ -247,7 +250,7 @@ class TcpTransport(
             if (s != null) {
                 val uptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
                 Logger.i {
-                    "$logTag: Disconnecting - Uptime: ${uptime}ms, " +
+                    "$logTag: [$currentAddress] Disconnecting - Uptime: ${uptime}ms, " +
                         "RX: $packetsReceived ($bytesReceived bytes), " +
                         "TX: $packetsSent ($bytesSent bytes)"
                 }
@@ -277,7 +280,7 @@ class TcpTransport(
         val stream =
             outStream
                 ?: run {
-                    Logger.w { "$logTag: Cannot send ${p.size} bytes: not connected" }
+                    Logger.w { "$logTag: [$currentAddress] Cannot send ${p.size} bytes: not connected" }
                     return
                 }
         packetsSent++
@@ -285,7 +288,7 @@ class TcpTransport(
         try {
             stream.write(p)
         } catch (ex: IOException) {
-            Logger.w(ex) { "$logTag: TCP write error: ${ex.message}" }
+            Logger.w(ex) { "$logTag: [$currentAddress] TCP write error" }
             disconnectSocket()
         }
     }
@@ -295,7 +298,7 @@ class TcpTransport(
         try {
             stream.flush()
         } catch (ex: IOException) {
-            Logger.w(ex) { "$logTag: TCP flush error: ${ex.message}" }
+            Logger.w(ex) { "$logTag: [$currentAddress] TCP flush error" }
             disconnectSocket()
         }
     }

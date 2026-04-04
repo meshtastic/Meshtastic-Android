@@ -54,8 +54,11 @@ interface NodeManager : NodeIdLookup {
     /** Starts the node manager with the given coroutine scope. */
     fun start(scope: CoroutineScope)
 
-    /** The local node number. */
-    var myNodeNum: Int?
+    /** The local node number as a thread-safe [StateFlow]. */
+    val myNodeNum: StateFlow<Int?>
+
+    /** Sets the local node number. */
+    fun setMyNodeNum(num: Int?)
 
     /** Loads the cached node database from the repository. */
     fun loadCachedNodeDB()

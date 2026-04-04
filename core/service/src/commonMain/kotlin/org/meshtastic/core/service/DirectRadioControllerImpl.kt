@@ -61,7 +61,7 @@ class DirectRadioControllerImpl(
         get() = router.actionHandler
 
     private val myNodeNum: Int
-        get() = nodeManager.myNodeNum ?: 0
+        get() = nodeManager.myNodeNum.value ?: 0
 
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState
@@ -180,7 +180,7 @@ class DirectRadioControllerImpl(
     }
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
-        val myNode = nodeManager.myNodeNum
+        val myNode = nodeManager.myNodeNum.value
         if (myNode != null) {
             actionHandler.handleRemoveByNodenum(nodeNum, packetId, myNode)
         } else {
