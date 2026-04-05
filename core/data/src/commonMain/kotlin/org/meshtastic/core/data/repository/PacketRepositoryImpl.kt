@@ -256,12 +256,20 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         insertRoomPacket(packetToSave)
     }
 
-    override suspend fun update(packet: DataPacket): Unit = withContext(dispatchers.io) {
+    override suspend fun update(packet: DataPacket, routingError: Int): Unit = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
         // Match on key fields that identify the packet, rather than the entire data object
         dao.findPacketsWithId(packet.id)
             .find { it.data.id == packet.id && it.data.from == packet.from && it.data.to == packet.to }
-            ?.let { dao.update(it.copy(data = packet)) }
+            ?.let { existing ->
+                val updated =
+                    if (routingError >= 0) {
+                        existing.copy(data = packet, routingError = routingError)
+                    } else {
+                        existing.copy(data = packet)
+                    }
+                dao.update(updated)
+            }
     }
 
     override suspend fun insertReaction(reaction: Reaction, myNodeNum: Int) =

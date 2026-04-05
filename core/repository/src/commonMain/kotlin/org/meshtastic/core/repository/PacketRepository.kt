@@ -175,8 +175,8 @@ interface PacketRepository {
         filtered: Boolean = false,
     )
 
-    /** Updates an existing packet in the database. */
-    suspend fun update(packet: DataPacket)
+    /** Updates an existing packet in the database, optionally setting a routing error code. */
+    suspend fun update(packet: DataPacket, routingError: Int = -1)
 
     /** Persists a message reaction (emoji). */
     suspend fun insertReaction(reaction: Reaction, myNodeNum: Int)

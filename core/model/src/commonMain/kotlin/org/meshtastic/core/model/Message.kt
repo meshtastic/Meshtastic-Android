@@ -21,10 +21,12 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delivery_confirmed
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_enroute
 import org.meshtastic.core.resources.message_status_queued
 import org.meshtastic.core.resources.message_status_sfpp_confirmed
 import org.meshtastic.core.resources.message_status_sfpp_routing
+import org.meshtastic.core.resources.message_status_unknown
 import org.meshtastic.core.resources.routing_error_admin_bad_session_key
 import org.meshtastic.core.resources.routing_error_admin_public_key_unauthorized
 import org.meshtastic.core.resources.routing_error_bad_request
@@ -103,7 +105,11 @@ data class Message(
                 MessageStatus.ENROUTE -> Res.string.message_status_enroute
                 MessageStatus.SFPP_ROUTING -> Res.string.message_status_sfpp_routing
                 MessageStatus.SFPP_CONFIRMED -> Res.string.message_status_sfpp_confirmed
-                else -> getStringResFrom(routingError)
+                MessageStatus.DELIVERED -> Res.string.message_status_delivered
+                MessageStatus.ERROR -> getStringResFrom(routingError)
+                MessageStatus.UNKNOWN,
+                null,
+                -> Res.string.message_status_unknown
             }
         return title to text
     }
