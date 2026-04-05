@@ -34,12 +34,12 @@ private const val TAG = "AndroidAudioPlayer"
 /**
  * Android implementation of [AudioPlayer].
  *
- * Fixes compared to previous versions:
- *  - BUG: MODE_STATIC with bufferSize < minBufferSize Ã¢â€ â€™ STATE_NO_STATIC_DATA (state=2) Ã¢â€ â€™ silence.
+ * Key implementation notes:
+ *  - BUG: MODE_STATIC with bufferSize < minBufferSize -> STATE_NO_STATIC_DATA (state=2) -> silence.
  *    FIX: bufferSize = maxOf(minBufferSize, pcmBytes) ALWAYS, even in static mode.
  *  - Using MODE_STREAM: simpler and avoids the STATE_NO_STATIC_DATA issue.
  *    For 1 second at 8kHz (16000 bytes) MODE_STREAM is more than adequate.
- *  - USAGE_MEDIA Ã¢â€ â€™ main speaker (not earpiece).
+ *  - USAGE_MEDIA -> main speaker (not earpiece).
  *  - [playingFilePath] StateFlow to sync play/stop icons in the UI.
  */
 class AndroidAudioPlayer(
@@ -63,7 +63,7 @@ class AndroidAudioPlayer(
         }
 
         if (pcmData.isEmpty()) {
-            Logger.w(tag = TAG) { "PCM data is empty Ã¢â‚¬â€ skipping playback" }
+            Logger.w(tag = TAG) { "PCM data is empty -- skipping playback" }
             onComplete()
             return
         }
@@ -80,7 +80,7 @@ class AndroidAudioPlayer(
         }
 
         // CRITICAL: bufferSize must always be >= minBufferSize.
-        // With MODE_STATIC, if bufferSize < minBufferSize Ã¢â€ â€™ state=STATE_NO_STATIC_DATA=2 Ã¢â€ â€™ silence.
+        // With MODE_STATIC, if bufferSize < minBufferSize -> state=STATE_NO_STATIC_DATA=2 -> silence.
         // MODE_STREAM is used for simplicity and robustness.
         val pcmBytes   = pcmData.size * Short.SIZE_BYTES
         val bufferSize = maxOf(minBufferSize, pcmBytes)

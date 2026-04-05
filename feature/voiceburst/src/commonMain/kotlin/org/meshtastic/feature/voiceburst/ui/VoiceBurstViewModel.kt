@@ -44,8 +44,8 @@ private const val TAG = "VoiceBurstViewModel"
  * ViewModel handling the lifecycle and orchestration of Voice Burst messaging.
  *
  * Full pipeline:
- *   MIC â†’ [AudioRecorder] â†’ PCM â†’ [Codec2Encoder.encode] â†’ bytes â†’ [VoiceBurstRepository.sendBurst]
- *   RADIO â†’ [VoiceBurstRepository.incomingBursts] â†’ bytes â†’ [Codec2Encoder.decode] â†’ PCM â†’ [AudioPlayer]
+ *   MIC -> [AudioRecorder] -> PCM -> [Codec2Encoder.encode] -> bytes -> [VoiceBurstRepository.sendBurst]
+ *   RADIO -> [VoiceBurstRepository.incomingBursts] -> bytes -> [Codec2Encoder.decode] -> PCM -> [AudioPlayer]
  *
  * Rate limiting is enforced: minimum [RATE_LIMIT_MS] between consecutive bursts.
  *
@@ -103,7 +103,7 @@ class VoiceBurstViewModel(
             .launchIn(viewModelScope)
     }
 
-    // â”€â”€â”€ Receiver-side logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- Receiver-side logic ------------------------------------------------
 
     private fun onBurstReceived(payload: VoiceBurstPayload) {
         Logger.i(tag = TAG) {
@@ -114,7 +114,7 @@ class VoiceBurstViewModel(
 
         val pcmData = encoder.decode(payload.audioData)
         if (pcmData == null || pcmData.isEmpty()) {
-            Logger.e(tag = TAG) { "Decoding failed â€” no PCM samples to play" }
+            Logger.e(tag = TAG) { "Decoding failed -- no PCM samples to play" }
             _state.update { VoiceBurstState.Idle }
             return
         }
@@ -128,7 +128,7 @@ class VoiceBurstViewModel(
         }
     }
 
-    // â”€â”€â”€ Sender-side (PTT) recording â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- Sender-side (PTT) recording ----------------------------------------
 
     /**
      * Initiates microphone recording if the state machine is [Idle].
@@ -183,7 +183,7 @@ class VoiceBurstViewModel(
                 uiTimerJob?.cancel()
                 uiTimerJob = null
                 Logger.e(tag = TAG) { "Hardware recording error: ${error.message}" }
-                _state.update { VoiceBurstState.Error(VoiceBurstError.ENCODING_FAILED) }
+                _state.update { VoiceBurstState.Error(VoiceBurstError.RECORDING_FAILED) }
             },
             maxDurationMs = MAX_DURATION_MS,
         )
@@ -201,7 +201,7 @@ class VoiceBurstViewModel(
         audioRecorder.stopRecording()
     }
 
-    // â”€â”€â”€ Encoding and Dispatch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- Encoding and Dispatch ----------------------------------------------
 
     internal fun onRecordingComplete(pcmData: ShortArray, durationMs: Int) {
         _state.update { VoiceBurstState.Encoding }
@@ -215,9 +215,9 @@ class VoiceBurstViewModel(
             }
 
             if (encoder.isStub) {
-                Logger.w(tag = TAG) { "Running with Codec2 stub â€” transmission will not be intelligible" }
+                Logger.w(tag = TAG) { "Running with Codec2 stub -- transmission will not be intelligible" }
             } else {
-                Logger.i(tag = TAG) { "Enc JNI Success: ${pcmData.size} samples â†’ ${audioBytes.size} bytes" }
+                Logger.i(tag = TAG) { "Enc JNI Success: ${pcmData.size} samples -> ${audioBytes.size} bytes" }
             }
 
             val payload = VoiceBurstPayload(

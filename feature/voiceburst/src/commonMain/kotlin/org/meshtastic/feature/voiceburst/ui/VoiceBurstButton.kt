@@ -54,8 +54,9 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * PTT (Push-To-Talk) button for Voice Burst.
  *
- * Visible only if [VoiceBurstViewModel.isVisible] == true (feature flag enabled).
- * Disabled during encoding/sending/rate limit.
+ * Render this composable only when Voice Burst is available; callers should not render
+ * it for [VoiceBurstState.Unsupported].
+ * Disabled during non-interactive processing states such as encoding and sending.
  *
  * Visual states:
  *   Idle       -> Mic icon, normal color

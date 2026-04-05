@@ -43,7 +43,7 @@ import org.meshtastic.feature.voiceburst.repository.VoiceBurstRepository
 /**
  * Koin module for the Voice Burst feature module.
  *
- * Follows the same pattern as [FeatureAchievementsAndroidModule]:
+ * Follows the standard Android feature-module pattern:
  *   - Context and Android-only APIs remain in androidMain
  *   - commonMain has no direct Android dependencies
  */

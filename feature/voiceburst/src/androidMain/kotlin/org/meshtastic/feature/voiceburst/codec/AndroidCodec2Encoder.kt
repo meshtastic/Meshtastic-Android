@@ -29,18 +29,18 @@ private const val TAG = "AndroidCodec2Encoder"
 /**
  * Android implementation of [Codec2Encoder].
  *
- * When [Codec2Jni.isAvailable] = true, uses libcodec2 via JNI (real voice audio).
+ * When [Codec2JNI.isAvailable] is true, uses libcodec2 via JNI (real voice audio).
  * Otherwise falls back to STUB mode (440Hz sine wave) for development/CI/builds without .so.
  *
  * Codec2 700B parameters:
  *   - Sample rate input:  8000 Hz
  *   - Frame:              40ms = 320 samples
  *   - Bytes per frame:    4
- *   - 1 second:           25 frames Ã— 4 bytes = 100 bytes
+ *   - 1 second:           25 frames x 4 bytes = 100 bytes
  *
  * Preprocessing applied before encoding (JNI mode only):
  *   1. Amplitude normalization (brings to 70% of Short.MAX_VALUE)
- *   2. Simple VAD: if RMS < threshold, returns silence without encoding
+ *   2. Simple VAD: if RMS < threshold, returns null without encoding
  *
  * JNI Lifecycle:
  *   The Codec2 handle is created in the constructor and destroyed in [close()].
@@ -63,14 +63,14 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
                         " bytesPerFrame=${Codec2JNI.getBytesPerFrame(Codec2JNI.MODE_700C)}"
                 }
             } else {
-                Logger.e(tag = TAG) { "Codec2JNI.create() returned 0 â€” falling back to stub mode" }
+                Logger.e(tag = TAG) { "Codec2JNI.create() returned 0 -- falling back to stub mode" }
                 codec2Handle = 0L
                 isStub = true
             }
         } else {
             codec2Handle = 0L
             isStub = true
-            Logger.w(tag = TAG) { "Codec2 JNI not available â€” stub mode (440Hz sine wave)" }
+            Logger.w(tag = TAG) { "Codec2 JNI not available -- stub mode (440Hz sine wave)" }
         }
     }
 
@@ -81,17 +81,17 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         }
     }
 
-    // â”€â”€â”€ encode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- encode -------------------------------------------------------------
 
     /**
      * Encodes 16-bit mono 8000Hz PCM into Codec2 700B bytes.
      *
-     * Accepts an array of any length â€” it is split into frames
+     * Accepts an array of any length -- it is split into frames
      * of [SAMPLES_PER_FRAME] samples. The last incomplete frame is
      * padded with zeros (zero-padding).
      *
      * @param pcmData  PCM samples from the microphone (8000 Hz, mono, signed 16-bit)
-     * @return         ByteArray with Codec2 bytes, null if input is empty
+     * @return         ByteArray with Codec2 bytes, null if input is empty or silence detected
      */
     override fun encode(pcmData: ShortArray): ByteArray? {
         if (pcmData.isEmpty()) return null
@@ -110,11 +110,11 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         // Preprocessing: normalization
         val normalized = normalize(pcmData)
 
-        // VAD: do not send silence
+        // VAD: do not send silence -- return null so the ViewModel skips transmission
         val rms = computeRms(normalized)
         if (rms < SILENCE_RMS_THRESHOLD) {
-            Logger.d(tag = TAG) { "VAD: silence detected (RMS=$rms) â€” skipping encode" }
-            return ByteArray(0)
+            Logger.d(tag = TAG) { "VAD: silence detected (RMS=$rms) -- skipping encode" }
+            return null
         }
 
         // Calculate needed frames (round up)
@@ -132,7 +132,6 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
             } else {
                 ShortArray(samplesPerFrame).also {
                     normalized.copyInto(it, 0, inStart, inEnd)
-                    // remaining already 0 by default
                 }
             }
 
@@ -147,13 +146,13 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         }
 
         Logger.d(tag = TAG) {
-            "Encode JNI: ${pcmData.size} samples â†’ ${output.size} bytes " +
-                "($frameCount frames Ã— $bytesPerFrame bytes)"
+            "Encode JNI: ${pcmData.size} samples -> ${output.size} bytes " +
+                "($frameCount frames x $bytesPerFrame bytes)"
         }
         return output
     }
 
-    // â”€â”€â”€ decode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- decode -------------------------------------------------------------
 
     /**
      * Decodes Codec2 700B bytes into 16-bit mono 8000Hz PCM samples.
@@ -178,7 +177,7 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         if (codec2Data.size % bytesPerFrame != 0) {
             Logger.w(tag = TAG) {
                 "Decode: input size (${codec2Data.size}) not a multiple of " +
-                    "bytesPerFrame ($bytesPerFrame) â€” truncating to complete frame"
+                    "bytesPerFrame ($bytesPerFrame) -- truncating to complete frame"
             }
         }
 
@@ -203,16 +202,16 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         }
 
         Logger.d(tag = TAG) {
-            "Decode JNI: ${codec2Data.size} bytes â†’ ${output.size} samples " +
-                "($frameCount frames Ã— $samplesPerFrame samples)"
+            "Decode JNI: ${codec2Data.size} bytes -> ${output.size} samples " +
+                "($frameCount frames x $samplesPerFrame samples)"
         }
         return output
     }
 
-    // â”€â”€â”€ Preprocessing helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- Preprocessing helpers ----------------------------------------------
 
     /**
-     * Normalizes the signal amplitude to [TARGET_AMPLITUDE] Ã— Short.MAX_VALUE.
+     * Normalizes the signal amplitude to [TARGET_AMPLITUDE] x Short.MAX_VALUE.
      * Prevents clipping and improves Codec2 quality on low-volume voices.
      */
     private fun normalize(pcm: ShortArray): ShortArray {
@@ -220,7 +219,6 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         if (maxAmp < 1f) return pcm  // absolute silence
 
         val gain = (TARGET_AMPLITUDE * Short.MAX_VALUE) / maxAmp
-        // Limit maximum gain to 10x to avoid excessive noise amplification
         val clampedGain = minOf(gain, MAX_GAIN)
 
         return ShortArray(pcm.size) { i ->
@@ -238,12 +236,12 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         return sqrt(sumSquares / pcm.size)
     }
 
-    // â”€â”€â”€ Stub (fallback when JNI is not available) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- Stub (fallback when JNI is not available) --------------------------
 
     private fun encodeStub(pcmData: ShortArray): ByteArray {
         val frameCount = (pcmData.size + SAMPLES_PER_FRAME - 1) / SAMPLES_PER_FRAME
         Logger.w(tag = TAG) {
-            "Codec2 STUB encode: ${pcmData.size} samples â†’ ${frameCount * BYTES_PER_FRAME} bytes (zeros)"
+            "Codec2 STUB encode: ${pcmData.size} samples -> ${frameCount * BYTES_PER_FRAME} bytes (zeros)"
         }
         return ByteArray(frameCount * BYTES_PER_FRAME) { 0x00 }
     }
@@ -253,10 +251,10 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         val totalSamples = frameCount * SAMPLES_PER_FRAME
 
         Logger.w(tag = TAG) {
-            "Codec2 STUB decode: ${codec2Data.size} bytes â†’ $totalSamples samples (440Hz sine wave)"
+            "Codec2 STUB decode: ${codec2Data.size} bytes -> $totalSamples samples (440Hz sine wave)"
         }
 
-        // Generate 440Hz sine wave (A4) â€” audible and recognizable
+        // Generate 440Hz sine wave (A4) -- audible and recognizable
         val sampleRate = 8000.0
         val frequency  = 440.0
         val amplitude  = Short.MAX_VALUE * 0.3  // 30% volume
@@ -277,12 +275,12 @@ class AndroidCodec2Encoder : Codec2Encoder, AutoCloseable {
         /** Target amplitude for normalization (70% of Short.MAX_VALUE). */
         private const val TARGET_AMPLITUDE = 0.70f
 
-        /** Maximum gain applied by normalization (10Ã—). */
+        /** Maximum gain applied by normalization (10x). */
         private const val MAX_GAIN = 10.0f
 
         /**
          * RMS threshold below which the frame is considered silence (simple VAD).
-         * 200.0 on the 0-32767 scale is approximately -44 dBFS â€” normal voice is 2000-8000.
+         * 200.0 on the 0-32767 scale is approximately -44 dBFS -- normal voice is 2000-8000.
          */
         private const val SILENCE_RMS_THRESHOLD = 200.0
     }
