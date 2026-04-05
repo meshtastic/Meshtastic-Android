@@ -230,7 +230,7 @@ class VoiceBurstViewModel(
 
             if (success) {
                 lastSentTimestamp = Clock.System.now().toEpochMilliseconds()
-                Logger.i(tag = TAG) { "Voice Burst broadcasted: ${audioBytes.size} bytes, ${durationMs}ms" }
+                Logger.i(tag = TAG) { "Voice Burst sent to $destNodeId: ${audioBytes.size} bytes, ${durationMs}ms" }
                 _state.update { VoiceBurstState.Sent }
                 delay(SENT_DISPLAY_MS)
                 _state.update { VoiceBurstState.Idle }
