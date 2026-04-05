@@ -95,22 +95,30 @@ class CommandSenderImpl(
 
     private fun computeHopLimit(): Int = (localConfig.value.lora?.hop_limit ?: 0).takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
 
-    private fun getAdminChannelIndex(toNum: Int): Int {
+    /**
+     * Resolves the correct channel index for sending a packet to [toNum].
+     *
+     * When both the local node and the destination support PKC, returns [DataPacket.PKC_CHANNEL_INDEX] so that
+     * [buildMeshPacket] enables PKI encryption. Otherwise falls back to the node's heard-on channel (for general
+     * packets) or the dedicated admin channel (for admin packets).
+     */
+    private fun getChannelIndex(toNum: Int, isAdmin: Boolean = false): Int {
         val myNum = nodeManager.myNodeNum.value ?: return 0
         val myNode = nodeManager.nodeDBbyNodeNum[myNum]
         val destNode = nodeManager.nodeDBbyNodeNum[toNum]
 
-        val adminChannelIndex =
-            when {
-                myNum == toNum -> 0
-                myNode?.hasPKC == true && destNode?.hasPKC == true -> DataPacket.PKC_CHANNEL_INDEX
-                else ->
-                    channelSet.value.settings
-                        .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
-                        .coerceAtLeast(0)
-            }
-        return adminChannelIndex
+        return when {
+            myNum == toNum -> 0
+            myNode?.hasPKC == true && destNode?.hasPKC == true -> DataPacket.PKC_CHANNEL_INDEX
+            isAdmin ->
+                channelSet.value.settings
+                    .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
+                    .coerceAtLeast(0)
+            else -> destNode?.channel ?: 0
+        }
     }
+
+    private fun getAdminChannelIndex(toNum: Int): Int = getChannelIndex(toNum, isAdmin = true)
 
     override fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()
@@ -191,7 +199,7 @@ class CommandSenderImpl(
         packetHandler.sendToRadio(
             buildMeshPacket(
                 to = idNum,
-                channel = if (destNum == null) 0 else nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                channel = if (destNum == null) 0 else getChannelIndex(destNum),
                 priority = MeshPacket.Priority.BACKGROUND,
                 decoded =
                 Data(
@@ -214,7 +222,7 @@ class CommandSenderImpl(
         packetHandler.sendToRadio(
             buildMeshPacket(
                 to = destNum,
-                channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                channel = getChannelIndex(destNum),
                 priority = MeshPacket.Priority.BACKGROUND,
                 decoded =
                 Data(
@@ -249,7 +257,7 @@ class CommandSenderImpl(
         packetHandler.sendToRadio(
             buildMeshPacket(
                 to = destNum,
-                channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                channel = getChannelIndex(destNum),
                 decoded =
                 Data(
                     portnum = PortNum.NODEINFO_APP,
@@ -267,7 +275,7 @@ class CommandSenderImpl(
                 to = destNum,
                 wantAck = true,
                 id = requestId,
-                channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                channel = getChannelIndex(destNum),
                 decoded = Data(portnum = PortNum.TRACEROUTE_APP, want_response = true, dest = destNum),
             ),
         )
@@ -305,7 +313,7 @@ class CommandSenderImpl(
             buildMeshPacket(
                 to = destNum,
                 id = requestId,
-                channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                channel = getChannelIndex(destNum),
                 decoded = Data(portnum = portNum, payload = payloadBytes, want_response = true, dest = destNum),
             ),
         )
@@ -342,7 +350,7 @@ class CommandSenderImpl(
                     to = destNum,
                     wantAck = true,
                     id = requestId,
-                    channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                    channel = getChannelIndex(destNum),
                     decoded =
                     Data(
                         portnum = PortNum.NEIGHBORINFO_APP,
@@ -358,7 +366,7 @@ class CommandSenderImpl(
                     to = destNum,
                     wantAck = true,
                     id = requestId,
-                    channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                    channel = getChannelIndex(destNum),
                     decoded = Data(portnum = PortNum.NEIGHBORINFO_APP, want_response = true, dest = destNum),
                 ),
             )
@@ -397,7 +405,14 @@ class CommandSenderImpl(
 
         if (channel == DataPacket.PKC_CHANNEL_INDEX) {
             pkiEncrypted = true
-            publicKey = nodeManager.nodeDBbyNodeNum[to]?.user?.public_key ?: ByteString.EMPTY
+            val destNode = nodeManager.nodeDBbyNodeNum[to]
+            // Resolve the public key using the same fallback as Node.hasPKC:
+            // standalone publicKey (populated after Room round-trip) first, then
+            // the embedded user.public_key (always available in-memory).
+            publicKey = destNode?.let { it.publicKey ?: it.user.public_key } ?: ByteString.EMPTY
+            if (publicKey.size == 0) {
+                Logger.w { "buildMeshPacket: no public key for node ${to.toUInt()}, PKI encryption will fail" }
+            }
             actualChannel = 0
         }
 

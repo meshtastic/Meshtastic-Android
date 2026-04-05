@@ -304,7 +304,7 @@ class MeshDataHandlerImpl(
             if (p != null && p.status != MessageStatus.RECEIVED) {
                 val updatedPacket =
                     p.copy(status = m, relays = if (isAck) p.relays + 1 else p.relays, relayNode = relayNode)
-                packetRepository.value.update(updatedPacket)
+                packetRepository.value.update(updatedPacket, routingError = routingError)
             }
 
             reaction?.let { r ->

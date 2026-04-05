@@ -65,8 +65,10 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delivery_confirmed
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.message_status_delivered
 import org.meshtastic.core.resources.message_status_enroute
 import org.meshtastic.core.resources.message_status_queued
+import org.meshtastic.core.resources.message_status_unknown
 import org.meshtastic.core.resources.react
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BottomSheetDialog
@@ -210,7 +212,11 @@ internal fun ReactionDialog(
                 MessageStatus.RECEIVED -> Res.string.delivery_confirmed
                 MessageStatus.QUEUED -> Res.string.message_status_queued
                 MessageStatus.ENROUTE -> Res.string.message_status_enroute
-                else -> getStringResFrom(reaction.routingError)
+                MessageStatus.DELIVERED -> Res.string.message_status_delivered
+                MessageStatus.SFPP_ROUTING -> Res.string.message_status_enroute
+                MessageStatus.SFPP_CONFIRMED -> Res.string.delivery_confirmed
+                MessageStatus.ERROR -> getStringResFrom(reaction.routingError)
+                MessageStatus.UNKNOWN -> Res.string.message_status_unknown
             }
 
         val relayNodeName =

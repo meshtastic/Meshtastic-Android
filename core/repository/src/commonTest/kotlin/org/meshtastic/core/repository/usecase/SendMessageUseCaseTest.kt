@@ -138,4 +138,77 @@ class SendMessageUseCaseTest {
         // Assert
         // Verified by observing that no exception is thrown and coverage is hit.
     }
+
+    @Test
+    fun `invoke with PKI DM triggers sendSharedContact`() = runTest {
+        // Arrange: PKI DMs use contactKey = "8!nodeHex" (PKC_CHANNEL_INDEX = 8)
+        val ourNode =
+            Node(
+                num = 1,
+                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
+                metadata = DeviceMetadata(firmware_version = "2.7.12"),
+            )
+        nodeRepository.setOurNode(ourNode)
+
+        val destNode = Node(num = 0x70fdde9b.toInt(), user = User(id = "!70fdde9b"))
+        nodeRepository.upsert(destNode)
+
+        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+
+        // Act — PKI DM: channel 8 + node ID
+        useCase("PKI direct message", "${DataPacket.PKC_CHANNEL_INDEX}!70fdde9b", null)
+
+        // Assert — sendSharedContact should be called for PKI DMs
+        radioController.sentSharedContacts.size shouldBe 1
+        radioController.sentSharedContacts[0] shouldBe 0x70fdde9b.toInt()
+        radioController.favoritedNodes.size shouldBe 0
+    }
+
+    @Test
+    fun `invoke with channel DM does not trigger sendSharedContact or favorite`() = runTest {
+        // Arrange: channel-based DMs use contactKey = "<ch>!nodeHex" where ch is 0-7
+        val ourNode =
+            Node(
+                num = 1,
+                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
+                metadata = DeviceMetadata(firmware_version = "2.7.12"),
+            )
+        nodeRepository.setOurNode(ourNode)
+
+        val destNode = Node(num = 0x12345678, user = User(id = "!12345678"))
+        nodeRepository.upsert(destNode)
+
+        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+
+        // Act — channel 1 DM (not PKI, not legacy)
+        useCase("Channel DM", "1!12345678", null)
+
+        // Assert — neither sendSharedContact nor favorite should be called for channel DMs
+        radioController.sentSharedContacts.size shouldBe 0
+        radioController.favoritedNodes.size shouldBe 0
+    }
+
+    @Test
+    fun `invoke with PKI DM to older firmware does not trigger favorite`() = runTest {
+        // Arrange: PKI DMs with old firmware should NOT fall through to favoriting
+        val ourNode =
+            Node(
+                num = 1,
+                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
+                metadata = DeviceMetadata(firmware_version = "2.0.0"),
+            )
+        nodeRepository.setOurNode(ourNode)
+
+        val destNode = Node(num = 0xABCDEF01.toInt(), user = User(id = "!abcdef01"))
+        nodeRepository.upsert(destNode)
+
+        appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
+
+        // Act — PKI DM with firmware that doesn't support verified contacts
+        useCase("Old PKI DM", "${DataPacket.PKC_CHANNEL_INDEX}!abcdef01", null)
+
+        // Assert — PKI DMs should not trigger legacy favoriting (that's only for channel==null)
+        radioController.sentSharedContacts.size shouldBe 0
+        radioController.favoritedNodes.size shouldBe 0
+    }
 }

@@ -125,15 +125,20 @@ open class DatabaseManager(
         // Build/open Room DB off the main thread
         val db = withContext(dispatchers.io) { getOrOpenDatabase(dbName) }
 
-        if (previousDbName != null && previousDbName != dbName) {
-            closeCachedDatabase(previousDbName)
-        }
-
+        // Emit the new DB BEFORE closing the old one. flatMapLatest collectors on
+        // currentDb will cancel their in-flight queries on the previous database once
+        // the new value is emitted. Closing the old pool first would race with those
+        // collectors, causing "Connection pool is closed" crashes.
         _currentDb.value = db
         _currentAddress.value = address
         markLastUsed(dbName)
         // Also mark the previous DB as used "just now" so LRU has an accurate, recent timestamp
         previousDbName?.let { markLastUsed(it) }
+
+        // Now safe to close the previous DB — collectors have switched to the new instance.
+        if (previousDbName != null && previousDbName != dbName) {
+            closeCachedDatabase(previousDbName)
+        }
 
         // Defer LRU eviction so switch is not blocked by filesystem work
         managerScope.launch(dispatchers.io) { enforceCacheLimit(activeDbName = dbName) }

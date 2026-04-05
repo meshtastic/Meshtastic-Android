@@ -79,7 +79,14 @@ class MeshActionHandlerImpl(
     override suspend fun onServiceAction(action: ServiceAction) {
         Logger.d { "ServiceAction dispatched: ${action::class.simpleName}" }
         ignoreExceptionSuspend {
-            val myNodeNum = nodeManager.myNodeNum.value ?: return@ignoreExceptionSuspend
+            val myNodeNum = nodeManager.myNodeNum.value
+            if (myNodeNum == null) {
+                Logger.w { "MeshActionHandlerImpl: myNodeNum is null, skipping ServiceAction!" }
+                if (action is ServiceAction.SendContact) {
+                    action.result.complete(false)
+                }
+                return@ignoreExceptionSuspend
+            }
             when (action) {
                 is ServiceAction.Favorite -> handleFavorite(action, myNodeNum)
                 is ServiceAction.Ignore -> handleIgnore(action, myNodeNum)

@@ -18,6 +18,8 @@ package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
 import dev.mokkery.mock
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
@@ -34,6 +36,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
 class NodeManagerImplTest {
@@ -225,5 +228,104 @@ class NodeManagerImplTest {
 
         assertTrue(!nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
         assertTrue(!nodeManager.nodeDBbyID.containsKey("!testnode"))
+    }
+
+    @Test
+    fun `handleReceivedUser sets publicKey from user public_key`() {
+        val nodeNum = 1234
+        val pk = ByteArray(32) { (it + 1).toByte() }.toByteString()
+        val existingUser =
+            User(id = "!12345678", long_name = "Existing", short_name = "EX", hw_model = HardwareModel.TLORA_V2)
+        nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
+
+        val incomingUser =
+            User(
+                id = "!12345678",
+                long_name = "Updated",
+                short_name = "UP",
+                hw_model = HardwareModel.TLORA_V2,
+                public_key = pk,
+            )
+        nodeManager.handleReceivedUser(nodeNum, incomingUser)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        assertEquals(pk, result.publicKey)
+        assertEquals(pk, result.user.public_key)
+        assertTrue(result.hasPKC)
+    }
+
+    @Test
+    fun `handleReceivedUser sets empty publicKey when key mismatch clears user key`() {
+        val nodeNum = 1234
+        val existingPk = ByteArray(32) { (it + 1).toByte() }.toByteString()
+        val existingUser =
+            User(
+                id = "!12345678",
+                long_name = "Existing",
+                short_name = "EX",
+                hw_model = HardwareModel.TLORA_V2,
+                public_key = existingPk,
+            )
+        nodeManager.updateNode(nodeNum) { it.copy(user = existingUser, publicKey = existingPk) }
+
+        val differentPk = ByteArray(32) { (it + 10).toByte() }.toByteString()
+        val incomingUser =
+            User(
+                id = "!12345678",
+                long_name = "Updated",
+                short_name = "UP",
+                hw_model = HardwareModel.TLORA_V2,
+                public_key = differentPk,
+            )
+        nodeManager.handleReceivedUser(nodeNum, incomingUser)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        // Key mismatch: newUser gets public_key cleared to EMPTY, and publicKey should match
+        assertEquals(ByteString.EMPTY, result.publicKey)
+        assertEquals(ByteString.EMPTY, result.user.public_key)
+    }
+
+    @Test
+    fun `installNodeInfo sets publicKey from user public_key`() {
+        val nodeNum = 5678
+        val pk = ByteArray(32) { (it + 1).toByte() }.toByteString()
+        val user =
+            User(
+                id = "!abcd1234",
+                long_name = "Remote Node",
+                short_name = "RN",
+                hw_model = HardwareModel.HELTEC_V3,
+                public_key = pk,
+            )
+        val info = ProtoNodeInfo(num = nodeNum, user = user, last_heard = 1000, channel = 0)
+
+        nodeManager.installNodeInfo(info)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        assertEquals(pk, result.publicKey)
+        assertEquals(pk, result.user.public_key)
+        assertTrue(result.hasPKC)
+    }
+
+    @Test
+    fun `installNodeInfo clears publicKey for licensed users`() {
+        val nodeNum = 5678
+        val pk = ByteArray(32) { (it + 1).toByte() }.toByteString()
+        val user =
+            User(
+                id = "!abcd1234",
+                long_name = "Licensed Op",
+                short_name = "LO",
+                hw_model = HardwareModel.HELTEC_V3,
+                public_key = pk,
+                is_licensed = true,
+            )
+        val info = ProtoNodeInfo(num = nodeNum, user = user, last_heard = 1000, channel = 0)
+
+        nodeManager.installNodeInfo(info)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        assertEquals(ByteString.EMPTY, result.publicKey)
+        assertEquals(ByteString.EMPTY, result.user.public_key)
     }
 }

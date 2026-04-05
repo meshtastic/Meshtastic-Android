@@ -99,6 +99,7 @@ class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHan
                 MeshPacket(
                     from = myNodeNum,
                     to = myNodeNum,
+                    id = kotlin.random.Random.nextInt(1, Int.MAX_VALUE),
                     decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = request.encode().toByteString()),
                     priority = MeshPacket.Priority.BACKGROUND,
                 ),
