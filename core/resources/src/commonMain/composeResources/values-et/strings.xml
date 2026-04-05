@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Kärgvõrgustik</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Filtreeri</string>
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
     <string name="node_filter_title">Filtreeri </string>
@@ -377,6 +378,8 @@
     <string name="currently">Praegu:</string>
     <string name="mute_status_always">Alati vaigistatud</string>
     <string name="mute_status_unmuted">Mitte vaigistatud</string>
+    <string name="mute_status_muted_for_days">Vaigistatud %1$d päeva, %2$s tundi</string>
+    <string name="mute_status_muted_for_hours">Vaigistatud %1$s tundi</string>
     <string name="mute_status_label">Vaigistatud olek</string>
     <string name="mute_add">Vaigista kasutaja '%1$s' teated?</string>
     <string name="mute_remove">Tühistada '%1$s' teadete vaigistus?</string>
@@ -474,6 +477,7 @@
     <string name="are_you_sure">Oled kindel?</string>
     <string name="router_role_confirmation_text"><![CDATA[Olen lugenud <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">seadme rollide juhendit </a> ja blogi postitust <a href="http://meshtastic.org/blog/choosing-the-right-device-role">valin õige seadme rolli</a>.]]></string>
     <string name="i_know_what_i_m_doing">Ma tean mida teen.</string>
+    <string name="low_battery_message">Sõlmel %1$s on madal aku pinge (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Madala akupinge hoiatus</string>
     <string name="low_battery_title">Madal akupinge: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Madala akupinge teated (lemmik sõlmed)</string>
@@ -902,6 +906,7 @@
     <string name="pax_metrics_log">Pax mõõdiku logi</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Pax mõõdikut pole saadaval.</string>
+    <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>
     <string name="ble_devices">Sinihamba seade</string>
     <string name="bluetooth_paired_devices">Seotud seadmed</string>
     <string name="connected_device">Ühendatud seadmed</string>
@@ -1082,6 +1087,7 @@
     <string name="firmware_update_dfu_error">DFU viga: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU katkestatud</string>
     <string name="firmware_update_node_info_missing">Sõlmel puudub kasutajateave.</string>
+    <string name="firmware_update_battery_low">Aku liiga tühi (%1$d%). Palun lae seade enne uuendamist.</string>
     <string name="firmware_update_retrieval_failed">Püsivara faili ei õnnestunud hankida.</string>
     <string name="firmware_update_nordic_failed">Nordic DFU värskendus nurjus</string>
     <string name="firmware_update_usb_failed">USB-värskendus ebaõnnestus</string>
@@ -1093,6 +1099,7 @@
     <string name="firmware_update_checking_version">Seadme versiooni kontrollimine...</string>
     <string name="firmware_update_starting_ota">Alustan üle-õhu värskendust...</string>
     <string name="firmware_update_uploading">Laen püsivara...</string>
+    <string name="firmware_update_uploading_progress">Uuendan püsivara... %1$d% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Seadme taaskäivitamine...</string>
     <string name="firmware_update_channel_name">Püsivara uuendus</string>
     <string name="firmware_update_channel_description">Püsivara värskenduse olek</string>
@@ -1171,8 +1178,10 @@
     <string name="permission_granted">Luba antud</string>
     <string name="permission_denied">Luba mitte antud</string>
     <string name="map_style_selection">Kaardi stiilis valik</string>
+    <string name="local_stats_battery">Aku: %1$d%</string>
     <string name="local_stats_nodes">Sõlmed: %1$d võrgus / %2$d kokku</string>
     <string name="local_stats_uptime">Töös: %1$s</string>
+    <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="local_stats_traffic">Liiklus: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">Vahendatud: %1$d (Tühistatud: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
@@ -1258,5 +1267,26 @@
     <string name="no_files_manifested">Faile ei avaldatud.</string>
     <string name="connect">Ühenda</string>
     <string name="done">Valmis</string>
+    <string name="wifi_provisioning">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>
+    <string name="wifi_provision_description">Anna mPWRD-OS-seadmele Sinihamba kaudu WiFi mandaadid.</string>
+    <string name="wifi_provision_mpwrd_disclaimer">Lisateavet mPWRD-OS projekti kohta leiate aadressilt\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_scanning_ble">Seadme otsimine…</string>
+    <string name="wifi_provision_device_found">Seade leitud</string>
+    <string name="wifi_provision_device_found_detail">Valmis WiFi võrkude otsimiseks.</string>
+    <string name="wifi_provision_scan_networks">Võrkude otsimine</string>
+    <string name="wifi_provision_scanning_wifi">Otsin…</string>
+    <string name="wifi_provision_sending_credentials">WiFi sätete rakendamine…</string>
+    <string name="wifi_provision_success">WiFi edukalt seadistatud!</string>
+    <string name="wifi_provision_success_detail">WiFi mandaadid rakendatud. Seade loob peagi võrguühenduse.</string>
+    <string name="wifi_provision_no_networks">Võrke ei leitud</string>
+    <string name="wifi_provision_no_networks_detail">Veenduge, et seade on sisse lülitatud ja levialas.</string>
+    <string name="wifi_provision_connect_failed">Ühenduse loomine ebaõnnestus: %1$s</string>
+    <string name="wifi_provision_scan_failed">WiFi võrkude leidmine ebaõnnestus %1$s</string>
     <string name="wifi_provision_refresh">Värskenda</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_available_networks">Saada olevad võrgud</string>
+    <string name="wifi_provision_ssid_label">Võrgu nimi (SSID)</string>
+    <string name="wifi_provision_ssid_placeholder">Sisestage või valige võrk</string>
+    <string name="wifi_provision_status_applied">WiFi edukalt seadistatud!</string>
+    <string name="wifi_provision_status_failed">WiFi sätete rakendamine ebaõnnestus</string>
 </resources>
