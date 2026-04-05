@@ -143,7 +143,7 @@ class AndroidAudioRecorder(
                 Logger.e(e, tag = TAG) { "Error during recording" }
                 onError(e)
             } finally {
-                record.stop()
+                runCatching { record.stop() } // guard against IllegalStateException on early-stop
                 record.release()
                 audioRecord = null
                 keepRecording = false

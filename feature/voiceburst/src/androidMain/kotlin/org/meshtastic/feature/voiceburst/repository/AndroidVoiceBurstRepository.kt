@@ -71,7 +71,7 @@ class AndroidVoiceBurstRepository(
     // ─── Feature flag ─────────────────────────────────────────────────────────
 
     private val featureEnabledFlow = dataStore.data
-        .map { prefs -> prefs[KEY_FEATURE_ENABLED] ?: true } // Default ON
+        .map { prefs -> prefs[KEY_FEATURE_ENABLED] ?: false } // Default OFF (experimental opt-in)
 
     override val isFeatureEnabled: StateFlow<Boolean> =
         featureEnabledFlow.stateIn(

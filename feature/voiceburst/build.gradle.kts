@@ -22,15 +22,18 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
-// ─── Codec2 JNI detection ─────────────────────────────────────────
-val codec2SoArm64 = File(projectDir, "src/androidMain/jniLibs/arm64-v8a/libcodec2.so")
-val codec2JniArm64 = File(projectDir, "src/androidMain/jniLibs/arm64-v8a/libcodec2_jni.so")
-val codec2Available = codec2SoArm64.exists() && codec2JniArm64.exists()
+// --- Codec2 JNI detection ---------------------------------------------------
+val codec2SoArm64   = File(projectDir, "src/androidMain/jniLibs/arm64-v8a/libcodec2.so")
+val codec2JniArm64  = File(projectDir, "src/androidMain/jniLibs/arm64-v8a/libcodec2_jni.so")
+val codec2SoX86_64  = File(projectDir, "src/androidMain/jniLibs/x86_64/libcodec2.so")
+val codec2JniX86_64 = File(projectDir, "src/androidMain/jniLibs/x86_64/libcodec2_jni.so")
+val codec2Available = (codec2SoArm64.exists() && codec2JniArm64.exists()) ||
+                      (codec2SoX86_64.exists() && codec2JniX86_64.exists())
 
 if (codec2Available) {
-    logger.lifecycle(":feature:voiceburst — libcodec2.so + libcodec2_jni.so trovate")
+    logger.lifecycle(":feature:voiceburst -- libcodec2.so + libcodec2_jni.so found")
 } else {
-    logger.lifecycle(":feature:voiceburst — .so assenti → stub mode (esegui scripts/build_codec2.sh)")
+    logger.lifecycle(":feature:voiceburst -- .so not found -> stub mode (run scripts/build_codec2.sh)")
 }
 
 kotlin {
@@ -73,6 +76,6 @@ kotlin {
     }
 }
 
-// ─── NESSUN externalNativeBuild ───────────────────────────────────
-// Le .so prebuilt in jniLibs/ vengono incluse automaticamente da AGP.
-// Il JNI wrapper è compilato da scripts/build_codec2.sh.
+// No externalNativeBuild block needed.
+// Prebuilt .so files in jniLibs/ are packaged automatically by AGP.
+// The JNI wrapper is compiled separately via scripts/build_codec2.sh.
