@@ -80,7 +80,7 @@ xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", v
 
 # AndroidX
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
-androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
+androidx-annotation = { module = "androidx.annotation:annotation", version = "1.10.0" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
