@@ -78,12 +78,12 @@ class DirectRadioControllerImpl(
     }
 
     override suspend fun favoriteNode(nodeNum: Int) {
-        val nodeDef = nodeRepository.getNode(nodeNum.toString())
+        val nodeDef = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
         serviceRepository.onServiceAction(ServiceAction.Favorite(nodeDef))
     }
 
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
-        val nodeDef = nodeRepository.getNode(nodeNum.toString())
+        val nodeDef = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
         val contact =
             SharedContact(node_num = nodeDef.num, user = nodeDef.user, manually_verified = nodeDef.manuallyVerified)
         val action = ServiceAction.SendContact(contact)

@@ -50,12 +50,12 @@ class AndroidRadioControllerImpl(
     }
 
     override suspend fun favoriteNode(nodeNum: Int) {
-        val nodeDef = nodeRepository.getNode(nodeNum.toString())
+        val nodeDef = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
         serviceRepository.onServiceAction(ServiceAction.Favorite(nodeDef))
     }
 
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
-        val nodeDef = nodeRepository.getNode(nodeNum.toString())
+        val nodeDef = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
         val contact =
             org.meshtastic.proto.SharedContact(
                 node_num = nodeDef.num,
