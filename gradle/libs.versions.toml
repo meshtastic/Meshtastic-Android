@@ -15,7 +15,7 @@ jetbrains-lifecycle = "2.11.0-alpha02"
 navigation3 = "1.1.0-beta01"
 navigationevent = "1.1.0-alpha01"
 paging = "3.4.2"
-room = "3.0.0-alpha02"
+room = "3.0.0-alpha03"
 koin = "4.2.0"
 koin-plugin = "0.6.2"
 
