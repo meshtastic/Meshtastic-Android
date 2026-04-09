@@ -16,6 +16,10 @@
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,20 +30,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.compose.cartesian.AutoScrollCondition
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.FadingEdges
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
@@ -47,19 +58,27 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.decoration.Decoration
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberFadingEdges
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.avg
+import org.meshtastic.core.resources.collapse_chart
+import org.meshtastic.core.resources.expand_chart
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.logs
+import org.meshtastic.core.resources.max
+import org.meshtastic.core.resources.min
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
@@ -67,6 +86,9 @@ import org.meshtastic.core.ui.icon.Refresh
 /**
  * A generic chart host for Meshtastic metric charts. Handles common boilerplate for markers, scrolling, and point
  * selection synchronization.
+ *
+ * Uses [FadingEdges] to indicate scrollable content beyond the visible area, and accepts optional [Decoration]s for
+ * reference threshold lines/bands.
  */
 @Composable
 fun GenericMetricChart(
@@ -77,6 +99,7 @@ fun GenericMetricChart(
     endAxis: VerticalAxis<Axis.Position.Vertical.End>? = null,
     bottomAxis: HorizontalAxis<Axis.Position.Horizontal.Bottom>? = null,
     marker: CartesianMarker? = null,
+    decorations: List<Decoration> = emptyList(),
     selectedX: Double? = null,
     onPointSelected: ((Double) -> Unit)? = null,
     vicoScrollState: VicoScrollState = rememberVicoScrollState(),
@@ -105,6 +128,8 @@ fun GenericMetricChart(
             marker = marker,
             markerVisibilityListener = markerVisibilityListener,
             persistentMarkers = { _ -> if (selectedX != null && marker != null) marker at selectedX else null },
+            fadingEdges = rememberFadingEdges(),
+            decorations = decorations,
         ),
         modelProducer = modelProducer,
         modifier = modifier,
@@ -115,31 +140,83 @@ fun GenericMetricChart(
 
 /**
  * An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column for
- * narrow screens (phones).
+ * narrow screens (phones). When [isChartExpanded] is true, the card list is hidden and the chart fills the available
+ * space.
  */
 @Composable
 fun AdaptiveMetricLayout(
     chartPart: @Composable (Modifier) -> Unit,
     listPart: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
+    isChartExpanded: Boolean = false,
 ) {
     BoxWithConstraints(modifier = modifier) {
         val isExpanded = maxWidth >= 600.dp
         if (isExpanded) {
             Row(modifier = Modifier.fillMaxSize()) {
                 chartPart(Modifier.weight(1f).fillMaxHeight())
-                listPart(Modifier.weight(1f).fillMaxHeight())
+                AnimatedVisibility(visible = !isChartExpanded, enter = expandVertically(), exit = shrinkVertically()) {
+                    listPart(Modifier.weight(1f).fillMaxHeight())
+                }
             }
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
-                chartPart(Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f))
-                listPart(Modifier.fillMaxWidth().weight(1f))
+                chartPart(
+                    if (isChartExpanded) {
+                        Modifier.fillMaxWidth().weight(1f)
+                    } else {
+                        Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f)
+                    },
+                )
+                AnimatedVisibility(visible = !isChartExpanded, enter = expandVertically(), exit = shrinkVertically()) {
+                    listPart(Modifier.fillMaxWidth().weight(1f))
+                }
             }
         }
     }
 }
 
-/** A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and synchronization. */
+/**
+ * Displays a compact row of min/max/avg statistics for a metric. Intended to be placed between the chart controls and
+ * the chart itself.
+ */
+@Composable
+fun MetricSummaryRow(values: List<Float>, label: String = "", modifier: Modifier = Modifier) {
+    if (values.isEmpty()) return
+    val minVal = values.min()
+    val maxVal = values.max()
+    val avgVal = values.average().toFloat()
+
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SummaryChip(label = stringResource(Res.string.min), value = formatString("%.1f %s", minVal, label))
+        SummaryChip(label = stringResource(Res.string.avg), value = formatString("%.1f %s", avgVal, label))
+        SummaryChip(label = stringResource(Res.string.max), value = formatString("%.1f %s", maxVal, label))
+    }
+}
+
+@Composable
+private fun SummaryChip(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(text = value, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+    }
+}
+
+/**
+ * A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and chart-to-list
+ * synchronisation.
+ *
+ * @param extraActions Additional composable actions rendered in the app bar before the expand/collapse toggle (e.g. a
+ *   cooldown traceroute button).
+ */
 @Composable
 @Suppress("LongMethod")
 fun <T> BaseMetricScreen(
@@ -151,14 +228,20 @@ fun <T> BaseMetricScreen(
     timeProvider: (T) -> Double,
     infoData: List<InfoDialogData> = emptyList(),
     onRequestTelemetry: (() -> Unit)? = null,
+    extraActions: @Composable () -> Unit = {},
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
     listPart: @Composable (Modifier, Double?, LazyListState, (Double) -> Unit) -> Unit,
     controlPart: @Composable () -> Unit = {},
 ) {
     var displayInfoDialog by remember { mutableStateOf(false) }
+    var isChartExpanded by remember { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
-    val vicoScrollState = rememberVicoScrollState()
+    val vicoScrollState =
+        rememberVicoScrollState(
+            autoScroll = Scroll.Absolute.End,
+            autoScrollCondition = AutoScrollCondition.OnModelGrowth,
+        )
     val coroutineScope = rememberCoroutineScope()
     var selectedX by remember { mutableStateOf<Double?>(null) }
 
@@ -172,6 +255,21 @@ fun <T> BaseMetricScreen(
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
+                    extraActions()
+                    IconButton(onClick = { isChartExpanded = !isChartExpanded }) {
+                        Icon(
+                            imageVector =
+                            if (isChartExpanded) {
+                                Icons.AutoMirrored.Rounded.List
+                            } else {
+                                Icons.Rounded.BarChart
+                            },
+                            contentDescription =
+                            stringResource(
+                                if (isChartExpanded) Res.string.collapse_chart else Res.string.expand_chart,
+                            ),
+                        )
+                    }
                     if (infoData.isNotEmpty()) {
                         IconButton(onClick = { displayInfoDialog = true }) {
                             Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
@@ -198,6 +296,7 @@ fun <T> BaseMetricScreen(
             controlPart()
 
             AdaptiveMetricLayout(
+                isChartExpanded = isChartExpanded,
                 chartPart = { modifier ->
                     chartPart(modifier, selectedX, vicoScrollState) { x ->
                         selectedX = x

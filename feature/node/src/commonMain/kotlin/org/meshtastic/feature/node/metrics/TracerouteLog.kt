@@ -14,29 +14,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.pluralStringResource
@@ -47,22 +62,23 @@ import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.routing_error_no_response
-import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.traceroute_diff
 import org.meshtastic.core.resources.traceroute_direct
 import org.meshtastic.core.resources.traceroute_duration
+import org.meshtastic.core.resources.traceroute_forward_hops
 import org.meshtastic.core.resources.traceroute_hops
 import org.meshtastic.core.resources.traceroute_log
+import org.meshtastic.core.resources.traceroute_no_response
+import org.meshtastic.core.resources.traceroute_return_hops
+import org.meshtastic.core.resources.traceroute_round_trip
 import org.meshtastic.core.resources.traceroute_route_back_to_us
 import org.meshtastic.core.resources.traceroute_route_towards_dest
-import org.meshtastic.core.resources.traceroute_time_and_text
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Group
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PersonOff
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Route
+import org.meshtastic.core.ui.theme.GraphColors
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
@@ -71,8 +87,13 @@ import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.component.CooldownIconButton
 import org.meshtastic.proto.RouteDiscovery
 
+/**
+ * Full-screen traceroute log with chart and card list, built on [BaseMetricScreen]. Shows forward/return hops and
+ * round-trip duration over time. Supports time-frame filtering, chart expand/collapse, and card-to-chart
+ * synchronisation.
+ */
 @OptIn(ExperimentalFoundationApi::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod", "UnusedParameter")
 @Composable
 fun TracerouteLogScreen(
     modifier: Modifier = Modifier,
@@ -81,6 +102,9 @@ fun TracerouteLogScreen(
     onViewOnMap: (requestId: Int, responseLogUuid: String) -> Unit = { _, _ -> },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
+    val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
 
     fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$long_name ($short_name)" }
 
@@ -88,155 +112,275 @@ fun TracerouteLogScreen(
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
     val statusOrange = MaterialTheme.colorScheme.StatusOrange
 
-    Scaffold(
-        topBar = {
-            val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
-            MainAppBar(
-                title = state.node?.user?.long_name ?: "",
-                subtitle = stringResource(Res.string.traceroute_log),
-                ourNode = null,
-                showNodeChip = false,
-                canNavigateUp = true,
-                onNavigateUp = onNavigateUp,
-                actions = {
-                    if (!state.isLocal) {
-                        CooldownIconButton(
-                            onClick = { viewModel.requestTraceroute() },
-                            cooldownTimestamp = lastTracerouteTime,
-                        ) {
-                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
-                        }
-                    }
-                },
-                onClickChip = {},
+    val headerTowardsStr = stringResource(Res.string.traceroute_route_towards_dest)
+    val headerBackStr = stringResource(Res.string.traceroute_route_back_to_us)
+    val durationTemplate = stringResource(Res.string.traceroute_duration, "%SECS%")
+
+    val threshold = timeFrame.timeThreshold()
+    val filteredRequests =
+        remember(state.tracerouteRequests, threshold) {
+            state.tracerouteRequests.filter { (it.received_date / MS_PER_SEC) >= threshold }
+        }
+
+    val points =
+        remember(filteredRequests, state.tracerouteResults) {
+            resolveTraceroutePoints(filteredRequests, state.tracerouteResults)
+        }
+
+    BaseMetricScreen(
+        onNavigateUp = onNavigateUp,
+        telemetryType = null,
+        titleRes = Res.string.traceroute_log,
+        nodeName = state.node?.user?.long_name ?: "",
+        data = points,
+        timeProvider = { it.timeSeconds },
+        infoData = TRACEROUTE_INFO_DATA,
+        extraActions = {
+            if (!state.isLocal) {
+                CooldownIconButton(
+                    onClick = { viewModel.requestTraceroute() },
+                    cooldownTimestamp = lastTracerouteTime,
+                ) {
+                    Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
+                }
+            }
+        },
+        controlPart = {
+            TimeFrameSelector(
+                selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
+                onTimeFrameSelected = viewModel::setTimeFrame,
+                modifier = Modifier.padding(horizontal = 16.dp),
             )
         },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-        ) {
-            items(state.tracerouteRequests, key = { it.uuid }) { log ->
-                val headerTowardsStr = stringResource(Res.string.traceroute_route_towards_dest)
-                val headerBackStr = stringResource(Res.string.traceroute_route_back_to_us)
-                val result =
-                    remember(state.tracerouteRequests, log.fromRadio.packet?.id) {
-                        state.tracerouteResults.find {
-                            it.fromRadio.packet?.decoded?.request_id == log.fromRadio.packet?.id
-                        }
-                    }
-                val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
-
-                val time = DateFormatter.formatDateTime(log.received_date)
-                val (text, icon) = route.getTextAndIcon()
-                var expanded by remember { mutableStateOf(false) }
-
-                val tracerouteDetailsAnnotated: AnnotatedString? = result?.let { res ->
-                    if (route != null && route.route.isNotEmpty() && route.route_back.isNotEmpty()) {
-                        val seconds = (res.received_date - log.received_date).coerceAtLeast(0).toDouble() / MS_PER_SEC
-                        val annotatedBase =
-                            annotateTraceroute(
-                                res.fromRadio.packet?.getTracerouteResponse(
-                                    ::getUsername,
-                                    headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                    headerBack = headerBackStr,
-                                ),
+        chartPart = { chartModifier, selectedX, vicoScrollState, onPointSelected ->
+            TracerouteMetricsChart(
+                modifier = chartModifier,
+                points = points.reversed(),
+                vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
+            )
+        },
+        listPart = { listModifier, selectedX, lazyListState, onCardClick ->
+            LazyColumn(modifier = listModifier.fillMaxSize(), state = lazyListState) {
+                itemsIndexed(points, key = { _, point -> point.request.uuid }) { _, point ->
+                    TracerouteCard(
+                        point = point,
+                        isSelected = point.timeSeconds == selectedX,
+                        onClick = { onCardClick(point.timeSeconds) },
+                        onLongClick = { viewModel.deleteLog(point.request.uuid) },
+                        onShowDetail = {
+                            showTracerouteDetail(
+                                point = point,
+                                viewModel = viewModel,
+                                getUsername = ::getUsername,
+                                headerTowards = headerTowardsStr,
+                                headerBack = headerBackStr,
+                                durationTemplate = durationTemplate,
                                 statusGreen = statusGreen,
                                 statusYellow = statusYellow,
                                 statusOrange = statusOrange,
+                                onViewOnMap = onViewOnMap,
                             )
-                        val durationText = stringResource(Res.string.traceroute_duration, formatString("%.1f", seconds))
-                        buildAnnotatedString {
-                            append(annotatedBase)
-                            append("\n\n$durationText")
-                        }
-                    } else {
-                        // For cases where there's a result but no full route, display plain text
-                        res.fromRadio.packet
-                            ?.getTracerouteResponse(
-                                ::getUsername,
-                                headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                headerBack = headerBackStr,
-                            )
-                            ?.let { AnnotatedString(it) }
-                    }
-                }
-                val overlay = route?.let {
-                    TracerouteOverlay(
-                        requestId = log.fromRadio.packet?.id ?: 0,
-                        forwardRoute = it.route,
-                        returnRoute = it.route_back,
-                    )
-                }
-
-                Box {
-                    MetricLogItem(
-                        icon = icon,
-                        text = stringResource(Res.string.traceroute_time_and_text, time, text),
-                        contentDescription = stringResource(Res.string.traceroute),
-                        modifier =
-                        Modifier.combinedClickable(onLongClick = { expanded = true }) {
-                            val dialogMessage =
-                                tracerouteDetailsAnnotated
-                                    ?: result
-                                        ?.fromRadio
-                                        ?.packet
-                                        ?.getTracerouteResponse(
-                                            ::getUsername,
-                                            headerTowards = headerTowardsStr,
-                                            headerBack = headerBackStr,
-                                        )
-                                        ?.let {
-                                            annotateTraceroute(
-                                                it,
-                                                statusGreen = statusGreen,
-                                                statusYellow = statusYellow,
-                                                statusOrange = statusOrange,
-                                            )
-                                        }
-                            dialogMessage?.let {
-                                val responseLogUuid = result?.uuid ?: return@combinedClickable
-                                viewModel.showTracerouteDetail(
-                                    annotatedMessage = it,
-                                    requestId = log.fromRadio.packet?.id ?: 0,
-                                    responseLogUuid = responseLogUuid,
-                                    overlay = overlay,
-                                    onViewOnMap = onViewOnMap,
-                                    onShowError = { /* Handle error */ },
-                                )
-                            }
                         },
                     )
-                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                        DeleteItem {
-                            viewModel.deleteLog(log.uuid)
-                            expanded = false
-                        }
-                    }
                 }
+            }
+        },
+    )
+}
+
+/** A selectable card summarising a single traceroute request/response pair. */
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+private fun TracerouteCard(
+    point: TraceroutePoint,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onShowDetail: () -> Unit,
+) {
+    val route = point.result?.fromRadio?.packet?.fullRouteDiscovery
+    val time = DateFormatter.formatDateTime(point.request.received_date)
+    val (summaryText, icon) = route.getTextAndIcon()
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        Card(
+            modifier =
+            Modifier.fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+                .combinedClickable(
+                    onLongClick = { expanded = true },
+                    onClick = {
+                        onClick()
+                        onShowDetail()
+                    },
+                ),
+            border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+            colors =
+            CardDefaults.cardColors(
+                containerColor =
+                if (isSelected) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+            ),
+        ) {
+            TracerouteCardContent(time = time, summaryText = summaryText, icon = icon, point = point)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DeleteItem {
+                onLongClick()
+                expanded = false
             }
         }
     }
+}
+
+/** Card body showing timestamp, route summary text/icon, and metric indicators. */
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun TracerouteCardContent(time: String, summaryText: String, icon: ImageVector, point: TraceroutePoint) {
+    Column(modifier = Modifier.padding(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = time, style = MaterialTheme.typography.titleMediumEmphasized, fontWeight = FontWeight.Bold)
+            Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = summaryText,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        TracerouteCardMetrics(point)
+    }
+}
+
+/** Compact coloured metric indicators (forward hops / return hops / RTT) shown at the bottom of a card. */
+@Composable
+private fun TracerouteCardMetrics(point: TraceroutePoint) {
+    if (point.forwardHops == null && point.returnHops == null && point.roundTripSeconds == null) return
+    Spacer(modifier = Modifier.height(4.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        point.forwardHops?.let { hops ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MetricIndicator(GraphColors.Blue)
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = formatString("%s: %d", stringResource(Res.string.traceroute_forward_hops), hops),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
+        point.returnHops?.let { hops ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MetricIndicator(GraphColors.Green)
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = formatString("%s: %d", stringResource(Res.string.traceroute_return_hops), hops),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
+        point.roundTripSeconds?.let { rtt ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MetricIndicator(GraphColors.Orange)
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = formatString("%s: %.1f s", stringResource(Res.string.traceroute_round_trip), rtt),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
+    }
+}
+
+/** Builds annotated route text and opens the traceroute detail dialog via the ViewModel. */
+@Suppress("LongParameterList")
+private fun showTracerouteDetail(
+    point: TraceroutePoint,
+    viewModel: MetricsViewModel,
+    getUsername: (Int) -> String,
+    headerTowards: String,
+    headerBack: String,
+    durationTemplate: String,
+    statusGreen: Color,
+    statusYellow: Color,
+    statusOrange: Color,
+    onViewOnMap: (requestId: Int, responseLogUuid: String) -> Unit,
+) {
+    val result = point.result ?: return
+    val route = result.fromRadio.packet?.fullRouteDiscovery
+
+    val annotated: AnnotatedString =
+        if (route != null && route.route.isNotEmpty() && route.route_back.isNotEmpty()) {
+            val seconds = point.roundTripSeconds ?: 0.0
+            val annotatedBase =
+                annotateTraceroute(
+                    result.fromRadio.packet?.getTracerouteResponse(
+                        getUsername,
+                        headerTowards = headerTowards,
+                        headerBack = headerBack,
+                    ),
+                    statusGreen = statusGreen,
+                    statusYellow = statusYellow,
+                    statusOrange = statusOrange,
+                )
+            val durationText = durationTemplate.replace("%SECS%", formatString("%.1f", seconds))
+            buildAnnotatedString {
+                append(annotatedBase)
+                append("\n\n$durationText")
+            }
+        } else {
+            result.fromRadio.packet
+                ?.getTracerouteResponse(getUsername, headerTowards = headerTowards, headerBack = headerBack)
+                ?.let { AnnotatedString(it) } ?: return
+        }
+
+    val overlay =
+        route?.let {
+            TracerouteOverlay(
+                requestId = point.request.fromRadio.packet?.id ?: 0,
+                forwardRoute = it.route,
+                returnRoute = it.route_back,
+            )
+        }
+
+    viewModel.showTracerouteDetail(
+        annotatedMessage = annotated,
+        requestId = point.request.fromRadio.packet?.id ?: 0,
+        responseLogUuid = result.uuid,
+        overlay = overlay,
+        onViewOnMap = onViewOnMap,
+        onShowError = {},
+    )
 }
 
 /** Generates a display string and icon based on the route discovery information. */
 @Composable
 private fun RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
     this == null -> {
-        stringResource(Res.string.routing_error_no_response) to MeshtasticIcons.PersonOff
+        stringResource(Res.string.traceroute_no_response) to MeshtasticIcons.PersonOff
     }
-    // A direct route means the sender and receiver are the only two nodes in the route.
-    route.size <= 2 && route_back.size <= 2 -> { // also check route_back size for direct to be more robust
+    route.size <= 2 && route_back.size <= 2 -> {
         stringResource(Res.string.traceroute_direct) to MeshtasticIcons.Group
     }
-
     route.size == route_back.size -> {
         val hops = route.size - 2
         pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Route
     }
-
     else -> {
-        // Asymmetric route
         val towards = maxOf(0, route.size - 2)
         val back = maxOf(0, route_back.size - 2)
         stringResource(Res.string.traceroute_diff, towards, back) to MeshtasticIcons.Route

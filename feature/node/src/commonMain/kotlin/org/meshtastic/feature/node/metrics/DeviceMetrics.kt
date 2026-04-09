@@ -53,9 +53,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
@@ -111,13 +111,13 @@ private val LEGEND_DATA =
         LegendData(
             nameRes = Res.string.channel_utilization,
             color = Device.CH_UTIL.color,
-            isLine = false,
+            isLine = true,
             environmentMetric = null,
         ),
         LegendData(
             nameRes = Res.string.air_utilization,
             color = Device.AIR_UTIL.color,
-            isLine = false,
+            isLine = true,
             environmentMetric = null,
         ),
     )
@@ -188,6 +188,10 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
+            if (hasBattery) {
+                val batteryValues = remember(data) { data.mapNotNull { it.device_metrics?.battery_level?.toFloat() } }
+                MetricSummaryRow(values = batteryValues, label = "%")
+            }
         },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             DeviceMetricsChart(
@@ -260,19 +264,19 @@ private fun DeviceMetricsChart(
 
         val batteryStyle =
             if (batteryData.isNotEmpty()) {
-                ChartStyling.createBoldLine(batteryColor, ChartStyling.MEDIUM_POINT_SIZE_DP)
+                ChartStyling.createBoldLine(batteryColor)
             } else {
                 null
             }
         val chUtilStyle =
             if (chUtilData.isNotEmpty()) {
-                ChartStyling.createPointOnlyLine(chUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+                ChartStyling.createSubtleLine(chUtilColor)
             } else {
                 null
             }
         val airUtilStyle =
             if (airUtilData.isNotEmpty()) {
-                ChartStyling.createPointOnlyLine(airUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+                ChartStyling.createDashedLine(airUtilColor)
             } else {
                 null
             }
@@ -322,6 +326,7 @@ private fun DeviceMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
+                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0),
                 )
             } else {
                 null
@@ -332,10 +337,7 @@ private fun DeviceMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(
-                            lineColor = voltageColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                        ),
+                        ChartStyling.createGradientLine(lineColor = voltageColor),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
                 )
@@ -346,6 +348,12 @@ private fun DeviceMetricsChart(
         val layers = remember(leftLayer, rightLayer) { listOfNotNull(leftLayer, rightLayer) }
 
         if (layers.isNotEmpty()) {
+            val decorations = buildList {
+                if (leftLayer != null) {
+                    add(ChartStyling.rememberThresholdLine(y = 20.0, color = batteryColor, label = "20%"))
+                }
+            }
+
             GenericMetricChart(
                 modelProducer = modelProducer,
                 modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
@@ -368,14 +376,9 @@ private fun DeviceMetricsChart(
                 } else {
                     null
                 },
-                bottomAxis =
-                HorizontalAxis.rememberBottom(
-                    label = ChartStyling.rememberAxisLabel(),
-                    valueFormatter = CommonCharts.dynamicTimeFormatter,
-                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-                    labelRotationDegrees = 45f,
-                ),
+                bottomAxis = CommonCharts.rememberBottomTimeAxis(),
                 marker = marker,
+                decorations = decorations,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,
                 vicoScrollState = vicoScrollState,

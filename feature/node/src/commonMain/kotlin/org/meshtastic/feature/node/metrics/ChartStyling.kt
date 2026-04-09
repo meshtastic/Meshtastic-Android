@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.metrics
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -28,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.patrykandpatrick.vico.compose.cartesian.decoration.Decoration
+import com.patrykandpatrick.vico.compose.cartesian.decoration.HorizontalLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
@@ -37,6 +40,7 @@ import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesi
 import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.Insets
 import com.patrykandpatrick.vico.compose.common.MarkerCornerBasedShape
+import com.patrykandpatrick.vico.compose.common.Position
 import com.patrykandpatrick.vico.compose.common.component.ShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.TextComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
@@ -46,121 +50,94 @@ import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 /**
  * Utility object for chart styling and component creation. Provides reusable styled lines, points, and axes for Vico
  * charts.
+ *
+ * **Design principles** (per [design#53](https://github.com/meshtastic/design/issues/53)):
+ * - Default to thin lines **without** point markers to avoid clutter on dense timeseries.
+ * - Show a single dot only at the marker/cursor position (handled by [rememberMarker]).
+ * - Use `Interpolator.catmullRom()` for smooth curves that pass through every data point.
+ * - Reserve bold lines for the single most-important series; use subtle/gradient fills for secondary data.
  */
+@Suppress("TooManyFunctions")
 object ChartStyling {
-    // Point sizes
-    const val SMALL_POINT_SIZE_DP = 6f
-    const val MEDIUM_POINT_SIZE_DP = 8f
-    const val LARGE_POINT_SIZE_DP = 10f
-
     // Line stroke widths
     const val THIN_LINE_WIDTH_DP = 1.5f
     const val MEDIUM_LINE_WIDTH_DP = 2f
     const val THICK_LINE_WIDTH_DP = 2.5f
 
     /**
-     * Creates a solid line with optional point markers.
+     * Creates a clean timeseries line — thin, smooth, with **no** point markers. This is the default style recommended
+     * by Oscar's UX guidance: "thin lines, and maybe a dot where the cursor is."
      *
      * @param lineColor The color of the line
-     * @param pointSize Size of point markers (in dp). If null, no point markers are shown.
      * @param lineWidth Width of the line in dp
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createStyledLine(
-        lineColor: Color,
-        pointSize: Float? = MEDIUM_POINT_SIZE_DP,
-        lineWidth: Float = MEDIUM_LINE_WIDTH_DP,
-    ): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
-        fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
-        pointProvider =
-        pointSize?.let {
-            LineCartesianLayer.PointProvider.single(
-                LineCartesianLayer.Point(
-                    rememberShapeComponent(fill = Fill(lineColor), shape = CircleShape),
-                    size = it.dp,
-                ),
-            )
-        },
-        stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
-    )
-
-    /**
-     * Creates a transparent line (no line, only points). Useful for distinguishing multiple metrics on the same chart.
-     *
-     * @param pointColor The color of the point markers
-     * @param pointSize Size of point markers in dp
-     * @return Configured [LineCartesianLayer.Line]
-     */
-    @Composable
-    fun createPointOnlyLine(pointColor: Color, pointSize: Float = MEDIUM_POINT_SIZE_DP): LineCartesianLayer.Line =
+    fun createStyledLine(lineColor: Color, lineWidth: Float = MEDIUM_LINE_WIDTH_DP): LineCartesianLayer.Line =
         LineCartesianLayer.rememberLine(
-            // we still need to give the line a color, the Marker derives the label color from the line
-            fill = LineCartesianLayer.LineFill.single(Fill(pointColor)),
-            // magic sauce to make the line disappear
-            stroke = LineCartesianLayer.LineStroke.Dashed(thickness = 0.dp, dashLength = 0.dp),
-            pointProvider =
-            LineCartesianLayer.PointProvider.single(
-                LineCartesianLayer.Point(
-                    rememberShapeComponent(fill = Fill(pointColor), shape = CircleShape),
-                    size = pointSize.dp,
-                ),
-            ),
+            fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
+            stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
+            interpolator = LineCartesianLayer.Interpolator.catmullRom(),
         )
 
     /**
-     * Creates a line with a gradient fill effect. The gradient goes from the line color to transparent.
+     * Creates a line with a gradient area fill effect. Ideal for emphasising a single series or showing magnitude. The
+     * gradient goes from the line color at ~30% opacity to near-transparent.
      *
      * @param lineColor The primary color of the line
-     * @param pointSize Size of point markers (in dp). If null, no point markers are shown.
      * @param lineWidth Width of the line in dp
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createGradientLine(
-        lineColor: Color,
-        pointSize: Float? = MEDIUM_POINT_SIZE_DP,
-        lineWidth: Float = MEDIUM_LINE_WIDTH_DP,
-    ): LineCartesianLayer.Line {
+    fun createGradientLine(lineColor: Color, lineWidth: Float = MEDIUM_LINE_WIDTH_DP): LineCartesianLayer.Line {
         val gradientBrush =
-            Brush.verticalGradient(colors = listOf(lineColor.copy(alpha = 0.3f), lineColor.copy(alpha = 0.1f)))
+            Brush.verticalGradient(colors = listOf(lineColor.copy(alpha = 0.3f), lineColor.copy(alpha = 0.05f)))
         return LineCartesianLayer.rememberLine(
             fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
             areaFill = LineCartesianLayer.AreaFill.single(Fill(gradientBrush)),
-            pointProvider =
-            pointSize?.let {
-                LineCartesianLayer.PointProvider.single(
-                    LineCartesianLayer.Point(
-                        rememberShapeComponent(fill = Fill(lineColor), shape = CircleShape),
-                        size = it.dp,
-                    ),
-                )
-            },
             stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
+            interpolator = LineCartesianLayer.Interpolator.catmullRom(),
         )
     }
 
     /**
-     * Creates a bold line suitable for highlighting primary metrics.
+     * Creates a bold line suitable for highlighting the primary metric in a multi-series chart.
      *
      * @param lineColor The color of the line
-     * @param pointSize Size of point markers (in dp). If null, no point markers are shown.
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createBoldLine(lineColor: Color, pointSize: Float? = LARGE_POINT_SIZE_DP): LineCartesianLayer.Line =
-        createStyledLine(lineColor = lineColor, pointSize = pointSize, lineWidth = THICK_LINE_WIDTH_DP)
+    fun createBoldLine(lineColor: Color): LineCartesianLayer.Line =
+        createStyledLine(lineColor = lineColor, lineWidth = THICK_LINE_WIDTH_DP)
 
     /**
-     * Creates a subtle line suitable for secondary metrics.
+     * Creates a subtle line suitable for secondary metrics that should not dominate the chart.
      *
      * @param lineColor The color of the line
-     * @param pointSize Size of point markers (in dp). If null, no point markers are shown.
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createSubtleLine(lineColor: Color, pointSize: Float? = SMALL_POINT_SIZE_DP): LineCartesianLayer.Line =
-        createStyledLine(lineColor = lineColor, pointSize = pointSize, lineWidth = THIN_LINE_WIDTH_DP)
+    fun createSubtleLine(lineColor: Color): LineCartesianLayer.Line =
+        createStyledLine(lineColor = lineColor, lineWidth = THIN_LINE_WIDTH_DP)
+
+    /**
+     * Creates a dashed secondary line. Useful for distinguishing two metrics that share the same axis without relying
+     * on colour alone.
+     *
+     * @param lineColor The color of the dashed line
+     * @return Configured [LineCartesianLayer.Line]
+     */
+    @Composable
+    fun createDashedLine(lineColor: Color): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
+        fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
+        stroke =
+        LineCartesianLayer.LineStroke.Dashed(
+            thickness = THIN_LINE_WIDTH_DP.dp,
+            dashLength = 6.dp,
+            gapLength = 3.dp,
+        ),
+        interpolator = LineCartesianLayer.Interpolator.catmullRom(),
+    )
 
     /**
      * Gets Material 3 theme-aware colors with opacity. Useful for creating color variants while respecting the current
@@ -171,6 +148,38 @@ object ChartStyling {
      * @return Color with adjusted alpha
      */
     fun createThemedColor(baseColor: Color, alpha: Float = 1f): Color = baseColor.copy(alpha = alpha)
+
+    /**
+     * Creates a [HorizontalLine] decoration for a reference threshold (e.g. battery low, pressure normal).
+     *
+     * @param y The y-value to draw the line at
+     * @param color The color of the threshold line
+     * @param label Optional label text for the line
+     */
+    @Composable
+    fun rememberThresholdLine(y: Double, color: Color, label: String? = null): Decoration {
+        val line = rememberLineComponent(fill = Fill(color.copy(alpha = 0.4f)), thickness = 1.dp)
+        val labelComponent =
+            if (label != null) {
+                rememberTextComponent(
+                    style =
+                    TextStyle(color = color.copy(alpha = 0.7f), fontSize = 9.sp, fontWeight = FontWeight.Medium),
+                    padding = Insets(horizontal = 4.dp, vertical = 1.dp),
+                )
+            } else {
+                null
+            }
+        return remember(y, color, label) {
+            HorizontalLine(
+                y = { y },
+                line = line,
+                labelComponent = labelComponent,
+                label = { label ?: "" },
+                horizontalLabelPosition = Position.Horizontal.End,
+                verticalLabelPosition = Position.Vertical.Top,
+            )
+        }
+    }
 
     /**
      * Creates and remembers a default [CartesianMarker] styled for the Meshtastic theme.
@@ -249,18 +258,6 @@ object ChartStyling {
             }
         }
     }
-
-    /**
-     * Creates a standard [com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer] with optimized
-     * spacing.
-     */
-    fun rememberItemPlacer(
-        spacing: Int = 50,
-    ): com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer =
-        com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer.aligned(
-            spacing = { spacing },
-            addExtremeLabelPadding = true,
-        )
 
     /**
      * Creates and remembers a [com.patrykandpatrick.vico.compose.common.component.TextComponent] styled for axis

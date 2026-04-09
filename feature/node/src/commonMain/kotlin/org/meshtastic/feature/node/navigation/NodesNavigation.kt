@@ -245,7 +245,7 @@ enum class NodeDetailRoute(
         Res.string.host,
         NodeDetailRoutes.HostMetricsLog::class,
         Icons.Rounded.Memory,
-        { metricsVM, onNavigateUp -> HostMetricsLogScreen(metricsVM, onNavigateUp) },
+        { metricsVM, onNavigateUp -> HostMetricsLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
     ),
     PAX(
         Res.string.pax,

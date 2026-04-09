@@ -21,14 +21,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
@@ -39,10 +42,12 @@ import org.meshtastic.core.resources.baro_pressure
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.radiation
 import org.meshtastic.core.resources.soil_moisture
 import org.meshtastic.core.resources.soil_temperature
 import org.meshtastic.core.resources.temperature
 import org.meshtastic.core.resources.uv_lux
+import org.meshtastic.core.resources.wind_speed
 import org.meshtastic.proto.Telemetry
 
 @Suppress("MagicNumber")
@@ -87,6 +92,18 @@ private val LEGEND_DATA_2 =
             isLine = true,
             environmentMetric = Environment.UV_LUX,
         ),
+        LegendData(
+            nameRes = Res.string.wind_speed,
+            color = Environment.WIND_SPEED.color,
+            isLine = true,
+            environmentMetric = Environment.WIND_SPEED,
+        ),
+        LegendData(
+            nameRes = Res.string.radiation,
+            color = Environment.RADIATION.color,
+            isLine = true,
+            environmentMetric = Environment.RADIATION,
+        ),
     )
 
 private val LEGEND_DATA_3 =
@@ -128,10 +145,21 @@ fun EnvironmentMetricsChart(
             (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3).filter {
                 graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0]
             }
+
+        // Legend toggle state: tracks indices into allLegendData that are hidden
+        var hiddenIndices by remember { mutableStateOf(emptySet<Int>()) }
+        val hiddenMetrics =
+            remember(hiddenIndices, allLegendData) {
+                hiddenIndices.mapNotNull { allLegendData.getOrNull(it)?.environmentMetric }.toSet()
+            }
+
         val colorToLabel = allLegendData.associate { it.color to stringResource(it.nameRes) }
 
+        val showPressure =
+            shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && Environment.BAROMETRIC_PRESSURE !in hiddenMetrics
         val pressureData =
-            remember(telemetries) {
+            remember(telemetries, showPressure) {
+                if (!showPressure) return@remember emptyList()
                 telemetries.filter {
                     val v = Environment.BAROMETRIC_PRESSURE.getValue(it)
                     it.time != 0 && v != null && !v.isNaN()
@@ -139,9 +167,10 @@ fun EnvironmentMetricsChart(
             }
 
         val otherMetrics =
-            remember(telemetries, shouldPlot) {
+            remember(telemetries, shouldPlot, hiddenMetrics) {
                 Environment.entries.filter { metric ->
                     metric != Environment.BAROMETRIC_PRESSURE &&
+                        metric !in hiddenMetrics &&
                         shouldPlot[metric.ordinal] &&
                         telemetries.any {
                             val v = metric.getValue(it)
@@ -163,7 +192,7 @@ fun EnvironmentMetricsChart(
         LaunchedEffect(pressureData, otherMetricsData) {
             modelProducer.runTransaction {
                 /* Pressure on its own layer/axis */
-                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && pressureData.isNotEmpty()) {
+                if (showPressure && pressureData.isNotEmpty()) {
                     lineSeries {
                         series(
                             x = pressureData.map { it.time },
@@ -193,28 +222,40 @@ fun EnvironmentMetricsChart(
             )
 
         val layers = mutableListOf<LineCartesianLayer>()
-        if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && pressureData.isNotEmpty()) {
+        if (showPressure && pressureData.isNotEmpty()) {
             layers.add(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(
-                            Environment.BAROMETRIC_PRESSURE.color,
-                            ChartStyling.MEDIUM_POINT_SIZE_DP,
-                        ),
+                        ChartStyling.createGradientLine(Environment.BAROMETRIC_PRESSURE.color),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
+                    // Fixed range per Oscar's UX guidance: barometric pressure should NOT autoscale,
+                    // otherwise trends (storms) are invisible. 700-1200 hPa covers sea-level to altitude.
+                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 700.0, maxY = 1200.0),
                 ),
             )
         }
         otherMetrics.forEach { metric ->
+            // Radiation and wind speed use fixed minY=0 per Oscar's UX guidance
+            val rangeProvider =
+                when (metric) {
+                    Environment.RADIATION,
+                    Environment.WIND_SPEED,
+                    -> CartesianLayerRangeProvider.fixed(minY = 0.0)
+                    else -> null
+                }
+            val lineStyle =
+                if (metric == Environment.WIND_SPEED) {
+                    ChartStyling.createDashedLine(metric.color)
+                } else {
+                    ChartStyling.createStyledLine(metric.color)
+                }
             layers.add(
                 rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(metric.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
-                    ),
+                    lineProvider = LineCartesianLayer.LineProvider.series(lineStyle),
                     verticalAxisPosition = Axis.Position.Vertical.End,
+                    rangeProvider = rangeProvider ?: CartesianLayerRangeProvider.auto(),
                 ),
             )
         }
@@ -227,7 +268,7 @@ fun EnvironmentMetricsChart(
                 modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
                 layers = layers,
                 startAxis =
-                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && pressureData.isNotEmpty()) {
+                if (showPressure && pressureData.isNotEmpty()) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = Environment.BAROMETRIC_PRESSURE.color),
                         valueFormatter = { _, value, _ -> formatString("%.0f hPa", value) },
@@ -236,17 +277,15 @@ fun EnvironmentMetricsChart(
                     null
                 },
                 endAxis =
-                VerticalAxis.rememberEnd(
-                    label = ChartStyling.rememberAxisLabel(color = endAxisColor),
-                    valueFormatter = { _, value, _ -> formatString("%.0f", value) },
-                ),
-                bottomAxis =
-                HorizontalAxis.rememberBottom(
-                    label = ChartStyling.rememberAxisLabel(),
-                    valueFormatter = CommonCharts.dynamicTimeFormatter,
-                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-                    labelRotationDegrees = 45f,
-                ),
+                if (otherMetrics.isNotEmpty()) {
+                    VerticalAxis.rememberEnd(
+                        label = ChartStyling.rememberAxisLabel(color = endAxisColor),
+                        valueFormatter = { _, value, _ -> formatString("%.0f", value) },
+                    )
+                } else {
+                    null
+                },
+                bottomAxis = CommonCharts.rememberBottomTimeAxis(),
                 marker = marker,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,
@@ -254,6 +293,13 @@ fun EnvironmentMetricsChart(
             )
         }
 
-        Legend(legendData = allLegendData, modifier = Modifier.padding(top = 0.dp))
+        Legend(
+            legendData = allLegendData,
+            modifier = Modifier.padding(top = 0.dp),
+            hiddenSet = hiddenIndices,
+            onToggle = { index ->
+                hiddenIndices = if (index in hiddenIndices) hiddenIndices - index else hiddenIndices + index
+            },
+        )
     }
 }
