@@ -32,6 +32,8 @@ import org.meshtastic.core.resources.serial_baud_rate
 import org.meshtastic.core.resources.serial_config
 import org.meshtastic.core.resources.serial_enabled
 import org.meshtastic.core.resources.serial_mode
+import org.meshtastic.core.resources.serial_rx_pin
+import org.meshtastic.core.resources.serial_tx_pin
 import org.meshtastic.core.resources.timeout
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -78,7 +80,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = "RX",
+                    title = stringResource(Res.string.serial_rx_pin),
                     value = formState.value.rxd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -86,7 +88,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = "TX",
+                    title = stringResource(Res.string.serial_tx_pin),
                     value = formState.value.txd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

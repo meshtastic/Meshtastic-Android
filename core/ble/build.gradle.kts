@@ -46,10 +46,7 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-        }
+        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
 
         val androidHostTest by getting {
             dependencies {
