@@ -53,6 +53,7 @@ import okio.ByteString
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.config_security_public_key
@@ -255,14 +256,13 @@ private fun AllKeyStates() {
         modifier = Modifier.verticalScroll(rememberScrollState()),
     ) {
         NodeKeySecurityState.entries.forEach { state ->
-            // Uses enum entries
             Row(verticalAlignment = Alignment.CenterVertically) {
-                when (state) {
-                    NodeKeySecurityState.PKM -> NodeKeyStatusIcon(hasPKC = false, mismatchKey = true)
-
-                    NodeKeySecurityState.PKC -> NodeKeyStatusIcon(hasPKC = true, mismatchKey = false)
-
-                    else -> NodeKeyStatusIcon(hasPKC = false, mismatchKey = false)
+                IconButton(onClick = {}, modifier = Modifier) {
+                    Icon(
+                        imageVector = vectorResource(state.icon),
+                        contentDescription = stringResource(state.descriptionResId),
+                        tint = state.color(),
+                    )
                 }
 
                 Column(modifier = Modifier.padding(start = 16.dp)) {

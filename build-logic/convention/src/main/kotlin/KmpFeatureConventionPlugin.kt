@@ -63,7 +63,7 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                     implementation(libs.library("accompanist-permissions"))
                     implementation(libs.library("androidx-activity-compose"))
                     implementation(libs.library("androidx-compose-material3"))
-                    implementation(libs.library("androidx-compose-material-iconsExtended"))
+
                     implementation(libs.library("androidx-compose-ui-text"))
                     implementation(libs.library("androidx-compose-ui-tooling-preview"))
                 }

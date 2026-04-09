@@ -121,7 +121,7 @@ androidx-work-testing = { module = "androidx.work:work-testing", version = "2.11
 
 # AndroidX Compose
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.03.01" }
-androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
+androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" } # Only used by deprecated mesh_service_example — remove when that module is deleted
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidxTracing" }
