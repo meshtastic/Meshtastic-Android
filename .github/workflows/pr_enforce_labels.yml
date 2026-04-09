@@ -9,24 +9,18 @@ permissions:
   contents: read
 
 jobs:
- check-label:
+  check-label:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check for PR labels
         uses: actions/github-script@v8
         with:
           script: |
-            // Always fetch the latest labels from the GitHub API to avoid stale context
-            const prNumber = context.payload.pull_request.number;
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-            });
-            const latestLabels = pr.labels.map(label => label.name);
-            const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release', 'refactor'];
+            // Extract labels from the payload directly to avoid extra API calls
+            const latestLabels = context.payload.pull_request.labels.map(label => label.name);
+            const requiredLabels = ['bugpost', 'enhancement', 'automation', 'dependencies', 'repo', 'release', 'refactor'];
+            console.log('Labels from payload:', latestLabels);
             const hasRequiredLabel = latestLabels.some(label => requiredLabels.includes(label));
-            console.log('Latest labels:', latestLabels);
             if (!hasRequiredLabel) {
               core.setFailed(`PR must have at least one of the following labels before it can be merged: ${requiredLabels.join(', ')}.`);
             }
