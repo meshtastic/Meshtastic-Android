@@ -44,6 +44,7 @@
     <string name="unrecognized">无法识别的</string>
     <string name="message_status_enroute">正在等待确认</string>
     <string name="message_status_queued">发送队列中</string>
+    <string name="message_status_unknown">未知</string>
     <string name="message_status_sfpp_routing">通过 SF++ 链路路由…</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 链上确认</string>
     <string name="routing_error_none">已确认</string>

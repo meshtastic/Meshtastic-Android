@@ -46,6 +46,8 @@
     <string name="unrecognized">Нераспознанный</string>
     <string name="message_status_enroute">Ожидание подтверждения</string>
     <string name="message_status_queued">В очереди на отправку</string>
+    <string name="message_status_delivered">Доставляется в сеть</string>
+    <string name="message_status_unknown">Неизвестно</string>
     <string name="message_status_sfpp_routing">Маршрутизация по SF++ цепочке…</string>
     <string name="message_status_sfpp_confirmed">Подтверждено в цепочке SF++</string>
     <string name="routing_error_none">Принято</string>

@@ -44,6 +44,7 @@
     <string name="unrecognized">Non reconnu</string>
     <string name="message_status_enroute">En attente d'accusé de réception</string>
     <string name="message_status_queued">En file d'attente pour l'envoi</string>
+    <string name="message_status_unknown">Inconnu</string>
     <string name="message_status_sfpp_routing">Routage via chaîne SF++…</string>
     <string name="message_status_sfpp_confirmed">Confirmé via chaîne SF++</string>
     <string name="routing_error_none">Entendu par un autre nœud (mais dans le cas d'un message direct, nous n'avons pas reçu la confirmation de réception par le destinataire : soit il n'a pas reçu le message, soit sa confirmation ne nous est pas parvenue)</string>

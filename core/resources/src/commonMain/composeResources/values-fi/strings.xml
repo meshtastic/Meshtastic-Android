@@ -46,6 +46,8 @@
     <string name="unrecognized">Tuntematon</string>
     <string name="message_status_enroute">Odottaa vahvistusta</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
+    <string name="message_status_delivered">Toimitettu mesh-verkkoon</string>
+    <string name="message_status_unknown">Tuntematon</string>
     <string name="message_status_sfpp_routing">Reititetään SF++ ketjun kautta…</string>
     <string name="message_status_sfpp_confirmed">Vahvistettu SF++-ketjussa</string>
     <string name="routing_error_none">Vahvistettu</string>

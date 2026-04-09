@@ -34,6 +34,7 @@
     <string name="unrecognized">Tanınmayan</string>
     <string name="message_status_enroute">Ulaştı bildirisi bekleniyor</string>
     <string name="message_status_queued">Gönderilmek üzere sırada</string>
+    <string name="message_status_unknown">Bilinmeyen</string>
     <string name="routing_error_none">Onaylandı</string>
     <string name="routing_error_no_route">Rota yok</string>
     <string name="routing_error_got_nak">Negatif bir onay alındı</string>

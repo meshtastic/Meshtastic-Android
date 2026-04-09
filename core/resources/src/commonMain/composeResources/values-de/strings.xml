@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">Knotenfilter löschen</string>
     <string name="node_filter_title">Filtern nach</string>
@@ -45,6 +46,8 @@
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
+    <string name="message_status_delivered">Versand ins Netz</string>
+    <string name="message_status_unknown">Unbekannt</string>
     <string name="message_status_sfpp_routing">Routen über den SF++ Weg.</string>
     <string name="message_status_sfpp_confirmed">Bestätigt auf dem SF++ Weg.</string>
     <string name="routing_error_none">Bestätigt</string>
@@ -377,6 +380,8 @@
     <string name="currently">Aktuell:</string>
     <string name="mute_status_always">Immer stumm</string>
     <string name="mute_status_unmuted">Nicht stumm</string>
+    <string name="mute_status_muted_for_days">Stumm für %1$d Tage, %2$s Stunden</string>
+    <string name="mute_status_muted_for_hours">Stumm für %1$s Stunden</string>
     <string name="mute_status_label">Stummschalten</string>
     <string name="mute_add">Benachrichtigungen für '%1$s ' stumm schalten?</string>
     <string name="mute_remove">Benachrichtigungen für '%1$s ' einschalten?</string>
@@ -474,6 +479,7 @@
     <string name="are_you_sure">Sind Sie sicher?</string>
     <string name="router_role_confirmation_text"><![CDATA[Ich habe die <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Dokumentation der Geräterollen </a> und den dazugehörigen Blogeintrag <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> über die Auswahl der richtigen Geräterolle</a> gelesen.]]></string>
     <string name="i_know_what_i_m_doing">Ich weiß was ich tue.</string>
+    <string name="low_battery_message">Knoten %1$s hat einen niedrigen Ladezustand (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Benachrichtigung leerer Akku</string>
     <string name="low_battery_title">Leerer Akku: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akkustands Warnung (für Favoriten)</string>
@@ -902,6 +908,7 @@
     <string name="pax_metrics_log">Benutzerzählerdaten</string>
     <string name="pax">Besucher</string>
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
+    <string name="wifi_devices">WLAN Unterstützung für mPWRD-OS</string>
     <string name="ble_devices">Bluetooth Geräte</string>
     <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
     <string name="connected_device">Verbundene Geräte</string>
@@ -1082,6 +1089,7 @@
     <string name="firmware_update_dfu_error">DFU Fehler: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU abgebrochen</string>
     <string name="firmware_update_node_info_missing">Benutzerinformationen des Knotens fehlen.</string>
+    <string name="firmware_update_battery_low">Akku zu niedrig (%1$d%). Bitte laden Sie Ihr Gerät vor der Aktualisierung.</string>
     <string name="firmware_update_retrieval_failed">Konnte Firmware Datei nicht abrufen.</string>
     <string name="firmware_update_nordic_failed">Nordic DFU Aktualisierung fehlgeschlagen</string>
     <string name="firmware_update_usb_failed">USB Aktualisierung fehlgeschlagen</string>
@@ -1093,6 +1101,7 @@
     <string name="firmware_update_checking_version">Geräteversion wird geprüft...</string>
     <string name="firmware_update_starting_ota">OTA Update wird gestartet...</string>
     <string name="firmware_update_uploading">Firmware aktualisieren...</string>
+    <string name="firmware_update_uploading_progress">Firmware wird hochgeladen... %1$d% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Gerät neu starten...</string>
     <string name="firmware_update_channel_name">Firmware Aktualisierung</string>
     <string name="firmware_update_channel_description">Status Firmware Aktualisierung</string>
@@ -1171,8 +1180,10 @@
     <string name="permission_granted">Berechtigung gewährt</string>
     <string name="permission_denied">Berechtigung verweigert</string>
     <string name="map_style_selection">Auswahl Kartenstil</string>
+    <string name="local_stats_battery">Akku: %1$d%</string>
     <string name="local_stats_nodes">Knoten: %1$d online / %2$d gesamt</string>
     <string name="local_stats_uptime">Laufzeit: %1$s</string>
+    <string name="local_stats_utilization">Kanalauslastung: %1$s% | Sendezeit: %2$s%</string>
     <string name="local_stats_traffic">Datenverkehr: TX %1$d / RX %2$d (Duplikate: %3$d)</string>
     <string name="local_stats_relays">Weiterleitungen: %1$d (Abgebrochen: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnose %1$s</string>
@@ -1258,5 +1269,26 @@
     <string name="no_files_manifested">Keine Dateien vorhanden.</string>
     <string name="connect">Verbindung herstellen</string>
     <string name="done">Fertig</string>
+    <string name="wifi_provisioning">WLAN Unterstützung für mPWRD-OS</string>
+    <string name="wifi_provision_description">Stellen Sie Ihrem mPWRD-OS Gerät WLAN Zugangsdaten über Bluetooth zur Verfügung.</string>
+    <string name="wifi_provision_mpwrd_disclaimer">Erfahren Sie mehr über das mPWRD-OS Projekt\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_scanning_ble">Gerät wird gesucht...</string>
+    <string name="wifi_provision_device_found">Gerät gefunden</string>
+    <string name="wifi_provision_device_found_detail">Bereit zur Suche nach WLAN Netzwerken.</string>
+    <string name="wifi_provision_scan_networks">Suche nach Netzwerken</string>
+    <string name="wifi_provision_scanning_wifi">Suche...</string>
+    <string name="wifi_provision_sending_credentials">WLAN Konfiguration wird angewendet...</string>
+    <string name="wifi_provision_success">WLAN erfolgreich konfiguriert!</string>
+    <string name="wifi_provision_success_detail">WLAN Zugangsdaten angewendet. Das Gerät wird sich in Kürze mit dem Netzwerk verbinden.</string>
+    <string name="wifi_provision_no_networks">Keine Netzwerke gefunden</string>
+    <string name="wifi_provision_no_networks_detail">Stellen Sie sicher, dass das Gerät eingeschaltet und in Reichweite ist.</string>
+    <string name="wifi_provision_connect_failed">Verbindung fehlgeschlagen: %1$s</string>
+    <string name="wifi_provision_scan_failed">Suche nach WLAN Netzwerken fehlgeschlagen: %1$s</string>
     <string name="wifi_provision_refresh">Aktualisieren</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_available_networks">Verfügbare Netzwerke</string>
+    <string name="wifi_provision_ssid_label">Netzwerkname (SSID)</string>
+    <string name="wifi_provision_ssid_placeholder">Netzwerk eingeben oder auswählen</string>
+    <string name="wifi_provision_status_applied">WLAN erfolgreich konfiguriert!</string>
+    <string name="wifi_provision_status_failed">WLAN Konfiguration konnte nicht angewendet werden</string>
 </resources>

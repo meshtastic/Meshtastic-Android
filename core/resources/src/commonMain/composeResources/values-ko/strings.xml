@@ -37,6 +37,7 @@
     <string name="unrecognized">확인되지 않음</string>
     <string name="message_status_enroute">수락을 기다리는 중</string>
     <string name="message_status_queued">전송 대기 열에 추가됨</string>
+    <string name="message_status_unknown">알 수 없는</string>
     <string name="routing_error_none">수락 됨</string>
     <string name="routing_error_no_route">루트 없음</string>
     <string name="routing_error_got_nak">수락 거부됨</string>

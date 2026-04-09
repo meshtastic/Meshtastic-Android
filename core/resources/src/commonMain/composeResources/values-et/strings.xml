@@ -46,6 +46,8 @@
     <string name="unrecognized">Tundmatu</string>
     <string name="message_status_enroute">Ootab kinnitamist</string>
     <string name="message_status_queued">Saatmise järjekorras</string>
+    <string name="message_status_delivered">Kärgvõrku kohale jõudnud</string>
+    <string name="message_status_unknown">Tundmatu</string>
     <string name="message_status_sfpp_routing">Marsruutimine SF++ ahela kaudu…</string>
     <string name="message_status_sfpp_confirmed">Kinnitatud SF++ ahel</string>
     <string name="routing_error_none">Kinnitatud</string>

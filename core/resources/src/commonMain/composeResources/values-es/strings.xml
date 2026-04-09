@@ -41,6 +41,7 @@
     <string name="unrecognized">No reconocido</string>
     <string name="message_status_enroute">Esperando ser reconocido</string>
     <string name="message_status_queued">En cola para enviar</string>
+    <string name="message_status_unknown">Desconocido</string>
     <string name="routing_error_none">Reconocido</string>
     <string name="routing_error_no_route">Sin ruta</string>
     <string name="routing_error_got_nak">Recibido un reconocimiento negativo</string>

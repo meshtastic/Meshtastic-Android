@@ -41,6 +41,7 @@
     <string name="unrecognized">Ismeretlen</string>
     <string name="message_status_enroute">Visszajelzésre vár</string>
     <string name="message_status_queued">Elküldésre vár</string>
+    <string name="message_status_unknown">Ismeretlen</string>
     <string name="routing_error_none">Visszaigazolva</string>
     <string name="routing_error_no_route">Nincs út</string>
     <string name="routing_error_got_nak">Negatív visszaigazolás érkezett</string>
