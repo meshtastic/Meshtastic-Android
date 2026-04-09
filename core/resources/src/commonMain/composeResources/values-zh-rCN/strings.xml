@@ -641,6 +641,7 @@
     <string name="ip">IP</string>
     <string name="gateway">网关</string>
     <string name="subnet">子版块</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">Paxcount 配置</string>
     <string name="paxcounter_enabled">启用 Paxcount</string>
     <string name="status_message">状态消息</string>

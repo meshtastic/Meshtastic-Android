@@ -600,6 +600,7 @@
     <string name="ipv4_mode">IPv4-läge</string>
     <string name="ip">Ip-adress</string>
     <string name="gateway">Gateway</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">Konfiguration av PAX-räknare</string>
     <string name="paxcounter_enabled">PAX-räknare aktiverad</string>
     <string name="status_message">Statusmeddelande</string>

@@ -563,6 +563,7 @@
     <string name="ipv4_mode">Tryb IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Brama domyślna</string>
+    <string name="dns">DNS</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Próg WiFi RSSI (domyślnie: -80)</string>
     <string name="position_config">Pozycjonowanie</string>
     <string name="smart_position_enabled">Sprytne pozycjonowanie</string>

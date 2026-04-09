@@ -630,6 +630,7 @@
     <string name="ip">IP</string>
     <string name="gateway">Passerelle</string>
     <string name="subnet">Subred</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">Configuration du Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter activé</string>
     <string name="status_message">Statut du message</string>
