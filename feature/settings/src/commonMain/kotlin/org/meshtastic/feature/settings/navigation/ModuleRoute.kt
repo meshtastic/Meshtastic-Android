@@ -157,7 +157,6 @@ enum class ModuleRoute(
         Icons.Rounded.People,
         AdminMessage.ModuleConfigType.TAK_CONFIG.value,
         isSupported = { it.supportsTakConfig },
-        isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },
     ),
     ;
 
