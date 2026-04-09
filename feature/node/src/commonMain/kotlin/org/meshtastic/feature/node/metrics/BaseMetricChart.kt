@@ -210,7 +210,13 @@ private fun SummaryChip(label: String, value: String) {
     }
 }
 
-/** A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and synchronization. */
+/**
+ * A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and chart-to-list
+ * synchronisation.
+ *
+ * @param extraActions Additional composable actions rendered in the app bar before the expand/collapse toggle (e.g. a
+ *   cooldown traceroute button).
+ */
 @Composable
 @Suppress("LongMethod")
 fun <T> BaseMetricScreen(
@@ -222,6 +228,7 @@ fun <T> BaseMetricScreen(
     timeProvider: (T) -> Double,
     infoData: List<InfoDialogData> = emptyList(),
     onRequestTelemetry: (() -> Unit)? = null,
+    extraActions: @Composable () -> Unit = {},
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
     listPart: @Composable (Modifier, Double?, LazyListState, (Double) -> Unit) -> Unit,
     controlPart: @Composable () -> Unit = {},
@@ -248,6 +255,7 @@ fun <T> BaseMetricScreen(
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
+                    extraActions()
                     IconButton(onClick = { isChartExpanded = !isChartExpanded }) {
                         Icon(
                             imageVector =

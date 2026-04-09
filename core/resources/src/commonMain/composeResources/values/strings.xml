@@ -479,6 +479,10 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Route traced toward destination:\n\n</string>
     <string name="traceroute_route_back_to_us">Route traced back to us:\n\n</string>
+    <string name="traceroute_forward_hops">Forward Hops</string>
+    <string name="traceroute_return_hops">Return Hops</string>
+    <string name="traceroute_round_trip">Round Trip</string>
+    <string name="traceroute_no_response">No Response</string>
     <string name="one_hour_short">1H</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
