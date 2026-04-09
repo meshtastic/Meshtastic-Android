@@ -44,6 +44,7 @@
     <string name="unrecognized">無法識別</string>
     <string name="message_status_enroute">正在等待確認</string>
     <string name="message_status_queued">發送佇列中</string>
+    <string name="message_status_unknown">不明</string>
     <string name="message_status_sfpp_routing">透過 SF++ 鏈路由…</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 鏈上確認</string>
     <string name="routing_error_none">已確認</string>

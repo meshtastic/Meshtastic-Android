@@ -41,6 +41,7 @@
     <string name="unrecognized">Neznámý</string>
     <string name="message_status_enroute">Čeká na potvrzení</string>
     <string name="message_status_queued">Ve frontě k odeslání</string>
+    <string name="message_status_unknown">Neznámé</string>
     <string name="routing_error_none">Potvrzený příjem</string>
     <string name="routing_error_no_route">Žádná trasa</string>
     <string name="routing_error_got_nak">Obdrženo negativní potvrzení</string>

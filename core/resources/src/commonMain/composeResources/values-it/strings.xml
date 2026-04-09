@@ -44,6 +44,7 @@
     <string name="unrecognized">Non riconosciuto</string>
     <string name="message_status_enroute">In attesa di conferma</string>
     <string name="message_status_queued">In coda per l'invio</string>
+    <string name="message_status_unknown">Sconosciuto</string>
     <string name="message_status_sfpp_routing">Percorso tramite catena SF++…</string>
     <string name="message_status_sfpp_confirmed">Confermato sulla catena SF++</string>
     <string name="routing_error_none">Confermato</string>

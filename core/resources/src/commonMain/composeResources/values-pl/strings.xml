@@ -41,6 +41,7 @@
     <string name="unrecognized">Nierozpoznany</string>
     <string name="message_status_enroute">Oczekiwanie na potwierdzenie</string>
     <string name="message_status_queued">Zakolejkowane do wysłania</string>
+    <string name="message_status_unknown">Nieznany</string>
     <string name="routing_error_none">Potwierdzone</string>
     <string name="routing_error_no_route">Brak trasy</string>
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>

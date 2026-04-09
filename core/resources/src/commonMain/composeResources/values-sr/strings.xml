@@ -31,6 +31,7 @@
     <string name="unrecognized">Nekategorisano</string>
     <string name="message_status_enroute">Čeka na potvrdu</string>
     <string name="message_status_queued">U redu za slanje</string>
+    <string name="message_status_unknown">Непознато</string>
     <string name="routing_error_none">Potvrđeno</string>
     <string name="routing_error_no_route">Nema rute</string>
     <string name="routing_error_got_nak">Primljena negativna potvrda</string>

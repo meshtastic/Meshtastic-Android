@@ -45,6 +45,8 @@
     <string name="unrecognized">Неразпознат</string>
     <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
+    <string name="message_status_delivered">Доставено до mesh</string>
+    <string name="message_status_unknown">Неизвестно</string>
     <string name="message_status_sfpp_routing"></string>
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_no_route">Няма маршрут</string>
@@ -665,6 +667,11 @@
     <string name="map_filter">Филтър на картата\n</string>
     <string name="only_favorites">Само любими</string>
     <string name="show_waypoints">Показване на пътни точки</string>
+    <string name="key_verification_title">Проверка на ключ</string>
+    <string name="key_verification_request_title">Заявка за проверка на ключ</string>
+    <string name="key_verification_final_title">Проверката на ключа е завършена</string>
+    <string name="duplicated_public_key_title">Открит е дублиран публичен ключ</string>
+    <string name="low_entropy_key_title">Открит е слаб ключ за криптиране</string>
     <string name="compromised_keys">Открити са компрометирани ключове, изберете OK за регенериране.</string>
     <string name="regenerate_private_key">Регенериране на частния ключ</string>
     <string name="regenerate_keys_confirmation">Сигурни ли сте, че искате да генерирате отново своя частен ключ?\n\nВъзлите, които може да са обменяли преди това ключове с възела, ще трябва да го премахнат и да обменят отново ключове, за да възобновят защитената комуникация.</string>
@@ -718,6 +725,7 @@
     <string name="message_input_label">Съобщение</string>
     <string name="type_a_message">Въведете съобщение</string>
     <string name="pax">PAX</string>
+    <string name="wifi_devices">Осигуряване на Wi-Fi за mPWRD-OS</string>
     <string name="ble_devices">Bluetooth устройства</string>
     <string name="bluetooth_paired_devices">Сдвоени устройства</string>
     <string name="connected_device">Свързано устройство</string>
@@ -867,6 +875,7 @@
     <string name="firmware_update_local_failed">Локалната актуализация не е успешна</string>
     <string name="firmware_update_dfu_error">DFU грешка: %1$s</string>
     <string name="firmware_update_node_info_missing">Липсва информация за потребителя на възела.</string>
+    <string name="firmware_update_battery_low">Батерията е твърде изтощена (%1$d%). Моля, заредете устройството си преди актуализиране.</string>
     <string name="firmware_update_usb_failed">Актуализацията през USB не е успешна</string>
     <string name="firmware_update_ota_failed">OTA актуализацията не е успешна: %1$s</string>
     <string name="firmware_update_loading">Зареждане на фърмуера...</string>
@@ -875,6 +884,7 @@
     <string name="firmware_update_checking_version">Проверка на версията на устройството...</string>
     <string name="firmware_update_starting_ota">Стартиране на OTA актуализация...</string>
     <string name="firmware_update_uploading">Качване на фърмуера...</string>
+    <string name="firmware_update_uploading_progress">Качване на фърмуера... %1$d% (%2$s)</string>
     <string name="firmware_update_rebooting_device">Рестартиране на устройството...</string>
     <string name="firmware_update_channel_name">Актуализация на фърмуера</string>
     <string name="firmware_update_channel_description">Състояние на актуализацията на фърмуера</string>
@@ -933,6 +943,7 @@
     <string name="bluetooth_feature_config">Конфигурация</string>
     <string name="bluetooth_feature_config_description">Управлявайте безжично настройките и каналите на вашето устройство.</string>
     <string name="map_style_selection">Избор на стил на картата</string>
+    <string name="local_stats_battery">Батерия: %1$d%</string>
     <string name="local_stats_nodes">Възли: %1$d онлайн / %2$d общо</string>
     <string name="local_stats_uptime">Време на работа: %1$s</string>
     <string name="local_stats_traffic">Трафик: TX %1$d / RX %2$d (D: %3$d)</string>
@@ -951,6 +962,8 @@
     <string name="error_copy_mbtiles_failed">Копирането на MBTiles файла във вътрешната памет не е успешно.</string>
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Конфигурация на TAK</string>
+    <string name="tak_server_enabled">Активиране на локален TAK сървър</string>
+    <string name="tak_server_enabled_desc">Стартира TCP сървър на порт 8089 за ATAK връзки</string>
     <string name="tak_team">Цвят на екипа</string>
     <string name="tak_role">Роля на члена</string>
     <string name="tak_team_unspecified_color">Неопределен</string>
@@ -992,5 +1005,24 @@
     <string name="files_available">Налични файлове (%1$d):</string>
     <string name="connect">Свързване</string>
     <string name="done">Готово</string>
+    <string name="wifi_provisioning">Осигуряване на Wi-Fi за mPWRD-OS</string>
+    <string name="wifi_provision_mpwrd_disclaimer">Научете повече за проекта mPWRD-OS \nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_scanning_ble">Търси се устройство…</string>
+    <string name="wifi_provision_device_found_detail">Готово за сканиране за WiFi мрежи.</string>
+    <string name="wifi_provision_scan_networks">Сканиране за мрежи</string>
+    <string name="wifi_provision_scanning_wifi">Сканиране…</string>
+    <string name="wifi_provision_sending_credentials">Прилагане на конфигурацията на WiFi…</string>
+    <string name="wifi_provision_success">WiFi е конфигуриран успешно!</string>
+    <string name="wifi_provision_success_detail">Приложени са идентификационните данни за WiFi. Устройството ще се свърже с мрежата скоро.</string>
+    <string name="wifi_provision_no_networks">Няма намерени мрежи</string>
+    <string name="wifi_provision_no_networks_detail">Уверете се, че устройството е включено и е в обхват.</string>
+    <string name="wifi_provision_connect_failed">Не можа да се свърже: %1$s</string>
+    <string name="wifi_provision_scan_failed">Неуспешно сканиране за WiFi мрежи: %1$s</string>
     <string name="wifi_provision_refresh">Опресняване</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_available_networks">Налични мрежи</string>
+    <string name="wifi_provision_ssid_label">Име на мрежата (SSID)</string>
+    <string name="wifi_provision_ssid_placeholder">Въведете или изберете мрежа</string>
+    <string name="wifi_provision_status_applied">WiFi е конфигуриран успешно!</string>
+    <string name="wifi_provision_status_failed">Прилагането на конфигурацията за WiFi не е успешно</string>
 </resources>
