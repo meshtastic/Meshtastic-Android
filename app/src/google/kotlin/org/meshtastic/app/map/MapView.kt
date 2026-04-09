@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.rounded.TripOrigin
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -120,6 +119,8 @@ import org.meshtastic.core.resources.speed
 import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.track_point
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
@@ -302,16 +303,17 @@ fun MapView(
     }
 
     val myNodeNum = mapViewModel.myNodeNum
-    val nodeClusterItems = displayNodes.map { node ->
-        val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
-        NodeClusterItem(
-            node = node,
-            nodePosition = latLng,
-            nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
-            nodeSnippet = "${node.user.long_name}",
-            myNodeNum = myNodeNum,
-        )
-    }
+    val nodeClusterItems =
+        displayNodes.map { node ->
+            val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
+            NodeClusterItem(
+                node = node,
+                nodePosition = latLng,
+                nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
+                nodeSnippet = "${node.user.long_name}",
+                myNodeNum = myNodeNum,
+            )
+        }
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
     val theme by mapViewModel.theme.collectAsStateWithLifecycle()
     val dark =
@@ -491,9 +493,11 @@ fun MapView(
 
             if (nodeTracks != null && focusedNodeNum != null) {
                 val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
-                val timeFilteredPositions = nodeTracks.filter {
-                    lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
-                }
+                val timeFilteredPositions =
+                    nodeTracks.filter {
+                        lastHeardTrackFilter == LastHeardFilter.Any ||
+                            it.time > nowSeconds - lastHeardTrackFilter.seconds
+                    }
                 val sortedPositions = timeFilteredPositions.sortedBy { it.time }
                 allNodes
                     .find { it.num == focusedNodeNum }
@@ -525,7 +529,7 @@ fun MapView(
                                         },
                                     ) {
                                         Icon(
-                                            imageVector = androidx.compose.material.icons.Icons.Rounded.TripOrigin,
+                                            imageVector = MeshtasticIcons.TripOrigin,
                                             contentDescription = stringResource(Res.string.track_point),
                                             tint = color,
                                         )
@@ -893,18 +897,19 @@ private fun offsetPolyline(
     val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
     if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
 
-    val headings = headingPoints.mapIndexed { index, _ ->
-        when (index) {
-            0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
-            headingPoints.lastIndex ->
-                SphericalUtil.computeHeading(
-                    headingPoints[headingPoints.lastIndex - 1],
-                    headingPoints[headingPoints.lastIndex],
-                )
+    val headings =
+        headingPoints.mapIndexed { index, _ ->
+            when (index) {
+                0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
+                headingPoints.lastIndex ->
+                    SphericalUtil.computeHeading(
+                        headingPoints[headingPoints.lastIndex - 1],
+                        headingPoints[headingPoints.lastIndex],
+                    )
 
-            else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
+                else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
+            }
         }
-    }
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]

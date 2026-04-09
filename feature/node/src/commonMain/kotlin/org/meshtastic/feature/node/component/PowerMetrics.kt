@@ -19,9 +19,6 @@ package org.meshtastic.feature.node.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Bolt
-import androidx.compose.material.icons.rounded.Power
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -32,6 +29,9 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
 import org.meshtastic.core.resources.channel_2
 import org.meshtastic.core.resources.channel_3
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PowerSupply
+import org.meshtastic.core.ui.icon.Voltage
 import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**
@@ -53,14 +53,14 @@ internal fun PowerMetrics(node: Node) {
                             VectorMetricInfo(
                                 Res.string.channel_1,
                                 "${NumberFormatter.format(ch1_voltage ?: 0f, 2)}V",
-                                Icons.Rounded.Bolt,
+                                MeshtasticIcons.Voltage,
                             ),
                         )
                         add(
                             VectorMetricInfo(
                                 Res.string.channel_1,
                                 "${NumberFormatter.format(ch1_current ?: 0f, 1)}mA",
-                                Icons.Rounded.Power,
+                                MeshtasticIcons.PowerSupply,
                             ),
                         )
                     }
@@ -69,14 +69,14 @@ internal fun PowerMetrics(node: Node) {
                             VectorMetricInfo(
                                 Res.string.channel_2,
                                 "${NumberFormatter.format(ch2_voltage ?: 0f, 2)}V",
-                                Icons.Rounded.Bolt,
+                                MeshtasticIcons.Voltage,
                             ),
                         )
                         add(
                             VectorMetricInfo(
                                 Res.string.channel_2,
                                 "${NumberFormatter.format(ch2_current ?: 0f, 1)}mA",
-                                Icons.Rounded.Power,
+                                MeshtasticIcons.PowerSupply,
                             ),
                         )
                     }
@@ -85,14 +85,14 @@ internal fun PowerMetrics(node: Node) {
                             VectorMetricInfo(
                                 Res.string.channel_3,
                                 "${NumberFormatter.format(ch3_voltage ?: 0f, 2)}V",
-                                Icons.Rounded.Bolt,
+                                MeshtasticIcons.Voltage,
                             ),
                         )
                         add(
                             VectorMetricInfo(
                                 Res.string.channel_3,
                                 "${NumberFormatter.format(ch3_current ?: 0f, 1)}mA",
-                                Icons.Rounded.Power,
+                                MeshtasticIcons.PowerSupply,
                             ),
                         )
                     }

@@ -30,9 +30,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
@@ -85,6 +82,9 @@ import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
@@ -139,7 +139,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                 onNavigateUp = onNavigateUp,
                 actions = {
                     IconButton(onClick = { showSettings = !showSettings }) {
-                        Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
+                        Icon(imageVector = MeshtasticIcons.Settings, contentDescription = null)
                     }
                     DebugMenuActions(deleteLogs = { viewModel.requestDeleteAllLogs() })
                 },
@@ -165,15 +165,16 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                         filterMode = filterMode,
                         onFilterModeChange = { filterMode = it },
                         onExportLogs = {
-                            val format = LocalDateTime.Format {
-                                year()
-                                monthNumber()
-                                day()
-                                char('_')
-                                hour()
-                                minute()
-                                second()
-                            }
+                            val format =
+                                LocalDateTime.Format {
+                                    year()
+                                    monthNumber()
+                                    day()
+                                    char('_')
+                                    hour()
+                                    minute()
+                                    second()
+                                }
                             val timestamp =
                                 fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
                             val fileName = "meshtastic_debug_$timestamp.txt"
@@ -388,7 +389,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
 @Composable
 fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
     IconButton(onClick = deleteLogs, modifier = modifier.padding(4.dp)) {
-        Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.debug_clear))
+        Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.debug_clear))
     }
 }
 

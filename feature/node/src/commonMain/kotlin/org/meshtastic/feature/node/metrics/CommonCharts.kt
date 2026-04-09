@@ -33,8 +33,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -63,6 +61,8 @@ import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.snr
+import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import kotlin.time.Duration.Companion.days
 
 object CommonCharts {
@@ -196,7 +196,7 @@ fun Legend(
 @Composable
 fun LegendInfoDialog(infoData: List<InfoDialogData>, onDismiss: () -> Unit) {
     AlertDialog(
-        icon = { Icon(imageVector = Icons.Rounded.Info, contentDescription = null) },
+        icon = { Icon(imageVector = MeshtasticIcons.Info, contentDescription = null) },
         title = {
             Text(
                 text = stringResource(Res.string.info),

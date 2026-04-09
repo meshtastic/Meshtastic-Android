@@ -32,23 +32,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.rounded.SpeakerNotes
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.ArrowDownward
-import androidx.compose.material.icons.rounded.ChatBubbleOutline
-import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material.icons.rounded.FilterListOff
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material.icons.rounded.SpeakerNotesOff
-import androidx.compose.material.icons.rounded.Visibility
-import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -112,8 +95,24 @@ import org.meshtastic.core.ui.component.EmptyDetailPlaceholder
 import org.meshtastic.core.ui.component.MeshtasticTextDialog
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.icon.ArrowBack
+import org.meshtastic.core.ui.icon.ArrowDownward
+import org.meshtastic.core.ui.icon.ChatBubbleOutline
+import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Conversations
+import org.meshtastic.core.ui.icon.Copy
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.FilterList
+import org.meshtastic.core.ui.icon.FilterListOff
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.More
+import org.meshtastic.core.ui.icon.Muted
+import org.meshtastic.core.ui.icon.Reply
+import org.meshtastic.core.ui.icon.SelectAll
+import org.meshtastic.core.ui.icon.Send
+import org.meshtastic.core.ui.icon.Unmuted
+import org.meshtastic.core.ui.icon.Visibility
+import org.meshtastic.core.ui.icon.VisibilityOff
 import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.proto.ChannelSet
 
@@ -136,13 +135,13 @@ fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState: LazyLi
         if (unreadCount > 0) {
             BadgedBox(badge = { Badge { Text(unreadCount.toString()) } }) {
                 Icon(
-                    imageVector = Icons.Rounded.ArrowDownward,
+                    imageVector = MeshtasticIcons.ArrowDownward,
                     contentDescription = stringResource(Res.string.scroll_to_bottom),
                 )
             }
         } else {
             Icon(
-                imageVector = Icons.Rounded.ArrowDownward,
+                imageVector = MeshtasticIcons.ArrowDownward,
                 contentDescription = stringResource(Res.string.scroll_to_bottom),
             )
         }
@@ -178,7 +177,7 @@ fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ourNode: N
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.Reply,
+                    imageVector = MeshtasticIcons.Reply,
                     contentDescription = stringResource(Res.string.reply),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -194,7 +193,7 @@ fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ourNode: N
                     overflow = TextOverflow.Ellipsis,
                 )
                 IconButton(onClick = onClearReply) {
-                    Icon(Icons.Filled.Close, contentDescription = stringResource(Res.string.cancel_reply))
+                    Icon(MeshtasticIcons.Close, contentDescription = stringResource(Res.string.cancel_reply))
                 }
             }
         }
@@ -253,20 +252,23 @@ fun ActionModeTopBar(selectedCount: Int, onAction: (MessageMenuAction) -> Unit) 
     navigationIcon = {
         IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = MeshtasticIcons.ArrowBack,
                 contentDescription = stringResource(Res.string.clear_selection),
             )
         }
     },
     actions = {
         IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
-            Icon(imageVector = Icons.Rounded.ContentCopy, contentDescription = stringResource(Res.string.copy))
+            Icon(imageVector = MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy))
         }
         IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
-            Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete))
+            Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
         }
         IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
-            Icon(imageVector = Icons.Rounded.SelectAll, contentDescription = stringResource(Res.string.select_all))
+            Icon(
+                imageVector = MeshtasticIcons.SelectAll,
+                contentDescription = stringResource(Res.string.select_all),
+            )
         }
     },
 )
@@ -316,7 +318,7 @@ fun MessageTopBar(
     navigationIcon = {
         IconButton(onClick = onNavigateBack) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = MeshtasticIcons.ArrowBack,
                 contentDescription = stringResource(Res.string.navigate_back),
             )
         }
@@ -356,7 +358,7 @@ private fun MessageTopBarActions(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }, enabled = true) {
-            Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.overflow_menu))
+            Icon(imageVector = MeshtasticIcons.More, contentDescription = stringResource(Res.string.overflow_menu))
         }
         OverFlowMenu(
             expanded = expanded,
@@ -409,8 +411,7 @@ private fun QuickChatToggleMenuItem(showQuickChat: Boolean, onDismiss: () -> Uni
         },
         leadingIcon = {
             Icon(
-                imageVector =
-                if (showQuickChat) Icons.Rounded.SpeakerNotesOff else Icons.AutoMirrored.Rounded.SpeakerNotes,
+                imageVector = if (showQuickChat) MeshtasticIcons.Muted else MeshtasticIcons.Unmuted,
                 contentDescription = title,
             )
         },
@@ -426,7 +427,7 @@ private fun QuickChatOptionsMenuItem(onDismiss: () -> Unit, onNavigate: () -> Un
             onDismiss()
             onNavigate()
         },
-        leadingIcon = { Icon(imageVector = Icons.Rounded.ChatBubbleOutline, contentDescription = title) },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.ChatBubbleOutline, contentDescription = title) },
     )
 }
 
@@ -441,7 +442,7 @@ private fun FilteredMessagesMenuItem(showFiltered: Boolean, count: Int, onDismis
         },
         leadingIcon = {
             Icon(
-                imageVector = if (showFiltered) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                imageVector = if (showFiltered) MeshtasticIcons.VisibilityOff else MeshtasticIcons.Visibility,
                 contentDescription = title,
             )
         },
@@ -462,7 +463,7 @@ private fun FilterToggleMenuItem(filteringDisabled: Boolean, onDismiss: () -> Un
         },
         leadingIcon = {
             Icon(
-                imageVector = if (filteringDisabled) Icons.Rounded.FilterList else Icons.Rounded.FilterListOff,
+                imageVector = if (filteringDisabled) MeshtasticIcons.FilterList else MeshtasticIcons.FilterListOff,
                 contentDescription = title,
             )
         },
@@ -676,7 +677,7 @@ fun MessageInput(
         },
         trailingIcon = {
             IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(Res.string.send))
+                Icon(imageVector = MeshtasticIcons.Send, contentDescription = stringResource(Res.string.send))
             }
         },
     )

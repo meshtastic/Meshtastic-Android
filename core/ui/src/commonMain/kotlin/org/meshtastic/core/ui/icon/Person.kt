@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.PersonSearch
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -37,3 +38,7 @@ val MeshtasticIcons.AccountCircle: ImageVector
     get() = Icons.Rounded.AccountCircle
 val MeshtasticIcons.PersonSearch: ImageVector
     get() = Icons.Rounded.PersonSearch
+
+// New
+val MeshtasticIcons.PersonAdd: ImageVector
+    get() = Icons.Rounded.PersonAdd

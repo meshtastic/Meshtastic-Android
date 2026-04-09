@@ -19,18 +19,6 @@ package org.meshtastic.feature.node.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Navigation
-import androidx.compose.material.icons.rounded.Air
-import androidx.compose.material.icons.rounded.BlurOn
-import androidx.compose.material.icons.rounded.Bolt
-import androidx.compose.material.icons.rounded.Height
-import androidx.compose.material.icons.rounded.LightMode
-import androidx.compose.material.icons.rounded.Power
-import androidx.compose.material.icons.rounded.Scale
-import androidx.compose.material.icons.rounded.Speed
-import androidx.compose.material.icons.rounded.Thermostat
-import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -62,6 +50,18 @@ import org.meshtastic.core.resources.uv_lux
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.resources.weight
 import org.meshtastic.core.resources.wind
+import org.meshtastic.core.ui.icon.AirQuality
+import org.meshtastic.core.ui.icon.Altitude
+import org.meshtastic.core.ui.icon.Humidity
+import org.meshtastic.core.ui.icon.LightMode
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Particulate
+import org.meshtastic.core.ui.icon.PowerSupply
+import org.meshtastic.core.ui.icon.Speed
+import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.core.ui.icon.Voltage
+import org.meshtastic.core.ui.icon.Weight
+import org.meshtastic.core.ui.icon.WindDirection
 import org.meshtastic.feature.node.model.DrawableMetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
 import org.meshtastic.proto.Config
@@ -83,7 +83,7 @@ internal fun EnvironmentMetrics(
                                 VectorMetricInfo(
                                     label = Res.string.temperature,
                                     value = temp.toTempString(isFahrenheit),
-                                    icon = Icons.Rounded.Thermostat,
+                                    icon = MeshtasticIcons.Temperature,
                                 ),
                             )
                         }
@@ -93,7 +93,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 Res.string.humidity,
                                 "${NumberFormatter.format(rh, 0)}%",
-                                Icons.Rounded.WaterDrop,
+                                MeshtasticIcons.Humidity,
                             ),
                         )
                     }
@@ -102,7 +102,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 Res.string.pressure,
                                 "${NumberFormatter.format(bp, 0)} hPa",
-                                Icons.Rounded.Speed,
+                                MeshtasticIcons.Speed,
                             ),
                         )
                     }
@@ -111,7 +111,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 label = Res.string.gas_resistance,
                                 value = "${NumberFormatter.format(gr, 0)} MΩ",
-                                icon = Icons.Rounded.BlurOn,
+                                icon = MeshtasticIcons.Particulate,
                             ),
                         )
                     }
@@ -120,7 +120,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 label = Res.string.voltage,
                                 value = "${NumberFormatter.format(v, 2)}V",
-                                icon = Icons.Rounded.Bolt,
+                                icon = MeshtasticIcons.Voltage,
                             ),
                         )
                     }
@@ -129,17 +129,17 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 label = Res.string.current,
                                 value = "${NumberFormatter.format(c, 1)}mA",
-                                icon = Icons.Rounded.Power,
+                                icon = MeshtasticIcons.PowerSupply,
                             ),
                         )
                     }
-                    iaq?.let { i -> add(VectorMetricInfo(Res.string.iaq, i.toString(), Icons.Rounded.Air)) }
+                    iaq?.let { i -> add(VectorMetricInfo(Res.string.iaq, i.toString(), MeshtasticIcons.AirQuality)) }
                     distance?.let { d ->
                         add(
                             VectorMetricInfo(
                                 label = Res.string.distance,
                                 value = d.toSmallDistanceString(displayUnits),
-                                icon = Icons.Rounded.Height,
+                                icon = MeshtasticIcons.Altitude,
                             ),
                         )
                     }
@@ -148,7 +148,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 label = Res.string.lux,
                                 value = "${NumberFormatter.format(l, 0)} lx",
-                                icon = Icons.Rounded.LightMode,
+                                icon = MeshtasticIcons.LightMode,
                             ),
                         )
                     }
@@ -157,7 +157,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 label = Res.string.uv_lux,
                                 value = "${NumberFormatter.format(uvl, 0)} lx",
-                                icon = Icons.Rounded.LightMode,
+                                icon = MeshtasticIcons.LightMode,
                             ),
                         )
                     }
@@ -168,7 +168,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 label = Res.string.wind,
                                 value = ws.toSpeedString(displayUnits),
-                                icon = Icons.Outlined.Navigation,
+                                icon = MeshtasticIcons.WindDirection,
                                 rotateIcon = normalizedBearing.toFloat(),
                             ),
                         )
@@ -178,7 +178,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 label = Res.string.weight,
                                 value = "${NumberFormatter.format(w, 2)} kg",
-                                icon = Icons.Rounded.Scale,
+                                icon = MeshtasticIcons.Weight,
                             ),
                         )
                     }

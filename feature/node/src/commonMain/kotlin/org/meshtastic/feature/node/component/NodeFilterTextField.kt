@@ -29,10 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -72,6 +68,10 @@ import org.meshtastic.core.resources.node_filter_show_ignored
 import org.meshtastic.core.resources.node_filter_title
 import org.meshtastic.core.resources.node_sort_button
 import org.meshtastic.core.resources.node_sort_title
+import org.meshtastic.core.ui.icon.Clear
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Search
+import org.meshtastic.core.ui.icon.Sort
 
 @Suppress("LongParameterList")
 @Composable
@@ -173,13 +173,13 @@ private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Un
             )
         },
         leadingIcon = {
-            Icon(Icons.Rounded.Search, contentDescription = stringResource(Res.string.node_filter_placeholder))
+            Icon(MeshtasticIcons.Search, contentDescription = stringResource(Res.string.node_filter_placeholder))
         },
         onValueChange = onTextChange,
         trailingIcon = {
             if (filterText.isNotEmpty() || isFocused) {
                 Icon(
-                    Icons.Rounded.Clear,
+                    MeshtasticIcons.Clear,
                     contentDescription = stringResource(Res.string.desc_node_filter_clear),
                     modifier =
                     Modifier.clickable {
@@ -208,7 +208,7 @@ private fun NodeSortButton(
 
     IconButton(onClick = { expanded = true }) {
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.Sort,
+            imageVector = MeshtasticIcons.Sort,
             contentDescription = stringResource(Res.string.node_sort_button),
             modifier = Modifier.heightIn(max = 48.dp),
             tint = MaterialTheme.colorScheme.onSurface,

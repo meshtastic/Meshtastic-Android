@@ -16,10 +16,6 @@
  */
 package org.meshtastic.feature.connections.ui.components
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.Usb
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -36,6 +32,10 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.serial
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Usb
+import org.meshtastic.core.ui.icon.Wifi
 
 @Suppress("LambdaParameterEventTrailing")
 @Composable
@@ -63,7 +63,7 @@ fun ConnectionsSegmentedBar(
 }
 
 private enum class Item(val imageVector: ImageVector, val textRes: StringResource, val deviceType: DeviceType) {
-    BLUETOOTH(imageVector = Icons.Rounded.Bluetooth, textRes = Res.string.bluetooth, deviceType = DeviceType.BLE),
-    NETWORK(imageVector = Icons.Rounded.Wifi, textRes = Res.string.network, deviceType = DeviceType.TCP),
-    SERIAL(imageVector = Icons.Rounded.Usb, textRes = Res.string.serial, deviceType = DeviceType.USB),
+    BLUETOOTH(imageVector = MeshtasticIcons.Bluetooth, textRes = Res.string.bluetooth, deviceType = DeviceType.BLE),
+    NETWORK(imageVector = MeshtasticIcons.Wifi, textRes = Res.string.network, deviceType = DeviceType.TCP),
+    SERIAL(imageVector = MeshtasticIcons.Usb, textRes = Res.string.serial, deviceType = DeviceType.USB),
 }

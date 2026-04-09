@@ -18,8 +18,6 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -63,6 +61,8 @@ import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 import kotlin.random.Random
@@ -150,7 +150,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     modifier = Modifier.padding(horizontal = 8.dp),
                     title = stringResource(Res.string.regenerate_private_key),
                     enabled = state.connected,
-                    icon = Icons.TwoTone.Warning,
+                    icon = MeshtasticIcons.Warning,
                     onClick = { showKeyGenerationDialog = true },
                 )
                 ExportSecurityConfigButton(

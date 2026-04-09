@@ -20,17 +20,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.rounded.AddReaction
-import androidx.compose.material.icons.twotone.AddLink
-import androidx.compose.material.icons.twotone.Cloud
-import androidx.compose.material.icons.twotone.CloudDone
-import androidx.compose.material.icons.twotone.CloudOff
-import androidx.compose.material.icons.twotone.CloudUpload
-import androidx.compose.material.icons.twotone.HowToReg
-import androidx.compose.material.icons.twotone.Link
-import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -46,6 +35,17 @@ import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.react
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
+import org.meshtastic.core.ui.icon.Acknowledged
+import org.meshtastic.core.ui.icon.AddLink
+import org.meshtastic.core.ui.icon.AddReaction
+import org.meshtastic.core.ui.icon.CloudUpload
+import org.meshtastic.core.ui.icon.LinkIcon
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MqttDelivered
+import org.meshtastic.core.ui.icon.MqttSent
+import org.meshtastic.core.ui.icon.MqttUnavailable
+import org.meshtastic.core.ui.icon.Reply
+import org.meshtastic.core.ui.icon.Warning
 
 @Composable
 internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
@@ -60,16 +60,14 @@ internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
         )
     }
     IconButton(onClick = { showEmojiPickerDialog = true }) {
-        Icon(imageVector = Icons.Rounded.AddReaction, contentDescription = stringResource(Res.string.react))
+        Icon(imageVector = MeshtasticIcons.AddReaction, contentDescription = stringResource(Res.string.react))
     }
 }
 
 @Composable
 private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
     onClick = onClick,
-    content = {
-        Icon(imageVector = Icons.AutoMirrored.Filled.Reply, contentDescription = stringResource(Res.string.reply))
-    },
+    content = { Icon(imageVector = MeshtasticIcons.Reply, contentDescription = stringResource(Res.string.reply)) },
 )
 
 @Composable
@@ -80,14 +78,14 @@ internal fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: Message
                 Icon(
                     imageVector =
                     when (currentStatus) {
-                        MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                        MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                        MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                        MessageStatus.SFPP_ROUTING -> Icons.TwoTone.AddLink
-                        MessageStatus.SFPP_CONFIRMED -> Icons.TwoTone.Link
-                        MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                        MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                        else -> Icons.TwoTone.Warning
+                        MessageStatus.RECEIVED -> MeshtasticIcons.Acknowledged
+                        MessageStatus.QUEUED -> MeshtasticIcons.CloudUpload
+                        MessageStatus.DELIVERED -> MeshtasticIcons.MqttDelivered
+                        MessageStatus.SFPP_ROUTING -> MeshtasticIcons.AddLink
+                        MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.LinkIcon
+                        MessageStatus.ENROUTE -> MeshtasticIcons.MqttSent
+                        MessageStatus.ERROR -> MeshtasticIcons.MqttUnavailable
+                        else -> MeshtasticIcons.Warning
                     },
                     contentDescription = stringResource(Res.string.message_delivery_status),
                 )

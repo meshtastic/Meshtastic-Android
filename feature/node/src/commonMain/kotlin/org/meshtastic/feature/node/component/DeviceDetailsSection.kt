@@ -27,9 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Router
-import androidx.compose.material.icons.twotone.Verified
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,6 +48,9 @@ import org.meshtastic.core.resources.img_hw_unknown
 import org.meshtastic.core.resources.supported
 import org.meshtastic.core.resources.supported_by_community
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.HardwareModel
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.model.MetricsState
@@ -78,7 +78,7 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
                         ?: deviceHardware.displayName
                 ListItem(
                     text = stringResource(Res.string.hardware),
-                    leadingIcon = Icons.Rounded.Router,
+                    leadingIcon = MeshtasticIcons.HardwareModel,
                     supportingText = deviceText,
                     copyable = true,
                     trailingIcon = null,
@@ -116,7 +116,7 @@ private fun SupportStatusItem(isSupported: Boolean) {
         },
         leadingIcon =
         if (isSupported) {
-            Icons.TwoTone.Verified
+            MeshtasticIcons.Verified
         } else {
             org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_unverified)
         },

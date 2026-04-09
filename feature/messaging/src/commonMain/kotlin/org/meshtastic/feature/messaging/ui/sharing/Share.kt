@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -42,6 +40,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.share
 import org.meshtastic.core.resources.share_to
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.feature.messaging.ui.contact.ContactItem
 import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 
@@ -90,10 +90,7 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
                 modifier = Modifier.fillMaxWidth().padding(24.dp),
                 enabled = selectedContact.isNotEmpty(),
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(Res.string.share),
-                )
+                Icon(imageVector = MeshtasticIcons.Send, contentDescription = stringResource(Res.string.share))
             }
         }
     }

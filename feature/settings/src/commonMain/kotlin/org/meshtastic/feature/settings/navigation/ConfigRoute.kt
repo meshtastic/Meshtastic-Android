@@ -16,17 +16,6 @@
  */
 package org.meshtastic.feature.settings.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.CellTower
-import androidx.compose.material.icons.filled.DisplaySettings
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Power
-import androidx.compose.material.icons.filled.Router
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.Route
@@ -42,43 +31,64 @@ import org.meshtastic.core.resources.position
 import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.security
 import org.meshtastic.core.resources.user
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.CellTower
+import org.meshtastic.core.ui.icon.ConfigChannels
+import org.meshtastic.core.ui.icon.DisplaySettings
+import org.meshtastic.core.ui.icon.HardwareModel
+import org.meshtastic.core.ui.icon.LocationOn
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Person
+import org.meshtastic.core.ui.icon.PowerSupply
+import org.meshtastic.core.ui.icon.SecurityShield
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.DeviceMetadata
 
 enum class ConfigRoute(val title: StringResource, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    USER(Res.string.user, SettingsRoutes.User, Icons.Default.Person, 0),
-    CHANNELS(Res.string.channels, SettingsRoutes.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
-    DEVICE(Res.string.device, SettingsRoutes.Device, Icons.Default.Router, AdminMessage.ConfigType.DEVICE_CONFIG.value),
+    USER(Res.string.user, SettingsRoutes.User, MeshtasticIcons.Person, 0),
+    CHANNELS(Res.string.channels, SettingsRoutes.ChannelConfig, MeshtasticIcons.ConfigChannels, 0),
+    DEVICE(
+        Res.string.device,
+        SettingsRoutes.Device,
+        MeshtasticIcons.HardwareModel,
+        AdminMessage.ConfigType.DEVICE_CONFIG.value,
+    ),
     POSITION(
         Res.string.position,
         SettingsRoutes.Position,
-        Icons.Default.LocationOn,
+        MeshtasticIcons.LocationOn,
         AdminMessage.ConfigType.POSITION_CONFIG.value,
     ),
-    POWER(Res.string.power, SettingsRoutes.Power, Icons.Default.Power, AdminMessage.ConfigType.POWER_CONFIG.value),
+    POWER(
+        Res.string.power,
+        SettingsRoutes.Power,
+        MeshtasticIcons.PowerSupply,
+        AdminMessage.ConfigType.POWER_CONFIG.value,
+    ),
     NETWORK(
         Res.string.network,
         SettingsRoutes.Network,
-        Icons.Default.Wifi,
+        MeshtasticIcons.Wifi,
         AdminMessage.ConfigType.NETWORK_CONFIG.value,
     ),
     DISPLAY(
         Res.string.display,
         SettingsRoutes.Display,
-        Icons.Default.DisplaySettings,
+        MeshtasticIcons.DisplaySettings,
         AdminMessage.ConfigType.DISPLAY_CONFIG.value,
     ),
-    LORA(Res.string.lora, SettingsRoutes.LoRa, Icons.Default.CellTower, AdminMessage.ConfigType.LORA_CONFIG.value),
+    LORA(Res.string.lora, SettingsRoutes.LoRa, MeshtasticIcons.CellTower, AdminMessage.ConfigType.LORA_CONFIG.value),
     BLUETOOTH(
         Res.string.bluetooth,
         SettingsRoutes.Bluetooth,
-        Icons.Default.Bluetooth,
+        MeshtasticIcons.Bluetooth,
         AdminMessage.ConfigType.BLUETOOTH_CONFIG.value,
     ),
     SECURITY(
         Res.string.security,
         SettingsRoutes.Security,
-        Icons.Default.Security,
+        MeshtasticIcons.SecurityShield,
         AdminMessage.ConfigType.SECURITY_CONFIG.value,
     ),
     ;

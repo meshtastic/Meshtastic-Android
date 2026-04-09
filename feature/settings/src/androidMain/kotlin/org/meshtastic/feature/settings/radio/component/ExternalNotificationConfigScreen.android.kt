@@ -21,9 +21,6 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -33,6 +30,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.import_label
 import org.meshtastic.core.resources.play
+import org.meshtastic.core.ui.icon.FolderOpen
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PlayArrow
 import java.io.File
 
 private const val MAX_RINGTONE_SIZE = 230
@@ -67,7 +67,7 @@ actual fun RingtoneTrailingIcon(ringtoneInput: String, onRingtoneImported: (Stri
 
     Row {
         IconButton(onClick = { launcher.launch("*/*") }, enabled = enabled) {
-            Icon(Icons.Default.FolderOpen, contentDescription = stringResource(Res.string.import_label))
+            Icon(MeshtasticIcons.FolderOpen, contentDescription = stringResource(Res.string.import_label))
         }
 
         IconButton(
@@ -89,7 +89,7 @@ actual fun RingtoneTrailingIcon(ringtoneInput: String, onRingtoneImported: (Stri
             },
             enabled = enabled,
         ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.play))
+            Icon(MeshtasticIcons.PlayArrow, contentDescription = stringResource(Res.string.play))
         }
     }
 }

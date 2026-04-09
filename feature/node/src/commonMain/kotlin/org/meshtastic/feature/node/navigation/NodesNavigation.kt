@@ -16,16 +16,6 @@
  */
 package org.meshtastic.feature.node.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CellTower
-import androidx.compose.material.icons.rounded.Groups
-import androidx.compose.material.icons.rounded.LightMode
-import androidx.compose.material.icons.rounded.LocationOn
-import androidx.compose.material.icons.rounded.Memory
-import androidx.compose.material.icons.rounded.People
-import androidx.compose.material.icons.rounded.PermScanWifi
-import androidx.compose.material.icons.rounded.Power
-import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -53,6 +43,16 @@ import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
+import org.meshtastic.core.ui.icon.CellTower
+import org.meshtastic.core.ui.icon.Groups
+import org.meshtastic.core.ui.icon.HardwareModel
+import org.meshtastic.core.ui.icon.LightMode
+import org.meshtastic.core.ui.icon.LocationOn
+import org.meshtastic.core.ui.icon.Memory
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PeopleCount
+import org.meshtastic.core.ui.icon.PermScanWifi
+import org.meshtastic.core.ui.icon.PowerSupply
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.detail.NodeDetailScreen
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
@@ -202,55 +202,55 @@ enum class NodeDetailRoute(
     DEVICE(
         Res.string.device,
         NodeDetailRoutes.DeviceMetrics::class,
-        Icons.Rounded.Router,
+        MeshtasticIcons.HardwareModel,
         { metricsVM, onNavigateUp -> DeviceMetricsScreen(metricsVM, onNavigateUp) },
     ),
     POSITION_LOG(
         Res.string.position_log,
         NodeDetailRoutes.PositionLog::class,
-        Icons.Rounded.LocationOn,
+        MeshtasticIcons.LocationOn,
         { metricsVM, onNavigateUp -> PositionLogScreen(metricsVM, onNavigateUp) },
     ),
     ENVIRONMENT(
         Res.string.environment,
         NodeDetailRoutes.EnvironmentMetrics::class,
-        Icons.Rounded.LightMode,
+        MeshtasticIcons.LightMode,
         { metricsVM, onNavigateUp -> EnvironmentMetricsScreen(metricsVM, onNavigateUp) },
     ),
     SIGNAL(
         Res.string.signal,
         NodeDetailRoutes.SignalMetrics::class,
-        Icons.Rounded.CellTower,
+        MeshtasticIcons.CellTower,
         { metricsVM, onNavigateUp -> SignalMetricsScreen(metricsVM, onNavigateUp) },
     ),
     TRACEROUTE(
         Res.string.traceroute,
         NodeDetailRoutes.TracerouteLog::class,
-        Icons.Rounded.PermScanWifi,
+        MeshtasticIcons.PermScanWifi,
         { metricsVM, onNavigateUp -> TracerouteLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
     ),
     NEIGHBOR_INFO(
         Res.string.neighbor_info,
         NodeDetailRoutes.NeighborInfoLog::class,
-        Icons.Rounded.Groups,
+        MeshtasticIcons.Groups,
         { metricsVM, onNavigateUp -> NeighborInfoLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
     ),
     POWER(
         Res.string.power,
         NodeDetailRoutes.PowerMetrics::class,
-        Icons.Rounded.Power,
+        MeshtasticIcons.PowerSupply,
         { metricsVM, onNavigateUp -> PowerMetricsScreen(metricsVM, onNavigateUp) },
     ),
     HOST(
         Res.string.host,
         NodeDetailRoutes.HostMetricsLog::class,
-        Icons.Rounded.Memory,
-        { metricsVM, onNavigateUp -> HostMetricsLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
+        MeshtasticIcons.Memory,
+        { metricsVM, onNavigateUp -> HostMetricsLogScreen(metricsVM, onNavigateUp) },
     ),
     PAX(
         Res.string.pax,
         NodeDetailRoutes.PaxMetrics::class,
-        Icons.Rounded.People,
+        MeshtasticIcons.PeopleCount,
         { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM, onNavigateUp) },
     ),
 }

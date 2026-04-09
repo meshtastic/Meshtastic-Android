@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -45,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
+import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
 fun SignedIntegerEditTextPreference(
@@ -234,7 +234,7 @@ fun EditTextPreference(
             } else if (isError) {
                 {
                     Icon(
-                        imageVector = Icons.TwoTone.Info,
+                        imageVector = MeshtasticIcons.Info,
                         contentDescription = stringResource(Res.string.error),
                         tint = MaterialTheme.colorScheme.error,
                     )

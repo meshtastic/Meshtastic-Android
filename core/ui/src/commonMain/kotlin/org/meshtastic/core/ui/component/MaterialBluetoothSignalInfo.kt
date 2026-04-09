@@ -19,9 +19,6 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.SignalCellularOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,12 +38,14 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.dbm_value
+import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SignalCellular0Bar
 import org.meshtastic.core.ui.icon.SignalCellular1Bar
 import org.meshtastic.core.ui.icon.SignalCellular2Bar
 import org.meshtastic.core.ui.icon.SignalCellular3Bar
 import org.meshtastic.core.ui.icon.SignalCellular4Bar
+import org.meshtastic.core.ui.icon.SignalOff
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
@@ -84,7 +83,7 @@ fun MaterialSignalInfo(
                 2 -> MeshtasticIcons.SignalCellular2Bar to MaterialTheme.colorScheme.StatusOrange
                 3 -> MeshtasticIcons.SignalCellular3Bar to MaterialTheme.colorScheme.StatusYellow
                 4 -> MeshtasticIcons.SignalCellular4Bar to MaterialTheme.colorScheme.StatusGreen
-                else -> Icons.Rounded.SignalCellularOff to MaterialTheme.colorScheme.onSurfaceVariant
+                else -> MeshtasticIcons.SignalOff to MaterialTheme.colorScheme.onSurfaceVariant
             }
 
         val foregroundPainter = typeIcon?.let { rememberVectorPainter(typeIcon) }
@@ -117,7 +116,7 @@ fun MaterialBluetoothSignalInfo(rssi: Int, modifier: Modifier = Modifier) {
         modifier = modifier,
         signalBars = getBluetoothSignalBars(rssi = rssi),
         signalStrengthValue = stringResource(Res.string.dbm_value, rssi),
-        typeIcon = Icons.Rounded.Bluetooth,
+        typeIcon = MeshtasticIcons.Bluetooth,
     )
 }
 

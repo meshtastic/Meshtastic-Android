@@ -17,8 +17,16 @@
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Forward
 import androidx.compose.material.icons.rounded.Bluetooth
+import androidx.compose.material.icons.rounded.BluetoothConnected
+import androidx.compose.material.icons.rounded.BluetoothSearching
+import androidx.compose.material.icons.rounded.Cached
+import androidx.compose.material.icons.rounded.Nfc
+import androidx.compose.material.icons.rounded.SettingsInputAntenna
+import androidx.compose.material.icons.rounded.SpeakerPhone
 import androidx.compose.material.icons.rounded.Usb
+import androidx.compose.material.icons.rounded.UsbOff
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -28,3 +36,21 @@ val MeshtasticIcons.Usb: ImageVector
     get() = Icons.Rounded.Usb
 val MeshtasticIcons.Wifi: ImageVector
     get() = Icons.Rounded.Wifi
+
+// New hardware icons
+val MeshtasticIcons.BluetoothConnected: ImageVector
+    get() = Icons.Rounded.BluetoothConnected
+val MeshtasticIcons.BluetoothSearching: ImageVector
+    get() = Icons.Rounded.BluetoothSearching
+val MeshtasticIcons.UsbOff: ImageVector
+    get() = Icons.Rounded.UsbOff
+val MeshtasticIcons.Serial: ImageVector
+    get() = Icons.AutoMirrored.Rounded.Forward
+val MeshtasticIcons.Antenna: ImageVector
+    get() = Icons.Rounded.SettingsInputAntenna
+val MeshtasticIcons.Speaker: ImageVector
+    get() = Icons.Rounded.SpeakerPhone
+val MeshtasticIcons.Reconnecting: ImageVector
+    get() = Icons.Rounded.Cached
+val MeshtasticIcons.Nfc: ImageVector
+    get() = Icons.Rounded.Nfc

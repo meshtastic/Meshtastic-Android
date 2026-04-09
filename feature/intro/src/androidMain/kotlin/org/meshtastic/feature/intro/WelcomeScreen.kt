@@ -23,10 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Hub
-import androidx.compose.material.icons.outlined.NearMe
-import androidx.compose.material.icons.outlined.SettingsInputAntenna
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,6 +45,10 @@ import org.meshtastic.core.resources.meshtastic
 import org.meshtastic.core.resources.share_your_location_in_real_time
 import org.meshtastic.core.resources.stay_connected_anywhere
 import org.meshtastic.core.resources.track_and_share_locations
+import org.meshtastic.core.ui.icon.Antenna
+import org.meshtastic.core.ui.icon.MeshHub
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.NearMe
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 
 /**
@@ -62,17 +62,17 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
     val features = remember {
         listOf(
             FeatureUIData(
-                icon = Icons.Outlined.SettingsInputAntenna,
+                icon = MeshtasticIcons.Antenna,
                 titleRes = Res.string.stay_connected_anywhere,
                 subtitleRes = Res.string.communicate_off_the_grid,
             ),
             FeatureUIData(
-                icon = Icons.Outlined.Hub,
+                icon = MeshtasticIcons.MeshHub,
                 titleRes = Res.string.create_your_own_networks,
                 subtitleRes = Res.string.easily_set_up_private_mesh_networks,
             ),
             FeatureUIData(
-                icon = Icons.Outlined.NearMe,
+                icon = MeshtasticIcons.NearMe,
                 titleRes = Res.string.track_and_share_locations,
                 subtitleRes = Res.string.share_your_location_in_real_time,
             ),

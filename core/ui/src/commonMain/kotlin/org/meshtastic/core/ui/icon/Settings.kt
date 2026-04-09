@@ -16,6 +16,25 @@
  */
 package org.meshtastic.core.ui.icon
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.rounded.Abc
+import androidx.compose.material.icons.rounded.AdminPanelSettings
+import androidx.compose.material.icons.rounded.AppSettingsAlt
+import androidx.compose.material.icons.rounded.BugReport
+import androidx.compose.material.icons.rounded.CleaningServices
+import androidx.compose.material.icons.rounded.DataUsage
+import androidx.compose.material.icons.rounded.FormatPaint
+import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.PermScanWifi
+import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.RestartAlt
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Sensors
+import androidx.compose.material.icons.rounded.SettingsRemote
+import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -157,3 +176,41 @@ val MeshtasticIcons.Settings: ImageVector
     }
 
 private var settings: ImageVector? = null
+
+// Config route icons
+val MeshtasticIcons.ConfigChannels: ImageVector
+    get() = Icons.AutoMirrored.Rounded.List
+val MeshtasticIcons.AdminPanelSettings: ImageVector
+    get() = Icons.Rounded.AdminPanelSettings
+val MeshtasticIcons.AppSettingsAlt: ImageVector
+    get() = Icons.Rounded.AppSettingsAlt
+val MeshtasticIcons.BugReport: ImageVector
+    get() = Icons.Rounded.BugReport
+val MeshtasticIcons.CleaningServices: ImageVector
+    get() = Icons.Rounded.CleaningServices
+val MeshtasticIcons.PowerSettingsNew: ImageVector
+    get() = Icons.Rounded.PowerSettingsNew
+val MeshtasticIcons.RestartAlt: ImageVector
+    get() = Icons.Rounded.RestartAlt
+val MeshtasticIcons.FactoryReset: ImageVector
+    get() = Icons.Rounded.Restore
+val MeshtasticIcons.Storage: ImageVector
+    get() = Icons.Rounded.Storage
+val MeshtasticIcons.FormatPaint: ImageVector
+    get() = Icons.Rounded.FormatPaint
+val MeshtasticIcons.Language: ImageVector
+    get() = Icons.Rounded.Language
+val MeshtasticIcons.WavingHand: ImageVector
+    get() = Icons.Rounded.WavingHand
+val MeshtasticIcons.Notifications: ImageVector
+    get() = Icons.Rounded.Notifications
+val MeshtasticIcons.DataUsage: ImageVector
+    get() = Icons.Rounded.DataUsage
+val MeshtasticIcons.PermScanWifi: ImageVector
+    get() = Icons.Rounded.PermScanWifi
+val MeshtasticIcons.DetectionSensor: ImageVector
+    get() = Icons.Rounded.Sensors
+val MeshtasticIcons.SettingsRemote: ImageVector
+    get() = Icons.Rounded.SettingsRemote
+val MeshtasticIcons.Abc: ImageVector
+    get() = Icons.Rounded.Abc

@@ -16,6 +16,21 @@
  */
 package org.meshtastic.core.ui.icon
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.GpsFixed
+import androidx.compose.material.icons.rounded.GpsOff
+import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.Lens
+import androidx.compose.material.icons.rounded.LocationDisabled
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.MyLocation
+import androidx.compose.material.icons.rounded.Navigation
+import androidx.compose.material.icons.rounded.PinDrop
+import androidx.compose.material.icons.rounded.Place
+import androidx.compose.material.icons.rounded.TripOrigin
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -107,3 +122,33 @@ val MeshtasticIcons.Map: ImageVector
     }
 
 private var map: ImageVector? = null
+
+// Map control icons
+val MeshtasticIcons.Layers: ImageVector
+    get() = Icons.Rounded.Layers
+val MeshtasticIcons.MyLocation: ImageVector
+    get() = Icons.Rounded.MyLocation
+val MeshtasticIcons.LocationDisabled: ImageVector
+    get() = Icons.Rounded.LocationDisabled
+val MeshtasticIcons.LocationOn: ImageVector
+    get() = Icons.Rounded.LocationOn
+val MeshtasticIcons.PinDrop: ImageVector
+    get() = Icons.Rounded.PinDrop
+val MeshtasticIcons.TripOrigin: ImageVector
+    get() = Icons.Rounded.TripOrigin
+val MeshtasticIcons.CalendarMonth: ImageVector
+    get() = Icons.Rounded.CalendarMonth
+val MeshtasticIcons.MapCompass: ImageVector
+    get() = Icons.Rounded.Navigation
+val MeshtasticIcons.Tune: ImageVector
+    get() = Icons.Rounded.Tune
+val MeshtasticIcons.Place: ImageVector
+    get() = Icons.Rounded.Place
+val MeshtasticIcons.Lens: ImageVector
+    get() = Icons.Rounded.Lens
+val MeshtasticIcons.GpsFixed: ImageVector
+    get() = Icons.Rounded.GpsFixed
+val MeshtasticIcons.GpsOff: ImageVector
+    get() = Icons.Rounded.GpsOff
+val MeshtasticIcons.Check: ImageVector
+    get() = Icons.Rounded.Check

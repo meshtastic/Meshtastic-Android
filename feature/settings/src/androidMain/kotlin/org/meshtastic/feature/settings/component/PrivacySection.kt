@@ -17,9 +17,6 @@
 package org.meshtastic.feature.settings.component
 
 import android.Manifest
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +31,9 @@ import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.location_disabled
 import org.meshtastic.core.resources.provide_location_to_mesh
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.core.ui.icon.BugReport
+import org.meshtastic.core.ui.icon.LocationOn
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
 
@@ -77,14 +77,14 @@ fun PrivacySection(
             SwitchListItem(
                 text = stringResource(Res.string.analytics_okay),
                 checked = analyticsEnabled,
-                leadingIcon = Icons.Default.BugReport,
+                leadingIcon = MeshtasticIcons.BugReport,
                 onClick = onToggleAnalytics,
             )
         }
 
         SwitchListItem(
             text = stringResource(Res.string.provide_location_to_mesh),
-            leadingIcon = Icons.Rounded.LocationOn,
+            leadingIcon = MeshtasticIcons.LocationOn,
             enabled = !isGpsDisabled,
             checked = provideLocation,
             onClick = { onToggleLocation(!provideLocation) },

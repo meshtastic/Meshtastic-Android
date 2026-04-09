@@ -19,9 +19,6 @@ package org.meshtastic.feature.intro
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Bluetooth
-import androidx.compose.material.icons.outlined.SettingsInputAntenna
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +32,9 @@ import org.meshtastic.core.resources.configure_bluetooth_permissions
 import org.meshtastic.core.resources.next
 import org.meshtastic.core.resources.permission_missing_31
 import org.meshtastic.core.resources.settings
+import org.meshtastic.core.ui.icon.Antenna
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 /**
  * Screen for configuring Bluetooth permissions during the app introduction. It explains why Bluetooth permissions are
@@ -58,12 +58,12 @@ internal fun BluetoothScreen(showNextButton: Boolean, onSkip: () -> Unit, onConf
     val features = remember {
         listOf(
             FeatureUIData(
-                icon = Icons.Outlined.Bluetooth,
+                icon = MeshtasticIcons.Bluetooth,
                 titleRes = Res.string.bluetooth_feature_discovery,
                 subtitleRes = Res.string.bluetooth_feature_discovery_description,
             ),
             FeatureUIData(
-                icon = Icons.Outlined.SettingsInputAntenna,
+                icon = MeshtasticIcons.Antenna,
                 titleRes = Res.string.bluetooth_feature_config,
                 subtitleRes = Res.string.bluetooth_feature_config_description,
             ),

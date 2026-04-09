@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.KeyOff
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Verified
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -37,3 +38,7 @@ val MeshtasticIcons.Verified: ImageVector
     get() = Icons.Rounded.Verified
 val MeshtasticIcons.Fingerprint: ImageVector
     get() = Icons.Rounded.Fingerprint
+
+// New
+val MeshtasticIcons.SecurityShield: ImageVector
+    get() = Icons.Rounded.Security

@@ -24,11 +24,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.CloudUpload
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +54,11 @@ import org.meshtastic.core.resources.security_icon_help_dismiss
 import org.meshtastic.core.resources.uplink_enabled
 import org.meshtastic.core.resources.uplink_feature_description
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.CloudDownload
+import org.meshtastic.core.ui.icon.CloudUpload
+import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.LocationOn
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
 internal fun ChannelLegend(onClick: () -> Unit) {
@@ -67,7 +67,7 @@ internal fun ChannelLegend(onClick: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         Row {
-            Icon(imageVector = Icons.Filled.Info, contentDescription = stringResource(Res.string.info))
+            Icon(imageVector = MeshtasticIcons.Info, contentDescription = stringResource(Res.string.info))
             Text(
                 text = stringResource(Res.string.primary),
                 color = MaterialTheme.colorScheme.primary,
@@ -88,17 +88,17 @@ internal enum class ChannelIcons(
     val additionalInfoResId: StringResource,
 ) {
     LOCATION(
-        icon = Icons.Filled.LocationOn,
+        icon = MeshtasticIcons.LocationOn,
         descriptionResId = Res.string.location_sharing,
         additionalInfoResId = Res.string.periodic_position_broadcast,
     ),
     UPLINK(
-        icon = Icons.Filled.CloudUpload,
+        icon = MeshtasticIcons.CloudUpload,
         descriptionResId = Res.string.uplink_enabled,
         additionalInfoResId = Res.string.uplink_feature_description,
     ),
     DOWNLINK(
-        icon = Icons.Filled.CloudDownload,
+        icon = MeshtasticIcons.CloudDownload,
         descriptionResId = Res.string.downlink_enabled,
         additionalInfoResId = Res.string.downlink_feature_description,
     ),

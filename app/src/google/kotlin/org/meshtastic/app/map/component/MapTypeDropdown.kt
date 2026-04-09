@@ -16,8 +16,6 @@
  */
 package org.meshtastic.app.map.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +34,8 @@ import org.meshtastic.core.resources.map_type_normal
 import org.meshtastic.core.resources.map_type_satellite
 import org.meshtastic.core.resources.map_type_terrain
 import org.meshtastic.core.resources.selected_map_type
+import org.meshtastic.core.ui.icon.Check
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Suppress("LongMethod")
 @Composable
@@ -67,7 +67,12 @@ internal fun MapTypeDropdown(
                 },
                 trailingIcon =
                 if (selectedCustomUrl == null && selectedGoogleMapType == type) {
-                    { Icon(Icons.Filled.Check, contentDescription = stringResource(Res.string.selected_map_type)) }
+                    {
+                        Icon(
+                            MeshtasticIcons.Check,
+                            contentDescription = stringResource(Res.string.selected_map_type),
+                        )
+                    }
                 } else {
                     null
                 },
@@ -87,7 +92,7 @@ internal fun MapTypeDropdown(
                     if (selectedCustomUrl == config.urlTemplate) {
                         {
                             Icon(
-                                Icons.Filled.Check,
+                                MeshtasticIcons.Check,
                                 contentDescription = stringResource(Res.string.selected_map_type),
                             )
                         }

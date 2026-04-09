@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +40,8 @@ import org.meshtastic.core.takserver.TAKDataPackageGenerator
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.tak.TakPermissionHandler
 import org.meshtastic.feature.settings.tak.rememberDataPackageExporter
@@ -74,7 +74,7 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         onBack = onBack,
         actions = {
             IconButton(onClick = { exportLauncher("Meshtastic_TAK_Server.zip") }) {
-                Icon(imageVector = Icons.Default.Share, contentDescription = "Export TAK Data Package")
+                Icon(imageVector = MeshtasticIcons.Share, contentDescription = "Export TAK Data Package")
             }
         },
         configState = formState,

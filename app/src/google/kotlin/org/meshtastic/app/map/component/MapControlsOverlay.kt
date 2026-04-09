@@ -20,15 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.MyLocation
-import androidx.compose.material.icons.outlined.Navigation
-import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material.icons.rounded.LocationDisabled
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -44,6 +35,14 @@ import org.meshtastic.core.resources.map_tile_source
 import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.toggle_my_position
+import org.meshtastic.core.ui.icon.Layers
+import org.meshtastic.core.ui.icon.LocationDisabled
+import org.meshtastic.core.ui.icon.Map
+import org.meshtastic.core.ui.icon.MapCompass
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MyLocation
+import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 @Composable
@@ -73,7 +72,7 @@ fun MapControlsOverlay(
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
         if (isNodeMap) {
             MapButton(
-                icon = Icons.Outlined.Tune,
+                icon = MeshtasticIcons.Tune,
                 contentDescription = stringResource(Res.string.map_filter),
                 onClick = onToggleMapFilterMenu,
             )
@@ -85,7 +84,7 @@ fun MapControlsOverlay(
         } else {
             Box {
                 MapButton(
-                    icon = Icons.Outlined.Tune,
+                    icon = MeshtasticIcons.Tune,
                     contentDescription = stringResource(Res.string.map_filter),
                     onClick = onToggleMapFilterMenu,
                 )
@@ -99,7 +98,7 @@ fun MapControlsOverlay(
 
         Box {
             MapButton(
-                icon = Icons.Outlined.Map,
+                icon = MeshtasticIcons.Map,
                 contentDescription = stringResource(Res.string.map_tile_source),
                 onClick = onToggleMapTypeMenu,
             )
@@ -112,7 +111,7 @@ fun MapControlsOverlay(
         }
 
         MapButton(
-            icon = Icons.Outlined.Layers,
+            icon = MeshtasticIcons.Layers,
             contentDescription = stringResource(Res.string.manage_map_layers),
             onClick = onManageLayersClicked,
         )
@@ -124,7 +123,7 @@ fun MapControlsOverlay(
                 }
             } else {
                 MapButton(
-                    icon = Icons.Filled.Refresh,
+                    icon = MeshtasticIcons.Refresh,
                     contentDescription = stringResource(Res.string.refresh),
                     onClick = onRefresh,
                 )
@@ -135,9 +134,9 @@ fun MapControlsOverlay(
         MapButton(
             icon =
             if (isLocationTrackingEnabled) {
-                Icons.Rounded.LocationDisabled
+                MeshtasticIcons.LocationDisabled
             } else {
-                Icons.Outlined.MyLocation
+                MeshtasticIcons.MyLocation
             },
             contentDescription = stringResource(Res.string.toggle_my_position),
             onClick = onToggleLocationTracking,
@@ -147,7 +146,7 @@ fun MapControlsOverlay(
 
 @Composable
 private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Boolean) {
-    val icon = if (isFollowing) Icons.Filled.Navigation else Icons.Outlined.Navigation
+    val icon = if (isFollowing) MeshtasticIcons.MapCompass else MeshtasticIcons.MapCompass
 
     MapButton(
         modifier = Modifier.rotate(-bearing),

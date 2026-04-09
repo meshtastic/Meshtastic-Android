@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.ui.icon
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BatteryAlert
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -181,3 +183,7 @@ val MeshtasticIcons.BatteryUnknown: ImageVector
     }
 
 private var batteryUnknown: ImageVector? = null
+
+// New
+val MeshtasticIcons.BatteryAlert: ImageVector
+    get() = Icons.Rounded.BatteryAlert

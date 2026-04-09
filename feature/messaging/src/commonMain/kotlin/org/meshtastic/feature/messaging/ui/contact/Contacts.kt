@@ -102,8 +102,8 @@ import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MarkChatRead
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
-import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
-import org.meshtastic.core.ui.icon.VolumeUpTwoTone
+import org.meshtastic.core.ui.icon.VolumeMute
+import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.proto.ChannelSet
@@ -455,9 +455,9 @@ private fun SelectionToolbar(
                 Icon(
                     imageVector =
                     if (isAllMuted) {
-                        MeshtasticIcons.VolumeUpTwoTone
+                        MeshtasticIcons.VolumeUp
                     } else {
-                        MeshtasticIcons.VolumeMuteTwoTone
+                        MeshtasticIcons.VolumeMute
                     },
                     contentDescription =
                     if (isAllMuted) {

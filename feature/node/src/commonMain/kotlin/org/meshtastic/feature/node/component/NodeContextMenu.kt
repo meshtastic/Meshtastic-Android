@@ -16,14 +16,6 @@
  */
 package org.meshtastic.feature.node.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.DoDisturbOn
-import androidx.compose.material.icons.outlined.DoDisturbOn
-import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -42,6 +34,13 @@ import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
 import org.meshtastic.core.resources.unmute
+import org.meshtastic.core.ui.icon.DeleteNode
+import org.meshtastic.core.ui.icon.DoDisturb
+import org.meshtastic.core.ui.icon.Favorite
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.NotFavorite
+import org.meshtastic.core.ui.icon.VolumeOff
+import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 /**
@@ -80,7 +79,7 @@ private fun FavoriteMenuItem(node: Node, onFavorite: () -> Unit, onDismiss: () -
         enabled = !node.isIgnored,
         leadingIcon = {
             Icon(
-                imageVector = if (isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                imageVector = if (isFavorite) MeshtasticIcons.Favorite else MeshtasticIcons.NotFavorite,
                 contentDescription = null,
             )
         },
@@ -98,7 +97,7 @@ private fun IgnoreMenuItem(node: Node, onIgnore: () -> Unit, onDismiss: () -> Un
         },
         leadingIcon = {
             Icon(
-                imageVector = if (isIgnored) Icons.Filled.DoDisturbOn else Icons.Outlined.DoDisturbOn,
+                imageVector = if (isIgnored) MeshtasticIcons.DoDisturb else MeshtasticIcons.DoDisturb,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.StatusRed,
             )
@@ -122,7 +121,7 @@ private fun MuteMenuItem(node: Node, onMute: () -> Unit, onDismiss: () -> Unit) 
         },
         leadingIcon = {
             Icon(
-                imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
+                imageVector = if (isMuted) MeshtasticIcons.VolumeOff else MeshtasticIcons.VolumeUp,
                 contentDescription = null,
             )
         },
@@ -140,7 +139,7 @@ private fun RemoveMenuItem(node: Node, onRemove: () -> Unit, onDismiss: () -> Un
         enabled = !node.isIgnored,
         leadingIcon = {
             Icon(
-                imageVector = Icons.Rounded.DeleteOutline,
+                imageVector = MeshtasticIcons.DeleteNode,
                 contentDescription = null,
                 tint = if (node.isIgnored) LocalContentColor.current else MaterialTheme.colorScheme.StatusRed,
             )

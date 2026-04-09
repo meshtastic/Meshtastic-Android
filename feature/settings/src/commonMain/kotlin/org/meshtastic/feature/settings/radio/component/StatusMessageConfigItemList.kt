@@ -18,8 +18,6 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -38,6 +36,8 @@ import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.status_message_config
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.Clear
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 @Composable
@@ -90,7 +90,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                         if (formState.value.node_status.isNotEmpty()) {
                             IconButton(onClick = { formState.value = formState.value.copy(node_status = "") }) {
                                 Icon(
-                                    imageVector = Icons.Default.Clear,
+                                    imageVector = MeshtasticIcons.Clear,
                                     contentDescription = stringResource(Res.string.clear),
                                 )
                             }

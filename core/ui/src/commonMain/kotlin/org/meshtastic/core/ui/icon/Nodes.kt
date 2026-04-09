@@ -16,6 +16,10 @@
  */
 package org.meshtastic.core.ui.icon
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Notes
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.DoDisturbOn
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -163,3 +167,11 @@ val MeshtasticIcons.Nodes: ImageVector
     }
 
 private var nodes: ImageVector? = null
+
+// New node management icons
+val MeshtasticIcons.Notes: ImageVector
+    get() = Icons.AutoMirrored.Rounded.Notes
+val MeshtasticIcons.DoDisturb: ImageVector
+    get() = Icons.Rounded.DoDisturbOn
+val MeshtasticIcons.DeleteNode: ImageVector
+    get() = Icons.Rounded.DeleteOutline

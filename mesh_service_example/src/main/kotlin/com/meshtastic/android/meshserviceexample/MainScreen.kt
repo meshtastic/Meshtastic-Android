@@ -39,10 +39,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.BatteryUnknown
 import androidx.compose.material.icons.automirrored.rounded.Message
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.BatteryUnknown
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.GpsFixed
@@ -483,12 +483,7 @@ private fun NodeItemActions(isOnline: Boolean, onAction: (String) -> Unit) {
             Icon(Icons.Rounded.Route, "Traceroute", Modifier.size(20.dp), MaterialTheme.colorScheme.primary)
         }
         IconButton(onClick = { onAction("telemetry") }, modifier = Modifier.size(40.dp)) {
-            Icon(
-                Icons.AutoMirrored.Rounded.BatteryUnknown,
-                "Telemetry",
-                Modifier.size(20.dp),
-                MaterialTheme.colorScheme.secondary,
-            )
+            Icon(Icons.Rounded.BatteryUnknown, "Telemetry", Modifier.size(20.dp), MaterialTheme.colorScheme.secondary)
         }
         IconButton(onClick = { onAction("position") }, modifier = Modifier.size(40.dp)) {
             Icon(Icons.Rounded.MyLocation, "Position", Modifier.size(20.dp), MaterialTheme.colorScheme.tertiary)

@@ -32,15 +32,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material.icons.outlined.MyLocation
-import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Lens
-import androidx.compose.material.icons.rounded.LocationDisabled
-import androidx.compose.material.icons.rounded.PinDrop
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Checkbox
@@ -131,6 +122,15 @@ import org.meshtastic.core.resources.waypoint_delete
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.Check
+import org.meshtastic.core.ui.icon.Favorite
+import org.meshtastic.core.ui.icon.Layers
+import org.meshtastic.core.ui.icon.Lens
+import org.meshtastic.core.ui.icon.LocationDisabled
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MyLocation
+import org.meshtastic.core.ui.icon.PinDrop
+import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.showToast
@@ -693,9 +693,10 @@ fun MapView(
         if (nodeTracks == null || focusedNodeNum == null) return emptyList<Marker>() to emptyList<Polyline>()
 
         val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
-        val timeFilteredPositions = nodeTracks.filter {
-            lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
-        }
+        val timeFilteredPositions =
+            nodeTracks.filter {
+                lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
+            }
         val sortedPositions = timeFilteredPositions.sortedBy { it.time }
 
         val focusedNode = nodes.find { it.num == focusedNodeNum } ?: return emptyList<Marker>() to emptyList<Polyline>()
@@ -718,17 +719,18 @@ fun MapView(
             }
         }
 
-        val trackMarkers = sortedPositions.mapIndexedNotNull { index, position ->
-            if (index == sortedPositions.lastIndex) return@mapIndexedNotNull null
+        val trackMarkers =
+            sortedPositions.mapIndexedNotNull { index, position ->
+                if (index == sortedPositions.lastIndex) return@mapIndexedNotNull null
 
-            Marker(this).apply {
-                this.position = GeoPoint((position.latitude_i ?: 0) * 1e-7, (position.longitude_i ?: 0) * 1e-7)
-                icon = AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot)
-                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                title = getString(Res.string.position)
-                snippet = formatAgo(position.time)
+                Marker(this).apply {
+                    this.position = GeoPoint((position.latitude_i ?: 0) * 1e-7, (position.longitude_i ?: 0) * 1e-7)
+                    icon = AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot)
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    title = getString(Res.string.position)
+                    snippet = formatAgo(position.time)
+                }
             }
-        }
         return trackMarkers to trackPolylines
     }
 
@@ -781,13 +783,13 @@ fun MapView(
                 ) {
                     MapButton(
                         onClick = { showMapStyleDialog = true },
-                        icon = Icons.Outlined.Layers,
+                        icon = MeshtasticIcons.Layers,
                         contentDescription = Res.string.map_style_selection,
                     )
                     Box(modifier = Modifier) {
                         MapButton(
                             onClick = { mapFilterExpanded = true },
-                            icon = Icons.Outlined.Tune,
+                            icon = MeshtasticIcons.Tune,
                             contentDescription = stringResource(Res.string.map_filter),
                         )
                         DropdownMenu(
@@ -802,7 +804,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Rounded.Star,
+                                            imageVector = MeshtasticIcons.Favorite,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -827,7 +829,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Rounded.PinDrop,
+                                            imageVector = MeshtasticIcons.PinDrop,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -852,7 +854,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Rounded.Lens,
+                                            imageVector = MeshtasticIcons.Lens,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -876,9 +878,9 @@ fun MapView(
                     MapButton(
                         icon =
                         if (myLocationOverlay == null) {
-                            Icons.Outlined.MyLocation
+                            MeshtasticIcons.MyLocation
                         } else {
-                            Icons.Rounded.LocationDisabled
+                            MeshtasticIcons.LocationDisabled
                         },
                         contentDescription = stringResource(Res.string.toggle_my_position),
                     ) {
@@ -976,7 +978,7 @@ private fun MapStyleDialog(selectedMapStyle: Int, onDismiss: () -> Unit, onSelec
         CustomTileSource.mTileSources.values.forEachIndexed { index, style ->
             ListItem(
                 text = style,
-                trailingIcon = if (index == selected.value) Icons.Rounded.Check else null,
+                trailingIcon = if (index == selected.value) MeshtasticIcons.Check else null,
                 onClick = {
                     selected.value = index
                     onSelectMapStyle(index)
@@ -1158,15 +1160,16 @@ private fun offsetPolyline(
     val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
     if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
 
-    val headings = headingPoints.mapIndexed { index, _ ->
-        when (index) {
-            0 -> bearingRad(headingPoints[0], headingPoints[1])
-            headingPoints.lastIndex ->
-                bearingRad(headingPoints[headingPoints.lastIndex - 1], headingPoints[headingPoints.lastIndex])
+    val headings =
+        headingPoints.mapIndexed { index, _ ->
+            when (index) {
+                0 -> bearingRad(headingPoints[0], headingPoints[1])
+                headingPoints.lastIndex ->
+                    bearingRad(headingPoints[headingPoints.lastIndex - 1], headingPoints[headingPoints.lastIndex])
 
-            else -> bearingRad(headingPoints[index - 1], headingPoints[index + 1])
+                else -> bearingRad(headingPoints[index - 1], headingPoints[index + 1])
+            }
         }
-    }
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]

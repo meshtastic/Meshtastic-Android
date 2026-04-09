@@ -28,10 +28,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Explore
-import androidx.compose.material.icons.rounded.LocationOn
-import androidx.compose.material.icons.rounded.SocialDistance
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,6 +48,10 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.exchange_position
 import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.resources.position
+import org.meshtastic.core.ui.icon.Compass
+import org.meshtastic.core.ui.icon.Distance
+import org.meshtastic.core.ui.icon.LocationOn
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
@@ -141,7 +141,7 @@ private fun PositionMap(node: Node, distance: String?) {
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(Icons.Rounded.SocialDistance, null, Modifier.size(16.dp))
+                    Icon(MeshtasticIcons.Distance, null, Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(distance, style = MaterialTheme.typography.labelLarge)
                 }
@@ -176,7 +176,7 @@ private fun PositionActionButtons(
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
             ) {
-                Icon(Icons.Rounded.LocationOn, null, Modifier.size(18.dp))
+                Icon(MeshtasticIcons.LocationOn, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(
                     text = stringResource(Res.string.exchange_position),
@@ -193,7 +193,7 @@ private fun PositionActionButtons(
                 modifier = if (isLocal) Modifier.fillMaxWidth() else Modifier.weight(COMPASS_BUTTON_WEIGHT),
                 shape = MaterialTheme.shapes.large,
             ) {
-                Icon(Icons.Rounded.Explore, null, Modifier.size(18.dp))
+                Icon(MeshtasticIcons.Compass, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(
                     text = stringResource(Res.string.open_compass),

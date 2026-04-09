@@ -19,8 +19,6 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Power
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +43,7 @@ import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.icon.BatteryEmpty
 import org.meshtastic.core.ui.icon.BatteryUnknown
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PowerSupply
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
@@ -78,7 +77,7 @@ fun MaterialBatteryInfo(
         } else if (level > 100) {
             Icon(
                 modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
-                imageVector = Icons.Rounded.Power,
+                imageVector = MeshtasticIcons.PowerSupply,
                 tint = contentColor.copy(alpha = 0.65f),
                 contentDescription = levelString,
             )

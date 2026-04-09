@@ -19,20 +19,6 @@ package org.meshtastic.feature.settings.radio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.AdminPanelSettings
-import androidx.compose.material.icons.rounded.AppSettingsAlt
-import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.CleaningServices
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.PowerSettingsNew
-import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material.icons.rounded.Restore
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Storage
-import androidx.compose.material.icons.rounded.SystemUpdate
-import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,6 +48,20 @@ import org.meshtastic.core.resources.radio_configuration
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.AdminPanelSettings
+import org.meshtastic.core.ui.icon.AppSettingsAlt
+import org.meshtastic.core.ui.icon.BugReport
+import org.meshtastic.core.ui.icon.CleaningServices
+import org.meshtastic.core.ui.icon.Download
+import org.meshtastic.core.ui.icon.FactoryReset
+import org.meshtastic.core.ui.icon.KeyboardArrowRight
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PowerSettingsNew
+import org.meshtastic.core.ui.icon.RestartAlt
+import org.meshtastic.core.ui.icon.Settings
+import org.meshtastic.core.ui.icon.Storage
+import org.meshtastic.core.ui.icon.SystemUpdate
+import org.meshtastic.core.ui.icon.Upload
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 
@@ -114,8 +114,8 @@ private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate
         }
         ListItem(
             text = stringResource(Res.string.device_configuration),
-            leadingIcon = Icons.Rounded.AppSettingsAlt,
-            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.AppSettingsAlt,
+            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
             enabled = enabled,
         ) {
             onNavigate(SettingsRoutes.DeviceConfiguration)
@@ -131,8 +131,8 @@ private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNaviga
         }
         ListItem(
             text = stringResource(Res.string.module_settings),
-            leadingIcon = Icons.Rounded.Settings,
-            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.Settings,
+            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
             enabled = enabled,
         ) {
             onNavigate(SettingsRoutes.ModuleConfiguration)
@@ -149,13 +149,13 @@ private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport:
 
         ListItem(
             text = stringResource(Res.string.import_configuration),
-            leadingIcon = Icons.Rounded.Download,
+            leadingIcon = MeshtasticIcons.Download,
             enabled = enabled,
             onClick = onImport,
         )
         ListItem(
             text = stringResource(Res.string.export_configuration),
-            leadingIcon = Icons.Rounded.Upload,
+            leadingIcon = MeshtasticIcons.Upload,
             enabled = enabled,
             onClick = onExport,
         )
@@ -167,8 +167,8 @@ private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit)
     ExpressiveSection(title = stringResource(Res.string.administration)) {
         ListItem(
             text = stringResource(Res.string.administration),
-            leadingIcon = Icons.Rounded.AdminPanelSettings,
-            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.AdminPanelSettings,
+            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
             leadingIconTint = MaterialTheme.colorScheme.error,
             textColor = MaterialTheme.colorScheme.error,
             trailingIconTint = MaterialTheme.colorScheme.error,
@@ -189,7 +189,7 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
         if (isOtaCapable) {
             ListItem(
                 text = stringResource(Res.string.firmware_update_title),
-                leadingIcon = Icons.Rounded.SystemUpdate,
+                leadingIcon = MeshtasticIcons.SystemUpdate,
                 enabled = enabled,
                 onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
             )
@@ -197,14 +197,14 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
 
         ListItem(
             text = stringResource(Res.string.clean_node_database_title),
-            leadingIcon = Icons.Rounded.CleaningServices,
+            leadingIcon = MeshtasticIcons.CleaningServices,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
         )
 
         ListItem(
             text = stringResource(Res.string.debug_panel),
-            leadingIcon = Icons.Rounded.BugReport,
+            leadingIcon = MeshtasticIcons.BugReport,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.DebugPanel) },
         )
@@ -212,10 +212,10 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
 }
 
 enum class AdminRoute(val icon: ImageVector, val title: StringResource) {
-    REBOOT(Icons.Rounded.RestartAlt, Res.string.reboot),
-    SHUTDOWN(Icons.Rounded.PowerSettingsNew, Res.string.shutdown),
-    FACTORY_RESET(Icons.Rounded.Restore, Res.string.factory_reset),
-    NODEDB_RESET(Icons.Rounded.Storage, Res.string.nodedb_reset),
+    REBOOT(MeshtasticIcons.RestartAlt, Res.string.reboot),
+    SHUTDOWN(MeshtasticIcons.PowerSettingsNew, Res.string.shutdown),
+    FACTORY_RESET(MeshtasticIcons.FactoryReset, Res.string.factory_reset),
+    NODEDB_RESET(MeshtasticIcons.Storage, Res.string.nodedb_reset),
 }
 
 @Composable

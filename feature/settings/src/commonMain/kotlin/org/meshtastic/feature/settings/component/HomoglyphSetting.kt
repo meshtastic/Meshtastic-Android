@@ -16,20 +16,20 @@
  */
 package org.meshtastic.feature.settings.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Abc
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.use_homoglyph_characters_encoding
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.core.ui.icon.Abc
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
 fun HomoglyphSetting(homoglyphEncodingEnabled: Boolean, onToggle: () -> Unit) {
     SwitchListItem(
         text = stringResource(Res.string.use_homoglyph_characters_encoding),
         checked = homoglyphEncodingEnabled,
-        leadingIcon = Icons.Default.Abc,
+        leadingIcon = MeshtasticIcons.Abc,
         onClick = onToggle,
     )
 }

@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.ui.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.OfflineShare
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
@@ -31,6 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.OfflineShare
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -50,7 +50,7 @@ fun MenuFAB(
                 checked = expanded,
                 onCheckedChange = onExpandedChange,
                 content = {
-                    val imageVector = if (expanded) Icons.Filled.Close else Icons.AutoMirrored.Rounded.OfflineShare
+                    val imageVector = if (expanded) MeshtasticIcons.Close else MeshtasticIcons.OfflineShare
                     Icon(imageVector = imageVector, contentDescription = contentDescription)
                 },
                 containerColor = ToggleFloatingActionButtonDefaults.containerColor(),

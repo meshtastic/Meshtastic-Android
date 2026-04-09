@@ -46,12 +46,12 @@ import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
-import org.meshtastic.core.ui.icon.CloudDone
-import org.meshtastic.core.ui.icon.CloudOffTwoTone
-import org.meshtastic.core.ui.icon.CloudSync
-import org.meshtastic.core.ui.icon.CloudTwoTone
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MqttDelivered
+import org.meshtastic.core.ui.icon.MqttSent
+import org.meshtastic.core.ui.icon.MqttSyncing
+import org.meshtastic.core.ui.icon.MqttUnavailable
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
@@ -135,7 +135,7 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState) {
 @Composable
 private fun ConnectedStatusIcon() {
     Icon(
-        imageVector = MeshtasticIcons.CloudDone,
+        imageVector = MeshtasticIcons.MqttDelivered,
         contentDescription = stringResource(Res.string.connected),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusGreen,
@@ -145,7 +145,7 @@ private fun ConnectedStatusIcon() {
 @Composable
 private fun ConnectingStatusIcon() {
     Icon(
-        imageVector = MeshtasticIcons.CloudSync,
+        imageVector = MeshtasticIcons.MqttSyncing,
         contentDescription = stringResource(Res.string.connecting),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusOrange,
@@ -155,7 +155,7 @@ private fun ConnectingStatusIcon() {
 @Composable
 private fun DisconnectedStatusIcon() {
     Icon(
-        imageVector = MeshtasticIcons.CloudOffTwoTone,
+        imageVector = MeshtasticIcons.MqttUnavailable,
         contentDescription = stringResource(Res.string.disconnected),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusRed,
@@ -165,7 +165,7 @@ private fun DisconnectedStatusIcon() {
 @Composable
 private fun DeviceSleepStatusIcon() {
     Icon(
-        imageVector = MeshtasticIcons.CloudTwoTone,
+        imageVector = MeshtasticIcons.MqttSent,
         contentDescription = stringResource(Res.string.device_sleeping),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusYellow,

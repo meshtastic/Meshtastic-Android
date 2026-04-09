@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -32,6 +30,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.ui.component.ChannelItem
 import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 
@@ -71,7 +71,7 @@ internal fun ChannelCard(
     Spacer(modifier = Modifier.width(10.dp))
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
-            imageVector = Icons.TwoTone.Close,
+            imageVector = MeshtasticIcons.Close,
             contentDescription = stringResource(Res.string.delete),
             modifier = Modifier.wrapContentSize(),
         )

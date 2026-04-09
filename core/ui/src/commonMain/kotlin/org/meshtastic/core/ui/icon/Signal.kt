@@ -17,10 +17,18 @@
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CellTower
 import androidx.compose.material.icons.rounded.CrueltyFree
+import androidx.compose.material.icons.rounded.Hub
+import androidx.compose.material.icons.rounded.NearMe
 import androidx.compose.material.icons.rounded.Route
+import androidx.compose.material.icons.rounded.SignalCellular4Bar
 import androidx.compose.material.icons.rounded.SignalCellularAlt
+import androidx.compose.material.icons.rounded.SignalCellularAlt1Bar
+import androidx.compose.material.icons.rounded.SignalCellularAlt2Bar
+import androidx.compose.material.icons.rounded.SignalCellularOff
 import androidx.compose.material.icons.rounded.SsidChart
+import androidx.compose.material.icons.rounded.Tsunami
 import androidx.compose.material.icons.rounded.WifiChannel
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -28,7 +36,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val MeshtasticIcons.Hops: ImageVector
+val MeshtasticIcons.HopCount: ImageVector
     get() = Icons.Rounded.CrueltyFree
 val MeshtasticIcons.Route: ImageVector
     get() = Icons.Rounded.Route
@@ -252,3 +260,25 @@ val MeshtasticIcons.SignalCellular4Bar: ImageVector
     }
 
 private var signalCellular4Bar: ImageVector? = null
+
+// New signal icons
+val MeshtasticIcons.CellTower: ImageVector
+    get() = Icons.Rounded.CellTower
+val MeshtasticIcons.MeshHub: ImageVector
+    get() = Icons.Rounded.Hub
+val MeshtasticIcons.NearMe: ImageVector
+    get() = Icons.Rounded.NearMe
+val MeshtasticIcons.Tsunami: ImageVector
+    get() = Icons.Rounded.Tsunami
+
+// LoRA signal quality (bar-style alt icons)
+val MeshtasticIcons.SignalAlt1Bar: ImageVector
+    get() = Icons.Rounded.SignalCellularAlt1Bar
+val MeshtasticIcons.SignalAlt2Bar: ImageVector
+    get() = Icons.Rounded.SignalCellularAlt2Bar
+val MeshtasticIcons.SignalAlt: ImageVector
+    get() = Icons.Rounded.SignalCellularAlt
+val MeshtasticIcons.SignalFull: ImageVector
+    get() = Icons.Rounded.SignalCellular4Bar
+val MeshtasticIcons.SignalOff: ImageVector
+    get() = Icons.Rounded.SignalCellularOff

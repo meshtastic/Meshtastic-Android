@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -48,6 +46,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_a_note
 import org.meshtastic.core.resources.notes
 import org.meshtastic.core.resources.save
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Save
 
 @Composable
 fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modifier = Modifier) {
@@ -86,7 +86,10 @@ fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modif
                             },
                             enabled = edited,
                         ) {
-                            Icon(imageVector = Icons.Rounded.Save, contentDescription = stringResource(Res.string.save))
+                            Icon(
+                                imageVector = MeshtasticIcons.Save,
+                                contentDescription = stringResource(Res.string.save),
+                            )
                         }
                     },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

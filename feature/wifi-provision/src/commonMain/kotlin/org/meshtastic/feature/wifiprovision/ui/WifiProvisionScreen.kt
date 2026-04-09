@@ -43,13 +43,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.Visibility
-import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -117,6 +110,13 @@ import org.meshtastic.core.resources.wifi_provision_ssid_label
 import org.meshtastic.core.resources.wifi_provision_ssid_placeholder
 import org.meshtastic.core.resources.wifi_provisioning
 import org.meshtastic.core.ui.component.AutoLinkText
+import org.meshtastic.core.ui.icon.ArrowBack
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.Lock
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Visibility
+import org.meshtastic.core.ui.icon.VisibilityOff
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.wifiprovision.WifiProvisionError
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
@@ -156,7 +156,7 @@ fun WifiProvisionScreen(
                 title = { Text(stringResource(Res.string.wifi_provisioning)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                        Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
             )
@@ -251,7 +251,7 @@ internal fun ScanningBleContent() {
 internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCancel: () -> Unit) {
     CenteredStatusContent {
         Icon(
-            Icons.Rounded.Bluetooth,
+            MeshtasticIcons.Bluetooth,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.primary,
@@ -344,7 +344,7 @@ internal fun ConnectedContent(
             if (isScanning) {
                 LoadingIndicator(modifier = Modifier.size(18.dp))
             } else {
-                Icon(Icons.Rounded.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(MeshtasticIcons.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
             }
             Spacer(Modifier.width(8.dp))
             Text(
@@ -416,7 +416,8 @@ internal fun ConnectedContent(
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                        imageVector =
+                        if (passwordVisible) MeshtasticIcons.VisibilityOff else MeshtasticIcons.Visibility,
                         contentDescription =
                         if (passwordVisible) {
                             stringResource(Res.string.hide_password)
@@ -453,7 +454,7 @@ internal fun ConnectedContent(
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(Res.string.wifi_provision_sending_credentials))
                 } else {
-                    Icon(Icons.Rounded.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(MeshtasticIcons.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(Res.string.apply))
                 }
@@ -474,12 +475,12 @@ internal fun NetworkRow(network: WifiNetwork, isSelected: Boolean, onClick: () -
         headlineContent = { Text(network.ssid) },
         supportingContent = { Text(stringResource(Res.string.wifi_provision_signal_strength, network.signalStrength)) },
         leadingContent = {
-            Icon(Icons.Rounded.Wifi, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(MeshtasticIcons.Wifi, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         },
         trailingContent = {
             if (network.isProtected) {
                 Icon(
-                    Icons.Rounded.Lock,
+                    MeshtasticIcons.Lock,
                     contentDescription = stringResource(Res.string.password),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

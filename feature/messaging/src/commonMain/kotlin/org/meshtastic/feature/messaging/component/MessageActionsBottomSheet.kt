@@ -26,12 +26,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Reply
-import androidx.compose.material.icons.rounded.AddReaction
-import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +49,12 @@ import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.more_reactions
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.select
+import org.meshtastic.core.ui.icon.AddReaction
+import org.meshtastic.core.ui.icon.Copy
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Reply
+import org.meshtastic.core.ui.icon.SelectAll
 
 @Composable
 fun MessageActionsContent(
@@ -90,27 +90,27 @@ fun MessageActionsContent(
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.reply)) },
-            leadingContent = {
-                Icon(Icons.AutoMirrored.Rounded.Reply, contentDescription = stringResource(Res.string.reply))
-            },
+            leadingContent = { Icon(MeshtasticIcons.Reply, contentDescription = stringResource(Res.string.reply)) },
             modifier = Modifier.clickable(onClick = onReply),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.copy)) },
-            leadingContent = { Icon(Icons.Rounded.ContentCopy, contentDescription = stringResource(Res.string.copy)) },
+            leadingContent = { Icon(MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy)) },
             modifier = Modifier.clickable(onClick = onCopy),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.select)) },
-            leadingContent = { Icon(Icons.Rounded.SelectAll, contentDescription = stringResource(Res.string.select)) },
+            leadingContent = {
+                Icon(MeshtasticIcons.SelectAll, contentDescription = stringResource(Res.string.select))
+            },
             modifier = Modifier.clickable(onClick = onSelect),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.delete)) },
-            leadingContent = { Icon(Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete)) },
+            leadingContent = { Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete)) },
             modifier = Modifier.clickable(onClick = onDelete),
         )
     }
@@ -143,7 +143,7 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
             modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
         ) {
             Icon(
-                Icons.Rounded.AddReaction,
+                MeshtasticIcons.AddReaction,
                 contentDescription = stringResource(Res.string.more_reactions),
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,

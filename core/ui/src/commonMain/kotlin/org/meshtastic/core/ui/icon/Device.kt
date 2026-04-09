@@ -17,12 +17,19 @@
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Android
+import androidx.compose.material.icons.rounded.DisplaySettings
 import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.ForkLeft
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Icecream
+import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.MilitaryTech
 import androidx.compose.material.icons.rounded.MyLocation
+import androidx.compose.material.icons.rounded.Numbers
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PersonOff
+import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Sensors
@@ -189,3 +196,19 @@ val MeshtasticIcons.Device: ImageVector
     }
 
 private var device: ImageVector? = null
+
+// New device icons
+val MeshtasticIcons.Memory: ImageVector
+    get() = Icons.Rounded.Memory
+val MeshtasticIcons.PhoneAndroid: ImageVector
+    get() = Icons.Rounded.PhoneAndroid
+val MeshtasticIcons.DisplaySettings: ImageVector
+    get() = Icons.Rounded.DisplaySettings
+val MeshtasticIcons.ForkLeft: ImageVector
+    get() = Icons.Rounded.ForkLeft
+val MeshtasticIcons.Icecream: ImageVector
+    get() = Icons.Rounded.Icecream
+val MeshtasticIcons.DeviceNumbers: ImageVector
+    get() = Icons.Rounded.Numbers
+val MeshtasticIcons.Android: ImageVector
+    get() = Icons.Rounded.Android

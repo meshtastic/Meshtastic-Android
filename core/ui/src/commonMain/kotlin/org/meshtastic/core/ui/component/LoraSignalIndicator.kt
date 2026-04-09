@@ -27,11 +27,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.SignalCellular4Bar
-import androidx.compose.material.icons.rounded.SignalCellularAlt
-import androidx.compose.material.icons.rounded.SignalCellularAlt1Bar
-import androidx.compose.material.icons.rounded.SignalCellularAlt2Bar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -55,6 +50,11 @@ import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.snr
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.SignalAlt
+import org.meshtastic.core.ui.icon.SignalAlt1Bar
+import org.meshtastic.core.ui.icon.SignalAlt2Bar
+import org.meshtastic.core.ui.icon.SignalFull
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -72,10 +72,10 @@ enum class Quality(
     @Stable val imageVector: ImageVector,
     @Stable val color: @Composable () -> Color,
 ) {
-    NONE(Res.string.none_quality, Icons.Rounded.SignalCellularAlt1Bar, { colorScheme.StatusRed }),
-    BAD(Res.string.bad, Icons.Rounded.SignalCellularAlt2Bar, { colorScheme.StatusOrange }),
-    FAIR(Res.string.fair, Icons.Rounded.SignalCellularAlt, { colorScheme.StatusYellow }),
-    GOOD(Res.string.good, Icons.Rounded.SignalCellular4Bar, { colorScheme.StatusGreen }),
+    NONE(Res.string.none_quality, MeshtasticIcons.SignalAlt1Bar, { colorScheme.StatusRed }),
+    BAD(Res.string.bad, MeshtasticIcons.SignalAlt2Bar, { colorScheme.StatusOrange }),
+    FAIR(Res.string.fair, MeshtasticIcons.SignalAlt, { colorScheme.StatusYellow }),
+    GOOD(Res.string.good, MeshtasticIcons.SignalFull, { colorScheme.StatusGreen }),
 }
 
 /**

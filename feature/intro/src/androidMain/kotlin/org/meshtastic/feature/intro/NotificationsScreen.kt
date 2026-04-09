@@ -19,10 +19,6 @@ package org.meshtastic.feature.intro
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Message
-import androidx.compose.material.icons.outlined.BatteryAlert
-import androidx.compose.material.icons.outlined.SpeakerPhone
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -38,6 +34,10 @@ import org.meshtastic.core.resources.notifications_for_channel_and_direct_messag
 import org.meshtastic.core.resources.notifications_for_low_battery_alerts
 import org.meshtastic.core.resources.notifications_for_newly_discovered_nodes
 import org.meshtastic.core.resources.settings
+import org.meshtastic.core.ui.icon.BatteryAlert
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Message
+import org.meshtastic.core.ui.icon.Speaker
 
 /**
  * Screen for configuring notification permissions during the app introduction. It explains why notification permissions
@@ -61,17 +61,17 @@ internal fun NotificationsScreen(showNextButton: Boolean, onSkip: () -> Unit, on
     val features = remember {
         listOf(
             FeatureUIData(
-                icon = Icons.AutoMirrored.Outlined.Message,
+                icon = MeshtasticIcons.Message,
                 titleRes = Res.string.incoming_messages,
                 subtitleRes = Res.string.notifications_for_channel_and_direct_messages,
             ),
             FeatureUIData(
-                icon = Icons.Outlined.SpeakerPhone,
+                icon = MeshtasticIcons.Speaker,
                 titleRes = Res.string.new_nodes,
                 subtitleRes = Res.string.notifications_for_newly_discovered_nodes,
             ),
             FeatureUIData(
-                icon = Icons.Outlined.BatteryAlert,
+                icon = MeshtasticIcons.BatteryAlert,
                 titleRes = Res.string.low_battery,
                 subtitleRes = Res.string.notifications_for_low_battery_alerts,
             ),

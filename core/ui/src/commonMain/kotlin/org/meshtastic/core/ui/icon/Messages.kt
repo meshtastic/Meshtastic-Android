@@ -16,6 +16,17 @@
  */
 package org.meshtastic.core.ui.icon
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Message
+import androidx.compose.material.icons.rounded.AddLink
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
+import androidx.compose.material.icons.rounded.FastForward
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.FilterListOff
+import androidx.compose.material.icons.rounded.FormatQuote
+import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -98,3 +109,25 @@ val MeshtasticIcons.Conversations: ImageVector
     }
 
 private var conversations: ImageVector? = null
+
+// Messaging UI icons
+val MeshtasticIcons.ChatBubbleOutline: ImageVector
+    get() = Icons.Rounded.ChatBubbleOutline
+val MeshtasticIcons.FormatQuote: ImageVector
+    get() = Icons.Rounded.FormatQuote
+val MeshtasticIcons.FilterList: ImageVector
+    get() = Icons.Rounded.FilterList
+val MeshtasticIcons.FilterListOff: ImageVector
+    get() = Icons.Rounded.FilterListOff
+val MeshtasticIcons.FastForward: ImageVector
+    get() = Icons.Rounded.FastForward
+val MeshtasticIcons.Message: ImageVector
+    get() = Icons.AutoMirrored.Rounded.Message
+val MeshtasticIcons.Visibility: ImageVector
+    get() = Icons.Rounded.Visibility
+val MeshtasticIcons.VisibilityOff: ImageVector
+    get() = Icons.Rounded.VisibilityOff
+val MeshtasticIcons.AddLink: ImageVector
+    get() = Icons.Rounded.AddLink
+val MeshtasticIcons.LinkIcon: ImageVector
+    get() = Icons.Rounded.Link

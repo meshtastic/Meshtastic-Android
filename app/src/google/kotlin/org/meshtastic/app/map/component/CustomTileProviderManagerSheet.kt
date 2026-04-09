@@ -27,9 +27,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -71,6 +68,9 @@ import org.meshtastic.core.resources.url_must_contain_placeholders
 import org.meshtastic.core.resources.url_template
 import org.meshtastic.core.resources.url_template_hint
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.Edit
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.showToast
 
 @Suppress("LongMethod")
@@ -155,13 +155,13 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
                                 },
                             ) {
                                 Icon(
-                                    Icons.Filled.Edit,
+                                    MeshtasticIcons.Edit,
                                     contentDescription = stringResource(Res.string.edit_custom_tile_source),
                                 )
                             }
                             IconButton(onClick = { mapViewModel.removeCustomTileProvider(config.id) }) {
                                 Icon(
-                                    Icons.Filled.Delete,
+                                    MeshtasticIcons.Delete,
                                     contentDescription = stringResource(Res.string.delete_custom_tile_source),
                                 )
                             }

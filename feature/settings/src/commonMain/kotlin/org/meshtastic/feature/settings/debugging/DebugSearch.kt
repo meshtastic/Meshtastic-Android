@@ -27,11 +27,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +50,11 @@ import org.meshtastic.core.resources.debug_logs_export
 import org.meshtastic.core.resources.debug_search_clear
 import org.meshtastic.core.resources.debug_search_next
 import org.meshtastic.core.resources.debug_search_prev
+import org.meshtastic.core.ui.icon.Clear
+import org.meshtastic.core.ui.icon.FileDownload
+import org.meshtastic.core.ui.icon.KeyboardArrowDown
+import org.meshtastic.core.ui.icon.KeyboardArrowUp
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState
 
@@ -77,14 +77,14 @@ fun DebugSearchNavigation(
         )
         IconButton(onClick = onPreviousMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
-                imageVector = Icons.Rounded.KeyboardArrowUp,
+                imageVector = MeshtasticIcons.KeyboardArrowUp,
                 contentDescription = stringResource(Res.string.debug_search_prev),
                 modifier = Modifier.size(16.dp),
             )
         }
         IconButton(onClick = onNextMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
-                imageVector = Icons.Rounded.KeyboardArrowDown,
+                imageVector = MeshtasticIcons.KeyboardArrowDown,
                 contentDescription = stringResource(Res.string.debug_search_next),
                 modifier = Modifier.size(16.dp),
             )
@@ -130,7 +130,7 @@ fun DebugSearchBar(
                 if (searchState.searchText.isNotEmpty()) {
                     IconButton(onClick = onClearSearch, modifier = Modifier.size(32.dp)) {
                         Icon(
-                            imageVector = Icons.Rounded.Clear,
+                            imageVector = MeshtasticIcons.Clear,
                             contentDescription = stringResource(Res.string.debug_search_clear),
                             modifier = Modifier.size(16.dp),
                         )
@@ -186,7 +186,7 @@ fun DebugSearchState(
             onExportLogs?.let { onExport ->
                 IconButton(onClick = onExport, modifier = Modifier) {
                     Icon(
-                        imageVector = Icons.Outlined.FileDownload,
+                        imageVector = MeshtasticIcons.FileDownload,
                         contentDescription = stringResource(Res.string.debug_logs_export),
                         modifier = Modifier.size(24.dp),
                     )
