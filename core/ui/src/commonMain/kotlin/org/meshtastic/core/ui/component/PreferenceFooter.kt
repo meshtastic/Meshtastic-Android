@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("detekt:ALL")
 
 package org.meshtastic.core.ui.component
 
@@ -30,28 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
-
-@Deprecated(message = "Use overload that accepts Strings for button text.")
-@Composable
-fun PreferenceFooter(
-    enabled: Boolean,
-    negativeText: StringResource,
-    onNegativeClicked: () -> Unit,
-    positiveText: StringResource,
-    onPositiveClicked: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    PreferenceFooter(
-        modifier = modifier,
-        enabled = enabled,
-        negativeText = stringResource(negativeText),
-        onNegativeClicked = onNegativeClicked,
-        positiveText = stringResource(positiveText),
-        onPositiveClicked = onPositiveClicked,
-    )
-}
 
 @Composable
 fun PreferenceFooter(

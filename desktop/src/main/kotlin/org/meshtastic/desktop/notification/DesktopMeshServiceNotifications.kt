@@ -16,7 +16,6 @@
  */
 package org.meshtastic.desktop.notification
 
-import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.Notification
@@ -29,7 +28,10 @@ import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
-@Single
+/**
+ * Desktop notifications implementation. Registered manually in [desktopPlatformStubsModule] — do NOT add @Single
+ * to avoid double-registration with the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
+ */
 @Suppress("TooManyFunctions")
 class DesktopMeshServiceNotifications(private val notificationManager: NotificationManager) : MeshServiceNotifications {
     override fun clearNotifications() {

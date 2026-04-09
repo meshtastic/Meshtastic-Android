@@ -80,12 +80,6 @@ class NetworkModule {
         .build()
 
     @Single
-    fun provideJson(): Json = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-    }
-
-    @Single
     fun provideHttpClient(json: Json, buildConfigProvider: BuildConfigProvider): HttpClient =
         HttpClient(engineFactory = Android) {
             install(plugin = ContentNegotiation) { json(json) }

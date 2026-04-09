@@ -18,9 +18,7 @@ package org.meshtastic.core.common
 
 import android.Manifest
 import android.app.Application
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
@@ -79,19 +77,4 @@ fun Context.hasBluetoothPermission(): Boolean = getBluetoothPermissions().isEmpt
 fun Context.hasLocationPermission(): Boolean {
     val perms = listOf(Manifest.permission.ACCESS_FINE_LOCATION)
     return perms.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
-}
-
-/**
- * Extension for Context to register a BroadcastReceiver in a compatible way across Android versions.
- *
- * @param receiver The receiver to register.
- * @param filter The intent filter.
- * @param flag The export flag (defaults to [ContextCompat.RECEIVER_EXPORTED]).
- */
-fun Context.registerReceiverCompat(
-    receiver: BroadcastReceiver,
-    filter: IntentFilter,
-    flag: Int = ContextCompat.RECEIVER_EXPORTED,
-) {
-    ContextCompat.registerReceiver(this, receiver, filter, flag)
 }

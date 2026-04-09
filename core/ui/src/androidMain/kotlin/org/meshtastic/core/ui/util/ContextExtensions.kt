@@ -16,9 +16,7 @@
  */
 package org.meshtastic.core.ui.util
 
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
@@ -31,13 +29,6 @@ suspend fun Context.showToast(stringResource: StringResource, vararg formatArgs:
 
 suspend fun Context.showToast(text: String) {
     Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
-}
-
-/** Finds the [Activity] from a [Context]. */
-fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }
 
 fun Context.openNfcSettings() {

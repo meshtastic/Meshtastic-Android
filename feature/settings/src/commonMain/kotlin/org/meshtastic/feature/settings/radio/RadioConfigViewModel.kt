@@ -126,7 +126,7 @@ open class RadioConfigViewModel(
     private val locationService: LocationService,
     private val fileService: FileService,
 ) : ViewModel() {
-    var analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
+    val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {
         toggleAnalyticsUseCase()

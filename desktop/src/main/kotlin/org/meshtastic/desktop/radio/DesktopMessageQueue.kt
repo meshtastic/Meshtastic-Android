@@ -19,6 +19,7 @@ package org.meshtastic.desktop.radio
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
@@ -36,7 +37,7 @@ class DesktopMessageQueue(
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
 ) : MessageQueue {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override suspend fun enqueue(packetId: Int) {
         scope.launch {

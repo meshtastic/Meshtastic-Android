@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -92,7 +93,7 @@ open class BaseMapViewModel(
             .stateInWhileSubscribed(initialValue = emptyMap())
 
     private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites.value)
-    val showOnlyFavoritesOnMap = showOnlyFavorites
+    val showOnlyFavoritesOnMap: StateFlow<Boolean> = showOnlyFavorites.asStateFlow()
 
     fun toggleOnlyFavorites() {
         val newValue = !showOnlyFavorites.value
@@ -101,7 +102,7 @@ open class BaseMapViewModel(
     }
 
     private val showWaypoints = MutableStateFlow(mapPrefs.showWaypointsOnMap.value)
-    val showWaypointsOnMap = showWaypoints
+    val showWaypointsOnMap: StateFlow<Boolean> = showWaypoints.asStateFlow()
 
     fun toggleShowWaypointsOnMap() {
         val newValue = !showWaypoints.value
@@ -110,7 +111,7 @@ open class BaseMapViewModel(
     }
 
     private val showPrecisionCircle = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap.value)
-    val showPrecisionCircleOnMap = showPrecisionCircle
+    val showPrecisionCircleOnMap: StateFlow<Boolean> = showPrecisionCircle.asStateFlow()
 
     fun toggleShowPrecisionCircleOnMap() {
         val newValue = !showPrecisionCircle.value
@@ -119,7 +120,7 @@ open class BaseMapViewModel(
     }
 
     private val lastHeardFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter.value))
-    val lastHeardFilter = lastHeardFilterValue
+    val lastHeardFilter: StateFlow<LastHeardFilter> = lastHeardFilterValue.asStateFlow()
 
     fun setLastHeardFilter(filter: LastHeardFilter) {
         lastHeardFilterValue.value = filter
@@ -128,7 +129,7 @@ open class BaseMapViewModel(
 
     private val lastHeardTrackFilterValue =
         MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter.value))
-    val lastHeardTrackFilter = lastHeardTrackFilterValue
+    val lastHeardTrackFilter: StateFlow<LastHeardFilter> = lastHeardTrackFilterValue.asStateFlow()
 
     fun setLastHeardTrackFilter(filter: LastHeardFilter) {
         lastHeardTrackFilterValue.value = filter

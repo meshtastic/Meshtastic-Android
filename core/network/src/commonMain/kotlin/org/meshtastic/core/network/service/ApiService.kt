@@ -29,7 +29,7 @@ interface ApiService {
     suspend fun getFirmwareReleases(): NetworkFirmwareReleases
 }
 
-@Single
+@Single(binds = [])
 class ApiServiceImpl(private val client: HttpClient) : ApiService {
     override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> =
         client.get("https://api.meshtastic.org/resource/deviceHardware").body()

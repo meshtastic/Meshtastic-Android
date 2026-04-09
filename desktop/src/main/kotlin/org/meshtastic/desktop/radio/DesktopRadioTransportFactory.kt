@@ -16,7 +16,6 @@
  */
 package org.meshtastic.desktop.radio
 
-import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
@@ -33,8 +32,10 @@ import org.meshtastic.core.repository.RadioTransportFactory
 /**
  * Desktop implementation of [RadioTransportFactory] delegating multiplatform transports (BLE, TCP) and providing
  * platform-specific transports (USB/Serial) via jSerialComm.
+ *
+ * Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to avoid double-registration
+ * with the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
  */
-@Single(binds = [RadioTransportFactory::class])
 class DesktopRadioTransportFactory(
     scanner: BleScanner,
     bluetoothRepository: BluetoothRepository,
