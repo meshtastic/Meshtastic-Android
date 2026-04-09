@@ -134,29 +134,39 @@ class MQTTRepositoryImpl(
 
         client = newClient
 
-        clientJob = scope.launch {
-            var reconnectDelay = INITIAL_RECONNECT_DELAY_MS
-            while (true) {
-                try {
-                    Logger.i { "MQTT Starting client loop for $host:$port" }
-                    newClient.runSuspend()
-                    // runSuspend returned normally — broker closed connection. Retry.
-                    Logger.w { "MQTT client loop ended normally, reconnecting in ${reconnectDelay}ms" }
-                } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
-                    Logger.e(e) { "MQTT Client loop error (MQTT), reconnecting in ${reconnectDelay}ms" }
-                } catch (e: io.github.davidepianca98.socket.IOException) {
-                    Logger.e(e) { "MQTT Client loop error (IO), reconnecting in ${reconnectDelay}ms" }
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    Logger.i { "MQTT Client loop cancelled" }
-                    throw e
+        clientJob =
+            scope.launch {
+                var reconnectDelay = INITIAL_RECONNECT_DELAY_MS
+                while (true) {
+                    try {
+                        Logger.i { "MQTT Starting client loop for $host:$port" }
+                        // Reset backoff on each successful connection establishment. If the broker
+                        // disconnects cleanly after hours of operation, the next reconnect should
+                        // start with the minimum delay rather than whatever was accumulated.
+                        reconnectDelay = INITIAL_RECONNECT_DELAY_MS
+                        newClient.runSuspend()
+                        // runSuspend returned normally — broker closed connection. Retry.
+                        Logger.w { "MQTT client loop ended normally, reconnecting in ${reconnectDelay}ms" }
+                    } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
+                        Logger.e(e) { "MQTT Client loop error (MQTT), reconnecting in ${reconnectDelay}ms" }
+                    } catch (e: io.github.davidepianca98.socket.IOException) {
+                        Logger.e(e) { "MQTT Client loop error (IO), reconnecting in ${reconnectDelay}ms" }
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        Logger.i { "MQTT Client loop cancelled" }
+                        throw e
+                    }
+                    delay(reconnectDelay)
+                    reconnectDelay =
+                        (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)
                 }
-                delay(reconnectDelay)
-                reconnectDelay = (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER)
-                    .coerceAtMost(MAX_RECONNECT_DELAY_MS)
             }
-        }
 
-        // Subscriptions
+        // Subscriptions: placed after runSuspend is launched and has had time to establish
+        // the TCP connection. KMQTT's subscribe() queues internally, but subscribing before
+        // the connection is ready may silently drop subscriptions depending on the version.
+        // A brief yield gives runSuspend() time to connect before we subscribe.
+        kotlinx.coroutines.yield()
+
         val subscriptions = mutableListOf<Subscription>()
         channelSet.subscribeList.forEach { globalId ->
             subscriptions.add(

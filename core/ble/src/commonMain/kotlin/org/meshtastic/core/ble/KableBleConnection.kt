@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
@@ -77,8 +78,8 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
 /**
  * [BleConnection] implementation using Kable for cross-platform BLE communication.
  *
- * Manages peripheral lifecycle (connect with exponential backoff, disconnect, reconnect),
- * connection state tracking, and GATT service profile access.
+ * Manages peripheral lifecycle (connect with exponential backoff, disconnect, reconnect), connection state tracking,
+ * and GATT service profile access.
  */
 class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
@@ -107,6 +108,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         )
     override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
 
+    @Suppress("LongMethod", "CyclomaticComplexMethod")
     override suspend fun connect(device: BleDevice) {
         val autoConnect = MutableStateFlow(device is DirectBleDevice)
 
@@ -129,8 +131,20 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                 else -> error("Unsupported BleDevice type: ${device::class}")
             }
 
-        peripheral?.disconnect()
-        peripheral?.close()
+        // Clean up previous peripheral under NonCancellable to prevent GATT resource leaks
+        // if the calling coroutine is cancelled during teardown.
+        withContext(NonCancellable) {
+            try {
+                peripheral?.disconnect()
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "[${device.address}] Failed to disconnect previous peripheral" }
+            }
+            try {
+                peripheral?.close()
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "[${device.address}] Failed to close previous peripheral" }
+            }
+        }
         peripheral = p
 
         ActiveBleConnection.activePeripheral = p
@@ -163,8 +177,9 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
             autoConnect.value =
                 try {
                     // Cancel any previous connectionScope to avoid leaking the old coroutine scope.
-                    connectionScope?.let {
+                    connectionScope?.let { oldScope ->
                         Logger.d { "[${device.address}] Cancelling previous connectionScope before reconnect" }
+                        oldScope.coroutineContext.job.cancel()
                     }
                     connectionScope = p.connect()
                     false

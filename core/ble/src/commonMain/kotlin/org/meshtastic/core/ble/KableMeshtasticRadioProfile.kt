@@ -33,8 +33,8 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 /**
  * [MeshtasticRadioProfile] implementation using Kable BLE characteristics.
  *
- * Supports both the modern `FROMRADIOSYNC` characteristic (single observe stream) and the legacy
- * `FROMNUM` + `FROMRADIO` polling fallback for older firmware versions.
+ * Supports both the modern `FROMRADIOSYNC` characteristic (single observe stream) and the legacy `FROMNUM` +
+ * `FROMRADIO` polling fallback for older firmware versions.
  */
 class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticRadioProfile {
 

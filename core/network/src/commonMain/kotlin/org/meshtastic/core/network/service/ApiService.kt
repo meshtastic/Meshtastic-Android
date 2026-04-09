@@ -35,9 +35,8 @@ interface ApiService {
 /**
  * Ktor-based [ApiService] implementation.
  *
- * Registered with `binds = []` to prevent Koin from auto-binding to [ApiService]; host modules
- * (`app`, `desktop`) provide their own explicit `ApiService` binding to allow platform-specific
- * `HttpClient` engines.
+ * Registered with `binds = []` to prevent Koin from auto-binding to [ApiService]; host modules (`app`, `desktop`)
+ * provide their own explicit `ApiService` binding to allow platform-specific `HttpClient` engines.
  */
 @Single(binds = [])
 class ApiServiceImpl(private val client: HttpClient) : ApiService {

@@ -30,8 +30,8 @@ import org.meshtastic.proto.ClientNotification
 /**
  * Android [RadioController] implementation that delegates to the bound [MeshService] via AIDL.
  *
- * All radio commands are forwarded through [AndroidServiceRepository.meshService]. If the service
- * is not yet bound, commands are silently dropped with a warning log.
+ * All radio commands are forwarded through [AndroidServiceRepository.meshService]. If the service is not yet bound,
+ * commands are silently dropped with a warning log.
  */
 @Single
 @Suppress("TooManyFunctions")
@@ -198,8 +198,8 @@ class AndroidRadioControllerImpl(
         serviceRepository.meshService?.commitEditSettings(destNum)
     }
 
-    override fun getPacketId(): Int = serviceRepository.meshService?.getPacketId()
-        ?: error("Cannot generate packet ID: meshService is not bound")
+    override fun getPacketId(): Int =
+        serviceRepository.meshService?.getPacketId() ?: error("Cannot generate packet ID: meshService is not bound")
 
     override fun startProvideLocation() {
         serviceRepository.meshService?.startProvideLocation()

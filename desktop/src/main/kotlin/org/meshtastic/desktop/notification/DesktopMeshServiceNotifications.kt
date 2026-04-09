@@ -29,8 +29,8 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
 /**
- * Desktop notifications implementation. Registered manually in [desktopPlatformStubsModule] — do NOT add @Single
- * to avoid double-registration with the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
+ * Desktop notifications implementation. Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to
+ * avoid double-registration with the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
  */
 @Suppress("TooManyFunctions")
 class DesktopMeshServiceNotifications(private val notificationManager: NotificationManager) : MeshServiceNotifications {

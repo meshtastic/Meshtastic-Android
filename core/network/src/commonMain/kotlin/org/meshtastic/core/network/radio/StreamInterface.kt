@@ -17,7 +17,7 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
@@ -64,7 +64,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : R
 
     override fun handleSendToRadio(p: ByteArray) {
         // This method is called from a continuation and it might show up late, so check for uart being null
-        service.serviceScope.launch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }
+        service.serviceScope.handledLaunch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }
     }
 
     /** Process a single incoming byte through the stream framing state machine. */

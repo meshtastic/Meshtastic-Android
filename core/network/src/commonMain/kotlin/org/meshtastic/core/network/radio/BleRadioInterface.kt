@@ -433,7 +433,7 @@ class BleRadioInterface(
         }
     }
 
-    private var radioService: org.meshtastic.core.ble.MeshtasticRadioProfile? = null
+    @Volatile private var radioService: org.meshtastic.core.ble.MeshtasticRadioProfile? = null
 
     // --- RadioTransport Implementation ---
 

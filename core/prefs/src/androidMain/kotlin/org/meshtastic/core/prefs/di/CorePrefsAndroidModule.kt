@@ -32,9 +32,8 @@ import org.meshtastic.core.di.CoroutineDispatchers
 /**
  * Koin module providing Android [DataStore] instances for each preference domain.
  *
- * Each DataStore is a singleton backed by its own [CoroutineScope] using the injected
- * [CoroutineDispatchers.io] dispatcher, and includes a [SharedPreferencesMigration] to
- * migrate legacy SharedPreferences data on first access.
+ * Each DataStore is a singleton backed by its own [CoroutineScope] using the injected [CoroutineDispatchers.io]
+ * dispatcher, and includes a [SharedPreferencesMigration] to migrate legacy SharedPreferences data on first access.
  */
 @Suppress("TooManyFunctions")
 @Module

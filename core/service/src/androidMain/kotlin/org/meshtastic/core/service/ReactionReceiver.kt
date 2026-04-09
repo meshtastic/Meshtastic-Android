@@ -32,8 +32,8 @@ import org.meshtastic.core.repository.ServiceRepository
 /**
  * Handles inline emoji reaction actions from message notifications.
  *
- * Uses [goAsync] to keep the process alive while the coroutine dispatches the reaction
- * through [ServiceRepository], matching the pattern used by [ReplyReceiver] and [MarkAsReadReceiver].
+ * Uses [goAsync] to keep the process alive while the coroutine dispatches the reaction through [ServiceRepository],
+ * matching the pattern used by [ReplyReceiver] and [MarkAsReadReceiver].
  */
 class ReactionReceiver :
     BroadcastReceiver(),

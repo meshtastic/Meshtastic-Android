@@ -21,9 +21,9 @@ package org.meshtastic.desktop.stub
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -98,8 +98,7 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override fun handleFromRadio(bytes: ByteArray) {}
 
     @Suppress("InjectDispatcher")
-    override val serviceScope: CoroutineScope =
-        CoroutineScope(SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
+    override val serviceScope: CoroutineScope = CoroutineScope(SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
 }
 
 // endregion

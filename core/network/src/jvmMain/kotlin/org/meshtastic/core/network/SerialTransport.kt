@@ -19,10 +19,10 @@ package org.meshtastic.core.network
 import co.touchlab.kermit.Logger
 import com.fazecast.jSerialComm.SerialPort
 import com.fazecast.jSerialComm.SerialPortTimeoutException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.radio.StreamInterface
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.Heartbeat
@@ -41,6 +41,7 @@ private constructor(
     private val portName: String,
     private val baudRate: Int = DEFAULT_BAUD_RATE,
     service: RadioInterfaceService,
+    private val dispatchers: CoroutineDispatchers,
 ) : StreamInterface(service) {
     private var serialPort: SerialPort? = null
     private var readJob: Job? = null
@@ -73,7 +74,7 @@ private constructor(
     private fun startReadLoop(port: SerialPort) {
         Logger.d { "[$portName] Starting serial read loop" }
         readJob =
-            service.serviceScope.launch(Dispatchers.IO) {
+            service.serviceScope.launch(dispatchers.io) {
                 val input = port.inputStream
                 val buffer = ByteArray(READ_BUFFER_SIZE)
                 try {
@@ -169,8 +170,13 @@ private constructor(
          * Creates and opens a [SerialTransport]. If the port cannot be opened, the transport signals a permanent
          * disconnect to the [service] and returns the (non-connected) instance.
          */
-        fun open(portName: String, baudRate: Int = DEFAULT_BAUD_RATE, service: RadioInterfaceService): SerialTransport {
-            val transport = SerialTransport(portName, baudRate, service)
+        fun open(
+            portName: String,
+            baudRate: Int = DEFAULT_BAUD_RATE,
+            service: RadioInterfaceService,
+            dispatchers: CoroutineDispatchers,
+        ): SerialTransport {
+            val transport = SerialTransport(portName, baudRate, service, dispatchers)
             if (!transport.startConnection()) {
                 val errorMessage = diagnoseOpenFailure(portName)
                 Logger.w { "[$portName] Serial port could not be opened; signalling disconnect. $errorMessage" }

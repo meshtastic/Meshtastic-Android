@@ -98,10 +98,9 @@ sealed interface WifiProvisionError {
 /**
  * ViewModel for the WiFi provisioning flow.
  *
- * Uses [KoinViewModel] so the instance is scoped to the navigation entry's [ViewModelStoreOwner].
- * A fresh [NymeaWifiService] (and its own [BleConnectionFactory]-backed
- * [org.meshtastic.core.ble.BleConnection]) is created lazily for each provisioning session and
- * cleaned up via [onCleared].
+ * Uses [KoinViewModel] so the instance is scoped to the navigation entry's [ViewModelStoreOwner]. A fresh
+ * [NymeaWifiService] (and its own [BleConnectionFactory]-backed [org.meshtastic.core.ble.BleConnection]) is created
+ * lazily for each provisioning session and cleaned up via [onCleared].
  */
 @KoinViewModel
 class WifiProvisionViewModel(

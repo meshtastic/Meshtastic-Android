@@ -27,5 +27,6 @@ import kotlin.concurrent.Volatile
  */
 internal object ActiveBleConnection {
     @Volatile var activePeripheral: Peripheral? = null
+
     @Volatile var activeAddress: String? = null
 }

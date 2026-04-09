@@ -33,8 +33,8 @@ import org.meshtastic.core.repository.RadioTransportFactory
  * Desktop implementation of [RadioTransportFactory] delegating multiplatform transports (BLE, TCP) and providing
  * platform-specific transports (USB/Serial) via jSerialComm.
  *
- * Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to avoid double-registration
- * with the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
+ * Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to avoid double-registration with
+ * the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
  */
 class DesktopRadioTransportFactory(
     scanner: BleScanner,
@@ -55,6 +55,7 @@ class DesktopRadioTransportFactory(
             SerialTransport.open(
                 portName = address.removePrefix(InterfaceId.SERIAL.id.toString()),
                 service = service,
+                dispatchers = dispatchers,
             )
         }
         else -> error("Unsupported transport for address: $address")
