@@ -61,9 +61,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
         }
 
-        androidMain.dependencies {
-            implementation(libs.markdown.renderer.android)
-        }
+        androidMain.dependencies { implementation(libs.markdown.renderer.android) }
 
         val androidHostTest by getting {
             dependencies {
