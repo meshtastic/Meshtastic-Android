@@ -52,6 +52,9 @@ class TAKClientConnection(
     private val writeChannel: ByteWriteChannel = socket.openWriteChannel(autoFlush = true)
     private val writeMutex = Mutex()
 
+    /** Tracks the last time data was received from the client, used for idle timeout detection. */
+    @Volatile private var lastDataReceived: Instant = Clock.System.now()
+
     /** Guards against emitting [TAKConnectionEvent.Disconnected] more than once. */
     @Volatile private var disconnectedEmitted = false
 
@@ -86,6 +89,7 @@ class TAKClientConnection(
                 readChannel.awaitContent()
                 val bytesRead = readChannel.readAvailable(buffer)
                 if (bytesRead > 0) {
+                    lastDataReceived = Clock.System.now()
                     processReceivedData(buffer.copyOfRange(0, bytesRead))
                 } else if (bytesRead == -1) {
                     break // EOF
@@ -102,16 +106,34 @@ class TAKClientConnection(
     }
 
     private suspend fun keepaliveLoop() {
+        val idleTimeoutMs = TAK_KEEPALIVE_INTERVAL_MS * TAK_READ_IDLE_TIMEOUT_MULTIPLIER
         while (scope.coroutineIsActive && !socket.isClosed) {
             kotlinx.coroutines.delay(TAK_KEEPALIVE_INTERVAL_MS)
+
+            val idleMs = (Clock.System.now() - lastDataReceived).inWholeMilliseconds
+            if (idleMs > idleTimeoutMs) {
+                Logger.w {
+                    "TAK client ${currentClientInfo.id} idle for ${idleMs}ms " +
+                        "(threshold ${idleTimeoutMs}ms), closing connection"
+                }
+                close()
+                return
+            }
+
             sendKeepalive()
         }
     }
 
     private fun sendKeepalive() {
         val now = Clock.System.now()
-        val stale = now + TAK_KEEPALIVE_INTERVAL_MS.milliseconds
-        sendXml(buildEventXml(uid = "takPong", type = "t-x-d-d", now = now, stale = stale, detail = ""))
+        val stale = now + (TAK_KEEPALIVE_INTERVAL_MS * TAK_KEEPALIVE_STALE_MULTIPLIER).milliseconds
+        sendXml(buildEventXml(uid = "takPong", type = "t-x-c-t", now = now, stale = stale, detail = ""))
+    }
+
+    private fun sendPong() {
+        val now = Clock.System.now()
+        val stale = now + (TAK_KEEPALIVE_INTERVAL_MS * TAK_KEEPALIVE_STALE_MULTIPLIER).milliseconds
+        sendXml(buildEventXml(uid = "takPong", type = "t-x-c-t-r", now = now, stale = stale, detail = ""))
     }
 
     private fun processReceivedData(newData: ByteArray) {
@@ -131,7 +153,7 @@ class TAKClientConnection(
                     return
                 }
                 cotMessage.type == "t-x-c-t" || cotMessage.uid == "ping" -> {
-                    // Keepalive / ping — discard silently
+                    sendPong()
                     return
                 }
                 else -> {
@@ -201,6 +223,7 @@ class TAKClientConnection(
                 throw e
             } catch (e: Exception) {
                 Logger.w(e) { "TAK client send error: ${currentClientInfo.id}" }
+                close()
             }
         }
     }

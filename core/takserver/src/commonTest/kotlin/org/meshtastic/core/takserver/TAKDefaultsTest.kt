@@ -21,6 +21,7 @@ import org.meshtastic.proto.Team
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class TAKDefaultsTest {
 
@@ -103,5 +104,23 @@ class TAKDefaultsTest {
     fun `toTakCallsign falls back to id when both names are blank`() {
         val user = User(id = "!1234", long_name = "", short_name = "")
         assertEquals("!1234", user.toTakCallsign())
+    }
+
+    // ── keepalive / idle timeout constants ─────────────────────────────────────
+
+    @Test
+    fun `keepalive stale window is wider than keepalive interval`() {
+        val staleMs = TAK_KEEPALIVE_INTERVAL_MS * TAK_KEEPALIVE_STALE_MULTIPLIER
+        assertTrue(
+            staleMs > TAK_KEEPALIVE_INTERVAL_MS,
+            "Stale window ($staleMs ms) must exceed keepalive interval ($TAK_KEEPALIVE_INTERVAL_MS ms)",
+        )
+    }
+
+    @Test
+    fun `idle timeout exceeds keepalive stale window`() {
+        val idleTimeoutMs = TAK_KEEPALIVE_INTERVAL_MS * TAK_READ_IDLE_TIMEOUT_MULTIPLIER
+        val staleMs = TAK_KEEPALIVE_INTERVAL_MS * TAK_KEEPALIVE_STALE_MULTIPLIER
+        assertTrue(idleTimeoutMs > staleMs, "Idle timeout ($idleTimeoutMs ms) must exceed stale window ($staleMs ms)")
     }
 }
