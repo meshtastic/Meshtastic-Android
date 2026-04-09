@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.CloudDone
 import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.CloudQueue
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Dangerous
 import androidx.compose.material.icons.rounded.Error
@@ -36,8 +37,10 @@ import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.HowToReg
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Lan
+import androidx.compose.material.icons.rounded.LinkOff
 import androidx.compose.material.icons.rounded.NoCell
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.SettingsEthernet
 import androidx.compose.material.icons.rounded.SpeakerNotesOff
 import androidx.compose.material.icons.rounded.Star
@@ -72,8 +75,6 @@ val MeshtasticIcons.History: ImageVector
 // MQTT connection status
 val MeshtasticIcons.MqttConnected: ImageVector
     get() = Icons.Rounded.Cloud
-val MeshtasticIcons.MqttDisconnected: ImageVector
-    get() = Icons.Rounded.CloudOff
 
 // MQTT delivery status
 val MeshtasticIcons.MqttDelivered: ImageVector
@@ -81,7 +82,7 @@ val MeshtasticIcons.MqttDelivered: ImageVector
 val MeshtasticIcons.MqttSyncing: ImageVector
     get() = Icons.Rounded.CloudSync
 val MeshtasticIcons.MqttSent: ImageVector
-    get() = Icons.Rounded.Cloud
+    get() = Icons.Rounded.CloudQueue
 val MeshtasticIcons.MqttUnavailable: ImageVector
     get() = Icons.Rounded.CloudOff
 
@@ -124,3 +125,13 @@ val MeshtasticIcons.RadioButtonUnchecked: ImageVector
 // Device sleep
 val MeshtasticIcons.DeviceSleep: ImageVector
     get() = Icons.Rounded.Bedtime
+
+// Node connection state (non-MQTT)
+val MeshtasticIcons.Disconnected: ImageVector
+    get() = Icons.Rounded.LinkOff
+
+// Message delivery status
+val MeshtasticIcons.MessageEnroute: ImageVector
+    get() = Icons.Rounded.Schedule
+val MeshtasticIcons.MessageError: ImageVector
+    get() = Icons.Rounded.ErrorOutline

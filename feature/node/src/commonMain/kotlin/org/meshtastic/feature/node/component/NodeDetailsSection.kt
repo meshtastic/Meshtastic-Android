@@ -75,7 +75,6 @@ import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
 import org.meshtastic.core.resources.via_mqtt
 import org.meshtastic.core.ui.icon.ArrowCircleUp
-import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.DeviceNumbers
 import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.HopCount
@@ -85,6 +84,8 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Person
+import org.meshtastic.core.ui.icon.Rssi
+import org.meshtastic.core.ui.icon.Snr
 import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.util.createClipEntry
@@ -263,7 +264,7 @@ private fun SignalRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.snr),
                 value = formatString("%.1f dB", node.snr),
-                icon = MeshtasticIcons.ChannelUtilization,
+                icon = MeshtasticIcons.Snr,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -273,7 +274,7 @@ private fun SignalRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.rssi),
                 value = formatString("%d dBm", node.rssi),
-                icon = MeshtasticIcons.ChannelUtilization,
+                icon = MeshtasticIcons.Rssi,
                 modifier = Modifier.weight(1f),
             )
         } else {

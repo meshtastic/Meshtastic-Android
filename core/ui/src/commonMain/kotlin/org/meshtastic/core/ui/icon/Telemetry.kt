@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.Air
 import androidx.compose.material.icons.rounded.BlurOn
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.ChargingStation
+import androidx.compose.material.icons.rounded.Compress
 import androidx.compose.material.icons.rounded.DataArray
 import androidx.compose.material.icons.rounded.ElectricBolt
 import androidx.compose.material.icons.rounded.Explore
@@ -45,7 +46,7 @@ val MeshtasticIcons.Temperature: ImageVector
 val MeshtasticIcons.Humidity: ImageVector
     get() = Icons.Rounded.WaterDrop
 val MeshtasticIcons.Pressure: ImageVector
-    get() = Icons.Rounded.Speed
+    get() = Icons.Rounded.Compress
 val MeshtasticIcons.SoilMoisture: ImageVector
     get() = Icons.Rounded.Grass
 val MeshtasticIcons.PeopleCount: ImageVector

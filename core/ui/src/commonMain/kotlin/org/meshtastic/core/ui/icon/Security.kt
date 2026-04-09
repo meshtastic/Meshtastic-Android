@@ -17,7 +17,6 @@
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.KeyOff
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
@@ -36,8 +35,6 @@ val MeshtasticIcons.KeyOff: ImageVector
     get() = Icons.Rounded.KeyOff
 val MeshtasticIcons.Verified: ImageVector
     get() = Icons.Rounded.Verified
-val MeshtasticIcons.Fingerprint: ImageVector
-    get() = Icons.Rounded.Fingerprint
 
 // New
 val MeshtasticIcons.SecurityShield: ImageVector

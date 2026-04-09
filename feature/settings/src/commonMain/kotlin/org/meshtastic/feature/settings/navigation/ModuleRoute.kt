@@ -50,6 +50,7 @@ import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Serial
 import org.meshtastic.core.ui.icon.SettingsRemote
 import org.meshtastic.core.ui.icon.Speed
+import org.meshtastic.core.ui.icon.TrafficManagement
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.proto.AdminMessage
@@ -152,7 +153,7 @@ enum class ModuleRoute(
     TRAFFIC_MANAGEMENT(
         Res.string.traffic_management,
         SettingsRoutes.TrafficManagement,
-        MeshtasticIcons.Speed,
+        MeshtasticIcons.TrafficManagement,
         AdminMessage.ModuleConfigType.TRAFFICMANAGEMENT_CONFIG.value,
         isSupported = { it.supportsTrafficManagementConfig },
     ),

@@ -57,7 +57,7 @@ import org.meshtastic.core.ui.icon.LightMode
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Particulate
 import org.meshtastic.core.ui.icon.PowerSupply
-import org.meshtastic.core.ui.icon.Speed
+import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Voltage
 import org.meshtastic.core.ui.icon.Weight
@@ -102,7 +102,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 Res.string.pressure,
                                 "${NumberFormatter.format(bp, 0)} hPa",
-                                MeshtasticIcons.Speed,
+                                MeshtasticIcons.Pressure,
                             ),
                         )
                     }

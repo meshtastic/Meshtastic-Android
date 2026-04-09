@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.AdminPanelSettings
+import androidx.compose.material.icons.rounded.AltRoute
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CleaningServices
@@ -214,3 +215,5 @@ val MeshtasticIcons.SettingsRemote: ImageVector
     get() = Icons.Rounded.SettingsRemote
 val MeshtasticIcons.Abc: ImageVector
     get() = Icons.Rounded.Abc
+val MeshtasticIcons.TrafficManagement: ImageVector
+    get() = Icons.Rounded.AltRoute

@@ -25,10 +25,10 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.ui.icon.Acknowledged
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MessageEnroute
+import org.meshtastic.core.ui.icon.MessageError
 import org.meshtastic.core.ui.icon.MqttDelivered
-import org.meshtastic.core.ui.icon.MqttSent
 import org.meshtastic.core.ui.icon.MqttSyncing
-import org.meshtastic.core.ui.icon.MqttUnavailable
 import org.meshtastic.core.ui.icon.Warning
 
 @Composable
@@ -40,8 +40,8 @@ fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier) {
             MessageStatus.DELIVERED -> MeshtasticIcons.MqttDelivered
             MessageStatus.SFPP_ROUTING -> MeshtasticIcons.MqttSyncing
             MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.MqttDelivered
-            MessageStatus.ENROUTE -> MeshtasticIcons.MqttSent
-            MessageStatus.ERROR -> MeshtasticIcons.MqttUnavailable
+            MessageStatus.ENROUTE -> MeshtasticIcons.MessageEnroute
+            MessageStatus.ERROR -> MeshtasticIcons.MessageError
             else -> MeshtasticIcons.Warning
         }
     Icon(

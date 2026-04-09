@@ -37,10 +37,10 @@ import org.meshtastic.core.resources.soil_temperature
 import org.meshtastic.core.resources.temperature
 import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.ElectricPower
-import org.meshtastic.core.ui.icon.Fingerprint
 import org.meshtastic.core.ui.icon.HardwareModel
 import org.meshtastic.core.ui.icon.Humidity
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.NodeId
 import org.meshtastic.core.ui.icon.PeopleCount
 import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.icon.SoilMoisture
@@ -191,7 +191,7 @@ fun RoleInfo(role: String, modifier: Modifier = Modifier, contentColor: Color = 
 fun NodeIdInfo(id: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
-        icon = MeshtasticIcons.Fingerprint,
+        icon = MeshtasticIcons.NodeId,
         contentDescription = stringResource(Res.string.node_id),
         text = id,
         style = MaterialTheme.typography.labelSmall,

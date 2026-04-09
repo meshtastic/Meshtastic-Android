@@ -41,9 +41,9 @@ import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.CloudUpload
 import org.meshtastic.core.ui.icon.LinkIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MessageEnroute
+import org.meshtastic.core.ui.icon.MessageError
 import org.meshtastic.core.ui.icon.MqttDelivered
-import org.meshtastic.core.ui.icon.MqttSent
-import org.meshtastic.core.ui.icon.MqttUnavailable
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.Warning
 
@@ -83,8 +83,8 @@ internal fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: Message
                         MessageStatus.DELIVERED -> MeshtasticIcons.MqttDelivered
                         MessageStatus.SFPP_ROUTING -> MeshtasticIcons.AddLink
                         MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.LinkIcon
-                        MessageStatus.ENROUTE -> MeshtasticIcons.MqttSent
-                        MessageStatus.ERROR -> MeshtasticIcons.MqttUnavailable
+                        MessageStatus.ENROUTE -> MeshtasticIcons.MessageEnroute
+                        MessageStatus.ERROR -> MeshtasticIcons.MessageError
                         else -> MeshtasticIcons.Warning
                     },
                     contentDescription = stringResource(Res.string.message_delivery_status),

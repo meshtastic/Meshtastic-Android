@@ -19,8 +19,10 @@ package org.meshtastic.core.ui.icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CellTower
 import androidx.compose.material.icons.rounded.CrueltyFree
+import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Hub
 import androidx.compose.material.icons.rounded.NearMe
+import androidx.compose.material.icons.rounded.Podcasts
 import androidx.compose.material.icons.rounded.Route
 import androidx.compose.material.icons.rounded.SignalCellular4Bar
 import androidx.compose.material.icons.rounded.SignalCellularAlt
@@ -46,6 +48,12 @@ val MeshtasticIcons.ChannelUtilization: ImageVector
     get() = Icons.Rounded.SignalCellularAlt
 val MeshtasticIcons.AirUtilization: ImageVector
     get() = Icons.Rounded.SsidChart
+
+// Signal measurement metrics
+val MeshtasticIcons.Snr: ImageVector
+    get() = Icons.Rounded.GraphicEq
+val MeshtasticIcons.Rssi: ImageVector
+    get() = Icons.Rounded.Podcasts
 
 val MeshtasticIcons.SignalCellular0Bar: ImageVector
     get() {

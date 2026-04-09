@@ -46,12 +46,12 @@ import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
+import org.meshtastic.core.ui.icon.DeviceSleep
+import org.meshtastic.core.ui.icon.Disconnected
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MqttDelivered
-import org.meshtastic.core.ui.icon.MqttSent
 import org.meshtastic.core.ui.icon.MqttSyncing
-import org.meshtastic.core.ui.icon.MqttUnavailable
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
@@ -155,7 +155,7 @@ private fun ConnectingStatusIcon() {
 @Composable
 private fun DisconnectedStatusIcon() {
     Icon(
-        imageVector = MeshtasticIcons.MqttUnavailable,
+        imageVector = MeshtasticIcons.Disconnected,
         contentDescription = stringResource(Res.string.disconnected),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusRed,
@@ -165,7 +165,7 @@ private fun DisconnectedStatusIcon() {
 @Composable
 private fun DeviceSleepStatusIcon() {
     Icon(
-        imageVector = MeshtasticIcons.MqttSent,
+        imageVector = MeshtasticIcons.DeviceSleep,
         contentDescription = stringResource(Res.string.device_sleeping),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusYellow,
