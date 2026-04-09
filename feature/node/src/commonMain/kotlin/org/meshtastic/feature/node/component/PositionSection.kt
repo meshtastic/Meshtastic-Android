@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
@@ -106,7 +107,7 @@ fun PositionSection(
                         AssistChip(
                             onClick = { onAction(NodeDetailAction.Navigate(LogsType.NODE_MAP.routeFactory(node.num))) },
                             label = { Text(stringResource(LogsType.NODE_MAP.titleRes)) },
-                            leadingIcon = { Icon(LogsType.NODE_MAP.icon, null, Modifier.size(18.dp)) },
+                            leadingIcon = { Icon(vectorResource(LogsType.NODE_MAP.icon), null, Modifier.size(18.dp)) },
                         )
                     }
 
@@ -116,7 +117,7 @@ fun PositionSection(
                                 onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.routeFactory(node.num)))
                             },
                             label = { Text(stringResource(LogsType.POSITIONS.titleRes)) },
-                            leadingIcon = { Icon(LogsType.POSITIONS.icon, null, Modifier.size(18.dp)) },
+                            leadingIcon = { Icon(vectorResource(LogsType.POSITIONS.icon), null, Modifier.size(18.dp)) },
                         )
                     }
                 }

@@ -19,12 +19,12 @@ package org.meshtastic.feature.node.navigation
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -36,6 +36,15 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.device
 import org.meshtastic.core.resources.environment
 import org.meshtastic.core.resources.host
+import org.meshtastic.core.resources.ic_cell_tower
+import org.meshtastic.core.resources.ic_groups
+import org.meshtastic.core.resources.ic_light_mode
+import org.meshtastic.core.resources.ic_location_on
+import org.meshtastic.core.resources.ic_memory
+import org.meshtastic.core.resources.ic_people
+import org.meshtastic.core.resources.ic_perm_scan_wifi
+import org.meshtastic.core.resources.ic_power
+import org.meshtastic.core.resources.ic_router
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.pax
 import org.meshtastic.core.resources.position_log
@@ -43,16 +52,6 @@ import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.icon.CellTower
-import org.meshtastic.core.ui.icon.Groups
-import org.meshtastic.core.ui.icon.HardwareModel
-import org.meshtastic.core.ui.icon.LightMode
-import org.meshtastic.core.ui.icon.LocationOn
-import org.meshtastic.core.ui.icon.Memory
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.PeopleCount
-import org.meshtastic.core.ui.icon.PermScanWifi
-import org.meshtastic.core.ui.icon.PowerSupply
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.detail.NodeDetailScreen
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
@@ -196,61 +195,61 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
 enum class NodeDetailRoute(
     val title: StringResource,
     val routeClass: KClass<out Route>,
-    val icon: ImageVector? = null,
+    val icon: DrawableResource? = null,
     val screenComposable: @Composable (metricsViewModel: MetricsViewModel, onNavigateUp: () -> Unit) -> Unit,
 ) {
     DEVICE(
         Res.string.device,
         NodeDetailRoutes.DeviceMetrics::class,
-        MeshtasticIcons.HardwareModel,
+        Res.drawable.ic_router,
         { metricsVM, onNavigateUp -> DeviceMetricsScreen(metricsVM, onNavigateUp) },
     ),
     POSITION_LOG(
         Res.string.position_log,
         NodeDetailRoutes.PositionLog::class,
-        MeshtasticIcons.LocationOn,
+        Res.drawable.ic_location_on,
         { metricsVM, onNavigateUp -> PositionLogScreen(metricsVM, onNavigateUp) },
     ),
     ENVIRONMENT(
         Res.string.environment,
         NodeDetailRoutes.EnvironmentMetrics::class,
-        MeshtasticIcons.LightMode,
+        Res.drawable.ic_light_mode,
         { metricsVM, onNavigateUp -> EnvironmentMetricsScreen(metricsVM, onNavigateUp) },
     ),
     SIGNAL(
         Res.string.signal,
         NodeDetailRoutes.SignalMetrics::class,
-        MeshtasticIcons.CellTower,
+        Res.drawable.ic_cell_tower,
         { metricsVM, onNavigateUp -> SignalMetricsScreen(metricsVM, onNavigateUp) },
     ),
     TRACEROUTE(
         Res.string.traceroute,
         NodeDetailRoutes.TracerouteLog::class,
-        MeshtasticIcons.PermScanWifi,
+        Res.drawable.ic_perm_scan_wifi,
         { metricsVM, onNavigateUp -> TracerouteLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
     ),
     NEIGHBOR_INFO(
         Res.string.neighbor_info,
         NodeDetailRoutes.NeighborInfoLog::class,
-        MeshtasticIcons.Groups,
+        Res.drawable.ic_groups,
         { metricsVM, onNavigateUp -> NeighborInfoLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
     ),
     POWER(
         Res.string.power,
         NodeDetailRoutes.PowerMetrics::class,
-        MeshtasticIcons.PowerSupply,
+        Res.drawable.ic_power,
         { metricsVM, onNavigateUp -> PowerMetricsScreen(metricsVM, onNavigateUp) },
     ),
     HOST(
         Res.string.host,
         NodeDetailRoutes.HostMetricsLog::class,
-        MeshtasticIcons.Memory,
+        Res.drawable.ic_memory,
         { metricsVM, onNavigateUp -> HostMetricsLogScreen(metricsVM, onNavigateUp) },
     ),
     PAX(
         Res.string.pax,
         NodeDetailRoutes.PaxMetrics::class,
-        MeshtasticIcons.PeopleCount,
+        Res.drawable.ic_people,
         { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM, onNavigateUp) },
     ),
 }

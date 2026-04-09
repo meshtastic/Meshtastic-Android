@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
@@ -58,7 +59,7 @@ fun SignalInfo(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Icon(
-                imageVector = quality.imageVector,
+                imageVector = vectorResource(quality.icon),
                 contentDescription = stringResource(Res.string.signal_quality),
                 modifier = Modifier.size(16.dp),
                 tint = signalColor,

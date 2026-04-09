@@ -46,14 +46,15 @@ fun ShutdownConfirmationDialog(
     node: Node?,
     onDismiss: () -> Unit,
     isShutdown: Boolean = true,
-    icon: ImageVector? = MeshtasticIcons.Warning,
+    icon: ImageVector? = null,
     onConfirm: () -> Unit,
 ) {
     val nodeLongName = node?.user?.long_name ?: "Unknown Node"
+    val resolvedIcon = icon ?: MeshtasticIcons.Warning
 
     MeshtasticDialog(
         onDismiss = onDismiss,
-        icon = icon,
+        icon = resolvedIcon,
         title = title,
         text = { ShutdownDialogContent(nodeLongName = nodeLongName, isShutdown = isShutdown) },
         confirmText = stringResource(Res.string.send),

@@ -40,11 +40,14 @@ import org.meshtastic.core.resources.ic_more_vert
 import org.meshtastic.core.resources.ic_offline_share
 import org.meshtastic.core.resources.ic_output
 import org.meshtastic.core.resources.ic_play_arrow
+import org.meshtastic.core.resources.ic_power_settings_new
 import org.meshtastic.core.resources.ic_qr_code
 import org.meshtastic.core.resources.ic_qr_code_2
 import org.meshtastic.core.resources.ic_qr_code_scanner
 import org.meshtastic.core.resources.ic_refresh
 import org.meshtastic.core.resources.ic_reply
+import org.meshtastic.core.resources.ic_restart_alt
+import org.meshtastic.core.resources.ic_restore
 import org.meshtastic.core.resources.ic_save
 import org.meshtastic.core.resources.ic_search
 import org.meshtastic.core.resources.ic_select_all
@@ -124,3 +127,9 @@ val MeshtasticIcons.OfflineShare: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_offline_share)
 val MeshtasticIcons.QrCodeScanner: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_qr_code_scanner)
+val MeshtasticIcons.RestartAlt: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_restart_alt)
+val MeshtasticIcons.PowerSettingsNew: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_power_settings_new)
+val MeshtasticIcons.FactoryReset: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_restore)

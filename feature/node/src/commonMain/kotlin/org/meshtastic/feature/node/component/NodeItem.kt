@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
@@ -283,7 +284,7 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                         if (thatNode.snr < 100f && thatNode.rssi < 0) {
                             val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
                             IconInfo(
-                                icon = quality.imageVector,
+                                icon = vectorResource(quality.icon),
                                 contentDescription = stringResource(Res.string.signal_quality),
                                 contentColor = quality.color.invoke(),
                                 text = stringResource(quality.nameRes),

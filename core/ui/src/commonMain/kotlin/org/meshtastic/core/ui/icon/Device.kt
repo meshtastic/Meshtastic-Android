@@ -74,3 +74,5 @@ val MeshtasticIcons.DeviceNumbers: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_numbers)
 val MeshtasticIcons.Android: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_android)
+val MeshtasticIcons.HardwareModel: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_router)

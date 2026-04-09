@@ -28,15 +28,17 @@ import org.meshtastic.core.ui.icon.Warning
 
 @Composable
 fun WarningDialog(
-    icon: ImageVector? = MeshtasticIcons.Warning,
+    icon: ImageVector? = null,
     title: String,
     text: @Composable () -> Unit = {},
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
+    val resolvedIcon = icon ?: MeshtasticIcons.Warning
+
     MeshtasticDialog(
         onDismiss = onDismiss,
-        icon = icon,
+        icon = resolvedIcon,
         title = title,
         text = text,
         confirmText = stringResource(Res.string.send),

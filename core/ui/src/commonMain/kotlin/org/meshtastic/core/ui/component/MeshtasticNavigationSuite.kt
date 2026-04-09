@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.navigation.ContactsRoutes
@@ -225,7 +226,7 @@ private fun NavigationIconContent(
             ) {
                 Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
                     Icon(
-                        imageVector = destination.icon,
+                        imageVector = vectorResource(destination.icon),
                         contentDescription = stringResource(destination.label),
                         tint = if (isSelectedState) colorScheme.primary else LocalContentColor.current,
                     )

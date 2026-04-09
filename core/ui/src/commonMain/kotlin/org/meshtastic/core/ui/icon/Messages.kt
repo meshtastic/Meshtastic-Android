@@ -26,7 +26,9 @@ import org.meshtastic.core.resources.ic_fast_forward
 import org.meshtastic.core.resources.ic_filter_list
 import org.meshtastic.core.resources.ic_filter_list_off
 import org.meshtastic.core.resources.ic_format_quote
+import org.meshtastic.core.resources.ic_forum
 import org.meshtastic.core.resources.ic_link
+import org.meshtastic.core.resources.ic_message
 import org.meshtastic.core.resources.ic_visibility
 import org.meshtastic.core.resources.ic_visibility_off
 
@@ -49,3 +51,7 @@ val MeshtasticIcons.AddLink: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_add_link)
 val MeshtasticIcons.LinkIcon: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_link)
+val MeshtasticIcons.Message: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_message)
+val MeshtasticIcons.Conversations: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_forum)

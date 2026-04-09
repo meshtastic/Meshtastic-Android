@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.settings.navigation
 
-import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -25,70 +25,69 @@ import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.channels
 import org.meshtastic.core.resources.device
 import org.meshtastic.core.resources.display
+import org.meshtastic.core.resources.ic_bluetooth
+import org.meshtastic.core.resources.ic_cell_tower
+import org.meshtastic.core.resources.ic_display_settings
+import org.meshtastic.core.resources.ic_list
+import org.meshtastic.core.resources.ic_location_on
+import org.meshtastic.core.resources.ic_person
+import org.meshtastic.core.resources.ic_power
+import org.meshtastic.core.resources.ic_router
+import org.meshtastic.core.resources.ic_security
+import org.meshtastic.core.resources.ic_wifi
 import org.meshtastic.core.resources.lora
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.position
 import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.security
 import org.meshtastic.core.resources.user
-import org.meshtastic.core.ui.icon.Bluetooth
-import org.meshtastic.core.ui.icon.CellTower
-import org.meshtastic.core.ui.icon.ConfigChannels
-import org.meshtastic.core.ui.icon.DisplaySettings
-import org.meshtastic.core.ui.icon.HardwareModel
-import org.meshtastic.core.ui.icon.LocationOn
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Person
-import org.meshtastic.core.ui.icon.PowerSupply
-import org.meshtastic.core.ui.icon.SecurityShield
-import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.DeviceMetadata
 
-enum class ConfigRoute(val title: StringResource, val route: Route, val icon: ImageVector? = null, val type: Int = 0) {
-    USER(Res.string.user, SettingsRoutes.User, MeshtasticIcons.Person, 0),
-    CHANNELS(Res.string.channels, SettingsRoutes.ChannelConfig, MeshtasticIcons.ConfigChannels, 0),
+enum class ConfigRoute(
+    val title: StringResource,
+    val route: Route,
+    val icon: DrawableResource? = null,
+    val type: Int = 0,
+) {
+    USER(Res.string.user, SettingsRoutes.User, Res.drawable.ic_person, 0),
+    CHANNELS(Res.string.channels, SettingsRoutes.ChannelConfig, Res.drawable.ic_list, 0),
     DEVICE(
         Res.string.device,
         SettingsRoutes.Device,
-        MeshtasticIcons.HardwareModel,
+        Res.drawable.ic_router,
         AdminMessage.ConfigType.DEVICE_CONFIG.value,
     ),
     POSITION(
         Res.string.position,
         SettingsRoutes.Position,
-        MeshtasticIcons.LocationOn,
+        Res.drawable.ic_location_on,
         AdminMessage.ConfigType.POSITION_CONFIG.value,
     ),
-    POWER(
-        Res.string.power,
-        SettingsRoutes.Power,
-        MeshtasticIcons.PowerSupply,
-        AdminMessage.ConfigType.POWER_CONFIG.value,
-    ),
+    POWER(Res.string.power, SettingsRoutes.Power, Res.drawable.ic_power, AdminMessage.ConfigType.POWER_CONFIG.value),
     NETWORK(
         Res.string.network,
         SettingsRoutes.Network,
-        MeshtasticIcons.Wifi,
+        Res.drawable.ic_wifi,
         AdminMessage.ConfigType.NETWORK_CONFIG.value,
     ),
     DISPLAY(
         Res.string.display,
         SettingsRoutes.Display,
-        MeshtasticIcons.DisplaySettings,
+        Res.drawable.ic_display_settings,
         AdminMessage.ConfigType.DISPLAY_CONFIG.value,
     ),
-    LORA(Res.string.lora, SettingsRoutes.LoRa, MeshtasticIcons.CellTower, AdminMessage.ConfigType.LORA_CONFIG.value),
+    LORA(Res.string.lora, SettingsRoutes.LoRa, Res.drawable.ic_cell_tower, AdminMessage.ConfigType.LORA_CONFIG.value),
     BLUETOOTH(
         Res.string.bluetooth,
         SettingsRoutes.Bluetooth,
-        MeshtasticIcons.Bluetooth,
+        Res.drawable.ic_bluetooth,
         AdminMessage.ConfigType.BLUETOOTH_CONFIG.value,
     ),
     SECURITY(
         Res.string.security,
         SettingsRoutes.Security,
-        MeshtasticIcons.SecurityShield,
+        Res.drawable.ic_security,
         AdminMessage.ConfigType.SECURITY_CONFIG.value,
     ),
     ;

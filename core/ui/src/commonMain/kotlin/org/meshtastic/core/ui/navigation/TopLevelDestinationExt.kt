@@ -16,22 +16,22 @@
  */
 package org.meshtastic.core.ui.navigation
 
-import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.DrawableResource
 import org.meshtastic.core.navigation.TopLevelDestination
-import org.meshtastic.core.ui.icon.Conversations
-import org.meshtastic.core.ui.icon.Map
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Nodes
-import org.meshtastic.core.ui.icon.Settings
-import org.meshtastic.core.ui.icon.Wifi
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_forum
+import org.meshtastic.core.resources.ic_map
+import org.meshtastic.core.resources.ic_nodes
+import org.meshtastic.core.resources.ic_settings
+import org.meshtastic.core.resources.ic_wifi
 
-/** Maps a shared [TopLevelDestination] to its corresponding icon from [MeshtasticIcons]. */
-val TopLevelDestination.icon: ImageVector
+/** Maps a shared [TopLevelDestination] to its corresponding icon [DrawableResource]. */
+val TopLevelDestination.icon: DrawableResource
     get() =
         when (this) {
-            TopLevelDestination.Conversations -> MeshtasticIcons.Conversations
-            TopLevelDestination.Nodes -> MeshtasticIcons.Nodes
-            TopLevelDestination.Map -> MeshtasticIcons.Map
-            TopLevelDestination.Settings -> MeshtasticIcons.Settings
-            TopLevelDestination.Connections -> MeshtasticIcons.Wifi
+            TopLevelDestination.Conversations -> Res.drawable.ic_forum
+            TopLevelDestination.Nodes -> Res.drawable.ic_nodes
+            TopLevelDestination.Map -> Res.drawable.ic_map
+            TopLevelDestination.Settings -> Res.drawable.ic_settings
+            TopLevelDestination.Connections -> Res.drawable.ic_wifi
         }

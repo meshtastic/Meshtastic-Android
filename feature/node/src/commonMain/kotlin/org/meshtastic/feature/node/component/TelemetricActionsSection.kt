@@ -41,31 +41,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_air
+import org.meshtastic.core.resources.ic_person
+import org.meshtastic.core.resources.ic_thermostat
 import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.request_air_quality_metrics
 import org.meshtastic.core.resources.request_telemetry
 import org.meshtastic.core.resources.telemetry
 import org.meshtastic.core.resources.userinfo
-import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Refresh
-import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 private data class TelemetricFeature(
     val titleRes: StringResource,
-    val icon: ImageVector,
+    val icon: DrawableResource,
     val requestAction: ((Node) -> NodeMenuAction)?,
     val logsType: LogsType? = null,
     val isVisible: (Node) -> Boolean = { true },
@@ -118,7 +119,7 @@ private fun rememberTelemetricFeatures(
     listOf(
         TelemetricFeature(
             titleRes = Res.string.userinfo,
-            icon = MeshtasticIcons.Person,
+            icon = Res.drawable.ic_person,
             requestAction = { NodeMenuAction.RequestUserInfo(it) },
             isVisible = { !isLocal },
         ),
@@ -154,7 +155,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = LogsType.ENVIRONMENT.titleRes,
-            icon = MeshtasticIcons.Temperature,
+            icon = Res.drawable.ic_thermostat,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
             logsType = LogsType.ENVIRONMENT,
             content = { EnvironmentMetrics(it, metricsState.displayUnits, metricsState.isFahrenheit) },
@@ -162,7 +163,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = Res.string.request_air_quality_metrics,
-            icon = MeshtasticIcons.AirQuality,
+            icon = Res.drawable.ic_air,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
         ),
         TelemetricFeature(
@@ -201,7 +202,11 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
         ListItem(
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             leadingContent = {
-                Icon(imageVector = feature.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(
+                    imageVector = vectorResource(feature.icon),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
             },
             headlineContent = {
                 Text(
@@ -229,7 +234,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                                 },
                             ) {
                                 Icon(
-                                    imageVector = feature.logsType?.icon ?: feature.icon,
+                                    imageVector = vectorResource(feature.logsType?.icon ?: feature.icon),
                                     modifier = Modifier.size(24.dp),
                                     contentDescription = logsDescription,
                                     tint = MaterialTheme.colorScheme.primary,

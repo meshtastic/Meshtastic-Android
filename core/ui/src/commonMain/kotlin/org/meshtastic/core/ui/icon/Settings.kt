@@ -25,8 +25,16 @@ import org.meshtastic.core.resources.ic_admin_panel_settings
 import org.meshtastic.core.resources.ic_app_settings_alt
 import org.meshtastic.core.resources.ic_bug_report
 import org.meshtastic.core.resources.ic_cleaning_services
+import org.meshtastic.core.resources.ic_data_usage
 import org.meshtastic.core.resources.ic_format_paint
 import org.meshtastic.core.resources.ic_language
+import org.meshtastic.core.resources.ic_list
+import org.meshtastic.core.resources.ic_notifications
+import org.meshtastic.core.resources.ic_perm_scan_wifi
+import org.meshtastic.core.resources.ic_sensors
+import org.meshtastic.core.resources.ic_settings
+import org.meshtastic.core.resources.ic_settings_remote
+import org.meshtastic.core.resources.ic_storage
 import org.meshtastic.core.resources.ic_waving_hand
 
 // Config route icons
@@ -46,3 +54,19 @@ val MeshtasticIcons.WavingHand: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_waving_hand)
 val MeshtasticIcons.Abc: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_abc)
+val MeshtasticIcons.Settings: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_settings)
+val MeshtasticIcons.ConfigChannels: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_list)
+val MeshtasticIcons.Notifications: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_notifications)
+val MeshtasticIcons.DataUsage: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_data_usage)
+val MeshtasticIcons.PermScanWifi: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_perm_scan_wifi)
+val MeshtasticIcons.DetectionSensor: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_sensors)
+val MeshtasticIcons.SettingsRemote: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_settings_remote)
+val MeshtasticIcons.Storage: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_storage)

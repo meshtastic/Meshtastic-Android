@@ -24,8 +24,11 @@ import org.meshtastic.core.resources.ic_arrow_circle_up
 import org.meshtastic.core.resources.ic_bedtime
 import org.meshtastic.core.resources.ic_check_circle
 import org.meshtastic.core.resources.ic_check_circle_outline
+import org.meshtastic.core.resources.ic_cloud
 import org.meshtastic.core.resources.ic_cloud_done
+import org.meshtastic.core.resources.ic_cloud_download
 import org.meshtastic.core.resources.ic_cloud_sync
+import org.meshtastic.core.resources.ic_cloud_upload
 import org.meshtastic.core.resources.ic_dangerous
 import org.meshtastic.core.resources.ic_error
 import org.meshtastic.core.resources.ic_error_outline
@@ -45,6 +48,7 @@ import org.meshtastic.core.resources.ic_star_border
 import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.ic_volume_mute
 import org.meshtastic.core.resources.ic_volume_off
+import org.meshtastic.core.resources.ic_warning
 
 // Favorites
 val MeshtasticIcons.Favorite: ImageVector
@@ -123,3 +127,11 @@ val MeshtasticIcons.MessageEnroute: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_schedule)
 val MeshtasticIcons.MessageError: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_error_outline)
+val MeshtasticIcons.Warning: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_warning)
+val MeshtasticIcons.MqttConnected: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_cloud)
+val MeshtasticIcons.CloudUpload: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_cloud_upload)
+val MeshtasticIcons.CloudDownload: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_cloud_download)

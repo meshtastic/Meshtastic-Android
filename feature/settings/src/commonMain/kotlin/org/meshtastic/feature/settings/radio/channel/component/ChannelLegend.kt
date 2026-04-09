@@ -31,15 +31,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_features
 import org.meshtastic.core.resources.downlink_enabled
 import org.meshtastic.core.resources.downlink_feature_description
+import org.meshtastic.core.resources.ic_cloud_download
+import org.meshtastic.core.resources.ic_cloud_upload
+import org.meshtastic.core.resources.ic_location_on
 import org.meshtastic.core.resources.icon_meanings
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.location_sharing
@@ -54,10 +58,7 @@ import org.meshtastic.core.resources.security_icon_help_dismiss
 import org.meshtastic.core.resources.uplink_enabled
 import org.meshtastic.core.resources.uplink_feature_description
 import org.meshtastic.core.ui.component.MeshtasticDialog
-import org.meshtastic.core.ui.icon.CloudDownload
-import org.meshtastic.core.ui.icon.CloudUpload
 import org.meshtastic.core.ui.icon.Info
-import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
@@ -83,22 +84,22 @@ internal fun ChannelLegend(onClick: () -> Unit) {
 }
 
 internal enum class ChannelIcons(
-    val icon: ImageVector,
+    val icon: DrawableResource,
     val descriptionResId: StringResource,
     val additionalInfoResId: StringResource,
 ) {
     LOCATION(
-        icon = MeshtasticIcons.LocationOn,
+        icon = Res.drawable.ic_location_on,
         descriptionResId = Res.string.location_sharing,
         additionalInfoResId = Res.string.periodic_position_broadcast,
     ),
     UPLINK(
-        icon = MeshtasticIcons.CloudUpload,
+        icon = Res.drawable.ic_cloud_upload,
         descriptionResId = Res.string.uplink_enabled,
         additionalInfoResId = Res.string.uplink_feature_description,
     ),
     DOWNLINK(
-        icon = MeshtasticIcons.CloudDownload,
+        icon = Res.drawable.ic_cloud_download,
         descriptionResId = Res.string.downlink_enabled,
         additionalInfoResId = Res.string.downlink_feature_description,
     ),
@@ -157,7 +158,7 @@ private fun IconDefinitions() {
     Text(text = stringResource(Res.string.icon_meanings), style = MaterialTheme.typography.titleLarge)
     ChannelIcons.entries.forEach { icon ->
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon.icon, contentDescription = stringResource(icon.descriptionResId))
+            Icon(imageVector = vectorResource(icon.icon), contentDescription = stringResource(icon.descriptionResId))
             Column(modifier = Modifier.padding(start = 16.dp)) {
                 Text(text = stringResource(icon.descriptionResId), style = MaterialTheme.typography.titleMedium)
                 Text(text = stringResource(icon.additionalInfoResId), style = MaterialTheme.typography.bodyMedium)

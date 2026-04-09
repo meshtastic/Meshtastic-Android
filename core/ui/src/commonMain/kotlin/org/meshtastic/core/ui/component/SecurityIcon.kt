@@ -53,11 +53,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_lock
+import org.meshtastic.core.resources.ic_lock_open
+import org.meshtastic.core.resources.ic_warning
 import org.meshtastic.core.resources.security_icon_badge_warning_description
 import org.meshtastic.core.resources.security_icon_description
 import org.meshtastic.core.resources.security_icon_help_dismiss
@@ -73,10 +78,6 @@ import org.meshtastic.core.resources.security_icon_insecure_no_precise
 import org.meshtastic.core.resources.security_icon_insecure_precise_only
 import org.meshtastic.core.resources.security_icon_secure
 import org.meshtastic.core.resources.security_icon_warning_precise_mqtt
-import org.meshtastic.core.ui.icon.Lock
-import org.meshtastic.core.ui.icon.LockOpen
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
@@ -99,16 +100,16 @@ private const val PRECISE_POSITION_BITS = 32
  */
 @Immutable
 enum class SecurityState(
-    @Stable val icon: ImageVector,
+    @Stable val icon: DrawableResource,
     @Stable val color: @Composable () -> Color,
     val descriptionResId: StringResource,
     val helpTextResId: StringResource,
-    @Stable val badgeIcon: ImageVector? = null,
+    @Stable val badgeIcon: DrawableResource? = null,
     @Stable val badgeIconColor: @Composable () -> Color? = { null },
 ) {
     /** State for a secure channel (green lock). */
     SECURE(
-        icon = MeshtasticIcons.Lock,
+        icon = Res.drawable.ic_lock,
         color = { colorScheme.StatusGreen },
         descriptionResId = Res.string.security_icon_secure,
         helpTextResId = Res.string.security_icon_help_green_lock,
@@ -119,7 +120,7 @@ enum class SecurityState(
      * warning. (yellow open lock)
      */
     INSECURE_NO_PRECISE(
-        icon = MeshtasticIcons.LockOpen,
+        icon = Res.drawable.ic_lock_open,
         color = { colorScheme.StatusYellow },
         descriptionResId = Res.string.security_icon_insecure_no_precise,
         helpTextResId = Res.string.security_icon_help_yellow_open_lock,
@@ -130,7 +131,7 @@ enum class SecurityState(
      * lock)
      */
     INSECURE_PRECISE_ONLY(
-        icon = MeshtasticIcons.LockOpen,
+        icon = Res.drawable.ic_lock_open,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.security_icon_insecure_precise_only,
         helpTextResId = Res.string.security_icon_help_red_open_lock,
@@ -141,11 +142,11 @@ enum class SecurityState(
      * badge).
      */
     INSECURE_PRECISE_MQTT_WARNING(
-        icon = MeshtasticIcons.LockOpen,
+        icon = Res.drawable.ic_lock_open,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.security_icon_warning_precise_mqtt,
         helpTextResId = Res.string.security_icon_help_warning_precise_mqtt,
-        badgeIcon = MeshtasticIcons.Warning,
+        badgeIcon = Res.drawable.ic_warning,
         badgeIconColor = { colorScheme.StatusYellow },
     ),
 }
@@ -238,10 +239,10 @@ fun SecurityIcon(
         },
     ) {
         SecurityIconDisplay(
-            icon = securityState.icon,
+            icon = vectorResource(securityState.icon),
             mainIconTint = securityState.color(),
             contentDescription = fullContentDescription,
-            badgeIcon = securityState.badgeIcon,
+            badgeIcon = securityState.badgeIcon?.let { vectorResource(it) },
             badgeIconColor = securityState.badgeIconColor(),
         )
     }
@@ -453,11 +454,11 @@ private fun SecurityHelpDialog(securityState: SecurityState, onDismiss: () -> Un
 private fun ContextualSecurityState(securityState: SecurityState) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         SecurityIconDisplay(
-            icon = securityState.icon,
+            icon = vectorResource(securityState.icon),
             mainIconTint = securityState.color(),
             contentDescription = stringResource(securityState.descriptionResId),
             modifier = Modifier.size(48.dp),
-            badgeIcon = securityState.badgeIcon,
+            badgeIcon = securityState.badgeIcon?.let { vectorResource(it) },
             badgeIconColor = securityState.badgeIconColor(),
         )
         Spacer(Modifier.height(16.dp))
@@ -479,11 +480,11 @@ private fun AllSecurityStates() {
             // Uses enum entries
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SecurityIconDisplay(
-                    icon = state.icon,
+                    icon = vectorResource(state.icon),
                     mainIconTint = state.color(),
                     contentDescription = stringResource(state.descriptionResId),
                     modifier = Modifier.size(48.dp),
-                    badgeIcon = state.badgeIcon,
+                    badgeIcon = state.badgeIcon?.let { vectorResource(it) },
                     badgeIconColor = state.badgeIconColor(),
                 )
                 Column(modifier = Modifier.padding(start = 16.dp)) {

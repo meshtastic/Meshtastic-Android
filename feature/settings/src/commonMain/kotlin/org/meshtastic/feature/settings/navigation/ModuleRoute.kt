@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.settings.navigation
 
-import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.navigation.Route
@@ -27,6 +27,20 @@ import org.meshtastic.core.resources.audio
 import org.meshtastic.core.resources.canned_message
 import org.meshtastic.core.resources.detection_sensor
 import org.meshtastic.core.resources.external_notification
+import org.meshtastic.core.resources.ic_alt_route
+import org.meshtastic.core.resources.ic_cloud
+import org.meshtastic.core.resources.ic_data_usage
+import org.meshtastic.core.resources.ic_light_mode
+import org.meshtastic.core.resources.ic_message
+import org.meshtastic.core.resources.ic_notifications
+import org.meshtastic.core.resources.ic_people
+import org.meshtastic.core.resources.ic_perm_scan_wifi
+import org.meshtastic.core.resources.ic_sensors
+import org.meshtastic.core.resources.ic_settings_remote
+import org.meshtastic.core.resources.ic_speed
+import org.meshtastic.core.resources.ic_terminal
+import org.meshtastic.core.resources.ic_usb
+import org.meshtastic.core.resources.ic_volume_up
 import org.meshtastic.core.resources.mqtt
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.paxcounter
@@ -38,21 +52,6 @@ import org.meshtastic.core.resources.store_forward
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.telemetry
 import org.meshtastic.core.resources.traffic_management
-import org.meshtastic.core.ui.icon.DataUsage
-import org.meshtastic.core.ui.icon.DetectionSensor
-import org.meshtastic.core.ui.icon.LightMode
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Message
-import org.meshtastic.core.ui.icon.MqttConnected
-import org.meshtastic.core.ui.icon.Notifications
-import org.meshtastic.core.ui.icon.PeopleCount
-import org.meshtastic.core.ui.icon.PermScanWifi
-import org.meshtastic.core.ui.icon.Serial
-import org.meshtastic.core.ui.icon.SettingsRemote
-import org.meshtastic.core.ui.icon.Speed
-import org.meshtastic.core.ui.icon.TrafficManagement
-import org.meshtastic.core.ui.icon.Usb
-import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
@@ -60,107 +59,102 @@ import org.meshtastic.proto.DeviceMetadata
 enum class ModuleRoute(
     val title: StringResource,
     val route: Route,
-    val icon: ImageVector? = null,
+    val icon: DrawableResource? = null,
     val type: Int = 0,
     val isSupported: (Capabilities) -> Boolean = { true },
     val isApplicable: (Config.DeviceConfig.Role?) -> Boolean = { true },
 ) {
-    MQTT(
-        Res.string.mqtt,
-        SettingsRoutes.MQTT,
-        MeshtasticIcons.MqttConnected,
-        AdminMessage.ModuleConfigType.MQTT_CONFIG.value,
-    ),
+    MQTT(Res.string.mqtt, SettingsRoutes.MQTT, Res.drawable.ic_cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
     SERIAL(
         Res.string.serial,
         SettingsRoutes.Serial,
-        MeshtasticIcons.Usb,
+        Res.drawable.ic_usb,
         AdminMessage.ModuleConfigType.SERIAL_CONFIG.value,
     ),
     EXT_NOTIFICATION(
         Res.string.external_notification,
         SettingsRoutes.ExtNotification,
-        MeshtasticIcons.Notifications,
+        Res.drawable.ic_notifications,
         AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG.value,
     ),
     STORE_FORWARD(
         Res.string.store_forward,
         SettingsRoutes.StoreForward,
-        MeshtasticIcons.Serial,
+        Res.drawable.ic_terminal,
         AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG.value,
     ),
     RANGE_TEST(
         Res.string.range_test,
         SettingsRoutes.RangeTest,
-        MeshtasticIcons.Speed,
+        Res.drawable.ic_speed,
         AdminMessage.ModuleConfigType.RANGETEST_CONFIG.value,
     ),
     TELEMETRY(
         Res.string.telemetry,
         SettingsRoutes.Telemetry,
-        MeshtasticIcons.DataUsage,
+        Res.drawable.ic_data_usage,
         AdminMessage.ModuleConfigType.TELEMETRY_CONFIG.value,
     ),
     CANNED_MESSAGE(
         Res.string.canned_message,
         SettingsRoutes.CannedMessage,
-        MeshtasticIcons.Message,
+        Res.drawable.ic_message,
         AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG.value,
     ),
     AUDIO(
         Res.string.audio,
         SettingsRoutes.Audio,
-        MeshtasticIcons.VolumeUp,
+        Res.drawable.ic_volume_up,
         AdminMessage.ModuleConfigType.AUDIO_CONFIG.value,
     ),
     REMOTE_HARDWARE(
         Res.string.remote_hardware,
         SettingsRoutes.RemoteHardware,
-        MeshtasticIcons.SettingsRemote,
+        Res.drawable.ic_settings_remote,
         AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG.value,
     ),
     NEIGHBOR_INFO(
         Res.string.neighbor_info,
         SettingsRoutes.NeighborInfo,
-        MeshtasticIcons.PeopleCount,
+        Res.drawable.ic_people,
         AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG.value,
     ),
     AMBIENT_LIGHTING(
         Res.string.ambient_lighting,
         SettingsRoutes.AmbientLighting,
-        MeshtasticIcons.LightMode,
+        Res.drawable.ic_light_mode,
         AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG.value,
     ),
     DETECTION_SENSOR(
         Res.string.detection_sensor,
         SettingsRoutes.DetectionSensor,
-        MeshtasticIcons.DetectionSensor,
+        Res.drawable.ic_sensors,
         AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG.value,
     ),
     PAXCOUNTER(
         Res.string.paxcounter,
         SettingsRoutes.Paxcounter,
-        MeshtasticIcons.PermScanWifi,
+        Res.drawable.ic_perm_scan_wifi,
         AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG.value,
     ),
     STATUS_MESSAGE(
         Res.string.status_message,
         SettingsRoutes.StatusMessage,
-        MeshtasticIcons.Message,
+        Res.drawable.ic_message,
         AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
         isSupported = { it.supportsStatusMessage },
     ),
     TRAFFIC_MANAGEMENT(
         Res.string.traffic_management,
         SettingsRoutes.TrafficManagement,
-        MeshtasticIcons.TrafficManagement,
+        Res.drawable.ic_alt_route,
         AdminMessage.ModuleConfigType.TRAFFICMANAGEMENT_CONFIG.value,
         isSupported = { it.supportsTrafficManagementConfig },
     ),
     TAK(
         Res.string.tak,
         SettingsRoutes.TAK,
-        MeshtasticIcons.PeopleCount,
+        Res.drawable.ic_people,
         AdminMessage.ModuleConfigType.TAK_CONFIG.value,
         isSupported = { it.supportsTakConfig },
         isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },

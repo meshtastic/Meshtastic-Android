@@ -22,6 +22,9 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_account_circle
 import org.meshtastic.core.resources.ic_group
+import org.meshtastic.core.resources.ic_groups
+import org.meshtastic.core.resources.ic_people
+import org.meshtastic.core.resources.ic_person
 import org.meshtastic.core.resources.ic_person_add
 import org.meshtastic.core.resources.ic_person_off
 import org.meshtastic.core.resources.ic_person_search
@@ -37,3 +40,9 @@ val MeshtasticIcons.PersonSearch: ImageVector
 
 val MeshtasticIcons.PersonAdd: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_person_add)
+val MeshtasticIcons.Person: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_person)
+val MeshtasticIcons.Groups: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_groups)
+val MeshtasticIcons.PeopleCount: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_people)

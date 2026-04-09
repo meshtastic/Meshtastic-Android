@@ -45,12 +45,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import okio.ByteString
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
@@ -63,6 +63,9 @@ import org.meshtastic.core.resources.encryption_pkc_text
 import org.meshtastic.core.resources.encryption_psk
 import org.meshtastic.core.resources.encryption_psk_text
 import org.meshtastic.core.resources.error
+import org.meshtastic.core.resources.ic_key_off
+import org.meshtastic.core.resources.ic_lock
+import org.meshtastic.core.resources.ic_lock_open
 import org.meshtastic.core.resources.security_icon_help_dismiss
 import org.meshtastic.core.resources.security_icon_help_show_all
 import org.meshtastic.core.resources.security_icon_help_show_less
@@ -136,7 +139,7 @@ fun NodeKeyStatusIcon(
  */
 @Immutable
 enum class NodeKeySecurityState(
-    @Stable val icon: ImageVector,
+    @Stable val icon: DrawableResource,
     @Stable val color: @Composable () -> Color,
     val descriptionResId: StringResource,
     val helpTextResId: StringResource,
@@ -144,7 +147,7 @@ enum class NodeKeySecurityState(
 ) {
     // State for public key mismatch
     PKM(
-        icon = MeshtasticIcons.KeyOff,
+        icon = Res.drawable.ic_key_off,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.encryption_error,
         helpTextResId = Res.string.encryption_error_text,
@@ -153,7 +156,7 @@ enum class NodeKeySecurityState(
 
     // State for public key encryption
     PKC(
-        icon = MeshtasticIcons.Lock,
+        icon = Res.drawable.ic_lock,
         color = { colorScheme.StatusGreen },
         title = Res.string.encryption_pkc,
         helpTextResId = Res.string.encryption_pkc_text,
@@ -162,7 +165,7 @@ enum class NodeKeySecurityState(
 
     // State for shared key encryption
     PSK(
-        icon = MeshtasticIcons.LockOpen,
+        icon = Res.drawable.ic_lock_open,
         color = { colorScheme.StatusYellow },
         title = Res.string.encryption_psk,
         helpTextResId = Res.string.encryption_psk_text,

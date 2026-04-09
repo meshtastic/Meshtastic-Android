@@ -23,10 +23,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -40,6 +41,10 @@ import org.meshtastic.core.resources.device_configuration
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.factory_reset
 import org.meshtastic.core.resources.firmware_update_title
+import org.meshtastic.core.resources.ic_power_settings_new
+import org.meshtastic.core.resources.ic_restart_alt
+import org.meshtastic.core.resources.ic_restore
+import org.meshtastic.core.resources.ic_storage
 import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.message_device_managed
 import org.meshtastic.core.resources.module_settings
@@ -53,13 +58,9 @@ import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.CleaningServices
 import org.meshtastic.core.ui.icon.Download
-import org.meshtastic.core.ui.icon.FactoryReset
 import org.meshtastic.core.ui.icon.KeyboardArrowRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.PowerSettingsNew
-import org.meshtastic.core.ui.icon.RestartAlt
 import org.meshtastic.core.ui.icon.Settings
-import org.meshtastic.core.ui.icon.Storage
 import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Upload
 import org.meshtastic.feature.settings.component.ExpressiveSection
@@ -101,7 +102,13 @@ private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClic
             ManagedMessage()
         }
         ConfigRoute.radioConfigRoutes.forEach {
-            ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
+            ListItem(
+                text = stringResource(it.title),
+                leadingIcon = it.icon?.let { res -> vectorResource(res) },
+                enabled = enabled,
+            ) {
+                onRouteClick(it)
+            }
         }
     }
 }
@@ -211,11 +218,11 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
     }
 }
 
-enum class AdminRoute(val icon: ImageVector, val title: StringResource) {
-    REBOOT(MeshtasticIcons.RestartAlt, Res.string.reboot),
-    SHUTDOWN(MeshtasticIcons.PowerSettingsNew, Res.string.shutdown),
-    FACTORY_RESET(MeshtasticIcons.FactoryReset, Res.string.factory_reset),
-    NODEDB_RESET(MeshtasticIcons.Storage, Res.string.nodedb_reset),
+enum class AdminRoute(val icon: DrawableResource, val title: StringResource) {
+    REBOOT(Res.drawable.ic_restart_alt, Res.string.reboot),
+    SHUTDOWN(Res.drawable.ic_power_settings_new, Res.string.shutdown),
+    FACTORY_RESET(Res.drawable.ic_restore, Res.string.factory_reset),
+    NODEDB_RESET(Res.drawable.ic_storage, Res.string.nodedb_reset),
 }
 
 @Composable

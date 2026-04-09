@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
@@ -135,7 +136,7 @@ private fun AdminRouteItems(
         ListItem(
             enabled = enabled,
             text = stringResource(route.title),
-            leadingIcon = route.icon,
+            leadingIcon = vectorResource(route.icon),
             leadingIconTint = MaterialTheme.colorScheme.error,
             textColor = MaterialTheme.colorScheme.error,
             trailingIcon = null,
