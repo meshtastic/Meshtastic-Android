@@ -233,13 +233,15 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `setResponseStateLoading for REBOOT calls useCase after packet response`() = runTest {
+    fun `setResponseStateLoading for REBOOT calls useCase after config response`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
+        // AdminRoute first sends a session key config request; the admin action fires
+        // only after the actual ConfigResponse (not a routing ACK / Success).
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config())
 
         viewModel = createViewModel()
 
@@ -247,20 +249,22 @@ class RadioConfigViewModelTest {
 
         viewModel.setResponseStateLoading(AdminRoute.REBOOT)
 
-        // Emit a packet to trigger processPacketResponse -> sendAdminRequest
+        // Emit a config response packet to trigger processPacketResponse -> sendAdminRequest
         packetFlow.emit(MeshPacket())
 
         verifySuspend { adminActionsUseCase.reboot(123) }
     }
 
     @Test
-    fun `setResponseStateLoading for FACTORY_RESET calls useCase after packet response`() = runTest {
+    fun `setResponseStateLoading for FACTORY_RESET calls useCase after config response`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
+        // AdminRoute first sends a session key config request; the admin action fires
+        // only after the actual ConfigResponse (not a routing ACK / Success).
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config())
 
         viewModel = createViewModel()
 
@@ -268,7 +272,7 @@ class RadioConfigViewModelTest {
 
         viewModel.setResponseStateLoading(AdminRoute.FACTORY_RESET)
 
-        // Emit a packet to trigger processPacketResponse -> sendAdminRequest
+        // Emit a config response packet to trigger processPacketResponse -> sendAdminRequest
         packetFlow.emit(MeshPacket())
 
         verifySuspend { adminActionsUseCase.factoryReset(123, any()) }
@@ -449,7 +453,6 @@ class RadioConfigViewModelTest {
         nodeRepository.setNodes(listOf(node))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
 
         viewModel = createViewModel()
 
@@ -461,13 +464,16 @@ class RadioConfigViewModelTest {
         packetFlow.emit(MeshPacket())
 
         viewModel.setResponseStateLoading(AdminRoute.SHUTDOWN)
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
+        // AdminRoute fires sendAdminRequest after receiving ConfigResponse (session key),
+        // not after a routing ACK (Success).
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(Config())
         packetFlow.emit(MeshPacket())
         verifySuspend { adminActionsUseCase.shutdown(123) }
 
         // NODEDB_RESET
         everySuspend { adminActionsUseCase.nodedbReset(any(), any(), any()) } returns 42
         viewModel.setResponseStateLoading(AdminRoute.NODEDB_RESET)
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(Config())
         packetFlow.emit(MeshPacket())
         verifySuspend { adminActionsUseCase.nodedbReset(123, any(), any()) }
     }

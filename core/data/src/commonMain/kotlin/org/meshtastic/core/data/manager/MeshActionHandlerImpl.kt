@@ -248,6 +248,11 @@ class MeshActionHandlerImpl(
     override fun handleSetRemoteConfig(id: Int, destNum: Int, payload: ByteArray) {
         val c = Config.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_config = c) }
+        // When targeting the local node, optimistically persist the config so the
+        // UI reflects changes immediately (matching handleSetConfig behaviour).
+        if (destNum == nodeManager.myNodeNum.value) {
+            scope.handledLaunch { radioConfigRepository.setLocalConfig(c) }
+        }
     }
 
     override fun handleGetRemoteConfig(id: Int, destNum: Int, config: Int) {
@@ -310,6 +315,11 @@ class MeshActionHandlerImpl(
         if (payload != null) {
             val c = Channel.ADAPTER.decode(payload)
             commandSender.sendAdmin(destNum, id) { AdminMessage(set_channel = c) }
+            // When targeting the local node, optimistically persist the channel so
+            // the UI reflects changes immediately (matching handleSetChannel behaviour).
+            if (destNum == nodeManager.myNodeNum.value) {
+                scope.handledLaunch { radioConfigRepository.updateChannelSettings(c) }
+            }
         }
     }
 

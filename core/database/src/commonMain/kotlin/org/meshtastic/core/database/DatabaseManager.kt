@@ -23,6 +23,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -135,10 +136,12 @@ open class DatabaseManager(
         // Also mark the previous DB as used "just now" so LRU has an accurate, recent timestamp
         previousDbName?.let { markLastUsed(it) }
 
-        // Now safe to close the previous DB — collectors have switched to the new instance.
-        if (previousDbName != null && previousDbName != dbName) {
-            closeCachedDatabase(previousDbName)
-        }
+        // Do NOT close the previous DB synchronously here. Even though _currentDb has been
+        // updated, in-flight `withDb` calls may still hold a reference to the old database
+        // (captured before the emission). Closing the connection pool while those queries are
+        // executing causes "Connection pool is closed" crashes. Instead, let LRU eviction
+        // (enforceCacheLimit) handle cleanup — it only runs on databases that are not the
+        // active target and have not been used recently.
 
         // Defer LRU eviction so switch is not blocked by filesystem work
         managerScope.launch(dispatchers.io) { enforceCacheLimit(activeDbName = dbName) }
@@ -167,11 +170,26 @@ open class DatabaseManager(
     private val limitedIo = dispatchers.io.limitedParallelism(4)
 
     /** Execute [block] with the current DB instance. */
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = withContext(limitedIo) {
         val db = _currentDb.value ?: return@withContext null
         val active = buildDbName(_currentAddress.value)
         markLastUsed(active)
-        block(db)
+        try {
+            block(db)
+        } catch (e: CancellationException) {
+            throw e // Preserve structured concurrency cancellation propagation.
+        } catch (e: Exception) {
+            // If the connection pool was closed between capturing `db` and executing the query
+            // (e.g., during a database switch), retry once with the current DB instance.
+            if (e.message?.contains("Connection pool is closed") == true) {
+                Logger.w { "withDb: connection pool closed, retrying with current DB" }
+                val retryDb = _currentDb.value ?: return@withContext null
+                block(retryDb)
+            } else {
+                throw e
+            }
+        }
     }
 
     /** Returns true if a database exists for the given device address. */

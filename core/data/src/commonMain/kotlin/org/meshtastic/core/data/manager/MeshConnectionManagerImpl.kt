@@ -205,6 +205,7 @@ class MeshConnectionManagerImpl(
 
     private fun tearDownConnection() {
         packetHandler.stopPacketQueue()
+        commandSender.setSessionPasskey(okio.ByteString.EMPTY) // Prevent stale passkey on reconnect.
         locationManager.stop()
         mqttManager.stop()
     }
@@ -227,8 +228,11 @@ class MeshConnectionManagerImpl(
             scope.handledLaunch {
                 try {
                     val localConfig = radioConfigRepository.localConfigFlow.first()
-                    val timeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
-                    Logger.d { "Waiting for sleeping device, timeout=$timeout secs" }
+                    val rawTimeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
+                    // Cap the timeout so routers or power-saving configs (ls_secs=3600) don't
+                    // leave the UI stuck in DeviceSleep for over an hour.
+                    val timeout = rawTimeout.coerceAtMost(MAX_SLEEP_TIMEOUT_SECONDS)
+                    Logger.d { "Waiting for sleeping device, timeout=$timeout secs (raw=$rawTimeout)" }
                     delay(timeout.seconds)
                     Logger.w { "Device timed out, setting disconnected" }
                     onConnectionChanged(ConnectionState.Disconnected)
@@ -354,6 +358,12 @@ class MeshConnectionManagerImpl(
 
     companion object {
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
+
+        // Maximum time (in seconds) to wait for a sleeping device before declaring it
+        // disconnected, regardless of the device's ls_secs configuration. Without this
+        // cap, routers (ls_secs=3600) leave the UI in DeviceSleep for over an hour.
+        private const val MAX_SLEEP_TIMEOUT_SECONDS = 300
+
         private val HANDSHAKE_TIMEOUT = 30.seconds
 
         // Shorter window for the retry attempt: if the device genuinely didn't receive the

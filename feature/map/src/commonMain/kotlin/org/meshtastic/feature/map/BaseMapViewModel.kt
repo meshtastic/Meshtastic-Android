@@ -82,6 +82,7 @@ open class BaseMapViewModel(
             .getWaypoints()
             .mapLatest { list ->
                 list
+                    .filter { it.waypoint != null }
                     .associateBy { packet -> packet.waypoint!!.id }
                     .filterValues {
                         val expire = it.waypoint?.expire ?: 0

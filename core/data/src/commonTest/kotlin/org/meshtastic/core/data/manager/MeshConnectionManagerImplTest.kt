@@ -28,6 +28,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.ConnectionState
@@ -266,5 +267,47 @@ class MeshConnectionManagerImplTest {
 
         verify { mqttManager.start(any(), true, true) }
         verify { historyManager.requestHistoryReplay(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `DeviceSleep timeout is capped at MAX_SLEEP_TIMEOUT_SECONDS for high ls_secs`() = runTest(testDispatcher) {
+        // Router with ls_secs=3600 — previously this created a 3630s timeout.
+        // With the cap, it should be clamped to 300s.
+        val config =
+            LocalConfig(
+                power = Config.PowerConfig(is_power_saving = true, ls_secs = 3600),
+                device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER),
+            )
+        every { radioConfigRepository.localConfigFlow } returns flowOf(config)
+        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
+        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
+        every { packetHandler.stopPacketQueue() } returns Unit
+        every { locationManager.stop() } returns Unit
+        every { mqttManager.stop() } returns Unit
+        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
+
+        manager.start(backgroundScope)
+        advanceUntilIdle()
+
+        // Transition to Connected then DeviceSleep
+        radioConnectionState.value = ConnectionState.Connected
+        advanceUntilIdle()
+        radioConnectionState.value = ConnectionState.DeviceSleep
+        advanceUntilIdle()
+
+        assertEquals(
+            ConnectionState.DeviceSleep,
+            serviceRepository.connectionState.value,
+            "Should be in DeviceSleep initially",
+        )
+
+        // Advance 300 seconds (the cap) + 1 second to trigger the timeout.
+        advanceTimeBy(301_000L)
+
+        assertEquals(
+            ConnectionState.Disconnected,
+            serviceRepository.connectionState.value,
+            "Should transition to Disconnected after capped timeout (300s), not the raw 3630s",
+        )
     }
 }

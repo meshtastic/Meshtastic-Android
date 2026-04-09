@@ -142,7 +142,7 @@ class LogSearchManager {
         return filteredLogs
             .flatMapIndexed { logIndex, log ->
                 searchText.split(" ").flatMap { term ->
-                    val escapedTerm = term // Simple regex escape or just use contains
+                    val escapedTerm = Regex.escape(term)
                     val regex = escapedTerm.toRegex(RegexOption.IGNORE_CASE)
                     val messageMatches =
                         regex.findAll(log.logMessage).map {

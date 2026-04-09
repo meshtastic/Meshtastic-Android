@@ -289,6 +289,7 @@ interface NodeInfoDao {
 
     @Upsert suspend fun doUpsert(node: NodeEntity)
 
+    @Transaction
     suspend fun upsert(node: NodeEntity) {
         val verifiedNode = getVerifiedNodeForUpsert(node)
         doUpsert(verifiedNode)

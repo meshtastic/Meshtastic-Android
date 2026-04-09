@@ -110,6 +110,7 @@ class PacketHandlerImpl(
     override fun sendToRadio(packet: MeshPacket) {
         scope.launch {
             queueMutex.withLock {
+                queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
                 queuedPackets.add(packet)
                 startPacketQueueLocked()
             }
@@ -123,6 +124,7 @@ class PacketHandlerImpl(
         val deferred = CompletableDeferred<Boolean>()
         responseMutex.withLock { queueResponse[packet.id] = deferred }
         queueMutex.withLock {
+            queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
             queuedPackets.add(packet)
             startPacketQueueLocked()
         }
@@ -199,15 +201,18 @@ class PacketHandlerImpl(
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} success $success" }
                         } catch (e: TimeoutCancellationException) {
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
+                            // Clean up the deferred for this packet. sendToRadioAndAwait callers
+                            // also clean up in their own finally block (idempotent remove).
+                            responseMutex.withLock { queueResponse.remove(packet.id) }
                         } catch (e: CancellationException) {
                             throw e // Preserve structured concurrency cancellation propagation.
                         } catch (e: Exception) {
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} failed" }
+                            responseMutex.withLock { queueResponse.remove(packet.id) }
                         }
-                        // Do NOT remove from queueResponse here. Removal is owned by:
-                        // - handleQueueStatus (normal completion path)
-                        // - sendToRadioAndAwait's finally block (for await-style callers)
-                        // - stopPacketQueue (bulk cleanup on disconnect)
+                        // Deferred cleanup is now handled in the catch blocks above.
+                        // handleQueueStatus (normal success) and stopPacketQueue (bulk cleanup)
+                        // also remove entries, and these removals are idempotent.
                     }
                 } finally {
                     // Hold queueMutex so that clearing queueJob and the restart decision are

@@ -98,11 +98,12 @@ class CommandSenderImpl(
     /**
      * Resolves the correct channel index for sending a packet to [toNum].
      *
-     * When both the local node and the destination support PKC, returns [DataPacket.PKC_CHANNEL_INDEX] so that
-     * [buildMeshPacket] enables PKI encryption. Otherwise falls back to the node's heard-on channel (for general
-     * packets) or the dedicated admin channel (for admin packets).
+     * PKI encryption ([DataPacket.PKC_CHANNEL_INDEX]) is only used for **admin** packets, where end-to-end encryption
+     * is appropriate. Protocol-level requests (traceroute, telemetry, position, nodeinfo, neighborinfo) must NOT use
+     * PKI because relay nodes need to read and/or modify the inner payload (e.g. traceroute appends each hop's node
+     * number). These requests fall back to the node's heard-on channel.
      */
-    private fun getChannelIndex(toNum: Int, isAdmin: Boolean = false): Int {
+    private fun getAdminChannelIndex(toNum: Int): Int {
         val myNum = nodeManager.myNodeNum.value ?: return 0
         val myNode = nodeManager.nodeDBbyNodeNum[myNum]
         val destNode = nodeManager.nodeDBbyNodeNum[toNum]
@@ -110,15 +111,18 @@ class CommandSenderImpl(
         return when {
             myNum == toNum -> 0
             myNode?.hasPKC == true && destNode?.hasPKC == true -> DataPacket.PKC_CHANNEL_INDEX
-            isAdmin ->
+            else ->
                 channelSet.value.settings
                     .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
                     .coerceAtLeast(0)
-            else -> destNode?.channel ?: 0
         }
     }
 
-    private fun getAdminChannelIndex(toNum: Int): Int = getChannelIndex(toNum, isAdmin = true)
+    /**
+     * Returns the heard-on channel for a non-admin request to [toNum]. Does NOT use PKI — protocol-level requests need
+     * clear inner payloads.
+     */
+    private fun getChannelIndex(toNum: Int): Int = nodeManager.nodeDBbyNodeNum[toNum]?.channel ?: 0
 
     override fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()

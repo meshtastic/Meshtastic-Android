@@ -17,6 +17,8 @@
 package org.meshtastic.core.network.radio
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
@@ -123,5 +125,53 @@ class BleRadioInterfaceTest {
 
         // Cancel the reconnect loop so runTest can complete.
         bleInterface.close()
+    }
+
+    /**
+     * After [RECONNECT_MAX_FAILURES] (10) consecutive failures, the reconnect loop should stop and signal a permanent
+     * disconnect. This prevents infinite battery drain when the device is genuinely offline.
+     *
+     * Time budget for 10 failures with bonded device (no scan): Each iteration = 1s settle + connectAndAwait throw +
+     * backoff Backoffs: 5s, 10s, 20s, 40s, 60s, 60s, 60s, 60s, 60s, (exit at failure 10 before backoff) Total ≈ 10×1s
+     * settle + 5+10+20+40+60+60+60+60+60 = 10 + 375 = 385s ≈ 385_000ms We use a generous 400_000ms to cover any timing
+     * variance.
+     */
+    @Test
+    fun `reconnect loop stops after RECONNECT_MAX_FAILURES with permanent disconnect`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+
+        connection.connectException = RadioNotConnectedException("simulated failure")
+        every { service.onDisconnect(any(), any()) } returns Unit
+
+        val bleInterface =
+            BleRadioInterface(
+                serviceScope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                service = service,
+                address = address,
+            )
+
+        // Advance enough time for all 10 failures to occur.
+        advanceTimeBy(400_001L)
+
+        // Should have been called with isPermanent=true at least once (the final call).
+        verify { service.onDisconnect(isPermanent = true, errorMessage = any()) }
+
+        bleInterface.close()
+    }
+
+    @Test
+    fun `computeReconnectBackoffMs returns correct backoff values`() {
+        assertEquals(5_000L, computeReconnectBackoffMs(0))
+        assertEquals(5_000L, computeReconnectBackoffMs(1))
+        assertEquals(10_000L, computeReconnectBackoffMs(2))
+        assertEquals(20_000L, computeReconnectBackoffMs(3))
+        assertEquals(40_000L, computeReconnectBackoffMs(4))
+        assertEquals(60_000L, computeReconnectBackoffMs(5))
+        assertEquals(60_000L, computeReconnectBackoffMs(10))
+        assertEquals(60_000L, computeReconnectBackoffMs(100))
     }
 }
