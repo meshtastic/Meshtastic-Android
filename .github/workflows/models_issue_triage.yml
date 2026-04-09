@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   triage:
-    if: ${{ github.repository == 'meshtastic/firmware' && github.event.issue.user.type != 'Bot' }}
+    if: ${{ github.repository == 'meshtastic/Meshtastic-Android' && github.event.issue.user.type != 'Bot' }}
     runs-on: ubuntu-24.04-arm
     steps:
       # ─────────────────────────────────────────────────────────────────────────
@@ -98,20 +98,20 @@ jobs:
         continue-on-error: true
         with:
           prompt: |
-            Analyze this GitHub issue for completeness and determine if it needs labels.
+            Analyze this GitHub issue for the Meshtastic Android app and determine if it needs labels.
 
-            If this looks like a bug on the device/firmware (crash, reboot, lockup, radio issues, GPS issues, display issues, power/sleep issues), request device logs and explain how to get them:
+            If this looks like a bug in the Android app (crash, ANR, UI glitch, connection failure, Bluetooth issues, notification problems, map issues), request app logs and explain how to get them:
 
-            Web Flasher logs:
-            - Go to https://flasher.meshtastic.org
-            - Connect the device via USB and click Connect
-            - Open the device console/log output, reproduce the problem, then copy/download and attach/paste the logs
+            Android app debug logs:
+            - Open the Meshtastic app, go to Settings > Debug > Save Logs
+            - Reproduce the problem, then share/attach the exported log file
 
-            Meshtastic CLI logs:
-            - Run: meshtastic --port <serial-port> --noproto
-            - Reproduce the problem, then copy/paste the terminal output
+            Android logcat (if app logs are insufficient):
+            - Connect phone via USB with USB debugging enabled
+            - Run: adb logcat -s Meshtastic:* *:E
+            - Reproduce the problem, then copy/paste the relevant output
 
-            Also request key context if missing: device model/variant, firmware version, region, steps to reproduce, expected vs actual.
+            Also request key context if missing: Android version, phone model, app version, Meshtastic device model, firmware version, connection type (BLE/USB/TCP), steps to reproduce, expected vs actual.
 
             Respond ONLY with JSON:
             {
@@ -120,7 +120,7 @@ jobs:
               "label": "needs-logs" | "needs-info" | "none"
             }
 
-            Use "needs-logs" if this is a device bug AND no logs are attached.
+            Use "needs-logs" if this is an app bug AND no logs are attached.
             Use "needs-info" if basic info like firmware version or steps to reproduce are missing.
             Use "none" if the issue is complete or is a feature request.
 
