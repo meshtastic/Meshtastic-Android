@@ -56,10 +56,7 @@ kotlin {
             implementation(libs.markdown.renderer.m3)
         }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.appcompat)
-            implementation(libs.markdown.renderer.android)
-        }
+        androidMain.dependencies { implementation(libs.markdown.renderer.android) }
 
         commonTest.dependencies {
             implementation(projects.core.testing)

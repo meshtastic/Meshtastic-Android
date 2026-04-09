@@ -49,7 +49,6 @@ kotlin {
             implementation(projects.feature.map)
 
             implementation(libs.jetbrains.navigation3.ui)
-            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)
@@ -62,11 +61,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
         }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.appcompat)
-
-            implementation(libs.markdown.renderer.android)
-        }
+        androidMain.dependencies { implementation(libs.markdown.renderer.android) }
 
         val androidHostTest by getting {
             dependencies {

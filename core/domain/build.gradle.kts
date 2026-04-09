@@ -39,7 +39,6 @@ kotlin {
             implementation(projects.core.resources)
 
             implementation(libs.kermit)
-            implementation(libs.compose.multiplatform.resources)
             implementation(libs.okio)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)

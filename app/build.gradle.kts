@@ -254,7 +254,6 @@ dependencies {
     implementation(libs.jetbrains.lifecycle.viewmodel.compose)
     implementation(libs.jetbrains.lifecycle.runtime.compose)
     implementation(libs.jetbrains.navigation3.ui)
-    implementation(libs.androidx.paging.compose)
     implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
