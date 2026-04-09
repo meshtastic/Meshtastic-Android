@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check for PR labels
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             // Extract labels from the payload directly to avoid extra API calls
