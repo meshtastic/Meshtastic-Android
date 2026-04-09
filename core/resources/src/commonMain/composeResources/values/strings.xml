@@ -689,6 +689,7 @@
     <string name="ip">IP</string>
     <string name="gateway">Gateway</string>
     <string name="subnet">Subred</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">Paxcounter Config</string>
     <string name="paxcounter_enabled">Paxcounter enabled</string>
     <string name="status_message">Status Message</string>
