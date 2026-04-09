@@ -182,7 +182,7 @@ private fun SignalMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createPointOnlyLine(rssiColor, ChartStyling.LARGE_POINT_SIZE_DP),
+                        ChartStyling.createStyledLine(rssiColor),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
                 )
@@ -195,7 +195,7 @@ private fun SignalMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createPointOnlyLine(snrColor, ChartStyling.LARGE_POINT_SIZE_DP),
+                        ChartStyling.createDashedLine(snrColor),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
                 )

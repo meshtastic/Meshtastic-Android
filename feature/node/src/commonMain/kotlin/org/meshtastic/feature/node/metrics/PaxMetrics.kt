@@ -48,6 +48,7 @@ import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
@@ -139,17 +140,15 @@ private fun PaxMetricsChart(
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createGradientLine(
                             lineColor = bleColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                         ),
                         ChartStyling.createGradientLine(
                             lineColor = wifiColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                         ),
                         ChartStyling.createBoldLine(
                             lineColor = paxColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                         ),
                     ),
+                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
                 ),
             ),
             startAxis = VerticalAxis.rememberStart(label = axisLabel),

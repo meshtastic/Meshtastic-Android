@@ -56,6 +56,7 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
@@ -111,13 +112,13 @@ private val LEGEND_DATA =
         LegendData(
             nameRes = Res.string.channel_utilization,
             color = Device.CH_UTIL.color,
-            isLine = false,
+            isLine = true,
             environmentMetric = null,
         ),
         LegendData(
             nameRes = Res.string.air_utilization,
             color = Device.AIR_UTIL.color,
-            isLine = false,
+            isLine = true,
             environmentMetric = null,
         ),
     )
@@ -260,19 +261,19 @@ private fun DeviceMetricsChart(
 
         val batteryStyle =
             if (batteryData.isNotEmpty()) {
-                ChartStyling.createBoldLine(batteryColor, ChartStyling.MEDIUM_POINT_SIZE_DP)
+                ChartStyling.createBoldLine(batteryColor)
             } else {
                 null
             }
         val chUtilStyle =
             if (chUtilData.isNotEmpty()) {
-                ChartStyling.createPointOnlyLine(chUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+                ChartStyling.createSubtleLine(chUtilColor)
             } else {
                 null
             }
         val airUtilStyle =
             if (airUtilData.isNotEmpty()) {
-                ChartStyling.createPointOnlyLine(airUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+                ChartStyling.createDashedLine(airUtilColor)
             } else {
                 null
             }
@@ -322,6 +323,7 @@ private fun DeviceMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
+                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0),
                 )
             } else {
                 null
@@ -334,7 +336,6 @@ private fun DeviceMetricsChart(
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createGradientLine(
                             lineColor = voltageColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                         ),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
@@ -346,6 +347,12 @@ private fun DeviceMetricsChart(
         val layers = remember(leftLayer, rightLayer) { listOfNotNull(leftLayer, rightLayer) }
 
         if (layers.isNotEmpty()) {
+            val decorations = buildList {
+                if (leftLayer != null) {
+                    add(ChartStyling.rememberThresholdLine(y = 20.0, color = batteryColor, label = "20%"))
+                }
+            }
+
             GenericMetricChart(
                 modelProducer = modelProducer,
                 modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
@@ -376,6 +383,7 @@ private fun DeviceMetricsChart(
                     labelRotationDegrees = 45f,
                 ),
                 marker = marker,
+                decorations = decorations,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,
                 vicoScrollState = vicoScrollState,

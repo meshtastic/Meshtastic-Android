@@ -231,7 +231,7 @@ private fun PowerMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createBoldLine(currentColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                        ChartStyling.createBoldLine(currentColor),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
                 )
@@ -244,7 +244,7 @@ private fun PowerMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(voltageColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                        ChartStyling.createGradientLine(voltageColor),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
                 )

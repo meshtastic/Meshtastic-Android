@@ -29,6 +29,7 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
@@ -200,10 +201,12 @@ fun EnvironmentMetricsChart(
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createGradientLine(
                             Environment.BAROMETRIC_PRESSURE.color,
-                            ChartStyling.MEDIUM_POINT_SIZE_DP,
                         ),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
+                    // Fixed range per Oscar's UX guidance: barometric pressure should NOT autoscale,
+                    // otherwise trends (storms) are invisible. 700-1200 hPa covers sea-level to altitude.
+                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 700.0, maxY = 1200.0),
                 ),
             )
         }
@@ -212,7 +215,7 @@ fun EnvironmentMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(metric.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                        ChartStyling.createStyledLine(metric.color),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
                 ),

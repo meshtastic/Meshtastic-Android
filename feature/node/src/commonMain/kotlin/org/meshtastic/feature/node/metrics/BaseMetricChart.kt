@@ -39,7 +39,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.compose.cartesian.AutoScrollCondition
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.FadingEdges
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
@@ -47,10 +49,12 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.decoration.Decoration
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberFadingEdges
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import kotlinx.coroutines.launch
@@ -67,6 +71,9 @@ import org.meshtastic.core.ui.icon.Refresh
 /**
  * A generic chart host for Meshtastic metric charts. Handles common boilerplate for markers, scrolling, and point
  * selection synchronization.
+ *
+ * Uses [FadingEdges] to indicate scrollable content beyond the visible area, and accepts optional [Decoration]s for
+ * reference threshold lines/bands.
  */
 @Composable
 fun GenericMetricChart(
@@ -77,6 +84,7 @@ fun GenericMetricChart(
     endAxis: VerticalAxis<Axis.Position.Vertical.End>? = null,
     bottomAxis: HorizontalAxis<Axis.Position.Horizontal.Bottom>? = null,
     marker: CartesianMarker? = null,
+    decorations: List<Decoration> = emptyList(),
     selectedX: Double? = null,
     onPointSelected: ((Double) -> Unit)? = null,
     vicoScrollState: VicoScrollState = rememberVicoScrollState(),
@@ -105,6 +113,8 @@ fun GenericMetricChart(
             marker = marker,
             markerVisibilityListener = markerVisibilityListener,
             persistentMarkers = { _ -> if (selectedX != null && marker != null) marker at selectedX else null },
+            fadingEdges = rememberFadingEdges(),
+            decorations = decorations,
         ),
         modelProducer = modelProducer,
         modifier = modifier,
@@ -158,7 +168,10 @@ fun <T> BaseMetricScreen(
     var displayInfoDialog by remember { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
-    val vicoScrollState = rememberVicoScrollState()
+    val vicoScrollState = rememberVicoScrollState(
+        autoScroll = Scroll.Absolute.End,
+        autoScrollCondition = AutoScrollCondition.OnModelGrowth,
+    )
     val coroutineScope = rememberCoroutineScope()
     var selectedX by remember { mutableStateOf<Double?>(null) }
 
