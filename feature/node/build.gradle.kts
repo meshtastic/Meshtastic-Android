@@ -49,7 +49,6 @@ kotlin {
             implementation(projects.feature.map)
 
             implementation(libs.jetbrains.navigation3.ui)
-            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)
@@ -63,8 +62,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.appcompat)
-
             implementation(libs.markdown.renderer.android)
         }
 

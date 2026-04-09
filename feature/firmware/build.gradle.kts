@@ -57,7 +57,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.appcompat)
             implementation(libs.markdown.renderer.android)
         }
 

@@ -44,8 +44,6 @@ kotlin {
             implementation(projects.core.di)
         }
 
-        androidMain.dependencies { implementation(libs.material) }
-
         val androidHostTest by getting {
             dependencies {
                 implementation(libs.junit)

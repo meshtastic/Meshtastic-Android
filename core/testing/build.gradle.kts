@@ -35,7 +35,6 @@ kotlin {
             api(projects.core.ble)
             implementation(projects.core.datastore)
             implementation(libs.androidx.room.runtime)
-            implementation(libs.jetbrains.lifecycle.runtime)
             api(libs.kermit)
 
             // Testing libraries - these are public API for all test consumers
