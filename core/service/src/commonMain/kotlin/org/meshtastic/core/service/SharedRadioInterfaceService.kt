@@ -292,8 +292,15 @@ class SharedRadioInterfaceService(
     }
 
     override fun sendToRadio(bytes: ByteArray) {
+        // Capture radioIf reference atomically to avoid racing with stopInterfaceLocked()
+        // which sets radioIf = null and cancels _serviceScope. Without this snapshot,
+        // we could read a non-null radioIf but launch into an already-cancelled scope.
+        val currentIf = radioIf ?: run {
+            Logger.w { "sendToRadio: no active radio interface, dropping ${bytes.size} bytes" }
+            return
+        }
         _serviceScope.handledLaunch {
-            radioIf?.handleSendToRadio(bytes)
+            currentIf.handleSendToRadio(bytes)
             _meshActivity.tryEmit(MeshActivity.Send)
         }
     }

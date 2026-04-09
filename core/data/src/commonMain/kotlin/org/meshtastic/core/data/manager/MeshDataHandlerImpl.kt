@@ -253,7 +253,7 @@ class MeshDataHandlerImpl(
         val u =
             User.ADAPTER.decode(payload)
                 .let { if (it.is_licensed == true) it.copy(public_key = okio.ByteString.EMPTY) else it }
-                .let { if (packet.via_mqtt == true) it.copy(long_name = "${it.long_name} (MQTT)") else it }
+                .let { if (packet.via_mqtt == true && !it.long_name.endsWith(" (MQTT)")) it.copy(long_name = "${it.long_name} (MQTT)") else it }
         nodeManager.handleReceivedUser(packet.from, u, packet.channel)
     }
 

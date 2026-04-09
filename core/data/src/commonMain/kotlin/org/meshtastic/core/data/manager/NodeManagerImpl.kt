@@ -170,19 +170,27 @@ class NodeManagerImpl(
         }
 
     override fun updateNode(nodeNum: Int, withBroadcast: Boolean, channel: Int, transform: (Node) -> Node) {
-        val next = transform(_nodeDBbyNodeNum.value[nodeNum] ?: getOrCreateNode(nodeNum, channel))
-
-        _nodeDBbyNodeNum.update { it.put(nodeNum, next) }
-        if (next.user.id.isNotEmpty()) {
-            _nodeDBbyID.update { it.put(next.user.id, next) }
+        // Perform read + transform inside update{} to ensure atomicity.
+        // Without this, concurrent calls for the same nodeNum could read the same snapshot
+        // and the last writer would silently overwrite the other's changes.
+        var next: Node? = null
+        _nodeDBbyNodeNum.update { map ->
+            val current = map[nodeNum] ?: getOrCreateNode(nodeNum, channel)
+            val transformed = transform(current)
+            next = transformed
+            map.put(nodeNum, transformed)
+        }
+        val result = next ?: return
+        if (result.user.id.isNotEmpty()) {
+            _nodeDBbyID.update { it.put(result.user.id, result) }
         }
 
-        if (next.user.id.isNotEmpty() && isNodeDbReady.value) {
-            scope.handledLaunch { nodeRepository.upsert(next) }
+        if (result.user.id.isNotEmpty() && isNodeDbReady.value) {
+            scope.handledLaunch { nodeRepository.upsert(result) }
         }
 
         if (withBroadcast) {
-            serviceBroadcasts.broadcastNodeChange(next)
+            serviceBroadcasts.broadcastNodeChange(result)
         }
     }
 
@@ -282,7 +290,7 @@ class NodeManagerImpl(
                 } else {
                     var newUser =
                         user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
-                    if (info.via_mqtt) {
+                    if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
                         newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
                     }
                     next = next.copy(user = newUser, publicKey = newUser.public_key)

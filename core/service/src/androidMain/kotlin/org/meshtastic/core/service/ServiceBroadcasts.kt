@@ -34,8 +34,10 @@ import org.meshtastic.core.repository.ServiceBroadcasts as SharedServiceBroadcas
 @Single
 class ServiceBroadcasts(private val context: Context, private val serviceRepository: ServiceRepository) :
     SharedServiceBroadcasts {
-    // A mapping of receiver class name to package name - used for explicit broadcasts
-    private val clientPackages = mutableMapOf<String, String>()
+    // A mapping of receiver class name to package name - used for explicit broadcasts.
+    // ConcurrentHashMap because subscribeReceiver() is called from AIDL binder threads
+    // while explicitBroadcast() iterates from coroutine contexts.
+    private val clientPackages = java.util.concurrent.ConcurrentHashMap<String, String>()
 
     override fun subscribeReceiver(receiverName: String, packageName: String) {
         clientPackages[receiverName] = packageName

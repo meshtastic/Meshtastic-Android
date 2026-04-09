@@ -17,6 +17,7 @@
 package org.meshtastic.core.service
 
 import android.content.Context
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
@@ -41,8 +42,12 @@ class AndroidRadioControllerImpl(
         get() = serviceRepository.clientNotification
 
     override suspend fun sendMessage(packet: DataPacket) {
-        // Bridging to the existing flow via IMeshService
-        serviceRepository.meshService?.send(packet)
+        val svc = serviceRepository.meshService
+        if (svc == null) {
+            Logger.w { "sendMessage: meshService is null, dropping packet" }
+            return
+        }
+        svc.send(packet)
     }
 
     override fun clearClientNotification() {
@@ -187,7 +192,8 @@ class AndroidRadioControllerImpl(
         serviceRepository.meshService?.commitEditSettings(destNum)
     }
 
-    override fun getPacketId(): Int = serviceRepository.meshService?.getPacketId() ?: 0
+    override fun getPacketId(): Int = serviceRepository.meshService?.getPacketId()
+        ?: error("Cannot generate packet ID: meshService is not bound")
 
     override fun startProvideLocation() {
         serviceRepository.meshService?.startProvideLocation()

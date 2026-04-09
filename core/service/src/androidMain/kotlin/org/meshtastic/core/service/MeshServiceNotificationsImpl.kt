@@ -37,7 +37,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
@@ -319,9 +319,9 @@ class MeshServiceNotificationsImpl(
             val repo = nodeRepository.value
             val myNodeNum = repo.myNodeInfo.value?.myNodeNum
             if (myNodeNum != null) {
-                // We use runBlocking here because this is called from MeshConnectionManager's synchronous methods,
-                // and we only do this once if the cache is empty.
-                val nodes = runBlocking { repo.nodeDBbyNum.first() }
+                // Use .value instead of runBlocking { .first() } to avoid potential deadlock
+                // if called on the same dispatcher the Flow's upstream coroutine needs.
+                val nodes = repo.nodeDBbyNum.value
                 nodes[myNodeNum]?.let { node ->
                     if (cachedDeviceMetrics == null) {
                         cachedDeviceMetrics = node.deviceMetrics

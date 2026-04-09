@@ -79,6 +79,13 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
     private var stateJob: Job? = null
     private var connectionScope: CoroutineScope? = null
 
+    companion object {
+        private const val INITIAL_RETRY_DELAY_MS = 1000L
+        private const val MAX_RETRY_DELAY_MS = 30_000L
+        private const val MAX_CONNECT_RETRIES = 15
+        private const val BACKOFF_MULTIPLIER = 2
+    }
+
     private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
     override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
 
@@ -143,17 +150,29 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                 }
                 .launchIn(scope)
 
+        var retryCount = 0
+        var retryDelayMs = INITIAL_RETRY_DELAY_MS
         while (p.state.value !is State.Connected) {
             autoConnect.value =
                 try {
+                    // Cancel any previous connectionScope to avoid leaking the old coroutine scope (M1).
+                    connectionScope?.let {
+                        Logger.d { "[${device.address}] Cancelling previous connectionScope before reconnect" }
+                    }
                     connectionScope = p.connect()
                     false
                 } catch (e: CancellationException) {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") _: Exception) {
-                    @Suppress("MagicNumber")
-                    val retryDelayMs = 1000L
+                    retryCount++
+                    if (retryCount > MAX_CONNECT_RETRIES) {
+                        Logger.w { "[${device.address}] Max connect retries ($MAX_CONNECT_RETRIES) exceeded" }
+                        _connectionState.emit(BleConnectionState.Disconnected)
+                        return
+                    }
+                    Logger.d { "[${device.address}] Connect retry $retryCount, backoff ${retryDelayMs}ms" }
                     delay(retryDelayMs)
+                    retryDelayMs = (retryDelayMs * BACKOFF_MULTIPLIER).coerceAtMost(MAX_RETRY_DELAY_MS)
                     true
                 }
         }
@@ -176,6 +195,11 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
     }
 
     override suspend fun disconnect() = withContext(NonCancellable) {
+        // Emit Disconnected before cancelling stateJob so downstream collectors see the
+        // state transition. If we cancel stateJob first, the peripheral's state flow
+        // emission of Disconnected is never forwarded to _connectionState.
+        _connectionState.emit(BleConnectionState.Disconnected)
+
         stateJob?.cancel()
         stateJob = null
         peripheral?.disconnect()
@@ -197,7 +221,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         val p = peripheral ?: error("Not connected")
         val cScope = connectionScope ?: error("No active connection scope")
         val service = KableBleService(p, serviceUuid)
-        return cScope.setup(service)
+        return withTimeout(timeout) { cScope.setup(service) }
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength()
