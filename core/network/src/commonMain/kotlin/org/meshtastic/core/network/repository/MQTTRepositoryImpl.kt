@@ -21,12 +21,14 @@ import io.github.davidepianca98.MQTTClient
 import io.github.davidepianca98.mqtt.MQTTVersion
 import io.github.davidepianca98.mqtt.Subscription
 import io.github.davidepianca98.mqtt.packets.Qos
+import io.github.davidepianca98.mqtt.packets.mqttv5.ReasonCode
 import io.github.davidepianca98.mqtt.packets.mqttv5.SubscriptionOptions
 import io.github.davidepianca98.socket.tls.TLSClientSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
@@ -54,6 +56,9 @@ class MQTTRepositoryImpl(
         private const val DEFAULT_TOPIC_LEVEL = "/2/e/"
         private const val JSON_TOPIC_LEVEL = "/2/json/"
         private const val DEFAULT_SERVER_ADDRESS = "mqtt.meshtastic.org"
+        private const val INITIAL_RECONNECT_DELAY_MS = 1000L
+        private const val MAX_RECONNECT_DELAY_MS = 30_000L
+        private const val RECONNECT_BACKOFF_MULTIPLIER = 2
     }
 
     private var client: MQTTClient? = null
@@ -62,8 +67,14 @@ class MQTTRepositoryImpl(
     private var clientJob: Job? = null
     private val publishSemaphore = Semaphore(20)
 
+    @Suppress("TooGenericExceptionCaught")
     override fun disconnect() {
         Logger.i { "MQTT Disconnecting" }
+        try {
+            client?.disconnect(ReasonCode.SUCCESS)
+        } catch (e: Exception) {
+            Logger.w(e) { "MQTT clean disconnect failed" }
+        }
         clientJob?.cancel()
         clientJob = null
         client = null
@@ -123,23 +134,39 @@ class MQTTRepositoryImpl(
 
         client = newClient
 
-        clientJob = scope.launch {
-            try {
-                Logger.i { "MQTT Starting client loop for $host:$port" }
-                newClient.runSuspend()
-            } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
-                Logger.e(e) { "MQTT Client loop error (MQTT)" }
-                close(e)
-            } catch (e: io.github.davidepianca98.socket.IOException) {
-                Logger.e(e) { "MQTT Client loop error (IO)" }
-                close(e)
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                Logger.i { "MQTT Client loop cancelled" }
-                throw e
+        clientJob =
+            scope.launch {
+                var reconnectDelay = INITIAL_RECONNECT_DELAY_MS
+                while (true) {
+                    try {
+                        Logger.i { "MQTT Starting client loop for $host:$port" }
+                        // Reset backoff on each successful connection establishment. If the broker
+                        // disconnects cleanly after hours of operation, the next reconnect should
+                        // start with the minimum delay rather than whatever was accumulated.
+                        reconnectDelay = INITIAL_RECONNECT_DELAY_MS
+                        newClient.runSuspend()
+                        // runSuspend returned normally — broker closed connection. Retry.
+                        Logger.w { "MQTT client loop ended normally, reconnecting in ${reconnectDelay}ms" }
+                    } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
+                        Logger.e(e) { "MQTT Client loop error (MQTT), reconnecting in ${reconnectDelay}ms" }
+                    } catch (e: io.github.davidepianca98.socket.IOException) {
+                        Logger.e(e) { "MQTT Client loop error (IO), reconnecting in ${reconnectDelay}ms" }
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        Logger.i { "MQTT Client loop cancelled" }
+                        throw e
+                    }
+                    delay(reconnectDelay)
+                    reconnectDelay =
+                        (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)
+                }
             }
-        }
 
-        // Subscriptions
+        // Subscriptions: placed after runSuspend is launched and has had time to establish
+        // the TCP connection. KMQTT's subscribe() queues internally, but subscribing before
+        // the connection is ready may silently drop subscriptions depending on the version.
+        // A brief yield gives runSuspend() time to connect before we subscribe.
+        kotlinx.coroutines.yield()
+
         val subscriptions = mutableListOf<Subscription>()
         channelSet.subscribeList.forEach { globalId ->
             subscriptions.add(

@@ -69,10 +69,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.kotest.assertions)
-            implementation(libs.kotest.property)
         }
     }
 }

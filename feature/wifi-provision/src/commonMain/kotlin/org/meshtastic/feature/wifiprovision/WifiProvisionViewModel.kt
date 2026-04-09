@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Factory
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.feature.wifiprovision.domain.NymeaWifiService
@@ -98,10 +98,11 @@ sealed interface WifiProvisionError {
 /**
  * ViewModel for the WiFi provisioning flow.
  *
- * Uses [Factory] scope so a fresh [NymeaWifiService] (and its own [BleConnectionFactory]-backed
- * [org.meshtastic.core.ble.BleConnection]) is created for each provisioning session.
+ * Uses [KoinViewModel] so the instance is scoped to the navigation entry's [ViewModelStoreOwner]. A fresh
+ * [NymeaWifiService] (and its own [BleConnectionFactory]-backed [org.meshtastic.core.ble.BleConnection]) is created
+ * lazily for each provisioning session and cleaned up via [onCleared].
  */
-@Factory
+@KoinViewModel
 class WifiProvisionViewModel(
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,

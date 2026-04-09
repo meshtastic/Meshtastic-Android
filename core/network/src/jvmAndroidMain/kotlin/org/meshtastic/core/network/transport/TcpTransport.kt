@@ -99,7 +99,10 @@ class TcpTransport(
 
     /** Whether the transport is currently connected. */
     val isConnected: Boolean
-        get() = socket?.isConnected == true && !socket!!.isClosed
+        get() {
+            val s = socket ?: return false
+            return s.isConnected && !s.isClosed
+        }
 
     /**
      * Start a TCP connection to the given address with automatic reconnect.
@@ -127,6 +130,8 @@ class TcpTransport(
      */
     suspend fun sendPacket(payload: ByteArray) {
         codec.frameAndSend(payload = payload, sendBytes = ::sendBytesRaw, flush = ::flushBytes)
+        packetsSent++
+        bytesSent += payload.size
     }
 
     /** Send a heartbeat packet to keep the connection alive. */
@@ -283,8 +288,6 @@ class TcpTransport(
                     Logger.w { "$logTag: [$currentAddress] Cannot send ${p.size} bytes: not connected" }
                     return
                 }
-        packetsSent++
-        bytesSent += p.size
         try {
             stream.write(p)
         } catch (ex: IOException) {

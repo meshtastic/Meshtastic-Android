@@ -34,7 +34,5 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.compose.multiplatform.ui)
         }
-
-        commonTest.dependencies { implementation(kotlin("test")) }
     }
 }

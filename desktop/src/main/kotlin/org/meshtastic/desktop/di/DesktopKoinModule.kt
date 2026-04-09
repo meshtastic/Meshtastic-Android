@@ -162,6 +162,11 @@ private fun desktopPlatformStubsModule() = module {
     single<org.meshtastic.feature.node.compass.PhoneLocationProvider> { NoopPhoneLocationProvider() }
     single<org.meshtastic.feature.node.compass.MagneticFieldProvider> { NoopMagneticFieldProvider() }
 
+    // Desktop uses the real ApiService implementation (no flavor stub needed)
+    single<org.meshtastic.core.network.service.ApiService> {
+        org.meshtastic.core.network.service.ApiServiceImpl(client = get())
+    }
+
     // Ktor HttpClient for JVM/Desktop (equivalent of CoreNetworkAndroidModule on Android)
     single<HttpClient> { HttpClient(Java) { install(ContentNegotiation) { json(get<Json>()) } } }
 

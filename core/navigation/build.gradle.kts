@@ -32,7 +32,5 @@ kotlin {
             implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kermit)
         }
-
-        commonTest.dependencies { implementation(kotlin("test")) }
     }
 }

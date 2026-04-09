@@ -17,12 +17,16 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
+import kotlin.concurrent.Volatile
 
 /**
  * A simple global tracker for the currently active BLE connection. This resolves instance mismatch issues between
  * dynamically created UI devices (scanned vs bonded) and the actual connection.
+ *
+ * Fields are volatile to ensure visibility across AIDL binder threads and coroutine dispatchers.
  */
 internal object ActiveBleConnection {
-    var activePeripheral: Peripheral? = null
-    var activeAddress: String? = null
+    @Volatile var activePeripheral: Peripheral? = null
+
+    @Volatile var activeAddress: String? = null
 }

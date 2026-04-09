@@ -70,6 +70,7 @@ private const val DEVICE_DETACH_TIMEOUT = 30_000L
 private const val VERIFY_TIMEOUT = 60_000L
 private const val VERIFY_DELAY = 2000L
 private const val MIN_BATTERY_LEVEL = 10
+private const val LOCAL_RELEASE_ID = "local"
 
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
@@ -299,8 +300,7 @@ class FirmwareUpdateViewModel(
 
                     val updateArtifact =
                         firmwareUpdateManager.startUpdate(
-                            release =
-                            FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                            release = FirmwareRelease(id = LOCAL_RELEASE_ID, zipUrl = "", releaseNotes = ""),
                             hardware = currentState.deviceHardware,
                             address = currentState.address,
                             updateState = { _state.value = it },

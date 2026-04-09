@@ -26,6 +26,7 @@ import org.koin.core.annotation.Single
 class CoreNetworkModule {
     @Single
     fun provideJson(): Json = Json {
+        isLenient = true
         ignoreUnknownKeys = true
         coerceInputValues = true
     }

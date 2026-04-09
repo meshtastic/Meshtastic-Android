@@ -16,8 +16,10 @@
  */
 package org.meshtastic.core.ble
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -28,6 +30,12 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 
+/**
+ * [MeshtasticRadioProfile] implementation using Kable BLE characteristics.
+ *
+ * Supports both the modern `FROMRADIOSYNC` characteristic (single observe stream) and the legacy `FROMNUM` +
+ * `FROMRADIO` polling fallback for older firmware versions.
+ */
 class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticRadioProfile {
 
     private val toRadio = service.characteristic(TORADIO_CHARACTERISTIC)
@@ -35,6 +43,10 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
     private val fromRadioSync = service.characteristic(FROMRADIOSYNC_CHARACTERISTIC)
     private val fromNum = service.characteristic(FROMNUM_CHARACTERISTIC)
     private val logRadioChar = service.characteristic(LOGRADIO_CHARACTERISTIC)
+
+    companion object {
+        private const val TRANSIENT_RETRY_DELAY_MS = 500L
+    }
 
     // replay = 1: a seed emission placed here before the collector starts is replayed to the
     // collector immediately on subscription. This is what drives the initial FROMRADIO poll
@@ -81,8 +93,13 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
                             }
                             val packet = service.read(fromRadioChar)
                             if (packet.isEmpty()) keepReading = false else send(packet)
-                        } catch (_: Exception) {
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Logger.w(e) { "FROMRADIO read error, pausing before next drain trigger" }
                             keepReading = false
+                            // Don't permanently stop — the next triggerDrain emission will retry.
+                            delay(TRANSIENT_RETRY_DELAY_MS)
                         }
                     }
                 }
@@ -96,6 +113,8 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
             if (service.hasCharacteristic(logRadioChar)) {
                 service.observe(logRadioChar).collect { send(it) }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
             // logRadio is optional, ignore if not found
         }

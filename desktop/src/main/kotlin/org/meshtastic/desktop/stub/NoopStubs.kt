@@ -20,6 +20,7 @@ package org.meshtastic.desktop.stub
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +39,6 @@ import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MeshWorkerManager
-import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
@@ -98,8 +98,7 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override fun handleFromRadio(bytes: ByteArray) {}
 
     @Suppress("InjectDispatcher")
-    override val serviceScope: CoroutineScope
-        get() = CoroutineScope(kotlinx.coroutines.Dispatchers.Default)
+    override val serviceScope: CoroutineScope = CoroutineScope(SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
 }
 
 // endregion
@@ -188,10 +187,6 @@ class NoopAppWidgetUpdater : AppWidgetUpdater {
 
 class NoopMeshWorkerManager : MeshWorkerManager {
     override fun enqueueSendMessage(packetId: Int) {}
-}
-
-class NoopMessageQueue : MessageQueue {
-    override suspend fun enqueue(packetId: Int) {}
 }
 
 class NoopMeshLocationManager : MeshLocationManager {

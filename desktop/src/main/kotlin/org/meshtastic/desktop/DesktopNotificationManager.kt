@@ -19,13 +19,15 @@ package org.meshtastic.desktop
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
 import androidx.compose.ui.window.Notification as ComposeNotification
 
-@Single
+/**
+ * Desktop notification manager. Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to avoid
+ * double-registration with the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
+ */
 class DesktopNotificationManager(private val prefs: NotificationPrefs) : NotificationManager {
     init {
         co.touchlab.kermit.Logger.i { "DesktopNotificationManager initialized" }

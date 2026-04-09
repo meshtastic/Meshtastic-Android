@@ -19,19 +19,29 @@ package org.meshtastic.core.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import co.touchlab.kermit.Logger
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.meshtastic.core.repository.MeshPrefs
 
 /** This receiver starts the MeshService on boot if a device was previously connected. */
-class BootCompleteReceiver : BroadcastReceiver() {
+class BootCompleteReceiver :
+    BroadcastReceiver(),
+    KoinComponent {
+
+    private val meshPrefs: MeshPrefs by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
         if (Intent.ACTION_BOOT_COMPLETED != intent.action) {
             return
         }
-        val prefs = context.getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
-        if (!prefs.contains("device_address")) {
+        val address = meshPrefs.deviceAddress.value
+        if (address.isNullOrBlank() || address.equals("n", ignoreCase = true)) {
+            Logger.d { "BootCompleteReceiver: no device previously connected, skipping service start" }
             return
         }
 
+        Logger.i { "BootCompleteReceiver: starting MeshService for device $address" }
         MeshService.startService(context)
     }
 }

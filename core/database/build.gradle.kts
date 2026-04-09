@@ -49,10 +49,8 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
-            implementation(libs.turbine)
         }
 
         val androidHostTest by getting {

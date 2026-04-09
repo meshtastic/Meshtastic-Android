@@ -38,6 +38,7 @@ import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.channel_name
 import org.meshtastic.core.resources.default_
 import org.meshtastic.core.resources.downlink_enabled
+import org.meshtastic.core.resources.psk
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.uplink_enabled
 import org.meshtastic.core.ui.component.EditBase64Preference
@@ -99,7 +100,7 @@ fun EditChannelDialog(
                 )
 
                 EditBase64Preference(
-                    title = "PSK",
+                    title = stringResource(Res.string.psk),
                     value = channelInput.psk,
                     enabled = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
