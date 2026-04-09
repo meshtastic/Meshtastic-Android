@@ -525,6 +525,7 @@
     <string name="ipv4_mode">Режим на IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Шлюз</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">Конфигуриране на Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Праг на WiFi RSSI (по подразбиране -80)</string>

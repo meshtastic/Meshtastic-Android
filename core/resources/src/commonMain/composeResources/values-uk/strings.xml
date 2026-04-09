@@ -465,6 +465,7 @@
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="ip">IP-адреса</string>
     <string name="gateway">Шлюз</string>
+    <string name="dns">DNS</string>
     <string name="wifi_rssi_threshold_defaults_to_80">RSSI поріг WiFi (за замовчуванням -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">RSSI поріг BLE (за замовчуванням -80)</string>
     <string name="position_config">Місцезнаходження</string>

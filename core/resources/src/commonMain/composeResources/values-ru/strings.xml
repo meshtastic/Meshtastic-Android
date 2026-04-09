@@ -671,6 +671,7 @@
     <string name="ip">IP-адрес</string>
     <string name="gateway">Шлюз</string>
     <string name="subnet">Подсеть</string>
+    <string name="dns">Служба доменных имен (DNS)</string>
     <string name="paxcounter_config">Настройки Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter включен</string>
     <string name="status_message">Состояние сообщения</string>

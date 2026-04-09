@@ -663,6 +663,7 @@
     <string name="ip">IP</string>
     <string name="gateway">Yhdyskäytävä</string>
     <string name="subnet">Aliverkko</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">PAX-laskurin asetukset</string>
     <string name="paxcounter_enabled">PAX-laskuri käytössä</string>
     <string name="status_message">Tilaviesti</string>

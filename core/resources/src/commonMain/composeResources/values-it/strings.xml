@@ -635,6 +635,7 @@
     <string name="ipv4_mode">Modalità IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Gateway</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">Configurazione Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter abilitato</string>
     <string name="status_message">Messaggio di Stato</string>

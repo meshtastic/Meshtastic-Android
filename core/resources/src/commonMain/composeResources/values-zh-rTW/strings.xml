@@ -626,6 +626,7 @@
     <string name="ip">IP</string>
     <string name="gateway">網閘</string>
     <string name="subnet">子網路</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">人流計數（Paxcount）設置</string>
     <string name="paxcounter_enabled">已啟用人流計數（Paxcount）</string>
     <string name="status_message">狀態訊息</string>

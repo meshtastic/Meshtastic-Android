@@ -663,6 +663,7 @@
     <string name="ip">IP</string>
     <string name="gateway">Gateway</string>
     <string name="subnet">Subnet</string>
+    <string name="dns">DNS</string>
     <string name="paxcounter_config">Einstellung Besucherzähler</string>
     <string name="paxcounter_enabled">Besucherzähler aktiviert</string>
     <string name="status_message">Statusmeldung</string>
