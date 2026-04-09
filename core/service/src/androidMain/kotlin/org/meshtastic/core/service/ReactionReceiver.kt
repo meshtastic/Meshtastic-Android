@@ -45,11 +45,14 @@ class ReactionReceiver :
         val reaction = intent.getStringExtra(EXTRA_EMOJI) ?: intent.getStringExtra(EXTRA_REACTION) ?: return
         val replyId = intent.getIntExtra(EXTRA_REPLY_ID, intent.getIntExtra(EXTRA_PACKET_ID, 0))
 
+        val pendingResult = goAsync()
         scope.launch {
             try {
                 serviceRepository.onServiceAction(ServiceAction.Reaction(reaction, replyId, contactKey))
             } catch (e: Exception) {
                 Logger.e(e) { "Error sending reaction" }
+            } finally {
+                pendingResult.finish()
             }
         }
     }
