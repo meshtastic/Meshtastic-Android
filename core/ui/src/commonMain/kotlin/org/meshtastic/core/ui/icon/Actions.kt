@@ -24,8 +24,6 @@ import org.meshtastic.core.resources.ic_add
 import org.meshtastic.core.resources.ic_add_reaction
 import org.meshtastic.core.resources.ic_clear
 import org.meshtastic.core.resources.ic_close
-import org.meshtastic.core.resources.ic_cloud_download
-import org.meshtastic.core.resources.ic_cloud_upload
 import org.meshtastic.core.resources.ic_content_copy
 import org.meshtastic.core.resources.ic_delete
 import org.meshtastic.core.resources.ic_done
@@ -87,8 +85,6 @@ val MeshtasticIcons.Share: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_share)
 val MeshtasticIcons.Sort: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_sort)
-val MeshtasticIcons.CloudDownload: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_cloud_download)
 val MeshtasticIcons.Folder: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_folder)
 val MeshtasticIcons.SystemUpdate: ImageVector
@@ -126,7 +122,5 @@ val MeshtasticIcons.FilterAltOff: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_filter_alt_off)
 val MeshtasticIcons.OfflineShare: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_offline_share)
-val MeshtasticIcons.CloudUpload: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_cloud_upload)
 val MeshtasticIcons.QrCodeScanner: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_qr_code_scanner)

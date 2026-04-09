@@ -83,22 +83,22 @@ internal fun ChannelLegend(onClick: () -> Unit) {
 }
 
 internal enum class ChannelIcons(
-    val icon: @Composable () -> ImageVector,
+    val icon: ImageVector,
     val descriptionResId: StringResource,
     val additionalInfoResId: StringResource,
 ) {
     LOCATION(
-        icon = { MeshtasticIcons.LocationOn },
+        icon = MeshtasticIcons.LocationOn,
         descriptionResId = Res.string.location_sharing,
         additionalInfoResId = Res.string.periodic_position_broadcast,
     ),
     UPLINK(
-        icon = { MeshtasticIcons.CloudUpload },
+        icon = MeshtasticIcons.CloudUpload,
         descriptionResId = Res.string.uplink_enabled,
         additionalInfoResId = Res.string.uplink_feature_description,
     ),
     DOWNLINK(
-        icon = { MeshtasticIcons.CloudDownload },
+        icon = MeshtasticIcons.CloudDownload,
         descriptionResId = Res.string.downlink_enabled,
         additionalInfoResId = Res.string.downlink_feature_description,
     ),
@@ -157,7 +157,7 @@ private fun IconDefinitions() {
     Text(text = stringResource(Res.string.icon_meanings), style = MaterialTheme.typography.titleLarge)
     ChannelIcons.entries.forEach { icon ->
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon.icon(), contentDescription = stringResource(icon.descriptionResId))
+            Icon(imageVector = icon.icon, contentDescription = stringResource(icon.descriptionResId))
             Column(modifier = Modifier.padding(start = 16.dp)) {
                 Text(text = stringResource(icon.descriptionResId), style = MaterialTheme.typography.titleMedium)
                 Text(text = stringResource(icon.additionalInfoResId), style = MaterialTheme.typography.bodyMedium)

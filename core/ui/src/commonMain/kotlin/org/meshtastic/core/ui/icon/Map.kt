@@ -27,17 +27,12 @@ import org.meshtastic.core.resources.ic_gps_off
 import org.meshtastic.core.resources.ic_layers
 import org.meshtastic.core.resources.ic_lens
 import org.meshtastic.core.resources.ic_location_disabled
-import org.meshtastic.core.resources.ic_location_on
-import org.meshtastic.core.resources.ic_map
 import org.meshtastic.core.resources.ic_my_location
 import org.meshtastic.core.resources.ic_navigation
 import org.meshtastic.core.resources.ic_pin_drop
 import org.meshtastic.core.resources.ic_place
 import org.meshtastic.core.resources.ic_trip_origin
 import org.meshtastic.core.resources.ic_tune
-
-val MeshtasticIcons.Map: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_map)
 
 // Map control icons
 val MeshtasticIcons.Layers: ImageVector
@@ -46,8 +41,6 @@ val MeshtasticIcons.MyLocation: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_my_location)
 val MeshtasticIcons.LocationDisabled: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_location_disabled)
-val MeshtasticIcons.LocationOn: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_location_on)
 val MeshtasticIcons.PinDrop: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_pin_drop)
 val MeshtasticIcons.TripOrigin: ImageVector

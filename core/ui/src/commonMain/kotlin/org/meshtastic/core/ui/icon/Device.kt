@@ -21,12 +21,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_android
-import org.meshtastic.core.resources.ic_display_settings
 import org.meshtastic.core.resources.ic_fingerprint
 import org.meshtastic.core.resources.ic_fork_left
 import org.meshtastic.core.resources.ic_home
 import org.meshtastic.core.resources.ic_icecream
-import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.ic_military_tech
 import org.meshtastic.core.resources.ic_mountain_flag
 import org.meshtastic.core.resources.ic_my_location
@@ -41,8 +39,6 @@ import org.meshtastic.core.resources.ic_visibility_off
 import org.meshtastic.core.resources.ic_work
 import org.meshtastic.proto.Config
 
-val MeshtasticIcons.HardwareModel: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_router)
 val MeshtasticIcons.Role: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_work)
 val MeshtasticIcons.NodeId: ImageVector
@@ -68,12 +64,8 @@ fun MeshtasticIcons.role(role: Config.DeviceConfig.Role?): ImageVector = when (r
 val MeshtasticIcons.Device: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_router)
 
-val MeshtasticIcons.Memory: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_memory)
 val MeshtasticIcons.PhoneAndroid: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_phone_android)
-val MeshtasticIcons.DisplaySettings: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_display_settings)
 val MeshtasticIcons.ForkLeft: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_fork_left)
 val MeshtasticIcons.Icecream: ImageVector

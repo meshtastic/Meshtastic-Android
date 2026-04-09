@@ -22,11 +22,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_delete_outline
 import org.meshtastic.core.resources.ic_do_disturb_on
-import org.meshtastic.core.resources.ic_nodes
 import org.meshtastic.core.resources.ic_notes
-
-val MeshtasticIcons.Nodes: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_nodes)
 
 val MeshtasticIcons.Notes: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_notes)

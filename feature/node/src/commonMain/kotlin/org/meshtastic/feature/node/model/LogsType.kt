@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.node.model
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.NodeDetailRoutes
@@ -44,23 +43,15 @@ import org.meshtastic.core.ui.icon.PowerSupply
 import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.icon.Temperature
 
-enum class LogsType(
-    val titleRes: StringResource,
-    val icon: @Composable () -> ImageVector,
-    val routeFactory: (Int) -> Route,
-) {
-    DEVICE(Res.string.device_metrics_log, { MeshtasticIcons.ChargingStation }, { NodeDetailRoutes.DeviceMetrics(it) }),
-    NODE_MAP(Res.string.node_map, { MeshtasticIcons.Map }, { NodeDetailRoutes.NodeMap(it) }),
-    POSITIONS(Res.string.position_log, { MeshtasticIcons.LocationOn }, { NodeDetailRoutes.PositionLog(it) }),
-    ENVIRONMENT(
-        Res.string.env_metrics_log,
-        { MeshtasticIcons.Temperature },
-        { NodeDetailRoutes.EnvironmentMetrics(it) },
-    ),
-    SIGNAL(Res.string.signal_quality, { MeshtasticIcons.ChannelUtilization }, { NodeDetailRoutes.SignalMetrics(it) }),
-    POWER(Res.string.power_metrics_log, { MeshtasticIcons.PowerSupply }, { NodeDetailRoutes.PowerMetrics(it) }),
-    TRACEROUTE(Res.string.traceroute_log, { MeshtasticIcons.Route }, { NodeDetailRoutes.TracerouteLog(it) }),
-    NEIGHBOR_INFO(Res.string.neighbor_info, { MeshtasticIcons.Groups }, { NodeDetailRoutes.NeighborInfoLog(it) }),
-    HOST(Res.string.host_metrics_log, { MeshtasticIcons.Memory }, { NodeDetailRoutes.HostMetricsLog(it) }),
-    PAX(Res.string.pax_metrics_log, { MeshtasticIcons.PeopleCount }, { NodeDetailRoutes.PaxMetrics(it) }),
+enum class LogsType(val titleRes: StringResource, val icon: ImageVector, val routeFactory: (Int) -> Route) {
+    DEVICE(Res.string.device_metrics_log, MeshtasticIcons.ChargingStation, { NodeDetailRoutes.DeviceMetrics(it) }),
+    NODE_MAP(Res.string.node_map, MeshtasticIcons.Map, { NodeDetailRoutes.NodeMap(it) }),
+    POSITIONS(Res.string.position_log, MeshtasticIcons.LocationOn, { NodeDetailRoutes.PositionLog(it) }),
+    ENVIRONMENT(Res.string.env_metrics_log, MeshtasticIcons.Temperature, { NodeDetailRoutes.EnvironmentMetrics(it) }),
+    SIGNAL(Res.string.signal_quality, MeshtasticIcons.ChannelUtilization, { NodeDetailRoutes.SignalMetrics(it) }),
+    POWER(Res.string.power_metrics_log, MeshtasticIcons.PowerSupply, { NodeDetailRoutes.PowerMetrics(it) }),
+    TRACEROUTE(Res.string.traceroute_log, MeshtasticIcons.Route, { NodeDetailRoutes.TracerouteLog(it) }),
+    NEIGHBOR_INFO(Res.string.neighbor_info, MeshtasticIcons.Groups, { NodeDetailRoutes.NeighborInfoLog(it) }),
+    HOST(Res.string.host_metrics_log, MeshtasticIcons.Memory, { NodeDetailRoutes.HostMetricsLog(it) }),
+    PAX(Res.string.pax_metrics_log, MeshtasticIcons.PeopleCount, { NodeDetailRoutes.PaxMetrics(it) }),
 }

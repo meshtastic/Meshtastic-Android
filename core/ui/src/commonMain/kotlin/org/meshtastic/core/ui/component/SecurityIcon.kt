@@ -99,16 +99,16 @@ private const val PRECISE_POSITION_BITS = 32
  */
 @Immutable
 enum class SecurityState(
-    @Stable val icon: @Composable () -> ImageVector,
+    @Stable val icon: ImageVector,
     @Stable val color: @Composable () -> Color,
     val descriptionResId: StringResource,
     val helpTextResId: StringResource,
-    @Stable val badgeIcon: @Composable (() -> ImageVector)? = null,
+    @Stable val badgeIcon: ImageVector? = null,
     @Stable val badgeIconColor: @Composable () -> Color? = { null },
 ) {
     /** State for a secure channel (green lock). */
     SECURE(
-        icon = { MeshtasticIcons.Lock },
+        icon = MeshtasticIcons.Lock,
         color = { colorScheme.StatusGreen },
         descriptionResId = Res.string.security_icon_secure,
         helpTextResId = Res.string.security_icon_help_green_lock,
@@ -119,7 +119,7 @@ enum class SecurityState(
      * warning. (yellow open lock)
      */
     INSECURE_NO_PRECISE(
-        icon = { MeshtasticIcons.LockOpen },
+        icon = MeshtasticIcons.LockOpen,
         color = { colorScheme.StatusYellow },
         descriptionResId = Res.string.security_icon_insecure_no_precise,
         helpTextResId = Res.string.security_icon_help_yellow_open_lock,
@@ -130,7 +130,7 @@ enum class SecurityState(
      * lock)
      */
     INSECURE_PRECISE_ONLY(
-        icon = { MeshtasticIcons.LockOpen },
+        icon = MeshtasticIcons.LockOpen,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.security_icon_insecure_precise_only,
         helpTextResId = Res.string.security_icon_help_red_open_lock,
@@ -141,11 +141,11 @@ enum class SecurityState(
      * badge).
      */
     INSECURE_PRECISE_MQTT_WARNING(
-        icon = { MeshtasticIcons.LockOpen },
+        icon = MeshtasticIcons.LockOpen,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.security_icon_warning_precise_mqtt,
         helpTextResId = Res.string.security_icon_help_warning_precise_mqtt,
-        badgeIcon = { MeshtasticIcons.Warning },
+        badgeIcon = MeshtasticIcons.Warning,
         badgeIconColor = { colorScheme.StatusYellow },
     ),
 }
@@ -238,11 +238,11 @@ fun SecurityIcon(
         },
     ) {
         SecurityIconDisplay(
-            icon = securityState.icon(),
-            mainIconTint = securityState.color.invoke(),
+            icon = securityState.icon,
+            mainIconTint = securityState.color(),
             contentDescription = fullContentDescription,
-            badgeIcon = securityState.badgeIcon?.invoke(),
-            badgeIconColor = securityState.badgeIconColor.invoke(),
+            badgeIcon = securityState.badgeIcon,
+            badgeIconColor = securityState.badgeIconColor(),
         )
     }
 
@@ -453,12 +453,12 @@ private fun SecurityHelpDialog(securityState: SecurityState, onDismiss: () -> Un
 private fun ContextualSecurityState(securityState: SecurityState) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         SecurityIconDisplay(
-            icon = securityState.icon(),
-            mainIconTint = securityState.color.invoke(),
+            icon = securityState.icon,
+            mainIconTint = securityState.color(),
             contentDescription = stringResource(securityState.descriptionResId),
             modifier = Modifier.size(48.dp),
-            badgeIcon = securityState.badgeIcon?.invoke(),
-            badgeIconColor = securityState.badgeIconColor.invoke(),
+            badgeIcon = securityState.badgeIcon,
+            badgeIconColor = securityState.badgeIconColor(),
         )
         Spacer(Modifier.height(16.dp))
         Text(text = stringResource(securityState.helpTextResId), style = MaterialTheme.typography.bodyMedium)
@@ -479,12 +479,12 @@ private fun AllSecurityStates() {
             // Uses enum entries
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SecurityIconDisplay(
-                    icon = state.icon(),
-                    mainIconTint = state.color.invoke(),
+                    icon = state.icon,
+                    mainIconTint = state.color(),
                     contentDescription = stringResource(state.descriptionResId),
                     modifier = Modifier.size(48.dp),
-                    badgeIcon = state.badgeIcon?.invoke(),
-                    badgeIconColor = state.badgeIconColor.invoke(),
+                    badgeIcon = state.badgeIcon,
+                    badgeIconColor = state.badgeIconColor(),
                 )
                 Column(modifier = Modifier.padding(start = 16.dp)) {
                     Text(text = stringResource(state.descriptionResId), style = MaterialTheme.typography.titleMedium)

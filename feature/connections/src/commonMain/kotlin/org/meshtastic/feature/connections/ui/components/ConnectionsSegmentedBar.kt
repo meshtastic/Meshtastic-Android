@@ -55,19 +55,15 @@ fun ConnectionsSegmentedBar(
                 shape = SegmentedButtonDefaults.itemShape(index, visibleItems.size),
                 onClick = { onClickDeviceType(item.deviceType) },
                 selected = item.deviceType == selectedDeviceType,
-                icon = { Icon(imageVector = item.imageVector(), contentDescription = text) },
+                icon = { Icon(imageVector = item.imageVector, contentDescription = text) },
                 label = { Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis) },
             )
         }
     }
 }
 
-private enum class Item(
-    val imageVector: @Composable () -> ImageVector,
-    val textRes: StringResource,
-    val deviceType: DeviceType,
-) {
-    BLUETOOTH(imageVector = { MeshtasticIcons.Bluetooth }, textRes = Res.string.bluetooth, deviceType = DeviceType.BLE),
-    NETWORK(imageVector = { MeshtasticIcons.Wifi }, textRes = Res.string.network, deviceType = DeviceType.TCP),
-    SERIAL(imageVector = { MeshtasticIcons.Usb }, textRes = Res.string.serial, deviceType = DeviceType.USB),
+private enum class Item(val imageVector: ImageVector, val textRes: StringResource, val deviceType: DeviceType) {
+    BLUETOOTH(imageVector = MeshtasticIcons.Bluetooth, textRes = Res.string.bluetooth, deviceType = DeviceType.BLE),
+    NETWORK(imageVector = MeshtasticIcons.Wifi, textRes = Res.string.network, deviceType = DeviceType.TCP),
+    SERIAL(imageVector = MeshtasticIcons.Usb, textRes = Res.string.serial, deviceType = DeviceType.USB),
 }

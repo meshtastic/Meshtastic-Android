@@ -65,7 +65,7 @@ import org.meshtastic.feature.node.model.NodeDetailAction
 
 private data class TelemetricFeature(
     val titleRes: StringResource,
-    val icon: @Composable () -> ImageVector,
+    val icon: ImageVector,
     val requestAction: ((Node) -> NodeMenuAction)?,
     val logsType: LogsType? = null,
     val isVisible: (Node) -> Boolean = { true },
@@ -118,7 +118,7 @@ private fun rememberTelemetricFeatures(
     listOf(
         TelemetricFeature(
             titleRes = Res.string.userinfo,
-            icon = { MeshtasticIcons.Person },
+            icon = MeshtasticIcons.Person,
             requestAction = { NodeMenuAction.RequestUserInfo(it) },
             isVisible = { !isLocal },
         ),
@@ -154,7 +154,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = LogsType.ENVIRONMENT.titleRes,
-            icon = { MeshtasticIcons.Temperature },
+            icon = MeshtasticIcons.Temperature,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
             logsType = LogsType.ENVIRONMENT,
             content = { EnvironmentMetrics(it, metricsState.displayUnits, metricsState.isFahrenheit) },
@@ -162,7 +162,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = Res.string.request_air_quality_metrics,
-            icon = { MeshtasticIcons.AirQuality },
+            icon = MeshtasticIcons.AirQuality,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
         ),
         TelemetricFeature(
@@ -201,7 +201,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
         ListItem(
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             leadingContent = {
-                Icon(imageVector = feature.icon(), contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Icon(imageVector = feature.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             },
             headlineContent = {
                 Text(
@@ -229,7 +229,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                                 },
                             ) {
                                 Icon(
-                                    imageVector = feature.logsType?.icon?.invoke() ?: feature.icon(),
+                                    imageVector = feature.logsType?.icon ?: feature.icon,
                                     modifier = Modifier.size(24.dp),
                                     contentDescription = logsDescription,
                                     tint = MaterialTheme.colorScheme.primary,

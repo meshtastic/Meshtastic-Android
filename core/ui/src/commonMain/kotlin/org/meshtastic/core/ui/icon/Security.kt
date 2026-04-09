@@ -20,23 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.ic_key_off
-import org.meshtastic.core.resources.ic_lock
-import org.meshtastic.core.resources.ic_lock_open
-import org.meshtastic.core.resources.ic_security
 import org.meshtastic.core.resources.ic_verified
-import org.meshtastic.core.resources.ic_warning
 
-val MeshtasticIcons.Lock: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_lock)
-val MeshtasticIcons.LockOpen: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_lock_open)
-val MeshtasticIcons.Warning: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_warning)
-val MeshtasticIcons.KeyOff: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_key_off)
 val MeshtasticIcons.Verified: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_verified)
-
-val MeshtasticIcons.SecurityShield: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_security)

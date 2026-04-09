@@ -136,7 +136,7 @@ fun NodeKeyStatusIcon(
  */
 @Immutable
 enum class NodeKeySecurityState(
-    @Stable val icon: @Composable () -> ImageVector,
+    @Stable val icon: ImageVector,
     @Stable val color: @Composable () -> Color,
     val descriptionResId: StringResource,
     val helpTextResId: StringResource,
@@ -144,7 +144,7 @@ enum class NodeKeySecurityState(
 ) {
     // State for public key mismatch
     PKM(
-        icon = { MeshtasticIcons.KeyOff },
+        icon = MeshtasticIcons.KeyOff,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.encryption_error,
         helpTextResId = Res.string.encryption_error_text,
@@ -153,7 +153,7 @@ enum class NodeKeySecurityState(
 
     // State for public key encryption
     PKC(
-        icon = { MeshtasticIcons.Lock },
+        icon = MeshtasticIcons.Lock,
         color = { colorScheme.StatusGreen },
         title = Res.string.encryption_pkc,
         helpTextResId = Res.string.encryption_pkc_text,
@@ -162,7 +162,7 @@ enum class NodeKeySecurityState(
 
     // State for shared key encryption
     PSK(
-        icon = { MeshtasticIcons.LockOpen },
+        icon = MeshtasticIcons.LockOpen,
         color = { colorScheme.StatusYellow },
         title = Res.string.encryption_psk,
         helpTextResId = Res.string.encryption_psk_text,

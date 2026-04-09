@@ -48,21 +48,21 @@ internal fun ChannelCard(
 ) = ChannelItem(index = index, title = title, enabled = enabled, onClick = onEditClick) {
     if (sharesLocation) {
         Icon(
-            imageVector = ChannelIcons.LOCATION.icon(),
+            imageVector = ChannelIcons.LOCATION.icon,
             contentDescription = stringResource(ChannelIcons.LOCATION.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
     if (channelSettings.uplink_enabled) {
         Icon(
-            imageVector = ChannelIcons.UPLINK.icon(),
+            imageVector = ChannelIcons.UPLINK.icon,
             contentDescription = stringResource(ChannelIcons.UPLINK.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
     if (channelSettings.downlink_enabled) {
         Icon(
-            imageVector = ChannelIcons.DOWNLINK.icon(),
+            imageVector = ChannelIcons.DOWNLINK.icon,
             contentDescription = stringResource(ChannelIcons.DOWNLINK.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )

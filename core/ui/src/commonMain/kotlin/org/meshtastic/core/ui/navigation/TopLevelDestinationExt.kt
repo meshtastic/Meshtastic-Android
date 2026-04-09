@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.ui.navigation
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.ui.icon.Conversations
@@ -28,7 +27,6 @@ import org.meshtastic.core.ui.icon.Wifi
 
 /** Maps a shared [TopLevelDestination] to its corresponding icon from [MeshtasticIcons]. */
 val TopLevelDestination.icon: ImageVector
-    @Composable
     get() =
         when (this) {
             TopLevelDestination.Conversations -> MeshtasticIcons.Conversations

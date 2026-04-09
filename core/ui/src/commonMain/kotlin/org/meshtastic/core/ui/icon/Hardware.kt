@@ -20,24 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.ic_bluetooth
 import org.meshtastic.core.resources.ic_bluetooth_connected
 import org.meshtastic.core.resources.ic_bluetooth_searching
 import org.meshtastic.core.resources.ic_cached
-import org.meshtastic.core.resources.ic_forward
 import org.meshtastic.core.resources.ic_nfc
 import org.meshtastic.core.resources.ic_settings_input_antenna
 import org.meshtastic.core.resources.ic_speaker_phone
-import org.meshtastic.core.resources.ic_usb
 import org.meshtastic.core.resources.ic_usb_off
-import org.meshtastic.core.resources.ic_wifi
-
-val MeshtasticIcons.Bluetooth: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_bluetooth)
-val MeshtasticIcons.Usb: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_usb)
-val MeshtasticIcons.Wifi: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_wifi)
 
 val MeshtasticIcons.BluetoothConnected: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_bluetooth_connected)
@@ -45,8 +34,6 @@ val MeshtasticIcons.BluetoothSearching: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_bluetooth_searching)
 val MeshtasticIcons.UsbOff: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_usb_off)
-val MeshtasticIcons.Serial: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_forward)
 val MeshtasticIcons.Antenna: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_settings_input_antenna)
 val MeshtasticIcons.Speaker: ImageVector

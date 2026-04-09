@@ -58,7 +58,7 @@ fun SignalInfo(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Icon(
-                imageVector = quality.imageVector(),
+                imageVector = quality.imageVector,
                 contentDescription = stringResource(Res.string.signal_quality),
                 modifier = Modifier.size(16.dp),
                 tint = signalColor,

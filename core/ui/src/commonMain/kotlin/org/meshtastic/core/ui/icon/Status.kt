@@ -24,7 +24,6 @@ import org.meshtastic.core.resources.ic_arrow_circle_up
 import org.meshtastic.core.resources.ic_bedtime
 import org.meshtastic.core.resources.ic_check_circle
 import org.meshtastic.core.resources.ic_check_circle_outline
-import org.meshtastic.core.resources.ic_cloud
 import org.meshtastic.core.resources.ic_cloud_done
 import org.meshtastic.core.resources.ic_cloud_sync
 import org.meshtastic.core.resources.ic_dangerous
@@ -46,7 +45,6 @@ import org.meshtastic.core.resources.ic_star_border
 import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.ic_volume_mute
 import org.meshtastic.core.resources.ic_volume_off
-import org.meshtastic.core.resources.ic_volume_up
 
 // Favorites
 val MeshtasticIcons.Favorite: ImageVector
@@ -63,8 +61,6 @@ val MeshtasticIcons.Unmuted: ImageVector
 // Volume
 val MeshtasticIcons.VolumeOff: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_volume_off)
-val MeshtasticIcons.VolumeUp: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_volume_up)
 val MeshtasticIcons.VolumeMute: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_volume_mute)
 
@@ -73,8 +69,6 @@ val MeshtasticIcons.History: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_history)
 
 // MQTT status
-val MeshtasticIcons.MqttConnected: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_cloud)
 val MeshtasticIcons.MqttDelivered: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_cloud_done)
 val MeshtasticIcons.MqttSyncing: ImageVector

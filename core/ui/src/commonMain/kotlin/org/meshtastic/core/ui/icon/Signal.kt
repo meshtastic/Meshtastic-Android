@@ -20,21 +20,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.ic_cell_tower
 import org.meshtastic.core.resources.ic_cruelty_free
 import org.meshtastic.core.resources.ic_graphic_eq
 import org.meshtastic.core.resources.ic_hub
 import org.meshtastic.core.resources.ic_near_me
 import org.meshtastic.core.resources.ic_podcasts
-import org.meshtastic.core.resources.ic_route
 import org.meshtastic.core.resources.ic_signal_cellular_0_bar
 import org.meshtastic.core.resources.ic_signal_cellular_1_bar
 import org.meshtastic.core.resources.ic_signal_cellular_2_bar
 import org.meshtastic.core.resources.ic_signal_cellular_3_bar
 import org.meshtastic.core.resources.ic_signal_cellular_4_bar
-import org.meshtastic.core.resources.ic_signal_cellular_alt
-import org.meshtastic.core.resources.ic_signal_cellular_alt_1_bar
-import org.meshtastic.core.resources.ic_signal_cellular_alt_2_bar
 import org.meshtastic.core.resources.ic_signal_cellular_off
 import org.meshtastic.core.resources.ic_ssid_chart
 import org.meshtastic.core.resources.ic_tsunami
@@ -42,12 +37,8 @@ import org.meshtastic.core.resources.ic_wifi_channel
 
 val MeshtasticIcons.HopCount: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_cruelty_free)
-val MeshtasticIcons.Route: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_route)
 val MeshtasticIcons.Channel: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_wifi_channel)
-val MeshtasticIcons.ChannelUtilization: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_signal_cellular_alt)
 val MeshtasticIcons.AirUtilization: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_ssid_chart)
 
@@ -72,8 +63,6 @@ val MeshtasticIcons.SignalCellular3Bar: ImageVector
 val MeshtasticIcons.SignalCellular4Bar: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_signal_cellular_4_bar)
 
-val MeshtasticIcons.CellTower: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_cell_tower)
 val MeshtasticIcons.MeshHub: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_hub)
 val MeshtasticIcons.NearMe: ImageVector
@@ -81,14 +70,5 @@ val MeshtasticIcons.NearMe: ImageVector
 val MeshtasticIcons.Tsunami: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_tsunami)
 
-// LoRA signal quality (bar-style alt icons)
-val MeshtasticIcons.SignalAlt1Bar: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_signal_cellular_alt_1_bar)
-val MeshtasticIcons.SignalAlt2Bar: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_signal_cellular_alt_2_bar)
-val MeshtasticIcons.SignalAlt: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_signal_cellular_alt)
-val MeshtasticIcons.SignalFull: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_signal_cellular_4_bar)
 val MeshtasticIcons.SignalOff: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_signal_cellular_off)

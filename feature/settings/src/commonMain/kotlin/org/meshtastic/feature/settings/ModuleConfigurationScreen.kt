@@ -86,7 +86,7 @@ fun ModuleConfigurationScreen(
                 modules.forEach {
                     ListItem(
                         text = stringResource(it.title),
-                        leadingIcon = it.icon?.invoke(),
+                        leadingIcon = it.icon,
                         enabled = state.connected && !state.responseState.isWaiting(),
                     ) {
                         onNavigate(it.route)

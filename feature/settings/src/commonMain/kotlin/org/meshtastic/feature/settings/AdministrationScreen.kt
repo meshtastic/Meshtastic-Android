@@ -135,7 +135,7 @@ private fun AdminRouteItems(
         ListItem(
             enabled = enabled,
             text = stringResource(route.title),
-            leadingIcon = route.icon(),
+            leadingIcon = route.icon,
             leadingIconTint = MaterialTheme.colorScheme.error,
             textColor = MaterialTheme.colorScheme.error,
             trailingIcon = null,
