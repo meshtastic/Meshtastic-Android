@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
@@ -291,13 +290,7 @@ private fun PowerMetricsChart(
                 } else {
                     null
                 },
-                bottomAxis =
-                HorizontalAxis.rememberBottom(
-                    label = ChartStyling.rememberAxisLabel(),
-                    valueFormatter = CommonCharts.dynamicTimeFormatter,
-                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-                    labelRotationDegrees = 45f,
-                ),
+                bottomAxis = CommonCharts.rememberBottomTimeAxis(),
                 marker = marker,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,

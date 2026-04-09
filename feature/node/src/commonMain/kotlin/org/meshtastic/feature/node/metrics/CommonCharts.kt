@@ -51,7 +51,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
+import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -85,18 +86,30 @@ object CommonCharts {
     @Composable
     fun getMaterial3ErrorColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.error.copy(alpha = alpha)
 
-    /** A dynamic [CartesianValueFormatter] that adjusts the time format based on the visible X range. */
+    /**
+     * A dynamic [CartesianValueFormatter] that adjusts the time format based on the total data span
+     * ([CartesianRanges.xLength]).
+     *
+     * Since chart data is already filtered by [TimeFrame], `xLength` approximates the visible window. Vico's formatter
+     * receives [CartesianMeasuringContext] during measurement passes — **not** [CartesianDrawingContext] — so
+     * `context.zoom` is unavailable and we intentionally avoid it.
+     *
+     * | Data span | Format                 | Example          |
+     * |-----------|------------------------|------------------|
+     * | ≤ 1 hour  | Time with seconds      | 3:45:12 PM       |
+     * | ≤ 2 days  | Time only              | 3:45 PM          |
+     * | ≤ 14 days | Date + time (two-line) | 4/9/26 ↵ 3:45 PM |
+     * | > 14 days | Date only              | 4/9/26           |
+     */
     val dynamicTimeFormatter = CartesianValueFormatter { context, value, _ ->
         val timestampMillis = (value * MS_PER_SEC.toDouble()).toLong()
-        val xLength = context.ranges.xLength
-        val zoom = if (context is CartesianDrawingContext) context.zoom else 1f
-        val visibleSpan = xLength / zoom
+        val dataSpanSeconds = context.ranges.xLength
 
         when {
-            visibleSpan <= TimeConstants.ONE_HOUR.inWholeSeconds -> DateFormatter.formatTimeWithSeconds(timestampMillis)
-            visibleSpan <= 2.days.inWholeSeconds -> DateFormatter.formatTime(timestampMillis)
-            visibleSpan <= 14.days.inWholeSeconds -> {
-                // < 2 weeks visible: separate date and time with a newline
+            dataSpanSeconds <= TimeConstants.ONE_HOUR.inWholeSeconds ->
+                DateFormatter.formatTimeWithSeconds(timestampMillis)
+            dataSpanSeconds <= 2.days.inWholeSeconds -> DateFormatter.formatTime(timestampMillis)
+            dataSpanSeconds <= 14.days.inWholeSeconds -> {
                 val dateStr = DateFormatter.formatDate(timestampMillis)
                 val timeStr = DateFormatter.formatTime(timestampMillis)
                 "$dateStr\n$timeStr"
@@ -106,6 +119,23 @@ object CommonCharts {
     }
 
     fun formatDateTime(timestampMillis: Long): String = DateFormatter.formatDateTime(timestampMillis)
+
+    /**
+     * Shared bottom time axis used by all metric chart screens.
+     *
+     * Uses `spacing = 1` with `addExtremeLabelPadding = true` so Vico's built-in auto-thinning controls label density —
+     * it measures label widths and automatically skips labels when they would overlap, adapting to both zoom level and
+     * screen width.
+     */
+    @Composable
+    fun rememberBottomTimeAxis(): HorizontalAxis<Axis.Position.Horizontal.Bottom> = HorizontalAxis.rememberBottom(
+        label = ChartStyling.rememberAxisLabel(),
+        valueFormatter = dynamicTimeFormatter,
+        itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 1 }, addExtremeLabelPadding = true),
+        labelRotationDegrees = LABEL_ROTATION_DEGREES,
+    )
+
+    private const val LABEL_ROTATION_DEGREES = 45f
 }
 
 data class LegendData(

@@ -50,10 +50,6 @@ import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 /**
  * Utility object for chart styling and component creation. Provides reusable styled lines, points, and axes for Vico
  * charts.
- */
-/**
- * Utility object for chart styling and component creation. Provides reusable styled lines, points, and axes for Vico
- * charts.
  *
  * **Design principles** (per [design#53](https://github.com/meshtastic/design/issues/53)):
  * - Default to thin lines **without** point markers to avoid clutter on dense timeseries.
@@ -262,18 +258,6 @@ object ChartStyling {
             }
         }
     }
-
-    /**
-     * Creates a standard [com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer] with optimized
-     * spacing.
-     */
-    fun rememberItemPlacer(
-        spacing: Int = 50,
-    ): com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer =
-        com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer.aligned(
-            spacing = { spacing },
-            addExtremeLabelPadding = true,
-        )
 
     /**
      * Creates and remembers a [com.patrykandpatrick.vico.compose.common.component.TextComponent] styled for axis

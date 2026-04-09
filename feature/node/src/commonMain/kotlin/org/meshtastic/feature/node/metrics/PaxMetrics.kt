@@ -45,7 +45,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
@@ -146,13 +145,7 @@ private fun PaxMetricsChart(
                 ),
             ),
             startAxis = VerticalAxis.rememberStart(label = axisLabel),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = axisLabel,
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-                labelRotationDegrees = 45f,
-            ),
+            bottomAxis = CommonCharts.rememberBottomTimeAxis(),
             marker = marker,
             selectedX = selectedX,
             onPointSelected = onPointSelected,
