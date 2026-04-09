@@ -45,6 +45,12 @@ import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 
+/**
+ * Shared base ViewModel for the map feature, providing node data, waypoints, map filter preferences,
+ * and traceroute overlay state.
+ *
+ * Platform-specific map ViewModels (fdroid/google) extend this to add flavor-specific map provider logic.
+ */
 @Suppress("TooManyFunctions")
 open class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,

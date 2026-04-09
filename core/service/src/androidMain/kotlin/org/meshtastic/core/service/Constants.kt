@@ -30,10 +30,7 @@ const val ACTION_MESSAGE_STATUS = MeshtasticIntent.ACTION_MESSAGE_STATUS
 
 fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
 
-//
-// standard EXTRA bundle definitions
-//
-
+// Standard EXTRA bundle definitions
 const val EXTRA_CONNECTED = MeshtasticIntent.EXTRA_CONNECTED
 
 const val EXTRA_PAYLOAD = MeshtasticIntent.EXTRA_PAYLOAD

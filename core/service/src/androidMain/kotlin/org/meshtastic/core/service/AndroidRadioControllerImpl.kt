@@ -27,6 +27,12 @@ import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.ClientNotification
 
+/**
+ * Android [RadioController] implementation that delegates to the bound [MeshService] via AIDL.
+ *
+ * All radio commands are forwarded through [AndroidServiceRepository.meshService]. If the service
+ * is not yet bound, commands are silently dropped with a warning log.
+ */
 @Single
 @Suppress("TooManyFunctions")
 class AndroidRadioControllerImpl(

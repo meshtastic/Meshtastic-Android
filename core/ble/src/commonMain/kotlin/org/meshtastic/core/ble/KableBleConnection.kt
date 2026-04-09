@@ -40,6 +40,7 @@ import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
+/** [BleService] implementation backed by a Kable [Peripheral] for a specific GATT service. */
 class KableBleService(private val peripheral: Peripheral, private val serviceUuid: Uuid) : BleService {
     override fun hasCharacteristic(characteristic: BleCharacteristic): Boolean = peripheral.services.value?.any { svc ->
         svc.serviceUuid == serviceUuid && svc.characteristics.any { it.characteristicUuid == characteristic.uuid }
@@ -73,6 +74,12 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
     }
 }
 
+/**
+ * [BleConnection] implementation using Kable for cross-platform BLE communication.
+ *
+ * Manages peripheral lifecycle (connect with exponential backoff, disconnect, reconnect),
+ * connection state tracking, and GATT service profile access.
+ */
 class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
     private var peripheral: Peripheral? = null
@@ -155,7 +162,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         while (p.state.value !is State.Connected) {
             autoConnect.value =
                 try {
-                    // Cancel any previous connectionScope to avoid leaking the old coroutine scope (M1).
+                    // Cancel any previous connectionScope to avoid leaking the old coroutine scope.
                     connectionScope?.let {
                         Logger.d { "[${device.address}] Cancelling previous connectionScope before reconnect" }
                     }

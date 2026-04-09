@@ -155,7 +155,7 @@ class ServiceBroadcasts(private val context: Context, private val serviceReposit
     private fun explicitBroadcast(intent: Intent) {
         context.sendBroadcast(
             intent,
-        ) // We also do a regular (not explicit broadcast) so any context-registered rceivers will work
+        ) // We also do a regular (not explicit broadcast) so any context-registered receivers will work
         clientPackages.forEach {
             intent.setClassName(it.value, it.key)
             context.sendBroadcast(intent)
