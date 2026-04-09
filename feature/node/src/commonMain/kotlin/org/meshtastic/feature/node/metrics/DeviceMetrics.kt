@@ -189,6 +189,10 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
+            if (hasBattery) {
+                val batteryValues = remember(data) { data.mapNotNull { it.device_metrics?.battery_level?.toFloat() } }
+                MetricSummaryRow(values = batteryValues, label = "%")
+            }
         },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             DeviceMetricsChart(
@@ -334,9 +338,7 @@ private fun DeviceMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(
-                            lineColor = voltageColor,
-                        ),
+                        ChartStyling.createGradientLine(lineColor = voltageColor),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
                 )

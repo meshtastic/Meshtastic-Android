@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -68,6 +70,11 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
 import org.meshtastic.core.resources.channel_2
 import org.meshtastic.core.resources.channel_3
+import org.meshtastic.core.resources.channel_4
+import org.meshtastic.core.resources.channel_5
+import org.meshtastic.core.resources.channel_6
+import org.meshtastic.core.resources.channel_7
+import org.meshtastic.core.resources.channel_8
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.power_metrics_log
 import org.meshtastic.core.resources.voltage
@@ -85,6 +92,11 @@ private enum class PowerChannel(val strRes: StringResource) {
     ONE(Res.string.channel_1),
     TWO(Res.string.channel_2),
     THREE(Res.string.channel_3),
+    FOUR(Res.string.channel_4),
+    FIVE(Res.string.channel_5),
+    SIX(Res.string.channel_6),
+    SEVEN(Res.string.channel_7),
+    EIGHT(Res.string.channel_8),
 }
 
 private val LEGEND_DATA =
@@ -110,6 +122,12 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.powerMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
+    val availableChannels =
+        remember(data) {
+            PowerChannel.entries.filter { channel ->
+                data.any { !retrieveVoltage(channel, it).isNaN() || !retrieveCurrent(channel, it).isNaN() }
+            }
+        }
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
 
     BaseMetricScreen(
@@ -130,10 +148,11 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier =
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp).horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    PowerChannel.entries.forEach { channel ->
+                    availableChannels.forEach { channel ->
                         FilterChip(
                             selected = selectedChannel == channel,
                             onClick = { selectedChannel = channel },
@@ -229,10 +248,7 @@ private fun PowerMetricsChart(
         val currentLayer =
             if (currentData.isNotEmpty()) {
                 rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createBoldLine(currentColor),
-                    ),
+                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createBoldLine(currentColor)),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
                 )
             } else {
@@ -243,9 +259,7 @@ private fun PowerMetricsChart(
             if (voltageData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(voltageColor),
-                    ),
+                    LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(voltageColor)),
                     verticalAxisPosition = Axis.Position.Vertical.End,
                 )
             } else {
@@ -296,7 +310,7 @@ private fun PowerMetricsChart(
 }
 
 @Composable
-@Suppress("CyclomaticComplexMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val time = telemetry.time.toLong() * MS_PER_SEC
@@ -328,19 +342,10 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                            val pm = telemetry.power_metrics
-                            if (pm != null) {
-                                if (pm.ch1_current != null || pm.ch1_voltage != null) {
-                                    PowerChannelColumn(Res.string.channel_1, pm.ch1_voltage ?: 0f, pm.ch1_current ?: 0f)
-                                }
-                                if (pm.ch2_current != null || pm.ch2_voltage != null) {
-                                    PowerChannelColumn(Res.string.channel_2, pm.ch2_voltage ?: 0f, pm.ch2_current ?: 0f)
-                                }
-                                if (pm.ch3_current != null || pm.ch3_voltage != null) {
-                                    PowerChannelColumn(Res.string.channel_3, pm.ch3_voltage ?: 0f, pm.ch3_current ?: 0f)
-                                }
-                            }
+                        val pm = telemetry.power_metrics
+                        if (pm != null) {
+                            PowerChannelsRow1(pm)
+                            PowerChannelsExtraRows(pm)
                         }
                     }
                 }
@@ -348,6 +353,61 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
         }
     }
 }
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun PowerChannelsRow1(pm: org.meshtastic.proto.PowerMetrics) {
+    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+        if (pm.ch1_current != null || pm.ch1_voltage != null) {
+            PowerChannelColumn(Res.string.channel_1, pm.ch1_voltage ?: 0f, pm.ch1_current ?: 0f)
+        }
+        if (pm.ch2_current != null || pm.ch2_voltage != null) {
+            PowerChannelColumn(Res.string.channel_2, pm.ch2_voltage ?: 0f, pm.ch2_current ?: 0f)
+        }
+        if (pm.ch3_current != null || pm.ch3_voltage != null) {
+            PowerChannelColumn(Res.string.channel_3, pm.ch3_voltage ?: 0f, pm.ch3_current ?: 0f)
+        }
+    }
+}
+
+@Composable
+@Suppress("CyclomaticComplexMethod")
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics) {
+    val hasCh456 =
+        hasChannelData(pm.ch4_voltage, pm.ch4_current) ||
+            hasChannelData(pm.ch5_voltage, pm.ch5_current) ||
+            hasChannelData(pm.ch6_voltage, pm.ch6_current)
+    val hasCh78 = hasChannelData(pm.ch7_voltage, pm.ch7_current) || hasChannelData(pm.ch8_voltage, pm.ch8_current)
+
+    if (hasCh456) {
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            if (hasChannelData(pm.ch4_voltage, pm.ch4_current)) {
+                PowerChannelColumn(Res.string.channel_4, pm.ch4_voltage ?: 0f, pm.ch4_current ?: 0f)
+            }
+            if (hasChannelData(pm.ch5_voltage, pm.ch5_current)) {
+                PowerChannelColumn(Res.string.channel_5, pm.ch5_voltage ?: 0f, pm.ch5_current ?: 0f)
+            }
+            if (hasChannelData(pm.ch6_voltage, pm.ch6_current)) {
+                PowerChannelColumn(Res.string.channel_6, pm.ch6_voltage ?: 0f, pm.ch6_current ?: 0f)
+            }
+        }
+    }
+    if (hasCh78) {
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            if (hasChannelData(pm.ch7_voltage, pm.ch7_current)) {
+                PowerChannelColumn(Res.string.channel_7, pm.ch7_voltage ?: 0f, pm.ch7_current ?: 0f)
+            }
+            if (hasChannelData(pm.ch8_voltage, pm.ch8_current)) {
+                PowerChannelColumn(Res.string.channel_8, pm.ch8_voltage ?: 0f, pm.ch8_current ?: 0f)
+            }
+        }
+    }
+}
+
+private fun hasChannelData(voltage: Float?, current: Float?): Boolean = voltage != null || current != null
 
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -380,17 +440,29 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
 }
 
 /** Retrieves the appropriate voltage depending on `channelSelected`. */
+@Suppress("CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
     PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: Float.NaN
     PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: Float.NaN
     PowerChannel.THREE -> telemetry.power_metrics?.ch3_voltage ?: Float.NaN
+    PowerChannel.FOUR -> telemetry.power_metrics?.ch4_voltage ?: Float.NaN
+    PowerChannel.FIVE -> telemetry.power_metrics?.ch5_voltage ?: Float.NaN
+    PowerChannel.SIX -> telemetry.power_metrics?.ch6_voltage ?: Float.NaN
+    PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_voltage ?: Float.NaN
+    PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_voltage ?: Float.NaN
 }
 
 /** Retrieves the appropriate current depending on `channelSelected`. */
+@Suppress("CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
     PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: Float.NaN
     PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: Float.NaN
     PowerChannel.THREE -> telemetry.power_metrics?.ch3_current ?: Float.NaN
+    PowerChannel.FOUR -> telemetry.power_metrics?.ch4_current ?: Float.NaN
+    PowerChannel.FIVE -> telemetry.power_metrics?.ch5_current ?: Float.NaN
+    PowerChannel.SIX -> telemetry.power_metrics?.ch6_current ?: Float.NaN
+    PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_current ?: Float.NaN
+    PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_current ?: Float.NaN
 }

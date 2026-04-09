@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -116,18 +117,46 @@ data class LegendData(
 
 data class InfoDialogData(val titleRes: StringResource, val definitionRes: StringResource, val color: Color)
 
-/** Creates the legend that identifies the colors used for the graph. */
+/**
+ * Creates the legend that identifies the colors used for the graph.
+ *
+ * When [onToggle] is provided, each item renders as a Material 3 [FilterChip] so users can tap to show/hide chart
+ * series. This provides proper M3 affordance (selected state styling, ripple, accessibility semantics). When [onToggle]
+ * is null, a compact read-only legend is shown instead.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun Legend(legendData: List<LegendData>, modifier: Modifier = Modifier) {
+fun Legend(
+    legendData: List<LegendData>,
+    modifier: Modifier = Modifier,
+    hiddenSet: Set<Int> = emptySet(),
+    onToggle: ((Int) -> Unit)? = null,
+) {
     FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        legendData.forEach { data ->
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
-                LegendLabel(text = stringResource(data.nameRes), color = data.color, isLine = data.isLine)
+        legendData.forEachIndexed { index, data ->
+            val isVisible = index !in hiddenSet
+            if (onToggle != null) {
+                FilterChip(
+                    selected = isVisible,
+                    onClick = { onToggle(index) },
+                    label = { Text(stringResource(data.nameRes)) },
+                    leadingIcon = { LegendIndicator(color = data.color, isLine = data.isLine) },
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                )
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
+                    LegendIndicator(color = data.color, isLine = data.isLine)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(data.nameRes),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                    )
+                }
             }
         }
     }
@@ -180,8 +209,9 @@ fun LegendInfoDialog(infoData: List<InfoDialogData>, onDismiss: () -> Unit) {
     )
 }
 
+/** Draws a small colored line segment or circle to identify a chart series. */
 @Composable
-private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
+fun LegendIndicator(color: Color, isLine: Boolean = false) {
     Canvas(modifier = Modifier.size(height = 4.dp, width = if (isLine) 16.dp else 4.dp)) {
         if (isLine) {
             drawLine(
@@ -195,12 +225,6 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
             drawCircle(color = color)
         }
     }
-    Spacer(modifier = Modifier.width(4.dp))
-    Text(
-        text = text,
-        color = MaterialTheme.colorScheme.onSurface,
-        fontSize = MaterialTheme.typography.labelSmall.fontSize,
-    )
 }
 
 @Composable
@@ -213,8 +237,13 @@ fun MetricIndicator(color: Color, modifier: Modifier = Modifier) {
 private fun LegendPreview() {
     val data =
         listOf(
-            LegendData(nameRes = Res.string.rssi, color = Color.Red),
-            LegendData(nameRes = Res.string.snr, color = Color.Green),
+            LegendData(nameRes = Res.string.rssi, color = Color.Red, isLine = true),
+            LegendData(nameRes = Res.string.snr, color = Color.Green, isLine = true),
         )
-    Legend(legendData = data)
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        // Read-only legend
+        Legend(legendData = data)
+        // Toggleable legend
+        Legend(legendData = data, hiddenSet = setOf(1), onToggle = {})
+    }
 }

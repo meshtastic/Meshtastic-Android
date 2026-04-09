@@ -61,6 +61,7 @@ import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
  * - Use `Interpolator.catmullRom()` for smooth curves that pass through every data point.
  * - Reserve bold lines for the single most-important series; use subtle/gradient fills for secondary data.
  */
+@Suppress("TooManyFunctions")
 object ChartStyling {
     // Line stroke widths
     const val THIN_LINE_WIDTH_DP = 1.5f
@@ -68,36 +69,31 @@ object ChartStyling {
     const val THICK_LINE_WIDTH_DP = 2.5f
 
     /**
-     * Creates a clean timeseries line — thin, smooth, with **no** point markers.
-     * This is the default style recommended by Oscar's UX guidance: "thin lines, and maybe a dot where the cursor is."
+     * Creates a clean timeseries line — thin, smooth, with **no** point markers. This is the default style recommended
+     * by Oscar's UX guidance: "thin lines, and maybe a dot where the cursor is."
      *
      * @param lineColor The color of the line
      * @param lineWidth Width of the line in dp
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createStyledLine(
-        lineColor: Color,
-        lineWidth: Float = MEDIUM_LINE_WIDTH_DP,
-    ): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
-        fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
-        stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
-        interpolator = LineCartesianLayer.Interpolator.catmullRom(),
-    )
+    fun createStyledLine(lineColor: Color, lineWidth: Float = MEDIUM_LINE_WIDTH_DP): LineCartesianLayer.Line =
+        LineCartesianLayer.rememberLine(
+            fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
+            stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
+            interpolator = LineCartesianLayer.Interpolator.catmullRom(),
+        )
 
     /**
-     * Creates a line with a gradient area fill effect. Ideal for emphasising a single series or showing magnitude.
-     * The gradient goes from the line color at ~30% opacity to near-transparent.
+     * Creates a line with a gradient area fill effect. Ideal for emphasising a single series or showing magnitude. The
+     * gradient goes from the line color at ~30% opacity to near-transparent.
      *
      * @param lineColor The primary color of the line
      * @param lineWidth Width of the line in dp
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createGradientLine(
-        lineColor: Color,
-        lineWidth: Float = MEDIUM_LINE_WIDTH_DP,
-    ): LineCartesianLayer.Line {
+    fun createGradientLine(lineColor: Color, lineWidth: Float = MEDIUM_LINE_WIDTH_DP): LineCartesianLayer.Line {
         val gradientBrush =
             Brush.verticalGradient(colors = listOf(lineColor.copy(alpha = 0.3f), lineColor.copy(alpha = 0.05f)))
         return LineCartesianLayer.rememberLine(
@@ -129,8 +125,8 @@ object ChartStyling {
         createStyledLine(lineColor = lineColor, lineWidth = THIN_LINE_WIDTH_DP)
 
     /**
-     * Creates a dashed secondary line. Useful for distinguishing two metrics that share the same axis
-     * without relying on colour alone.
+     * Creates a dashed secondary line. Useful for distinguishing two metrics that share the same axis without relying
+     * on colour alone.
      *
      * @param lineColor The color of the dashed line
      * @return Configured [LineCartesianLayer.Line]
@@ -138,7 +134,8 @@ object ChartStyling {
     @Composable
     fun createDashedLine(lineColor: Color): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
         fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
-        stroke = LineCartesianLayer.LineStroke.Dashed(
+        stroke =
+        LineCartesianLayer.LineStroke.Dashed(
             thickness = THIN_LINE_WIDTH_DP.dp,
             dashLength = 6.dp,
             gapLength = 3.dp,
@@ -164,23 +161,18 @@ object ChartStyling {
      * @param label Optional label text for the line
      */
     @Composable
-    fun rememberThresholdLine(
-        y: Double,
-        color: Color,
-        label: String? = null,
-    ): Decoration {
-        val line = rememberLineComponent(
-            fill = Fill(color.copy(alpha = 0.4f)),
-            thickness = 1.dp,
-        )
-        val labelComponent = if (label != null) {
-            rememberTextComponent(
-                style = TextStyle(color = color.copy(alpha = 0.7f), fontSize = 9.sp, fontWeight = FontWeight.Medium),
-                padding = Insets(horizontal = 4.dp, vertical = 1.dp),
-            )
-        } else {
-            null
-        }
+    fun rememberThresholdLine(y: Double, color: Color, label: String? = null): Decoration {
+        val line = rememberLineComponent(fill = Fill(color.copy(alpha = 0.4f)), thickness = 1.dp)
+        val labelComponent =
+            if (label != null) {
+                rememberTextComponent(
+                    style =
+                    TextStyle(color = color.copy(alpha = 0.7f), fontSize = 9.sp, fontWeight = FontWeight.Medium),
+                    padding = Insets(horizontal = 4.dp, vertical = 1.dp),
+                )
+            } else {
+                null
+            }
         return remember(y, color, label) {
             HorizontalLine(
                 y = { y },

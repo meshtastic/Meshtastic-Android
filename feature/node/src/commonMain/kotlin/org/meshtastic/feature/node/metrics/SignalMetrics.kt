@@ -180,10 +180,7 @@ private fun SignalMetricsChart(
         val rssiLayer =
             if (rssiData.isNotEmpty()) {
                 rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createStyledLine(rssiColor),
-                    ),
+                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createStyledLine(rssiColor)),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
                 )
             } else {
@@ -193,10 +190,7 @@ private fun SignalMetricsChart(
         val snrLayer =
             if (snrData.isNotEmpty()) {
                 rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createDashedLine(snrColor),
-                    ),
+                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createDashedLine(snrColor)),
                     verticalAxisPosition = Axis.Position.Vertical.End,
                 )
             } else {

@@ -138,15 +138,9 @@ private fun PaxMetricsChart(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(
-                            lineColor = bleColor,
-                        ),
-                        ChartStyling.createGradientLine(
-                            lineColor = wifiColor,
-                        ),
-                        ChartStyling.createBoldLine(
-                            lineColor = paxColor,
-                        ),
+                        ChartStyling.createGradientLine(lineColor = bleColor),
+                        ChartStyling.createGradientLine(lineColor = wifiColor),
+                        ChartStyling.createBoldLine(lineColor = paxColor),
                     ),
                     rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
                 ),

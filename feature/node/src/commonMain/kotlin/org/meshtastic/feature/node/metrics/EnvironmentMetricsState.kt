@@ -23,10 +23,12 @@ import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
+import org.meshtastic.core.ui.theme.GraphColors.Lime
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
+import org.meshtastic.core.ui.theme.GraphColors.Teal
 import org.meshtastic.proto.Telemetry
 
 @Suppress("MagicNumber")
@@ -59,6 +61,12 @@ enum class Environment(val color: Color) {
     },
     UV_LUX(Orange) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.uv_lux
+    },
+    WIND_SPEED(Teal) {
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.wind_speed
+    },
+    RADIATION(Lime) {
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.radiation
     }, ;
 
     abstract fun getValue(telemetry: Telemetry): Float?
@@ -114,9 +122,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Relative Humidity
-        val humidities = telemetries.mapNotNull {
-            it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f }
-        }
+        val humidities =
+            telemetries.mapNotNull { it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f } }
         if (humidities.isNotEmpty()) {
             minValues.add(humidities.minOf { it })
             maxValues.add(humidities.maxOf { it })
@@ -124,9 +131,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Soil Temperature
-        val soilTemperatures = telemetries.mapNotNull {
-            it.environment_metrics?.soil_temperature?.takeIf { !it.isNaN() }
-        }
+        val soilTemperatures =
+            telemetries.mapNotNull { it.environment_metrics?.soil_temperature?.takeIf { !it.isNaN() } }
         if (soilTemperatures.isNotEmpty()) {
             var minSoilTemperatureValue = soilTemperatures.minOf { it }
             var maxSoilTemperatureValue = soilTemperatures.maxOf { it }
@@ -140,9 +146,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Soil Moisture
-        val soilMoistures = telemetries.mapNotNull {
-            it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE }
-        }
+        val soilMoistures =
+            telemetries.mapNotNull { it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE } }
         if (soilMoistures.isNotEmpty()) {
             minValues.add(soilMoistures.minOf { it.toFloat() })
             maxValues.add(soilMoistures.maxOf { it.toFloat() })
@@ -181,6 +186,23 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
             minValues.add(uvLuxValues.minOf { it })
             maxValues.add(uvLuxValues.maxOf { it })
             shouldPlot[Environment.UV_LUX.ordinal] = true
+        }
+
+        // Wind Speed
+        val windSpeeds = telemetries.mapNotNull { it.environment_metrics?.wind_speed?.takeIf { !it.isNaN() } }
+        if (windSpeeds.isNotEmpty()) {
+            minValues.add(windSpeeds.minOf { it })
+            maxValues.add(windSpeeds.maxOf { it })
+            shouldPlot[Environment.WIND_SPEED.ordinal] = true
+        }
+
+        // Radiation (uses separate fixed axis with minY=0 per Oscar's guidance)
+        val radiationValues =
+            telemetries.mapNotNull { it.environment_metrics?.radiation?.takeIf { !it.isNaN() && it > 0f } }
+        if (radiationValues.isNotEmpty()) {
+            minValues.add(radiationValues.minOf { it })
+            maxValues.add(radiationValues.maxOf { it })
+            shouldPlot[Environment.RADIATION.ordinal] = true
         }
 
         val min = if (minValues.isEmpty()) 0f else minValues.minOf { it }

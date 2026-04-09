@@ -487,6 +487,10 @@
     <string name="four_weeks">4W</string>
     <string name="one_month">1M</string>
     <string name="max">Max</string>
+    <string name="min">Min</string>
+    <string name="avg">Avg</string>
+    <string name="expand_chart">Expand chart</string>
+    <string name="collapse_chart">Collapse chart</string>
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
@@ -500,6 +504,11 @@
     <string name="channel_1">Channel 1</string>
     <string name="channel_2">Channel 2</string>
     <string name="channel_3">Channel 3</string>
+    <string name="channel_4">Channel 4</string>
+    <string name="channel_5">Channel 5</string>
+    <string name="channel_6">Channel 6</string>
+    <string name="channel_7">Channel 7</string>
+    <string name="channel_8">Channel 8</string>
     <string name="current">Current</string>
     <string name="voltage">Voltage</string>
     <string name="are_you_sure">Are you sure?</string>
@@ -780,6 +789,14 @@
     <string name="distance">Distance</string>
     <string name="lux">Lux</string>
     <string name="wind">Wind</string>
+    <string name="wind_speed">Wind Speed</string>
+    <string name="wind_gust">Wind Gust</string>
+    <string name="wind_lull">Wind Lull</string>
+    <string name="wind_direction">Wind Dir</string>
+    <string name="rainfall_1h">Rain (1h)</string>
+    <string name="rainfall_24h">Rain (24h)</string>
+    <string name="ir_lux">IR Lux</string>
+    <string name="white_lux">White Lux</string>
     <string name="weight">Weight</string>
     <string name="radiation">Radiation</string>
     <string name="store_forward_config"><![CDATA[Store & Forward Config]]></string>

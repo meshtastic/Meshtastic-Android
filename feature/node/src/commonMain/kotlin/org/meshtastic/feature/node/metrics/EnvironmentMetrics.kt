@@ -40,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,11 +60,17 @@ import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.iaq_definition
 import org.meshtastic.core.resources.lux
 import org.meshtastic.core.resources.radiation
+import org.meshtastic.core.resources.rainfall_1h
+import org.meshtastic.core.resources.rainfall_24h
 import org.meshtastic.core.resources.soil_moisture
 import org.meshtastic.core.resources.soil_temperature
 import org.meshtastic.core.resources.temperature
 import org.meshtastic.core.resources.uv_lux
 import org.meshtastic.core.resources.voltage
+import org.meshtastic.core.resources.wind_direction
+import org.meshtastic.core.resources.wind_gust
+import org.meshtastic.core.resources.wind_lull
+import org.meshtastic.core.resources.wind_speed
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
@@ -93,6 +100,14 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
+            val tempValues =
+                remember(filteredTelemetries) {
+                    filteredTelemetries.mapNotNull { it.environment_metrics?.temperature?.takeIf { t -> !t.isNaN() } }
+                }
+            if (tempValues.isNotEmpty()) {
+                val unit = if (state.isFahrenheit) "°F" else "°C"
+                MetricSummaryRow(values = tempValues, label = unit)
+            }
         },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             EnvironmentMetricsChart(
@@ -341,8 +356,103 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
     envMetrics.radiation?.let { radiation ->
         if (!radiation.isNaN() && radiation > 0f) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricIndicator(Environment.RADIATION.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = formatString("%s %.2f µR/h", stringResource(Res.string.radiation), radiation),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun WindDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+    val hasSpeed = envMetrics.wind_speed != null && !envMetrics.wind_speed!!.isNaN()
+    val hasGust = envMetrics.wind_gust != null && !envMetrics.wind_gust!!.isNaN()
+    val hasLull = envMetrics.wind_lull != null && !envMetrics.wind_lull!!.isNaN()
+
+    if (hasSpeed || hasGust || hasLull) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            if (hasSpeed) WindSpeedRow(envMetrics)
+            if (hasGust || hasLull) WindGustLullRow(envMetrics, hasGust, hasLull)
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            MetricIndicator(Environment.WIND_SPEED.color)
+            Spacer(Modifier.width(4.dp))
+            val dirText =
+                if (envMetrics.wind_direction != null) {
+                    formatString(
+                        "%s %.1f m/s (%s %d°)",
+                        stringResource(Res.string.wind_speed),
+                        envMetrics.wind_speed!!,
+                        stringResource(Res.string.wind_direction),
+                        envMetrics.wind_direction!!,
+                    )
+                } else {
+                    formatString("%s %.1f m/s", stringResource(Res.string.wind_speed), envMetrics.wind_speed!!)
+                }
+            Text(
+                text = dirText,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            )
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun WindGustLullRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics, hasGust: Boolean, hasLull: Boolean) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        if (hasGust) {
+            Text(
+                text = formatString("%s %.1f m/s", stringResource(Res.string.wind_gust), envMetrics.wind_gust!!),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            )
+        }
+        if (hasLull) {
+            Text(
+                text = formatString("%s %.1f m/s", stringResource(Res.string.wind_lull), envMetrics.wind_lull!!),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            )
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+    val has1h = envMetrics.rainfall_1h != null && !envMetrics.rainfall_1h!!.isNaN()
+    val has24h = envMetrics.rainfall_24h != null && !envMetrics.rainfall_24h!!.isNaN()
+
+    if (has1h || has24h) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            if (has1h) {
                 Text(
-                    text = formatString("%s %.2f µR/h", stringResource(Res.string.radiation), radiation),
+                    text = formatString("%s %.1f mm", stringResource(Res.string.rainfall_1h), envMetrics.rainfall_1h!!),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                )
+            }
+            if (has24h) {
+                Text(
+                    text =
+                    formatString("%s %.1f mm", stringResource(Res.string.rainfall_24h), envMetrics.rainfall_24h!!),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
@@ -406,6 +516,8 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
 
         VoltageCurrentDisplay(envMetrics)
         RadiationDisplay(envMetrics)
+        WindDisplay(envMetrics)
+        RainfallDisplay(envMetrics)
     }
 }
 
@@ -427,6 +539,12 @@ private fun PreviewEnvironmentMetricsContent() {
             iaq = 100,
             radiation = 0.15f,
             gas_resistance = 1200.0f,
+            wind_speed = 5.2f,
+            wind_direction = 225,
+            wind_gust = 8.1f,
+            wind_lull = 2.3f,
+            rainfall_1h = 1.5f,
+            rainfall_24h = 12.3f,
         )
     val fakeTelemetry = Telemetry(time = nowSeconds.toInt(), environment_metrics = fakeEnvMetrics)
     MaterialTheme {
