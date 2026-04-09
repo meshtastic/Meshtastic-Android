@@ -48,12 +48,16 @@ jobs:
           if (labels.size > 0) {
             const labelArray = [...labels];
             core.info(`Applying labels: ${labelArray.join(', ')}`);
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              labels: labelArray,
-            });
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: labelArray,
+              });
+            } catch (e) {
+              core.warning(`Could not apply labels (rate limited?): ${e.message}`);
+            }
           } else {
             core.info('No labels matched for this PR.');
           }
