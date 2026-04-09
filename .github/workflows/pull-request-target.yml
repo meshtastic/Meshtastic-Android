@@ -1,7 +1,8 @@
 name: "Pull Request Labeler"
 on:
-- pull_request_target
-# Do not execute arbitary code on this workflow. 
+  pull_request_target:
+    types: [opened, synchronize]
+# Do not execute arbitrary code on this workflow.
 # See warnings at https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target
 
 jobs:
@@ -11,5 +12,48 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-24.04-arm
     steps:
-    - id: label-the-PR
-      uses: actions/labeler@v6
+    - name: Auto-label PR
+      uses: actions/github-script@v8
+      with:
+        script: |
+          const branch = context.payload.pull_request.head.ref;
+          const labels = new Set();
+
+          // enhancement: branch contains feat
+          if (/feat/i.test(branch)) labels.add('enhancement');
+
+          // bugfix: branch starts with fix or bug
+          if (/^(fix|bug)/i.test(branch)) labels.add('bugfix');
+
+          // refactor: branch starts with refactor
+          if (/^refactor/i.test(branch)) labels.add('refactor');
+
+          // repo: branch contains repo or ci
+          if (/repo|ci/i.test(branch)) {
+            labels.add('repo');
+          } else {
+            // Also label 'repo' if .github files were changed (needs one API call)
+            try {
+              const files = await github.paginate(
+                github.rest.pulls.listFiles,
+                { owner: context.repo.owner, repo: context.repo.repo, pull_number: context.payload.pull_request.number, per_page: 100 },
+                (res) => res.data.map(f => f.filename)
+              );
+              if (files.some(f => f.startsWith('.github/'))) labels.add('repo');
+            } catch (e) {
+              core.warning(`Could not list PR files (rate limited?): ${e.message}`);
+            }
+          }
+
+          if (labels.size > 0) {
+            const labelArray = [...labels];
+            core.info(`Applying labels: ${labelArray.join(', ')}`);
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: labelArray,
+            });
+          } else {
+            core.info('No labels matched for this PR.');
+          }
