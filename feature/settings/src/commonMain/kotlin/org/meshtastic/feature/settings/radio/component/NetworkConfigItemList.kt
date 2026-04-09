@@ -46,6 +46,7 @@ import org.meshtastic.core.resources.config_network_eth_enabled_summary
 import org.meshtastic.core.resources.config_network_udp_enabled_summary
 import org.meshtastic.core.resources.config_network_wifi_enabled_summary
 import org.meshtastic.core.resources.connection_status
+import org.meshtastic.core.resources.dns
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.ethernet_config
 import org.meshtastic.core.resources.ethernet_enabled
@@ -271,29 +272,31 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 SwitchPreference(
                     title = stringResource(Res.string.udp_enabled),
                     summary = stringResource(Res.string.config_network_udp_enabled_summary),
-                    checked = formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
-                    onCheckedChange = {
-                        formState.value =
-                            formState.value.copy(
-                                address_mode =
-                                if (it) {
-                                    Config.NetworkConfig.AddressMode.STATIC
-                                } else {
-                                    Config.NetworkConfig.AddressMode.DHCP
-                                },
-                            )
+                    checked =
+                    formState.value.enabled_protocols and Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value !=
+                        0,
+                    onCheckedChange = { enabled ->
+                        val flags =
+                            if (enabled) {
+                                formState.value.enabled_protocols or
+                                    Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value
+                            } else {
+                                formState.value.enabled_protocols and
+                                    Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value.inv()
+                            }
+                        formState.value = formState.value.copy(enabled_protocols = flags)
                     },
                     enabled = state.connected,
                 )
+                HorizontalDivider()
+                DropDownPreference(
+                    title = stringResource(Res.string.ipv4_mode),
+                    enabled = state.connected,
+                    selectedItem = formState.value.address_mode,
+                    onItemSelected = { formState.value = formState.value.copy(address_mode = it) },
+                    itemLabel = { it.name },
+                )
                 if (formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC) {
-                    HorizontalDivider()
-                    DropDownPreference(
-                        title = stringResource(Res.string.ipv4_mode),
-                        enabled = state.connected,
-                        selectedItem = formState.value.address_mode,
-                        onItemSelected = { formState.value = formState.value.copy(address_mode = it) },
-                        itemLabel = { it.name },
-                    )
                     HorizontalDivider()
                     val ipv4 = formState.value.ipv4_config ?: Config.NetworkConfig.IpV4Config()
                     EditIPv4Preference(
@@ -321,6 +324,14 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         onValueChanged = {
                             formState.value = formState.value.copy(ipv4_config = ipv4.copy(subnet = it))
                         },
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    )
+                    HorizontalDivider()
+                    EditIPv4Preference(
+                        title = stringResource(Res.string.dns),
+                        value = ipv4.dns,
+                        enabled = state.connected,
+                        onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(dns = it)) },
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     )
                 }
