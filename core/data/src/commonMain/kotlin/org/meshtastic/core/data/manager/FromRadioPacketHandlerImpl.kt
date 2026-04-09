@@ -89,6 +89,12 @@ class FromRadioPacketHandlerImpl(
             fileInfo != null -> router.value.configFlowManager.handleFileInfo(fileInfo)
             xmodemPacket != null -> router.value.xmodemManager.handleIncomingXModem(xmodemPacket)
             clientNotification != null -> handleClientNotification(clientNotification)
+            // Firmware rebooted without a transport-level disconnect (common on serial/TCP).
+            // Re-handshake immediately rather than waiting for the 30s stall guard.
+            proto.rebooted != null -> {
+                Logger.w { "Firmware rebooted (rebooted=${proto.rebooted}), re-initiating handshake" }
+                router.value.configFlowManager.triggerWantConfig()
+            }
         }
     }
 

@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import okio.IOException
@@ -58,6 +59,9 @@ class MeshConfigFlowManagerImpl(
 ) : MeshConfigFlowManager {
     private lateinit var scope: CoroutineScope
     private val wantConfigDelay = 100L
+
+    /** Monotonically increasing generation so async clears from a stale handshake are discarded. */
+    private val handshakeGeneration = atomic(0L)
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -203,12 +207,18 @@ class MeshConfigFlowManagerImpl(
         handshakeState = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
         nodeManager.setMyNodeNum(myInfo.my_node_num)
 
+        // Bump the generation so that a pending clear from a prior (interrupted) handshake
+        // will see a stale snapshot and skip its writes, preventing it from wiping config
+        // that was saved by this (newer) handshake's incoming packets.
+        val gen = handshakeGeneration.incrementAndGet()
+
         // Clear persisted radio config so the new handshake starts from a clean slate.
         // DataStore serializes its own writes, so the clear will precede subsequent
         // setLocalConfig / updateChannelSettings calls dispatched by later packets in this
         // session (handleFromRadio processes packets sequentially, so later dispatches always
         // occur after this one returns).
         scope.handledLaunch {
+            if (handshakeGeneration.value != gen) return@handledLaunch // Stale handshake; skip.
             radioConfigRepository.clearChannelSet()
             radioConfigRepository.clearLocalConfig()
             radioConfigRepository.clearLocalModuleConfig()

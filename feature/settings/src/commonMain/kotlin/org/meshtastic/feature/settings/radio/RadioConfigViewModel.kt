@@ -585,7 +585,12 @@ open class RadioConfigViewModel(
         val route = radioConfigState.value.route
 
         when (result) {
-            is RadioResponseResult.Error -> sendError(result.message)
+            is RadioResponseResult.Error -> {
+                sendError(result.message)
+                // Abort the AdminRoute flow — do not fire the destructive action
+                // (reboot/shutdown/factory_reset) if the metadata preflight failed.
+                return
+            }
             is RadioResponseResult.Success -> {
                 if (route.isEmpty()) {
                     val data = packet.decoded!!
@@ -704,6 +709,12 @@ open class RadioConfigViewModel(
                 incrementCompleted()
             }
         }
+
+        // Routing ACKs (Success) share the same request_id as the upcoming ADMIN_APP response.
+        // Removing the id here would cause the actual admin response to be silently dropped,
+        // because processRadioResponseUseCase checks `request_id in requestIds`.
+        // The Success branch already handles its own id removal when route is empty (set flow).
+        if (result is RadioResponseResult.Success) return
 
         if (AdminRoute.entries.any { it.name == route }) {
             sendAdminRequest(destNum)

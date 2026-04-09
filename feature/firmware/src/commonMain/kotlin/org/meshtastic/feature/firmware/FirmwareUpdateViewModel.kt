@@ -21,6 +21,7 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -121,7 +122,11 @@ class FirmwareUpdateViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.launch { tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile) }
+        // viewModelScope is already cancelled when onCleared() runs, so use a standalone scope
+        // for fire-and-forget cleanup of temporary firmware files.
+        kotlinx.coroutines.CoroutineScope(NonCancellable).launch {
+            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+        }
     }
 
     fun setReleaseType(type: FirmwareReleaseType) {

@@ -21,6 +21,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.XModemFile
 import org.meshtastic.core.repository.XModemManager
@@ -59,6 +60,8 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
     @Volatile private var transferName = ""
 
     @Volatile private var expectedSeq = INITIAL_SEQ
+
+    @Volatile private var lastActivityMillis = 0L
     private val blocks = mutableListOf<ByteArray>()
 
     override fun setTransferName(name: String) {
@@ -66,6 +69,17 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
     }
 
     override fun handleIncomingXModem(packet: XModem) {
+        // If blocks have accumulated but no activity for INACTIVITY_TIMEOUT_MS,
+        // the previous transfer is stale (firmware crash, BLE disconnect, etc.).
+        if (blocks.isNotEmpty() && lastActivityMillis > 0L) {
+            val elapsed = nowMillis - lastActivityMillis
+            if (elapsed > INACTIVITY_TIMEOUT_MS) {
+                Logger.w { "XModem: inactivity timeout (${elapsed}ms) — resetting stale transfer" }
+                reset()
+            }
+        }
+        lastActivityMillis = nowMillis
+
         when (packet.control) {
             XModem.Control.SOH,
             XModem.Control.STX,
@@ -135,6 +149,7 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
         expectedSeq = INITIAL_SEQ
         blocks.clear()
         transferName = ""
+        lastActivityMillis = 0L
     }
 
     // CRC-CCITT: polynomial 0x1021, initial value 0x0000 (XModem variant)
@@ -157,5 +172,6 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
         private const val CTRLZ = 0x1A.toByte()
         private const val CRC_POLY = 0x1021
         private const val BITS_PER_BYTE = 8
+        private const val INACTIVITY_TIMEOUT_MS = 30_000L
     }
 }

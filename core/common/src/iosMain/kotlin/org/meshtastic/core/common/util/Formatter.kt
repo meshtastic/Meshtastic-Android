@@ -23,6 +23,7 @@ package org.meshtastic.core.common.util
  * - `%s`, `%d` — positional or sequential string/integer
  * - `%N$s`, `%N$d` — explicit positional string/integer
  * - `%N$.Nf`, `%.Nf` — float with decimal precision
+ * - `%x`, `%X`, `%08x` — hexadecimal (lower/upper, optional zero-padded width)
  * - `%%` — literal percent
  *
  * This avoids a dependency on `NSString.stringWithFormat` (which uses Obj-C `%@` conventions).
@@ -57,7 +58,20 @@ actual fun formatString(pattern: String, vararg args: Any?): String = buildStrin
             i = startPos // rewind — digits are part of width/precision, not positional index
         }
 
-        // Parse optional flags/width (skip for now — not used in this codebase)
+        // Parse optional flags (zero-pad)
+        var zeroPad = false
+        if (i < pattern.length && pattern[i] == '0') {
+            zeroPad = true
+            i++
+        }
+
+        // Parse optional width
+        var width: Int? = null
+        val widthStart = i
+        while (i < pattern.length && pattern[i].isDigit()) i++
+        if (i > widthStart) {
+            width = pattern.substring(widthStart, i).toInt()
+        }
 
         // Parse optional precision (.N)
         var precision: Int? = null
@@ -86,10 +100,24 @@ actual fun formatString(pattern: String, vararg args: Any?): String = buildStrin
                 val places = precision ?: DEFAULT_FLOAT_PRECISION
                 append(NumberFormatter.format(value, places))
             }
+            'x',
+            'X',
+            -> {
+                val value = (arg as? Number)?.toLong() ?: 0L
+                // Mask to 32 bits when the original arg fits in an Int to match unsigned behaviour.
+                val masked = if (arg is Int) value and INT_MASK else value
+                var hex = masked.toString(HEX_RADIX)
+                if (conversion == 'X') hex = hex.uppercase()
+                val padChar = if (zeroPad) '0' else ' '
+                val padWidth = width ?: 0
+                append(hex.padStart(padWidth, padChar))
+            }
             else -> {
                 // Unknown conversion — reproduce original token
                 append('%')
                 if (explicitIndex != null) append("${explicitIndex + 1}$")
+                if (zeroPad) append('0')
+                if (width != null) append(width)
                 if (precision != null) append(".$precision")
                 append(conversion)
             }
@@ -98,3 +126,5 @@ actual fun formatString(pattern: String, vararg args: Any?): String = buildStrin
 }
 
 private const val DEFAULT_FLOAT_PRECISION = 6
+private const val HEX_RADIX = 16
+private const val INT_MASK = 0xFFFFFFFFL

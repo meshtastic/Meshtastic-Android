@@ -53,6 +53,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
+import kotlin.concurrent.Volatile
 
 /**
  * Shared multiplatform connection orchestrator for Meshtastic radios.
@@ -107,8 +108,16 @@ class SharedRadioInterfaceService(
     private var heartbeatJob: kotlinx.coroutines.Job? = null
     private var lastHeartbeatMillis = 0L
 
+    @Volatile private var lastDataReceivedMillis = 0L
+
     companion object {
         private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
+
+        // If we haven't received any data from the radio within this window after sending a
+        // heartbeat while the connection is nominally "Connected", the connection is likely a
+        // zombie (BLE stack didn't report disconnect). Two missed heartbeat intervals gives
+        // the firmware a reasonable window to respond or send telemetry.
+        private const val LIVENESS_TIMEOUT_MILLIS = HEARTBEAT_INTERVAL_MILLIS * 2
     }
 
     private val initLock = Mutex()
@@ -245,13 +254,34 @@ class SharedRadioInterfaceService(
 
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
+        lastDataReceivedMillis = nowMillis
         heartbeatJob =
             serviceScope.launch {
                 while (true) {
                     delay(HEARTBEAT_INTERVAL_MILLIS)
                     keepAlive()
+                    checkLiveness()
                 }
             }
+    }
+
+    /**
+     * Detects zombie connections where the BLE stack didn't report a disconnect.
+     *
+     * If we believe we're connected but haven't received any data from the radio within [LIVENESS_TIMEOUT_MILLIS], the
+     * connection is likely dead. Signal a non-permanent disconnect so the reconnect machinery can take over.
+     */
+    private fun checkLiveness() {
+        if (_connectionState.value != ConnectionState.Connected) return
+
+        val silenceMs = nowMillis - lastDataReceivedMillis
+        if (silenceMs > LIVENESS_TIMEOUT_MILLIS) {
+            Logger.w {
+                "Liveness check failed: no data received for ${silenceMs}ms " +
+                    "(threshold: ${LIVENESS_TIMEOUT_MILLIS}ms). Treating as disconnect."
+            }
+            onDisconnect(isPermanent = false, errorMessage = "Connection timeout — no data received")
+        }
     }
 
     fun keepAlive(now: Long = nowMillis) {
@@ -271,6 +301,7 @@ class SharedRadioInterfaceService(
     @Suppress("TooGenericExceptionCaught")
     override fun handleFromRadio(bytes: ByteArray) {
         try {
+            lastDataReceivedMillis = nowMillis
             processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(bytes) }
             _meshActivity.tryEmit(MeshActivity.Receive)
         } catch (t: Throwable) {
@@ -283,6 +314,7 @@ class SharedRadioInterfaceService(
         // launching a coroutine. The async launch pattern introduced a window where a concurrent
         // onDisconnect launch could execute AFTER an onConnect launch, leaving the service stuck
         // in Connected while the transport was actually disconnected.
+        lastDataReceivedMillis = nowMillis
         if (_connectionState.value != ConnectionState.Connected) {
             Logger.d { "Broadcasting connection state change to Connected" }
             _connectionState.value = ConnectionState.Connected

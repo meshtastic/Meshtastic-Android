@@ -123,7 +123,7 @@ class NodeDetailViewModel(
 
     /** Returns the type-safe navigation route for a direct message to this node. */
     fun getDirectMessageRoute(node: Node, ourNode: Node?): String {
-        val hasPKC = ourNode?.hasPKC == true
+        val hasPKC = ourNode?.hasPKC == true && node.hasPKC
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
         return "${channel}${node.user.id}"
     }

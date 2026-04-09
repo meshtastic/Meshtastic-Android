@@ -65,6 +65,18 @@ private const val CONNECTION_TIMEOUT_MS = 15_000L
 private const val RECONNECT_FAILURE_THRESHOLD = 3
 private const val RECONNECT_BASE_DELAY_MS = 5_000L
 private const val RECONNECT_MAX_DELAY_MS = 60_000L
+private const val RECONNECT_MAX_FAILURES = 10
+
+/**
+ * Minimum milliseconds a BLE connection must stay up before we consider it "stable" and reset
+ * [BleRadioInterface.consecutiveFailures]. Without this, a device at the edge of BLE range can repeatedly connect for a
+ * fraction of a second and drop — each brief connection resets the failure counter so [RECONNECT_FAILURE_THRESHOLD] is
+ * never reached, and the app never signals [ConnectionState.DeviceSleep].
+ *
+ * The value (5 s) is long enough that only connections that survive past the initial GATT setup are treated as genuine,
+ * but short enough that normal reconnects after light-sleep still reset the counter promptly.
+ */
+private const val MIN_STABLE_CONNECTION_MS = 5_000L
 
 /**
  * Returns the reconnect backoff delay in milliseconds for a given consecutive failure count.
@@ -181,7 +193,7 @@ class BleRadioInterface(
         throw RadioNotConnectedException("Device not found at address $address")
     }
 
-    @Suppress("LongMethod")
+    @Suppress("LongMethod", "CyclomaticComplexMethod")
     private fun connect() {
         connectionJob =
             connectionScope.launch {
@@ -231,8 +243,9 @@ class BleRadioInterface(
                             throw RadioNotConnectedException("Failed to connect to device at address $address")
                         }
 
-                        // Connection succeeded — reset failure counter
-                        consecutiveFailures = 0
+                        // Connection succeeded — only reset the failure counter if the
+                        // connection stays up long enough. See MIN_STABLE_CONNECTION_MS.
+                        val gattConnectedAt = nowMillis
                         isFullyConnected = true
                         onConnected()
 
@@ -257,6 +270,39 @@ class BleRadioInterface(
                         }
 
                         Logger.i { "[$address] BLE connection dropped, preparing to reconnect" }
+
+                        // Only reset the failure counter if the connection was stable (lasted
+                        // longer than MIN_STABLE_CONNECTION_MS). A connection that drops within
+                        // seconds typically means the device is at the edge of BLE range or
+                        // powered off — the Android BLE stack may briefly "connect" to a cached
+                        // GATT profile before realising the device is gone. Without this guard,
+                        // the failure counter resets on every brief connect, preventing us from
+                        // ever reaching RECONNECT_FAILURE_THRESHOLD and signalling DeviceSleep.
+                        val connectionUptime = nowMillis - gattConnectedAt
+                        if (connectionUptime >= MIN_STABLE_CONNECTION_MS) {
+                            consecutiveFailures = 0
+                        } else {
+                            consecutiveFailures++
+                            Logger.w {
+                                "[$address] Connection lasted only ${connectionUptime}ms " +
+                                    "(< ${MIN_STABLE_CONNECTION_MS}ms) — treating as failure " +
+                                    "(consecutive failures: $consecutiveFailures)"
+                            }
+                            if (consecutiveFailures >= RECONNECT_MAX_FAILURES) {
+                                Logger.e { "[$address] Giving up after $consecutiveFailures unstable connections" }
+                                service.onDisconnect(
+                                    isPermanent = true,
+                                    errorMessage = "Device unreachable (unstable connection)",
+                                )
+                                return@launch
+                            }
+                            if (consecutiveFailures >= RECONNECT_FAILURE_THRESHOLD) {
+                                service.onDisconnect(
+                                    isPermanent = false,
+                                    errorMessage = "Device unreachable (unstable connection)",
+                                )
+                            }
+                        }
                     } catch (e: kotlinx.coroutines.CancellationException) {
                         Logger.d { "[$address] BLE connection coroutine cancelled" }
                         throw e
@@ -268,10 +314,19 @@ class BleRadioInterface(
                                 "(consecutive failures: $consecutiveFailures)"
                         }
 
-                        // At the failure threshold, signal DeviceSleep so MeshConnectionManagerImpl can
-                        // start its sleep timeout. Use == (not >=) to fire exactly once; repeated
-                        // onDisconnect signals would reset upstream state machines unnecessarily.
-                        if (consecutiveFailures == RECONNECT_FAILURE_THRESHOLD) {
+                        // After exceeding the max failure limit, give up permanently to stop
+                        // draining battery on a device that is genuinely offline. The user
+                        // must manually reconnect from the connections screen.
+                        if (consecutiveFailures >= RECONNECT_MAX_FAILURES) {
+                            Logger.e { "[$address] Giving up after $consecutiveFailures consecutive failures" }
+                            val (_, msg) = e.toDisconnectReason()
+                            service.onDisconnect(isPermanent = true, errorMessage = msg)
+                            return@launch
+                        }
+
+                        // At the failure threshold, signal DeviceSleep so
+                        // MeshConnectionManagerImpl can start its sleep timeout.
+                        if (consecutiveFailures >= RECONNECT_FAILURE_THRESHOLD) {
                             handleFailure(e)
                         }
 
@@ -312,10 +367,11 @@ class BleRadioInterface(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        // Do NOT call service.onDisconnect() here. The reconnect while-loop handles retries
-        // internally. Emitting DeviceSleep on every transient disconnect creates competing state
-        // transitions with MeshConnectionManagerImpl's sleep timeout. Instead, handleFailure()
-        // is called from the catch block after RECONNECT_FAILURE_THRESHOLD consecutive failures.
+        // Signal DeviceSleep immediately so the UI reflects the disconnect while the
+        // reconnect loop continues in the background. The previous approach suppressed
+        // this signal until RECONNECT_FAILURE_THRESHOLD consecutive failures, leaving the
+        // UI stuck on "Connected" for 35+ seconds after the device disappeared.
+        service.onDisconnect(isPermanent = false)
     }
 
     private suspend fun discoverServicesAndSetupCharacteristics() {

@@ -25,6 +25,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.meshtastic.core.network.radio.StreamInterface
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.proto.Heartbeat
+import org.meshtastic.proto.ToRadio
 import java.io.File
 
 /**
@@ -137,7 +139,11 @@ private constructor(
     }
 
     override fun keepAlive() {
-        // Not specifically needed for raw serial unless implemented
+        // Send a ToRadio heartbeat so the firmware resets its idle timer and responds with
+        // a FromRadio queueStatus — proving the serial link is alive. Without this, the
+        // serial transport has no way to detect a silently dead device.
+        Logger.d { "[$portName] Serial keepAlive — sending heartbeat" }
+        handleSendToRadio(ToRadio(heartbeat = Heartbeat()).encode())
     }
 
     private fun closePortResources() {

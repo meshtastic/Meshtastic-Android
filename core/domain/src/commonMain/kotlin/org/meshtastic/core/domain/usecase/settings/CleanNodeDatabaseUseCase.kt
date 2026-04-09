@@ -57,8 +57,8 @@ constructor(
         if (nodeNums.isEmpty()) return
 
         nodeRepository.deleteNodes(nodeNums)
-        val packetId = radioController.getPacketId()
         for (nodeNum in nodeNums) {
+            val packetId = radioController.getPacketId()
             radioController.removeByNodenum(packetId, nodeNum)
         }
     }
