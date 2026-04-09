@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   triage:
-    if: ${{ github.repository == 'meshtastic/firmware' && github.event.pull_request.user.type != 'Bot' }}
+    if: ${{ github.repository == 'meshtastic/Meshtastic-Android' && github.event.pull_request.user.type != 'Bot' }}
     runs-on: ubuntu-24.04-arm
     steps:
       # ─────────────────────────────────────────────────────────────────────────
@@ -26,8 +26,8 @@ jobs:
         id: check-labels
         with:
           script: |
-            const skipLabels = new Set(['automation']);
-            const typeLabels = new Set(['bugfix', 'hardware-support', 'enhancement', 'dependencies', 'submodules', 'github_actions', 'trunk', 'cleanup']);
+            const skipLabels = new Set(['automation', 'release']);
+            const typeLabels = new Set(['bugfix', 'enhancement', 'dependencies', 'repo', 'refactor']);
             const prLabels = context.payload.pull_request.labels.map(l => l.name);
 
             const shouldSkipAll = prLabels.some(l => skipLabels.has(l));
@@ -87,7 +87,7 @@ jobs:
             core.setOutput('is_spam', 'true');
 
       # ─────────────────────────────────────────────────────────────────────────
-      # Step 3: Auto-label PR type (bugfix/hardware-support/enhancement)
+      # Step 3: Auto-label PR type (bugfix/enhancement/refactor)
       # ─────────────────────────────────────────────────────────────────────────
       - name: Classify PR for labeling
         if: steps.check-labels.outputs.skip_all != 'true' && steps.check-labels.outputs.has_type_label != 'true' && (steps.quality.outputs.response == 'ok' || steps.quality.outputs.response == '')
@@ -97,13 +97,13 @@ jobs:
         with:
           max-tokens: 30
           prompt: |
-            Classify this pull request into exactly one category.
+            Classify this pull request for the Meshtastic Android app into exactly one category.
 
-            Return exactly one of: bugfix, hardware-support, enhancement
+            Return exactly one of: bugfix, enhancement, refactor
 
             Use bugfix if it fixes a bug, crash, or incorrect behavior.
-            Use hardware-support if it adds or improves support for a specific hardware device/variant.
-            Use enhancement if it adds a new feature, improves performance, or refactors code.
+            Use enhancement if it adds a new feature, improves performance, or adds new functionality.
+            Use refactor if it restructures code without changing behavior, cleans up code, or improves architecture.
 
             Title: ${{ github.event.pull_request.title }}
             Body: ${{ github.event.pull_request.body }}
@@ -120,8 +120,8 @@ jobs:
             const label = (process.env.TYPE_LABEL || '').trim().toLowerCase();
             const labelMeta = {
               'bugfix': { color: 'd73a4a', description: 'Bug fix' },
-              'hardware-support': { color: '0e8a16', description: 'Hardware support addition or improvement' },
               'enhancement': { color: 'a2eeef', description: 'New feature or enhancement' },
+              'refactor': { color: 'c5def5', description: 'Code restructuring without behavior change' },
             };
             const meta = labelMeta[label];
             if (!meta) return;
