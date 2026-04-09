@@ -720,6 +720,8 @@
     <string name="serial_enabled">Sarjaportti käytössä</string>
     <string name="echo_enabled">Palautus päällä</string>
     <string name="serial_baud_rate">Sarjaportin nopeus</string>
+    <string name="serial_rx_pin">RX</string>
+    <string name="serial_tx_pin">TX</string>
     <string name="timeout">Aikakatkaisu</string>
     <string name="serial_mode">Sarjaportin tila</string>
     <string name="override_console_serial_port">Korvaa konsolin sarjaportti</string>
