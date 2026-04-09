@@ -20,7 +20,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_notifications
@@ -58,7 +57,7 @@ internal fun NotificationsScreen(showNextButton: Boolean, onSkip: () -> Unit, on
             tag = SETTINGS_TAG,
         )
 
-    val features = remember {
+    val features =
         listOf(
             FeatureUIData(
                 icon = MeshtasticIcons.Message,
@@ -76,7 +75,6 @@ internal fun NotificationsScreen(showNextButton: Boolean, onSkip: () -> Unit, on
                 subtitleRes = Res.string.notifications_for_low_battery_alerts,
             ),
         )
-    }
 
     PermissionScreenLayout(
         headlineRes = Res.string.app_notifications,

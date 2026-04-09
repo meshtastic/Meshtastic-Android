@@ -16,139 +16,55 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.GpsFixed
-import androidx.compose.material.icons.rounded.GpsOff
-import androidx.compose.material.icons.rounded.Layers
-import androidx.compose.material.icons.rounded.Lens
-import androidx.compose.material.icons.rounded.LocationDisabled
-import androidx.compose.material.icons.rounded.LocationOn
-import androidx.compose.material.icons.rounded.MyLocation
-import androidx.compose.material.icons.rounded.Navigation
-import androidx.compose.material.icons.rounded.PinDrop
-import androidx.compose.material.icons.rounded.Place
-import androidx.compose.material.icons.rounded.TripOrigin
-import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.path
-import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_calendar_month
+import org.meshtastic.core.resources.ic_check
+import org.meshtastic.core.resources.ic_gps_fixed
+import org.meshtastic.core.resources.ic_gps_off
+import org.meshtastic.core.resources.ic_layers
+import org.meshtastic.core.resources.ic_lens
+import org.meshtastic.core.resources.ic_location_disabled
+import org.meshtastic.core.resources.ic_location_on
+import org.meshtastic.core.resources.ic_map
+import org.meshtastic.core.resources.ic_my_location
+import org.meshtastic.core.resources.ic_navigation
+import org.meshtastic.core.resources.ic_pin_drop
+import org.meshtastic.core.resources.ic_place
+import org.meshtastic.core.resources.ic_trip_origin
+import org.meshtastic.core.resources.ic_tune
 
-/**
- * This is from Material Symbols.
- *
- * @see
- *   [map](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:map:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=map&icon.size=24&icon.color=%23e3e3e3&icon.platform=android&icon.style=Rounded)
- */
 val MeshtasticIcons.Map: ImageVector
-    get() {
-        if (map != null) {
-            return map!!
-        }
-        map =
-            ImageVector.Builder(
-                name = "Outlined.Map",
-                defaultWidth = 24.dp,
-                defaultHeight = 24.dp,
-                viewportWidth = 960f,
-                viewportHeight = 960f,
-            )
-                .apply {
-                    path(fill = SolidColor(Color.Black)) {
-                        moveToRelative(574f, 831f)
-                        lineToRelative(-214f, -75f)
-                        lineToRelative(-186f, 72f)
-                        quadToRelative(-10f, 4f, -19.5f, 2.5f)
-                        reflectiveQuadTo(137f, 824f)
-                        quadToRelative(-8f, -5f, -12.5f, -13.5f)
-                        reflectiveQuadTo(120f, 791f)
-                        verticalLineToRelative(-561f)
-                        quadToRelative(0f, -13f, 7.5f, -23f)
-                        reflectiveQuadToRelative(20.5f, -15f)
-                        lineToRelative(186f, -63f)
-                        quadToRelative(6f, -2f, 12.5f, -3f)
-                        reflectiveQuadToRelative(13.5f, -1f)
-                        quadToRelative(7f, 0f, 13.5f, 1f)
-                        reflectiveQuadToRelative(12.5f, 3f)
-                        lineToRelative(214f, 75f)
-                        lineToRelative(186f, -72f)
-                        quadToRelative(10f, -4f, 19.5f, -2.5f)
-                        reflectiveQuadTo(823f, 136f)
-                        quadToRelative(8f, 5f, 12.5f, 13.5f)
-                        reflectiveQuadTo(840f, 169f)
-                        verticalLineToRelative(561f)
-                        quadToRelative(0f, 13f, -7.5f, 23f)
-                        reflectiveQuadTo(812f, 768f)
-                        lineToRelative(-186f, 63f)
-                        quadToRelative(-6f, 2f, -12.5f, 3f)
-                        reflectiveQuadToRelative(-13.5f, 1f)
-                        quadToRelative(-7f, 0f, -13.5f, -1f)
-                        reflectiveQuadToRelative(-12.5f, -3f)
-                        close()
-                        moveTo(560f, 742f)
-                        verticalLineToRelative(-468f)
-                        lineToRelative(-160f, -56f)
-                        verticalLineToRelative(468f)
-                        lineToRelative(160f, 56f)
-                        close()
-                        moveTo(640f, 742f)
-                        lineTo(760f, 702f)
-                        verticalLineToRelative(-474f)
-                        lineToRelative(-120f, 46f)
-                        verticalLineToRelative(468f)
-                        close()
-                        moveTo(200f, 732f)
-                        lineTo(320f, 686f)
-                        verticalLineToRelative(-468f)
-                        lineToRelative(-120f, 40f)
-                        verticalLineToRelative(474f)
-                        close()
-                        moveTo(640f, 274f)
-                        verticalLineToRelative(468f)
-                        verticalLineToRelative(-468f)
-                        close()
-                        moveTo(320f, 218f)
-                        verticalLineToRelative(468f)
-                        verticalLineToRelative(-468f)
-                        close()
-                    }
-                }
-                .build()
-
-        return map!!
-    }
-
-private var map: ImageVector? = null
+    @Composable get() = vectorResource(Res.drawable.ic_map)
 
 // Map control icons
 val MeshtasticIcons.Layers: ImageVector
-    get() = Icons.Rounded.Layers
+    @Composable get() = vectorResource(Res.drawable.ic_layers)
 val MeshtasticIcons.MyLocation: ImageVector
-    get() = Icons.Rounded.MyLocation
+    @Composable get() = vectorResource(Res.drawable.ic_my_location)
 val MeshtasticIcons.LocationDisabled: ImageVector
-    get() = Icons.Rounded.LocationDisabled
+    @Composable get() = vectorResource(Res.drawable.ic_location_disabled)
 val MeshtasticIcons.LocationOn: ImageVector
-    get() = Icons.Rounded.LocationOn
+    @Composable get() = vectorResource(Res.drawable.ic_location_on)
 val MeshtasticIcons.PinDrop: ImageVector
-    get() = Icons.Rounded.PinDrop
+    @Composable get() = vectorResource(Res.drawable.ic_pin_drop)
 val MeshtasticIcons.TripOrigin: ImageVector
-    get() = Icons.Rounded.TripOrigin
+    @Composable get() = vectorResource(Res.drawable.ic_trip_origin)
 val MeshtasticIcons.CalendarMonth: ImageVector
-    get() = Icons.Rounded.CalendarMonth
+    @Composable get() = vectorResource(Res.drawable.ic_calendar_month)
 val MeshtasticIcons.MapCompass: ImageVector
-    get() = Icons.Rounded.Navigation
+    @Composable get() = vectorResource(Res.drawable.ic_navigation)
 val MeshtasticIcons.Tune: ImageVector
-    get() = Icons.Rounded.Tune
+    @Composable get() = vectorResource(Res.drawable.ic_tune)
 val MeshtasticIcons.Place: ImageVector
-    get() = Icons.Rounded.Place
+    @Composable get() = vectorResource(Res.drawable.ic_place)
 val MeshtasticIcons.Lens: ImageVector
-    get() = Icons.Rounded.Lens
+    @Composable get() = vectorResource(Res.drawable.ic_lens)
 val MeshtasticIcons.GpsFixed: ImageVector
-    get() = Icons.Rounded.GpsFixed
+    @Composable get() = vectorResource(Res.drawable.ic_gps_fixed)
 val MeshtasticIcons.GpsOff: ImageVector
-    get() = Icons.Rounded.GpsOff
+    @Composable get() = vectorResource(Res.drawable.ic_gps_off)
 val MeshtasticIcons.Check: ImageVector
-    get() = Icons.Rounded.Check
+    @Composable get() = vectorResource(Res.drawable.ic_check)

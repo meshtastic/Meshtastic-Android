@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -59,7 +58,7 @@ import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 @Composable
 internal fun WelcomeScreen(onGetStarted: () -> Unit) {
     val analyticsIntro = LocalAnalyticsIntroProvider.current
-    val features = remember {
+    val features =
         listOf(
             FeatureUIData(
                 icon = MeshtasticIcons.Antenna,
@@ -77,7 +76,6 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
                 subtitleRes = Res.string.share_your_location_in_real_time,
             ),
         )
-    }
 
     Scaffold(
         bottomBar = {

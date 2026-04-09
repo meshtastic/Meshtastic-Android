@@ -283,7 +283,7 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                         if (thatNode.snr < 100f && thatNode.rssi < 0) {
                             val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
                             IconInfo(
-                                icon = quality.imageVector,
+                                icon = quality.imageVector(),
                                 contentDescription = stringResource(Res.string.signal_quality),
                                 contentColor = quality.color.invoke(),
                                 text = stringResource(quality.nameRes),

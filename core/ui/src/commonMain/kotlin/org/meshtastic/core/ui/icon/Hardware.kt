@@ -16,40 +16,42 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Forward
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.BluetoothConnected
-import androidx.compose.material.icons.rounded.BluetoothSearching
-import androidx.compose.material.icons.rounded.Cached
-import androidx.compose.material.icons.rounded.Nfc
-import androidx.compose.material.icons.rounded.SettingsInputAntenna
-import androidx.compose.material.icons.rounded.SpeakerPhone
-import androidx.compose.material.icons.rounded.Usb
-import androidx.compose.material.icons.rounded.UsbOff
-import androidx.compose.material.icons.rounded.Wifi
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_bluetooth
+import org.meshtastic.core.resources.ic_bluetooth_connected
+import org.meshtastic.core.resources.ic_bluetooth_searching
+import org.meshtastic.core.resources.ic_cached
+import org.meshtastic.core.resources.ic_forward
+import org.meshtastic.core.resources.ic_nfc
+import org.meshtastic.core.resources.ic_settings_input_antenna
+import org.meshtastic.core.resources.ic_speaker_phone
+import org.meshtastic.core.resources.ic_usb
+import org.meshtastic.core.resources.ic_usb_off
+import org.meshtastic.core.resources.ic_wifi
 
 val MeshtasticIcons.Bluetooth: ImageVector
-    get() = Icons.Rounded.Bluetooth
+    @Composable get() = vectorResource(Res.drawable.ic_bluetooth)
 val MeshtasticIcons.Usb: ImageVector
-    get() = Icons.Rounded.Usb
+    @Composable get() = vectorResource(Res.drawable.ic_usb)
 val MeshtasticIcons.Wifi: ImageVector
-    get() = Icons.Rounded.Wifi
+    @Composable get() = vectorResource(Res.drawable.ic_wifi)
 
 val MeshtasticIcons.BluetoothConnected: ImageVector
-    get() = Icons.Rounded.BluetoothConnected
+    @Composable get() = vectorResource(Res.drawable.ic_bluetooth_connected)
 val MeshtasticIcons.BluetoothSearching: ImageVector
-    get() = Icons.Rounded.BluetoothSearching
+    @Composable get() = vectorResource(Res.drawable.ic_bluetooth_searching)
 val MeshtasticIcons.UsbOff: ImageVector
-    get() = Icons.Rounded.UsbOff
+    @Composable get() = vectorResource(Res.drawable.ic_usb_off)
 val MeshtasticIcons.Serial: ImageVector
-    get() = Icons.AutoMirrored.Rounded.Forward
+    @Composable get() = vectorResource(Res.drawable.ic_forward)
 val MeshtasticIcons.Antenna: ImageVector
-    get() = Icons.Rounded.SettingsInputAntenna
+    @Composable get() = vectorResource(Res.drawable.ic_settings_input_antenna)
 val MeshtasticIcons.Speaker: ImageVector
-    get() = Icons.Rounded.SpeakerPhone
+    @Composable get() = vectorResource(Res.drawable.ic_speaker_phone)
 val MeshtasticIcons.Reconnecting: ImageVector
-    get() = Icons.Rounded.Cached
+    @Composable get() = vectorResource(Res.drawable.ic_cached)
 val MeshtasticIcons.Nfc: ImageVector
-    get() = Icons.Rounded.Nfc
+    @Composable get() = vectorResource(Res.drawable.ic_nfc)

@@ -16,30 +16,32 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.ArrowDownward
-import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.ExpandLess
-import androidx.compose.material.icons.rounded.ExpandMore
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_arrow_back
+import org.meshtastic.core.resources.ic_arrow_downward
+import org.meshtastic.core.resources.ic_chevron_right
+import org.meshtastic.core.resources.ic_expand_less
+import org.meshtastic.core.resources.ic_expand_more
+import org.meshtastic.core.resources.ic_keyboard_arrow_down
+import org.meshtastic.core.resources.ic_keyboard_arrow_right
+import org.meshtastic.core.resources.ic_keyboard_arrow_up
 
 val MeshtasticIcons.ArrowBack: ImageVector
-    get() = Icons.AutoMirrored.Rounded.ArrowBack
+    @Composable get() = vectorResource(Res.drawable.ic_arrow_back)
 val MeshtasticIcons.ChevronRight: ImageVector
-    get() = Icons.Rounded.ChevronRight
+    @Composable get() = vectorResource(Res.drawable.ic_chevron_right)
 val MeshtasticIcons.KeyboardArrowRight: ImageVector
-    get() = Icons.AutoMirrored.Rounded.KeyboardArrowRight
+    @Composable get() = vectorResource(Res.drawable.ic_keyboard_arrow_right)
 val MeshtasticIcons.KeyboardArrowDown: ImageVector
-    get() = Icons.Rounded.KeyboardArrowDown
+    @Composable get() = vectorResource(Res.drawable.ic_keyboard_arrow_down)
 val MeshtasticIcons.KeyboardArrowUp: ImageVector
-    get() = Icons.Rounded.KeyboardArrowUp
+    @Composable get() = vectorResource(Res.drawable.ic_keyboard_arrow_up)
 val MeshtasticIcons.ArrowDownward: ImageVector
-    get() = Icons.Rounded.ArrowDownward
+    @Composable get() = vectorResource(Res.drawable.ic_arrow_downward)
 val MeshtasticIcons.ExpandMore: ImageVector
-    get() = Icons.Rounded.ExpandMore
+    @Composable get() = vectorResource(Res.drawable.ic_expand_more)
 val MeshtasticIcons.ExpandLess: ImageVector
-    get() = Icons.Rounded.ExpandLess
+    @Composable get() = vectorResource(Res.drawable.ic_expand_less)

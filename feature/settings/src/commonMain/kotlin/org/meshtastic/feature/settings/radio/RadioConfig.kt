@@ -101,7 +101,9 @@ private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClic
             ManagedMessage()
         }
         ConfigRoute.radioConfigRoutes.forEach {
-            ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
+            ListItem(text = stringResource(it.title), leadingIcon = it.icon?.invoke(), enabled = enabled) {
+                onRouteClick(it)
+            }
         }
     }
 }
@@ -211,11 +213,11 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
     }
 }
 
-enum class AdminRoute(val icon: ImageVector, val title: StringResource) {
-    REBOOT(MeshtasticIcons.RestartAlt, Res.string.reboot),
-    SHUTDOWN(MeshtasticIcons.PowerSettingsNew, Res.string.shutdown),
-    FACTORY_RESET(MeshtasticIcons.FactoryReset, Res.string.factory_reset),
-    NODEDB_RESET(MeshtasticIcons.Storage, Res.string.nodedb_reset),
+enum class AdminRoute(val icon: @Composable () -> ImageVector, val title: StringResource) {
+    REBOOT({ MeshtasticIcons.RestartAlt }, Res.string.reboot),
+    SHUTDOWN({ MeshtasticIcons.PowerSettingsNew }, Res.string.shutdown),
+    FACTORY_RESET({ MeshtasticIcons.FactoryReset }, Res.string.factory_reset),
+    NODEDB_RESET({ MeshtasticIcons.Storage }, Res.string.nodedb_reset),
 }
 
 @Composable

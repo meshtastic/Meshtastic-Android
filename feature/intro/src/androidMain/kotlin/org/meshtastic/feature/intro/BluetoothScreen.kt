@@ -20,7 +20,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_feature_config
@@ -55,7 +54,7 @@ internal fun BluetoothScreen(showNextButton: Boolean, onSkip: () -> Unit, onConf
             tag = SETTINGS_TAG,
         )
 
-    val features = remember {
+    val features =
         listOf(
             FeatureUIData(
                 icon = MeshtasticIcons.Bluetooth,
@@ -68,7 +67,6 @@ internal fun BluetoothScreen(showNextButton: Boolean, onSkip: () -> Unit, onConf
                 subtitleRes = Res.string.bluetooth_feature_config_description,
             ),
         )
-    }
 
     PermissionScreenLayout(
         headlineRes = Res.string.bluetooth_permission,

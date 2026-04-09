@@ -69,13 +69,13 @@ const val RSSI_FAIR_THRESHOLD = -126
 @Stable
 enum class Quality(
     @Stable val nameRes: StringResource,
-    @Stable val imageVector: ImageVector,
+    @Stable val imageVector: @Composable () -> ImageVector,
     @Stable val color: @Composable () -> Color,
 ) {
-    NONE(Res.string.none_quality, MeshtasticIcons.SignalAlt1Bar, { colorScheme.StatusRed }),
-    BAD(Res.string.bad, MeshtasticIcons.SignalAlt2Bar, { colorScheme.StatusOrange }),
-    FAIR(Res.string.fair, MeshtasticIcons.SignalAlt, { colorScheme.StatusYellow }),
-    GOOD(Res.string.good, MeshtasticIcons.SignalFull, { colorScheme.StatusGreen }),
+    NONE(Res.string.none_quality, { MeshtasticIcons.SignalAlt1Bar }, { colorScheme.StatusRed }),
+    BAD(Res.string.bad, { MeshtasticIcons.SignalAlt2Bar }, { colorScheme.StatusOrange }),
+    FAIR(Res.string.fair, { MeshtasticIcons.SignalAlt }, { colorScheme.StatusYellow }),
+    GOOD(Res.string.good, { MeshtasticIcons.SignalFull }, { colorScheme.StatusGreen }),
 }
 
 /**
@@ -100,7 +100,7 @@ fun NodeSignalQuality(snr: Float, rssi: Int, modifier: Modifier = Modifier) {
         )
         Icon(
             modifier = Modifier.size(SIZE_ICON_DP.dp),
-            imageVector = quality.imageVector,
+            imageVector = quality.imageVector(),
             contentDescription = stringResource(Res.string.signal_quality),
             tint = quality.color.invoke(),
         )
@@ -129,7 +129,7 @@ fun LoraSignalIndicator(snr: Float, rssi: Int, contentColor: Color = MaterialThe
     ) {
         Icon(
             modifier = Modifier.size(SIZE_ICON_DP.dp),
-            imageVector = quality.imageVector,
+            imageVector = quality.imageVector(),
             contentDescription = stringResource(Res.string.signal_quality),
             tint = quality.color.invoke(),
         )

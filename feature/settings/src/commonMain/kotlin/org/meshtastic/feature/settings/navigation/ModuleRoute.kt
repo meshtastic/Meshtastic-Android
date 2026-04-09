@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.settings.navigation
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.model.Capabilities
@@ -60,7 +61,7 @@ import org.meshtastic.proto.DeviceMetadata
 enum class ModuleRoute(
     val title: StringResource,
     val route: Route,
-    val icon: ImageVector?,
+    val icon: @Composable (() -> ImageVector)? = null,
     val type: Int = 0,
     val isSupported: (Capabilities) -> Boolean = { true },
     val isApplicable: (Config.DeviceConfig.Role?) -> Boolean = { true },
@@ -68,99 +69,99 @@ enum class ModuleRoute(
     MQTT(
         Res.string.mqtt,
         SettingsRoutes.MQTT,
-        MeshtasticIcons.MqttConnected,
+        { MeshtasticIcons.MqttConnected },
         AdminMessage.ModuleConfigType.MQTT_CONFIG.value,
     ),
     SERIAL(
         Res.string.serial,
         SettingsRoutes.Serial,
-        MeshtasticIcons.Usb,
+        { MeshtasticIcons.Usb },
         AdminMessage.ModuleConfigType.SERIAL_CONFIG.value,
     ),
     EXT_NOTIFICATION(
         Res.string.external_notification,
         SettingsRoutes.ExtNotification,
-        MeshtasticIcons.Notifications,
+        { MeshtasticIcons.Notifications },
         AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG.value,
     ),
     STORE_FORWARD(
         Res.string.store_forward,
         SettingsRoutes.StoreForward,
-        MeshtasticIcons.Serial,
+        { MeshtasticIcons.Serial },
         AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG.value,
     ),
     RANGE_TEST(
         Res.string.range_test,
         SettingsRoutes.RangeTest,
-        MeshtasticIcons.Speed,
+        { MeshtasticIcons.Speed },
         AdminMessage.ModuleConfigType.RANGETEST_CONFIG.value,
     ),
     TELEMETRY(
         Res.string.telemetry,
         SettingsRoutes.Telemetry,
-        MeshtasticIcons.DataUsage,
+        { MeshtasticIcons.DataUsage },
         AdminMessage.ModuleConfigType.TELEMETRY_CONFIG.value,
     ),
     CANNED_MESSAGE(
         Res.string.canned_message,
         SettingsRoutes.CannedMessage,
-        MeshtasticIcons.Message,
+        { MeshtasticIcons.Message },
         AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG.value,
     ),
     AUDIO(
         Res.string.audio,
         SettingsRoutes.Audio,
-        MeshtasticIcons.VolumeUp,
+        { MeshtasticIcons.VolumeUp },
         AdminMessage.ModuleConfigType.AUDIO_CONFIG.value,
     ),
     REMOTE_HARDWARE(
         Res.string.remote_hardware,
         SettingsRoutes.RemoteHardware,
-        MeshtasticIcons.SettingsRemote,
+        { MeshtasticIcons.SettingsRemote },
         AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG.value,
     ),
     NEIGHBOR_INFO(
         Res.string.neighbor_info,
         SettingsRoutes.NeighborInfo,
-        MeshtasticIcons.PeopleCount,
+        { MeshtasticIcons.PeopleCount },
         AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG.value,
     ),
     AMBIENT_LIGHTING(
         Res.string.ambient_lighting,
         SettingsRoutes.AmbientLighting,
-        MeshtasticIcons.LightMode,
+        { MeshtasticIcons.LightMode },
         AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG.value,
     ),
     DETECTION_SENSOR(
         Res.string.detection_sensor,
         SettingsRoutes.DetectionSensor,
-        MeshtasticIcons.DetectionSensor,
+        { MeshtasticIcons.DetectionSensor },
         AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG.value,
     ),
     PAXCOUNTER(
         Res.string.paxcounter,
         SettingsRoutes.Paxcounter,
-        MeshtasticIcons.PermScanWifi,
+        { MeshtasticIcons.PermScanWifi },
         AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG.value,
     ),
     STATUS_MESSAGE(
         Res.string.status_message,
         SettingsRoutes.StatusMessage,
-        MeshtasticIcons.Message,
+        { MeshtasticIcons.Message },
         AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
         isSupported = { it.supportsStatusMessage },
     ),
     TRAFFIC_MANAGEMENT(
         Res.string.traffic_management,
         SettingsRoutes.TrafficManagement,
-        MeshtasticIcons.TrafficManagement,
+        { MeshtasticIcons.TrafficManagement },
         AdminMessage.ModuleConfigType.TRAFFICMANAGEMENT_CONFIG.value,
         isSupported = { it.supportsTrafficManagementConfig },
     ),
     TAK(
         Res.string.tak,
         SettingsRoutes.TAK,
-        MeshtasticIcons.PeopleCount,
+        { MeshtasticIcons.PeopleCount },
         AdminMessage.ModuleConfigType.TAK_CONFIG.value,
         isSupported = { it.supportsTakConfig },
         isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },

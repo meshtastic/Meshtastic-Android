@@ -16,25 +16,27 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyOff
-import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.LockOpen
-import androidx.compose.material.icons.rounded.Security
-import androidx.compose.material.icons.rounded.Verified
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_key_off
+import org.meshtastic.core.resources.ic_lock
+import org.meshtastic.core.resources.ic_lock_open
+import org.meshtastic.core.resources.ic_security
+import org.meshtastic.core.resources.ic_verified
+import org.meshtastic.core.resources.ic_warning
 
 val MeshtasticIcons.Lock: ImageVector
-    get() = Icons.Rounded.Lock
+    @Composable get() = vectorResource(Res.drawable.ic_lock)
 val MeshtasticIcons.LockOpen: ImageVector
-    get() = Icons.Rounded.LockOpen
+    @Composable get() = vectorResource(Res.drawable.ic_lock_open)
 val MeshtasticIcons.Warning: ImageVector
-    get() = Icons.Rounded.Warning
+    @Composable get() = vectorResource(Res.drawable.ic_warning)
 val MeshtasticIcons.KeyOff: ImageVector
-    get() = Icons.Rounded.KeyOff
+    @Composable get() = vectorResource(Res.drawable.ic_key_off)
 val MeshtasticIcons.Verified: ImageVector
-    get() = Icons.Rounded.Verified
+    @Composable get() = vectorResource(Res.drawable.ic_verified)
 
 val MeshtasticIcons.SecurityShield: ImageVector
-    get() = Icons.Rounded.Security
+    @Composable get() = vectorResource(Res.drawable.ic_security)

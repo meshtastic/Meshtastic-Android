@@ -106,7 +106,7 @@ fun PositionSection(
                         AssistChip(
                             onClick = { onAction(NodeDetailAction.Navigate(LogsType.NODE_MAP.routeFactory(node.num))) },
                             label = { Text(stringResource(LogsType.NODE_MAP.titleRes)) },
-                            leadingIcon = { Icon(LogsType.NODE_MAP.icon, null, Modifier.size(18.dp)) },
+                            leadingIcon = { Icon(LogsType.NODE_MAP.icon(), null, Modifier.size(18.dp)) },
                         )
                     }
 
@@ -116,7 +116,7 @@ fun PositionSection(
                                 onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.routeFactory(node.num)))
                             },
                             label = { Text(stringResource(LogsType.POSITIONS.titleRes)) },
-                            leadingIcon = { Icon(LogsType.POSITIONS.icon, null, Modifier.size(18.dp)) },
+                            leadingIcon = { Icon(LogsType.POSITIONS.icon(), null, Modifier.size(18.dp)) },
                         )
                     }
                 }

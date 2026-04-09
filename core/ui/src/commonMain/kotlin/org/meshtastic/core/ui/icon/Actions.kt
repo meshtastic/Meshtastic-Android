@@ -16,115 +16,117 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.OfflineShare
-import androidx.compose.material.icons.automirrored.rounded.Reply
-import androidx.compose.material.icons.automirrored.rounded.Send
-import androidx.compose.material.icons.automirrored.rounded.Sort
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.AddReaction
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.rounded.CloudUpload
-import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Done
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.DragHandle
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.FileDownload
-import androidx.compose.material.icons.rounded.FilterAlt
-import androidx.compose.material.icons.rounded.FilterAltOff
-import androidx.compose.material.icons.rounded.Folder
-import androidx.compose.material.icons.rounded.FolderOpen
-import androidx.compose.material.icons.rounded.MarkChatRead
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Output
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.QrCode
-import androidx.compose.material.icons.rounded.QrCode2
-import androidx.compose.material.icons.rounded.QrCodeScanner
-import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.rounded.SystemUpdate
-import androidx.compose.material.icons.rounded.ThumbUp
-import androidx.compose.material.icons.rounded.Upload
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_add
+import org.meshtastic.core.resources.ic_add_reaction
+import org.meshtastic.core.resources.ic_clear
+import org.meshtastic.core.resources.ic_close
+import org.meshtastic.core.resources.ic_cloud_download
+import org.meshtastic.core.resources.ic_cloud_upload
+import org.meshtastic.core.resources.ic_content_copy
+import org.meshtastic.core.resources.ic_delete
+import org.meshtastic.core.resources.ic_done
+import org.meshtastic.core.resources.ic_download
+import org.meshtastic.core.resources.ic_drag_handle
+import org.meshtastic.core.resources.ic_edit
+import org.meshtastic.core.resources.ic_file_download
+import org.meshtastic.core.resources.ic_filter_alt
+import org.meshtastic.core.resources.ic_filter_alt_off
+import org.meshtastic.core.resources.ic_folder
+import org.meshtastic.core.resources.ic_folder_open
+import org.meshtastic.core.resources.ic_mark_chat_read
+import org.meshtastic.core.resources.ic_more_vert
+import org.meshtastic.core.resources.ic_offline_share
+import org.meshtastic.core.resources.ic_output
+import org.meshtastic.core.resources.ic_play_arrow
+import org.meshtastic.core.resources.ic_qr_code
+import org.meshtastic.core.resources.ic_qr_code_2
+import org.meshtastic.core.resources.ic_qr_code_scanner
+import org.meshtastic.core.resources.ic_refresh
+import org.meshtastic.core.resources.ic_reply
+import org.meshtastic.core.resources.ic_save
+import org.meshtastic.core.resources.ic_search
+import org.meshtastic.core.resources.ic_select_all
+import org.meshtastic.core.resources.ic_send
+import org.meshtastic.core.resources.ic_share
+import org.meshtastic.core.resources.ic_sort
+import org.meshtastic.core.resources.ic_system_update
+import org.meshtastic.core.resources.ic_thumb_up
+import org.meshtastic.core.resources.ic_upload
 
 val MeshtasticIcons.Add: ImageVector
-    get() = Icons.Rounded.Add
+    @Composable get() = vectorResource(Res.drawable.ic_add)
 val MeshtasticIcons.AddReaction: ImageVector
-    get() = Icons.Rounded.AddReaction
+    @Composable get() = vectorResource(Res.drawable.ic_add_reaction)
 val MeshtasticIcons.Clear: ImageVector
-    get() = Icons.Rounded.Clear
+    @Composable get() = vectorResource(Res.drawable.ic_clear)
 val MeshtasticIcons.Close: ImageVector
-    get() = Icons.Rounded.Close
+    @Composable get() = vectorResource(Res.drawable.ic_close)
 val MeshtasticIcons.Copy: ImageVector
-    get() = Icons.Rounded.ContentCopy
+    @Composable get() = vectorResource(Res.drawable.ic_content_copy)
 val MeshtasticIcons.Delete: ImageVector
-    get() = Icons.Rounded.Delete
+    @Composable get() = vectorResource(Res.drawable.ic_delete)
 val MeshtasticIcons.Edit: ImageVector
-    get() = Icons.Rounded.Edit
+    @Composable get() = vectorResource(Res.drawable.ic_edit)
 val MeshtasticIcons.More: ImageVector
-    get() = Icons.Rounded.MoreVert
+    @Composable get() = vectorResource(Res.drawable.ic_more_vert)
 val MeshtasticIcons.Refresh: ImageVector
-    get() = Icons.Rounded.Refresh
+    @Composable get() = vectorResource(Res.drawable.ic_refresh)
 val MeshtasticIcons.Reply: ImageVector
-    get() = Icons.AutoMirrored.Rounded.Reply
+    @Composable get() = vectorResource(Res.drawable.ic_reply)
 val MeshtasticIcons.Save: ImageVector
-    get() = Icons.Rounded.Save
+    @Composable get() = vectorResource(Res.drawable.ic_save)
 val MeshtasticIcons.Search: ImageVector
-    get() = Icons.Rounded.Search
+    @Composable get() = vectorResource(Res.drawable.ic_search)
 val MeshtasticIcons.Send: ImageVector
-    get() = Icons.AutoMirrored.Rounded.Send
+    @Composable get() = vectorResource(Res.drawable.ic_send)
 val MeshtasticIcons.Share: ImageVector
-    get() = Icons.Rounded.Share
+    @Composable get() = vectorResource(Res.drawable.ic_share)
 val MeshtasticIcons.Sort: ImageVector
-    get() = Icons.AutoMirrored.Rounded.Sort
+    @Composable get() = vectorResource(Res.drawable.ic_sort)
 val MeshtasticIcons.CloudDownload: ImageVector
-    get() = Icons.Rounded.CloudDownload
+    @Composable get() = vectorResource(Res.drawable.ic_cloud_download)
 val MeshtasticIcons.Folder: ImageVector
-    get() = Icons.Rounded.Folder
+    @Composable get() = vectorResource(Res.drawable.ic_folder)
 val MeshtasticIcons.SystemUpdate: ImageVector
-    get() = Icons.Rounded.SystemUpdate
+    @Composable get() = vectorResource(Res.drawable.ic_system_update)
 val MeshtasticIcons.SelectAll: ImageVector
-    get() = Icons.Rounded.SelectAll
+    @Composable get() = vectorResource(Res.drawable.ic_select_all)
 val MeshtasticIcons.ThumbUp: ImageVector
-    get() = Icons.Rounded.ThumbUp
+    @Composable get() = vectorResource(Res.drawable.ic_thumb_up)
 val MeshtasticIcons.MarkChatRead: ImageVector
-    get() = Icons.Rounded.MarkChatRead
+    @Composable get() = vectorResource(Res.drawable.ic_mark_chat_read)
 val MeshtasticIcons.QrCode2: ImageVector
-    get() = Icons.Rounded.QrCode2
+    @Composable get() = vectorResource(Res.drawable.ic_qr_code_2)
 
 val MeshtasticIcons.Download: ImageVector
-    get() = Icons.Rounded.Download
+    @Composable get() = vectorResource(Res.drawable.ic_download)
 val MeshtasticIcons.Upload: ImageVector
-    get() = Icons.Rounded.Upload
+    @Composable get() = vectorResource(Res.drawable.ic_upload)
 val MeshtasticIcons.DragHandle: ImageVector
-    get() = Icons.Rounded.DragHandle
+    @Composable get() = vectorResource(Res.drawable.ic_drag_handle)
 val MeshtasticIcons.Done: ImageVector
-    get() = Icons.Rounded.Done
+    @Composable get() = vectorResource(Res.drawable.ic_done)
 val MeshtasticIcons.QrCode: ImageVector
-    get() = Icons.Rounded.QrCode
+    @Composable get() = vectorResource(Res.drawable.ic_qr_code)
 val MeshtasticIcons.FolderOpen: ImageVector
-    get() = Icons.Rounded.FolderOpen
+    @Composable get() = vectorResource(Res.drawable.ic_folder_open)
 val MeshtasticIcons.Output: ImageVector
-    get() = Icons.Rounded.Output
+    @Composable get() = vectorResource(Res.drawable.ic_output)
 val MeshtasticIcons.FileDownload: ImageVector
-    get() = Icons.Rounded.FileDownload
+    @Composable get() = vectorResource(Res.drawable.ic_file_download)
 val MeshtasticIcons.PlayArrow: ImageVector
-    get() = Icons.Rounded.PlayArrow
+    @Composable get() = vectorResource(Res.drawable.ic_play_arrow)
 val MeshtasticIcons.FilterAlt: ImageVector
-    get() = Icons.Rounded.FilterAlt
+    @Composable get() = vectorResource(Res.drawable.ic_filter_alt)
 val MeshtasticIcons.FilterAltOff: ImageVector
-    get() = Icons.Rounded.FilterAltOff
+    @Composable get() = vectorResource(Res.drawable.ic_filter_alt_off)
 val MeshtasticIcons.OfflineShare: ImageVector
-    get() = Icons.AutoMirrored.Rounded.OfflineShare
+    @Composable get() = vectorResource(Res.drawable.ic_offline_share)
 val MeshtasticIcons.CloudUpload: ImageVector
-    get() = Icons.Rounded.CloudUpload
+    @Composable get() = vectorResource(Res.drawable.ic_cloud_upload)
 val MeshtasticIcons.QrCodeScanner: ImageVector
-    get() = Icons.Rounded.QrCodeScanner
+    @Composable get() = vectorResource(Res.drawable.ic_qr_code_scanner)

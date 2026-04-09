@@ -20,7 +20,6 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.configure_location_permissions
@@ -59,7 +58,7 @@ internal fun LocationScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfi
             tag = SETTINGS_TAG,
         )
 
-    val features = remember {
+    val features =
         listOf(
             FeatureUIData(
                 icon = MeshtasticIcons.LocationOn,
@@ -82,7 +81,6 @@ internal fun LocationScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfi
                 subtitleRes = Res.string.mesh_map_location_description,
             ),
         )
-    }
 
     PermissionScreenLayout(
         headlineRes = Res.string.phone_location,

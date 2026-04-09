@@ -16,114 +16,116 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.SpeakerNotes
-import androidx.compose.material.icons.automirrored.rounded.VolumeMute
-import androidx.compose.material.icons.automirrored.rounded.VolumeOff
-import androidx.compose.material.icons.automirrored.rounded.VolumeUp
-import androidx.compose.material.icons.rounded.ArrowCircleUp
-import androidx.compose.material.icons.rounded.Bedtime
-import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.CheckCircleOutline
-import androidx.compose.material.icons.rounded.Cloud
-import androidx.compose.material.icons.rounded.CloudDone
-import androidx.compose.material.icons.rounded.CloudSync
-import androidx.compose.material.icons.rounded.Dangerous
-import androidx.compose.material.icons.rounded.Error
-import androidx.compose.material.icons.rounded.ErrorOutline
-import androidx.compose.material.icons.rounded.History
-import androidx.compose.material.icons.rounded.HowToReg
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Lan
-import androidx.compose.material.icons.rounded.LinkOff
-import androidx.compose.material.icons.rounded.NoCell
-import androidx.compose.material.icons.rounded.RadioButtonUnchecked
-import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material.icons.rounded.SettingsEthernet
-import androidx.compose.material.icons.rounded.SpeakerNotesOff
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.StarBorder
-import androidx.compose.material.icons.rounded.Terminal
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_arrow_circle_up
+import org.meshtastic.core.resources.ic_bedtime
+import org.meshtastic.core.resources.ic_check_circle
+import org.meshtastic.core.resources.ic_check_circle_outline
+import org.meshtastic.core.resources.ic_cloud
+import org.meshtastic.core.resources.ic_cloud_done
+import org.meshtastic.core.resources.ic_cloud_sync
+import org.meshtastic.core.resources.ic_dangerous
+import org.meshtastic.core.resources.ic_error
+import org.meshtastic.core.resources.ic_error_outline
+import org.meshtastic.core.resources.ic_history
+import org.meshtastic.core.resources.ic_how_to_reg
+import org.meshtastic.core.resources.ic_info
+import org.meshtastic.core.resources.ic_lan
+import org.meshtastic.core.resources.ic_link_off
+import org.meshtastic.core.resources.ic_no_cell
+import org.meshtastic.core.resources.ic_radio_button_unchecked
+import org.meshtastic.core.resources.ic_schedule
+import org.meshtastic.core.resources.ic_settings_ethernet
+import org.meshtastic.core.resources.ic_speaker_notes
+import org.meshtastic.core.resources.ic_speaker_notes_off
+import org.meshtastic.core.resources.ic_star
+import org.meshtastic.core.resources.ic_star_border
+import org.meshtastic.core.resources.ic_terminal
+import org.meshtastic.core.resources.ic_volume_mute
+import org.meshtastic.core.resources.ic_volume_off
+import org.meshtastic.core.resources.ic_volume_up
 
 // Favorites
 val MeshtasticIcons.Favorite: ImageVector
-    get() = Icons.Rounded.Star
+    @Composable get() = vectorResource(Res.drawable.ic_star)
 val MeshtasticIcons.NotFavorite: ImageVector
-    get() = Icons.Rounded.StarBorder
+    @Composable get() = vectorResource(Res.drawable.ic_star_border)
 
 // Mute state
 val MeshtasticIcons.Muted: ImageVector
-    get() = Icons.Rounded.SpeakerNotesOff
+    @Composable get() = vectorResource(Res.drawable.ic_speaker_notes_off)
 val MeshtasticIcons.Unmuted: ImageVector
-    get() = Icons.AutoMirrored.Rounded.SpeakerNotes
+    @Composable get() = vectorResource(Res.drawable.ic_speaker_notes)
 
 // Volume
 val MeshtasticIcons.VolumeOff: ImageVector
-    get() = Icons.AutoMirrored.Rounded.VolumeOff
+    @Composable get() = vectorResource(Res.drawable.ic_volume_off)
 val MeshtasticIcons.VolumeUp: ImageVector
-    get() = Icons.AutoMirrored.Rounded.VolumeUp
+    @Composable get() = vectorResource(Res.drawable.ic_volume_up)
 val MeshtasticIcons.VolumeMute: ImageVector
-    get() = Icons.AutoMirrored.Rounded.VolumeMute
+    @Composable get() = vectorResource(Res.drawable.ic_volume_mute)
 
 // Time
 val MeshtasticIcons.History: ImageVector
-    get() = Icons.Rounded.History
+    @Composable get() = vectorResource(Res.drawable.ic_history)
 
 // MQTT status
 val MeshtasticIcons.MqttConnected: ImageVector
-    get() = Icons.Rounded.Cloud
+    @Composable get() = vectorResource(Res.drawable.ic_cloud)
 val MeshtasticIcons.MqttDelivered: ImageVector
-    get() = Icons.Rounded.CloudDone
+    @Composable get() = vectorResource(Res.drawable.ic_cloud_done)
 val MeshtasticIcons.MqttSyncing: ImageVector
-    get() = Icons.Rounded.CloudSync
+    @Composable get() = vectorResource(Res.drawable.ic_cloud_sync)
 
 // Connectivity
 val MeshtasticIcons.Unmessageable: ImageVector
-    get() = Icons.Rounded.NoCell
+    @Composable get() = vectorResource(Res.drawable.ic_no_cell)
 val MeshtasticIcons.Udp: ImageVector
-    get() = Icons.Rounded.Lan
+    @Composable get() = vectorResource(Res.drawable.ic_lan)
 val MeshtasticIcons.Api: ImageVector
-    get() = Icons.Rounded.Terminal
+    @Composable get() = vectorResource(Res.drawable.ic_terminal)
 val MeshtasticIcons.Ethernet: ImageVector
-    get() = Icons.Rounded.SettingsEthernet
+    @Composable get() = vectorResource(Res.drawable.ic_settings_ethernet)
 
 // Update & lifecycle
 val MeshtasticIcons.ArrowCircleUp: ImageVector
-    get() = Icons.Rounded.ArrowCircleUp
+    @Composable get() = vectorResource(Res.drawable.ic_arrow_circle_up)
 val MeshtasticIcons.Dangerous: ImageVector
-    get() = Icons.Rounded.Dangerous
+    @Composable get() = vectorResource(Res.drawable.ic_dangerous)
 
 // Result states
 val MeshtasticIcons.CheckCircle: ImageVector
-    get() = Icons.Rounded.CheckCircleOutline
+    @Composable get() = vectorResource(Res.drawable.ic_check_circle_outline)
 val MeshtasticIcons.Success: ImageVector
-    get() = Icons.Rounded.CheckCircle
+    @Composable get() = vectorResource(Res.drawable.ic_check_circle)
 val MeshtasticIcons.Error: ImageVector
-    get() = Icons.Rounded.Error
+    @Composable get() = vectorResource(Res.drawable.ic_error)
 val MeshtasticIcons.ErrorOutline: ImageVector
-    get() = Icons.Rounded.ErrorOutline
+    @Composable get() = vectorResource(Res.drawable.ic_error_outline)
 val MeshtasticIcons.Info: ImageVector
-    get() = Icons.Rounded.Info
+    @Composable get() = vectorResource(Res.drawable.ic_info)
 
 // Acknowledgment
 val MeshtasticIcons.Acknowledged: ImageVector
-    get() = Icons.Rounded.HowToReg
+    @Composable get() = vectorResource(Res.drawable.ic_how_to_reg)
 
 // Selection state
 val MeshtasticIcons.RadioButtonUnchecked: ImageVector
-    get() = Icons.Rounded.RadioButtonUnchecked
+    @Composable get() = vectorResource(Res.drawable.ic_radio_button_unchecked)
 
 // Device sleep
 val MeshtasticIcons.DeviceSleep: ImageVector
-    get() = Icons.Rounded.Bedtime
+    @Composable get() = vectorResource(Res.drawable.ic_bedtime)
 
 // Node connection state (non-MQTT)
 val MeshtasticIcons.Disconnected: ImageVector
-    get() = Icons.Rounded.LinkOff
+    @Composable get() = vectorResource(Res.drawable.ic_link_off)
 
 // Message delivery status
 val MeshtasticIcons.MessageEnroute: ImageVector
-    get() = Icons.Rounded.Schedule
+    @Composable get() = vectorResource(Res.drawable.ic_schedule)
 val MeshtasticIcons.MessageError: ImageVector
-    get() = Icons.Rounded.ErrorOutline
+    @Composable get() = vectorResource(Res.drawable.ic_error_outline)

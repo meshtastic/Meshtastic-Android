@@ -183,7 +183,6 @@ dependencies {
     // Compose Desktop
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.multiplatform.material3)
-    implementation(libs.compose.multiplatform.materialIconsExtended)
     implementation(libs.compose.multiplatform.runtime)
     implementation(libs.compose.multiplatform.foundation)
     implementation(libs.compose.multiplatform.resources)
