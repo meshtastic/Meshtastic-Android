@@ -1380,7 +1380,7 @@
     "hasMui": false,
     "partitionScheme": "8MB",
     "images": [
-      "t5s3-epaper-pro.svg"
+      "t5s3_epaper.svg"
     ]
   },
   {
