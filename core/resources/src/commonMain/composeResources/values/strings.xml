@@ -483,6 +483,13 @@
     <string name="traceroute_return_hops">Return Hops</string>
     <string name="traceroute_round_trip">Round Trip</string>
     <string name="traceroute_no_response">No Response</string>
+    <string name="load_1_min">Load 1m</string>
+    <string name="load_5_min">Load 5m</string>
+    <string name="load_15_min">Load 15m</string>
+    <string name="load_1_min_description">One-minute system load average</string>
+    <string name="load_5_min_description">Five-minute system load average</string>
+    <string name="load_15_min_description">Fifteen-minute system load average</string>
+    <string name="free_memory_description">Available system memory in bytes</string>
     <string name="one_hour_short">1H</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
