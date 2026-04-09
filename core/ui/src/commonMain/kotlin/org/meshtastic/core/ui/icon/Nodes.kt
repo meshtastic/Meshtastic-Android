@@ -168,7 +168,6 @@ val MeshtasticIcons.Nodes: ImageVector
 
 private var nodes: ImageVector? = null
 
-// New node management icons
 val MeshtasticIcons.Notes: ImageVector
     get() = Icons.AutoMirrored.Rounded.Notes
 val MeshtasticIcons.DoDisturb: ImageVector

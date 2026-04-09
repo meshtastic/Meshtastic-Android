@@ -39,6 +39,5 @@ val MeshtasticIcons.AccountCircle: ImageVector
 val MeshtasticIcons.PersonSearch: ImageVector
     get() = Icons.Rounded.PersonSearch
 
-// New
 val MeshtasticIcons.PersonAdd: ImageVector
     get() = Icons.Rounded.PersonAdd

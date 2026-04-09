@@ -36,6 +36,5 @@ val MeshtasticIcons.KeyOff: ImageVector
 val MeshtasticIcons.Verified: ImageVector
     get() = Icons.Rounded.Verified
 
-// New
 val MeshtasticIcons.SecurityShield: ImageVector
     get() = Icons.Rounded.Security

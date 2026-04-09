@@ -184,6 +184,5 @@ val MeshtasticIcons.BatteryUnknown: ImageVector
 
 private var batteryUnknown: ImageVector? = null
 
-// New
 val MeshtasticIcons.BatteryAlert: ImageVector
     get() = Icons.Rounded.BatteryAlert

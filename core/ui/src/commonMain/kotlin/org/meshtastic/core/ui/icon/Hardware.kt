@@ -37,7 +37,6 @@ val MeshtasticIcons.Usb: ImageVector
 val MeshtasticIcons.Wifi: ImageVector
     get() = Icons.Rounded.Wifi
 
-// New hardware icons
 val MeshtasticIcons.BluetoothConnected: ImageVector
     get() = Icons.Rounded.BluetoothConnected
 val MeshtasticIcons.BluetoothSearching: ImageVector

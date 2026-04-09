@@ -197,7 +197,6 @@ val MeshtasticIcons.Device: ImageVector
 
 private var device: ImageVector? = null
 
-// New device icons
 val MeshtasticIcons.Memory: ImageVector
     get() = Icons.Rounded.Memory
 val MeshtasticIcons.PhoneAndroid: ImageVector

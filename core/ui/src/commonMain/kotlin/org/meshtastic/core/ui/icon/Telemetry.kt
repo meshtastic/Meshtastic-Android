@@ -68,7 +68,6 @@ val MeshtasticIcons.Chart: ImageVector
 val MeshtasticIcons.LineAxis: ImageVector
     get() = Icons.Rounded.LineAxis
 
-// New telemetry icons
 val MeshtasticIcons.LightMode: ImageVector
     get() = Icons.Rounded.LightMode
 val MeshtasticIcons.Altitude: ImageVector

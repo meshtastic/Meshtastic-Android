@@ -100,7 +100,6 @@ val MeshtasticIcons.MarkChatRead: ImageVector
 val MeshtasticIcons.QrCode2: ImageVector
     get() = Icons.Rounded.QrCode2
 
-// New action icons
 val MeshtasticIcons.Download: ImageVector
     get() = Icons.Rounded.Download
 val MeshtasticIcons.Upload: ImageVector

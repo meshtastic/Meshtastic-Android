@@ -27,8 +27,6 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.CheckCircleOutline
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.CloudDone
-import androidx.compose.material.icons.rounded.CloudOff
-import androidx.compose.material.icons.rounded.CloudQueue
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Dangerous
 import androidx.compose.material.icons.rounded.Error
@@ -72,19 +70,13 @@ val MeshtasticIcons.VolumeMute: ImageVector
 val MeshtasticIcons.History: ImageVector
     get() = Icons.Rounded.History
 
-// MQTT connection status
+// MQTT status
 val MeshtasticIcons.MqttConnected: ImageVector
     get() = Icons.Rounded.Cloud
-
-// MQTT delivery status
 val MeshtasticIcons.MqttDelivered: ImageVector
     get() = Icons.Rounded.CloudDone
 val MeshtasticIcons.MqttSyncing: ImageVector
     get() = Icons.Rounded.CloudSync
-val MeshtasticIcons.MqttSent: ImageVector
-    get() = Icons.Rounded.CloudQueue
-val MeshtasticIcons.MqttUnavailable: ImageVector
-    get() = Icons.Rounded.CloudOff
 
 // Connectivity
 val MeshtasticIcons.Unmessageable: ImageVector

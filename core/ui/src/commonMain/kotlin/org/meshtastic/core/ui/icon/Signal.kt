@@ -269,7 +269,6 @@ val MeshtasticIcons.SignalCellular4Bar: ImageVector
 
 private var signalCellular4Bar: ImageVector? = null
 
-// New signal icons
 val MeshtasticIcons.CellTower: ImageVector
     get() = Icons.Rounded.CellTower
 val MeshtasticIcons.MeshHub: ImageVector
