@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,20 +16,25 @@
  */
 package org.meshtastic.app.map.node
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.feature.map.node.NodeMapViewModel
+import org.meshtastic.proto.Position
 
+/**
+ * Flavor-unified entry point for the embeddable node-track map. Resolves [destNum] to obtain
+ * [NodeMapViewModel.applicationId] and [NodeMapViewModel.mapStyleId], then delegates to the OSMDroid implementation
+ * ([NodeTrackOsmMap]).
+ */
 @Composable
-fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) {
-    val positions by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
+fun NodeTrackMap(destNum: Int, positions: List<Position>, modifier: Modifier = Modifier) {
+    val vm = koinViewModel<NodeMapViewModel>()
+    vm.setDestNum(destNum)
     NodeTrackOsmMap(
         positions = positions,
-        applicationId = nodeMapViewModel.applicationId,
-        mapStyleId = nodeMapViewModel.mapStyleId,
-        modifier = Modifier.fillMaxSize(),
+        applicationId = vm.applicationId,
+        mapStyleId = vm.mapStyleId,
+        modifier = modifier,
     )
 }

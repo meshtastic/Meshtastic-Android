@@ -207,7 +207,7 @@ object DeepLinkRouter {
     private val nodeDetailSubRoutes: Map<String, (Int) -> Route> =
         mapOf(
             "device-metrics" to { destNum -> NodeDetailRoute.DeviceMetrics(destNum) },
-            "map" to { destNum -> NodeDetailRoute.NodeMap(destNum) },
+            "map" to { destNum -> NodeDetailRoute.PositionLog(destNum) },
             "position" to { destNum -> NodeDetailRoute.PositionLog(destNum) },
             "environment" to { destNum -> NodeDetailRoute.EnvironmentMetrics(destNum) },
             "signal" to { destNum -> NodeDetailRoute.SignalMetrics(destNum) },

@@ -27,7 +27,6 @@ import org.meshtastic.core.resources.host_metrics_log
 import org.meshtastic.core.resources.ic_charging_station
 import org.meshtastic.core.resources.ic_groups
 import org.meshtastic.core.resources.ic_location_on
-import org.meshtastic.core.resources.ic_map
 import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.ic_people
 import org.meshtastic.core.resources.ic_power
@@ -35,7 +34,6 @@ import org.meshtastic.core.resources.ic_route
 import org.meshtastic.core.resources.ic_signal_cellular_alt
 import org.meshtastic.core.resources.ic_thermostat
 import org.meshtastic.core.resources.neighbor_info
-import org.meshtastic.core.resources.node_map
 import org.meshtastic.core.resources.pax_metrics_log
 import org.meshtastic.core.resources.position_log
 import org.meshtastic.core.resources.power_metrics_log
@@ -44,7 +42,6 @@ import org.meshtastic.core.resources.traceroute_log
 
 enum class LogsType(val titleRes: StringResource, val icon: DrawableResource, val routeFactory: (Int) -> Route) {
     DEVICE(Res.string.device_metrics_log, Res.drawable.ic_charging_station, { NodeDetailRoute.DeviceMetrics(it) }),
-    NODE_MAP(Res.string.node_map, Res.drawable.ic_map, { NodeDetailRoute.NodeMap(it) }),
     POSITIONS(Res.string.position_log, Res.drawable.ic_location_on, { NodeDetailRoute.PositionLog(it) }),
     ENVIRONMENT(Res.string.env_metrics_log, Res.drawable.ic_thermostat, { NodeDetailRoute.EnvironmentMetrics(it) }),
     SIGNAL(Res.string.signal_quality, Res.drawable.ic_signal_cellular_alt, { NodeDetailRoute.SignalMetrics(it) }),

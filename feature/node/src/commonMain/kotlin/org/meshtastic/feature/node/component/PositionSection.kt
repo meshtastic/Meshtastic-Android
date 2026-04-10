@@ -96,30 +96,18 @@ fun PositionSection(
                 onAction = onAction,
             )
 
-            if (availableLogs.contains(LogsType.NODE_MAP) || availableLogs.contains(LogsType.POSITIONS)) {
+            if (availableLogs.contains(LogsType.POSITIONS)) {
                 Spacer(Modifier.height(12.dp))
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    if (availableLogs.contains(LogsType.NODE_MAP)) {
-                        AssistChip(
-                            onClick = { onAction(NodeDetailAction.Navigate(LogsType.NODE_MAP.routeFactory(node.num))) },
-                            label = { Text(stringResource(LogsType.NODE_MAP.titleRes)) },
-                            leadingIcon = { Icon(vectorResource(LogsType.NODE_MAP.icon), null, Modifier.size(18.dp)) },
-                        )
-                    }
-
-                    if (availableLogs.contains(LogsType.POSITIONS)) {
-                        AssistChip(
-                            onClick = {
-                                onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.routeFactory(node.num)))
-                            },
-                            label = { Text(stringResource(LogsType.POSITIONS.titleRes)) },
-                            leadingIcon = { Icon(vectorResource(LogsType.POSITIONS.icon), null, Modifier.size(18.dp)) },
-                        )
-                    }
+                    AssistChip(
+                        onClick = { onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.routeFactory(node.num))) },
+                        label = { Text(stringResource(LogsType.POSITIONS.titleRes)) },
+                        leadingIcon = { Icon(vectorResource(LogsType.POSITIONS.icon), null, Modifier.size(18.dp)) },
+                    )
                 }
             }
         }

@@ -122,11 +122,6 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         )
     }
 
-    entry<NodeDetailRoute.NodeMap>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
-        val mapScreen = org.meshtastic.core.ui.util.LocalNodeMapScreenProvider.current
-        mapScreen(args.destNum) { backStack.removeLastOrNull() }
-    }
-
     entry<NodeDetailRoute.TracerouteLog>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(args.destNum) }
         metricsViewModel.setNodeId(args.destNum)
