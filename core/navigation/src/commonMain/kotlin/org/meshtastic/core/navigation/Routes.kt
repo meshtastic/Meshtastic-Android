@@ -63,7 +63,9 @@ sealed interface NodesRoute : Route {
 
     @Serializable data object Nodes : NodesRoute
 
-    @Serializable data class NodeDetailGraph(val destNum: Int? = null) : NodesRoute, Graph
+    @Serializable data class NodeDetailGraph(val destNum: Int? = null) :
+        NodesRoute,
+        Graph
 
     @Serializable data class NodeDetail(val destNum: Int? = null) : NodesRoute
 }
@@ -84,7 +86,8 @@ sealed interface NodeDetailRoute : Route {
 
     @Serializable data class TracerouteLog(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class TracerouteMap(val destNum: Int, val requestId: Int, val logUuid: String? = null) : NodeDetailRoute
+    @Serializable
+    data class TracerouteMap(val destNum: Int, val requestId: Int, val logUuid: String? = null) : NodeDetailRoute
 
     @Serializable data class HostMetricsLog(val destNum: Int) : NodeDetailRoute
 
@@ -95,7 +98,9 @@ sealed interface NodeDetailRoute : Route {
 
 @Serializable
 sealed interface SettingsRoute : Route {
-    @Serializable data class SettingsGraph(val destNum: Int? = null) : SettingsRoute, Graph
+    @Serializable data class SettingsGraph(val destNum: Int? = null) :
+        SettingsRoute,
+        Graph
 
     @Serializable data class Settings(val destNum: Int? = null) : SettingsRoute
 
