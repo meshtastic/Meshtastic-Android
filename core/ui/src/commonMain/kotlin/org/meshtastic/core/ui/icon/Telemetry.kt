@@ -16,45 +16,78 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Air
-import androidx.compose.material.icons.rounded.DataArray
-import androidx.compose.material.icons.rounded.ElectricBolt
-import androidx.compose.material.icons.rounded.Grass
-import androidx.compose.material.icons.rounded.LineAxis
-import androidx.compose.material.icons.rounded.People
-import androidx.compose.material.icons.rounded.SocialDistance
-import androidx.compose.material.icons.rounded.Speed
-import androidx.compose.material.icons.rounded.StackedLineChart
-import androidx.compose.material.icons.rounded.Thermostat
-import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material.icons.twotone.SatelliteAlt
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_air
+import org.meshtastic.core.resources.ic_alt_route
+import org.meshtastic.core.resources.ic_blur_on
+import org.meshtastic.core.resources.ic_bolt
+import org.meshtastic.core.resources.ic_charging_station
+import org.meshtastic.core.resources.ic_compress
+import org.meshtastic.core.resources.ic_data_array
+import org.meshtastic.core.resources.ic_electric_bolt
+import org.meshtastic.core.resources.ic_explore
+import org.meshtastic.core.resources.ic_grass
+import org.meshtastic.core.resources.ic_height
+import org.meshtastic.core.resources.ic_light_mode
+import org.meshtastic.core.resources.ic_line_axis
+import org.meshtastic.core.resources.ic_navigation
+import org.meshtastic.core.resources.ic_power
+import org.meshtastic.core.resources.ic_satellite_alt
+import org.meshtastic.core.resources.ic_scale
+import org.meshtastic.core.resources.ic_social_distance
+import org.meshtastic.core.resources.ic_speed
+import org.meshtastic.core.resources.ic_stacked_line_chart
+import org.meshtastic.core.resources.ic_thermostat
+import org.meshtastic.core.resources.ic_volume_up
+import org.meshtastic.core.resources.ic_water_drop
 
-val MeshtasticIcons.Temperature: ImageVector
-    get() = Icons.Rounded.Thermostat
 val MeshtasticIcons.Humidity: ImageVector
-    get() = Icons.Rounded.WaterDrop
+    @Composable get() = vectorResource(Res.drawable.ic_water_drop)
 val MeshtasticIcons.Pressure: ImageVector
-    get() = Icons.Rounded.Speed
-val MeshtasticIcons.Soil: ImageVector
-    get() = Icons.Rounded.Grass
-val MeshtasticIcons.Paxcount: ImageVector
-    get() = Icons.Rounded.People
-val MeshtasticIcons.AirQuality: ImageVector
-    get() = Icons.Rounded.Air
-val MeshtasticIcons.Power: ImageVector
-    get() = Icons.Rounded.ElectricBolt
+    @Composable get() = vectorResource(Res.drawable.ic_compress)
+val MeshtasticIcons.SoilMoisture: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_grass)
+val MeshtasticIcons.ElectricPower: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_electric_bolt)
 val MeshtasticIcons.Distance: ImageVector
-    get() = Icons.Rounded.SocialDistance
+    @Composable get() = vectorResource(Res.drawable.ic_social_distance)
 val MeshtasticIcons.Satellites: ImageVector
-    get() = Icons.TwoTone.SatelliteAlt
+    @Composable get() = vectorResource(Res.drawable.ic_satellite_alt)
 val MeshtasticIcons.DataArray: ImageVector
-    get() = Icons.Rounded.DataArray
-val MeshtasticIcons.Speed: ImageVector
-    get() = Icons.Rounded.Speed
+    @Composable get() = vectorResource(Res.drawable.ic_data_array)
 val MeshtasticIcons.Chart: ImageVector
-    get() = Icons.Rounded.StackedLineChart
-
+    @Composable get() = vectorResource(Res.drawable.ic_stacked_line_chart)
 val MeshtasticIcons.LineAxis: ImageVector
-    get() = Icons.Rounded.LineAxis
+    @Composable get() = vectorResource(Res.drawable.ic_line_axis)
+
+val MeshtasticIcons.Altitude: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_height)
+val MeshtasticIcons.Weight: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_scale)
+val MeshtasticIcons.Particulate: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_blur_on)
+val MeshtasticIcons.WindDirection: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_navigation)
+val MeshtasticIcons.Voltage: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_bolt)
+val MeshtasticIcons.Compass: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_explore)
+val MeshtasticIcons.Temperature: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_thermostat)
+val MeshtasticIcons.PowerSupply: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_power)
+val MeshtasticIcons.AirQuality: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_air)
+val MeshtasticIcons.Speed: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_speed)
+val MeshtasticIcons.LightMode: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_light_mode)
+val MeshtasticIcons.ChargingStation: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_charging_station)
+val MeshtasticIcons.TrafficManagement: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_alt_route)
+val MeshtasticIcons.VolumeUp: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_volume_up)

@@ -21,8 +21,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +37,8 @@ import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.shutdown_node_name
 import org.meshtastic.core.resources.shutdown_warning
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 
 @Composable
 fun ShutdownConfirmationDialog(
@@ -46,14 +46,15 @@ fun ShutdownConfirmationDialog(
     node: Node?,
     onDismiss: () -> Unit,
     isShutdown: Boolean = true,
-    icon: ImageVector? = Icons.Rounded.Warning,
+    icon: ImageVector? = null,
     onConfirm: () -> Unit,
 ) {
     val nodeLongName = node?.user?.long_name ?: "Unknown Node"
+    val resolvedIcon = icon ?: MeshtasticIcons.Warning
 
     MeshtasticDialog(
         onDismiss = onDismiss,
-        icon = icon,
+        icon = resolvedIcon,
         title = title,
         text = { ShutdownDialogContent(nodeLongName = nodeLongName, isShutdown = isShutdown) },
         confirmText = stringResource(Res.string.send),

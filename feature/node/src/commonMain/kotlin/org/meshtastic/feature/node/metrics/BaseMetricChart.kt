@@ -29,10 +29,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.List
-import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -80,6 +76,9 @@ import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.max
 import org.meshtastic.core.resources.min
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.BarChart
+import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 
@@ -260,9 +259,9 @@ fun <T> BaseMetricScreen(
                         Icon(
                             imageVector =
                             if (isChartExpanded) {
-                                Icons.AutoMirrored.Rounded.List
+                                MeshtasticIcons.List
                             } else {
-                                Icons.Rounded.BarChart
+                                MeshtasticIcons.BarChart
                             },
                             contentDescription =
                             stringResource(
@@ -272,7 +271,10 @@ fun <T> BaseMetricScreen(
                     }
                     if (infoData.isNotEmpty()) {
                         IconButton(onClick = { displayInfoDialog = true }) {
-                            Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
+                            Icon(
+                                imageVector = MeshtasticIcons.Info,
+                                contentDescription = stringResource(Res.string.info),
+                            )
                         }
                     }
                     if (telemetryType != null) {

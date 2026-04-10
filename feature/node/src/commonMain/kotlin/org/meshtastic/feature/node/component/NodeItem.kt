@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -48,6 +46,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
@@ -90,6 +89,7 @@ import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
@@ -178,7 +178,7 @@ fun NodeItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.Notes,
+                        imageVector = MeshtasticIcons.Notes,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = contentColor.copy(alpha = 0.7f),
@@ -284,7 +284,7 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                         if (thatNode.snr < 100f && thatNode.rssi < 0) {
                             val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
                             IconInfo(
-                                icon = quality.imageVector,
+                                icon = vectorResource(quality.icon),
                                 contentDescription = stringResource(Res.string.signal_quality),
                                 contentColor = quality.color.invoke(),
                                 text = stringResource(quality.nameRes),

@@ -16,24 +16,23 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Fingerprint
-import androidx.compose.material.icons.rounded.KeyOff
-import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.LockOpen
-import androidx.compose.material.icons.rounded.Verified
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_key_off
+import org.meshtastic.core.resources.ic_lock
+import org.meshtastic.core.resources.ic_lock_open
+import org.meshtastic.core.resources.ic_security
+import org.meshtastic.core.resources.ic_verified
 
-val MeshtasticIcons.Lock: ImageVector
-    get() = Icons.Rounded.Lock
-val MeshtasticIcons.LockOpen: ImageVector
-    get() = Icons.Rounded.LockOpen
-val MeshtasticIcons.Warning: ImageVector
-    get() = Icons.Rounded.Warning
-val MeshtasticIcons.KeyOff: ImageVector
-    get() = Icons.Rounded.KeyOff
 val MeshtasticIcons.Verified: ImageVector
-    get() = Icons.Rounded.Verified
-val MeshtasticIcons.Fingerprint: ImageVector
-    get() = Icons.Rounded.Fingerprint
+    @Composable get() = vectorResource(Res.drawable.ic_verified)
+val MeshtasticIcons.Lock: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_lock)
+val MeshtasticIcons.LockOpen: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_lock_open)
+val MeshtasticIcons.KeyOff: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_key_off)
+val MeshtasticIcons.SecurityShield: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_security)

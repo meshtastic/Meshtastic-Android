@@ -29,9 +29,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Notes
-import androidx.compose.material.icons.rounded.Numbers
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -78,14 +75,17 @@ import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
 import org.meshtastic.core.resources.via_mqtt
 import org.meshtastic.core.ui.icon.ArrowCircleUp
-import org.meshtastic.core.ui.icon.ChannelUtilization
-import org.meshtastic.core.ui.icon.Cloud
+import org.meshtastic.core.ui.icon.DeviceNumbers
 import org.meshtastic.core.ui.icon.History
-import org.meshtastic.core.ui.icon.Hops
+import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MqttConnected
+import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Person
+import org.meshtastic.core.ui.icon.Rssi
+import org.meshtastic.core.ui.icon.Snr
 import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.util.createClipEntry
@@ -189,7 +189,7 @@ private fun StatusMessageRow(status: String) {
     InfoItem(
         label = stringResource(Res.string.status_message),
         value = status,
-        icon = Icons.AutoMirrored.Rounded.Notes,
+        icon = MeshtasticIcons.Notes,
         modifier = Modifier.fillMaxWidth(),
     )
 }
@@ -200,13 +200,13 @@ private fun NodeIdentificationRow(node: Node) {
         InfoItem(
             label = stringResource(Res.string.node_id),
             value = DataPacket.nodeNumToDefaultId(node.num),
-            icon = Icons.Rounded.Numbers,
+            icon = MeshtasticIcons.DeviceNumbers,
             modifier = Modifier.weight(1f),
         )
         InfoItem(
             label = stringResource(Res.string.node_number),
             value = node.num.toUInt().toString(),
-            icon = Icons.Rounded.Numbers,
+            icon = MeshtasticIcons.DeviceNumbers,
             modifier = Modifier.weight(1f),
         )
     }
@@ -225,7 +225,7 @@ private fun HearsAndHopsRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.hops_away),
                 value = node.hopsAway.toString(),
-                icon = MeshtasticIcons.Hops,
+                icon = MeshtasticIcons.HopCount,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -264,7 +264,7 @@ private fun SignalRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.snr),
                 value = formatString("%.1f dB", node.snr),
-                icon = MeshtasticIcons.ChannelUtilization,
+                icon = MeshtasticIcons.Snr,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -274,7 +274,7 @@ private fun SignalRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.rssi),
                 value = formatString("%d dBm", node.rssi),
-                icon = MeshtasticIcons.ChannelUtilization,
+                icon = MeshtasticIcons.Rssi,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -290,7 +290,7 @@ private fun MqttAndVerificationRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.via_mqtt),
                 value = "Yes",
-                icon = MeshtasticIcons.Cloud,
+                icon = MeshtasticIcons.MqttConnected,
                 modifier = Modifier.weight(1f),
             )
         } else {

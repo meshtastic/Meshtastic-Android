@@ -25,9 +25,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,6 +57,9 @@ import org.meshtastic.core.resources.filter_whole_word
 import org.meshtastic.core.resources.filter_words
 import org.meshtastic.core.resources.filter_words_summary
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
 fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit) {
@@ -155,7 +155,7 @@ private fun FilterWordsInputCard(newWord: String, onNewWordChange: (String) -> U
                     keyboardActions = KeyboardActions(onDone = { onAddWord() }),
                 )
                 IconButton(onClick = onAddWord) {
-                    Icon(Icons.Rounded.Add, contentDescription = stringResource(Res.string.add))
+                    Icon(MeshtasticIcons.Add, contentDescription = stringResource(Res.string.add))
                 }
             }
         }
@@ -183,7 +183,7 @@ private fun FilterWordItem(word: String, onRemove: () -> Unit) {
                 )
             }
             IconButton(onClick = onRemove) {
-                Icon(Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete))
+                Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
             }
         }
     }

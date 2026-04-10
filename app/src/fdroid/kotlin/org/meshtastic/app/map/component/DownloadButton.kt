@@ -21,8 +21,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +30,8 @@ import androidx.compose.ui.draw.scale
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map_download_region
+import org.meshtastic.core.ui.icon.Download
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
 fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
@@ -50,7 +50,7 @@ fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
     ) {
         FloatingActionButton(onClick = onClick, contentColor = MaterialTheme.colorScheme.primary) {
             Icon(
-                imageVector = Icons.Rounded.Download,
+                imageVector = MeshtasticIcons.Download,
                 contentDescription = stringResource(Res.string.map_download_region),
                 modifier = Modifier.scale(1.25f),
             )

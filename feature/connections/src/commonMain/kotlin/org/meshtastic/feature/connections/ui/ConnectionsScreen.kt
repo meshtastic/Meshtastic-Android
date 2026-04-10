@@ -27,8 +27,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -68,6 +66,7 @@ import org.meshtastic.core.resources.unknown_device
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
@@ -317,7 +316,7 @@ private fun ConnectedDeviceContent(
         if (regionUnset && selectedDevice != "m") {
             TitledCard(title = null) {
                 ListItem(
-                    leadingIcon = Icons.Rounded.Language,
+                    leadingIcon = MeshtasticIcons.Language,
                     text = stringResource(Res.string.set_your_region),
                     onClick = onSetRegion,
                 )

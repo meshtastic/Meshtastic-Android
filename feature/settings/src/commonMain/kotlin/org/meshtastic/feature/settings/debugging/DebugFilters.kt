@@ -28,13 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.twotone.FilterAlt
-import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -66,6 +59,12 @@ import org.meshtastic.core.resources.debug_filter_preset_title
 import org.meshtastic.core.resources.debug_filters
 import org.meshtastic.core.resources.match_all
 import org.meshtastic.core.resources.match_any
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.Clear
+import org.meshtastic.core.ui.icon.Done
+import org.meshtastic.core.ui.icon.FilterAlt
+import org.meshtastic.core.ui.icon.FilterAltOff
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 
 @Composable
@@ -104,7 +103,7 @@ fun DebugCustomFilterInput(
             },
             enabled = customFilterText.isNotBlank(),
         ) {
-            Icon(imageVector = Icons.Rounded.Add, contentDescription = stringResource(Res.string.debug_filter_add))
+            Icon(imageVector = MeshtasticIcons.Add, contentDescription = stringResource(Res.string.debug_filter_add))
         }
     }
 }
@@ -117,13 +116,14 @@ fun DebugPresetFilters(
     onFilterTextsChange: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val availableFilters = presetFilters.filter { filter ->
-        logs.any { log ->
-            log.logMessage.contains(filter, ignoreCase = true) ||
-                log.messageType.contains(filter, ignoreCase = true) ||
-                log.formattedReceivedDate.contains(filter, ignoreCase = true)
+    val availableFilters =
+        presetFilters.filter { filter ->
+            logs.any { log ->
+                log.logMessage.contains(filter, ignoreCase = true) ||
+                    log.messageType.contains(filter, ignoreCase = true) ||
+                    log.formattedReceivedDate.contains(filter, ignoreCase = true)
+            }
         }
-    }
     Column(modifier = modifier) {
         Text(
             text = stringResource(Res.string.debug_filter_preset_title),
@@ -151,7 +151,7 @@ fun DebugPresetFilters(
                     leadingIcon = {
                         if (filter in filterTexts) {
                             Icon(
-                                imageVector = Icons.Filled.Done,
+                                imageVector = MeshtasticIcons.Done,
                                 contentDescription = stringResource(Res.string.debug_filter_included),
                             )
                         }
@@ -188,9 +188,9 @@ fun DebugFilterBar(
                     Icon(
                         imageVector =
                         if (filterTexts.isNotEmpty()) {
-                            Icons.TwoTone.FilterAlt
+                            MeshtasticIcons.FilterAlt
                         } else {
-                            Icons.TwoTone.FilterAltOff
+                            MeshtasticIcons.FilterAltOff
                         },
                         contentDescription = stringResource(Res.string.debug_filters),
                     )
@@ -266,7 +266,7 @@ fun DebugActiveFilters(
                 }
                 IconButton(onClick = { onFilterTextsChange(emptyList()) }) {
                     Icon(
-                        imageVector = Icons.Rounded.Clear,
+                        imageVector = MeshtasticIcons.Clear,
                         contentDescription = stringResource(Res.string.debug_filter_clear),
                     )
                 }
@@ -281,8 +281,8 @@ fun DebugActiveFilters(
                         selected = true,
                         onClick = { onFilterTextsChange(filterTexts - filter) },
                         label = { Text(filter) },
-                        leadingIcon = { Icon(imageVector = Icons.TwoTone.FilterAlt, contentDescription = null) },
-                        trailingIcon = { Icon(imageVector = Icons.Filled.Clear, contentDescription = null) },
+                        leadingIcon = { Icon(imageVector = MeshtasticIcons.FilterAlt, contentDescription = null) },
+                        trailingIcon = { Icon(imageVector = MeshtasticIcons.Clear, contentDescription = null) },
                     )
                 }
             }

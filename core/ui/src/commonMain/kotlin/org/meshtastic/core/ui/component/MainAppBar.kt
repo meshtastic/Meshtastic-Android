@@ -20,8 +20,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -39,6 +37,8 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.navigate_back
+import org.meshtastic.core.ui.icon.ArrowBack
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +78,7 @@ fun MainAppBar(
             {
                 IconButton(onClick = onNavigateUp) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = MeshtasticIcons.ArrowBack,
                         contentDescription = stringResource(Res.string.navigate_back),
                     )
                 }

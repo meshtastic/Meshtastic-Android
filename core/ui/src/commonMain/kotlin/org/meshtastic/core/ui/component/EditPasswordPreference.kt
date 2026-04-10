@@ -18,8 +18,6 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -37,6 +35,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.hide_password
 import org.meshtastic.core.resources.show_password
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.VisibilityOff
 
 @Composable
 fun EditPasswordPreference(
@@ -65,7 +65,8 @@ fun EditPasswordPreference(
         trailingIcon = {
             IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                 Icon(
-                    imageVector = if (isPasswordVisible) Icons.TwoTone.VisibilityOff else Icons.TwoTone.VisibilityOff,
+                    imageVector =
+                    if (isPasswordVisible) MeshtasticIcons.VisibilityOff else MeshtasticIcons.VisibilityOff,
                     contentDescription =
                     if (isPasswordVisible) {
                         stringResource(Res.string.hide_password)

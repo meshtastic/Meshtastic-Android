@@ -21,10 +21,6 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.FormatPaint
-import androidx.compose.material.icons.rounded.Language
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +31,10 @@ import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.theme
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.FormatPaint
+import org.meshtastic.core.ui.icon.KeyboardArrowRight
+import org.meshtastic.core.ui.icon.Language
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
 /** Section for app appearance settings like language and theme. */
@@ -51,8 +51,8 @@ fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () ->
     ExpressiveSection(title = stringResource(Res.string.app_settings)) {
         ListItem(
             text = stringResource(Res.string.preferences_language),
-            leadingIcon = Icons.Rounded.Language,
-            trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.Language,
+            trailingIcon = if (useInAppLangPicker) null else MeshtasticIcons.KeyboardArrowRight,
         ) {
             if (useInAppLangPicker) {
                 onShowLanguagePicker()
@@ -69,7 +69,7 @@ fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () ->
 
         ListItem(
             text = stringResource(Res.string.theme),
-            leadingIcon = Icons.Rounded.FormatPaint,
+            leadingIcon = MeshtasticIcons.FormatPaint,
             trailingIcon = null,
         ) {
             onShowThemePicker()

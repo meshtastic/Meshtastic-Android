@@ -17,8 +17,6 @@
 package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.UsbOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,6 +25,8 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.no_usb_devices_found
 import org.meshtastic.core.resources.usb
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.UsbOff
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
@@ -40,7 +40,7 @@ fun UsbDevices(
     if (usbDevices.isEmpty()) {
         EmptyStateContent(
             text = stringResource(Res.string.no_usb_devices_found),
-            imageVector = Icons.Rounded.UsbOff,
+            imageVector = MeshtasticIcons.UsbOff,
             modifier = Modifier.padding(vertical = 32.dp),
         )
     } else {

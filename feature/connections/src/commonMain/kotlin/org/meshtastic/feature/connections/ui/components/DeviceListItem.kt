@@ -24,13 +24,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.BluetoothSearching
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.BluetoothConnected
-import androidx.compose.material.icons.rounded.Usb
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -58,6 +51,13 @@ import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.serial
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.BluetoothConnected
+import org.meshtastic.core.ui.icon.BluetoothSearching
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Usb
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
 private const val RSSI_UPDATE_RATE_MS = 2000L
@@ -91,16 +91,16 @@ fun DeviceListItem(
         when (device) {
             is DeviceListEntry.Ble ->
                 if (connectionState.isConnected()) {
-                    Icons.Rounded.BluetoothConnected
+                    MeshtasticIcons.BluetoothConnected
                 } else if (connectionState.isConnecting()) {
-                    Icons.AutoMirrored.Rounded.BluetoothSearching
+                    MeshtasticIcons.BluetoothSearching
                 } else {
-                    Icons.Rounded.Bluetooth
+                    MeshtasticIcons.Bluetooth
                 }
 
-            is DeviceListEntry.Usb -> Icons.Rounded.Usb
-            is DeviceListEntry.Tcp -> Icons.Rounded.Wifi
-            is DeviceListEntry.Mock -> Icons.Rounded.Add
+            is DeviceListEntry.Usb -> MeshtasticIcons.Usb
+            is DeviceListEntry.Tcp -> MeshtasticIcons.Wifi
+            is DeviceListEntry.Mock -> MeshtasticIcons.Add
         }
 
     val contentDescription =

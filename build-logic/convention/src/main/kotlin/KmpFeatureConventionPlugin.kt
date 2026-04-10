@@ -43,7 +43,6 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                 sourceSets.getByName("commonMain").dependencies {
                     // Compose Multiplatform UI
                     implementation(libs.library("compose-multiplatform-material3"))
-                    implementation(libs.library("compose-multiplatform-materialIconsExtended"))
 
                     // Lifecycle & ViewModel (JetBrains KMP forks — safe in commonMain)
                     implementation(libs.library("jetbrains-lifecycle-viewmodel-compose"))
@@ -64,7 +63,7 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                     implementation(libs.library("accompanist-permissions"))
                     implementation(libs.library("androidx-activity-compose"))
                     implementation(libs.library("androidx-compose-material3"))
-                    implementation(libs.library("androidx-compose-material-iconsExtended"))
+
                     implementation(libs.library("androidx-compose-ui-text"))
                     implementation(libs.library("androidx-compose-ui-tooling-preview"))
                 }

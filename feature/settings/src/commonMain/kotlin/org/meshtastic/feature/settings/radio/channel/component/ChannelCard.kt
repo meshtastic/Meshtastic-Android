@@ -20,18 +20,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.ui.component.ChannelItem
 import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 
@@ -48,21 +49,21 @@ internal fun ChannelCard(
 ) = ChannelItem(index = index, title = title, enabled = enabled, onClick = onEditClick) {
     if (sharesLocation) {
         Icon(
-            imageVector = ChannelIcons.LOCATION.icon,
+            imageVector = vectorResource(ChannelIcons.LOCATION.icon),
             contentDescription = stringResource(ChannelIcons.LOCATION.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
     if (channelSettings.uplink_enabled) {
         Icon(
-            imageVector = ChannelIcons.UPLINK.icon,
+            imageVector = vectorResource(ChannelIcons.UPLINK.icon),
             contentDescription = stringResource(ChannelIcons.UPLINK.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
     if (channelSettings.downlink_enabled) {
         Icon(
-            imageVector = ChannelIcons.DOWNLINK.icon,
+            imageVector = vectorResource(ChannelIcons.DOWNLINK.icon),
             contentDescription = stringResource(ChannelIcons.DOWNLINK.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
@@ -71,7 +72,7 @@ internal fun ChannelCard(
     Spacer(modifier = Modifier.width(10.dp))
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
-            imageVector = Icons.TwoTone.Close,
+            imageVector = MeshtasticIcons.Close,
             contentDescription = stringResource(Res.string.delete),
             modifier = Modifier.wrapContentSize(),
         )

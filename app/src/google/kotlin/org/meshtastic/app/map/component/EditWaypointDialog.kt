@@ -33,9 +33,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -82,6 +79,9 @@ import org.meshtastic.core.resources.time
 import org.meshtastic.core.resources.waypoint_edit
 import org.meshtastic.core.resources.waypoint_new
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
+import org.meshtastic.core.ui.icon.CalendarMonth
+import org.meshtastic.core.ui.icon.Lock
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.proto.Waypoint
 import kotlin.time.Duration.Companion.hours
 
@@ -190,7 +190,7 @@ fun EditWaypointDialog(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
-                                imageVector = Icons.Rounded.Lock,
+                                imageVector = MeshtasticIcons.Lock,
                                 contentDescription = stringResource(Res.string.locked),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -209,7 +209,7 @@ fun EditWaypointDialog(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
-                                imageVector = Icons.Rounded.CalendarMonth,
+                                imageVector = MeshtasticIcons.CalendarMonth,
                                 contentDescription = stringResource(Res.string.expires),
                             )
                             Spacer(modifier = Modifier.width(8.dp))

@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -64,6 +62,8 @@ import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
@@ -182,7 +182,7 @@ private fun ChannelConfigScreen(
                     },
                     modifier = Modifier.padding(16.dp),
                 ) {
-                    Icon(Icons.TwoTone.Add, stringResource(Res.string.add))
+                    Icon(MeshtasticIcons.Add, stringResource(Res.string.add))
                 }
             }
         },

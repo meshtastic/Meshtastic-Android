@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,6 +29,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.preview_custom_composable_line_one
 import org.meshtastic.core.resources.preview_custom_composable_line_two
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.AppTheme
 
 /** A helper component that renders an [AlertManager.AlertData] using the same logic as MainScreen. */
@@ -79,7 +79,7 @@ fun PreviewIconAlert() {
                 AlertManager.AlertData(
                     title = "Warning",
                     message = "This action cannot be undone.",
-                    icon = Icons.Rounded.Warning,
+                    icon = MeshtasticIcons.Warning,
                 ),
             )
         }

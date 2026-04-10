@@ -17,8 +17,6 @@
 package org.meshtastic.app.map.component
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -30,6 +28,8 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map_style_selection
+import org.meshtastic.core.ui.icon.Layers
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
@@ -57,5 +57,5 @@ fun MapButton(icon: ImageVector, contentDescription: String?, modifier: Modifier
 @PreviewLightDark
 @Composable
 private fun MapButtonPreview() {
-    AppTheme { MapButton(icon = Icons.Outlined.Layers, contentDescription = Res.string.map_style_selection) }
+    AppTheme { MapButton(icon = MeshtasticIcons.Layers, contentDescription = Res.string.map_style_selection) }
 }

@@ -26,9 +26,9 @@ import org.meshtastic.core.resources.via_api
 import org.meshtastic.core.resources.via_mqtt
 import org.meshtastic.core.resources.via_udp
 import org.meshtastic.core.ui.icon.Api
-import org.meshtastic.core.ui.icon.Cloud
 import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Udp
 import org.meshtastic.proto.MeshPacket
 
@@ -37,7 +37,7 @@ fun TransportIcon(transport: Int, viaMqtt: Boolean, modifier: Modifier = Modifie
     val (icon, description) =
         when {
             viaMqtt || transport == MeshPacket.TransportMechanism.TRANSPORT_MQTT.value ->
-                MeshtasticIcons.Cloud to stringResource(Res.string.via_mqtt)
+                MeshtasticIcons.MqttConnected to stringResource(Res.string.via_mqtt)
             transport == MeshPacket.TransportMechanism.TRANSPORT_MULTICAST_UDP.value ->
                 MeshtasticIcons.Udp to stringResource(Res.string.via_udp)
             transport == MeshPacket.TransportMechanism.TRANSPORT_API.value ->

@@ -35,8 +35,6 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +74,8 @@ import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.feature.messaging.component.ActionModeTopBar
@@ -483,10 +483,7 @@ private fun MessageInput(
         // cursor position and multi-byte characters, likely outside simple inputTransformation.
         trailingIcon = {
             IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(Res.string.send),
-                )
+                Icon(imageVector = MeshtasticIcons.Send, contentDescription = stringResource(Res.string.send))
             }
         },
     )

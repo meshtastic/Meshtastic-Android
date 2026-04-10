@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FormatQuote
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -71,7 +69,8 @@ import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
-import org.meshtastic.core.ui.icon.Hops
+import org.meshtastic.core.ui.icon.FormatQuote
+import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.MessageItemColors
 import org.meshtastic.core.ui.util.createClipEntry
@@ -279,7 +278,7 @@ fun MessageItem(
                                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                             ) {
                                 Icon(
-                                    imageVector = MeshtasticIcons.Hops,
+                                    imageVector = MeshtasticIcons.HopCount,
                                     contentDescription = null,
                                     modifier = Modifier.size(14.dp),
                                     tint = cardColors.contentColor.copy(alpha = 0.7f),
@@ -388,7 +387,7 @@ private fun OriginalMessageSnippet(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
-                    Icons.Rounded.FormatQuote,
+                    MeshtasticIcons.FormatQuote,
                     contentDescription = stringResource(Res.string.reply),
                     modifier = Modifier.size(16.dp),
                 )

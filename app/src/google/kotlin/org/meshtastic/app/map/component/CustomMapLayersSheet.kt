@@ -25,11 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,6 +61,11 @@ import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.show_layer
 import org.meshtastic.core.resources.url
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Visibility
+import org.meshtastic.core.ui.icon.VisibilityOff
 
 @Suppress("LongMethod")
 @Composable
@@ -119,7 +119,7 @@ fun CustomMapLayersSheet(
                                 } else {
                                     IconButton(onClick = { onRefreshLayer(layer.id) }) {
                                         Icon(
-                                            imageVector = Icons.Filled.Refresh,
+                                            imageVector = MeshtasticIcons.Refresh,
                                             contentDescription = stringResource(Res.string.refresh),
                                         )
                                     }
@@ -129,9 +129,9 @@ fun CustomMapLayersSheet(
                                 Icon(
                                     imageVector =
                                     if (layer.isVisible) {
-                                        Icons.Filled.Visibility
+                                        MeshtasticIcons.Visibility
                                     } else {
-                                        Icons.Filled.VisibilityOff
+                                        MeshtasticIcons.VisibilityOff
                                     },
                                     contentDescription =
                                     stringResource(
@@ -145,7 +145,7 @@ fun CustomMapLayersSheet(
                             }
                             IconButton(onClick = { onRemoveLayer(layer.id) }) {
                                 Icon(
-                                    imageVector = Icons.Filled.Delete,
+                                    imageVector = MeshtasticIcons.Delete,
                                     contentDescription = stringResource(Res.string.remove_layer),
                                 )
                             }

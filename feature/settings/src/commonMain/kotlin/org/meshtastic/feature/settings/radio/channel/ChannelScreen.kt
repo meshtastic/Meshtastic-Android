@@ -30,9 +30,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.twotone.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -88,6 +85,9 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.QrDialog
+import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.QrCode
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.core.ui.util.rememberShowToastResource
@@ -353,7 +353,7 @@ private fun ChannelListView(
         second = {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Button(onClick = onClickShare, modifier = Modifier.padding(16.dp), enabled = enabled) {
-                    Icon(imageVector = Icons.TwoTone.QrCodeScanner, contentDescription = null)
+                    Icon(imageVector = MeshtasticIcons.QrCode, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = stringResource(Res.string.generate_qr_code))
                 }
@@ -378,7 +378,7 @@ private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
         }
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
-            imageVector = Icons.Rounded.ChevronRight,
+            imageVector = MeshtasticIcons.ChevronRight,
             contentDescription = stringResource(Res.string.navigate_into_label),
             modifier = Modifier.padding(end = 16.dp),
         )

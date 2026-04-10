@@ -20,10 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.Nfc
-import androidx.compose.material.icons.twotone.QrCodeScanner
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,8 +48,11 @@ import org.meshtastic.core.resources.scan_shared_contact_nfc
 import org.meshtastic.core.resources.scan_shared_contact_qr
 import org.meshtastic.core.resources.share_channels_qr
 import org.meshtastic.core.resources.url
+import org.meshtastic.core.ui.icon.LinkIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Nfc
 import org.meshtastic.core.ui.icon.QrCode2
+import org.meshtastic.core.ui.icon.QrCodeScanner
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
@@ -155,7 +154,7 @@ fun MeshtasticImportFAB(
                 stringResource(
                     if (isContactContext) Res.string.scan_shared_contact_nfc else Res.string.scan_channels_nfc,
                 ),
-                icon = Icons.Rounded.Nfc,
+                icon = MeshtasticIcons.Nfc,
                 onClick = { isNfcScanning = true },
                 testTag = "nfc_import",
             ),
@@ -169,7 +168,7 @@ fun MeshtasticImportFAB(
                 stringResource(
                     if (isContactContext) Res.string.scan_shared_contact_qr else Res.string.scan_channels_qr,
                 ),
-                icon = Icons.TwoTone.QrCodeScanner,
+                icon = MeshtasticIcons.QrCodeScanner,
                 onClick = { barcodeScanner.startScan() },
                 testTag = "qr_import",
             ),
@@ -182,7 +181,7 @@ fun MeshtasticImportFAB(
             stringResource(
                 if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
             ),
-            icon = Icons.Rounded.Link,
+            icon = MeshtasticIcons.LinkIcon,
             onClick = { showUrlDialog = true },
             testTag = "url_import",
         ),

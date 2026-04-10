@@ -18,10 +18,6 @@ package org.meshtastic.app.map.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -45,6 +41,10 @@ import org.meshtastic.core.resources.last_heard_filter_label
 import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.ui.icon.Favorite
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Place
+import org.meshtastic.core.ui.icon.RadioButtonUnchecked
 import org.meshtastic.feature.map.LastHeardFilter
 import kotlin.math.roundToInt
 
@@ -56,7 +56,10 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             text = { Text(stringResource(Res.string.only_favorites)) },
             onClick = { mapViewModel.toggleOnlyFavorites() },
             leadingIcon = {
-                Icon(imageVector = Icons.Filled.Star, contentDescription = stringResource(Res.string.only_favorites))
+                Icon(
+                    imageVector = MeshtasticIcons.Favorite,
+                    contentDescription = stringResource(Res.string.only_favorites),
+                )
             },
             trailingIcon = {
                 Checkbox(
@@ -69,7 +72,10 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             text = { Text(stringResource(Res.string.show_waypoints)) },
             onClick = { mapViewModel.toggleShowWaypointsOnMap() },
             leadingIcon = {
-                Icon(imageVector = Icons.Filled.Place, contentDescription = stringResource(Res.string.show_waypoints))
+                Icon(
+                    imageVector = MeshtasticIcons.Place,
+                    contentDescription = stringResource(Res.string.show_waypoints),
+                )
             },
             trailingIcon = {
                 Checkbox(
@@ -83,7 +89,7 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Outlined.RadioButtonUnchecked, // Placeholder icon
+                    imageVector = MeshtasticIcons.RadioButtonUnchecked, // Placeholder icon
                     contentDescription = stringResource(Res.string.show_precision_circle),
                 )
             },

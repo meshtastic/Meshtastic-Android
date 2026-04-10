@@ -31,11 +31,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.DragHandle
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -80,6 +75,11 @@ import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.DragHandle
+import org.meshtastic.core.ui.icon.Edit
+import org.meshtastic.core.ui.icon.FastForward
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
 fun QuickChatScreen(modifier: Modifier = Modifier, viewModel: QuickChatViewModel, onNavigateUp: () -> Unit) {
@@ -135,7 +135,7 @@ fun QuickChatScreen(modifier: Modifier = Modifier, viewModel: QuickChatViewModel
                 onClick = { showActionDialog = QuickChatAction(position = actions.size) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             ) {
-                Icon(imageVector = Icons.Rounded.Add, contentDescription = stringResource(Res.string.add))
+                Icon(imageVector = MeshtasticIcons.Add, contentDescription = stringResource(Res.string.add))
             }
         }
     }
@@ -215,9 +215,9 @@ internal fun EditQuickChatDialog(
 
                 val (text, icon) =
                     if (isInstant) {
-                        Res.string.quick_chat_instant to Icons.Rounded.FastForward
+                        Res.string.quick_chat_instant to MeshtasticIcons.FastForward
                     } else {
-                        Res.string.quick_chat_append to Icons.Rounded.Add
+                        Res.string.quick_chat_append to MeshtasticIcons.Add
                     }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -302,7 +302,7 @@ internal fun QuickChatItem(
             leadingContent = {
                 if (action.mode == QuickChatAction.Mode.Instant) {
                     Icon(
-                        imageVector = Icons.Rounded.FastForward,
+                        imageVector = MeshtasticIcons.FastForward,
                         contentDescription = stringResource(Res.string.quick_chat_instant),
                     )
                 }
@@ -313,12 +313,12 @@ internal fun QuickChatItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { onEdit(action) }, modifier = Modifier.size(48.dp)) {
                         Icon(
-                            imageVector = Icons.Rounded.Edit,
+                            imageVector = MeshtasticIcons.Edit,
                             contentDescription = stringResource(Res.string.quick_chat_edit),
                         )
                     }
                     Icon(
-                        imageVector = Icons.Rounded.DragHandle,
+                        imageVector = MeshtasticIcons.DragHandle,
                         contentDescription = stringResource(Res.string.quick_chat),
                     )
                 }

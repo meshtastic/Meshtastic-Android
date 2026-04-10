@@ -23,13 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.FormatPaint
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.Memory
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,6 +59,13 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.FormatPaint
+import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.KeyboardArrowRight
+import org.meshtastic.core.ui.icon.Language
+import org.meshtastic.core.ui.icon.Memory
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.HomoglyphSetting
@@ -166,7 +166,7 @@ fun DesktopSettingsScreen(
                 ExpressiveSection(title = stringResource(Res.string.app_settings)) {
                     ListItem(
                         text = stringResource(Res.string.theme),
-                        leadingIcon = Icons.Rounded.FormatPaint,
+                        leadingIcon = MeshtasticIcons.FormatPaint,
                         trailingIcon = null,
                     ) {
                         showThemePickerDialog = true
@@ -174,7 +174,7 @@ fun DesktopSettingsScreen(
 
                     ListItem(
                         text = stringResource(Res.string.preferences_language),
-                        leadingIcon = Icons.Rounded.Language,
+                        leadingIcon = MeshtasticIcons.Language,
                         trailingIcon = null,
                     ) {
                         showLanguagePickerDialog = true
@@ -201,7 +201,7 @@ fun DesktopSettingsScreen(
                 }
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
-                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = Icons.Rounded.Wifi) {
+                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
                         onNavigate(WifiProvisionRoutes.WifiProvision())
                     }
                 }
@@ -237,8 +237,8 @@ private fun DesktopAppInfoSection(
     ExpressiveSection(title = stringResource(Res.string.info)) {
         ListItem(
             text = stringResource(Res.string.acknowledgements),
-            leadingIcon = Icons.Rounded.Info,
-            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.Info,
+            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
         ) {
             onNavigateToAbout()
         }
@@ -274,7 +274,7 @@ private fun DesktopAppVersionButton(
 
     ListItem(
         text = stringResource(Res.string.app_version),
-        leadingIcon = Icons.Rounded.Memory,
+        leadingIcon = MeshtasticIcons.Memory,
         supportingText = appVersionName,
         trailingIcon = null,
     ) {

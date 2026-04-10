@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.stringResource
@@ -25,18 +23,22 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.send
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 
 @Composable
 fun WarningDialog(
-    icon: ImageVector? = Icons.Rounded.Warning,
+    icon: ImageVector? = null,
     title: String,
     text: @Composable () -> Unit = {},
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
+    val resolvedIcon = icon ?: MeshtasticIcons.Warning
+
     MeshtasticDialog(
         onDismiss = onDismiss,
-        icon = icon,
+        icon = resolvedIcon,
         title = title,
         text = text,
         confirmText = stringResource(Res.string.send),

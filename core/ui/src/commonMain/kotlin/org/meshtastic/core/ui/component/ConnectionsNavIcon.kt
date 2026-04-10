@@ -17,12 +17,6 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.Cached
-import androidx.compose.material.icons.rounded.Snooze
-import androidx.compose.material.icons.rounded.Usb
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
@@ -35,9 +29,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Device
+import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
+import org.meshtastic.core.ui.icon.Reconnecting
+import org.meshtastic.core.ui.icon.Usb
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -86,14 +85,14 @@ private fun getTint(connectionState: ConnectionState): Color = when (connectionS
 fun getIconPair(connectionState: ConnectionState, deviceType: DeviceType? = null): Pair<ImageVector, ImageVector?> =
     when (connectionState) {
         ConnectionState.Disconnected -> MeshtasticIcons.NoDevice to null
-        ConnectionState.DeviceSleep -> MeshtasticIcons.Device to Icons.Rounded.Snooze
-        ConnectionState.Connecting -> MeshtasticIcons.Device to Icons.Rounded.Cached
+        ConnectionState.DeviceSleep -> MeshtasticIcons.Device to MeshtasticIcons.DeviceSleep
+        ConnectionState.Connecting -> MeshtasticIcons.Device to MeshtasticIcons.Reconnecting
         else ->
             MeshtasticIcons.Device to
                 when (deviceType) {
-                    DeviceType.BLE -> Icons.Rounded.Bluetooth
-                    DeviceType.TCP -> Icons.Rounded.Wifi
-                    DeviceType.USB -> Icons.Rounded.Usb
+                    DeviceType.BLE -> MeshtasticIcons.Bluetooth
+                    DeviceType.TCP -> MeshtasticIcons.Wifi
+                    DeviceType.USB -> MeshtasticIcons.Usb
                     else -> null
                 }
     }

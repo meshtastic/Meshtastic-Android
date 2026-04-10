@@ -34,8 +34,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -127,6 +125,7 @@ import org.meshtastic.core.resources.learn_more
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.CloudDownload
@@ -233,7 +232,7 @@ private fun FirmwareUpdateScaffold(
                 title = { Text(stringResource(Res.string.firmware_update_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                        Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
             )

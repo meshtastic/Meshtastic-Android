@@ -43,9 +43,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -80,6 +77,9 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.search_emoji
 import org.meshtastic.core.ui.component.BottomSheetDialog
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Search
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -218,13 +218,13 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
             )
         },
         leadingIcon = {
-            Icon(imageVector = Icons.Rounded.Search, contentDescription = null, modifier = Modifier.size(20.dp))
+            Icon(imageVector = MeshtasticIcons.Search, contentDescription = null, modifier = Modifier.size(20.dp))
         },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
                     Icon(
-                        imageVector = Icons.Rounded.Close,
+                        imageVector = MeshtasticIcons.Close,
                         contentDescription = stringResource(Res.string.clear),
                         modifier = Modifier.size(20.dp),
                     )

@@ -19,11 +19,7 @@ package org.meshtastic.feature.intro
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.Router
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.configure_location_permissions
@@ -39,6 +35,9 @@ import org.meshtastic.core.resources.phone_location_description
 import org.meshtastic.core.resources.settings
 import org.meshtastic.core.resources.share_location
 import org.meshtastic.core.resources.share_location_description
+import org.meshtastic.core.ui.icon.HardwareModel
+import org.meshtastic.core.ui.icon.LocationOn
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 /**
  * Screen for configuring location permissions during the app introduction. It explains why location permissions are
@@ -59,30 +58,29 @@ internal fun LocationScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfi
             tag = SETTINGS_TAG,
         )
 
-    val features = remember {
+    val features =
         listOf(
             FeatureUIData(
-                icon = Icons.Outlined.LocationOn,
+                icon = MeshtasticIcons.LocationOn,
                 titleRes = Res.string.share_location,
                 subtitleRes = Res.string.share_location_description,
             ),
             FeatureUIData(
-                icon = Icons.Outlined.Router,
+                icon = MeshtasticIcons.HardwareModel,
                 titleRes = Res.string.distance_measurements,
                 subtitleRes = Res.string.distance_measurements_description,
             ),
             FeatureUIData(
-                icon = Icons.Outlined.Router, // Consider a different icon if appropriate
+                icon = MeshtasticIcons.HardwareModel, // Consider a different icon if appropriate
                 titleRes = Res.string.distance_filters,
                 subtitleRes = Res.string.distance_filters_description,
             ),
             FeatureUIData(
-                icon = Icons.Outlined.LocationOn, // Consider a different icon if appropriate
+                icon = MeshtasticIcons.LocationOn, // Consider a different icon if appropriate
                 titleRes = Res.string.mesh_map_location,
                 subtitleRes = Res.string.mesh_map_location_description,
             ),
         )
-    }
 
     PermissionScreenLayout(
         headlineRes = Res.string.phone_location,

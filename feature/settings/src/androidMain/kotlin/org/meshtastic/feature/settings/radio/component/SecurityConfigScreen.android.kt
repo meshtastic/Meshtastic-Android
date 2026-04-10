@@ -21,8 +21,6 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,6 +37,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.export_keys
 import org.meshtastic.core.resources.export_keys_confirmation
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
@@ -81,7 +81,7 @@ actual fun ExportSecurityConfigButton(
         modifier = Modifier.padding(horizontal = 8.dp),
         title = stringResource(Res.string.export_keys),
         enabled = enabled,
-        icon = Icons.TwoTone.Warning,
+        icon = MeshtasticIcons.Warning,
         onClick = { showEditSecurityConfigDialog = true },
     )
 }

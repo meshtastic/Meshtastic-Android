@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +44,8 @@ import org.meshtastic.core.resources.gpio_pin
 import org.meshtastic.core.resources.ignore_incoming
 import org.meshtastic.core.resources.name
 import org.meshtastic.core.resources.type
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.proto.RemoteHardwarePin
 import org.meshtastic.proto.RemoteHardwarePinType
 
@@ -85,7 +85,7 @@ inline fun <reified T> EditListPreference(
                         },
                     ) {
                         Icon(
-                            imageVector = Icons.TwoTone.Close,
+                            imageVector = MeshtasticIcons.Close,
                             contentDescription = stringResource(Res.string.delete),
                             modifier = Modifier.wrapContentSize(),
                         )

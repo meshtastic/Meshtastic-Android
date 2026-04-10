@@ -23,9 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -59,6 +56,9 @@ import org.meshtastic.core.resources.discovered_network_devices
 import org.meshtastic.core.resources.ip_port
 import org.meshtastic.core.resources.no_network_devices_found
 import org.meshtastic.core.resources.recent_network_devices
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.HardwareModel
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
@@ -97,11 +97,11 @@ fun NetworkDevices(
         if (discoveredNetworkDevices.isEmpty() && recentNetworkDevices.isEmpty()) {
             EmptyStateContent(
                 text = stringResource(Res.string.no_network_devices_found),
-                imageVector = Icons.Rounded.Router,
+                imageVector = MeshtasticIcons.HardwareModel,
                 modifier = Modifier.padding(vertical = 32.dp),
             ) {
                 Button(onClick = { showAddDialog = true }) {
-                    Icon(Icons.Rounded.Add, contentDescription = null)
+                    Icon(MeshtasticIcons.Add, contentDescription = null)
                     Text(stringResource(Res.string.add_network_device))
                 }
             }
@@ -127,7 +127,7 @@ fun NetworkDevices(
 
             Row(modifier = Modifier.padding(top = 8.dp)) {
                 FloatingActionButton(onClick = { showAddDialog = true }) {
-                    Icon(Icons.Rounded.Add, contentDescription = stringResource(Res.string.add_network_device))
+                    Icon(MeshtasticIcons.Add, contentDescription = stringResource(Res.string.add_network_device))
                 }
             }
         }

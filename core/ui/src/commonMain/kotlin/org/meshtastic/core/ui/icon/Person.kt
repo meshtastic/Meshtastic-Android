@@ -16,24 +16,33 @@
  */
 package org.meshtastic.core.ui.icon
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountCircle
-import androidx.compose.material.icons.rounded.Group
-import androidx.compose.material.icons.rounded.Groups
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.PersonOff
-import androidx.compose.material.icons.rounded.PersonSearch
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_account_circle
+import org.meshtastic.core.resources.ic_group
+import org.meshtastic.core.resources.ic_groups
+import org.meshtastic.core.resources.ic_people
+import org.meshtastic.core.resources.ic_person
+import org.meshtastic.core.resources.ic_person_add
+import org.meshtastic.core.resources.ic_person_off
+import org.meshtastic.core.resources.ic_person_search
 
-val MeshtasticIcons.Person: ImageVector
-    get() = Icons.Rounded.Person
 val MeshtasticIcons.PersonOff: ImageVector
-    get() = Icons.Rounded.PersonOff
-val MeshtasticIcons.Groups: ImageVector
-    get() = Icons.Rounded.Groups
+    @Composable get() = vectorResource(Res.drawable.ic_person_off)
 val MeshtasticIcons.Group: ImageVector
-    get() = Icons.Rounded.Group
+    @Composable get() = vectorResource(Res.drawable.ic_group)
 val MeshtasticIcons.AccountCircle: ImageVector
-    get() = Icons.Rounded.AccountCircle
+    @Composable get() = vectorResource(Res.drawable.ic_account_circle)
 val MeshtasticIcons.PersonSearch: ImageVector
-    get() = Icons.Rounded.PersonSearch
+    @Composable get() = vectorResource(Res.drawable.ic_person_search)
+
+val MeshtasticIcons.PersonAdd: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_person_add)
+val MeshtasticIcons.Person: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_person)
+val MeshtasticIcons.Groups: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_groups)
+val MeshtasticIcons.PeopleCount: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_people)

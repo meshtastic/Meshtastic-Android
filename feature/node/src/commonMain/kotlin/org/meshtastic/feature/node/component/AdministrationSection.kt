@@ -17,11 +17,6 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ForkLeft
-import androidx.compose.material.icons.rounded.Icecream
-import androidx.compose.material.icons.rounded.Memory
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,6 +38,11 @@ import org.meshtastic.core.resources.latest_stable_firmware
 import org.meshtastic.core.resources.remote_admin
 import org.meshtastic.core.resources.request_metadata
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.ForkLeft
+import org.meshtastic.core.ui.icon.Icecream
+import org.meshtastic.core.ui.icon.Memory
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -63,7 +63,7 @@ fun AdministrationSection(
         Column {
             ListItem(
                 text = stringResource(Res.string.request_metadata),
-                leadingIcon = Icons.Rounded.Memory,
+                leadingIcon = MeshtasticIcons.Memory,
                 trailingIcon = null,
                 onClick = {
                     onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num)))
@@ -74,7 +74,7 @@ fun AdministrationSection(
 
             ListItem(
                 text = stringResource(Res.string.remote_admin),
-                leadingIcon = Icons.Rounded.Settings,
+                leadingIcon = MeshtasticIcons.Settings,
                 enabled = metricsState.isLocal || node.metadata != null,
             ) {
                 onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
@@ -101,8 +101,8 @@ private fun FirmwareSection(
             firmwareEdition?.let { edition ->
                 val icon =
                     when (edition) {
-                        FirmwareEdition.VANILLA -> Icons.Rounded.Icecream
-                        else -> Icons.Rounded.ForkLeft
+                        FirmwareEdition.VANILLA -> MeshtasticIcons.Icecream
+                        else -> MeshtasticIcons.ForkLeft
                     }
 
                 ListItem(
@@ -138,7 +138,7 @@ private fun FirmwareVersionItems(
 
     ListItem(
         text = stringResource(Res.string.installed_firmware_version),
-        leadingIcon = Icons.Rounded.Memory,
+        leadingIcon = MeshtasticIcons.Memory,
         supportingText = version.substringBeforeLast("."),
         copyable = true,
         leadingIconTint = statusColor,
@@ -149,7 +149,7 @@ private fun FirmwareVersionItems(
 
     ListItem(
         text = stringResource(Res.string.latest_stable_firmware),
-        leadingIcon = Icons.Rounded.Memory,
+        leadingIcon = MeshtasticIcons.Memory,
         supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
         copyable = true,
         leadingIconTint = MaterialTheme.colorScheme.StatusGreen,
@@ -161,7 +161,7 @@ private fun FirmwareVersionItems(
 
     ListItem(
         text = stringResource(Res.string.latest_alpha_firmware),
-        leadingIcon = Icons.Rounded.Memory,
+        leadingIcon = MeshtasticIcons.Memory,
         supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
         copyable = true,
         leadingIconTint = MaterialTheme.colorScheme.StatusYellow,

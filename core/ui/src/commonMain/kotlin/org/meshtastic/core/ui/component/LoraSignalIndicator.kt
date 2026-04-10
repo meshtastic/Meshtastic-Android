@@ -27,11 +27,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.SignalCellular4Bar
-import androidx.compose.material.icons.rounded.SignalCellularAlt
-import androidx.compose.material.icons.rounded.SignalCellularAlt1Bar
-import androidx.compose.material.icons.rounded.SignalCellularAlt2Bar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -41,15 +36,20 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bad
 import org.meshtastic.core.resources.fair
 import org.meshtastic.core.resources.good
+import org.meshtastic.core.resources.ic_signal_cellular_4_bar
+import org.meshtastic.core.resources.ic_signal_cellular_alt
+import org.meshtastic.core.resources.ic_signal_cellular_alt_1_bar
+import org.meshtastic.core.resources.ic_signal_cellular_alt_2_bar
 import org.meshtastic.core.resources.none_quality
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.signal
@@ -69,13 +69,13 @@ const val RSSI_FAIR_THRESHOLD = -126
 @Stable
 enum class Quality(
     @Stable val nameRes: StringResource,
-    @Stable val imageVector: ImageVector,
+    @Stable val icon: DrawableResource,
     @Stable val color: @Composable () -> Color,
 ) {
-    NONE(Res.string.none_quality, Icons.Rounded.SignalCellularAlt1Bar, { colorScheme.StatusRed }),
-    BAD(Res.string.bad, Icons.Rounded.SignalCellularAlt2Bar, { colorScheme.StatusOrange }),
-    FAIR(Res.string.fair, Icons.Rounded.SignalCellularAlt, { colorScheme.StatusYellow }),
-    GOOD(Res.string.good, Icons.Rounded.SignalCellular4Bar, { colorScheme.StatusGreen }),
+    NONE(Res.string.none_quality, Res.drawable.ic_signal_cellular_alt_1_bar, { colorScheme.StatusRed }),
+    BAD(Res.string.bad, Res.drawable.ic_signal_cellular_alt_2_bar, { colorScheme.StatusOrange }),
+    FAIR(Res.string.fair, Res.drawable.ic_signal_cellular_alt, { colorScheme.StatusYellow }),
+    GOOD(Res.string.good, Res.drawable.ic_signal_cellular_4_bar, { colorScheme.StatusGreen }),
 }
 
 /**
@@ -100,9 +100,9 @@ fun NodeSignalQuality(snr: Float, rssi: Int, modifier: Modifier = Modifier) {
         )
         Icon(
             modifier = Modifier.size(SIZE_ICON_DP.dp),
-            imageVector = quality.imageVector,
+            imageVector = vectorResource(quality.icon),
             contentDescription = stringResource(Res.string.signal_quality),
-            tint = quality.color.invoke(),
+            tint = quality.color(),
         )
     }
 }
@@ -129,9 +129,9 @@ fun LoraSignalIndicator(snr: Float, rssi: Int, contentColor: Color = MaterialThe
     ) {
         Icon(
             modifier = Modifier.size(SIZE_ICON_DP.dp),
-            imageVector = quality.imageVector,
+            imageVector = vectorResource(quality.icon),
             contentDescription = stringResource(Res.string.signal_quality),
-            tint = quality.color.invoke(),
+            tint = quality.color(),
         )
         Text(
             text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",

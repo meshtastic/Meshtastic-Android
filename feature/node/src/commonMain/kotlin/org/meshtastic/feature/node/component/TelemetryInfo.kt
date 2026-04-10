@@ -18,16 +18,6 @@
 
 package org.meshtastic.feature.node.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Air
-import androidx.compose.material.icons.rounded.ElectricBolt
-import androidx.compose.material.icons.rounded.Fingerprint
-import androidx.compose.material.icons.rounded.Grass
-import androidx.compose.material.icons.rounded.People
-import androidx.compose.material.icons.rounded.Router
-import androidx.compose.material.icons.rounded.Thermostat
-import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -45,6 +35,16 @@ import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.soil_moisture
 import org.meshtastic.core.resources.soil_temperature
 import org.meshtastic.core.resources.temperature
+import org.meshtastic.core.ui.icon.AirQuality
+import org.meshtastic.core.ui.icon.ElectricPower
+import org.meshtastic.core.ui.icon.HardwareModel
+import org.meshtastic.core.ui.icon.Humidity
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.NodeId
+import org.meshtastic.core.ui.icon.PeopleCount
+import org.meshtastic.core.ui.icon.Role
+import org.meshtastic.core.ui.icon.SoilMoisture
+import org.meshtastic.core.ui.icon.Temperature
 
 @Composable
 fun TemperatureInfo(
@@ -54,7 +54,7 @@ fun TemperatureInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.Thermostat,
+        icon = MeshtasticIcons.Temperature,
         contentDescription = stringResource(Res.string.env_metrics_log),
         label = stringResource(Res.string.temperature),
         text = temp,
@@ -70,7 +70,7 @@ fun HumidityInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.WaterDrop,
+        icon = MeshtasticIcons.Humidity,
         contentDescription = stringResource(Res.string.env_metrics_log),
         label = stringResource(Res.string.humidity),
         text = humidity,
@@ -86,7 +86,7 @@ fun SoilTemperatureInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.Grass,
+        icon = MeshtasticIcons.SoilMoisture,
         contentDescription = stringResource(Res.string.env_metrics_log),
         label = stringResource(Res.string.soil_temperature),
         text = temp,
@@ -102,7 +102,7 @@ fun SoilMoistureInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.Grass,
+        icon = MeshtasticIcons.SoilMoisture,
         contentDescription = stringResource(Res.string.env_metrics_log),
         label = stringResource(Res.string.soil_moisture),
         text = moisture,
@@ -118,7 +118,7 @@ fun PaxcountInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.People,
+        icon = MeshtasticIcons.PeopleCount,
         contentDescription = stringResource(Res.string.pax_metrics_log),
         label = stringResource(Res.string.pax),
         text = pax,
@@ -134,7 +134,7 @@ fun AirQualityInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.Air,
+        icon = MeshtasticIcons.AirQuality,
         contentDescription = stringResource(Res.string.env_metrics_log),
         label = stringResource(Res.string.iaq),
         text = iaq,
@@ -151,7 +151,7 @@ fun PowerInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.ElectricBolt,
+        icon = MeshtasticIcons.ElectricPower,
         contentDescription = stringResource(Res.string.env_metrics_log),
         label = label,
         text = value,
@@ -167,7 +167,7 @@ fun HardwareInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.Router,
+        icon = MeshtasticIcons.HardwareModel,
         contentDescription = stringResource(Res.string.hardware_model),
         text = hwModel,
         style = MaterialTheme.typography.labelSmall,
@@ -179,7 +179,7 @@ fun HardwareInfo(
 fun RoleInfo(role: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.Work,
+        icon = MeshtasticIcons.Role,
         contentDescription = stringResource(Res.string.role),
         text = role,
         style = MaterialTheme.typography.labelSmall,
@@ -191,7 +191,7 @@ fun RoleInfo(role: String, modifier: Modifier = Modifier, contentColor: Color = 
 fun NodeIdInfo(id: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.Fingerprint,
+        icon = MeshtasticIcons.NodeId,
         contentDescription = stringResource(Res.string.node_id),
         text = id,
         style = MaterialTheme.typography.labelSmall,

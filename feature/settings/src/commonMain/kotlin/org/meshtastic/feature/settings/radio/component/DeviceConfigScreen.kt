@@ -25,9 +25,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -109,7 +106,9 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.Clear
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.util.annotatedStringFromHtml
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -270,7 +269,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     onValueChanged = { formState.value = formState.value.copy(tzdef = it) },
                     trailingIcon = {
                         IconButton(onClick = { formState.value = formState.value.copy(tzdef = "") }) {
-                            Icon(imageVector = Icons.Rounded.Clear, contentDescription = null)
+                            Icon(imageVector = MeshtasticIcons.Clear, contentDescription = null)
                         }
                     },
                 )
@@ -283,7 +282,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     shape = RectangleShape,
                     onClick = { formState.value = formState.value.copy(tzdef = appTzPosixString) },
                 ) {
-                    Icon(imageVector = Icons.Rounded.PhoneAndroid, contentDescription = null)
+                    Icon(imageVector = MeshtasticIcons.PhoneAndroid, contentDescription = null)
 
                     Spacer(modifier = Modifier.width(8.dp))
 

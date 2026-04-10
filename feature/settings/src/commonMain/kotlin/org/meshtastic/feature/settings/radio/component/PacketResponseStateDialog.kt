@@ -22,9 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +43,9 @@ import org.meshtastic.core.resources.delivery_confirmed
 import org.meshtastic.core.resources.delivery_confirmed_reboot_warning
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.Error
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.feature.settings.radio.ResponseState
 
 private const val AUTO_DISMISS_DELAY_MS = 1500L
@@ -135,7 +135,7 @@ private fun LoadingContent(state: ResponseState.Loading, onComplete: () -> Unit)
 @Composable
 private fun SuccessContent() {
     Icon(
-        imageVector = Icons.Filled.CheckCircle,
+        imageVector = MeshtasticIcons.Success,
         contentDescription = null,
         modifier = Modifier.size(84.dp),
         tint = MaterialTheme.colorScheme.primary,
@@ -158,7 +158,7 @@ private fun SuccessContent() {
 @Composable
 private fun ErrorContent(state: ResponseState.Error) {
     Icon(
-        imageVector = Icons.Filled.Error,
+        imageVector = MeshtasticIcons.Error,
         contentDescription = null,
         modifier = Modifier.size(84.dp),
         tint = MaterialTheme.colorScheme.error,

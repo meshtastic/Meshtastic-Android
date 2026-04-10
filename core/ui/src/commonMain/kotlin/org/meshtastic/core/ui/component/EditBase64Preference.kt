@@ -21,9 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Close
-import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -50,6 +47,9 @@ import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.reset
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
 
 @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
 @Composable
@@ -80,8 +80,8 @@ fun EditBase64Preference(
 
     val (icon, description) =
         when {
-            isError -> Icons.TwoTone.Close to stringResource(Res.string.error)
-            onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(Res.string.reset)
+            isError -> MeshtasticIcons.Close to stringResource(Res.string.error)
+            onGenerateKey != null && !isFocused -> MeshtasticIcons.Refresh to stringResource(Res.string.reset)
             else -> null to null
         }
     Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
