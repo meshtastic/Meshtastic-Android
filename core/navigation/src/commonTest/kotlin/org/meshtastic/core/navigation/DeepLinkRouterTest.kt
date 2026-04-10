@@ -156,7 +156,7 @@ class DeepLinkRouterTest {
             listOf(
                 NodesRoute.NodesGraph,
                 NodesRoute.NodeDetailGraph(destNum = 5678),
-                NodeDetailRoute.NodeMap(destNum = 5678),
+                NodeDetailRoute.PositionLog(destNum = 5678),
             ),
             route("/nodes/5678/map"),
         )

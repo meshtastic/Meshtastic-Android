@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: 2026-03-31
+> Last updated: 2026-04-10
 
 Forward-looking priorities for the Meshtastic KMP multi-target effort. For current state, see [`kmp-status.md`](./kmp-status.md). For the full gap analysis, see [`decisions/architecture-review-2026-03.md`](./decisions/architecture-review-2026-03.md).
 
@@ -81,10 +81,10 @@ These items address structural gaps identified in the March 2026 architecture re
 
 1. **Evaluate KMP-native testing tools** — ✅ **Done:** Fully evaluated and integrated `Mokkery`, `Turbine`, and `Kotest` across the KMP modules. `mockk` has been successfully replaced, enabling property-based and Flow testing in `commonTest` for iOS readiness.
 2. **Desktop Map Integration** — Address the major Desktop feature gap by implementing a raster map view using [**MapComposeMP**](https://github.com/p-lr/MapComposeMP).
-    - Implement a `MapComposeProvider` for Desktop.
+    - Implement Desktop providers for the 3 decomposed map contracts: `MapViewProvider` (main map), `NodeTrackMapProvider` (per-node track overlay for `PositionLogScreen`), and `TracerouteMapProvider` (traceroute visualization).
     - Implement a **Web Mercator Projection** helper in `feature:map/commonMain` to translate GPS coordinates to the 2D image plane.
-    - Leverage the existing `BaseMapViewModel` contract.
-3. **Unify `MapViewModel`** — Collapse the remaining Google and F-Droid specific `MapViewModel` classes in the `:app` module into a single `commonMain` implementation by isolating platform-specific settings (styles, tile sources) behind a repository interface.
+    - Leverage the existing `BaseMapViewModel` contract and `TracerouteNodeSelection` logic in `commonMain`.
+3. **Unify `MapViewModel`** — Collapse the remaining Google and F-Droid specific `MapViewModel` classes in the `:app` module into a single `commonMain` implementation by isolating platform-specific settings (styles, tile sources) behind a repository interface. The `MapViewProvider` interface has been simplified (track/traceroute rendering extracted to dedicated providers), reducing the surface area of this unification.
 4. **iOS CI gate** — ✅ **Done:** added `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI. `commonMain` successfully compiles on iOS.
 
 ## Medium-Term Priorities (60 days)

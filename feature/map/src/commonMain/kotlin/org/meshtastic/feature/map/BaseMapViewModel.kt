@@ -31,6 +31,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -41,7 +42,6 @@ import org.meshtastic.core.resources.one_day
 import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.two_days
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 
@@ -194,16 +194,42 @@ open class BaseMapViewModel(
             )
 }
 
+/**
+ * Result of resolving a [TracerouteOverlay]'s node nums into displayable [Node] instances.
+ *
+ * @property overlayNodeNums All unique node nums referenced by the traceroute.
+ * @property nodesForMarkers Nodes to render as map markers (with snapshot positions when available).
+ * @property nodeLookup Node-num-keyed map for polyline coordinate resolution.
+ */
 data class TracerouteNodeSelection(
     val overlayNodeNums: Set<Int>,
     val nodesForMarkers: List<Node>,
     val nodeLookup: Map<Int, Node>,
 )
 
+/** Convenience extension that delegates to [tracerouteNodeSelection] using the VM's [getNodeOrFallback]. */
 fun BaseMapViewModel.tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
     nodes: List<Node>,
+): TracerouteNodeSelection = tracerouteNodeSelection(
+    tracerouteOverlay = tracerouteOverlay,
+    tracerouteNodePositions = tracerouteNodePositions,
+    nodes = nodes,
+    getNodeOrFallback = ::getNodeOrFallback,
+)
+
+/**
+ * Resolves traceroute overlay node nums into displayable [Node] instances. Snapshot positions (recorded at traceroute
+ * time) take priority over live positions from the node database.
+ *
+ * @param getNodeOrFallback Provides a [Node] for a given num, falling back to a stub if not in the DB.
+ */
+fun tracerouteNodeSelection(
+    tracerouteOverlay: TracerouteOverlay?,
+    tracerouteNodePositions: Map<Int, Position>,
+    nodes: List<Node>,
+    getNodeOrFallback: (Int) -> Node,
 ): TracerouteNodeSelection {
     val overlayNodeNums = tracerouteOverlay?.relatedNodeNums ?: emptySet()
     val tracerouteSnapshotNodes =

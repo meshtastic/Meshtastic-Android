@@ -58,18 +58,20 @@ import org.meshtastic.core.ui.icon.VolumeMute
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.feature.node.model.LogsType
-import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
+import org.meshtastic.proto.Config
 
 @Composable
 fun DeviceActions(
     node: Node,
+    ourNode: Node?,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
-    metricsState: MetricsState,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
+    isFahrenheit: Boolean,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
 ) {
@@ -85,10 +87,12 @@ fun DeviceActions(
 
         TelemetricActionsSection(
             node = node,
+            ourNode = ourNode,
             availableLogs = availableLogs,
             lastTracerouteTime = lastTracerouteTime,
             lastRequestNeighborsTime = lastRequestNeighborsTime,
-            metricsState = metricsState,
+            displayUnits = displayUnits,
+            isFahrenheit = isFahrenheit,
             onAction = onAction,
             isLocal = isLocal,
         )

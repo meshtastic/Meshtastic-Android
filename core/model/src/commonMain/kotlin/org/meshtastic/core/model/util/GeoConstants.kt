@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.map.model
+package org.meshtastic.core.model.util
 
-data class TracerouteOverlay(
-    val requestId: Int,
-    val forwardRoute: List<Int> = emptyList(),
-    val returnRoute: List<Int> = emptyList(),
-) {
-    val relatedNodeNums: Set<Int> = (forwardRoute + returnRoute).toSet()
+/** Common geographic constants for coordinate conversions. */
+object GeoConstants {
+    /** Multiplier to convert protobuf integer coordinates (1e-7 degree units) to decimal degrees. */
+    const val DEG_D = 1e-7
 
-    val hasRoutes: Boolean
-        get() = forwardRoute.isNotEmpty() || returnRoute.isNotEmpty()
+    /** Multiplier to convert protobuf integer heading values (1e-5 degree units) to decimal degrees. */
+    const val HEADING_DEG = 1e-5
+
+    /** Mean radius of the Earth in meters, for haversine calculations. */
+    const val EARTH_RADIUS_METERS = 6_371_000.0
 }

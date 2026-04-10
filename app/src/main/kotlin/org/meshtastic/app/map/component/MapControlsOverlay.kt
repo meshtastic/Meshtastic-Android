@@ -27,17 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.app.map.MapViewModel
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_filter
-import org.meshtastic.core.resources.map_tile_source
 import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.toggle_my_position
-import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.LocationDisabled
-import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
@@ -45,77 +40,58 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
+/**
+ * Shared map controls overlay used by both Google and F-Droid map views. Provides compass, filter button, location
+ * tracking button, and optional slots for flavor-specific content (map type selector, layers, refresh).
+ *
+ * @param onToggleFilterMenu Callback to open/close the filter dropdown.
+ * @param filterDropdownContent Composable rendered inside a [Box] alongside the filter button — typically a
+ *   `DropdownMenu` with filter options.
+ * @param mapTypeContent Optional composable for a map type selector button + dropdown. Google flavor provides map type
+ *   and custom tile options; F-Droid provides a tile source selector.
+ * @param layersContent Optional composable for a layers management button.
+ * @param showRefresh Whether to show a refresh button (e.g., for network map layers).
+ * @param isRefreshing Whether a refresh is currently in progress.
+ * @param onRefresh Callback when the refresh button is clicked.
+ */
+@Suppress("LongParameterList")
 @Composable
 fun MapControlsOverlay(
+    onToggleFilterMenu: () -> Unit,
     modifier: Modifier = Modifier,
-    mapFilterMenuExpanded: Boolean,
-    onMapFilterMenuDismissRequest: () -> Unit,
-    onToggleMapFilterMenu: () -> Unit,
-    mapViewModel: MapViewModel, // For MapFilterDropdown and MapTypeDropdown
-    mapTypeMenuExpanded: Boolean,
-    onMapTypeMenuDismissRequest: () -> Unit,
-    onToggleMapTypeMenu: () -> Unit,
-    onManageLayersClicked: () -> Unit,
-    onManageCustomTileProvidersClicked: () -> Unit, // New parameter
-    isNodeMap: Boolean,
-    // Location tracking parameters
-    isLocationTrackingEnabled: Boolean = false,
-    onToggleLocationTracking: () -> Unit = {},
     bearing: Float = 0f,
     onCompassClick: () -> Unit = {},
-    followPhoneBearing: Boolean,
+    followPhoneBearing: Boolean = false,
+    filterDropdownContent: @Composable () -> Unit = {},
+    mapTypeContent: @Composable () -> Unit = {},
+    layersContent: @Composable () -> Unit = {},
+    isLocationTrackingEnabled: Boolean = false,
+    onToggleLocationTracking: () -> Unit = {},
     showRefresh: Boolean = false,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
 ) {
     Row(modifier = modifier) {
+        // Compass
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
-        if (isNodeMap) {
+
+        // Filter button + dropdown
+        Box {
             MapButton(
                 icon = MeshtasticIcons.Tune,
                 contentDescription = stringResource(Res.string.map_filter),
-                onClick = onToggleMapFilterMenu,
+                onClick = onToggleFilterMenu,
             )
-            NodeMapFilterDropdown(
-                expanded = mapFilterMenuExpanded,
-                onDismissRequest = onMapFilterMenuDismissRequest,
-                mapViewModel = mapViewModel,
-            )
-        } else {
-            Box {
-                MapButton(
-                    icon = MeshtasticIcons.Tune,
-                    contentDescription = stringResource(Res.string.map_filter),
-                    onClick = onToggleMapFilterMenu,
-                )
-                MapFilterDropdown(
-                    expanded = mapFilterMenuExpanded,
-                    onDismissRequest = onMapFilterMenuDismissRequest,
-                    mapViewModel = mapViewModel,
-                )
-            }
+            filterDropdownContent()
         }
 
-        Box {
-            MapButton(
-                icon = MeshtasticIcons.Map,
-                contentDescription = stringResource(Res.string.map_tile_source),
-                onClick = onToggleMapTypeMenu,
-            )
-            MapTypeDropdown(
-                expanded = mapTypeMenuExpanded,
-                onDismissRequest = onMapTypeMenuDismissRequest,
-                mapViewModel = mapViewModel, // Pass mapViewModel
-                onManageCustomTileProvidersClicked = onManageCustomTileProvidersClicked, // Pass new callback
-            )
-        }
+        // Map type selector (flavor-specific)
+        mapTypeContent()
 
-        MapButton(
-            icon = MeshtasticIcons.Layers,
-            contentDescription = stringResource(Res.string.manage_map_layers),
-            onClick = onManageLayersClicked,
-        )
+        // Layers button (flavor-specific)
+        layersContent()
 
+        // Refresh button (optional)
         if (showRefresh) {
             if (isRefreshing) {
                 Box(modifier = Modifier.padding(8.dp)) {
@@ -132,12 +108,7 @@ fun MapControlsOverlay(
 
         // Location tracking button
         MapButton(
-            icon =
-            if (isLocationTrackingEnabled) {
-                MeshtasticIcons.LocationDisabled
-            } else {
-                MeshtasticIcons.MyLocation
-            },
+            icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
             contentDescription = stringResource(Res.string.toggle_my_position),
             onClick = onToggleLocationTracking,
         )
@@ -146,12 +117,16 @@ fun MapControlsOverlay(
 
 @Composable
 private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Boolean) {
-    val icon = if (isFollowing) MeshtasticIcons.MapCompass else MeshtasticIcons.MapCompass
-
+    val iconTint =
+        when {
+            isFollowing -> MaterialTheme.colorScheme.primary
+            bearing == 0f -> MaterialTheme.colorScheme.StatusRed
+            else -> null
+        }
     MapButton(
         modifier = Modifier.rotate(-bearing),
-        icon = icon,
-        iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { bearing == 0f },
+        icon = MeshtasticIcons.MapCompass,
+        iconTint = iconTint,
         contentDescription = stringResource(Res.string.orient_north),
         onClick = onClick,
     )

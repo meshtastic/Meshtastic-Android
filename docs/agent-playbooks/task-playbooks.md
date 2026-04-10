@@ -15,6 +15,8 @@ Key files for discovering established patterns:
 | Shared ViewModel | `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt` |
 | `CompositionLocal` platform injection | `app/src/main/kotlin/org/meshtastic/app/MainActivity.kt` |
 | Platform abstraction contract | `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/MapViewProvider.kt` |
+| Node track map provider contract | `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/LocalNodeTrackMapProvider.kt` |
+| Traceroute map provider contract | `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/LocalTracerouteMapProvider.kt` |
 | Shared strings resource | `core/resources/src/commonMain/composeResources/values/strings.xml` |
 | Okio shared I/O | `core/domain/src/commonMain/kotlin/org/meshtastic/core/domain/usecase/settings/ImportProfileUseCase.kt` |
 | `stateInWhileSubscribed` | `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/ViewModelExtensions.kt` |
@@ -82,7 +84,9 @@ Reference examples:
 4. Keep adapter types narrow and stable (interfaces, DTO-like params).
 
 Reference examples:
-- Contract: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/MapViewProvider.kt`
+- Contract (main map): `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/MapViewProvider.kt`
+- Contract (node tracks): `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/LocalNodeTrackMapProvider.kt`
+- Contract (traceroute): `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/LocalTracerouteMapProvider.kt`
 - Provider wiring: `app/src/main/kotlin/org/meshtastic/app/MainActivity.kt`
 - Consumer side: `feature/map/src/androidMain/kotlin/org/meshtastic/feature/map/MapScreen.kt`
 

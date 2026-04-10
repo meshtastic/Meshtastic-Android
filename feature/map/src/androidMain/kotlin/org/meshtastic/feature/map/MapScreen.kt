@@ -57,7 +57,6 @@ fun MapScreen(
     ) { paddingValues ->
         LocalMapViewProvider.current?.MapView(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
-            viewModel = viewModel,
             navigateToNodeDetails = navigateToNodeDetails,
             waypointId = waypointId,
         )

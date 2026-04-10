@@ -18,22 +18,17 @@
 
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.free_memory
@@ -104,11 +99,10 @@ internal fun HostMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    Column(modifier = modifier) {
-        if (data.isEmpty()) return@Column
-
-        val modelProducer = remember { CartesianChartModelProducer() }
-
+    MetricChartScaffold(isEmpty = data.isEmpty(), legendData = HOST_METRICS_LEGEND_DATA, modifier = modifier) {
+            modelProducer,
+            chartModifier,
+        ->
         val load1Data = remember(data) { data.filter { it.host_metrics?.load1 != null && it.host_metrics!!.load1 > 0 } }
         val load5Data = remember(data) { data.filter { it.host_metrics?.load5 != null && it.host_metrics!!.load5 > 0 } }
         val load15Data =
@@ -157,7 +151,7 @@ internal fun HostMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(alpha = 1f)) {
+                    when (color) {
                         load1Color -> formatString("L1: %.2f", value)
                         load5Color -> formatString("L5: %.2f", value)
                         load15Color -> formatString("L15: %.2f", value)
@@ -167,39 +161,33 @@ internal fun HostMetricsChart(
             )
 
         val hasLoad = load1Data.isNotEmpty() || load5Data.isNotEmpty() || load15Data.isNotEmpty()
+        val load1Style = if (load1Data.isNotEmpty()) ChartStyling.createStyledLine(load1Color) else null
+        val load5Style = if (load5Data.isNotEmpty()) ChartStyling.createDashedLine(load5Color) else null
+        val load15Style = if (load15Data.isNotEmpty()) ChartStyling.createSubtleLine(load15Color) else null
+        val loadStyles = listOfNotNull(load1Style, load5Style, load15Style)
 
         val loadLayer =
-            if (hasLoad) {
-                val load1Style = if (load1Data.isNotEmpty()) ChartStyling.createStyledLine(load1Color) else null
-                val load5Style = if (load5Data.isNotEmpty()) ChartStyling.createDashedLine(load5Color) else null
-                val load15Style = if (load15Data.isNotEmpty()) ChartStyling.createSubtleLine(load15Color) else null
-                val styles = listOfNotNull(load1Style, load5Style, load15Style)
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(styles),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = hasLoad,
+                lineProvider = LineCartesianLayer.LineProvider.series(loadStyles),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+                rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
+            )
 
         val memLayer =
-            if (memData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(memColor)),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
-                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = memData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(memColor)),
+                verticalAxisPosition = Axis.Position.Vertical.End,
+                rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
+            )
 
         val layers = remember(loadLayer, memLayer) { listOfNotNull(loadLayer, memLayer) }
 
         if (layers.isNotEmpty()) {
             GenericMetricChart(
                 modelProducer = modelProducer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                modifier = chartModifier,
                 layers = layers,
                 startAxis =
                 if (hasLoad) {
@@ -226,7 +214,5 @@ internal fun HostMetricsChart(
                 vicoScrollState = vicoScrollState,
             )
         }
-
-        Legend(legendData = HOST_METRICS_LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
 }

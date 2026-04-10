@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -56,6 +57,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.info
@@ -63,28 +65,12 @@ import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.time.Duration.Companion.days
 
 object CommonCharts {
-    const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
     const val SCROLL_BIAS = 0.5f
-
-    /** Gets the Material 3 primary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3PrimaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
-
-    /** Gets the Material 3 secondary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3SecondaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha)
-
-    /** Gets the Material 3 tertiary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3TertiaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.tertiary.copy(alpha = alpha)
-
-    /** Gets the Material 3 error color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3ErrorColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.error.copy(alpha = alpha)
 
     /**
      * A dynamic [CartesianValueFormatter] that adjusts the time format based on the total data span
@@ -118,8 +104,6 @@ object CommonCharts {
         }
     }
 
-    fun formatDateTime(timestampMillis: Long): String = DateFormatter.formatDateTime(timestampMillis)
-
     /**
      * Shared bottom time axis used by all metric chart screens.
      *
@@ -142,7 +126,7 @@ data class LegendData(
     val nameRes: StringResource,
     val color: Color,
     val isLine: Boolean = false,
-    val environmentMetric: Environment? = null,
+    val metricKey: Any? = null,
 )
 
 data class InfoDialogData(val titleRes: StringResource, val definitionRes: StringResource, val color: Color)
@@ -163,9 +147,9 @@ fun Legend(
     onToggle: ((Int) -> Unit)? = null,
 ) {
     FlowRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.Center,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         legendData.forEachIndexed { index, data ->
             val isVisible = index !in hiddenSet
@@ -173,7 +157,7 @@ fun Legend(
                 FilterChip(
                     selected = isVisible,
                     onClick = { onToggle(index) },
-                    label = { Text(stringResource(data.nameRes)) },
+                    label = { Text(text = stringResource(data.nameRes), style = MaterialTheme.typography.labelSmall) },
                     leadingIcon = { LegendIndicator(color = data.color, isLine = data.isLine) },
                     modifier = Modifier.padding(horizontal = 2.dp),
                 )
@@ -262,7 +246,8 @@ fun MetricIndicator(color: Color, modifier: Modifier = Modifier) {
     Box(modifier = modifier.size(8.dp).clip(CircleShape).background(color))
 }
 
-@Suppress("UnusedPrivateMember") // Compose preview
+@PreviewLightDark
+@Suppress("unused") // Compose preview
 @Composable
 private fun LegendPreview() {
     val data =
@@ -270,10 +255,12 @@ private fun LegendPreview() {
             LegendData(nameRes = Res.string.rssi, color = Color.Red, isLine = true),
             LegendData(nameRes = Res.string.snr, color = Color.Green, isLine = true),
         )
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        // Read-only legend
-        Legend(legendData = data)
-        // Toggleable legend
-        Legend(legendData = data, hiddenSet = setOf(1), onToggle = {})
+    AppTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Read-only legend
+            Legend(legendData = data)
+            // Toggleable legend
+            Legend(legendData = data, hiddenSet = setOf(1), onToggle = {})
+        }
     }
 }

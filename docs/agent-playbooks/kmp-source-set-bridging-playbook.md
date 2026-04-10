@@ -26,7 +26,9 @@ Examples in current code:
 - Platform/flavor UI implementations should be injected via `CompositionLocal` from app.
 
 Examples:
-- Contract: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/MapViewProvider.kt`
+- Contract (main map): `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/MapViewProvider.kt`
+- Contract (node tracks): `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/LocalNodeTrackMapProvider.kt`
+- Contract (traceroute): `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/LocalTracerouteMapProvider.kt`
 - Provider wiring: `app/src/main/kotlin/org/meshtastic/app/MainActivity.kt`
 
 ## 4) DI and module activation checks

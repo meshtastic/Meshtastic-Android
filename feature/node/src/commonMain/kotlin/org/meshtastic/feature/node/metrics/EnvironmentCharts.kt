@@ -57,52 +57,42 @@ private val LEGEND_DATA_1 =
             nameRes = Res.string.temperature,
             color = Environment.TEMPERATURE.color,
             isLine = true,
-            environmentMetric = Environment.TEMPERATURE,
+            metricKey = Environment.TEMPERATURE,
         ),
         LegendData(
             nameRes = Res.string.humidity,
             color = Environment.HUMIDITY.color,
             isLine = true,
-            environmentMetric = Environment.HUMIDITY,
+            metricKey = Environment.HUMIDITY,
         ),
     )
 private val LEGEND_DATA_2 =
     listOf(
-        LegendData(
-            nameRes = Res.string.iaq,
-            color = Environment.IAQ.color,
-            isLine = true,
-            environmentMetric = Environment.IAQ,
-        ),
+        LegendData(nameRes = Res.string.iaq, color = Environment.IAQ.color, isLine = true, metricKey = Environment.IAQ),
         LegendData(
             nameRes = Res.string.baro_pressure,
             color = Environment.BAROMETRIC_PRESSURE.color,
             isLine = true,
-            environmentMetric = Environment.BAROMETRIC_PRESSURE,
+            metricKey = Environment.BAROMETRIC_PRESSURE,
         ),
-        LegendData(
-            nameRes = Res.string.lux,
-            color = Environment.LUX.color,
-            isLine = true,
-            environmentMetric = Environment.LUX,
-        ),
+        LegendData(nameRes = Res.string.lux, color = Environment.LUX.color, isLine = true, metricKey = Environment.LUX),
         LegendData(
             nameRes = Res.string.uv_lux,
             color = Environment.UV_LUX.color,
             isLine = true,
-            environmentMetric = Environment.UV_LUX,
+            metricKey = Environment.UV_LUX,
         ),
         LegendData(
             nameRes = Res.string.wind_speed,
             color = Environment.WIND_SPEED.color,
             isLine = true,
-            environmentMetric = Environment.WIND_SPEED,
+            metricKey = Environment.WIND_SPEED,
         ),
         LegendData(
             nameRes = Res.string.radiation,
             color = Environment.RADIATION.color,
             isLine = true,
-            environmentMetric = Environment.RADIATION,
+            metricKey = Environment.RADIATION,
         ),
     )
 
@@ -112,13 +102,13 @@ private val LEGEND_DATA_3 =
             nameRes = Res.string.soil_temperature,
             color = Environment.SOIL_TEMPERATURE.color,
             isLine = true,
-            environmentMetric = Environment.SOIL_TEMPERATURE,
+            metricKey = Environment.SOIL_TEMPERATURE,
         ),
         LegendData(
             nameRes = Res.string.soil_moisture,
             color = Environment.SOIL_MOISTURE.color,
             isLine = true,
-            environmentMetric = Environment.SOIL_MOISTURE,
+            metricKey = Environment.SOIL_MOISTURE,
         ),
     )
 
@@ -143,14 +133,14 @@ fun EnvironmentMetricsChart(
 
         val allLegendData =
             (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3).filter {
-                graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0]
+                graphData.shouldPlot[(it.metricKey as? Environment)?.ordinal ?: 0]
             }
 
         // Legend toggle state: tracks indices into allLegendData that are hidden
         var hiddenIndices by remember { mutableStateOf(emptySet<Int>()) }
         val hiddenMetrics =
             remember(hiddenIndices, allLegendData) {
-                hiddenIndices.mapNotNull { allLegendData.getOrNull(it)?.environmentMetric }.toSet()
+                hiddenIndices.mapNotNull { allLegendData.getOrNull(it)?.metricKey as? Environment }.toSet()
             }
 
         val colorToLabel = allLegendData.associate { it.color to stringResource(it.nameRes) }
@@ -216,7 +206,7 @@ fun EnvironmentMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    val label = colorToLabel[color.copy(alpha = 1f)] ?: ""
+                    val label = colorToLabel[color] ?: ""
                     formatString("%s: %.1f", label, value)
                 },
             )

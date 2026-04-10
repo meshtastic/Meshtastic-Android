@@ -47,7 +47,9 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
+import org.meshtastic.core.model.util.GeoConstants
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
@@ -61,7 +63,6 @@ import org.meshtastic.core.resources.view_on_map
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.toMessageRes
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.model.MetricsState
@@ -333,12 +334,12 @@ open class MetricsViewModel(
                             .toLocalDateTime(TimeZone.currentSystemDefault())
                     val rxDateTime = "\"${localDateTime.date}\",\"${localDateTime.time}\""
 
-                    val latitude = (position.latitude_i ?: 0) * 1e-7
-                    val longitude = (position.longitude_i ?: 0) * 1e-7
+                    val latitude = (position.latitude_i ?: 0) * GeoConstants.DEG_D
+                    val longitude = (position.longitude_i ?: 0) * GeoConstants.DEG_D
                     val altitude = position.altitude
                     val satsInView = position.sats_in_view
                     val speed = position.ground_speed
-                    val heading = formatString("%.2f", (position.ground_track ?: 0) * 1e-5)
+                    val heading = formatString("%.2f", (position.ground_track ?: 0) * GeoConstants.HEADING_DEG)
 
                     sink.writeUtf8(
                         "$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n",

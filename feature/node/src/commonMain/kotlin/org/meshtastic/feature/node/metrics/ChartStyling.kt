@@ -29,10 +29,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.decoration.Decoration
 import com.patrykandpatrick.vico.compose.cartesian.decoration.HorizontalLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
@@ -249,10 +252,13 @@ object ChartStyling {
                 if (target is LineCartesianLayerMarkerTarget) {
                     target.points.forEachIndexed { pointIndex, point ->
                         if (pointIndex > 0) append(", ")
-                        // Force alpha to 1f so text is readable even if the line is transparent/subtle
-                        val color = point.color.copy(alpha = .8f)
-                        val text = format(point.entry.y, color)
-                        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(text) }
+                        // Pass the opaque color to the format lambda so callers can match without alpha gymnastics.
+                        // Apply 0.8 alpha only on the rendered text for readability.
+                        val opaqueColor = point.color.copy(alpha = 1f)
+                        val text = format(point.entry.y, opaqueColor)
+                        withStyle(SpanStyle(color = opaqueColor.copy(alpha = .8f), fontWeight = FontWeight.Bold)) {
+                            append(text)
+                        }
                     }
                 }
             }
@@ -266,4 +272,26 @@ object ChartStyling {
     @Composable
     fun rememberAxisLabel(color: Color = MaterialTheme.colorScheme.onSurfaceVariant): TextComponent =
         rememberTextComponent(style = TextStyle(color = color, fontSize = 10.sp, fontWeight = FontWeight.Medium))
+}
+
+/**
+ * Creates a [LineCartesianLayer] only when [hasData] is true, returning null otherwise.
+ *
+ * Extracts the repeated `if (data.isNotEmpty()) rememberLineCartesianLayer(...) else null` pattern used in every metric
+ * chart composable.
+ */
+@Composable
+fun rememberConditionalLayer(
+    hasData: Boolean,
+    lineProvider: LineCartesianLayer.LineProvider,
+    verticalAxisPosition: Axis.Position.Vertical,
+    rangeProvider: CartesianLayerRangeProvider? = null,
+): LineCartesianLayer? = if (hasData) {
+    rememberLineCartesianLayer(
+        lineProvider = lineProvider,
+        verticalAxisPosition = verticalAxisPosition,
+        rangeProvider = rangeProvider ?: CartesianLayerRangeProvider.auto(),
+    )
+} else {
+    null
 }

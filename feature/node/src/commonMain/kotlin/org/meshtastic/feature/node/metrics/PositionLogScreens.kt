@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -44,12 +45,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.collapse_chart
+import org.meshtastic.core.resources.expand_chart
+import org.meshtastic.core.resources.logs
+import org.meshtastic.core.resources.position_log
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.BarChart
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Save
+import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 
 @Composable
 private fun ActionButtons(
@@ -92,16 +100,32 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         org.meshtastic.core.ui.util.rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri) }
 
     var clearButtonEnabled by rememberSaveable(state.positionLogs) { mutableStateOf(state.positionLogs.isNotEmpty()) }
+    var isMapExpanded by remember { mutableStateOf(false) }
+
+    val trackMap = LocalNodeTrackMapProvider.current
+    val destNum = state.node?.num ?: 0
 
     Scaffold(
         topBar = {
             MainAppBar(
                 title = state.node?.user?.long_name ?: "",
+                subtitle =
+                stringResource(Res.string.position_log) +
+                    " (${state.positionLogs.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
+                    IconButton(onClick = { isMapExpanded = !isMapExpanded }) {
+                        Icon(
+                            imageVector = if (isMapExpanded) MeshtasticIcons.List else MeshtasticIcons.BarChart,
+                            contentDescription =
+                            stringResource(
+                                if (isMapExpanded) Res.string.collapse_chart else Res.string.expand_chart,
+                            ),
+                        )
+                    }
                     if (!state.isLocal) {
                         IconButton(onClick = { viewModel.requestPosition() }) {
                             Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
@@ -112,30 +136,38 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
             )
         },
     ) { innerPadding ->
-        BoxWithConstraints(modifier = Modifier.padding(innerPadding)) {
-            val compactWidth = maxWidth < 600.dp
-            Column {
-                val textStyle =
-                    if (compactWidth) {
-                        MaterialTheme.typography.bodySmall
-                    } else {
-                        LocalTextStyle.current
-                    }
-                CompositionLocalProvider(LocalTextStyle provides textStyle) {
-                    PositionLogHeader(compactWidth)
-                    PositionList(compactWidth, state.positionLogs, state.displayUnits)
-                }
+        Column(modifier = Modifier.padding(innerPadding)) {
+            AdaptiveMetricLayout(
+                isChartExpanded = isMapExpanded,
+                chartPart = { modifier -> trackMap(destNum, state.positionLogs, modifier) },
+                listPart = { modifier ->
+                    BoxWithConstraints(modifier = modifier) {
+                        val compactWidth = maxWidth < 600.dp
+                        Column {
+                            val textStyle =
+                                if (compactWidth) {
+                                    MaterialTheme.typography.bodySmall
+                                } else {
+                                    LocalTextStyle.current
+                                }
+                            CompositionLocalProvider(LocalTextStyle provides textStyle) {
+                                PositionLogHeader(compactWidth)
+                                PositionList(compactWidth, state.positionLogs, state.displayUnits)
+                            }
 
-                ActionButtons(
-                    clearButtonEnabled = clearButtonEnabled,
-                    onClear = {
-                        clearButtonEnabled = false
-                        viewModel.clearPosition()
-                    },
-                    saveButtonEnabled = state.hasPositionLogs(),
-                    onSave = { exportPositionLauncher("position.csv", "text/csv") },
-                )
-            }
+                            ActionButtons(
+                                clearButtonEnabled = clearButtonEnabled,
+                                onClear = {
+                                    clearButtonEnabled = false
+                                    viewModel.clearPosition()
+                                },
+                                saveButtonEnabled = state.hasPositionLogs(),
+                                onSave = { exportPositionLauncher("position.csv", "text/csv") },
+                            )
+                        }
+                    }
+                },
+            )
         }
     }
 }

@@ -41,7 +41,6 @@ import org.meshtastic.feature.node.component.DeviceActions
 import org.meshtastic.feature.node.component.DeviceDetailsSection
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NotesSection
-import org.meshtastic.feature.node.component.PositionSection
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 /**
@@ -81,8 +80,8 @@ fun NodeDetailContent(
 }
 
 /**
- * Scrollable list of node detail sections: identity, device actions, position, hardware details, notes, and
- * administration.
+ * Scrollable list of node detail sections: identity, device actions (including telemetry and position), hardware
+ * details, notes, and administration.
  */
 @Composable
 fun NodeDetailList(
@@ -105,15 +104,16 @@ fun NodeDetailList(
         item {
             DeviceActions(
                 node = node,
+                ourNode = ourNode,
                 lastTracerouteTime = uiState.lastTracerouteTime,
                 lastRequestNeighborsTime = uiState.lastRequestNeighborsTime,
                 availableLogs = uiState.availableLogs,
                 onAction = onAction,
-                metricsState = uiState.metricsState,
+                displayUnits = uiState.metricsState.displayUnits,
+                isFahrenheit = uiState.metricsState.isFahrenheit,
                 isLocal = uiState.metricsState.isLocal,
             )
         }
-        item { PositionSection(node, ourNode, uiState.metricsState, uiState.availableLogs, onAction) }
         if (uiState.metricsState.deviceHardware != null) {
             item { DeviceDetailsSection(uiState.metricsState) }
         }

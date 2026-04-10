@@ -25,13 +25,12 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.locked
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.Waypoint
-
-private const val DEG_D = 1e-7
 
 @Composable
 fun WaypointMarkers(

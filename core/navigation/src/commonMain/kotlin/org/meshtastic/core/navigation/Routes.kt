@@ -74,8 +74,6 @@ sealed interface NodesRoute : Route {
 sealed interface NodeDetailRoute : Route {
     @Serializable data class DeviceMetrics(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class NodeMap(val destNum: Int) : NodeDetailRoute
-
     @Serializable data class PositionLog(val destNum: Int) : NodeDetailRoute
 
     @Serializable data class EnvironmentMetrics(val destNum: Int) : NodeDetailRoute

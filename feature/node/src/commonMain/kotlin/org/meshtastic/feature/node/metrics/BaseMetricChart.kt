@@ -19,9 +19,9 @@ package org.meshtastic.feature.node.metrics
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,16 +31,13 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -65,16 +62,12 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.avg
 import org.meshtastic.core.resources.collapse_chart
 import org.meshtastic.core.resources.expand_chart
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.logs
-import org.meshtastic.core.resources.max
-import org.meshtastic.core.resources.min
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.BarChart
 import org.meshtastic.core.ui.icon.Info
@@ -138,6 +131,46 @@ fun GenericMetricChart(
 }
 
 /**
+ * Common scaffold for all metric chart composables. Provides:
+ * - A [Column] container with the supplied [modifier]
+ * - An empty-data guard (returns early when [isEmpty] is true)
+ * - A remembered [CartesianChartModelProducer] passed to [content]
+ * - A trailing [Legend] strip
+ *
+ * @param isEmpty Whether the chart data is empty — when true, nothing is rendered.
+ * @param legendData Legend items shown below the chart.
+ * @param key Optional key for the [CartesianChartModelProducer] (e.g. a selected channel). Pass a different value to
+ *   recreate the producer.
+ * @param hiddenSet Indices of hidden legend items (toggleable legend).
+ * @param onToggle Callback when a legend item is toggled; when null, a read-only legend is rendered.
+ * @param content Builder lambda receiving the [CartesianChartModelProducer] and a standard `Modifier.weight(1f)`
+ *   suitable for the chart area.
+ */
+@Composable
+fun MetricChartScaffold(
+    isEmpty: Boolean,
+    legendData: List<LegendData>,
+    modifier: Modifier = Modifier,
+    key: Any? = Unit,
+    hiddenSet: Set<Int> = emptySet(),
+    onToggle: ((Int) -> Unit)? = null,
+    content: @Composable ColumnScope.(CartesianChartModelProducer, Modifier) -> Unit,
+) {
+    Column(modifier = modifier) {
+        if (isEmpty) return@Column
+        val modelProducer = remember(key) { CartesianChartModelProducer() }
+        val chartModifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp)
+        content(modelProducer, chartModifier)
+        Legend(
+            legendData = legendData,
+            modifier = Modifier.padding(top = 0.dp),
+            hiddenSet = hiddenSet,
+            onToggle = onToggle,
+        )
+    }
+}
+
+/**
  * An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column for
  * narrow screens (phones). When [isChartExpanded] is true, the card list is hidden and the chart fills the available
  * space.
@@ -164,7 +197,7 @@ fun AdaptiveMetricLayout(
                     if (isChartExpanded) {
                         Modifier.fillMaxWidth().weight(1f)
                     } else {
-                        Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f)
+                        Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.45f)
                     },
                 )
                 AnimatedVisibility(visible = !isChartExpanded, enter = expandVertically(), exit = shrinkVertically()) {
@@ -172,40 +205,6 @@ fun AdaptiveMetricLayout(
                 }
             }
         }
-    }
-}
-
-/**
- * Displays a compact row of min/max/avg statistics for a metric. Intended to be placed between the chart controls and
- * the chart itself.
- */
-@Composable
-fun MetricSummaryRow(values: List<Float>, label: String = "", modifier: Modifier = Modifier) {
-    if (values.isEmpty()) return
-    val minVal = values.min()
-    val maxVal = values.max()
-    val avgVal = values.average().toFloat()
-
-    Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        SummaryChip(label = stringResource(Res.string.min), value = formatString("%.1f %s", minVal, label))
-        SummaryChip(label = stringResource(Res.string.avg), value = formatString("%.1f %s", avgVal, label))
-        SummaryChip(label = stringResource(Res.string.max), value = formatString("%.1f %s", maxVal, label))
-    }
-}
-
-@Composable
-private fun SummaryChip(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(text = value, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 

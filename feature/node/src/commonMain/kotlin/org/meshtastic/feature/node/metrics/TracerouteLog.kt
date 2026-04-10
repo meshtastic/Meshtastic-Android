@@ -58,6 +58,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
@@ -83,7 +84,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.annotateTraceroute
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.component.CooldownIconButton
 import org.meshtastic.proto.RouteDiscovery
 

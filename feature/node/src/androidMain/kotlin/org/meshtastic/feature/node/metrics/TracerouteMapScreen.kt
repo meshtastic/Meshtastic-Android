@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.traceroute
@@ -51,9 +52,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.theme.TracerouteColors
-import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
-import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.proto.Position
 
 @Composable
@@ -117,16 +117,14 @@ private fun TracerouteMapScaffold(
         },
     ) { paddingValues ->
         Box(modifier = modifier.fillMaxSize().padding(paddingValues)) {
-            LocalMapViewProvider.current?.MapView(
-                modifier = Modifier,
-                viewModel = Unit,
-                navigateToNodeDetails = {},
-                tracerouteOverlay = overlay,
-                tracerouteNodePositions = snapshotPositions,
-                onTracerouteMappableCountChanged = { shown: Int, total: Int ->
+            LocalTracerouteMapProvider.current(
+                overlay,
+                snapshotPositions,
+                { shown: Int, total: Int ->
                     tracerouteNodesShown = shown
                     tracerouteNodesTotal = total
                 },
+                Modifier.fillMaxSize(),
             )
             Column(
                 modifier = Modifier.align(insets.overlayAlignment).padding(insets.overlayPadding),

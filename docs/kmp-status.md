@@ -1,6 +1,6 @@
 # KMP Migration Status
 
-> Last updated: 2026-03-31
+> Last updated: 2026-04-10
 
 Single source of truth for Kotlin Multiplatform migration progress. For the forward-looking roadmap, see [`roadmap.md`](./roadmap.md). For completed decision records, see [`decisions/`](./decisions/).
 
@@ -49,7 +49,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; fully shared `contactsGraph`, `MessageScreen`, `ContactsScreen`, and `MessageListPaged` |
 | `feature:connections` | ✅ | ✅ Shared `ConnectionsScreen` with dynamic transport detection |
 | `feature:intro` | — | — | Screens remain in `androidMain`; shared ViewModel only |
-| `feature:map` | — | Placeholder; shared `NodeMapViewModel` and `BaseMapViewModel` only |
+| `feature:map` | — | Placeholder; shared `NodeMapViewModel`, `BaseMapViewModel`, and `TracerouteNodeSelection`. Map rendering decomposed into 3 `CompositionLocal` provider contracts (`MapViewProvider`, `NodeTrackMapProvider`, `TracerouteMapProvider`) with per-flavor implementations in `:app` |
 | `feature:firmware` | ✅ | ✅ Fully KMP: Unified OTA, native Secure DFU, USB/UF2, FirmwareRetriever |
 | `feature:wifi-provision` | ✅ | ✅ KMP WiFi provisioning via BLE (Nymea protocol); shared UI and ViewModel |
 | `feature:widget` | ❌ | — | Android-only (Glance appwidgets). Intentional. |
@@ -144,6 +144,8 @@ Extracted to shared `commonMain` (no longer app-only):
 - `ChannelViewModel` → `feature:settings/commonMain`
 - `NodeMapViewModel` → `feature:map/commonMain` (Shared logic for node-specific maps)
 - `BaseMapViewModel` → `feature:map/commonMain` (Core contract for all maps)
+- `TracerouteOverlay` → `core:model/commonMain` (Pure data class for traceroute route segments; extracted from `feature:map` for cross-module reuse)
+- `GeoConstants` → `core:model/commonMain` (Centralized `DEG_D`, `HEADING_DEG`, `EARTH_RADIUS_METERS` constants; eliminates 7 duplicate private constants)
 
 Extracted to core KMP modules:
 - Android Services, WorkManager Workers, and BroadcastReceivers → `core:service/androidMain`
@@ -151,7 +153,7 @@ Extracted to core KMP modules:
 - TCP radio connections, BLE radio connections (`BleRadioInterface`), and mDNS/NSD Service Discovery → `core:network/commonMain` (with Android `NsdManager` and Desktop `JmDNS` implementations)
 
 Remaining to be extracted from `:app` or unified in `commonMain`:
-- `MapViewModel` (Unify Google/F-Droid flavors into a single `commonMain` class consuming a `MapConfigProvider` interface)
+- `MapViewModel` (Unify Google/F-Droid flavors into a single `commonMain` class consuming a `MapConfigProvider` interface. `MapViewProvider` interface simplified — track rendering and traceroute rendering extracted to dedicated provider contracts)
 
 ## Prerelease Dependencies
 

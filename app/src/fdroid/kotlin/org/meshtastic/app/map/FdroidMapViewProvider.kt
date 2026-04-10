@@ -23,32 +23,17 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ui.util.MapViewProvider
 
+/** OSMDroid implementation of [MapViewProvider]. */
 @Single
 class FdroidMapViewProvider : MapViewProvider {
     @Composable
-    override fun MapView(
-        modifier: Modifier,
-        viewModel: Any,
-        navigateToNodeDetails: (Int) -> Unit,
-        focusedNodeNum: Int?,
-        nodeTracks: List<Any>?,
-        tracerouteOverlay: Any?,
-        tracerouteNodePositions: Map<Int, Any>,
-        onTracerouteMappableCountChanged: (Int, Int) -> Unit,
-        waypointId: Int?,
-    ) {
+    override fun MapView(modifier: Modifier, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
         val mapViewModel: MapViewModel = koinViewModel()
         LaunchedEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
-        @Suppress("UNCHECKED_CAST")
         org.meshtastic.app.map.MapView(
             modifier = modifier,
             mapViewModel = mapViewModel,
             navigateToNodeDetails = navigateToNodeDetails,
-            focusedNodeNum = focusedNodeNum,
-            nodeTracks = nodeTracks as? List<org.meshtastic.proto.Position>,
-            tracerouteOverlay = tracerouteOverlay as? org.meshtastic.feature.map.model.TracerouteOverlay,
-            tracerouteNodePositions = tracerouteNodePositions as? Map<Int, org.meshtastic.proto.Position> ?: emptyMap(),
-            onTracerouteMappableCountChanged = onTracerouteMappableCountChanged,
         )
     }
 }
