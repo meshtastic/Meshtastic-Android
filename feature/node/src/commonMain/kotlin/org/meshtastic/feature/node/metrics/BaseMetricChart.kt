@@ -96,6 +96,11 @@ fun GenericMetricChart(
     onPointSelected: ((Double) -> Unit)? = null,
     vicoScrollState: VicoScrollState = rememberVicoScrollState(),
 ) {
+    // Hoist zoom state above rememberCartesianChart so that the variable slot count
+    // from the vararg layers spread does not shift this remember call during recomposition
+    // (toggling legend chips changes the layer count, which corrupts the slot table).
+    val zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content)
+
     val markerVisibilityListener =
         remember(onPointSelected) {
             object : CartesianMarkerVisibilityListener {
@@ -126,7 +131,7 @@ fun GenericMetricChart(
         modelProducer = modelProducer,
         modifier = modifier,
         scrollState = vicoScrollState,
-        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
+        zoomState = zoomState,
     )
 }
 
