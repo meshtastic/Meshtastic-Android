@@ -46,7 +46,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
@@ -63,10 +62,8 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.maps.android.SphericalUtil
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -74,7 +71,6 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.widgets.ScaleBar
 import com.google.maps.android.data.geojson.GeoJsonLayer
@@ -92,19 +88,11 @@ import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.Node
-import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatAgo
-import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
-import kotlin.math.abs
-import kotlin.math.max
 
 private const val DEG_D = 1e-7
-private const val TRACEROUTE_OFFSET_METERS = 100.0
-private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
@@ -113,9 +101,6 @@ fun MapView(
     modifier: Modifier = Modifier,
     mapViewModel: MapViewModel = koinViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
-    tracerouteOverlay: TracerouteOverlay? = null,
-    tracerouteNodePositions: Map<Int, Position> = emptyMap(),
-    onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -236,15 +221,6 @@ fun MapView(
     val displayableWaypoints = waypoints.values.mapNotNull { it.waypoint }
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
 
-    val tracerouteSelection =
-        remember(tracerouteOverlay, tracerouteNodePositions, allNodes) {
-            mapViewModel.tracerouteNodeSelection(
-                tracerouteOverlay = tracerouteOverlay,
-                tracerouteNodePositions = tracerouteNodePositions,
-                nodes = allNodes,
-            )
-        }
-
     val filteredNodes =
         allNodes
             .filter { node -> !mapFilterState.onlyFavorites || node.isFavorite || node.num == ourNodeInfo?.num }
@@ -254,21 +230,9 @@ fun MapView(
                     node.num == ourNodeInfo?.num
             }
 
-    val displayNodes =
-        if (tracerouteOverlay != null) {
-            tracerouteSelection.nodesForMarkers
-        } else {
-            filteredNodes
-        }
-    LaunchedEffect(tracerouteOverlay, displayNodes) {
-        if (tracerouteOverlay != null) {
-            onTracerouteMappableCountChanged(displayNodes.size, tracerouteOverlay.relatedNodeNums.size)
-        }
-    }
-
     val myNodeNum = mapViewModel.myNodeNum
     val nodeClusterItems =
-        displayNodes.map { node ->
+        filteredNodes.map { node ->
             val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
             NodeClusterItem(
                 node = node,
@@ -292,43 +256,6 @@ fun MapView(
             true -> ComposeMapColorScheme.DARK
             else -> ComposeMapColorScheme.LIGHT
         }
-    val tracerouteForwardPoints =
-        remember(tracerouteOverlay, displayNodes) {
-            val nodeLookup = displayNodes.associateBy { it.num }
-            tracerouteOverlay?.forwardRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
-        }
-    val tracerouteReturnPoints =
-        remember(tracerouteOverlay, displayNodes) {
-            val nodeLookup = displayNodes.associateBy { it.num }
-            tracerouteOverlay?.returnRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
-        }
-    val tracerouteHeadingReferencePoints =
-        remember(tracerouteForwardPoints, tracerouteReturnPoints) {
-            when {
-                tracerouteForwardPoints.size >= 2 -> tracerouteForwardPoints
-                tracerouteReturnPoints.size >= 2 -> tracerouteReturnPoints
-                else -> emptyList()
-            }
-        }
-    val tracerouteForwardOffsetPoints =
-        remember(tracerouteForwardPoints, tracerouteHeadingReferencePoints) {
-            offsetPolyline(
-                points = tracerouteForwardPoints,
-                offsetMeters = TRACEROUTE_OFFSET_METERS,
-                headingReferencePoints = tracerouteHeadingReferencePoints,
-                sideMultiplier = 1.0,
-            )
-        }
-    val tracerouteReturnOffsetPoints =
-        remember(tracerouteReturnPoints, tracerouteHeadingReferencePoints) {
-            offsetPolyline(
-                points = tracerouteReturnPoints,
-                offsetMeters = TRACEROUTE_OFFSET_METERS,
-                headingReferencePoints = tracerouteHeadingReferencePoints,
-                sideMultiplier = -1.0,
-            )
-        }
-    var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
     var showLayersBottomSheet by remember { mutableStateOf(false) }
 
@@ -369,26 +296,6 @@ fun MapView(
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-    }
-    LaunchedEffect(tracerouteOverlay, tracerouteForwardPoints, tracerouteReturnPoints) {
-        if (tracerouteOverlay == null || hasCenteredTraceroute) return@LaunchedEffect
-        val allPoints = (tracerouteForwardPoints + tracerouteReturnPoints).distinct()
-        if (allPoints.isNotEmpty()) {
-            val cameraUpdate =
-                if (allPoints.size == 1) {
-                    CameraUpdateFactory.newLatLngZoom(allPoints.first(), max(cameraPositionState.position.zoom, 12f))
-                } else {
-                    val bounds = LatLngBounds.builder()
-                    allPoints.forEach { bounds.include(it) }
-                    CameraUpdateFactory.newLatLngBounds(bounds.build(), TRACEROUTE_BOUNDS_PADDING_PX)
-                }
-            try {
-                cameraPositionState.animate(cameraUpdate)
-                hasCenteredTraceroute = true
-            } catch (e: IllegalStateException) {
-                Logger.d { "Error centering traceroute overlay: ${e.message}" }
-            }
         }
     }
 
@@ -434,25 +341,6 @@ fun MapView(
                         TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                     }
                 }
-            }
-
-            if (tracerouteForwardPoints.size >= 2) {
-                Polyline(
-                    points = tracerouteForwardOffsetPoints,
-                    jointType = JointType.ROUND,
-                    color = TracerouteColors.OutgoingRoute,
-                    width = 9f,
-                    zIndex = 3.0f,
-                )
-            }
-            if (tracerouteReturnPoints.size >= 2) {
-                Polyline(
-                    points = tracerouteReturnOffsetPoints,
-                    jointType = JointType.ROUND,
-                    color = TracerouteColors.ReturnRoute,
-                    width = 7f,
-                    zIndex = 2.5f,
-                )
             }
 
             NodeClusterMarkers(
@@ -724,36 +612,4 @@ fun Uri.getFileName(context: android.content.Context): String {
 
 internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
 
-private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
-
 private fun Waypoint.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
-
-private fun offsetPolyline(
-    points: List<LatLng>,
-    offsetMeters: Double,
-    headingReferencePoints: List<LatLng> = points,
-    sideMultiplier: Double = 1.0,
-): List<LatLng> {
-    val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
-    if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
-
-    val headings =
-        headingPoints.mapIndexed { index, _ ->
-            when (index) {
-                0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
-                headingPoints.lastIndex ->
-                    SphericalUtil.computeHeading(
-                        headingPoints[headingPoints.lastIndex - 1],
-                        headingPoints[headingPoints.lastIndex],
-                    )
-
-                else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
-            }
-        }
-
-    return points.mapIndexed { index, point ->
-        val heading = headings[index.coerceIn(0, headings.lastIndex)]
-        val perpendicularHeading = heading + (90.0 * sideMultiplier)
-        SphericalUtil.computeOffset(point, abs(offsetMeters), perpendicularHeading)
-    }
-}

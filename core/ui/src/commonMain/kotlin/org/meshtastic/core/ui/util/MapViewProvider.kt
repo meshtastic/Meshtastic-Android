@@ -31,9 +31,6 @@ interface MapViewProvider {
         // We use Any here to avoid circular dependency with feature:map
         viewModel: Any,
         navigateToNodeDetails: (Int) -> Unit,
-        tracerouteOverlay: Any? = null,
-        tracerouteNodePositions: Map<Int, Any> = emptyMap(),
-        onTracerouteMappableCountChanged: (Int, Int) -> Unit = { _, _ -> },
         waypointId: Int? = null,
     )
 }

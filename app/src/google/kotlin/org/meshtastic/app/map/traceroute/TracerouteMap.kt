@@ -14,25 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.app.map.traceroute
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.annotation.Single
-import org.meshtastic.core.ui.util.MapViewProvider
+import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.proto.Position
 
-@Single
-class FdroidMapViewProvider : MapViewProvider {
-    @Composable
-    override fun MapView(modifier: Modifier, viewModel: Any, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
-        val mapViewModel: MapViewModel = koinViewModel()
-        LaunchedEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
-        org.meshtastic.app.map.MapView(
-            modifier = modifier,
-            mapViewModel = mapViewModel,
-            navigateToNodeDetails = navigateToNodeDetails,
-        )
-    }
+/**
+ * Flavor-unified entry point for the embeddable traceroute map. Delegates to the Google Maps implementation
+ * ([TracerouteGoogleMap]).
+ */
+@Composable
+fun TracerouteMap(
+    tracerouteOverlay: TracerouteOverlay?,
+    tracerouteNodePositions: Map<Int, Position>,
+    onMappableCountChanged: (shown: Int, total: Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TracerouteGoogleMap(
+        tracerouteOverlay = tracerouteOverlay,
+        tracerouteNodePositions = tracerouteNodePositions,
+        onMappableCountChanged = onMappableCountChanged,
+        modifier = modifier,
+    )
 }

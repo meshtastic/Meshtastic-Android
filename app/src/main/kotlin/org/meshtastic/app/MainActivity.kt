@@ -73,6 +73,7 @@ import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
+import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.intro.AppIntroductionScreen
@@ -169,6 +170,17 @@ class MainActivity : ComponentActivity() {
                     org.meshtastic.app.map.node.NodeTrackMap(destNum, positions, modifier)
                 },
             LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),
+            LocalTracerouteMapProvider provides
+                { overlay, nodePositions, onMappableCountChanged, modifier ->
+                    @Suppress("UNCHECKED_CAST")
+                    org.meshtastic.app.map.traceroute.TracerouteMap(
+                        tracerouteOverlay = overlay as? org.meshtastic.feature.map.model.TracerouteOverlay,
+                        tracerouteNodePositions =
+                        nodePositions as? Map<Int, org.meshtastic.proto.Position> ?: emptyMap(),
+                        onMappableCountChanged = onMappableCountChanged,
+                        modifier = modifier,
+                    )
+                },
             org.meshtastic.core.ui.util.LocalNodeMapScreenProvider provides
                 { destNum, onNavigateUp ->
                     val vm = koinViewModel<org.meshtastic.feature.map.node.NodeMapViewModel>()

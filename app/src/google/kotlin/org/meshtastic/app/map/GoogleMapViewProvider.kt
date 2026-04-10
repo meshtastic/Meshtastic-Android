@@ -26,25 +26,13 @@ import org.meshtastic.core.ui.util.MapViewProvider
 @Single
 class GoogleMapViewProvider : MapViewProvider {
     @Composable
-    override fun MapView(
-        modifier: Modifier,
-        viewModel: Any,
-        navigateToNodeDetails: (Int) -> Unit,
-        tracerouteOverlay: Any?,
-        tracerouteNodePositions: Map<Int, Any>,
-        onTracerouteMappableCountChanged: (Int, Int) -> Unit,
-        waypointId: Int?,
-    ) {
+    override fun MapView(modifier: Modifier, viewModel: Any, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
         val mapViewModel: MapViewModel = koinViewModel()
         LaunchedEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
-        @Suppress("UNCHECKED_CAST")
         org.meshtastic.app.map.MapView(
             modifier = modifier,
             mapViewModel = mapViewModel,
             navigateToNodeDetails = navigateToNodeDetails,
-            tracerouteOverlay = tracerouteOverlay as? org.meshtastic.feature.map.model.TracerouteOverlay,
-            tracerouteNodePositions = tracerouteNodePositions as? Map<Int, org.meshtastic.proto.Position> ?: emptyMap(),
-            onTracerouteMappableCountChanged = onTracerouteMappableCountChanged,
         )
     }
 }
