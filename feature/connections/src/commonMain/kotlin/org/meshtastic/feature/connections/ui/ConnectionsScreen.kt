@@ -51,7 +51,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connected_device
@@ -125,8 +125,8 @@ fun ConnectionsScreen(
                 getNavRouteFrom(radioConfigState.route)?.let { route ->
                     isWaiting = false
                     radioConfigViewModel.clearPacketResponse()
-                    if (route == SettingsRoutes.LoRa) {
-                        onConfigNavigate(SettingsRoutes.LoRa)
+                    if (route == SettingsRoute.LoRa) {
+                        onConfigNavigate(SettingsRoute.LoRa)
                     }
                 }
             },

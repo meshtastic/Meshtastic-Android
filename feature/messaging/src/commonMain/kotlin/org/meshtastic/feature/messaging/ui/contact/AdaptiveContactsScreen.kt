@@ -21,9 +21,9 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.common.util.MeshtasticUri
-import org.meshtastic.core.navigation.ChannelsRoutes
-import org.meshtastic.core.navigation.ContactsRoutes
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.ChannelsRoute
+import org.meshtastic.core.navigation.ContactsRoute
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
@@ -40,16 +40,16 @@ fun AdaptiveContactsScreen(
     onClearRequestChannelUrl: () -> Unit,
 ) {
     ContactsScreen(
-        onNavigateToShare = { backStack.add(ChannelsRoutes.ChannelsGraph) },
+        onNavigateToShare = { backStack.add(ChannelsRoute.ChannelsGraph) },
         sharedContactRequested = sharedContactRequested,
         requestChannelSet = requestChannelSet,
         onHandleDeepLink = onHandleDeepLink,
         onClearSharedContactRequested = onClearSharedContactRequested,
         onClearRequestChannelUrl = onClearRequestChannelUrl,
         viewModel = contactsViewModel,
-        onClickNodeChip = { backStack.add(NodesRoutes.NodeDetail(it)) },
-        onNavigateToMessages = { contactKey -> backStack.add(ContactsRoutes.Messages(contactKey)) },
-        onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetail(it)) },
+        onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
+        onNavigateToMessages = { contactKey -> backStack.add(ContactsRoute.Messages(contactKey)) },
+        onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) },
         scrollToTopEvents = scrollToTopEvents,
         activeContactKey = null,
     )

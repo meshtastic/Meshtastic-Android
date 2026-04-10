@@ -50,9 +50,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.navigation.ContactsRoutes
+import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.MultiBackstack
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
@@ -141,7 +141,7 @@ private fun handleNavigation(
         val currentKey = multiBackstack.activeBackStack.lastOrNull()
         when (destination) {
             TopLevelDestination.Nodes -> {
-                val onNodesList = currentKey is NodesRoutes.NodesGraph || currentKey is NodesRoutes.Nodes
+                val onNodesList = currentKey is NodesRoute.NodesGraph || currentKey is NodesRoute.Nodes
                 if (!onNodesList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {
@@ -150,7 +150,7 @@ private fun handleNavigation(
             }
             TopLevelDestination.Conversations -> {
                 val onConversationsList =
-                    currentKey is ContactsRoutes.ContactsGraph || currentKey is ContactsRoutes.Contacts
+                    currentKey is ContactsRoute.ContactsGraph || currentKey is ContactsRoute.Contacts
                 if (!onConversationsList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {

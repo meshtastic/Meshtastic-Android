@@ -29,7 +29,7 @@ class MultiBackstackTest {
         val multiBackstack = MultiBackstack(startTab)
 
         val nodesStack =
-            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoutes.Nodes)) }
+            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
         val mapStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Map.route)) }
 
         multiBackstack.backStacks =
@@ -51,7 +51,7 @@ class MultiBackstackTest {
         val multiBackstack = MultiBackstack(startTab)
 
         val nodesStack =
-            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoutes.Nodes)) }
+            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
         multiBackstack.backStacks = mapOf(TopLevelDestination.Nodes.route to nodesStack)
 
         assertEquals(2, multiBackstack.activeBackStack.size)
@@ -68,7 +68,7 @@ class MultiBackstackTest {
         val multiBackstack = MultiBackstack(startTab)
 
         val nodesStack =
-            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoutes.Nodes)) }
+            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
         multiBackstack.backStacks = mapOf(TopLevelDestination.Nodes.route to nodesStack)
 
         multiBackstack.goBack()
@@ -104,11 +104,11 @@ class MultiBackstackTest {
         val settingsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Settings.route)) }
         multiBackstack.backStacks = mapOf(TopLevelDestination.Settings.route to settingsStack)
 
-        val deepLinkPath = listOf(TopLevelDestination.Settings.route, SettingsRoutes.About)
+        val deepLinkPath = listOf(TopLevelDestination.Settings.route, SettingsRoute.About)
         multiBackstack.handleDeepLink(deepLinkPath)
 
         assertEquals(TopLevelDestination.Settings.route, multiBackstack.currentTabRoute)
         assertEquals(2, multiBackstack.activeBackStack.size)
-        assertEquals(SettingsRoutes.About, multiBackstack.activeBackStack.last())
+        assertEquals(SettingsRoute.About, multiBackstack.activeBackStack.last())
     }
 }

@@ -19,7 +19,7 @@ package org.meshtastic.feature.settings.navigation
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.channels
@@ -50,43 +50,43 @@ enum class ConfigRoute(
     val icon: DrawableResource? = null,
     val type: Int = 0,
 ) {
-    USER(Res.string.user, SettingsRoutes.User, Res.drawable.ic_person, 0),
-    CHANNELS(Res.string.channels, SettingsRoutes.ChannelConfig, Res.drawable.ic_list, 0),
+    USER(Res.string.user, SettingsRoute.User, Res.drawable.ic_person, 0),
+    CHANNELS(Res.string.channels, SettingsRoute.ChannelConfig, Res.drawable.ic_list, 0),
     DEVICE(
         Res.string.device,
-        SettingsRoutes.Device,
+        SettingsRoute.Device,
         Res.drawable.ic_router,
         AdminMessage.ConfigType.DEVICE_CONFIG.value,
     ),
     POSITION(
         Res.string.position,
-        SettingsRoutes.Position,
+        SettingsRoute.Position,
         Res.drawable.ic_location_on,
         AdminMessage.ConfigType.POSITION_CONFIG.value,
     ),
-    POWER(Res.string.power, SettingsRoutes.Power, Res.drawable.ic_power, AdminMessage.ConfigType.POWER_CONFIG.value),
+    POWER(Res.string.power, SettingsRoute.Power, Res.drawable.ic_power, AdminMessage.ConfigType.POWER_CONFIG.value),
     NETWORK(
         Res.string.network,
-        SettingsRoutes.Network,
+        SettingsRoute.Network,
         Res.drawable.ic_wifi,
         AdminMessage.ConfigType.NETWORK_CONFIG.value,
     ),
     DISPLAY(
         Res.string.display,
-        SettingsRoutes.Display,
+        SettingsRoute.Display,
         Res.drawable.ic_display_settings,
         AdminMessage.ConfigType.DISPLAY_CONFIG.value,
     ),
-    LORA(Res.string.lora, SettingsRoutes.LoRa, Res.drawable.ic_cell_tower, AdminMessage.ConfigType.LORA_CONFIG.value),
+    LORA(Res.string.lora, SettingsRoute.LoRa, Res.drawable.ic_cell_tower, AdminMessage.ConfigType.LORA_CONFIG.value),
     BLUETOOTH(
         Res.string.bluetooth,
-        SettingsRoutes.Bluetooth,
+        SettingsRoute.Bluetooth,
         Res.drawable.ic_bluetooth,
         AdminMessage.ConfigType.BLUETOOTH_CONFIG.value,
     ),
     SECURITY(
         Res.string.security,
-        SettingsRoutes.Security,
+        SettingsRoute.Security,
         Res.drawable.ic_security,
         AdminMessage.ConfigType.SECURITY_CONFIG.value,
     ),

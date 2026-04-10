@@ -28,9 +28,9 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.meshtastic.core.navigation.FirmwareRoutes
+import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.advanced_title
@@ -125,7 +125,7 @@ private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate
             trailingIcon = MeshtasticIcons.KeyboardArrowRight,
             enabled = enabled,
         ) {
-            onNavigate(SettingsRoutes.DeviceConfiguration)
+            onNavigate(SettingsRoute.DeviceConfiguration)
         }
     }
 }
@@ -142,7 +142,7 @@ private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNaviga
             trailingIcon = MeshtasticIcons.KeyboardArrowRight,
             enabled = enabled,
         ) {
-            onNavigate(SettingsRoutes.ModuleConfiguration)
+            onNavigate(SettingsRoute.ModuleConfiguration)
         }
     }
 }
@@ -181,7 +181,7 @@ private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit)
             trailingIconTint = MaterialTheme.colorScheme.error,
             enabled = enabled,
         ) {
-            onNavigate(SettingsRoutes.Administration)
+            onNavigate(SettingsRoute.Administration)
         }
     }
 }
@@ -198,7 +198,7 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
                 text = stringResource(Res.string.firmware_update_title),
                 leadingIcon = MeshtasticIcons.SystemUpdate,
                 enabled = enabled,
-                onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+                onClick = { onNavigate(FirmwareRoute.FirmwareUpdate) },
             )
         }
 
@@ -206,14 +206,14 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             text = stringResource(Res.string.clean_node_database_title),
             leadingIcon = MeshtasticIcons.CleaningServices,
             enabled = enabled,
-            onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
+            onClick = { onNavigate(SettingsRoute.CleanNodeDb) },
         )
 
         ListItem(
             text = stringResource(Res.string.debug_panel),
             leadingIcon = MeshtasticIcons.BugReport,
             enabled = enabled,
-            onClick = { onNavigate(SettingsRoutes.DebugPanel) },
+            onClick = { onNavigate(SettingsRoute.DebugPanel) },
         )
     }
 }

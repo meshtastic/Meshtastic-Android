@@ -19,21 +19,21 @@ package org.meshtastic.feature.wifiprovision.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import org.meshtastic.core.navigation.WifiProvisionRoutes
+import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.feature.wifiprovision.ui.WifiProvisionScreen
 
 /**
  * Registers the WiFi provisioning graph entries into the host navigation provider.
  *
- * Both the graph sentinel ([WifiProvisionRoutes.WifiProvisionGraph]) and the primary screen
- * ([WifiProvisionRoutes.WifiProvision]) navigate to the same composable so that the feature can be reached via either a
+ * Both the graph sentinel ([WifiProvisionRoute.WifiProvisionGraph]) and the primary screen
+ * ([WifiProvisionRoute.WifiProvision]) navigate to the same composable so that the feature can be reached via either a
  * top-level push or a deep-link graph push.
  */
 fun EntryProviderScope<NavKey>.wifiProvisionGraph(backStack: NavBackStack<NavKey>) {
-    entry<WifiProvisionRoutes.WifiProvisionGraph> {
+    entry<WifiProvisionRoute.WifiProvisionGraph> {
         WifiProvisionScreen(onNavigateUp = { backStack.removeLastOrNull() })
     }
-    entry<WifiProvisionRoutes.WifiProvision> { key ->
+    entry<WifiProvisionRoute.WifiProvision> { key ->
         WifiProvisionScreen(onNavigateUp = { backStack.removeLastOrNull() }, address = key.address)
     }
 }

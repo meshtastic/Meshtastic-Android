@@ -41,7 +41,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:data` | Core manager implementations and data orchestration. |
 | `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`, `BleRadioInterface`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
-| `core:navigation` | Shared navigation keys/routes for Navigation 3, `DeepLinkRouter` for typed backstack synthesis, and `MeshtasticNavSavedStateConfig` for backstack persistence. |
+| `core:navigation` | Shared navigation keys/routes for Navigation 3 using `@Serializable sealed interface` hierarchies per feature domain (e.g., `SettingsRoute`, `NodesRoute`). `DeepLinkRouter` for typed backstack synthesis, and `MeshtasticNavSavedStateConfig` with `subclassesOfSealed()` for automatic polymorphic backstack persistence — new routes are registered at compile time. |
 | `core:ui` | Shared Compose UI components (`MeshtasticAppShell`, `MeshtasticNavDisplay`, `MeshtasticNavigationSuite`, `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
 | `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
 | `core:api` | Public AIDL/API integration module for external clients. |
@@ -189,6 +189,7 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - **`maxParallelForks` CI logic:** ProjectExtensions.kt line ~79 checks `project.findProperty("ci") == "true"` and uses full available processors in CI (4 forks on std runners) vs. half locally. All CI invocations pass `-Pci=true` to enable this.
 - **Detekt report formats:** Detekt.kt line ~44 checks `project.findProperty("ci") == "true"` and disables html, txt, md reports in CI; only xml + sarif are required for GitHub reporting.
 - **KMP Smoke Compile:** Use `./gradlew kmpSmokeCompile` instead of listing individual module compile tasks. The `kmpSmokeCompile` lifecycle task (registered in `RootConventionPlugin`) auto-discovers all KMP modules and depends on their `compileKotlinJvm` + `compileKotlinIosSimulatorArm64` tasks.
+- **Robolectric SDK caching:** The `gradle-setup` composite action caches `~/.m2/repository/org/robolectric` to prevent flaky `SocketException` failures when Robolectric downloads instrumented SDK jars. The cache key is `robolectric-{version}-sdk{level}` — update it when bumping the Robolectric version in `libs.versions.toml` or the SDK level in `robolectric.properties` / `@Config(sdk = ...)`.
 - **`mavenLocal()` gated:** The `mavenLocal()` repository is disabled by default to prevent CI cache poisoning. For local JitPack testing, pass `-PuseMavenLocal` to Gradle.
 - **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent the agent from getting stuck in an interactive prompt.
 - **Text Search:** Prefer using `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.

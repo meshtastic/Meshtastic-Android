@@ -27,6 +27,15 @@ runs:
         distribution: ${{ inputs.jdk_distribution }}
         token: ${{ github.token }}
 
+    # Robolectric downloads instrumented SDK jars from Maven Central at test time.
+    # Cache them to avoid flaky SocketException failures on CI runners.
+    # Update the key when bumping robolectric version in libs.versions.toml or sdk in robolectric.properties.
+    - name: Cache Robolectric SDK jars
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository/org/robolectric
+        key: robolectric-4.16.1-sdk34
+
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v6
       with:

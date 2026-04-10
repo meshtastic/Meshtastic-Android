@@ -62,7 +62,7 @@ import org.jetbrains.skia.Image
 import org.koin.core.context.startKoin
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.database.desktopDataDir
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.UiPrefs
@@ -241,7 +241,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                         true
                     }
                     event.key == Key.Slash -> {
-                        backStack.add(SettingsRoutes.About)
+                        backStack.add(SettingsRoute.About)
                         true
                     }
                     else -> false

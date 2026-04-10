@@ -32,7 +32,7 @@ import co.touchlab.kermit.Logger
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
@@ -53,7 +53,7 @@ import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 @Composable
 fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
-    val multiBackstack = rememberMultiBackstack(NodesRoutes.NodesGraph)
+    val multiBackstack = rememberMultiBackstack(NodesRoute.NodesGraph)
     val backStack = multiBackstack.activeBackStack
 
     AndroidAppVersionCheck(viewModel)

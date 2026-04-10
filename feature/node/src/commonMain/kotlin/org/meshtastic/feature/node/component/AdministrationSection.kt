@@ -27,7 +27,7 @@ import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.firmware
@@ -77,7 +77,7 @@ fun AdministrationSection(
                 leadingIcon = MeshtasticIcons.Settings,
                 enabled = metricsState.isLocal || node.metadata != null,
             ) {
-                onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
+                onAction(NodeDetailAction.Navigate(SettingsRoute.Settings(node.num)))
             }
         }
     }

@@ -59,11 +59,11 @@ object DeepLinkRouter {
             "messages",
             "quickchat",
             -> routeContacts(uri, pathSegments)
-            "connections" -> listOf(ConnectionsRoutes.ConnectionsGraph)
+            "connections" -> listOf(ConnectionsRoute.ConnectionsGraph)
             "map" -> routeMap(uri, pathSegments)
             "nodes" -> routeNodes(uri, pathSegments)
             "settings" -> routeSettings(pathSegments)
-            "channels" -> listOf(ChannelsRoutes.ChannelsGraph)
+            "channels" -> listOf(ChannelsRoute.ChannelsGraph)
             "firmware" -> routeFirmware(pathSegments)
             "wifi-provision" -> routeWifiProvision(uri)
             else -> {
@@ -78,31 +78,31 @@ object DeepLinkRouter {
         return when (firstSegment) {
             "share" -> {
                 val message = uri.getQueryParameter("message") ?: ""
-                listOf(ContactsRoutes.ContactsGraph, ContactsRoutes.Share(message))
+                listOf(ContactsRoute.ContactsGraph, ContactsRoute.Share(message))
             }
             "quickchat" -> {
-                listOf(ContactsRoutes.ContactsGraph, ContactsRoutes.QuickChat)
+                listOf(ContactsRoute.ContactsGraph, ContactsRoute.QuickChat)
             }
             "messages" -> {
                 val contactKey = if (segments.size > 1) segments[1] else uri.getQueryParameter("contactKey") ?: ""
                 val message = uri.getQueryParameter("message") ?: ""
                 if (contactKey.isNotBlank()) {
                     listOf(
-                        ContactsRoutes.ContactsGraph,
-                        ContactsRoutes.Messages(contactKey = contactKey, message = message),
+                        ContactsRoute.ContactsGraph,
+                        ContactsRoute.Messages(contactKey = contactKey, message = message),
                     )
                 } else {
-                    listOf(ContactsRoutes.ContactsGraph)
+                    listOf(ContactsRoute.ContactsGraph)
                 }
             }
-            else -> listOf(ContactsRoutes.ContactsGraph)
+            else -> listOf(ContactsRoute.ContactsGraph)
         }
     }
 
     private fun routeMap(uri: CommonUri, segments: List<String>): List<NavKey> {
         val waypointIdStr = if (segments.size > 1) segments[1] else uri.getQueryParameter("waypointId")
         val waypointId = waypointIdStr?.toIntOrNull()
-        return listOf(MapRoutes.Map(waypointId))
+        return listOf(MapRoute.Map(waypointId))
     }
 
     private fun routeNodes(uri: CommonUri, segments: List<String>): List<NavKey> {
@@ -110,17 +110,17 @@ object DeepLinkRouter {
         val destNum = destNumStr?.toIntOrNull()
 
         return if (destNum == null) {
-            listOf(NodesRoutes.NodesGraph)
+            listOf(NodesRoute.NodesGraph)
         } else if (segments.size > 2) {
             val subRouteStr = segments[2].lowercase()
             val detailRouteFn = nodeDetailSubRoutes[subRouteStr]
             if (detailRouteFn != null) {
-                listOf(NodesRoutes.NodesGraph, NodesRoutes.NodeDetailGraph(destNum), detailRouteFn(destNum))
+                listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetailGraph(destNum), detailRouteFn(destNum))
             } else {
-                listOf(NodesRoutes.NodesGraph, NodesRoutes.NodeDetail(destNum))
+                listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum))
             }
         } else {
-            listOf(NodesRoutes.NodesGraph, NodesRoutes.NodeDetail(destNum))
+            listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum))
         }
     }
 
@@ -142,79 +142,79 @@ object DeepLinkRouter {
         }
 
         if (subRouteStr == null) {
-            return listOf(SettingsRoutes.SettingsGraph(destNum))
+            return listOf(SettingsRoute.SettingsGraph(destNum))
         }
 
         val subRoute = settingsSubRoutes[subRouteStr]
         return if (subRoute != null) {
-            listOf(SettingsRoutes.SettingsGraph(destNum), subRoute)
+            listOf(SettingsRoute.SettingsGraph(destNum), subRoute)
         } else {
-            listOf(SettingsRoutes.SettingsGraph(destNum))
+            listOf(SettingsRoute.SettingsGraph(destNum))
         }
     }
 
     private fun routeWifiProvision(uri: CommonUri): List<NavKey> {
         val address = uri.getQueryParameter("address")
-        return listOf(WifiProvisionRoutes.WifiProvision(address))
+        return listOf(WifiProvisionRoute.WifiProvision(address))
     }
 
     private fun routeFirmware(segments: List<String>): List<NavKey> {
         val update = if (segments.size > 1) segments[1].lowercase() == "update" else false
         return if (update) {
-            listOf(FirmwareRoutes.FirmwareGraph, FirmwareRoutes.FirmwareUpdate)
+            listOf(FirmwareRoute.FirmwareGraph, FirmwareRoute.FirmwareUpdate)
         } else {
-            listOf(FirmwareRoutes.FirmwareGraph)
+            listOf(FirmwareRoute.FirmwareGraph)
         }
     }
 
     private val settingsSubRoutes: Map<String, Route> =
         mapOf(
-            "device-config" to SettingsRoutes.DeviceConfiguration,
-            "module-config" to SettingsRoutes.ModuleConfiguration,
-            "admin" to SettingsRoutes.Administration,
-            "user" to SettingsRoutes.User,
-            "channel" to SettingsRoutes.ChannelConfig,
-            "device" to SettingsRoutes.Device,
-            "position" to SettingsRoutes.Position,
-            "power" to SettingsRoutes.Power,
-            "network" to SettingsRoutes.Network,
-            "display" to SettingsRoutes.Display,
-            "lora" to SettingsRoutes.LoRa,
-            "bluetooth" to SettingsRoutes.Bluetooth,
-            "security" to SettingsRoutes.Security,
-            "mqtt" to SettingsRoutes.MQTT,
-            "serial" to SettingsRoutes.Serial,
-            "ext-notification" to SettingsRoutes.ExtNotification,
-            "store-forward" to SettingsRoutes.StoreForward,
-            "range-test" to SettingsRoutes.RangeTest,
-            "telemetry" to SettingsRoutes.Telemetry,
-            "canned-message" to SettingsRoutes.CannedMessage,
-            "audio" to SettingsRoutes.Audio,
-            "remote-hardware" to SettingsRoutes.RemoteHardware,
-            "neighbor-info" to SettingsRoutes.NeighborInfo,
-            "ambient-lighting" to SettingsRoutes.AmbientLighting,
-            "detection-sensor" to SettingsRoutes.DetectionSensor,
-            "paxcounter" to SettingsRoutes.Paxcounter,
-            "status-message" to SettingsRoutes.StatusMessage,
-            "traffic-management" to SettingsRoutes.TrafficManagement,
-            "tak" to SettingsRoutes.TAK,
-            "clean-node-db" to SettingsRoutes.CleanNodeDb,
-            "debug-panel" to SettingsRoutes.DebugPanel,
-            "about" to SettingsRoutes.About,
-            "filter-settings" to SettingsRoutes.FilterSettings,
+            "device-config" to SettingsRoute.DeviceConfiguration,
+            "module-config" to SettingsRoute.ModuleConfiguration,
+            "admin" to SettingsRoute.Administration,
+            "user" to SettingsRoute.User,
+            "channel" to SettingsRoute.ChannelConfig,
+            "device" to SettingsRoute.Device,
+            "position" to SettingsRoute.Position,
+            "power" to SettingsRoute.Power,
+            "network" to SettingsRoute.Network,
+            "display" to SettingsRoute.Display,
+            "lora" to SettingsRoute.LoRa,
+            "bluetooth" to SettingsRoute.Bluetooth,
+            "security" to SettingsRoute.Security,
+            "mqtt" to SettingsRoute.MQTT,
+            "serial" to SettingsRoute.Serial,
+            "ext-notification" to SettingsRoute.ExtNotification,
+            "store-forward" to SettingsRoute.StoreForward,
+            "range-test" to SettingsRoute.RangeTest,
+            "telemetry" to SettingsRoute.Telemetry,
+            "canned-message" to SettingsRoute.CannedMessage,
+            "audio" to SettingsRoute.Audio,
+            "remote-hardware" to SettingsRoute.RemoteHardware,
+            "neighbor-info" to SettingsRoute.NeighborInfo,
+            "ambient-lighting" to SettingsRoute.AmbientLighting,
+            "detection-sensor" to SettingsRoute.DetectionSensor,
+            "paxcounter" to SettingsRoute.Paxcounter,
+            "status-message" to SettingsRoute.StatusMessage,
+            "traffic-management" to SettingsRoute.TrafficManagement,
+            "tak" to SettingsRoute.TAK,
+            "clean-node-db" to SettingsRoute.CleanNodeDb,
+            "debug-panel" to SettingsRoute.DebugPanel,
+            "about" to SettingsRoute.About,
+            "filter-settings" to SettingsRoute.FilterSettings,
         )
 
     private val nodeDetailSubRoutes: Map<String, (Int) -> Route> =
         mapOf(
-            "device-metrics" to { destNum -> NodeDetailRoutes.DeviceMetrics(destNum) },
-            "map" to { destNum -> NodeDetailRoutes.NodeMap(destNum) },
-            "position" to { destNum -> NodeDetailRoutes.PositionLog(destNum) },
-            "environment" to { destNum -> NodeDetailRoutes.EnvironmentMetrics(destNum) },
-            "signal" to { destNum -> NodeDetailRoutes.SignalMetrics(destNum) },
-            "power" to { destNum -> NodeDetailRoutes.PowerMetrics(destNum) },
-            "traceroute" to { destNum -> NodeDetailRoutes.TracerouteLog(destNum) },
-            "host-metrics" to { destNum -> NodeDetailRoutes.HostMetricsLog(destNum) },
-            "pax" to { destNum -> NodeDetailRoutes.PaxMetrics(destNum) },
-            "neighbors" to { destNum -> NodeDetailRoutes.NeighborInfoLog(destNum) },
+            "device-metrics" to { destNum -> NodeDetailRoute.DeviceMetrics(destNum) },
+            "map" to { destNum -> NodeDetailRoute.NodeMap(destNum) },
+            "position" to { destNum -> NodeDetailRoute.PositionLog(destNum) },
+            "environment" to { destNum -> NodeDetailRoute.EnvironmentMetrics(destNum) },
+            "signal" to { destNum -> NodeDetailRoute.SignalMetrics(destNum) },
+            "power" to { destNum -> NodeDetailRoute.PowerMetrics(destNum) },
+            "traceroute" to { destNum -> NodeDetailRoute.TracerouteLog(destNum) },
+            "host-metrics" to { destNum -> NodeDetailRoute.HostMetricsLog(destNum) },
+            "pax" to { destNum -> NodeDetailRoute.PaxMetrics(destNum) },
+            "neighbors" to { destNum -> NodeDetailRoute.NeighborInfoLog(destNum) },
         )
 }
