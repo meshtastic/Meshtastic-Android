@@ -41,6 +41,7 @@
     <string name="internal">内置</string>
     <string name="node_sort_via_favorite">通过收藏夹</string>
     <string name="node_filter_show_ignored">仅显示忽略的节点</string>
+    <string name="node_filter_exclude_mqtt">排除MQTT</string>
     <string name="unrecognized">无法识别的</string>
     <string name="message_status_enroute">正在等待确认</string>
     <string name="message_status_queued">发送队列中</string>
@@ -140,6 +141,7 @@
     <string name="config_position_gps_update_interval_summary">我们应该多长时间尝试获取GPS位置(&lt;10秒将GPS保持开启)。</string>
     <string name="config_position_flags_summary">包含的字段越多，信息就越大，导致通讯时间更长，丢包风险更高.</string>
     <string name="config_power_is_power_saving_summary">尽可能让所有设备处于睡眠状态，对于跟踪器和传感器来说，这也包括 LoRa 无线电。如果您想将电台与手机 App 一起使用，或使用没有用户按钮的电台，请不要使用此设置。</string>
+    <string name="config_security_public_key">从您的私钥生成并发送到网络上的其他节点，让它们能够计算共享的密钥。</string>
     <string name="config_security_private_key">用来创建远程设备共享密钥</string>
     <string name="config_security_admin_key">授权向该节点发送管理员密钥</string>
     <string name="config_security_is_managed">设备由 Mesh 管理员管理，用户无法访问任何设备设置。</string>
@@ -245,8 +247,11 @@
     <string name="match_all">匹配所有 | 任意</string>
     <string name="debug_clear_logs_confirm">这将从您的设备中移除所有日志数据包和数据库条目 - 完整重置，永久失去所有内容。</string>
     <string name="clear">清除</string>
+    <string name="search_emoji">搜索Emoji……</string>
+    <string name="more_reactions">更多反应</string>
     <string name="channel_label">频道</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
+    <string name="a11y_message_from">来自 %1$s: %2$s 的消息</string>
     <string name="message_delivery_status">消息传递状态</string>
     <string name="new_messages_below">新消息</string>
     <string name="meshtastic_messages_notifications">私信提醒</string>
@@ -1163,7 +1168,7 @@
     <string name="local_stats_heap">空闲</string>
     <string name="local_stats_heap_value">%1$d / %2$d</string>
     <string name="local_stats_updated_at">%1$s</string>
-    <string name="powered">支持</string>
+    <string name="powered">已插电</string>
     <string name="meshtastic_stats">Meshtastic 统计</string>
     <string name="refresh">刷新</string>
     <string name="updated">更新</string>
@@ -1221,7 +1226,7 @@
     <string name="traffic_management_router_preserve_hops">保留路由跳数</string>
     <string name="no_messages_yet">尚无消息</string>
     <string name="unread_count">%1$d 未读</string>
-    <string name="map_coming_soon">地图支持将很快到桌面</string>
+    <string name="map_coming_soon">桌面端的地图支持即将推出</string>
     <string name="no_device_connected">设备未连接</string>
     <string name="update_status">更新状态</string>
     <string name="ready_for_firmware_update">准备好固件更新</string>
