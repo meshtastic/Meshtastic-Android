@@ -64,6 +64,7 @@ internal fun PositionInlineContent(
 
     PositionMap(node, distance)
     LinkedCoordinatesItem(node, displayUnits)
+    Spacer(Modifier.height(8.dp))
     FilledTonalButton(
         onClick = { onAction(NodeDetailAction.OpenCompass(node, displayUnits)) },
         modifier = Modifier.fillMaxWidth(),
