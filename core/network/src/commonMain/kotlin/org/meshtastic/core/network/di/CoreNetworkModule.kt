@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.network.di
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
@@ -24,10 +25,12 @@ import org.koin.core.annotation.Single
 @Module
 @ComponentScan("org.meshtastic.core.network")
 class CoreNetworkModule {
+    @OptIn(ExperimentalSerializationApi::class)
     @Single
     fun provideJson(): Json = Json {
         isLenient = true
         ignoreUnknownKeys = true
         coerceInputValues = true
+        exceptionsWithDebugInfo = false
     }
 }

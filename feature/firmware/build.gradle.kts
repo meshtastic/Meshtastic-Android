@@ -58,11 +58,12 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.markdown.renderer.android) }
 
+        commonTest.dependencies { implementation(projects.core.testing) }
+
         val androidHostTest by getting {
             dependencies {
                 implementation(libs.junit)
                 implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.compose.ui.test.junit4)
                 implementation(libs.androidx.test.ext.junit)
             }
         }

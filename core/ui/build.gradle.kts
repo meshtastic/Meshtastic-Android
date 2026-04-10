@@ -70,9 +70,6 @@ kotlin {
             implementation(projects.core.testing)
             implementation(libs.junit)
             implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.turbine)
-            implementation(libs.kotest.assertions)
-            implementation(libs.kotest.property)
         }
 
         val androidHostTest by getting { dependencies { implementation(libs.androidx.test.runner) } }

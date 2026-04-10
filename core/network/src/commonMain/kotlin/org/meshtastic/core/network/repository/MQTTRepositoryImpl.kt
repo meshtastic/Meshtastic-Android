@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
@@ -62,7 +63,12 @@ class MQTTRepositoryImpl(
     }
 
     private var client: MQTTClient? = null
-    private val json = Json { ignoreUnknownKeys = true }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private val json = Json {
+        ignoreUnknownKeys = true
+        exceptionsWithDebugInfo = false
+    }
     private val scope = CoroutineScope(dispatchers.default + SupervisorJob())
     private var clientJob: Job? = null
     private val publishSemaphore = Semaphore(20)
@@ -115,6 +121,9 @@ class MQTTRepositoryImpl(
                             Logger.d { "MQTT parsed JSON payload successfully" }
 
                             trySend(MqttClientProxyMessage(topic = topic, text = jsonStr, retained = packet.retain))
+                        } catch (e: kotlinx.serialization.json.JsonDecodingException) {
+                            @OptIn(ExperimentalSerializationApi::class)
+                            Logger.e(e) { "Failed to parse MQTT JSON: ${e.shortMessage} (path: ${e.path})" }
                         } catch (e: kotlinx.serialization.SerializationException) {
                             Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
                         } catch (e: IllegalArgumentException) {
