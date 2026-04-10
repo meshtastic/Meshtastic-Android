@@ -227,16 +227,16 @@ dependencies {
 }
 
 aboutLibraries {
-    // Fetch full license text + funding info from GitHub API when on CI with a token
-    val isCi =
-        providers
-            .gradleProperty("ci")
-            .map { it.toBoolean() }
-            .getOrElse(providers.environmentVariable("CI").map { it.toBoolean() }.getOrElse(false))
+    // Run offline by default to avoid burning GitHub API calls on every build.
+    // Release builds pass -PaboutLibraries.release=true to fetch full license text + funding info.
+    val isReleaseBuild = providers.gradleProperty("aboutLibraries.release").map { it.toBoolean() }.getOrElse(false)
     val ghToken = providers.environmentVariable("GITHUB_TOKEN")
+
+    offlineMode = !isReleaseBuild
+
     collect {
-        fetchRemoteLicense = isCi && ghToken.isPresent
-        fetchRemoteFunding = isCi && ghToken.isPresent
+        fetchRemoteLicense = isReleaseBuild && ghToken.isPresent
+        fetchRemoteFunding = isReleaseBuild && ghToken.isPresent
         if (ghToken.isPresent) {
             gitHubApiToken = ghToken.get()
         }
