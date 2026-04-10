@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,8 +28,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -80,14 +78,13 @@ private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
-        LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color, environmentMetric = null),
-        LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color, environmentMetric = null),
+        LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color),
+        LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color),
+        LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color),
     )
 
 @Suppress("LongMethod")
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PaxMetricsChart(
     modifier: Modifier = Modifier,
     totalSeries: List<Pair<Int, Int>>,
@@ -120,7 +117,7 @@ private fun PaxMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(alpha = 1f)) {
+                    when (color) {
                         bleColor -> formatString("BLE: %.0f", value)
                         wifiColor -> formatString("WiFi: %.0f", value)
                         paxColor -> formatString("PAX: %.0f", value)
@@ -250,21 +247,8 @@ fun PaxcountInfo(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onClick() },
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        colors =
-        CardDefaults.cardColors(
-            containerColor =
-            if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-        ),
-    ) {
+    SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Text(
                 text = DateFormatter.formatDateTime(log.received_date),
@@ -278,17 +262,11 @@ fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClic
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                    MetricIndicator(PaxSeries.PAX.color)
-                    Spacer(Modifier.width(4.dp))
-                    Text(text = "PAX: ${pax.ble + pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                    MetricValueRow(color = PaxSeries.PAX.color, text = "PAX: ${pax.ble + pax.wifi}")
                     Spacer(Modifier.width(8.dp))
-                    MetricIndicator(PaxSeries.BLE.color)
-                    Spacer(Modifier.width(4.dp))
-                    Text(text = "B:${pax.ble}", style = MaterialTheme.typography.bodyLarge)
+                    MetricValueRow(color = PaxSeries.BLE.color, text = "B:${pax.ble}")
                     Spacer(Modifier.width(8.dp))
-                    MetricIndicator(PaxSeries.WIFI.color)
-                    Spacer(Modifier.width(4.dp))
-                    Text(text = "W:${pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                    MetricValueRow(color = PaxSeries.WIFI.color, text = "W:${pax.wifi}")
                 }
 
                 Text(

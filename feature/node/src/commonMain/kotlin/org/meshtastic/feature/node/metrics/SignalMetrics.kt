@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,12 +31,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -76,8 +72,8 @@ private enum class SignalMetric(val color: Color) {
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = Res.string.rssi, color = SignalMetric.RSSI.color, environmentMetric = null),
-        LegendData(nameRes = Res.string.snr, color = SignalMetric.SNR.color, environmentMetric = null),
+        LegendData(nameRes = Res.string.rssi, color = SignalMetric.RSSI.color),
+        LegendData(nameRes = Res.string.snr, color = SignalMetric.SNR.color),
     )
 
 @Suppress("LongMethod")
@@ -134,7 +130,6 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
     meshPackets: List<MeshPacket>,
@@ -168,7 +163,7 @@ private fun SignalMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    if (color.copy(alpha = 1f) == rssiColor) {
+                    if (color == rssiColor) {
                         formatString("RSSI: %.0f dBm", value)
                     } else {
                         formatString("SNR: %.1f dB", value)
@@ -234,63 +229,42 @@ private fun SignalMetricsChart(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
     val time = meshPacket.rx_time.toLong() * MS_PER_SEC
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        colors =
-        CardDefaults.cardColors(
-            containerColor =
-            if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-        ),
-    ) {
-        Surface(color = Color.Transparent) {
-            SelectionContainer {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    /* Data */
-                    Box(modifier = Modifier.weight(weight = 5f).height(IntrinsicSize.Min)) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            /* Time */
-                            Row(horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(
-                                    text = CommonCharts.formatDateTime(time),
-                                    style = MaterialTheme.typography.titleMediumEmphasized,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            /* SNR and RSSI */
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                MetricIndicator(SignalMetric.RSSI.color)
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    text = formatString("%.0f dBm", meshPacket.rx_rssi.toFloat()),
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-                                Spacer(Modifier.width(12.dp))
-                                MetricIndicator(SignalMetric.SNR.color)
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    text = formatString("%.1f dB", meshPacket.rx_snr),
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-                            }
-                        }
+    SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            /* Data */
+            Box(modifier = Modifier.weight(weight = 5f).height(IntrinsicSize.Min)) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    /* Time */
+                    Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(
+                            text = CommonCharts.formatDateTime(time),
+                            style = MaterialTheme.typography.titleMediumEmphasized,
+                            fontWeight = FontWeight.Bold,
+                        )
                     }
 
-                    /* Signal Indicator */
-                    Box(modifier = Modifier.weight(weight = 3f).height(IntrinsicSize.Max)) {
-                        LoraSignalIndicator(meshPacket.rx_snr, meshPacket.rx_rssi)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    /* SNR and RSSI */
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MetricValueRow(
+                            color = SignalMetric.RSSI.color,
+                            text = formatString("%.0f dBm", meshPacket.rx_rssi.toFloat()),
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        MetricValueRow(
+                            color = SignalMetric.SNR.color,
+                            text = formatString("%.1f dB", meshPacket.rx_snr),
+                        )
                     }
                 }
+            }
+
+            /* Signal Indicator */
+            Box(modifier = Modifier.weight(weight = 3f).height(IntrinsicSize.Max)) {
+                LoraSignalIndicator(meshPacket.rx_snr, meshPacket.rx_rssi)
             }
         }
     }

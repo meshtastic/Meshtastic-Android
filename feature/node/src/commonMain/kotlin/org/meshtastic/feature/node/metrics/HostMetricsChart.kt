@@ -157,7 +157,7 @@ internal fun HostMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(alpha = 1f)) {
+                    when (color) {
                         load1Color -> formatString("L1: %.2f", value)
                         load5Color -> formatString("L5: %.2f", value)
                         load15Color -> formatString("L15: %.2f", value)

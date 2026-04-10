@@ -70,22 +70,6 @@ object CommonCharts {
     const val MAX_PERCENT_VALUE = 100f
     const val SCROLL_BIAS = 0.5f
 
-    /** Gets the Material 3 primary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3PrimaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
-
-    /** Gets the Material 3 secondary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3SecondaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha)
-
-    /** Gets the Material 3 tertiary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3TertiaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.tertiary.copy(alpha = alpha)
-
-    /** Gets the Material 3 error color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3ErrorColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.error.copy(alpha = alpha)
-
     /**
      * A dynamic [CartesianValueFormatter] that adjusts the time format based on the total data span
      * ([CartesianRanges.xLength]).
@@ -142,7 +126,7 @@ data class LegendData(
     val nameRes: StringResource,
     val color: Color,
     val isLine: Boolean = false,
-    val environmentMetric: Environment? = null,
+    val metricKey: Any? = null,
 )
 
 data class InfoDialogData(val titleRes: StringResource, val definitionRes: StringResource, val color: Color)
@@ -163,9 +147,9 @@ fun Legend(
     onToggle: ((Int) -> Unit)? = null,
 ) {
     FlowRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.Center,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         legendData.forEachIndexed { index, data ->
             val isVisible = index !in hiddenSet
@@ -173,7 +157,7 @@ fun Legend(
                 FilterChip(
                     selected = isVisible,
                     onClick = { onToggle(index) },
-                    label = { Text(stringResource(data.nameRes)) },
+                    label = { Text(text = stringResource(data.nameRes), style = MaterialTheme.typography.labelSmall) },
                     leadingIcon = { LegendIndicator(color = data.color, isLine = data.isLine) },
                     modifier = Modifier.padding(horizontal = 2.dp),
                 )

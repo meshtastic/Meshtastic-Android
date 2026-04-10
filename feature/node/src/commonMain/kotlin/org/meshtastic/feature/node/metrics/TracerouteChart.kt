@@ -184,7 +184,7 @@ internal fun TracerouteMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(alpha = 1f)) {
+                    when (color) {
                         forwardColor -> formatString("Fwd: %.0f hops", value)
                         returnColor -> formatString("Ret: %.0f hops", value)
                         else -> formatString("RTT: %.1f s", value)

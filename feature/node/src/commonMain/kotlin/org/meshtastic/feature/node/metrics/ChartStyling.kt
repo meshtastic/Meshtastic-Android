@@ -249,10 +249,13 @@ object ChartStyling {
                 if (target is LineCartesianLayerMarkerTarget) {
                     target.points.forEachIndexed { pointIndex, point ->
                         if (pointIndex > 0) append(", ")
-                        // Force alpha to 1f so text is readable even if the line is transparent/subtle
-                        val color = point.color.copy(alpha = .8f)
-                        val text = format(point.entry.y, color)
-                        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(text) }
+                        // Pass the opaque color to the format lambda so callers can match without alpha gymnastics.
+                        // Apply 0.8 alpha only on the rendered text for readability.
+                        val opaqueColor = point.color.copy(alpha = 1f)
+                        val text = format(point.entry.y, opaqueColor)
+                        withStyle(SpanStyle(color = opaqueColor.copy(alpha = .8f), fontWeight = FontWeight.Bold)) {
+                            append(text)
+                        }
                     }
                 }
             }

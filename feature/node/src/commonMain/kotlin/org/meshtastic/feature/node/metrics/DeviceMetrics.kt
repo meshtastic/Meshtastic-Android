@@ -15,11 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("MagicNumber")
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,9 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -106,20 +102,10 @@ private enum class Device(val color: Color) {
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = Res.string.battery, color = Device.BATTERY.color, isLine = true, environmentMetric = null),
-        LegendData(nameRes = Res.string.voltage, color = Device.VOLTAGE.color, isLine = true, environmentMetric = null),
-        LegendData(
-            nameRes = Res.string.channel_utilization,
-            color = Device.CH_UTIL.color,
-            isLine = true,
-            environmentMetric = null,
-        ),
-        LegendData(
-            nameRes = Res.string.air_utilization,
-            color = Device.AIR_UTIL.color,
-            isLine = true,
-            environmentMetric = null,
-        ),
+        LegendData(nameRes = Res.string.battery, color = Device.BATTERY.color, isLine = true),
+        LegendData(nameRes = Res.string.voltage, color = Device.VOLTAGE.color, isLine = true),
+        LegendData(nameRes = Res.string.channel_utilization, color = Device.CH_UTIL.color, isLine = true),
+        LegendData(nameRes = Res.string.air_utilization, color = Device.AIR_UTIL.color, isLine = true),
     )
 
 @Suppress("LongMethod")
@@ -188,10 +174,6 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
-            if (hasBattery) {
-                val batteryValues = remember(data) { data.mapNotNull { it.device_metrics?.battery_level?.toFloat() } }
-                MetricSummaryRow(values = batteryValues, label = "%")
-            }
         },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             DeviceMetricsChart(
@@ -219,7 +201,6 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
@@ -247,7 +228,7 @@ private fun DeviceMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(alpha = 1f)) {
+                    when (color) {
                         batteryColor -> formatString(percentValueTemplate, batteryLabel, value)
                         voltageColor -> formatString(voltageValueTemplate, voltageLabel, value)
                         chUtilColor -> formatString(percentValueTemplate, channelUtilizationLabel, value)
@@ -391,7 +372,6 @@ private fun DeviceMetricsChart(
 
 @Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsChartPreview() {
     val now = nowSeconds.toInt()
     val telemetries =
@@ -422,7 +402,6 @@ private fun DeviceMetricsChartPreview() {
 
 @Composable
 @Suppress("LongMethod")
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val deviceMetrics = telemetry.device_metrics
     val time = telemetry.time.toLong() * MS_PER_SEC
@@ -431,93 +410,67 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
     val uptimeLabel = stringResource(Res.string.uptime)
     val percentValueTemplate = stringResource(Res.string.device_metrics_percent_value)
     val labelValueTemplate = stringResource(Res.string.device_metrics_label_value)
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        colors =
-        CardDefaults.cardColors(
-            containerColor =
-            if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-        ),
-    ) {
-        Surface(color = Color.Transparent) {
-            SelectionContainer {
-                Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                    /* Time, Battery, and Voltage */
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(
-                            text = CommonCharts.formatDateTime(time),
-                            style = MaterialTheme.typography.titleMediumEmphasized,
-                            fontWeight = FontWeight.Bold,
-                        )
+    SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+            /* Time, Battery, and Voltage */
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    text = CommonCharts.formatDateTime(time),
+                    style = MaterialTheme.typography.titleMediumEmphasized,
+                    fontWeight = FontWeight.Bold,
+                )
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (deviceMetrics?.battery_level != null) {
-                                MetricIndicator(Device.BATTERY.color)
-                                Spacer(Modifier.width(4.dp))
-                            }
-                            if (deviceMetrics?.voltage != null) {
-                                MetricIndicator(Device.VOLTAGE.color)
-                                Spacer(Modifier.width(8.dp))
-                            }
-                            MaterialBatteryInfo(
-                                level = deviceMetrics?.battery_level ?: 0,
-                                voltage = deviceMetrics?.voltage ?: 0f,
-                            )
-                        }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (deviceMetrics?.battery_level != null) {
+                        MetricIndicator(Device.BATTERY.color)
+                        Spacer(Modifier.width(4.dp))
                     }
+                    if (deviceMetrics?.voltage != null) {
+                        MetricIndicator(Device.VOLTAGE.color)
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    MaterialBatteryInfo(
+                        level = deviceMetrics?.battery_level ?: 0,
+                        voltage = deviceMetrics?.voltage ?: 0f,
+                    )
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                    /* Channel Utilization and Air Utilization Tx */
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (deviceMetrics?.channel_utilization != null) {
-                                MetricIndicator(Device.CH_UTIL.color)
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    text =
-                                    formatString(
-                                        percentValueTemplate,
-                                        channelUtilizationLabel,
-                                        deviceMetrics.channel_utilization ?: 0f,
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                )
-                                Spacer(Modifier.width(12.dp))
-                            }
-                            if (deviceMetrics?.air_util_tx != null) {
-                                MetricIndicator(Device.AIR_UTIL.color)
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    text =
-                                    formatString(
-                                        percentValueTemplate,
-                                        airUtilizationLabel,
-                                        deviceMetrics.air_util_tx ?: 0f,
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                )
-                            }
-                        }
-                        Text(
+            /* Channel Utilization and Air Utilization Tx */
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (deviceMetrics?.channel_utilization != null) {
+                        MetricValueRow(
+                            color = Device.CH_UTIL.color,
                             text =
                             formatString(
-                                labelValueTemplate,
-                                uptimeLabel,
-                                formatUptime(deviceMetrics?.uptime_seconds ?: 0),
+                                percentValueTemplate,
+                                channelUtilizationLabel,
+                                deviceMetrics.channel_utilization ?: 0f,
                             ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        )
+                        Spacer(Modifier.width(12.dp))
+                    }
+                    if (deviceMetrics?.air_util_tx != null) {
+                        MetricValueRow(
+                            color = Device.AIR_UTIL.color,
+                            text =
+                            formatString(
+                                percentValueTemplate,
+                                airUtilizationLabel,
+                                deviceMetrics.air_util_tx ?: 0f,
+                            ),
                         )
                     }
                 }
+                Text(
+                    text =
+                    formatString(labelValueTemplate, uptimeLabel, formatUptime(deviceMetrics?.uptime_seconds ?: 0)),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                )
             }
         }
     }
@@ -525,7 +478,6 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 
 @Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsCardPreview() {
     val now = nowSeconds.toInt()
     val telemetry =
@@ -545,7 +497,6 @@ private fun DeviceMetricsCardPreview() {
 
 @Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsScreenPreview() {
     val now = nowSeconds.toInt()
     val telemetries =

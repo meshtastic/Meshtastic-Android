@@ -15,11 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("TooManyFunctions")
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,19 +30,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -100,14 +94,6 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
-            val tempValues =
-                remember(filteredTelemetries) {
-                    filteredTelemetries.mapNotNull { it.environment_metrics?.temperature?.takeIf { t -> !t.isNaN() } }
-                }
-            if (tempValues.isNotEmpty()) {
-                val unit = if (state.isFahrenheit) "°F" else "°C"
-                MetricSummaryRow(values = tempValues, label = unit)
-            }
         },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             EnvironmentMetricsChart(
@@ -135,7 +121,6 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun TemperatureDisplay(
     envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     environmentDisplayFahrenheit: Boolean,
@@ -157,7 +142,6 @@ private fun TemperatureDisplay(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val hasHumidity = envMetrics.relative_humidity?.let { !it.isNaN() } == true
     val hasPressure = envMetrics.barometric_pressure?.let { !it.isNaN() && it > 0 } == true
@@ -198,7 +182,6 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun SoilMetricsDisplay(
     envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     environmentDisplayFahrenheit: Boolean,
@@ -251,7 +234,6 @@ private fun SoilMetricsDisplay(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val hasLux = envMetrics.lux != null && !envMetrics.lux!!.isNaN()
     val hasUvLux = envMetrics.uv_lux != null && !envMetrics.uv_lux!!.isNaN()
@@ -287,7 +269,6 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val hasVoltage = envMetrics.voltage != null && !envMetrics.voltage!!.isNaN()
     val hasCurrent = envMetrics.current != null && !envMetrics.current!!.isNaN()
@@ -315,7 +296,6 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val iaqValue = envMetrics.iaq
     val gasResistance = envMetrics.gas_resistance
@@ -351,7 +331,6 @@ private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     envMetrics.radiation?.let { radiation ->
         if (!radiation.isNaN() && radiation > 0f) {
@@ -371,7 +350,6 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun WindDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val hasSpeed = envMetrics.wind_speed != null && !envMetrics.wind_speed!!.isNaN()
     val hasGust = envMetrics.wind_gust != null && !envMetrics.wind_gust!!.isNaN()
@@ -386,7 +364,6 @@ private fun WindDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -414,7 +391,6 @@ private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun WindGustLullRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics, hasGust: Boolean, hasLull: Boolean) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         if (hasGust) {
@@ -435,7 +411,6 @@ private fun WindGustLullRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics,
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val has1h = envMetrics.rainfall_1h != null && !envMetrics.rainfall_1h!!.isNaN()
     val has24h = envMetrics.rainfall_24h != null && !envMetrics.rainfall_24h!!.isNaN()
@@ -462,34 +437,18 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun EnvironmentMetricsCard(
     telemetry: Telemetry,
     environmentDisplayFahrenheit: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        colors =
-        CardDefaults.cardColors(
-            containerColor =
-            if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-        ),
-    ) {
-        Surface(color = Color.Transparent) {
-            SelectionContainer { EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit) }
-        }
+    SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
+        EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit)
     }
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
     val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
     val time = telemetry.time.toLong() * MS_PER_SEC
@@ -523,7 +482,6 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
 
 @Suppress("MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PreviewEnvironmentMetricsContent() {
     val fakeEnvMetrics =
         org.meshtastic.proto.EnvironmentMetrics(
