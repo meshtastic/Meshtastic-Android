@@ -294,8 +294,6 @@ jobs:
             tasks+=(
               "app:connectedFdroidDebugAndroidTest"
               "app:connectedGoogleDebugAndroidTest"
-              "core:barcode:connectedFdroidDebugAndroidTest"
-              "core:barcode:connectedGoogleDebugAndroidTest"
             )
           fi
 

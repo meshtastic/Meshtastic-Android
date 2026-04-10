@@ -52,13 +52,6 @@ kotlin {
             api(libs.androidx.annotation)
             api(libs.androidx.core.ktx)
         }
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.robolectric)
-                implementation(libs.androidx.test.ext.junit)
-            }
-        }
         val androidDeviceTest by getting {
             dependencies {
                 implementation(libs.androidx.test.ext.junit)
