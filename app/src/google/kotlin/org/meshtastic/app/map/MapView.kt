@@ -21,8 +21,6 @@ package org.meshtastic.app.map
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Paint
 import android.net.Uri
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -56,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.createBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -67,8 +64,6 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
@@ -798,7 +793,6 @@ private fun MainMapContent(
         mapFilterState = mapFilterState,
         myNodeNum = myNodeNum ?: 0,
         isConnected = isConnected,
-        unicodeEmojiToBitmapProvider = ::unicodeEmojiToBitmap,
         onEditWaypointRequest = onEditWaypointRequest,
         selectedWaypointId = selectedWaypointId,
     )
@@ -1066,23 +1060,6 @@ internal fun convertIntToEmoji(unicodeCodePoint: Int): String = try {
 } catch (e: IllegalArgumentException) {
     Logger.w(e) { "Invalid unicode code point: $unicodeCodePoint" }
     "\uD83D\uDCCD"
-}
-
-internal fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
-    val unicodeEmoji = convertIntToEmoji(icon)
-    val paint =
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            textSize = 64f
-            color = android.graphics.Color.BLACK
-            textAlign = Paint.Align.CENTER
-        }
-    val baseline = -paint.ascent()
-    val width = (paint.measureText(unicodeEmoji) + 0.5f).toInt()
-    val height = (baseline + paint.descent() + 0.5f).toInt()
-    val image = createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(image)
-    canvas.drawText(unicodeEmoji, width / 2f, baseline, paint)
-    return BitmapDescriptorFactory.fromBitmap(image)
 }
 
 @Suppress("NestedBlockDepth")

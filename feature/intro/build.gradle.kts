@@ -44,7 +44,6 @@ kotlin {
                 implementation(libs.junit)
                 implementation(project.dependencies.platform(libs.androidx.compose.bom))
                 implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.compose.ui.test.junit4)
             }
         }
     }

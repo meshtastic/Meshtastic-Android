@@ -17,7 +17,9 @@
 package org.meshtastic.feature.firmware.ota.dfu
 
 import co.touchlab.kermit.Logger
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecodingException
 
 private val json = Json { ignoreUnknownKeys = true }
 
@@ -36,7 +38,11 @@ internal fun parseDfuZipEntries(entries: Map<String, ByteArray>): DfuZipPackage 
 
     val manifest =
         runCatching { json.decodeFromString<DfuManifest>(manifestBytes.decodeToString()) }
-            .getOrElse { e -> throw DfuException.InvalidPackage("Failed to parse manifest.json: ${e.message}") }
+            .getOrElse { e ->
+                @OptIn(ExperimentalSerializationApi::class)
+                val detail = (e as? JsonDecodingException)?.shortMessage ?: e.message
+                throw DfuException.InvalidPackage("Failed to parse manifest.json: $detail")
+            }
 
     val entry =
         manifest.manifest.primaryEntry ?: throw DfuException.InvalidPackage("No firmware entry found in manifest.json")

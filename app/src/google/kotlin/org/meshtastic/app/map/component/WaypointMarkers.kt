@@ -16,15 +16,22 @@
  */
 package org.meshtastic.app.map.component
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.google.android.gms.maps.model.BitmapDescriptor
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberComposeBitmapDescriptor
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import kotlinx.coroutines.launch
+import org.meshtastic.app.map.convertIntToEmoji
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.locked
@@ -32,13 +39,13 @@ import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.Waypoint
 
+@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun WaypointMarkers(
     displayableWaypoints: List<Waypoint>,
     mapFilterState: BaseMapViewModel.MapFilterState,
     myNodeNum: Int,
     isConnected: Boolean,
-    unicodeEmojiToBitmapProvider: (Int) -> BitmapDescriptor,
     onEditWaypointRequest: (Waypoint) -> Unit,
     selectedWaypointId: Int? = null,
 ) {
@@ -57,14 +64,16 @@ fun WaypointMarkers(
                 }
             }
 
+            val iconCodePoint = if ((waypoint.icon ?: 0) == 0) PUSHPIN else waypoint.icon!!
+            val emojiText = convertIntToEmoji(iconCodePoint)
+            val icon =
+                rememberComposeBitmapDescriptor(iconCodePoint) {
+                    Text(text = emojiText, fontSize = 32.sp, modifier = Modifier.padding(2.dp))
+                }
+
             Marker(
                 state = markerState,
-                icon =
-                if ((waypoint.icon ?: 0) == 0) {
-                    unicodeEmojiToBitmapProvider(PUSHPIN) // Default icon (Round Pushpin)
-                } else {
-                    unicodeEmojiToBitmapProvider(waypoint.icon!!)
-                },
+                icon = icon,
                 title = (waypoint.name ?: "").replace('\n', ' ').replace('\b', ' '),
                 snippet = (waypoint.description ?: "").replace('\n', ' ').replace('\b', ' '),
                 visible = true,
