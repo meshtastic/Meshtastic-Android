@@ -49,7 +49,8 @@ import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.PortNum
 
-@Suppress("TooManyFunctions", "LargeClass", "DEPRECATION") // IMeshService is deprecated but still required for AIDL binding
+// IMeshService is deprecated but still required for AIDL binding
+@Suppress("TooManyFunctions", "LargeClass", "DEPRECATION")
 class MeshService : Service() {
 
     private val radioInterfaceService: RadioInterfaceService by inject()
