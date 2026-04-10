@@ -47,6 +47,14 @@
 # R8 optimization for Kotlin null checks (AGP 9.0+)
 -processkotlinnullchecks remove
 
+# Compose Multiplatform resources: keep the resource library internals and generated Res
+# accessor classes so R8 does not tree-shake the resource loading infrastructure.
+# Without these rules the fdroid flavor (which has fewer transitive Compose dependencies
+# than google) crashes at startup with a misleading URLDecodeException due to R8
+# exception-class merging (see Koin keep rule above).
+-keep class org.jetbrains.compose.resources.** { *; }
+-keep class org.meshtastic.core.resources.** { *; }
+
 # Nordic BLE
 -dontwarn no.nordicsemi.kotlin.ble.environment.android.mock.**
 -keep class no.nordicsemi.kotlin.ble.environment.android.mock.** { *; }

@@ -17,6 +17,7 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.datadog.gradle.plugin.DdExtension
+import com.datadog.gradle.plugin.InjectBuildIdToAssetsTask
 import com.datadog.gradle.plugin.InstrumentationMode
 import com.datadog.gradle.plugin.SdkCheckLevel
 import org.gradle.api.Plugin
@@ -24,8 +25,10 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
+import org.gradle.kotlin.dsl.withType
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
+import java.io.File
 
 /**
  * Convention plugin for analytics (Google Services, Crashlytics, Datadog). Segregates these plugins to only affect the
@@ -65,16 +68,36 @@ class AnalyticsConventionPlugin : Plugin<Project> {
                 }
             }
 
+            // Disable Datadog analytics/upload tasks for fdroid, but NOT the buildId
+            // inject/generate tasks. The Datadog plugin wires InjectBuildIdToAssetsTask via
+            // variant.artifacts.toTransform(SingleArtifact.ASSETS), which replaces the merged
+            // assets artifact for the entire variant. Disabling that task leaves its output
+            // directory empty, causing compressAssets to produce zero files and stripping ALL
+            // assets (including Compose Multiplatform .cvr resources) from the release APK.
             plugins.withId("com.datadoghq.dd-sdk-android-gradle-plugin") {
                 tasks.configureEach {
                     if (
                         (
                             name.contains("datadog", ignoreCase = true) ||
-                                name.contains("uploadMapping", ignoreCase = true) ||
-                                name.contains("buildId", ignoreCase = true)
+                                name.contains("uploadMapping", ignoreCase = true)
                             ) && name.contains("fdroid", ignoreCase = true)
                     ) {
                         enabled = false
+                    }
+                }
+
+                // The inject task must stay enabled to maintain the AGP artifact pipeline,
+                // but we strip the datadog.buildId file from its output to preserve fdroid
+                // sterility — no analytics artifacts should ship in the open-source flavor.
+                tasks.withType<InjectBuildIdToAssetsTask>().configureEach {
+                    if (name.contains("Fdroid", ignoreCase = true)) {
+                        doLast {
+                            // Constant: GenerateBuildIdTask.BUILD_ID_FILE_NAME
+                            val buildIdFile = File(outputAssets.get().asFile, "datadog.buildId")
+                            if (buildIdFile.exists()) {
+                                buildIdFile.delete()
+                            }
+                        }
                     }
                 }
             }
