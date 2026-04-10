@@ -11,7 +11,7 @@ The codebase is **~98% structurally KMP** — 18/20 core modules and 8/8 feature
 
 Of the five structural gaps originally identified, four are resolved and one remains in progress:
 
-1. **`app` is a God module** — originally 90 files / ~11K LOC of transport, service, UI, and ViewModel code that should live in core/feature modules. *(✅ Resolved — app module reduced to 6 files: `MainActivity`, `MeshUtilApplication`, Nav shell, and DI config)*
+1. **`app` is a God module** — originally 90 files / ~11K LOC of transport, service, UI, and ViewModel code that should live in core/feature modules. *(✅ Resolved — app module reduced to 8 files: `MainActivity`, `MeshUtilApplication`, Nav shell, DI config, and shared map UI components)*
 2. ~~**Radio transport layer is app-locked**~~ — ✅ Resolved: `RadioTransport` interface in `core:repository/commonMain`; shared `StreamFrameCodec` + `TcpTransport` in `core:network`.
 3. ~~**`java.*` APIs leak into `commonMain`**~~ — ✅ Resolved: `Locale`, `ConcurrentHashMap`, `ReentrantLock` purged.
 4. ~~**Zero feature-level `commonTest`**~~ — ✅ Resolved: 193 shared tests across all 8 features; `core:testing` module established.
@@ -24,7 +24,7 @@ Of the five structural gaps originally identified, four are resolved and one rem
 | `core/*/commonMain` | 337 | 32,700 | Shared business/data logic |
 | `feature/*/commonMain` | 146 | 19,700 | Shared feature UI + ViewModels |
 | `feature/*/androidMain` | 62 | 14,700 | Platform UI (charts, previews, permissions) |
-| `app/src/main` | 6 | ~300 | Android app shell (target achieved) |
+| `app/src/main` | 8 | ~450 | Android app shell + shared map UI components |
 | `desktop/src` | 26 | 4,800 | Desktop app shell |
 | `core/*/androidMain` | 49 | 3,500 | Platform implementations |
 | `core/*/jvmMain` | 11 | ~500 | JVM actuals |
@@ -38,7 +38,7 @@ Of the five structural gaps originally identified, four are resolved and one rem
 
 ### A1. `app` module is a God module
 
-The `app` module should be a thin shell (~20 files): `MainActivity`, DI assembly, nav host. Originally it held **90 files / ~11K LOC**, now completely reduced to a **6-file shell**:
+The `app` module should be a thin shell (~20 files): `MainActivity`, DI assembly, nav host, and shared flavor-agnostic UI. Originally it held **90 files / ~11K LOC**, now reduced to an **8-file shell** (6 original + 2 shared map UI components: `MapButton`, `MapControlsOverlay`):
 
 | Area | Files | LOC | Where it should live |
 |---|---:|---:|---|

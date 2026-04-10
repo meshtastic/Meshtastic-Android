@@ -42,9 +42,9 @@ import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
 import org.meshtastic.core.ui.icon.Favorite
+import org.meshtastic.core.ui.icon.Lens
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Place
-import org.meshtastic.core.ui.icon.RadioButtonUnchecked
+import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.feature.map.LastHeardFilter
 import kotlin.math.roundToInt
 
@@ -73,7 +73,7 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             onClick = { mapViewModel.toggleShowWaypointsOnMap() },
             leadingIcon = {
                 Icon(
-                    imageVector = MeshtasticIcons.Place,
+                    imageVector = MeshtasticIcons.PinDrop,
                     contentDescription = stringResource(Res.string.show_waypoints),
                 )
             },
@@ -89,7 +89,7 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
             leadingIcon = {
                 Icon(
-                    imageVector = MeshtasticIcons.RadioButtonUnchecked, // Placeholder icon
+                    imageVector = MeshtasticIcons.Lens,
                     contentDescription = stringResource(Res.string.show_precision_circle),
                 )
             },

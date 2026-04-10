@@ -89,6 +89,7 @@ import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
+import com.google.maps.android.data.Layer
 import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.kml.KmlLayer
 import kotlinx.coroutines.CoroutineScope
@@ -186,7 +187,6 @@ fun MapView(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
-    val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
 
     // --- Location permissions ---
     val locationPermissionsState =
@@ -345,8 +345,10 @@ fun MapView(
             emptyList()
         }
 
-    // Traceroute: resolve node selection + polylines (uses all nodes, not just those with positions,
-    // so that getNodeOrFallback can resolve metadata for hops whose positions come from snapshots).
+    // Traceroute: resolve node selection + polylines. Collected unconditionally per Compose rules
+    // (composable calls cannot be conditional), but only consumed in Traceroute mode. Uses all
+    // nodes, not just those with positions, so getNodeOrFallback can resolve metadata for hops
+    // whose positions come from snapshots.
     val allNodesForTraceroute by mapViewModel.nodes.collectAsStateWithLifecycle(listOf())
     val tracerouteSelection =
         if (mode is GoogleMapMode.Traceroute) {
@@ -543,7 +545,6 @@ fun MapView(
             when (mode) {
                 is GoogleMapMode.Main ->
                     MainMapContent(
-                        filteredNodes = filteredNodes,
                         nodeClusterItems =
                         filteredNodes.map { node ->
                             val latLng =
@@ -574,6 +575,7 @@ fun MapView(
                     )
 
                 is GoogleMapMode.NodeTrack -> {
+                    val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
                     if (mode.focusedNode != null && sortedTrackPositions.isNotEmpty()) {
                         NodeTrackOverlay(
                             focusedNode = mode.focusedNode,
@@ -749,7 +751,6 @@ fun MapView(
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
 private fun MainMapContent(
-    filteredNodes: List<Node>,
     nodeClusterItems: List<NodeClusterItem>,
     mapFilterState: MapFilterState,
     navigateToNodeDetails: (Int) -> Unit,
@@ -1004,7 +1005,7 @@ private fun offsetPolyline(
 @Composable
 private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel) {
     val context = LocalContext.current
-    var currentLayer by remember { mutableStateOf<com.google.maps.android.data.Layer?>(null) }
+    var currentLayer by remember { mutableStateOf<Layer?>(null) }
 
     MapEffect(layerItem.id, layerItem.isRefreshing) { map ->
         currentLayer?.safeRemoveLayerFromMap()
@@ -1040,7 +1041,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
     }
 }
 
-private fun com.google.maps.android.data.Layer.safeRemoveLayerFromMap() {
+private fun Layer.safeRemoveLayerFromMap() {
     try {
         removeLayerFromMap()
     } catch (e: Exception) {
@@ -1048,7 +1049,7 @@ private fun com.google.maps.android.data.Layer.safeRemoveLayerFromMap() {
     }
 }
 
-private fun com.google.maps.android.data.Layer.safeAddLayerToMap() {
+private fun Layer.safeAddLayerToMap() {
     try {
         if (!isLayerOnMap) addLayerToMap()
     } catch (e: Exception) {
@@ -1102,7 +1103,5 @@ fun Uri.getFileName(context: android.content.Context): String {
 
 /** Converts protobuf [Position] integer coordinates to a Google Maps [LatLng]. */
 internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
-
-private fun Waypoint.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
 
 // endregion

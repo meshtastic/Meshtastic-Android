@@ -10,8 +10,8 @@ The `:feature:map` module provides the mapping interface for the application. Ma
 | Contract | Purpose | Implementations |
 |---|---|---|
 | `MapViewProvider` | Main map (nodes, waypoints, controls) | `GoogleMapViewProvider`, `FdroidMapViewProvider` |
-| `NodeTrackMapProvider` | Per-node GPS track overlay (embedded in `PositionLogScreen`) | `NodeTrackGoogleMap`, `NodeTrackOsmMap` |
-| `TracerouteMapProvider` | Traceroute route visualization | `TracerouteGoogleMap`, `TracerouteOsmMap` |
+| `NodeTrackMapProvider` | Per-node GPS track overlay (embedded in `PositionLogScreen`) | Google: `NodeTrackMap` → `MapView(GoogleMapMode.NodeTrack)`, F-Droid: `NodeTrackMap` → `NodeTrackOsmMap` |
+| `TracerouteMapProvider` | Traceroute route visualization | Google: `TracerouteMap` → `MapView(GoogleMapMode.Traceroute)`, F-Droid: `TracerouteMap` → `TracerouteOsmMap` |
 
 All providers are injected via `CompositionLocal` in `MainActivity.kt` and consumed by feature modules without direct dependency on Google Maps or osmdroid.
 
@@ -23,7 +23,7 @@ All providers are injected via `CompositionLocal` in `MainActivity.kt` and consu
 ### Key Data Types
 
 - **`TracerouteOverlay`** (`core:model/commonMain`) — Pure data class representing traceroute route segments. Extracted from `feature:map` for cross-module reuse.
-- **`TracerouteNodeSelection`** (`feature:map/commonMain`) — Sealed class modeling node selection states during traceroute visualization.
+- **`TracerouteNodeSelection`** (`feature:map/commonMain`) — Data class modeling node selection results during traceroute visualization.
 - **`GeoConstants`** (`core:model/commonMain`) — Centralized geographic constants (`DEG_D`, `HEADING_DEG`, `EARTH_RADIUS_METERS`).
 
 ## Map Providers

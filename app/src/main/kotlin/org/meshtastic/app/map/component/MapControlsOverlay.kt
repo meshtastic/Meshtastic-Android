@@ -117,11 +117,12 @@ fun MapControlsOverlay(
 
 @Composable
 private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Boolean) {
-    val iconTint = when {
-        isFollowing -> MaterialTheme.colorScheme.primary
-        bearing == 0f -> MaterialTheme.colorScheme.StatusRed
-        else -> null
-    }
+    val iconTint =
+        when {
+            isFollowing -> MaterialTheme.colorScheme.primary
+            bearing == 0f -> MaterialTheme.colorScheme.StatusRed
+            else -> null
+        }
     MapButton(
         modifier = Modifier.rotate(-bearing),
         icon = MeshtasticIcons.MapCompass,

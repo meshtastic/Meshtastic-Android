@@ -61,11 +61,11 @@ import kotlin.math.roundToInt
  *
  * Applies the [lastHeardTrackFilter][org.meshtastic.feature.map.BaseMapViewModel.MapFilterState.lastHeardTrackFilter]
  * from [MapViewModel] to filter positions by time, matching the behavior of the Google Maps implementation. Includes a
- * track filter slider UI so users can adjust the time range directly from the map.
+ * minimal [MapControlsOverlay][org.meshtastic.app.map.component.MapControlsOverlay] with a track time filter slider so
+ * users can adjust the time range directly from the map.
  *
- * Unlike the monolithic [org.meshtastic.app.map.MapView], this composable does **not** include node clusters,
- * waypoints, location tracking, or any map controls. It is designed to be embedded inside the position-log adaptive
- * layout.
+ * Unlike the main [org.meshtastic.app.map.MapView], this composable does **not** include node clusters, waypoints, or
+ * location tracking. It is designed to be embedded inside the position-log adaptive layout.
  */
 @Composable
 fun NodeTrackOsmMap(

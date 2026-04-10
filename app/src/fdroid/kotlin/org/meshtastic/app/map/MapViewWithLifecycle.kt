@@ -16,7 +16,6 @@
  */
 package org.meshtastic.app.map
 
-import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -110,11 +109,6 @@ internal fun rememberMapViewWithLifecycle(
     }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
-        val activity = context as? android.app.Activity
-
-        // Keep the screen on while the map is actively displayed (replaces deprecated FULL_WAKE_LOCK).
-        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
@@ -136,10 +130,7 @@ internal fun rememberMapViewWithLifecycle(
 
         lifecycle.addObserver(observer)
 
-        onDispose {
-            lifecycle.removeObserver(observer)
-            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
+        onDispose { lifecycle.removeObserver(observer) }
     }
     return mapView
 }

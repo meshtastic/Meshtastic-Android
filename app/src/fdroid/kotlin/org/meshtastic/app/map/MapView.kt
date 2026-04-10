@@ -128,7 +128,9 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
@@ -201,7 +203,7 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
  * @param navigateToNodeDetails Callback to navigate to the details screen of a selected node.
  */
 @OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
-@Suppress("CyclomaticComplexMethod", "LongParameterList", "LongMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
@@ -305,6 +307,16 @@ fun MapView(
         }
     }
 
+    // Keep screen on while location tracking is active
+    LaunchedEffect(myLocationOverlay) {
+        val activity = context as? android.app.Activity ?: return@LaunchedEffect
+        if (myLocationOverlay != null) {
+            activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            activity.window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
@@ -325,8 +337,7 @@ fun MapView(
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = mapViewModel.ourNodeInfo.value
-        val displayUnits =
-            mapViewModel.config.display?.units ?: org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.METRIC
+        val displayUnits = mapViewModel.config.display?.units ?: DisplayUnits.METRIC
         val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (mapFilterStateValue.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
@@ -707,7 +718,7 @@ fun MapView(
 private fun FdroidMainMapFilterDropdown(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    mapFilterState: org.meshtastic.feature.map.BaseMapViewModel.MapFilterState,
+    mapFilterState: MapFilterState,
     mapViewModel: MapViewModel,
 ) {
     DropdownMenu(
