@@ -56,12 +56,6 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.androidx.work.runtime.ktx) }
 
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.androidx.work.testing)
-                implementation(libs.androidx.test.core)
-                implementation(libs.robolectric)
-            }
-        }
+        val androidHostTest by getting { dependencies { implementation(libs.androidx.work.testing) } }
     }
 }
