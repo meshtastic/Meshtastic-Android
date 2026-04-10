@@ -65,6 +65,7 @@ import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 @Composable
 fun DeviceActions(
     node: Node,
+    ourNode: Node?,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
     availableLogs: Set<LogsType>,
@@ -85,6 +86,7 @@ fun DeviceActions(
 
         TelemetricActionsSection(
             node = node,
+            ourNode = ourNode,
             availableLogs = availableLogs,
             lastTracerouteTime = lastTracerouteTime,
             lastRequestNeighborsTime = lastRequestNeighborsTime,

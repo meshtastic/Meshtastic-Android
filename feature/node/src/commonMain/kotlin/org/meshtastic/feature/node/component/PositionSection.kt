@@ -16,10 +16,7 @@
  */
 package org.meshtastic.feature.node.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,9 +25,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,75 +36,47 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.exchange_position
 import org.meshtastic.core.resources.open_compass
-import org.meshtastic.core.resources.position
 import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.Distance
-import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
-import org.meshtastic.feature.node.model.LogsType
-import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.proto.Config
 
-private const val EXCHANGE_BUTTON_WEIGHT = 1.1f
-private const val COMPASS_BUTTON_WEIGHT = 0.9f
 private const val MAP_HEIGHT_DP = 200
 
 /**
- * Displays node position details, last update time, distance, and related actions like requesting position and
- * accessing map/position logs.
+ * Inline position content shown beneath the Position row in the Telemetry section. Displays the inline map with
+ * distance badge, linked coordinates, and compass button.
  */
 @Composable
-fun PositionSection(
+internal fun PositionInlineContent(
     node: Node,
     ourNode: Node?,
-    metricsState: MetricsState,
-    availableLogs: Set<LogsType>,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
     onAction: (NodeDetailAction) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(metricsState.displayUnits)
-    val hasValidPosition = node.latitude != 0.0 || node.longitude != 0.0
-    val isLocal = metricsState.isLocal
+    val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(displayUnits)
 
-    SectionCard(title = Res.string.position, modifier = modifier) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            if (hasValidPosition) {
-                PositionMap(node, distance)
-                LinkedCoordinatesItem(node, metricsState.displayUnits)
-                Spacer(Modifier.height(8.dp))
-            }
-
-            PositionActionButtons(
-                node = node,
-                isLocal = isLocal,
-                hasValidPosition = hasValidPosition,
-                displayUnits = metricsState.displayUnits,
-                onAction = onAction,
-            )
-
-            if (availableLogs.contains(LogsType.POSITIONS)) {
-                Spacer(Modifier.height(12.dp))
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    AssistChip(
-                        onClick = { onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.routeFactory(node.num))) },
-                        label = { Text(stringResource(LogsType.POSITIONS.titleRes)) },
-                        leadingIcon = { Icon(vectorResource(LogsType.POSITIONS.icon), null, Modifier.size(18.dp)) },
-                    )
-                }
-            }
-        }
+    PositionMap(node, distance)
+    LinkedCoordinatesItem(node, displayUnits)
+    FilledTonalButton(
+        onClick = { onAction(NodeDetailAction.OpenCompass(node, displayUnits)) },
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+    ) {
+        Icon(MeshtasticIcons.Compass, null, Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = stringResource(Res.string.open_compass),
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
@@ -134,62 +100,6 @@ private fun PositionMap(node: Node, distance: String?) {
                     Spacer(Modifier.width(6.dp))
                     Text(distance, style = MaterialTheme.typography.labelLarge)
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PositionActionButtons(
-    node: Node,
-    isLocal: Boolean,
-    hasValidPosition: Boolean,
-    displayUnits: Config.DisplayConfig.DisplayUnits,
-    onAction: (NodeDetailAction) -> Unit,
-) {
-    if (isLocal && !hasValidPosition) return
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        if (!isLocal) {
-            Button(
-                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
-                modifier = Modifier.weight(EXCHANGE_BUTTON_WEIGHT),
-                shape = MaterialTheme.shapes.large,
-                colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-            ) {
-                Icon(MeshtasticIcons.LocationOn, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    text = stringResource(Res.string.exchange_position),
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Visible,
-                )
-            }
-        }
-
-        if (hasValidPosition) {
-            FilledTonalButton(
-                onClick = { onAction(NodeDetailAction.OpenCompass(node, displayUnits)) },
-                modifier = if (isLocal) Modifier.fillMaxWidth() else Modifier.weight(COMPASS_BUTTON_WEIGHT),
-                shape = MaterialTheme.shapes.large,
-            ) {
-                Icon(MeshtasticIcons.Compass, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    text = stringResource(Res.string.open_compass),
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
             }
         }
     }
