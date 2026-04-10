@@ -4,12 +4,23 @@ on:
   pull_request:
     types: [edited, labeled]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   pull-requests: read
   contents: read
 
 jobs:
   check-label:
+    # Skip bot PRs — they already have labels from the workflows/bots that create them
+    if: >-
+      github.event.pull_request.user.login != 'renovate[bot]' &&
+      github.event.pull_request.user.login != 'github-actions[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.pull_request.head.ref != 'scheduled-updates' &&
+      github.event.pull_request.head.ref != 'l10n_main'
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Check for PR labels
