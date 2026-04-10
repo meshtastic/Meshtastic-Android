@@ -60,8 +60,8 @@ import org.meshtastic.core.resources.debug_filters
 import org.meshtastic.core.resources.match_all
 import org.meshtastic.core.resources.match_any
 import org.meshtastic.core.ui.icon.Add
-import org.meshtastic.core.ui.icon.Clear
-import org.meshtastic.core.ui.icon.Done
+import org.meshtastic.core.ui.icon.Check
+import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.FilterAlt
 import org.meshtastic.core.ui.icon.FilterAltOff
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -151,7 +151,7 @@ fun DebugPresetFilters(
                     leadingIcon = {
                         if (filter in filterTexts) {
                             Icon(
-                                imageVector = MeshtasticIcons.Done,
+                                imageVector = MeshtasticIcons.Check,
                                 contentDescription = stringResource(Res.string.debug_filter_included),
                             )
                         }
@@ -266,7 +266,7 @@ fun DebugActiveFilters(
                 }
                 IconButton(onClick = { onFilterTextsChange(emptyList()) }) {
                     Icon(
-                        imageVector = MeshtasticIcons.Clear,
+                        imageVector = MeshtasticIcons.Close,
                         contentDescription = stringResource(Res.string.debug_filter_clear),
                     )
                 }
@@ -282,7 +282,7 @@ fun DebugActiveFilters(
                         onClick = { onFilterTextsChange(filterTexts - filter) },
                         label = { Text(filter) },
                         leadingIcon = { Icon(imageVector = MeshtasticIcons.FilterAlt, contentDescription = null) },
-                        trailingIcon = { Icon(imageVector = MeshtasticIcons.Clear, contentDescription = null) },
+                        trailingIcon = { Icon(imageVector = MeshtasticIcons.Close, contentDescription = null) },
                     )
                 }
             }

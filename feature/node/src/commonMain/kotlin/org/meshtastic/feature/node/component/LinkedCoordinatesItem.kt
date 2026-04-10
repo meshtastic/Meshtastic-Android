@@ -39,7 +39,7 @@ import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.last_position_update
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
-import org.meshtastic.core.ui.icon.KeyboardArrowRight
+import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.createClipEntry
@@ -82,7 +82,7 @@ fun LinkedCoordinatesItem(
         text = stringResource(Res.string.last_position_update),
         leadingIcon = MeshtasticIcons.LocationOn,
         supportingText = "$ago • $coordinates$elevationText",
-        trailingContent = MeshtasticIcons.KeyboardArrowRight.icon(),
+        trailingContent = MeshtasticIcons.ChevronRight.icon(),
         onClick = { openMap(node.latitude, node.longitude, node.user.long_name) },
         onLongClick = { coroutineScope.launch { clipboard.setClipEntry(createClipEntry(coordinates, copyLabel)) } },
     )

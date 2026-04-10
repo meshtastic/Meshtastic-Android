@@ -44,8 +44,8 @@ import org.meshtastic.core.resources.modules_unlocked
 import org.meshtastic.core.resources.system_settings
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.AppSettingsAlt
+import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.Info
-import org.meshtastic.core.ui.icon.KeyboardArrowRight
 import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notifications
@@ -101,7 +101,7 @@ fun AppInfoSection(
         ListItem(
             text = stringResource(Res.string.acknowledgements),
             leadingIcon = MeshtasticIcons.Info,
-            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
+            trailingIcon = MeshtasticIcons.ChevronRight,
         ) {
             onNavigateToAbout()
         }

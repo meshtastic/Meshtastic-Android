@@ -22,16 +22,16 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_arrow_circle_up
 import org.meshtastic.core.resources.ic_bedtime
-import org.meshtastic.core.resources.ic_check_circle
-import org.meshtastic.core.resources.ic_check_circle_outline
+import org.meshtastic.core.resources.ic_check_circle_fill0
+import org.meshtastic.core.resources.ic_check_circle_fill1
 import org.meshtastic.core.resources.ic_cloud
 import org.meshtastic.core.resources.ic_cloud_done
 import org.meshtastic.core.resources.ic_cloud_download
 import org.meshtastic.core.resources.ic_cloud_sync
 import org.meshtastic.core.resources.ic_cloud_upload
 import org.meshtastic.core.resources.ic_dangerous
-import org.meshtastic.core.resources.ic_error
-import org.meshtastic.core.resources.ic_error_outline
+import org.meshtastic.core.resources.ic_error_fill0
+import org.meshtastic.core.resources.ic_error_fill1
 import org.meshtastic.core.resources.ic_history
 import org.meshtastic.core.resources.ic_how_to_reg
 import org.meshtastic.core.resources.ic_info
@@ -96,13 +96,13 @@ val MeshtasticIcons.Dangerous: ImageVector
 
 // Result states
 val MeshtasticIcons.CheckCircle: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_check_circle_outline)
+    @Composable get() = vectorResource(Res.drawable.ic_check_circle_fill0)
 val MeshtasticIcons.Success: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_check_circle)
+    @Composable get() = vectorResource(Res.drawable.ic_check_circle_fill1)
 val MeshtasticIcons.Error: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_error)
+    @Composable get() = vectorResource(Res.drawable.ic_error_fill1)
 val MeshtasticIcons.ErrorOutline: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_error_outline)
+    @Composable get() = vectorResource(Res.drawable.ic_error_fill0)
 val MeshtasticIcons.Info: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_info)
 
@@ -126,7 +126,7 @@ val MeshtasticIcons.Disconnected: ImageVector
 val MeshtasticIcons.MessageEnroute: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_schedule)
 val MeshtasticIcons.MessageError: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_error_outline)
+    @Composable get() = vectorResource(Res.drawable.ic_error_fill0)
 val MeshtasticIcons.Warning: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_warning)
 val MeshtasticIcons.MqttConnected: ImageVector

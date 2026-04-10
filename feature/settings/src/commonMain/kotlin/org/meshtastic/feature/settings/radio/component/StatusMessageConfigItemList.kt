@@ -36,7 +36,7 @@ import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.status_message_config
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.ui.icon.Clear
+import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
@@ -90,7 +90,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                         if (formState.value.node_status.isNotEmpty()) {
                             IconButton(onClick = { formState.value = formState.value.copy(node_status = "") }) {
                                 Icon(
-                                    imageVector = MeshtasticIcons.Clear,
+                                    imageVector = MeshtasticIcons.Close,
                                     contentDescription = stringResource(Res.string.clear),
                                 )
                             }

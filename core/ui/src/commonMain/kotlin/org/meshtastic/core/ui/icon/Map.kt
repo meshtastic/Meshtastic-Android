@@ -21,9 +21,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_calendar_month
-import org.meshtastic.core.resources.ic_check
-import org.meshtastic.core.resources.ic_gps_fixed
-import org.meshtastic.core.resources.ic_gps_off
 import org.meshtastic.core.resources.ic_layers
 import org.meshtastic.core.resources.ic_lens
 import org.meshtastic.core.resources.ic_location_disabled
@@ -58,12 +55,6 @@ val MeshtasticIcons.Place: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_place)
 val MeshtasticIcons.Lens: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_lens)
-val MeshtasticIcons.GpsFixed: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_gps_fixed)
-val MeshtasticIcons.GpsOff: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_gps_off)
-val MeshtasticIcons.Check: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_check)
 val MeshtasticIcons.Map: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_map)
 val MeshtasticIcons.LocationOn: ImageVector

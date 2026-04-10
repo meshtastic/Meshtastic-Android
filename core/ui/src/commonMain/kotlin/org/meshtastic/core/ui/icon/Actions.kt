@@ -23,11 +23,10 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_add
 import org.meshtastic.core.resources.ic_add_reaction
 import org.meshtastic.core.resources.ic_bar_chart
-import org.meshtastic.core.resources.ic_clear
+import org.meshtastic.core.resources.ic_check
 import org.meshtastic.core.resources.ic_close
 import org.meshtastic.core.resources.ic_content_copy
-import org.meshtastic.core.resources.ic_delete
-import org.meshtastic.core.resources.ic_done
+import org.meshtastic.core.resources.ic_delete_fill1
 import org.meshtastic.core.resources.ic_download
 import org.meshtastic.core.resources.ic_drag_handle
 import org.meshtastic.core.resources.ic_edit
@@ -64,14 +63,12 @@ val MeshtasticIcons.Add: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_add)
 val MeshtasticIcons.AddReaction: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_add_reaction)
-val MeshtasticIcons.Clear: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_clear)
 val MeshtasticIcons.Close: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_close)
 val MeshtasticIcons.Copy: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_content_copy)
 val MeshtasticIcons.Delete: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_delete)
+    @Composable get() = vectorResource(Res.drawable.ic_delete_fill1)
 val MeshtasticIcons.Edit: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_edit)
 val MeshtasticIcons.More: ImageVector
@@ -109,8 +106,8 @@ val MeshtasticIcons.Upload: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_upload)
 val MeshtasticIcons.DragHandle: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_drag_handle)
-val MeshtasticIcons.Done: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_done)
+val MeshtasticIcons.Check: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_check)
 val MeshtasticIcons.QrCode: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_qr_code)
 val MeshtasticIcons.FolderOpen: ImageVector

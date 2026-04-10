@@ -31,8 +31,8 @@ import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.theme
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.FormatPaint
-import org.meshtastic.core.ui.icon.KeyboardArrowRight
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
@@ -52,7 +52,7 @@ fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () ->
         ListItem(
             text = stringResource(Res.string.preferences_language),
             leadingIcon = MeshtasticIcons.Language,
-            trailingIcon = if (useInAppLangPicker) null else MeshtasticIcons.KeyboardArrowRight,
+            trailingIcon = if (useInAppLangPicker) null else MeshtasticIcons.ChevronRight,
         ) {
             if (useInAppLangPicker) {
                 onShowLanguagePicker()

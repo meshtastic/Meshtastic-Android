@@ -36,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.meshtastic.core.ui.icon.Android
-import org.meshtastic.core.ui.icon.KeyboardArrowRight
+import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
@@ -55,7 +55,7 @@ fun ListItem(
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
     leadingIconTint: Color = LocalContentColor.current,
-    trailingIcon: ImageVector? = MeshtasticIcons.KeyboardArrowRight,
+    trailingIcon: ImageVector? = MeshtasticIcons.ChevronRight,
     trailingIconTint: Color = LocalContentColor.current,
     onClick: (() -> Unit)? = null,
 ) {

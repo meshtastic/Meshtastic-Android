@@ -59,9 +59,9 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.FormatPaint
 import org.meshtastic.core.ui.icon.Info
-import org.meshtastic.core.ui.icon.KeyboardArrowRight
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -238,7 +238,7 @@ private fun DesktopAppInfoSection(
         ListItem(
             text = stringResource(Res.string.acknowledgements),
             leadingIcon = MeshtasticIcons.Info,
-            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
+            trailingIcon = MeshtasticIcons.ChevronRight,
         ) {
             onNavigateToAbout()
         }

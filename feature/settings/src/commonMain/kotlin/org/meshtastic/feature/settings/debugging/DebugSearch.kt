@@ -50,7 +50,7 @@ import org.meshtastic.core.resources.debug_logs_export
 import org.meshtastic.core.resources.debug_search_clear
 import org.meshtastic.core.resources.debug_search_next
 import org.meshtastic.core.resources.debug_search_prev
-import org.meshtastic.core.ui.icon.Clear
+import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.KeyboardArrowDown
 import org.meshtastic.core.ui.icon.KeyboardArrowUp
@@ -130,7 +130,7 @@ fun DebugSearchBar(
                 if (searchState.searchText.isNotEmpty()) {
                     IconButton(onClick = onClearSearch, modifier = Modifier.size(32.dp)) {
                         Icon(
-                            imageVector = MeshtasticIcons.Clear,
+                            imageVector = MeshtasticIcons.Close,
                             contentDescription = stringResource(Res.string.debug_search_clear),
                             modifier = Modifier.size(16.dp),
                         )

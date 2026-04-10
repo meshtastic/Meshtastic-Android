@@ -37,11 +37,11 @@ import org.meshtastic.core.resources.device
 import org.meshtastic.core.resources.environment
 import org.meshtastic.core.resources.host
 import org.meshtastic.core.resources.ic_cell_tower
+import org.meshtastic.core.resources.ic_group
 import org.meshtastic.core.resources.ic_groups
 import org.meshtastic.core.resources.ic_light_mode
 import org.meshtastic.core.resources.ic_location_on
 import org.meshtastic.core.resources.ic_memory
-import org.meshtastic.core.resources.ic_people
 import org.meshtastic.core.resources.ic_perm_scan_wifi
 import org.meshtastic.core.resources.ic_power
 import org.meshtastic.core.resources.ic_router
@@ -244,7 +244,7 @@ enum class NodeDetailScreen(
     PAX(
         Res.string.pax,
         NodeDetailRoute.PaxMetrics::class,
-        Res.drawable.ic_people,
+        Res.drawable.ic_group,
         { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM, onNavigateUp) },
     ),
 }
