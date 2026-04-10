@@ -68,7 +68,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alert_bell_text
 import org.meshtastic.core.resources.cancel_reply
 import org.meshtastic.core.resources.clear_selection
-import org.meshtastic.core.resources.conversations
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.delete_messages
@@ -77,7 +76,6 @@ import org.meshtastic.core.resources.filter_disable_for_contact
 import org.meshtastic.core.resources.filter_enable_for_contact
 import org.meshtastic.core.resources.filter_hide_count
 import org.meshtastic.core.resources.filter_show_count
-import org.meshtastic.core.resources.message_input_label
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.resources.new_messages_below
 import org.meshtastic.core.resources.overflow_menu
@@ -88,10 +86,7 @@ import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.replying_to
 import org.meshtastic.core.resources.scroll_to_bottom
 import org.meshtastic.core.resources.select_all
-import org.meshtastic.core.resources.send
-import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown
-import org.meshtastic.core.ui.component.EmptyDetailPlaceholder
 import org.meshtastic.core.ui.component.MeshtasticTextDialog
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
@@ -99,7 +94,6 @@ import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.ArrowDownward
 import org.meshtastic.core.ui.icon.ChatBubbleOutline
 import org.meshtastic.core.ui.icon.Close
-import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.FilterList
@@ -109,7 +103,6 @@ import org.meshtastic.core.ui.icon.More
 import org.meshtastic.core.ui.icon.Muted
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
-import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.core.ui.icon.Unmuted
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
@@ -600,98 +593,7 @@ fun MessageStatusDialog(
 
 // endregion
 
-// region ── EmptyConversationsPlaceholder ──
-
-@Composable
-fun EmptyConversationsPlaceholder(modifier: Modifier = Modifier) {
-    EmptyDetailPlaceholder(
-        icon = MeshtasticIcons.Conversations,
-        title = stringResource(Res.string.conversations),
-        modifier = modifier,
-    )
-}
-
-// endregion
-
-// region ── MessageInput ──
-
-/**
- * Shared message input field with send button, byte counter, and homoglyph encoding support.
- *
- * @param messageText The current message text.
- * @param onMessageChange Callback when the text changes.
- * @param onSendMessage Callback when the send button is pressed.
- * @param isEnabled Whether the input field should be enabled.
- * @param isHomoglyphEncodingEnabled Whether to optimize text using homoglyph encoding.
- * @param maxByteSize The maximum allowed size of the message in bytes.
- */
-@Composable
-fun MessageInput(
-    messageText: String,
-    onMessageChange: (String) -> Unit,
-    onSendMessage: () -> Unit,
-    isEnabled: Boolean,
-    modifier: Modifier = Modifier,
-    isHomoglyphEncodingEnabled: Boolean = false,
-    maxByteSize: Int = MESSAGE_CHARACTER_LIMIT_BYTES,
-) {
-    val currentText =
-        if (isHomoglyphEncodingEnabled) {
-            org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(
-                messageText,
-            )
-        } else {
-            messageText
-        }
-
-    val currentByteLength = remember(currentText) { currentText.encodeToByteArray().size }
-
-    val isOverLimit = currentByteLength > maxByteSize
-    val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
-
-    androidx.compose.material3.OutlinedTextField(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-        value = messageText,
-        onValueChange = onMessageChange,
-        maxLines = MAX_INPUT_LINES,
-        label = { Text(stringResource(Res.string.message_input_label)) },
-        enabled = isEnabled,
-        shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
-        isError = isOverLimit,
-        placeholder = { Text(stringResource(Res.string.type_a_message)) },
-        supportingText = {
-            if (isEnabled) {
-                Text(
-                    text = "$currentByteLength/$maxByteSize",
-                    style = MaterialTheme.typography.bodySmall,
-                    color =
-                    if (isOverLimit) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.End,
-                )
-            }
-        },
-        trailingIcon = {
-            IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
-                Icon(imageVector = MeshtasticIcons.Send, contentDescription = stringResource(Res.string.send))
-            }
-        },
-    )
-}
-
-// endregion
-
 // region ── Utility Functions ──
-
-/** Maximum number of lines for the message input field. */
-private const val MAX_INPUT_LINES = 3
-
-/** Corner radius percentage for the message input field. */
-private const val ROUNDED_CORNER_PERCENT = 100
 
 /** The maximum number of characters to display in the reply snippet. */
 internal const val SNIPPET_CHARACTER_LIMIT = 50
