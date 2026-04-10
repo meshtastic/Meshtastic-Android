@@ -38,7 +38,8 @@ platform :android do
       task: "assembleFdroidRelease",
       properties: {
         "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE']
+        "android.injected.version.code" => ENV['VERSION_CODE'],
+        "aboutLibraries.release" => "true"
       }
     )
   end
@@ -50,7 +51,8 @@ platform :android do
       print_command: false,
       properties: {
         "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE']
+        "android.injected.version.code" => ENV['VERSION_CODE'],
+        "aboutLibraries.release" => "true"
       }
     )
     lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
