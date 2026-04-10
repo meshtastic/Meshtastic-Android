@@ -18,7 +18,7 @@ package org.meshtastic.app.map.traceroute
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 
 /**

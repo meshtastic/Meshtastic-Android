@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.traceroute
@@ -53,7 +54,6 @@ import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 
 @Composable

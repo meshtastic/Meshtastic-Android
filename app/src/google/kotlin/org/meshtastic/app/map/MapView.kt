@@ -88,11 +88,10 @@ import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
-
-private const val DEG_D = 1e-7
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)

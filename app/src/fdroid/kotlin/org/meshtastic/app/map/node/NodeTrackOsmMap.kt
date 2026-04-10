@@ -28,11 +28,10 @@ import org.meshtastic.app.map.addPositionMarkers
 import org.meshtastic.app.map.addScaleBarOverlay
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.rememberMapViewWithLifecycle
+import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.proto.Position
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-
-private const val DEG_D = 1e-7
 
 /**
  * A focused OSMDroid map composable that renders **only** a node's position track — a dashed polyline with directional

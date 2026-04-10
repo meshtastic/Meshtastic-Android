@@ -31,6 +31,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -41,7 +42,6 @@ import org.meshtastic.core.resources.one_day
 import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.two_days
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 
@@ -204,6 +204,18 @@ fun BaseMapViewModel.tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
     nodes: List<Node>,
+): TracerouteNodeSelection = tracerouteNodeSelection(
+    tracerouteOverlay = tracerouteOverlay,
+    tracerouteNodePositions = tracerouteNodePositions,
+    nodes = nodes,
+    getNodeOrFallback = ::getNodeOrFallback,
+)
+
+fun tracerouteNodeSelection(
+    tracerouteOverlay: TracerouteOverlay?,
+    tracerouteNodePositions: Map<Int, Position>,
+    nodes: List<Node>,
+    getNodeOrFallback: (Int) -> Node,
 ): TracerouteNodeSelection {
     val overlayNodeNums = tracerouteOverlay?.relatedNodeNums ?: emptySet()
     val tracerouteSnapshotNodes =

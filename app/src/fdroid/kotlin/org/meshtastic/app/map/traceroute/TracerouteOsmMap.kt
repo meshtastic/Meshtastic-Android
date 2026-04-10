@@ -42,23 +42,23 @@ import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
 import org.meshtastic.app.map.rememberMapViewWithLifecycle
 import org.meshtastic.app.map.zoomIn
+import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.util.GeoConstants.EARTH_RADIUS_METERS
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatAgo
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.Position
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
-private const val DEG_D = 1e-7
-private const val EARTH_RADIUS_METERS = 6_371_000.0
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_SINGLE_POINT_ZOOM = 12.0
 private const val TRACEROUTE_ZOOM_OUT_LEVELS = 0.5
@@ -128,11 +128,21 @@ fun TracerouteOsmMap(
         }
     val forwardOffsetPoints =
         remember(forwardPoints, headingReferencePoints) {
-            offsetPolyline(forwardPoints, TRACEROUTE_OFFSET_METERS, headingReferencePoints, 1.0)
+            offsetPolyline(
+                points = forwardPoints,
+                offsetMeters = TRACEROUTE_OFFSET_METERS,
+                headingReferencePoints = headingReferencePoints,
+                sideMultiplier = 1.0,
+            )
         }
     val returnOffsetPoints =
         remember(returnPoints, headingReferencePoints) {
-            offsetPolyline(returnPoints, TRACEROUTE_OFFSET_METERS, headingReferencePoints, -1.0)
+            offsetPolyline(
+                points = returnPoints,
+                offsetMeters = TRACEROUTE_OFFSET_METERS,
+                headingReferencePoints = headingReferencePoints,
+                sideMultiplier = -1.0,
+            )
         }
 
     // Camera auto-center
@@ -232,7 +242,7 @@ private fun buildTraceroutePolylines(
 
 // --- Haversine offset math for OSMDroid (no SphericalUtil available) ---
 
-private fun Double.toRad(): Double = this * Math.PI / 180.0
+private fun Double.toRad(): Double = this * PI / 180.0
 
 private fun bearingRad(from: GeoPoint, to: GeoPoint): Double {
     val lat1 = from.latitude.toRad()
@@ -248,7 +258,7 @@ private fun GeoPoint.offsetPoint(headingRad: Double, offsetMeters: Double): GeoP
     val lat2 = asin(sin(lat1) * cos(distanceByRadius) + cos(lat1) * sin(distanceByRadius) * cos(headingRad))
     val lon2 =
         lon1 + atan2(sin(headingRad) * sin(distanceByRadius) * cos(lat1), cos(distanceByRadius) - sin(lat1) * sin(lat2))
-    return GeoPoint(Math.toDegrees(lat2), Math.toDegrees(lon2))
+    return GeoPoint(lat2 * 180.0 / PI, lon2 * 180.0 / PI)
 }
 
 private fun offsetPolyline(
@@ -273,7 +283,7 @@ private fun offsetPolyline(
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]
-        val perpendicularHeading = heading + (Math.PI / 2 * sideMultiplier)
+        val perpendicularHeading = heading + (PI / 2 * sideMultiplier)
         point.offsetPoint(perpendicularHeading, abs(offsetMeters))
     }
 }

@@ -33,6 +33,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.model.util.GeoConstants.DEG_D
+import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
@@ -78,9 +80,6 @@ fun PositionLogHeader(compactWidth: Boolean) {
         PositionText(stringResource(Res.string.timestamp), WEIGHT_40)
     }
 }
-
-const val DEG_D = 1e-7
-const val HEADING_DEG = 1e-5
 
 @Composable
 fun PositionItem(compactWidth: Boolean, position: Position, system: Config.DisplayConfig.DisplayUnits) {

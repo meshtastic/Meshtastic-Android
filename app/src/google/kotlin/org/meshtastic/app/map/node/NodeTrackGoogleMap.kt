@@ -66,6 +66,8 @@ import org.meshtastic.app.map.component.NodeMapFilterDropdown
 import org.meshtastic.app.map.toLatLng
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.GeoConstants.DEG_D
+import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
@@ -92,8 +94,6 @@ import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import kotlin.math.max
 
-private const val DEG_D = 1e-7
-private const val HEADING_DEG = 1e-5
 private const val TRACK_BOUNDS_PADDING_PX = 80
 private const val DEFAULT_ZOOM = 12f
 

@@ -19,7 +19,9 @@ package org.meshtastic.core.ui.util
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.ui.component.PlaceholderScreen
+import org.meshtastic.proto.Position
 
 /**
  * Provides an embeddable traceroute map composable that renders node markers and forward/return offset polylines for a
@@ -30,8 +32,8 @@ import org.meshtastic.core.ui.component.PlaceholderScreen
  * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen].
  *
  * Parameters:
- * - `tracerouteOverlay`: The [Any]-typed overlay (actually [TracerouteOverlay]) with forward/return route node nums.
- * - `tracerouteNodePositions`: Map of node num to [Any]-typed position snapshots for the route nodes.
+ * - `tracerouteOverlay`: The overlay with forward/return route node nums.
+ * - `tracerouteNodePositions`: Map of node num to position snapshots for the route nodes.
  * - `onMappableCountChanged`: Callback with (shown, total) node counts.
  * - `modifier`: Compose modifier for the map.
  */
@@ -39,8 +41,8 @@ import org.meshtastic.core.ui.component.PlaceholderScreen
 val LocalTracerouteMapProvider =
     compositionLocalOf<
         @Composable (
-            tracerouteOverlay: Any?,
-            tracerouteNodePositions: Map<Int, Any>,
+            tracerouteOverlay: TracerouteOverlay?,
+            tracerouteNodePositions: Map<Int, Position>,
             onMappableCountChanged: (Int, Int) -> Unit,
             modifier: Modifier,
         ) -> Unit,

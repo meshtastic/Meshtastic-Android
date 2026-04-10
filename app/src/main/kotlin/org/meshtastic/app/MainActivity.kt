@@ -69,15 +69,24 @@ import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
+import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
+import org.meshtastic.core.ui.util.LocalNodeMapScreenProvider
+import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
+import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import org.meshtastic.feature.intro.IntroViewModel
+import org.meshtastic.feature.map.MapScreen
+import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.node.NodeMapViewModel
+import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 
 class MainActivity : ComponentActivity() {
     private val model: UIViewModel by viewModel()
@@ -165,47 +174,42 @@ class MainActivity : ComponentActivity() {
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
             LocalMapViewProvider provides getMapViewProvider(),
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
-            org.meshtastic.core.ui.util.LocalNodeTrackMapProvider provides
+            LocalNodeTrackMapProvider provides
                 { destNum, positions, modifier ->
                     org.meshtastic.app.map.node.NodeTrackMap(destNum, positions, modifier)
                 },
             LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),
             LocalTracerouteMapProvider provides
                 { overlay, nodePositions, onMappableCountChanged, modifier ->
-                    @Suppress("UNCHECKED_CAST")
                     org.meshtastic.app.map.traceroute.TracerouteMap(
-                        tracerouteOverlay = overlay as? org.meshtastic.feature.map.model.TracerouteOverlay,
-                        tracerouteNodePositions =
-                        nodePositions as? Map<Int, org.meshtastic.proto.Position> ?: emptyMap(),
+                        tracerouteOverlay = overlay,
+                        tracerouteNodePositions = nodePositions,
                         onMappableCountChanged = onMappableCountChanged,
                         modifier = modifier,
                     )
                 },
-            org.meshtastic.core.ui.util.LocalNodeMapScreenProvider provides
+            LocalNodeMapScreenProvider provides
                 { destNum, onNavigateUp ->
-                    val vm = koinViewModel<org.meshtastic.feature.map.node.NodeMapViewModel>()
+                    val vm = koinViewModel<NodeMapViewModel>()
                     vm.setDestNum(destNum)
                     org.meshtastic.app.map.node.NodeMapScreen(vm, onNavigateUp = onNavigateUp)
                 },
-            org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider provides
+            LocalTracerouteMapScreenProvider provides
                 { destNum, requestId, logUuid, onNavigateUp ->
-                    val metricsViewModel =
-                        koinViewModel<org.meshtastic.feature.node.metrics.MetricsViewModel> {
-                            org.koin.core.parameter.parametersOf(destNum)
-                        }
+                    val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(destNum) }
                     metricsViewModel.setNodeId(destNum)
 
-                    org.meshtastic.feature.node.metrics.TracerouteMapScreen(
+                    TracerouteMapScreen(
                         metricsViewModel = metricsViewModel,
                         requestId = requestId,
                         logUuid = logUuid,
                         onNavigateUp = onNavigateUp,
                     )
                 },
-            org.meshtastic.core.ui.util.LocalMapMainScreenProvider provides
+            LocalMapMainScreenProvider provides
                 { onClickNodeChip, navigateToNodeDetails, waypointId ->
-                    val viewModel = koinViewModel<org.meshtastic.feature.map.SharedMapViewModel>()
-                    org.meshtastic.feature.map.MapScreen(
+                    val viewModel = koinViewModel<SharedMapViewModel>()
+                    MapScreen(
                         viewModel = viewModel,
                         onClickNodeChip = onClickNodeChip,
                         navigateToNodeDetails = navigateToNodeDetails,

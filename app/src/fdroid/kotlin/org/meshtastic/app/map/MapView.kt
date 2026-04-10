@@ -110,7 +110,6 @@ import org.meshtastic.core.resources.map_style_selection
 import org.meshtastic.core.resources.map_subDescription
 import org.meshtastic.core.resources.map_tile_source
 import org.meshtastic.core.resources.only_favorites
-import org.meshtastic.core.resources.position
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
 import org.meshtastic.core.resources.toggle_my_position
@@ -147,7 +146,6 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
-import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
@@ -160,7 +158,7 @@ private fun MapView.updateMarkers(
     Logger.d { "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints" }
 
     overlays.removeAll { overlay ->
-        overlay is MarkerWithLabel || (overlay is Marker && overlay !in nodeClusterer.items) || overlay is Polyline
+        overlay is MarkerWithLabel || (overlay is Marker && overlay !in nodeClusterer.items)
     }
 
     overlays.addAll(waypointMarkers)

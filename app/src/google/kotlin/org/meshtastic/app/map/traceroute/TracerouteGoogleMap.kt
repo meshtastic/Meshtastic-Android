@@ -52,15 +52,14 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.MapViewModel
 import org.meshtastic.app.map.toLatLng
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.TracerouteColors
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.Position
 import kotlin.math.abs
 import kotlin.math.max
 
-private const val DEG_D = 1e-7
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 private const val DEFAULT_ZOOM = 12f
@@ -83,7 +82,7 @@ fun TracerouteGoogleMap(
     modifier: Modifier = Modifier,
     mapViewModel: MapViewModel = koinViewModel(),
 ) {
-    val allNodes by mapViewModel.nodesWithPosition.collectAsStateWithLifecycle(listOf())
+    val allNodes by mapViewModel.nodes.collectAsStateWithLifecycle(listOf())
     val theme by mapViewModel.theme.collectAsStateWithLifecycle()
 
     val dark =
@@ -113,14 +112,13 @@ fun TracerouteGoogleMap(
     }
 
     // Compute polyline points from node positions
+    val nodeLookup = tracerouteSelection.nodeLookup
     val tracerouteForwardPoints =
-        remember(tracerouteOverlay, displayNodes) {
-            val nodeLookup = displayNodes.associateBy { it.num }
+        remember(tracerouteOverlay, nodeLookup) {
             tracerouteOverlay?.forwardRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
         }
     val tracerouteReturnPoints =
-        remember(tracerouteOverlay, displayNodes) {
-            val nodeLookup = displayNodes.associateBy { it.num }
+        remember(tracerouteOverlay, nodeLookup) {
             tracerouteOverlay?.returnRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
         }
 
@@ -220,11 +218,7 @@ fun TracerouteGoogleMap(
 
             // Individual node markers (simple markers, no clustering needed for traceroute)
             displayNodes.forEach { node ->
-                val markerState =
-                    rememberUpdatedMarkerState(
-                        position =
-                        LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D),
-                    )
+                val markerState = rememberUpdatedMarkerState(position = node.position.toLatLng())
                 MarkerComposable(state = markerState, zIndex = 4f) { NodeChip(node = node) }
             }
         }
