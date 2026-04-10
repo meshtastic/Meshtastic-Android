@@ -194,12 +194,20 @@ open class BaseMapViewModel(
             )
 }
 
+/**
+ * Result of resolving a [TracerouteOverlay]'s node nums into displayable [Node] instances.
+ *
+ * @property overlayNodeNums All unique node nums referenced by the traceroute.
+ * @property nodesForMarkers Nodes to render as map markers (with snapshot positions when available).
+ * @property nodeLookup Node-num-keyed map for polyline coordinate resolution.
+ */
 data class TracerouteNodeSelection(
     val overlayNodeNums: Set<Int>,
     val nodesForMarkers: List<Node>,
     val nodeLookup: Map<Int, Node>,
 )
 
+/** Convenience extension that delegates to [tracerouteNodeSelection] using the VM's [getNodeOrFallback]. */
 fun BaseMapViewModel.tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
@@ -211,6 +219,12 @@ fun BaseMapViewModel.tracerouteNodeSelection(
     getNodeOrFallback = ::getNodeOrFallback,
 )
 
+/**
+ * Resolves traceroute overlay node nums into displayable [Node] instances. Snapshot positions (recorded at traceroute
+ * time) take priority over live positions from the node database.
+ *
+ * @param getNodeOrFallback Provides a [Node] for a given num, falling back to a stub if not in the DB.
+ */
 fun tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,

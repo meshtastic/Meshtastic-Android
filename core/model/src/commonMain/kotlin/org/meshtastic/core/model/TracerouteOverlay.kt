@@ -16,13 +16,22 @@
  */
 package org.meshtastic.core.model
 
+/**
+ * Represents a traceroute result with forward and return routes as ordered lists of node nums.
+ *
+ * @property requestId The mesh packet request ID that initiated this traceroute.
+ * @property forwardRoute Ordered node nums along the path towards the destination.
+ * @property returnRoute Ordered node nums along the return path back to the originator.
+ */
 data class TracerouteOverlay(
     val requestId: Int,
     val forwardRoute: List<Int> = emptyList(),
     val returnRoute: List<Int> = emptyList(),
 ) {
+    /** All unique node nums involved in either route direction. */
     val relatedNodeNums: Set<Int> = (forwardRoute + returnRoute).toSet()
 
+    /** True if at least one route direction contains nodes. */
     val hasRoutes: Boolean
         get() = forwardRoute.isNotEmpty() || returnRoute.isNotEmpty()
 }

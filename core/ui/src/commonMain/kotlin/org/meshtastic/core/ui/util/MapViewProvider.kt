@@ -22,17 +22,10 @@ import androidx.compose.ui.Modifier
 
 /**
  * Interface for providing a flavored MapView. This allows the map feature to be decoupled from specific map
- * implementations (Google Maps vs osmdroid).
+ * implementations (Google Maps vs OSMDroid). Platform implementations create their own ViewModel via Koin.
  */
 interface MapViewProvider {
-    @Composable
-    fun MapView(
-        modifier: Modifier,
-        // We use Any here to avoid circular dependency with feature:map
-        viewModel: Any,
-        navigateToNodeDetails: (Int) -> Unit,
-        waypointId: Int? = null,
-    )
+    @Composable fun MapView(modifier: Modifier, navigateToNodeDetails: (Int) -> Unit, waypointId: Int? = null)
 }
 
 val LocalMapViewProvider = compositionLocalOf<MapViewProvider?> { null }

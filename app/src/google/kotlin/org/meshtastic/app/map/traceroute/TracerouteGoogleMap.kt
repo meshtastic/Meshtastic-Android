@@ -68,9 +68,9 @@ private const val DEFAULT_ZOOM = 12f
  * A focused Google Maps composable that renders **only** traceroute visualization — node markers for each hop and
  * forward/return offset polylines with auto-centering camera.
  *
- * Unlike [org.meshtastic.app.map.MapView], this composable does **not** include node clusters, waypoints, location
- * tracking, custom tile providers, map layers, or waypoint editing. It is designed to be embedded inside the
- * [TracerouteMapScreen]'s scaffold.
+ * Unlike the main `MapView`, this composable does **not** include node clusters, waypoints, location tracking, custom
+ * tile providers, map layers, or waypoint editing. It is designed to be embedded inside the `TracerouteMapScreen`'s
+ * scaffold.
  */
 @OptIn(MapsComposeExperimentalApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -230,7 +230,7 @@ fun TracerouteGoogleMap(
     }
 }
 
-private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
+private fun Node.toLatLng(): LatLng = this.position.toLatLng()
 
 private fun offsetPolyline(
     points: List<LatLng>,

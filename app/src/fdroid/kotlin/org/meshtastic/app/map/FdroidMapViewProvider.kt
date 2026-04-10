@@ -23,10 +23,11 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ui.util.MapViewProvider
 
+/** OSMDroid implementation of [MapViewProvider]. */
 @Single
 class FdroidMapViewProvider : MapViewProvider {
     @Composable
-    override fun MapView(modifier: Modifier, viewModel: Any, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
+    override fun MapView(modifier: Modifier, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
         val mapViewModel: MapViewModel = koinViewModel()
         LaunchedEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
         org.meshtastic.app.map.MapView(

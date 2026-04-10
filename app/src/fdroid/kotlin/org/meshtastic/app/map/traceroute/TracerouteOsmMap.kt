@@ -67,9 +67,8 @@ private const val TRACEROUTE_ZOOM_OUT_LEVELS = 0.5
  * A focused OSMDroid map composable that renders **only** traceroute visualization — node markers for each hop and
  * forward/return offset polylines with auto-centering camera.
  *
- * Unlike the monolithic [org.meshtastic.app.map.MapView], this composable does **not** include node clusters,
- * waypoints, location tracking, or any map controls. It is designed to be embedded inside [TracerouteMapScreen]'s
- * scaffold.
+ * Unlike the main `MapView`, this composable does **not** include node clusters, waypoints, location tracking, or any
+ * map controls. It is designed to be embedded inside `TracerouteMapScreen`'s scaffold.
  */
 @Composable
 fun TracerouteOsmMap(

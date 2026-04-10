@@ -26,7 +26,7 @@ import org.meshtastic.proto.Position
 /**
  * Provides an embeddable traceroute map composable that renders node markers and forward/return offset polylines for a
  * traceroute result. Unlike [LocalMapViewProvider], this does **not** include a Scaffold, AppBar, waypoints, location
- * tracking, custom tiles, or any main-map features — it is designed to be embedded inside [TracerouteMapScreen]'s
+ * tracking, custom tiles, or any main-map features — it is designed to be embedded inside `TracerouteMapScreen`'s
  * scaffold.
  *
  * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen].
