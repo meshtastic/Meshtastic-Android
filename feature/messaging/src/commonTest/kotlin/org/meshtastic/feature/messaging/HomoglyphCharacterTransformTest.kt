@@ -27,8 +27,8 @@ class HomoglyphCharacterTransformTest {
     fun `optimizeUtf8StringWithHomoglyphs shrinks binary size of cyrillic text containing some homoglyphs`() {
         val testString = "Мештастик - это проект с открытым исходным кодом"
         val transformedTestString = HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(testString)
-        val testStringBytes = testString.toByteArray(charset = Charsets.UTF_8)
-        val transformedTestStringBytes = transformedTestString.toByteArray(charset = Charsets.UTF_8)
+        val testStringBytes = testString.encodeToByteArray()
+        val transformedTestStringBytes = transformedTestString.encodeToByteArray()
         val transformedStringBinarySizeShrinked = transformedTestStringBytes.size < testStringBytes.size
         assertTrue(transformedStringBinarySizeShrinked)
     }
@@ -37,8 +37,8 @@ class HomoglyphCharacterTransformTest {
     fun `optimizeUtf8StringWithHomoglyphs shrinks binary size in half of cyrillic text containing only homoglyphs`() {
         val testString = "Косуха"
         val transformedTestString = HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(testString)
-        val testStringBytes = testString.toByteArray(charset = Charsets.UTF_8)
-        val transformedTestStringBytes = transformedTestString.toByteArray(charset = Charsets.UTF_8)
+        val testStringBytes = testString.encodeToByteArray()
+        val transformedTestStringBytes = transformedTestString.encodeToByteArray()
         assertEquals(transformedTestStringBytes.size, testStringBytes.size / 2)
     }
 

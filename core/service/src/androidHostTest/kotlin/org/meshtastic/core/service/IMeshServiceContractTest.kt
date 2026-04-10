@@ -16,12 +16,17 @@
  */
 package org.meshtastic.core.service
 
+import org.junit.runner.RunWith
 import org.meshtastic.core.service.testing.FakeIMeshService
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 /** Test to verify that the AIDL contract is correctly implemented by our test harness. */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class IMeshServiceContractTest {
 
     @Test

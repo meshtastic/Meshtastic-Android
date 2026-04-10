@@ -60,8 +60,6 @@ kotlin {
         val androidHostTest by getting {
             dependencies {
                 implementation(projects.core.testing)
-                implementation(libs.robolectric)
-                implementation(libs.androidx.test.core)
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.androidx.work.testing)
             }
