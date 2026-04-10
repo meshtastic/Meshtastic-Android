@@ -109,7 +109,8 @@ fun NodeDetailList(
                 lastRequestNeighborsTime = uiState.lastRequestNeighborsTime,
                 availableLogs = uiState.availableLogs,
                 onAction = onAction,
-                metricsState = uiState.metricsState,
+                displayUnits = uiState.metricsState.displayUnits,
+                isFahrenheit = uiState.metricsState.isFahrenheit,
                 isLocal = uiState.metricsState.isLocal,
             )
         }

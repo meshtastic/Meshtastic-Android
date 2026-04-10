@@ -61,8 +61,8 @@ import org.meshtastic.core.resources.userinfo
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.model.LogsType
-import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
+import org.meshtastic.proto.Config
 
 private data class TelemetricFeature(
     val titleRes: StringResource,
@@ -83,12 +83,21 @@ internal fun TelemetricActionsSection(
     availableLogs: Set<LogsType>,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
-    metricsState: MetricsState,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
+    isFahrenheit: Boolean,
     onAction: (NodeDetailAction) -> Unit,
     isLocal: Boolean = false,
 ) {
     val features =
-        rememberTelemetricFeatures(node, ourNode, lastTracerouteTime, lastRequestNeighborsTime, metricsState, isLocal)
+        rememberTelemetricFeatures(
+            node,
+            ourNode,
+            lastTracerouteTime,
+            lastRequestNeighborsTime,
+            displayUnits,
+            isFahrenheit,
+            isLocal,
+        )
 
     SectionCard(title = Res.string.telemetry) {
         features
@@ -116,10 +125,11 @@ private fun rememberTelemetricFeatures(
     ourNode: Node?,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
-    metricsState: MetricsState,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
+    isFahrenheit: Boolean,
     isLocal: Boolean,
 ): List<TelemetricFeature> =
-    remember(node, ourNode, lastTracerouteTime, lastRequestNeighborsTime, metricsState, isLocal) {
+    remember(node, ourNode, lastTracerouteTime, lastRequestNeighborsTime, displayUnits, isFahrenheit, isLocal) {
         listOf(
             TelemetricFeature(
                 titleRes = Res.string.userinfo,
@@ -132,7 +142,7 @@ private fun rememberTelemetricFeatures(
                 icon = LogsType.POSITIONS.icon,
                 requestAction = if (isLocal) null else { n -> NodeMenuAction.RequestPosition(n) },
                 logsType = LogsType.POSITIONS,
-                content = { node, action -> PositionInlineContent(node, ourNode, metricsState.displayUnits, action) },
+                content = { node, action -> PositionInlineContent(node, ourNode, displayUnits, action) },
                 hasContent = { it.latitude != 0.0 || it.longitude != 0.0 },
             ),
             TelemetricFeature(
@@ -170,7 +180,7 @@ private fun rememberTelemetricFeatures(
                 icon = Res.drawable.ic_thermostat,
                 requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
                 logsType = LogsType.ENVIRONMENT,
-                content = { node, _ -> EnvironmentMetrics(node, metricsState.displayUnits, metricsState.isFahrenheit) },
+                content = { node, _ -> EnvironmentMetrics(node, displayUnits, isFahrenheit) },
                 hasContent = { it.hasEnvironmentMetrics },
             ),
             TelemetricFeature(
