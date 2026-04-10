@@ -68,8 +68,8 @@ import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.exchange_position
 import org.meshtastic.core.resources.last_position_update
 import org.meshtastic.core.ui.icon.ErrorOutline
-import org.meshtastic.core.ui.icon.GpsFixed
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MyLocation
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassWarning
 import kotlin.math.PI
@@ -152,7 +152,7 @@ fun CompassSheetContent(
             )
             // Quick way to re-request a fresh fix without leaving the compass sheet
             Button(onClick = onRequestPosition, modifier = Modifier.fillMaxWidth()) {
-                Icon(imageVector = MeshtasticIcons.GpsFixed, contentDescription = null)
+                Icon(imageVector = MeshtasticIcons.MyLocation, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.exchange_position))
             }
@@ -204,13 +204,13 @@ private fun WarningList(
 
         if (warnings.contains(CompassWarning.NO_LOCATION_PERMISSION)) {
             Button(onClick = onRequestPermission, modifier = Modifier.fillMaxWidth()) {
-                Icon(imageVector = MeshtasticIcons.GpsFixed, contentDescription = null)
+                Icon(imageVector = MeshtasticIcons.MyLocation, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.compass_no_location_permission))
             }
         } else if (warnings.contains(CompassWarning.LOCATION_DISABLED)) {
             Button(onClick = onOpenLocationSettings, modifier = Modifier.fillMaxWidth()) {
-                Icon(imageVector = MeshtasticIcons.GpsFixed, contentDescription = null)
+                Icon(imageVector = MeshtasticIcons.MyLocation, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.compass_location_disabled))
             }

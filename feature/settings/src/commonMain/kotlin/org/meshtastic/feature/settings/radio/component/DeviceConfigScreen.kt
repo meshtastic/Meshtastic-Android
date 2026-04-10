@@ -106,7 +106,7 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.ui.icon.Clear
+import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.role
@@ -269,7 +269,7 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     onValueChanged = { formState.value = formState.value.copy(tzdef = it) },
                     trailingIcon = {
                         IconButton(onClick = { formState.value = formState.value.copy(tzdef = "") }) {
-                            Icon(imageVector = MeshtasticIcons.Clear, contentDescription = null)
+                            Icon(imageVector = MeshtasticIcons.Close, contentDescription = null)
                         }
                     },
                 )

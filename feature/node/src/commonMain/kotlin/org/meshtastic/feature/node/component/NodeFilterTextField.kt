@@ -68,7 +68,7 @@ import org.meshtastic.core.resources.node_filter_show_ignored
 import org.meshtastic.core.resources.node_filter_title
 import org.meshtastic.core.resources.node_sort_button
 import org.meshtastic.core.resources.node_sort_title
-import org.meshtastic.core.ui.icon.Clear
+import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.Sort
@@ -179,7 +179,7 @@ private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Un
         trailingIcon = {
             if (filterText.isNotEmpty() || isFocused) {
                 Icon(
-                    MeshtasticIcons.Clear,
+                    MeshtasticIcons.Close,
                     contentDescription = stringResource(Res.string.desc_node_filter_clear),
                     modifier =
                     Modifier.clickable {

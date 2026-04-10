@@ -30,10 +30,10 @@ import org.meshtastic.core.resources.external_notification
 import org.meshtastic.core.resources.ic_alt_route
 import org.meshtastic.core.resources.ic_cloud
 import org.meshtastic.core.resources.ic_data_usage
+import org.meshtastic.core.resources.ic_group
 import org.meshtastic.core.resources.ic_light_mode
 import org.meshtastic.core.resources.ic_message
 import org.meshtastic.core.resources.ic_notifications
-import org.meshtastic.core.resources.ic_people
 import org.meshtastic.core.resources.ic_perm_scan_wifi
 import org.meshtastic.core.resources.ic_sensors
 import org.meshtastic.core.resources.ic_settings_remote
@@ -116,7 +116,7 @@ enum class ModuleRoute(
     NEIGHBOR_INFO(
         Res.string.neighbor_info,
         SettingsRoute.NeighborInfo,
-        Res.drawable.ic_people,
+        Res.drawable.ic_group,
         AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG.value,
     ),
     AMBIENT_LIGHTING(
@@ -154,7 +154,7 @@ enum class ModuleRoute(
     TAK(
         Res.string.tak,
         SettingsRoute.TAK,
-        Res.drawable.ic_people,
+        Res.drawable.ic_group,
         AdminMessage.ModuleConfigType.TAK_CONFIG.value,
         isSupported = { it.supportsTakConfig },
         isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },

@@ -25,10 +25,10 @@ import org.meshtastic.core.resources.device_metrics_log
 import org.meshtastic.core.resources.env_metrics_log
 import org.meshtastic.core.resources.host_metrics_log
 import org.meshtastic.core.resources.ic_charging_station
+import org.meshtastic.core.resources.ic_group
 import org.meshtastic.core.resources.ic_groups
 import org.meshtastic.core.resources.ic_location_on
 import org.meshtastic.core.resources.ic_memory
-import org.meshtastic.core.resources.ic_people
 import org.meshtastic.core.resources.ic_power
 import org.meshtastic.core.resources.ic_route
 import org.meshtastic.core.resources.ic_signal_cellular_alt
@@ -49,5 +49,5 @@ enum class LogsType(val titleRes: StringResource, val icon: DrawableResource, va
     TRACEROUTE(Res.string.traceroute_log, Res.drawable.ic_route, { NodeDetailRoute.TracerouteLog(it) }),
     NEIGHBOR_INFO(Res.string.neighbor_info, Res.drawable.ic_groups, { NodeDetailRoute.NeighborInfoLog(it) }),
     HOST(Res.string.host_metrics_log, Res.drawable.ic_memory, { NodeDetailRoute.HostMetricsLog(it) }),
-    PAX(Res.string.pax_metrics_log, Res.drawable.ic_people, { NodeDetailRoute.PaxMetrics(it) }),
+    PAX(Res.string.pax_metrics_log, Res.drawable.ic_group, { NodeDetailRoute.PaxMetrics(it) }),
 }

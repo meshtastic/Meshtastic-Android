@@ -56,9 +56,9 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.AdminPanelSettings
 import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.BugReport
+import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.CleaningServices
 import org.meshtastic.core.ui.icon.Download
-import org.meshtastic.core.ui.icon.KeyboardArrowRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.SystemUpdate
@@ -122,7 +122,7 @@ private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate
         ListItem(
             text = stringResource(Res.string.device_configuration),
             leadingIcon = MeshtasticIcons.AppSettingsAlt,
-            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
+            trailingIcon = MeshtasticIcons.ChevronRight,
             enabled = enabled,
         ) {
             onNavigate(SettingsRoute.DeviceConfiguration)
@@ -139,7 +139,7 @@ private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNaviga
         ListItem(
             text = stringResource(Res.string.module_settings),
             leadingIcon = MeshtasticIcons.Settings,
-            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
+            trailingIcon = MeshtasticIcons.ChevronRight,
             enabled = enabled,
         ) {
             onNavigate(SettingsRoute.ModuleConfiguration)
@@ -175,7 +175,7 @@ private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit)
         ListItem(
             text = stringResource(Res.string.administration),
             leadingIcon = MeshtasticIcons.AdminPanelSettings,
-            trailingIcon = MeshtasticIcons.KeyboardArrowRight,
+            trailingIcon = MeshtasticIcons.ChevronRight,
             leadingIconTint = MaterialTheme.colorScheme.error,
             textColor = MaterialTheme.colorScheme.error,
             trailingIconTint = MaterialTheme.colorScheme.error,

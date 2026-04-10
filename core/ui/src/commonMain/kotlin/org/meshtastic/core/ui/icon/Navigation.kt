@@ -26,15 +26,12 @@ import org.meshtastic.core.resources.ic_chevron_right
 import org.meshtastic.core.resources.ic_expand_less
 import org.meshtastic.core.resources.ic_expand_more
 import org.meshtastic.core.resources.ic_keyboard_arrow_down
-import org.meshtastic.core.resources.ic_keyboard_arrow_right
 import org.meshtastic.core.resources.ic_keyboard_arrow_up
 
 val MeshtasticIcons.ArrowBack: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_arrow_back)
 val MeshtasticIcons.ChevronRight: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_chevron_right)
-val MeshtasticIcons.KeyboardArrowRight: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_keyboard_arrow_right)
 val MeshtasticIcons.KeyboardArrowDown: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_keyboard_arrow_down)
 val MeshtasticIcons.KeyboardArrowUp: ImageVector
