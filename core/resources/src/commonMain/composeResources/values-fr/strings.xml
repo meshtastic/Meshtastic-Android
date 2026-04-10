@@ -421,6 +421,7 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Route aller :\n\n</string>
     <string name="traceroute_route_back_to_us">Route retour :\n\n</string>
+    <string name="traceroute_no_response">Pas de réponse</string>
     <string name="one_hour_short">1H</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>

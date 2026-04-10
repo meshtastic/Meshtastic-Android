@@ -453,6 +453,7 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Route zum Zielort:\n\n</string>
     <string name="traceroute_route_back_to_us">Route zurück zu uns:\n\n</string>
+    <string name="traceroute_no_response">Keine Antwort</string>
     <string name="one_hour_short">1 Stunde</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
@@ -754,6 +755,7 @@
     <string name="distance">Distanz</string>
     <string name="lux">Lux</string>
     <string name="wind">Wind</string>
+    <string name="wind_speed">Windgeschwindigkeit</string>
     <string name="weight">Gewicht</string>
     <string name="radiation">Strahlung</string>
     <string name="store_forward_config"><![CDATA[Speichern & Weiterleiten Einstellungen]]></string>
