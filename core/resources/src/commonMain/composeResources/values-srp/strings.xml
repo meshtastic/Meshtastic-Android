@@ -20,7 +20,6 @@
     <string name="node_filter_placeholder">Филтер</string>
     <string name="desc_node_filter_clear">очисти филтер чворова</string>
     <string name="node_filter_include_unknown">Укључи непознато</string>
-    <string name="node_filter_show_details">Прикажи детаље</string>
     <string name="node_sort_alpha">А-Ш</string>
     <string name="node_sort_channel">Канал</string>
     <string name="node_sort_distance">Удаљеност</string>
@@ -48,34 +47,22 @@
     <string name="routing_error_pki_unknown_pubkey">Непознат јавни кључ</string>
     <string name="routing_error_admin_bad_session_key">Лош кључ сесије</string>
     <string name="routing_error_admin_public_key_unauthorized">Јавни кључ није ауторизован</string>
-    <string name="role_client">Клијент</string>
     <string name="role_client_desc">Повезана апликација или самостални уређај за слање порука.</string>
-    <string name="role_client_mute">Клијент мутиран</string>
     <string name="role_client_mute_desc">Уређај који не прослеђује пакете примљене од других уређаја.</string>
-    <string name="role_router">Рутер</string>
     <string name="role_router_desc">Инфраструктурни чвор за проширење покривености мреже прослеђивањем порука. Видљив на листи чворова.</string>
     <string name="role_router_client_desc">Комбинација и РУТЕРА и КЛИЈЕНТА. Нису намењени за мобилне уређаје.</string>
-    <string name="role_repeater">Поновљач</string>
     <string name="role_repeater_desc">Инфраструктурни чвор за проширење покривености мреже прослеђивањем порука са минималним трошковима енергије. Није видљив на листи чворова.</string>
-    <string name="role_tracker">Трекер</string>
     <string name="role_tracker_desc">Емитује пакете са GPS позицијом као приоритет.</string>
-    <string name="role_sensor">Сензор</string>
     <string name="role_sensor_desc">Емитује телеметријске пакете као приоритет.</string>
     <string name="role_tak_desc">Оптимизован за комуникацију са ATAK системом, смањује рутинске емисије.</string>
-    <string name="role_client_hidden">Скривени клијент</string>
     <string name="role_client_hidden_desc">Уређај који емитује само по потреби ради прикривености или уштеде енергије.</string>
-    <string name="role_lost_and_found">Изгубљено и нађено</string>
     <string name="role_lost_and_found_desc">Редовно емитује локацију као поруку подразумеваном каналу ради помоћи при проналаску уређаја.</string>
-    <string name="role_tak_tracker">ТАК Трекер</string>
     <string name="role_tak_tracker_desc">Омогућава аутоматске TAK PLI емисије и смањује рутинске емисије.</string>
-    <string name="role_router_late">Рутер са кашњењем</string>
     <string name="role_router_late_desc">Инфраструктурни чвор који увек поново емитује пакете само једном, али тек након свих других режима, обезбеђујући додатно покривање за локалне кластере. Видљиво на листи чворова.</string>
-    <string name="rebroadcast_mode_all">Сви</string>
     <string name="rebroadcast_mode_all_desc">Поново преноси сваку примећену поруку, ако је била на нашем приватном каналу или из друге мреже са истим LoRA параметрима.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Исто као понашање као ALL, али прескаче декодирање пакета и једноставно их поново преноси. Доступно само у Repeater улози. Постављање овога на било коју другу улогу резултираће ALL понашањем.</string>
     <string name="rebroadcast_mode_local_only_desc">Игнорише примећене поруке из страних мрежа које су отворене или оне које не може да декодира. Поново преноси поруку само на локалне примарне/секундарне канале чвора.</string>
     <string name="rebroadcast_mode_known_only_desc">Игнорише примећене поруке из страних мрежа као LOCAL ONLY, али иде корак даље тако што такође игнорише поруке са чворова који нису већ на листи познатих чворова.</string>
-    <string name="rebroadcast_mode_none">Ништа</string>
     <string name="rebroadcast_mode_none_desc">Дозвољено само за улоге SENSOR, TRACKER и TAK_TRACKER, ово ће онемогућити све поновне преносе, слично као улога CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Игнорише пакете са нестандардним бројевима порта као што су: TAK, RangeTest, PaxCounter, итд. Поново преноси само пакете са стандардним бројевима порта: NodeInfo, Text, Position, Telemetry и Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Третирај двоструки тап на подржаним акцелерометрима као притисак корисничког дугмета.</string>
@@ -124,25 +111,18 @@
     <string name="qr_code">QR код</string>
     <string name="unknown_username">Непознато корисничко име</string>
     <string name="send">Пошаљи</string>
-    <string name="warning_not_paired">Још нисте упарили Мештастик компатибилан радио са овим телефоном. Молимо вас да упарите уређај и поставите своје корисничко име.\n\nОва апликација отвореног кода је у развоју, ако нађете проблеме, молимо вас да их објавите на нашем форуму: https://github.com/orgs/meshtastic/discussions\n\nЗа више информација посетите нашу веб страницу - www.meshtastic.org.</string>
     <string name="you">Ти</string>
     <string name="accept">Прихвати</string>
     <string name="cancel">Откажи</string>
     <string name="save_changes">Сачувај</string>
     <string name="new_channel_rcvd">Примљен нови линк канала</string>
-    <string name="report_bug">Пријави грешку</string>
-    <string name="report_a_bug">Пријави грешку</string>
-    <string name="report_bug_text">Да ли сте сигурни да желите да пријавите грешку? Након пријаве, молимо вас да објавите на https://github.com/orgs/meshtastic/discussions како бисмо могли да упаримо извештај са оним што сте нашли.</string>
     <string name="report">Извештај</string>
-    <string name="pairing_completed">Упаривање завршено, покрећем сервис</string>
-    <string name="pairing_failed_try_again">Упаривање неуспешно, молимо изабери поново</string>
     <string name="location_disabled">Приступ локацији је искључен, не може се обезбедити позиција мрежи.</string>
     <string name="share">Подели</string>
     <string name="disconnected">Раскачено</string>
     <string name="device_sleeping">Уређај је у стању спавања</string>
     <string name="ip_address">IP адреса:</string>
     <string name="connected">Блутут повезан</string>
-    <string name="connected_to">Повезан на радио уређај (%1$s)</string>
     <string name="not_connected">Није повезан</string>
     <string name="connected_sleeping">Повезан на радио уређај, али уређај је у стању спавања</string>
     <string name="app_too_old">Неопходно је ажурирање апликације</string>
@@ -251,7 +231,6 @@
     <string name="humidity">Влажност</string>
     <string name="logs">Дневници</string>
     <string name="hops_away">Скокова удаљено</string>
-    <string name="hops_away_template">Скокови удаљености: %1$d</string>
     <string name="info">Информација</string>
     <string name="ch_util_definition">Искоришћење за тренутни канал, укључујући добро формиран TX, RX и неисправан RX (такође познат као шум).</string>
     <string name="air_util_definition">Проценат искоришћења ефирског времена за пренос у последњем сату.</string>
@@ -260,7 +239,6 @@
     <string name="encryption_pkc">Шифровање јавним кључем</string>
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
     <string name="meshtastic_new_nodes_notifications">Обавештења о новим чворовима</string>
-    <string name="more_details">Више детаља</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Однос сигнал/шум SNR је мера која се користи у комуникацијама за квантитативно одређивање нивоа жељеног сигнала у односу на ниво позадинског шума. У Мештастик и другим бежичним системима, већи SNR указује на јаснији сигнал који може побољшати поузданост и квалитет преноса података.</string>
     <string name="rssi">RSSI</string>
@@ -289,10 +267,8 @@
     <string name="traceroute_diff">Скокови ка %1$d Скокови назад %2$d</string>
     <string name="traceroute_no_response">Нема одговора</string>
     <string name="twenty_four_hours">24ч</string>
-    <string name="forty_eight_hours">48ч</string>
     <string name="one_week">1н</string>
     <string name="two_weeks">2н</string>
-    <string name="four_weeks">4н</string>
     <string name="max">Максимум</string>
     <string name="unknown_age">Непозната старост</string>
     <string name="copy">Копирај</string>
@@ -316,7 +292,6 @@
     <string name="low_battery_title">Низак ниво батерије: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Нотификације о ниском нивоу батерије (омиљени чворови)</string>
     <string name="udp_enabled">Омогућено</string>
-    <string name="udp_config">UDP конфигурација</string>
     <string name="user">Корисник</string>
     <string name="channels">Канали</string>
     <string name="device">Уређај</string>
@@ -344,7 +319,6 @@
     <string name="messages">Поруке</string>
     <string name="detection_sensor_config">Подешавања ензора откривања</string>
     <string name="friendly_name">Пријатељски назив</string>
-    <string name="device_config">Уређај</string>
     <string name="role">Улога уређаја</string>
     <string name="button_gpio">Дугме GPIO</string>
     <string name="buzzer_gpio">Звучни сигнал GPIO</string>
@@ -377,17 +351,14 @@
     <string name="address">Адреса</string>
     <string name="username">Корисничко име</string>
     <string name="password">Лозинка</string>
-    <string name="network_config">Мрежа</string>
     <string name="wifi_config">Опције вајфаја</string>
     <string name="enabled">Омогућено</string>
     <string name="ethernet_config">Етернет опције</string>
-    <string name="position_config">Позиција</string>
     <string name="latitude">Ширина</string>
     <string name="longitude">Дужина</string>
     <string name="position_flags">Заставице позиције</string>
     <string name="power_config">Подешавања напајња</string>
     <string name="range_test_config">Конфигурација теста домета</string>
-    <string name="security_config">Сигурност</string>
     <string name="public_key">Јавни кључ</string>
     <string name="private_key">Приватни кључ</string>
     <string name="serial_config">Подешавања серијске везе</string>
@@ -451,7 +422,6 @@
     <string name="interval_unset">Уклони</string>
     <string name="interval_always_on">Увек укључен</string>
     <!-- Compass -->
-    <string name="add_channels_title">Додај канале</string>
     <!-- Message Filter -->
     <string name="channel_url">Линк канала</string>
     <string name="generate_qr_code">Генерисање QR кода</string>
@@ -459,5 +429,4 @@
     <string name="bluetooth_permission">Блутут</string>
     <string name="powered">Напајано</string>
     <!-- Network Map Layers -->
-    <string name="no_device_connected">Нема повезаних уређаја</string>
 </resources>

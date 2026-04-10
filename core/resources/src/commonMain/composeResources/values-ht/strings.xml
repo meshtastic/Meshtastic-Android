@@ -20,7 +20,6 @@
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">klarifye filtè nœud</string>
     <string name="node_filter_include_unknown">Enkli enkoni</string>
-    <string name="node_filter_show_details">Montre detay</string>
     <string name="node_sort_channel">kanal</string>
     <string name="node_sort_distance">Distans</string>
     <string name="node_sort_hops_away">Sote lwen</string>
@@ -61,7 +60,6 @@
     <string name="rebroadcast_mode_all_skip_decoding_desc">Menm jan ak konpòtman kòm \"ALL\" men sote dekodaj pakè yo epi senpleman rebroadcast yo. Disponib sèlman nan wòl Repeater. Mete sa sou nenpòt lòt wòl ap bay konpòtman \"ALL\".</string>
     <string name="rebroadcast_mode_local_only_desc">Ignoré mesaj obsève soti nan meshes etranje ki louvri oswa sa yo li pa ka dekripte. Sèlman rebroadcast mesaj sou kanal prensipal / segondè lokal nœud.</string>
     <string name="rebroadcast_mode_known_only_desc">Ignoré mesaj obsève soti nan meshes etranje tankou \"LOCAL ONLY\", men ale yon etap pi lwen pa tou ignorer mesaj ki soti nan nœud ki poko nan lis konnen nœud la.</string>
-    <string name="rebroadcast_mode_none">Pa gen</string>
     <string name="rebroadcast_mode_none_desc">Sèlman pèmèt pou wòl SENSOR, TRACKER ak TAK_TRACKER, sa a ap entèdi tout rebroadcasts, pa diferan de wòl CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoré pakè soti nan portnum ki pa estanda tankou: TAK, RangeTest, PaxCounter, elatriye. Sèlman rebroadcast pakè ak portnum estanda: NodeInfo, Tèks, Pozisyon, Telemetri, ak Routing.</string>
     <!-- Position Config -->
@@ -69,24 +67,17 @@
     <string name="qr_code">Kòd QR</string>
     <string name="unknown_username">Non itilizatè enkoni</string>
     <string name="send">Voye</string>
-    <string name="warning_not_paired">Ou poko konekte ak yon radyo ki konpatib ak Meshtastic sou telefòn sa a. Tanpri konekte yon aparèy epi mete non itilizatè w lan.\n\nSa a se yon aplikasyon piblik ki nan tès Alpha. Si ou gen pwoblèm, tanpri pataje sou fowòm nou an: https://github.com/orgs/meshtastic/discussions\n\nPou plis enfòmasyon, vizite sit wèb nou an - www.meshtastic.org.</string>
     <string name="you">Ou</string>
     <string name="accept">Aksepte</string>
     <string name="cancel">Anile</string>
     <string name="save_changes">Sove</string>
     <string name="new_channel_rcvd">Nouvo kanal URL resevwa</string>
-    <string name="report_bug">Rapòte yon pwoblèm</string>
-    <string name="report_a_bug">Rapòte pwoblèm</string>
-    <string name="report_bug_text">Èske ou sèten ou vle rapòte yon pwoblèm? Aprew fin rapòte, tanpri pataje sou https://github.com/orgs/meshtastic/discussions pou nou ka konpare rapò a ak sa ou jwenn nan.</string>
     <string name="report">Rapò</string>
-    <string name="pairing_completed">Koneksyon konplè, sèvis kòmanse</string>
-    <string name="pairing_failed_try_again">Koneksyon echwe, tanpri chwazi ankò</string>
     <string name="location_disabled">Aksè lokasyon enfim, pa ka bay pozisyon mesh la.</string>
     <string name="share">Pataje</string>
     <string name="disconnected">Dekonekte</string>
     <string name="device_sleeping">Aparèy ap dòmi</string>
     <string name="ip_address">Adrès IP:</string>
-    <string name="connected_to">Konekte ak radyo (%1$s)</string>
     <string name="not_connected">Pa konekte</string>
     <string name="connected_sleeping">Konekte ak radyo, men li ap dòmi</string>
     <string name="app_too_old">Aplikasyon twò ansyen</string>
@@ -195,7 +186,6 @@
     <string name="encryption_pkc">Chifreman Kle Piblik</string>
     <string name="encryption_error">Pa matche kle piblik</string>
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
-    <string name="more_details">Plis detay</string>
     <string name="snr_definition">Rapò Siynal sou Bri, yon mezi ki itilize nan kominikasyon pou mezire nivo siynal vle a kont nivo bri ki nan anviwònman an. Nan Meshtastic ak lòt sistèm san fil, yon SNR pi wo endike yon siynal pi klè ki ka amelyore fyab ak kalite transmisyon done.</string>
     <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
     <string name="iaq_definition">(Kalite Lèy Entèryè) echèl relatif valè IAQ jan li mezire pa Bosch BME680. Ranje valè 0–500.</string>

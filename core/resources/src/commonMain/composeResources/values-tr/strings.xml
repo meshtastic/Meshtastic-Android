@@ -21,7 +21,6 @@
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">düğüm filtresini kaldır</string>
     <string name="node_filter_include_unknown">Bilinmeyenleri dahil et</string>
-    <string name="node_filter_show_details">Detayları göster</string>
     <string name="node_sort_button">Düğüm sıralama seçenekleri</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
@@ -63,12 +62,10 @@
     <string name="role_lost_and_found_desc">Cihazın kurtarılmasına yardımcı olmak için konumunu düzenli olarak varsayılan kanala mesaj olarak gönderir.</string>
     <string name="role_tak_tracker_desc">Rutin yayınları azaltarak otomatik TAK PLI yayınlarını etkinleştirir.</string>
     <string name="role_router_late_desc">Tüm diğer modlardan sonra paketleri her zaman bir kez yeniden yayınlayan ve yerel kümeler için ek kapsama alanı sağlayan altyapı düğümü. Düğümler listesinde görünür.</string>
-    <string name="rebroadcast_mode_all">Hepsi</string>
     <string name="rebroadcast_mode_all_desc">Tespit edilen herhangi bir mesajı, özel kanalımızdaysa veya aynı LoRa parametrelerine sahip başka bir ağdan geliyorsa yeniden yayınlayın.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">ALL ile aynı davranış, ancak paketleri çözmeksizin yeniden yayınlar. Yalnızca Repeater rolünde kullanılabilir. Bunu başka herhangi bir rolde ayarlamak ALL davranışıyla sonuçlanacaktır.</string>
     <string name="rebroadcast_mode_local_only_desc">Açık olan veya şifresini çözemediği yabancı ağlardan geldiği tespit edilen mesajları yok sayar. Yalnızca düğümlerin yerel birincil / ikincil kanallarında mesajı yeniden yayınlar.</string>
     <string name="rebroadcast_mode_known_only_desc">LOCAL ONLY gibi yabancı ağlardan geldiği tespit edilen mesajları yok sayar, ancak düğümün bilinen listesinde bulunmayan düğümlerden gelen mesajları da yok sayarak bir adım daha ileri gider.</string>
-    <string name="rebroadcast_mode_none">Yok</string>
     <string name="rebroadcast_mode_none_desc">Yalnızca SENSOR, TRACKER ve TAK_TRACKER rolleri için izin verilir, CLIENT_MUTE rolünden farklı olarak tüm yeniden yayınları engeller.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">TAK, RangeTest, PaxCounter gibi standart olmayan portnum'ları yok sayarken sadece standart portnum'lar olan NodeInfo, Text, Position, Telemetry ve Routing'i yeniden yayınlar.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Desteklenen ivmeölçerlere çift dokunmayı kullanıcı düğmesine basma olarak değerlendirir.</string>
@@ -81,27 +78,19 @@
     <string name="qr_code">Karekod</string>
     <string name="unknown_username">Bilinmeyen kullanıcı adı</string>
     <string name="send">Gönder</string>
-    <string name="warning_not_paired">Telefonu, Meshtastic uyumlu bir cihaz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin.\n\nAçık kaynaklı bu uygulama şu an alfa-test aşamasında, problem fark ederseniz forumda lütfen paylaşın: https://github.com/orgs/meshtastic/discussions\n\nDaha fazla bilgi için, sitemiz: www.meshtastic.org.</string>
     <string name="you">Siz</string>
     <string name="accept">Kabul et</string>
     <string name="cancel">İptal</string>
     <string name="save_changes">Kaydet</string>
     <string name="new_channel_rcvd">Yeni Kanal Adresi(URL) alındı</string>
-    <string name="report_bug">Hata Bildir</string>
-    <string name="report_a_bug">Hata Bildir</string>
-    <string name="report_bug_text">Hata bildirmek istediğinizden emin misiniz? Hata bildirdikten sonra, lütfen https://github.com/orgs/meshtastic/discussions sayfasında paylaşınız ki raporu bulgularınızla eşleştirebilelim.</string>
     <string name="report">Bildir</string>
-    <string name="pairing_completed">Eşleşme tamamlandı, servis başlatılıyor</string>
-    <string name="pairing_failed_try_again">Eşleşme başarısız, lütfen tekrar seçiniz</string>
     <string name="location_disabled">Konum erişimi kapalı, konum ağ ile paylaşılamıyor.</string>
     <string name="share">Paylaş</string>
     <string name="disconnected">Bağlantı kesildi</string>
     <string name="device_sleeping">Cihaz uyku durumunda</string>
-    <string name="connected_count">Bağlı: %1$s çevrimiçi</string>
     <string name="ip_address">IP Adresi:</string>
     <string name="ip_port">Bağlantı noktası:</string>
     <string name="connected">Bağlandı</string>
-    <string name="connected_to">(%1$s) telsizine bağlandı </string>
     <string name="connecting">Bağlanıyor</string>
     <string name="not_connected">Bağlı değil</string>
     <string name="unknown_device">Bilinmeyen Cihaz</string>
@@ -223,7 +212,6 @@
     <string name="encryption_pkc">Genel Anahtar Şifrelemesi</string>
     <string name="encryption_error">Genel Anahtar Uyuşmazlığı</string>
     <string name="meshtastic_new_nodes_notifications">Yeni düğüm bildirimleri</string>
-    <string name="more_details">Daha fazla detay</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Sinyal-Gürültü Oranı, iletişimde istenen bir sinyalin seviyesini arka plan gürültüsü seviyesine mukayese ölçmek için kullanılan bir ölçüdür. Meshtastic ve diğer kablosuz sistemlerde, daha yüksek bir SNR, veri iletiminin güvenilirliğini ve kalitesini artırabilecek daha net bir sinyale işaret eder.</string>
     <string name="rssi">RSSI</string>
@@ -248,10 +236,8 @@
     </plurals>
     <string name="traceroute_diff">İleri atlama %1$d Geri atlama %2$d</string>
     <string name="twenty_four_hours">24S</string>
-    <string name="forty_eight_hours">48S</string>
     <string name="one_week">1H</string>
     <string name="two_weeks">2H</string>
-    <string name="four_weeks">4H</string>
     <string name="max">Maks</string>
     <string name="unknown_age">Bilinmeyen Yaş</string>
     <string name="copy">Kopyala</string>
@@ -272,7 +258,6 @@
     <string name="low_battery_title">Düşük pil: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Düşük pil bildirimleri (favori düğümler)</string>
     <string name="udp_enabled">Açık</string>
-    <string name="udp_config">UDP Ayarları</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Son duyulma: %2$s<br>Son konum: %3$s<br>Pil: %4$s]]></string>
     <string name="toggle_my_position">Konumunumu aç/kapa</string>
     <string name="user">Kullanıcı</string>
@@ -347,7 +332,6 @@
     <string name="gpio_pin_to_monitor">İzlenecek GPIO pini</string>
     <string name="detection_trigger_type">Algılama tetikleme türü</string>
     <string name="use_input_pullup_mode">INPUT_PULLUP modu kullan</string>
-    <string name="device_config">Cihaz</string>
     <string name="nodeinfo_broadcast_interval">Node Bilgisi Yayın Aralığı</string>
     <string name="compass_north_top">Pusula kuzey üstte</string>
     <string name="flip_screen">Ekranı Çevir</string>
@@ -376,7 +360,6 @@
     <string name="lora_config">LoRa</string>
     <string name="advanced">Gelişmiş</string>
     <string name="bandwidth">Bant genişliği</string>
-    <string name="frequency_offset_mhz">Frekans kayması (MHz)</string>
     <string name="region_frequency_plan">Bölge</string>
     <string name="override_duty_cycle">Görev Döngüsünü Geçersiz Kıl</string>
     <string name="ignore_incoming">Gelenleri Yoksay</string>
@@ -398,7 +381,6 @@
     <string name="neighbor_info_enabled">Komşu Bilgisi etkin</string>
     <string name="update_interval_seconds">Güncelleme aralığı (saniye)</string>
     <string name="transmit_over_lora">LoRa üzerinden ilet</string>
-    <string name="network_config">Ağ</string>
     <string name="enabled">Açık</string>
     <string name="wifi_enabled">WiFi etkin</string>
     <string name="ssid">SSID</string>
@@ -414,22 +396,10 @@
     <string name="paxcounter_enabled">Pax sayacı etkin</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI eşiği (varsayılan -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI eşiği (varsayılan -80)</string>
-    <string name="position_config">Konum</string>
-    <string name="position_broadcast_interval_seconds">Konum yayılma aralığı (saniye)</string>
-    <string name="smart_position_enabled">Akıllı konum etkin</string>
-    <string name="smart_broadcast_minimum_distance_meters">Akıllı yayılma minimum mesafe (metre)</string>
-    <string name="smart_broadcast_minimum_interval_seconds">Akıllı yayılma minimum aralık (saniye)</string>
-    <string name="use_fixed_position">Sabit konum kullan</string>
     <string name="latitude">Enlem</string>
     <string name="longitude">Boylam</string>
-    <string name="altitude_meters">Yükseklik (metre)</string>
-    <string name="gps_update_interval_seconds">GPS güncelleme aralığı (saniye)</string>
-    <string name="redefine_gps_rx_pin">GPS_RX_PIN’i yeniden tanımla</string>
-    <string name="redefine_gps_tx_pin">GPS_TX_PIN’i yeniden tanımla</string>
-    <string name="redefine_pin_gps_en">PIN_GPS_EN’i yeniden tanımla</string>
     <string name="power_config">Güç Ayarı</string>
     <string name="enable_power_saving_mode">Güç tasarrufu modunu etkinleştir</string>
-    <string name="shutdown_on_battery_delay_seconds">Pilin kapanma gecikmesi (saniye)</string>
     <string name="adc_multiplier_override_ratio">ADC çarpanını geçersiz kılma oranı</string>
     <string name="battery_ina_2xx_i2c_address">Pilin INA_2XX I2C adresi</string>
     <string name="range_test_config">Menzi Test Ayarı</string>
@@ -440,7 +410,6 @@
     <string name="remote_hardware_enabled">Uzak Donanım etkin</string>
     <string name="allow_undefined_pin_access">Tanımlanmamış pin erişimine izin ver</string>
     <string name="available_pins">Mevcut pinler</string>
-    <string name="security_config">Güvenlik</string>
     <string name="public_key">Genel Anahtar</string>
     <string name="private_key">Özel Anahtar</string>
     <string name="admin_key">Yönetici Anahtarı</string>
@@ -508,7 +477,6 @@
     <string name="press_and_drag">Yeniden sıralamak için basılı tutup sürükleyin</string>
     <string name="unmute">Sesi aç</string>
     <string name="dynamic">Dinamik</string>
-    <string name="scan_qr_code">QR Kodu Tara</string>
     <string name="share_contact">Kişiyi paylaş</string>
     <string name="import_shared_contact">Paylaşılan kişiyi içe aktar?</string>
     <string name="unmessageable">Mesaj gönderilemez</string>
@@ -524,7 +492,6 @@
     <string name="host_metrics_log">Sunucu Ölçümleri</string>
     <string name="host">Sunucu</string>
     <string name="free_memory">Boş Hafıza</string>
-    <string name="disk_free">Boş Disk</string>
     <string name="load">Yükle</string>
     <string name="user_string">Kullanıcı Karakter Dizisi</string>
     <string name="nodes">Düğümler</string>
@@ -547,7 +514,6 @@
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_dismiss">Vazgeç</string>
-    <string name="confirm_delete_node">Bu node silinsin mi?</string>
     <string name="message_input_label">Mesaj</string>
     <string name="type_a_message">Mesaj yaz</string>
     <string name="download">İndir</string>
@@ -566,12 +532,10 @@
     <string name="one_day">24 Saat</string>
     <string name="two_days">48 Saat</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_disconnecting">Bağlantı Kesiliyor...</string>
     <string name="firmware_update_failed">Güncelleme başarısız</string>
     <string name="interval_unset">Ayarlanmamış</string>
     <!-- Compass -->
     <string name="now">Şimdi</string>
-    <string name="add_channels_title">Kanal Ekle</string>
     <!-- Message Filter -->
     <string name="generate_qr_code">QR kod oluştur</string>
     <string name="all_time">Hepsi</string>

@@ -20,7 +20,6 @@
     <string name="node_filter_placeholder">Filtras</string>
     <string name="desc_node_filter_clear">išvalyti įtaisų filtrą</string>
     <string name="node_filter_include_unknown">Įtraukti nežinomus</string>
-    <string name="node_filter_show_details">Rodyti detales</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanalas</string>
     <string name="node_sort_distance">Atstumas</string>
@@ -60,32 +59,23 @@
     <string name="role_tak_tracker_desc">Įgalina automatines TAK PLI transliacijas ir sumažina rutininių transliacijų kiekį.</string>
     <string name="rebroadcast_mode_all_desc">Persiųsti visas žinutes, nesvarbu jos iš Jūsų privataus tinklo ar iš kito tinklo su analogiškais LoRa parametrais.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Taip pat kaip ir VISI bet nebando dekoduoti paketų ir juos tiesiog persiunčia. Galima naudoti tik Repeater rolės įtaise. Įjungus bet kokiame kitame įtaise - veiks tiesiog kaip VISI.</string>
-    <string name="rebroadcast_mode_known_only">Tik žinomi</string>
-    <string name="rebroadcast_mode_none">Nėra</string>
     <string name="rebroadcast_mode_none_desc">Leidžiama tik SENSOR, TRACKER ar TAK_TRACKER rolių įtaisams. Tai užblokuos visas retransliacijas, ne taip kaip CLIENT_MUTE atveju.</string>
     <!-- Position Config -->
     <string name="channel_name">Kanalo pavadinimas</string>
     <string name="qr_code">QR kodas</string>
     <string name="unknown_username">Nežinomas vartotojo vardas</string>
     <string name="send">Siųsti</string>
-    <string name="warning_not_paired">Su šiuo telefonu dar nėra susietas joks Meshtastic įtaisais. Prašome suporuoti įrenginį ir nustatyti savo vartotojo vardą.\n\nŠi atvirojo kodo programa yra kūrimo stadijoje, jei pastebėsite problemas, prašome pranešti mūsų forume: https://github.com/orgs/meshtastic/discussions\n\nDaugiau informacijos rasite mūsų interneto svetainėje - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="accept">Priimti</string>
     <string name="cancel">Atšaukti</string>
     <string name="save_changes">Išsaugoti</string>
     <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
-    <string name="report_bug">Pranešti apie klaidą</string>
-    <string name="report_a_bug">Pranešti apie klaidą</string>
-    <string name="report_bug_text">Ar tikrai norite pranešti apie klaidą? Po pranešimo prašome parašyti forume https://github.com/orgs/meshtastic/discussions, kad galėtume suderinti pranešimą su jūsų pastebėjimais.</string>
     <string name="report">Raportuoti</string>
-    <string name="pairing_completed">Susiejimas užbaigtas, paslauga pradedama</string>
-    <string name="pairing_failed_try_again">Susiejimas nepavyko, prašome pasirinkti iš naujo</string>
     <string name="location_disabled">Vietos prieigos funkcija išjungta, negalima pateikti pozicijos tinklui.</string>
     <string name="share">Dalintis</string>
     <string name="disconnected">Atsijungta</string>
     <string name="device_sleeping">Įrenginys miega</string>
     <string name="ip_address">IP adresas:</string>
-    <string name="connected_to">Prisijungta prie radijo (%1$s)</string>
     <string name="not_connected">Neprijungtas</string>
     <string name="connected_sleeping">Prisijungta prie radijo, bet jis yra miego režime</string>
     <string name="app_too_old">Reikalingas programos atnaujinimas</string>
@@ -198,7 +188,6 @@
     <string name="encryption_pkc">Viešojo rakto šifruotė</string>
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
     <string name="meshtastic_new_nodes_notifications">Naujo įtaiso pranešimas</string>
-    <string name="more_details">Daugiau info</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
     <string name="node_map">Įtaisų žemėlapis</string>
@@ -221,10 +210,8 @@
     </plurals>
     <string name="traceroute_diff">Persiuntimų iki %1$d persiuntimų nuo %2$d</string>
     <string name="twenty_four_hours">24 val</string>
-    <string name="forty_eight_hours">48 val</string>
     <string name="one_week">1 sav</string>
     <string name="two_weeks">2 sav</string>
-    <string name="four_weeks">4 sav</string>
     <string name="max">Max</string>
     <string name="copy">Kopijuoti</string>
     <string name="alert_bell_text">Skambučio simbolis!</string>
