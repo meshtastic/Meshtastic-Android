@@ -483,7 +483,13 @@ private fun NodeItemActions(isOnline: Boolean, onAction: (String) -> Unit) {
             Icon(Icons.Rounded.Route, "Traceroute", Modifier.size(20.dp), MaterialTheme.colorScheme.primary)
         }
         IconButton(onClick = { onAction("telemetry") }, modifier = Modifier.size(40.dp)) {
-            Icon(Icons.Rounded.BatteryUnknown, "Telemetry", Modifier.size(20.dp), MaterialTheme.colorScheme.secondary)
+            Icon(
+                @Suppress("DEPRECATION") // AutoMirrored variant not available in current icons version
+                Icons.Rounded.BatteryUnknown,
+                "Telemetry",
+                Modifier.size(20.dp),
+                MaterialTheme.colorScheme.secondary,
+            )
         }
         IconButton(onClick = { onAction("position") }, modifier = Modifier.size(40.dp)) {
             Icon(Icons.Rounded.MyLocation, "Position", Modifier.size(20.dp), MaterialTheme.colorScheme.tertiary)

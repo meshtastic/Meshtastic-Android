@@ -49,7 +49,7 @@ import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.PortNum
 
-@Suppress("TooManyFunctions", "LargeClass")
+@Suppress("TooManyFunctions", "LargeClass", "DEPRECATION") // IMeshService is deprecated but still required for AIDL binding
 class MeshService : Service() {
 
     private val radioInterfaceService: RadioInterfaceService by inject()
@@ -88,7 +88,6 @@ class MeshService : Service() {
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)
 
         fun changeDeviceAddress(context: Context, service: IMeshService, address: String?) {
-            @Suppress("DEPRECATION") // Internal use: routes address change through AIDL binder
             service.setDeviceAddress(address)
             startService(context)
         }

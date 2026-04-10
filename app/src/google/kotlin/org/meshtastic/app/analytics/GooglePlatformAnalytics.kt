@@ -38,7 +38,7 @@ import com.datadog.android.rum.RumActionType
 import com.datadog.android.rum.RumConfiguration
 import com.datadog.android.sessionreplay.SessionReplay
 import com.datadog.android.sessionreplay.SessionReplayConfiguration
-import com.datadog.android.sessionreplay.SessionReplayPrivacy
+import com.datadog.android.sessionreplay.TextAndInputPrivacy
 import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
 import com.datadog.android.trace.opentelemetry.DatadogOpenTelemetry
@@ -175,7 +175,9 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         // Masks all text inputs to protect message content.
         if (BuildConfig.DEBUG) {
             val sessionReplayConfig =
-                SessionReplayConfiguration.Builder(sampleRate).setPrivacy(SessionReplayPrivacy.MASK_USER_INPUT).build()
+                SessionReplayConfiguration.Builder(sampleRate)
+                    .setTextAndInputPrivacy(TextAndInputPrivacy.MASK_ALL_INPUTS)
+                    .build()
             SessionReplay.enable(sessionReplayConfig)
         }
 
