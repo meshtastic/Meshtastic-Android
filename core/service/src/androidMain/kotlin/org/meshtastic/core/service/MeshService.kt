@@ -98,24 +98,28 @@ class MeshService : Service() {
     }
 
     override fun onCreate() {
-        try {
-            super.onCreate()
-            Logger.i { "Creating mesh service" }
+        super.onCreate()
+        Logger.i { "Creating mesh service" }
 
+        try {
             orchestrator.start()
             isServiceInitialized = true
         } catch (e: IllegalStateException) {
-            // DI can throw IllegalStateException if the component is not created.
-            // This can happen if the service is started by the system (e.g. after a crash or on boot)
-            // before the DI framework has a chance to initialize.
-            // In release builds, exception messages might be stripped by R8, so we don't rely strictly on message
-            // strings.
-            Logger.w(e) { "MeshService created before DI component was ready, stopping service" }
+            // Koin throws IllegalStateException when the DI graph is not yet initialized.
+            // This can happen if the system restarts the service (e.g. after a crash or on boot)
+            // before Application.onCreate() has finished setting up Koin.
+            // In release builds, R8 may merge Koin's InstanceCreationException with unrelated
+            // exception classes (observed as io.ktor.http.URLDecodeException), so we cannot rely
+            // on the exception type alone. We catch IllegalStateException narrowly around the
+            // orchestrator/DI access — not around super.onCreate() — so framework exceptions
+            // still propagate normally.
+            Logger.e(e) { "MeshService: DI not ready, stopping service" }
             stopSelf()
             return
         }
     }
 
+    @Suppress("ReturnCount")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!isServiceInitialized) {
             Logger.w { "onStartCommand called but service is not initialized (likely DI failure). Stopping." }

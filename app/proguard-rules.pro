@@ -40,6 +40,10 @@
 -dontobfuscate
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
 
+# Koin DI: prevent R8 from merging exception classes (observed as io.ktor.http.URLDecodeException
+# replacing Koin's InstanceCreationException in stack traces, making crashes undiagnosable).
+-keep class org.koin.core.error.** { *; }
+
 # R8 optimization for Kotlin null checks (AGP 9.0+)
 -processkotlinnullchecks remove
 
