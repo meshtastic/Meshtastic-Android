@@ -57,7 +57,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.atTime
@@ -120,12 +119,12 @@ fun EditWaypointDialog(
         val expireValue = waypointInput.expire ?: 0
         if (isExpiryEnabled) {
             if (expireValue != 0 && expireValue != Int.MAX_VALUE) {
-                val instant = Instant.fromEpochSeconds(expireValue.toLong())
+                val instant = kotlin.time.Instant.fromEpochSeconds(expireValue.toLong())
                 val date = java.util.Date(instant.toEpochMilliseconds())
                 selectedDateString = dateFormat.format(date)
                 selectedTimeString = timeFormat.format(date)
             } else { // If enabled but not set, default to 8 hours from now
-                val futureInstant = kotlinx.datetime.Clock.System.now() + 8.hours
+                val futureInstant = kotlin.time.Clock.System.now() + 8.hours
                 val date = java.util.Date(futureInstant.toEpochMilliseconds())
                 selectedDateString = dateFormat.format(date)
                 selectedTimeString = timeFormat.format(date)
@@ -223,7 +222,7 @@ fun EditWaypointDialog(
                                     val expireValue = waypointInput.expire ?: 0
                                     // Default to 8 hours from now if not already set
                                     if (expireValue == 0 || expireValue == Int.MAX_VALUE) {
-                                        val futureInstant = kotlinx.datetime.Clock.System.now() + 8.hours
+                                        val futureInstant = kotlin.time.Clock.System.now() + 8.hours
                                         waypointInput = waypointInput.copy(expire = futureInstant.epochSeconds.toInt())
                                     }
                                 } else {
@@ -237,9 +236,9 @@ fun EditWaypointDialog(
                         val currentInstant =
                             (waypointInput.expire ?: 0).let {
                                 if (it != 0 && it != Int.MAX_VALUE) {
-                                    Instant.fromEpochSeconds(it.toLong())
+                                    kotlin.time.Instant.fromEpochSeconds(it.toLong())
                                 } else {
-                                    kotlinx.datetime.Clock.System.now() + 8.hours
+                                    kotlin.time.Clock.System.now() + 8.hours
                                 }
                             }
                         val ldt = currentInstant.toLocalDateTime(tz)
@@ -252,9 +251,9 @@ fun EditWaypointDialog(
                                         (waypointInput.expire ?: 0)
                                             .let {
                                                 if (it != 0 && it != Int.MAX_VALUE) {
-                                                    Instant.fromEpochSeconds(it.toLong())
+                                                    kotlin.time.Instant.fromEpochSeconds(it.toLong())
                                                 } else {
-                                                    kotlinx.datetime.Clock.System.now() + 8.hours
+                                                    kotlin.time.Clock.System.now() + 8.hours
                                                 }
                                             }
                                             .toLocalDateTime(tz)
@@ -287,9 +286,9 @@ fun EditWaypointDialog(
                                         (waypointInput.expire ?: 0)
                                             .let {
                                                 if (it != 0 && it != Int.MAX_VALUE) {
-                                                    Instant.fromEpochSeconds(it.toLong())
+                                                    kotlin.time.Instant.fromEpochSeconds(it.toLong())
                                                 } else {
-                                                    kotlinx.datetime.Clock.System.now() + 8.hours
+                                                    kotlin.time.Clock.System.now() + 8.hours
                                                 }
                                             }
                                             .toLocalDateTime(tz)

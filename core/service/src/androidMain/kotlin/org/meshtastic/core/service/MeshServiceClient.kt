@@ -29,6 +29,7 @@ import org.meshtastic.core.common.util.SequentialJob
 
 /** A Activity-lifecycle-aware [ServiceClient] that binds [MeshService] once the Activity is started. */
 @Factory
+@Suppress("DEPRECATION") // IMeshService is deprecated but still required for AIDL binding
 class MeshServiceClient(
     private val context: Context,
     private val serviceRepository: AndroidServiceRepository,

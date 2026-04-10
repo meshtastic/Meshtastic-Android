@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("DEPRECATION") // IMeshService is deprecated but still required for AIDL binding
+
 package com.meshtastic.android.meshserviceexample
 
 import android.content.Intent

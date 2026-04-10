@@ -33,6 +33,10 @@ configure<com.android.build.api.dsl.LibraryExtension> {
     publishing { singleVariant("release") { withSourcesJar() } }
 }
 
+// Suppress dep-ann warnings from AIDL-generated code where Javadoc @deprecated
+// doesn't produce @Deprecated annotations on Stub/Proxy override methods.
+tasks.withType<JavaCompile>().configureEach { options.compilerArgs.add("-Xlint:-dep-ann") }
+
 // Map the Android component to a Maven publication
 afterEvaluate {
     publishing {
