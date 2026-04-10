@@ -56,7 +56,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -84,7 +83,6 @@ import org.meshtastic.app.map.model.MarkerWithLabel
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
@@ -134,7 +132,6 @@ import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.showToast
-import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.Position
@@ -169,25 +166,15 @@ import kotlin.math.sin
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
-    trackMarkers: List<Marker>,
-    trackPolylines: List<Polyline>,
     nodeClusterer: RadiusMarkerClusterer,
 ) {
-    Logger.d {
-        "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints ${trackMarkers.size} tracks"
-    }
-
-    val trackOverlayIds = (trackMarkers + trackPolylines).toSet()
+    Logger.d { "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints" }
 
     overlays.removeAll { overlay ->
-        overlay is MarkerWithLabel ||
-            (overlay is Marker && overlay !in nodeClusterer.items && overlay !in trackOverlayIds) ||
-            (overlay is Polyline && overlay !in trackOverlayIds)
+        overlay is MarkerWithLabel || (overlay is Marker && overlay !in nodeClusterer.items) || overlay is Polyline
     }
 
     overlays.addAll(waypointMarkers)
-    overlays.addAll(trackPolylines)
-    overlays.addAll(trackMarkers)
 
     nodeClusterer.items.clear()
     nodeClusterer.items.addAll(nodeMarkers)
@@ -231,8 +218,6 @@ fun MapView(
     modifier: Modifier = Modifier,
     mapViewModel: MapViewModel = koinViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
-    focusedNodeNum: Int? = null,
-    nodeTracks: List<Position>? = null,
     tracerouteOverlay: TracerouteOverlay? = null,
     tracerouteNodePositions: Map<Int, Position> = emptyMap(),
     onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
@@ -689,51 +674,6 @@ fun MapView(
         }
     }
 
-    fun MapView.onTracksChanged(nodeTracks: List<Position>?, focusedNodeNum: Int?): Pair<List<Marker>, List<Polyline>> {
-        if (nodeTracks == null || focusedNodeNum == null) return emptyList<Marker>() to emptyList<Polyline>()
-
-        val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
-        val timeFilteredPositions =
-            nodeTracks.filter {
-                lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
-            }
-        val sortedPositions = timeFilteredPositions.sortedBy { it.time }
-
-        val focusedNode = nodes.find { it.num == focusedNodeNum } ?: return emptyList<Marker>() to emptyList<Polyline>()
-        val color = focusedNode.colors.second
-
-        val trackPolylines = mutableListOf<Polyline>()
-        if (sortedPositions.size > 1) {
-            val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
-            segments.forEachIndexed { index, segmentPoints ->
-                val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
-                val polyline =
-                    Polyline().apply {
-                        setPoints(
-                            segmentPoints.map { GeoPoint((it.latitude_i ?: 0) * 1e-7, (it.longitude_i ?: 0) * 1e-7) },
-                        )
-                        outlinePaint.color = Color(color).copy(alpha = alpha).toArgb()
-                        outlinePaint.strokeWidth = 8f
-                    }
-                trackPolylines.add(polyline)
-            }
-        }
-
-        val trackMarkers =
-            sortedPositions.mapIndexedNotNull { index, position ->
-                if (index == sortedPositions.lastIndex) return@mapIndexedNotNull null
-
-                Marker(this).apply {
-                    this.position = GeoPoint((position.latitude_i ?: 0) * 1e-7, (position.longitude_i ?: 0) * 1e-7)
-                    icon = AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot)
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    title = getString(Res.string.position)
-                    snippet = formatAgo(position.time)
-                }
-            }
-        return trackMarkers to trackPolylines
-    }
-
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
@@ -751,13 +691,10 @@ fun MapView(
                 modifier = Modifier.fillMaxSize(),
                 update = { mapView ->
                     mapView.updateTracerouteOverlay(tracerouteForwardOffsetPoints, tracerouteReturnOffsetPoints)
-                    val (trackMarkers, trackPolylines) = mapView.onTracksChanged(nodeTracks, focusedNodeNum)
                     with(mapView) {
                         updateMarkers(
                             onNodesChanged(nodesForMarkers),
                             onWaypointChanged(waypoints.values, selectedWaypointId),
-                            trackMarkers,
-                            trackPolylines,
                             nodeClusterer,
                         )
                     }

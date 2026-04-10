@@ -56,8 +56,7 @@ fun MapControlsOverlay(
     onMapTypeMenuDismissRequest: () -> Unit,
     onToggleMapTypeMenu: () -> Unit,
     onManageLayersClicked: () -> Unit,
-    onManageCustomTileProvidersClicked: () -> Unit, // New parameter
-    isNodeMap: Boolean,
+    onManageCustomTileProvidersClicked: () -> Unit,
     // Location tracking parameters
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
@@ -70,30 +69,17 @@ fun MapControlsOverlay(
 ) {
     Row(modifier = modifier) {
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
-        if (isNodeMap) {
+        Box {
             MapButton(
                 icon = MeshtasticIcons.Tune,
                 contentDescription = stringResource(Res.string.map_filter),
                 onClick = onToggleMapFilterMenu,
             )
-            NodeMapFilterDropdown(
+            MapFilterDropdown(
                 expanded = mapFilterMenuExpanded,
                 onDismissRequest = onMapFilterMenuDismissRequest,
                 mapViewModel = mapViewModel,
             )
-        } else {
-            Box {
-                MapButton(
-                    icon = MeshtasticIcons.Tune,
-                    contentDescription = stringResource(Res.string.map_filter),
-                    onClick = onToggleMapFilterMenu,
-                )
-                MapFilterDropdown(
-                    expanded = mapFilterMenuExpanded,
-                    onDismissRequest = onMapFilterMenuDismissRequest,
-                    mapViewModel = mapViewModel,
-                )
-            }
         }
 
         Box {

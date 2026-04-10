@@ -30,18 +30,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -81,16 +74,12 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.MarkerComposable
-import com.google.maps.android.compose.MarkerInfoWindowComposable
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
-import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
 import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.kml.KmlLayer
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.json.JSONObject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.ClusterItemsListDialog
@@ -104,38 +93,16 @@ import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.metersIn
-import org.meshtastic.core.model.util.mpsToKmph
-import org.meshtastic.core.model.util.mpsToMph
-import org.meshtastic.core.model.util.toString
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.alt
-import org.meshtastic.core.resources.heading
-import org.meshtastic.core.resources.latitude
-import org.meshtastic.core.resources.longitude
-import org.meshtastic.core.resources.position
-import org.meshtastic.core.resources.sats
-import org.meshtastic.core.resources.speed
-import org.meshtastic.core.resources.timestamp
-import org.meshtastic.core.resources.track_point
-import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.TripOrigin
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatAgo
-import org.meshtastic.core.ui.util.formatPositionTime
-import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.map.tracerouteNodeSelection
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import kotlin.math.abs
 import kotlin.math.max
 
-private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 private const val DEG_D = 1e-7
-private const val HEADING_DEG = 1e-5
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 
@@ -146,8 +113,6 @@ fun MapView(
     modifier: Modifier = Modifier,
     mapViewModel: MapViewModel = koinViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
-    focusedNodeNum: Int? = null,
-    nodeTracks: List<Position>? = null,
     tracerouteOverlay: TracerouteOverlay? = null,
     tracerouteNodePositions: Map<Int, Position> = emptyMap(),
     onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
@@ -155,7 +120,6 @@ fun MapView(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
-    val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
 
     // Location permissions state
     val locationPermissionsState =
@@ -491,97 +455,34 @@ fun MapView(
                 )
             }
 
-            if (nodeTracks != null && focusedNodeNum != null) {
-                val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
-                val timeFilteredPositions =
-                    nodeTracks.filter {
-                        lastHeardTrackFilter == LastHeardFilter.Any ||
-                            it.time > nowSeconds - lastHeardTrackFilter.seconds
+            NodeClusterMarkers(
+                nodeClusterItems = nodeClusterItems,
+                mapFilterState = mapFilterState,
+                navigateToNodeDetails = navigateToNodeDetails,
+                onClusterClick = { cluster ->
+                    val items = cluster.items.toList()
+                    val allSameLocation = items.size > 1 && items.all { it.position == items.first().position }
+
+                    if (allSameLocation) {
+                        showClusterItemsDialog = items
+                    } else {
+                        val bounds = LatLngBounds.builder()
+                        cluster.items.forEach { bounds.include(it.position) }
+                        coroutineScope.launch {
+                            cameraPositionState.animate(
+                                CameraUpdateFactory.newCameraPosition(
+                                    CameraPosition.Builder()
+                                        .target(bounds.build().center)
+                                        .zoom(cameraPositionState.position.zoom + 1)
+                                        .build(),
+                                ),
+                            )
+                        }
+                        Logger.d { "Cluster clicked! $cluster" }
                     }
-                val sortedPositions = timeFilteredPositions.sortedBy { it.time }
-                allNodes
-                    .find { it.num == focusedNodeNum }
-                    ?.let { focusedNode ->
-                        sortedPositions.forEachIndexed { index, position ->
-                            key(position.time) {
-                                val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
-                                val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
-                                val color = Color(focusedNode.colors.second).copy(alpha = alpha)
-                                val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
-                                val activeNodeZIndex = if (isHighPriority) 5f else 4f
-
-                                if (index == sortedPositions.lastIndex) {
-                                    MarkerComposable(
-                                        state = markerState,
-                                        zIndex = activeNodeZIndex,
-                                        alpha = if (isHighPriority) 1.0f else 0.9f,
-                                    ) {
-                                        NodeChip(node = focusedNode)
-                                    }
-                                } else {
-                                    MarkerInfoWindowComposable(
-                                        state = markerState,
-                                        title = stringResource(Res.string.position),
-                                        snippet = formatAgo(position.time),
-                                        zIndex = 1f + alpha,
-                                        infoContent = {
-                                            PositionInfoWindowContent(position = position, displayUnits = displayUnits)
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = MeshtasticIcons.TripOrigin,
-                                            contentDescription = stringResource(Res.string.track_point),
-                                            tint = color,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        if (sortedPositions.size > 1) {
-                            val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
-                            segments.forEachIndexed { index, segmentPoints ->
-                                val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
-                                Polyline(
-                                    points = segmentPoints.map { it.toLatLng() },
-                                    jointType = JointType.ROUND,
-                                    color = Color(focusedNode.colors.second).copy(alpha = alpha),
-                                    width = 8f,
-                                    zIndex = 0.6f,
-                                )
-                            }
-                        }
-                    }
-            } else {
-                NodeClusterMarkers(
-                    nodeClusterItems = nodeClusterItems,
-                    mapFilterState = mapFilterState,
-                    navigateToNodeDetails = navigateToNodeDetails,
-                    onClusterClick = { cluster ->
-                        val items = cluster.items.toList()
-                        val allSameLocation = items.size > 1 && items.all { it.position == items.first().position }
-
-                        if (allSameLocation) {
-                            showClusterItemsDialog = items
-                        } else {
-                            val bounds = LatLngBounds.builder()
-                            cluster.items.forEach { bounds.include(it.position) }
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newCameraPosition(
-                                        CameraPosition.Builder()
-                                            .target(bounds.build().center)
-                                            .zoom(cameraPositionState.position.zoom + 1)
-                                            .build(),
-                                    ),
-                                )
-                            }
-                            Logger.d { "Cluster clicked! $cluster" }
-                        }
-                        true
-                    },
-                )
-            }
+                    true
+                },
+            )
 
             WaypointMarkers(
                 displayableWaypoints = displayableWaypoints,
@@ -645,7 +546,6 @@ fun MapView(
                 mapTypeMenuExpanded = false
                 showCustomTileManagerSheet = true
             },
-            isNodeMap = focusedNodeNum != null,
             isLocationTrackingEnabled = isLocationTrackingEnabled,
             onToggleLocationTracking = {
                 if (locationPermissionsState.allPermissionsGranted) {
@@ -820,66 +720,6 @@ fun Uri.getFileName(context: android.content.Context): String {
         }
     }
     return name
-}
-
-@Composable
-@Suppress("LongMethod")
-private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayUnits = DisplayUnits.METRIC) {
-    @Composable
-    fun PositionRow(label: String, value: String) {
-        Row(modifier = Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(label, style = MaterialTheme.typography.labelMedium)
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(value, style = MaterialTheme.typography.labelMedium)
-        }
-    }
-
-    Card {
-        Column(modifier = Modifier.padding(8.dp)) {
-            PositionRow(
-                label = stringResource(Res.string.latitude),
-                value = "%.5f".format((position.latitude_i ?: 0) * DEG_D),
-            )
-
-            PositionRow(
-                label = stringResource(Res.string.longitude),
-                value = "%.5f".format((position.longitude_i ?: 0) * DEG_D),
-            )
-
-            PositionRow(label = stringResource(Res.string.sats), value = position.sats_in_view?.toString() ?: "")
-
-            PositionRow(
-                label = stringResource(Res.string.alt),
-                value = (position.altitude ?: 0).metersIn(displayUnits).toString(displayUnits),
-            )
-
-            PositionRow(label = stringResource(Res.string.speed), value = speedFromPosition(position, displayUnits))
-
-            PositionRow(
-                label = stringResource(Res.string.heading),
-                value = "%.0f°".format((position.ground_track ?: 0) * HEADING_DEG),
-            )
-
-            PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime())
-        }
-    }
-}
-
-@Composable
-private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): String {
-    val speedInMps = position.ground_speed ?: 0
-    val mpsText = "%d m/s".format(speedInMps)
-    val speedText =
-        if (speedInMps > 10) {
-            when (displayUnits) {
-                DisplayUnits.METRIC -> "%.1f Km/h".format(speedInMps.mpsToKmph())
-                DisplayUnits.IMPERIAL -> "%.1f mph".format(speedInMps.mpsToMph())
-                else -> mpsText
-            }
-        } else {
-            mpsText
-        }
-    return speedText
 }
 
 internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)

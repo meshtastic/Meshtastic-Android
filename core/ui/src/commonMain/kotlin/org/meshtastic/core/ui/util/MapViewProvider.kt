@@ -31,9 +31,6 @@ interface MapViewProvider {
         // We use Any here to avoid circular dependency with feature:map
         viewModel: Any,
         navigateToNodeDetails: (Int) -> Unit,
-        focusedNodeNum: Int? = null,
-        // Using List<Any> to avoid dependency on proto.Position if needed
-        nodeTracks: List<Any>? = null,
         tracerouteOverlay: Any? = null,
         tracerouteNodePositions: Map<Int, Any> = emptyMap(),
         onTracerouteMappableCountChanged: (Int, Int) -> Unit = { _, _ -> },
