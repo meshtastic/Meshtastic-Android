@@ -20,7 +20,6 @@
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">tøm nodefilter</string>
     <string name="node_filter_include_unknown">Inkluder ukjent</string>
-    <string name="node_filter_show_details">Vis detaljer</string>
     <string name="node_sort_alpha">A-Å</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Distanse</string>
@@ -63,7 +62,6 @@
     <string name="rebroadcast_mode_all_skip_decoding_desc">Samme atferd som alle andre, men hopper over pakkedekoding og sender dem ganske enkelt på nytt. Kun tilgjengelig i Repeater-rollen. Å sette dette på andre roller vil resultere i ALL oppførsel.</string>
     <string name="rebroadcast_mode_local_only_desc">Ignorerer observerte meldinger fra fremmede mesh'er som er åpne eller de som ikke kan dekrypteres. Sender kun meldingen på nytt på nodene lokale primære / sekundære kanaler.</string>
     <string name="rebroadcast_mode_known_only_desc">Ignorer observerte meldinger fra utenlandske mesher som KUN LOKALE men tar det steget videre, ved å også ignorere meldinger fra noder som ikke allerede er i nodens kjente liste.</string>
-    <string name="rebroadcast_mode_none">Ingen</string>
     <string name="rebroadcast_mode_none_desc">Bare tillatt for SENSOR, TRACKER og TAK_TRACKER roller, så vil dette hindre alle rekringkastinger, ikke i motsetning til CLIENT_MUTE rollen.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignorerer pakker fra ikke-standard portnumre som: TAK, RangeTest, PaxCounter, etc. Kringkaster kun pakker med standard portnum: NodeInfo, Text, Position, Telemetrær og Ruting.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Behandle dobbeltrykk på støttede akselerometre som brukerknappetrykk.</string>
@@ -74,24 +72,17 @@
     <string name="qr_code">QR kode</string>
     <string name="unknown_username">Ukjent Brukernavn</string>
     <string name="send">Send</string>
-    <string name="warning_not_paired">Du har ikke paret en Meshtastic kompatibel radio med denne telefonen. Vennligst parr en enhet, og sett ditt brukernavn.\n\nDenne åpen kildekode applikasjonen er i alfa-testing, Hvis du finner problemer, vennligst post på vårt forum: https://github.com/orgs/meshtastic/discussions\n\nFor mer informasjon, se vår nettside - www.meshtastic.org.</string>
     <string name="you">Deg</string>
     <string name="accept">Godta</string>
     <string name="cancel">Avbryt</string>
     <string name="save_changes">Lagre</string>
     <string name="new_channel_rcvd">Ny kanal URL mottatt</string>
-    <string name="report_bug">Rapporter Feil</string>
-    <string name="report_a_bug">Rapporter en feil</string>
-    <string name="report_bug_text">Er du sikker på at du vil rapportere en feil? Etter rapportering, vennligst posti https://github.com/orgs/meshtastic/discussions så vi kan matche rapporten med hva du fant.</string>
     <string name="report">Rapport</string>
-    <string name="pairing_completed">Paring fullført, starter tjeneste</string>
-    <string name="pairing_failed_try_again">Paring feilet, vennligst velg igjen</string>
     <string name="location_disabled">Lokasjonstilgang er slått av,kan ikke gi posisjon til mesh.</string>
     <string name="share">Del</string>
     <string name="disconnected">Frakoblet</string>
     <string name="device_sleeping">Enhet sover</string>
     <string name="ip_address">IP-adresse:</string>
-    <string name="connected_to">Tilkoblet til radio (%1$s)</string>
     <string name="not_connected">Ikke tilkoblet</string>
     <string name="connected_sleeping">Tilkoblet radio, men den sover</string>
     <string name="app_too_old">Applikasjon for gammel</string>
@@ -202,7 +193,6 @@
     <string name="encryption_pkc">Offentlig-nøkkel kryptering</string>
     <string name="encryption_error">Direktemeldinger bruker den nye offentlige nøkkelinfrastrukturen for kryptering. Krever firmware versjon 2.5 eller høyere.</string>
     <string name="meshtastic_new_nodes_notifications">Varsel om nye noder</string>
-    <string name="more_details">Flere detaljer</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, et mål som brukes i kommunikasjon for å sette nivået av et ønsket signal til bakgrunnstrøynivået. I Meshtastic og andre trådløse systemer tyder et høyere SNR på et klarere signal som kan forbedre påliteligheten og kvaliteten på dataoverføringen.</string>
     <string name="rssi">RSSI</string>
@@ -226,10 +216,8 @@
     </plurals>
     <string name="traceroute_diff">Hopp mot %1$d Hopper tilbake %2$d</string>
     <string name="twenty_four_hours">24t</string>
-    <string name="forty_eight_hours">48t</string>
     <string name="one_week">1U</string>
     <string name="two_weeks">2U</string>
-    <string name="four_weeks">4U</string>
     <string name="max">Maks</string>
     <string name="copy">Kopier</string>
     <string name="alert_bell_text">Varsel, bjellekarakter!</string>

@@ -24,7 +24,6 @@
     <string name="node_filter_only_online">Ocultar nós offline</string>
     <string name="node_filter_only_direct">Mostrar apenas nós diretos</string>
     <string name="node_filter_ignored">Você está vendo nós ignorados,\nPressione para retornar à lista de nós.</string>
-    <string name="node_filter_show_details">Mostrar detalhes</string>
     <string name="node_sort_button">Opções de ordenação do nó</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canal</string>
@@ -70,7 +69,6 @@
     <string name="rebroadcast_mode_all_skip_decoding_desc">O mesmo que o comportamento de TODOS, mas ignora a decodificação de pacotes e simplesmente os retransmite. Apenas disponível no papel de Repetidor. Configurar isso em qualquer outra função resultará em comportamento como TODOS.</string>
     <string name="rebroadcast_mode_local_only_desc">Ignora mensagens observadas de malhas estrangeiras que estão abertas ou aquelas que não pode descriptografar. Apenas retransmite mensagem nos nós de canais primários / secundários.</string>
     <string name="rebroadcast_mode_known_only_desc">Ignora mensagens observadas de malhas estrangeiras como APENAS LOCAL, e vai ainda mais longe ignorando também mensagens de nós que não estão na lista conhecida do nó.</string>
-    <string name="rebroadcast_mode_none">Nenhum</string>
     <string name="rebroadcast_mode_none_desc">Somente permitido para os papéis SENSOR, TRACKER e TAK_TRACKER, isso irá inibir todas as retransmissões, como do papel CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignora pacotes de portnums não padrão como: TAK, RangeTest, PaxCounter, etc. Apenas retransmite pacotes com portnums padrão: NodeInfo, Text, Position, Telemetry, and Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Tratar toque duplo nos acelerômetros suportados enquanto um botão pressionado pelo usuário.</string>
@@ -81,29 +79,20 @@
     <string name="qr_code">Código QR</string>
     <string name="unknown_username">Nome desconhecido</string>
     <string name="send">Enviar</string>
-    <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: https://github.com/orgs/meshtastic/discussions\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
     <string name="you">Você</string>
     <string name="accept">Aceitar</string>
     <string name="cancel">Cancelar</string>
     <string name="save_changes">Salvar</string>
     <string name="new_channel_rcvd">Novo link de canal recebido</string>
-    <string name="permission_missing">Meshtastic precisa de permissões de localização ativadas para encontrar novos dispositivos via Bluetooth. Você pode desativar quando não estiver usando.</string>
-    <string name="report_bug">Informar Bug</string>
-    <string name="report_a_bug">Informar um bug</string>
-    <string name="report_bug_text">Tem certeza que deseja informar um erro? Após o envio, por favor envie uma mensagem em https://github.com/orgs/meshtastic/discussions para podermos comparar o relatório com o problema encontrado.</string>
     <string name="report">Informar</string>
-    <string name="pairing_completed">Pareamento concluído, iniciando serviço</string>
-    <string name="pairing_failed_try_again">Pareamento falhou, favor selecionar novamente</string>
     <string name="location_disabled">Localização desativada, não será possível informar sua posição.</string>
     <string name="share">Compartilhar</string>
     <string name="new_node_seen">Novo Nó Visto: %1$s</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo em suspensão (sleep)</string>
-    <string name="connected_count">Conectado: %1$s ligado(s)</string>
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
     <string name="connected">Conectado</string>
-    <string name="connected_to">Conectado ao rádio (%1$s)</string>
     <string name="not_connected">Não conectado</string>
     <string name="connected_sleeping">Conectado ao rádio, mas ele está em suspensão (sleep)</string>
     <string name="app_too_old">Atualização do aplicativo necessária</string>
@@ -182,7 +171,6 @@
     <string name="quick_chat_show">Mostrar menu de chat rápido</string>
     <string name="quick_chat_hide">Ocultar menu de chat rápido</string>
     <string name="factory_reset">Redefinição de fábrica</string>
-    <string name="bluetooth_disabled">O Bluetooth está desativado. Por favor, ative-o nas configurações do seu dispositivo.</string>
     <string name="open_settings">Abrir configurações</string>
     <string name="firmware_version">Versão do firmware: %1$s</string>
     <string name="permission_missing_31">Meshtastic precisa das permissões de \"Dispositivos próximos\" habilitadas para localizar e conectar a dispositivos via Bluetooth. Você pode desativar quando não estiver em uso.</string>
@@ -233,7 +221,6 @@
     <string name="battery">Bateria</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Qtd de saltos</string>
-    <string name="hops_away_template">Distância em Saltos: %1$d</string>
     <string name="info">Informação</string>
     <string name="ch_util_definition">Utilização para o canal atual, incluindo TX bem formado, RX e RX mal formado (conhecido como ruído).</string>
     <string name="air_util_definition">Percentagem do tempo de ar utilizado na última hora para transmissões.</string>
@@ -242,7 +229,6 @@
     <string name="encryption_pkc">Criptografia de Chave Pública</string>
     <string name="encryption_error">Chave pública não confere</string>
     <string name="meshtastic_new_nodes_notifications">Novas notificações de nó</string>
-    <string name="more_details">Mais detalhes</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Relação sinal-para-ruído, uma medida utilizada nas comunicações para quantificar o nível de um sinal desejado para o nível de ruído de fundo. Na Meshtastic e outros sistemas sem fios, uma SNR maior indica um sinal mais claro que pode melhorar a confiabilidade e a qualidade da transmissão de dados.</string>
     <string name="rssi">RSSI</string>
@@ -268,10 +254,8 @@
     </plurals>
     <string name="traceroute_diff">Salto em direção a %1$d Saltos de volta %2$d</string>
     <string name="twenty_four_hours">24H</string>
-    <string name="forty_eight_hours">48H</string>
     <string name="one_week">1S</string>
     <string name="two_weeks">2S</string>
-    <string name="four_weeks">4S</string>
     <string name="max">Máx.</string>
     <string name="unknown_age">Idade Desconhecida</string>
     <string name="copy">Copiar</string>
@@ -291,7 +275,6 @@
     <string name="meshtastic_low_battery_notifications">Notificações de bateria fraca</string>
     <string name="low_battery_title">Bateria fraca: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificações de bateria fraca (nós favoritos)</string>
-    <string name="udp_config">Configuração UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Última vez: %2$s<br>Última posição: %3$s<br>Bateria: %4$s]]></string>
     <string name="toggle_my_position">Habilitar minha posição</string>
     <string name="user">Usuário</string>
@@ -367,7 +350,6 @@
     <string name="gpio_pin_to_monitor">Pino GPIO para monitorar</string>
     <string name="detection_trigger_type">Tipo de gatilho de deteção</string>
     <string name="use_input_pullup_mode">Usar o modo INPUT_PULLUP</string>
-    <string name="device_config">Dispositivo</string>
     <string name="compass_north_top">Norte da bússola no topo</string>
     <string name="flip_screen">Inverter tela</string>
     <string name="display_units">Unidades de exibição</string>
@@ -394,7 +376,6 @@
     <string name="use_i2s_as_buzzer">Usar I2S como campainha</string>
     <string name="lora_config">LoRa</string>
     <string name="bandwidth">Largura da banda</string>
-    <string name="frequency_offset_mhz">Deslocamento da frequência (MHz)</string>
     <string name="region_frequency_plan">Região</string>
     <string name="override_duty_cycle">Ignorar ciclo de trabalho</string>
     <string name="ignore_incoming">Ignorar entrada</string>
@@ -416,7 +397,6 @@
     <string name="neighbor_info_enabled">Informações do Vizinho ativado</string>
     <string name="update_interval_seconds">Intervalo de atualização (segundos)</string>
     <string name="transmit_over_lora">Transmitir por LoRa</string>
-    <string name="network_config">Rede</string>
     <string name="wifi_enabled">Wi-Fi ativado</string>
     <string name="ssid">SSID</string>
     <string name="psk">PSK</string>
@@ -430,23 +410,11 @@
     <string name="paxcounter_enabled">Contador de Pessoas ativado</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Limite de RSSI do Wi-Fi (o padrão é -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">Limite de RSSI BLE (o padrão é -80)</string>
-    <string name="position_config">Posição</string>
-    <string name="position_broadcast_interval_seconds">Intervalo de transmissão de posição (segundos)</string>
-    <string name="smart_position_enabled">Posição inteligente ativada</string>
-    <string name="smart_broadcast_minimum_distance_meters">Distância mínima da transmissão inteligente (metros)</string>
-    <string name="smart_broadcast_minimum_interval_seconds">Intervalo mínimo da transmissão inteligente (segundos)</string>
-    <string name="use_fixed_position">Usar posição fixa</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
-    <string name="altitude_meters">Altitude (metros)</string>
     <string name="position_config_set_fixed_from_phone">Definir a partir da localização atual do telefone</string>
-    <string name="gps_update_interval_seconds">Intervalo de atualização do GPS (segundos)</string>
-    <string name="redefine_gps_rx_pin">Redefinir GPS_RX_PIN</string>
-    <string name="redefine_gps_tx_pin">Redefinir GPS_TX_PIN</string>
-    <string name="redefine_pin_gps_en">Redefinir PIN_GPS_EN</string>
     <string name="power_config">Configuração de Energia</string>
     <string name="enable_power_saving_mode">Ativar modo de economia de energia</string>
-    <string name="shutdown_on_battery_delay_seconds">Espera para desligar ao passar para bateria (segundos)</string>
     <string name="adc_multiplier_override_ratio">Alterar proporção do multiplicador ADC</string>
     <string name="battery_ina_2xx_i2c_address">Endereço I2C da bateria INA_2XX</string>
     <string name="range_test_config">Configuração de Teste de Distância</string>
@@ -457,7 +425,6 @@
     <string name="remote_hardware_enabled">Hardware Remoto ativado</string>
     <string name="allow_undefined_pin_access">Permitir acesso indefinido ao pino</string>
     <string name="available_pins">Pinos disponíveis</string>
-    <string name="security_config">Segurança</string>
     <string name="public_key">Chave Publica</string>
     <string name="private_key">Chave Privada</string>
     <string name="admin_key">Chave do Administrador</string>
@@ -526,7 +493,6 @@
     <string name="press_and_drag">Pressione e arraste para reordenar</string>
     <string name="unmute">Desmutar</string>
     <string name="dynamic">Dinâmico</string>
-    <string name="scan_qr_code">Escanear Código QR</string>
     <string name="share_contact">Compartilhar Contato</string>
     <string name="import_shared_contact">Importar contato compartilhado?</string>
     <string name="unmessageable">Impossível enviar mensagens</string>
@@ -542,7 +508,6 @@
     <string name="host_metrics_log">Métricas do Host</string>
     <string name="host">Host</string>
     <string name="free_memory">Memória Livre</string>
-    <string name="disk_free">Armazenamento Livre</string>
     <string name="load">Carregar</string>
     <string name="user_string">String de Usuário</string>
     <string name="navigate_into_label">Navegar Em</string>
@@ -577,8 +542,6 @@
     <string name="remote">Remoto</string>
     <string name="react">Reagir</string>
     <string name="disconnect">Desconectar</string>
-    <string name="no_network_devices">Nenhum dispositivo de rede encontrado.</string>
-    <string name="no_usb_devices">Nenhum dispositivo USB Serial encontrado.</string>
     <string name="scroll_to_bottom">Rolar para o final</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="security_icon_description">Status de segurança</string>
@@ -593,8 +556,6 @@
     <string name="clean_node_database_title">Limpar Banco de Dados de Nó</string>
     <string name="clean_nodes_older_than">Limpar nós vistos há mais de %1$d dias</string>
     <string name="clean_unknown_nodes">Limpar somente nós desconhecidos</string>
-    <string name="clean_low_interaction_nodes">Limpar nós com baixa/nenhuma interação</string>
-    <string name="clean_ignored_nodes">Limpar nós ignorados</string>
     <string name="clean_now">Limpar Agora</string>
     <string name="clean_node_database_confirmation">Isto irá remover %1$d nós de seu banco de dados. Esta ação não pode ser desfeita.</string>
     <string name="security_icon_help_green_lock">Um cadeado verde significa que o canal é criptografado com uma chave AES de 128 ou 256 bits.</string>
@@ -613,7 +574,6 @@
     <string name="security_icon_help_show_all">Mostrar Todos os Significados</string>
     <string name="security_icon_help_show_less">Exibir Status Atual</string>
     <string name="security_icon_help_dismiss">Ignorar</string>
-    <string name="confirm_delete_node">Tem certeza que deseja excluir este nó?</string>
     <string name="replying_to">Respondendo a %1$s</string>
     <string name="cancel_reply">Cancelar resposta</string>
     <string name="delete_messages_title">Excluir Mensagens?</string>
@@ -669,17 +629,13 @@
     <string name="configure_critical_alerts">Configurar Alertas Críticos</string>
     <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <string name="next">Avançar</string>
-    <string name="grant_permissions">Conceder Permissões</string>
     <string name="nodes_queued_for_deletion">%1$d nós na fila para exclusão:</string>
     <string name="clean_node_database_description">Cuidado: Isso irá remover nós dos bancos de dados do aplicativo e do dispositivo.\nSeleções são somadas.</string>
-    <string name="connecting_to_device">Conectando ao dispositivo</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satélite</string>
     <string name="map_type_terrain">Terreno</string>
     <string name="map_type_hybrid">Híbrido</string>
     <string name="manage_map_layers">Gerenciar Camadas do Mapa</string>
-    <string name="map_layers_title">Camadas do Mapa</string>
-    <string name="add_layer_button">Adicionar Camada</string>
     <string name="hide_layer">Ocultar Camada</string>
     <string name="show_layer">Mostrar Camada</string>
     <string name="remove_layer">Remover Camada</string>

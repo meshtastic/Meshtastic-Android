@@ -24,7 +24,6 @@
     <string name="node_filter_include_unknown">미확인 노드 포함</string>
     <string name="node_filter_only_online">오프라인 노드 숨기기</string>
     <string name="node_filter_only_direct">직접 연결된 노드만 보기</string>
-    <string name="node_filter_show_details">자세히 보기</string>
     <string name="node_sort_button">노드 정렬</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">채널</string>
@@ -66,14 +65,11 @@
     <string name="role_lost_and_found_desc">분실 장치의 회수를 돕기 위해 기본 채널에 정기적으로 위치 정보를 전송.</string>
     <string name="role_tak_tracker_desc">TAK PLI 전송을 자동화하고 정기적 전송을 최소화.</string>
     <string name="role_router_late_desc">모든 다른 모드의 노드들이 패킷을 재전송한 후에만 항상 한 번씩 패킷을 재전송하여, 로컬 클러스터에 추가적인 커버리지를 보장하는 인프라스트럭처 노드입니다. 노드 목록에 표시.</string>
-    <string name="rebroadcast_mode_all">All</string>
     <string name="rebroadcast_mode_all_desc">관찰된 메시지가 우리 비공개 채널에 있거나, 동일한 LoRa 파라미터를 사용하는 다른 메쉬에서 온 경우 해당 메시지를 재전송합니다.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">ALL 역할과 동일하게 동작하지만, 패킷 디코딩을 건너뛰고 단순히 재전송만 수행합니다. Repeater 일때 설정가능. 다른 Role에서는 ALL로 동작.</string>
     <string name="rebroadcast_mode_local_only_desc">오픈되어 있거나 해독할 수 없는 외부 메시에서 관찰된 메시지를 무시합니다. 로컬 주/보조 채널에서만 메시지를 재브로드캐스트.</string>
     <string name="rebroadcast_mode_known_only_desc">LOCAL_ONLY와 유사하게 외부 메쉬에서 관찰된 메시지를 무시하지만, 추가적으로 알려진 목록에 없는 노드의 메시지도 무시합니다.</string>
-    <string name="rebroadcast_mode_none">없음</string>
     <string name="rebroadcast_mode_none_desc">SENSOR, TRACKER 및 TAK_TRACKER role에서만 허용되며 CLIENT_MUTE role과 마찬가지로 모든 재브로드캐스트를 금지합니다.</string>
-    <string name="rebroadcast_mode_core_portnums_only">핵심 포트 번호만 허용</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">TAK, RangeTest, PaxCounter 등과 같은 비표준 포트 번호의 패킷을 무시합니다. NodeInfo, Text, Position, Telemetry 및 Routing과 같은 표준 포트 번호가 있는 패킷만 재브로드캐스트.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">가속도계가 있는 장치를 두 번 탭하여 사용자 버튼과 동일한 동작.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">장치에서 깜빡이는 LED를 제어합니다. 대부분 장치의 경우 최대 4개의 LED 중 하나를 제어할 수 있지만 충전 상태 LED와 GPS 상태 LED는 제어할 수 없습니다.</string>
@@ -86,27 +82,19 @@
     <string name="qr_code">QR코드</string>
     <string name="unknown_username">미확인 유저</string>
     <string name="send">보내기</string>
-    <string name="warning_not_paired">아직 스마트폰과 Meshtastic 장치와 연결하지 않았습니다. 장치와 연결하고 사용자 이름을 정하세요. \n\n이 오픈소스 응용 프로그램은 개발 중입니다. 문제가 발견되면 포럼: https://github.com/orgs/meshtastic/discussions 을 통해 알려주세요.\n\n 자세한 정보는 웹페이지 - www.meshtastic.org 를 참조하세요.</string>
     <string name="you">나</string>
     <string name="accept">수락</string>
     <string name="cancel">취소</string>
     <string name="save_changes">저장</string>
     <string name="new_channel_rcvd">새로운 채널 URL 수신</string>
-    <string name="report_bug">버그 보고</string>
-    <string name="report_a_bug">버그 보고</string>
-    <string name="report_bug_text">버그를 보고하시겠습니까? 보고 후 Meshtastic 포럼 https://github.com/orgs/meshtastic/discussions 에 당신이 발견한 내용을 게시해주시면 신고 내용과 귀하가 찾은 내용을 일치 시킬 수 있습니다.</string>
     <string name="report">보고</string>
-    <string name="pairing_completed">연결 완료, 서비스를 시작합니다.</string>
-    <string name="pairing_failed_try_again">연결 실패, 다시 시도해주세요.</string>
     <string name="location_disabled">위치 접근 권한 해제, 메시에 위치를 제공할 수 없습니다.</string>
     <string name="share">공유</string>
     <string name="disconnected">연결 끊김</string>
     <string name="device_sleeping">절전모드</string>
-    <string name="connected_count">연결됨: 중 %1$s 온라인</string>
     <string name="ip_address">IP 주소:</string>
     <string name="ip_port">포트:</string>
     <string name="connected">연결됨</string>
-    <string name="connected_to">(%1$s)에 연결됨</string>
     <string name="connecting">연결 중</string>
     <string name="not_connected">연결되지 않음</string>
     <string name="connected_sleeping">연결되었지만, 해당 장치는 절전모드입니다.</string>
@@ -216,7 +204,6 @@
     <string name="battery">배터리</string>
     <string name="logs">로그</string>
     <string name="hops_away">Hops 수</string>
-    <string name="hops_away_template">%1$d Hops 떨어짐</string>
     <string name="info">정보</string>
     <string name="ch_util_definition">현재 채널 사용, 올바르게 형성된 TX, RX, 잘못 형성된 RX(일명 노이즈)를 포함.</string>
     <string name="air_util_definition">지난 1시간 동안 전송에 사용된 통신 시간의 백분율.</string>
@@ -225,7 +212,6 @@
     <string name="encryption_pkc">공개 키 암호화</string>
     <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="meshtastic_new_nodes_notifications">새로운 노드 알림</string>
-    <string name="more_details">자세히 보기</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">통신에서 원하는 신호의 수준을 배경 잡음의 수준과 비교하여 정량화하는 데 사용되는 신호 대 잡음비 Signal-to-Noise Ratio, SNR는 Meshtastic와 같은 무선 시스템에서 SNR이 높을수록 더 선명한 신호를 나타내어 데이터 전송의 안정성과 품질을 향상시킬 수 있습니다.</string>
     <string name="rssi">RSSI</string>
@@ -250,10 +236,8 @@
     </plurals>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
     <string name="twenty_four_hours">24시간</string>
-    <string name="forty_eight_hours">48시간</string>
     <string name="one_week">1주</string>
     <string name="two_weeks">2주</string>
-    <string name="four_weeks">4주</string>
     <string name="max">최대</string>
     <string name="unknown_age">수명 확인 되지 않음</string>
     <string name="copy">복사</string>
@@ -274,7 +258,6 @@
     <string name="low_battery_title">배터리  부족: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">배터리 부족 알림 (즐겨찾기 노드)</string>
     <string name="udp_enabled">활성화</string>
-    <string name="udp_config">UDP 설정</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>최근 수신: %2$s<br>최근 위치: %3$s<br>배터리: %4$s]]></string>
     <string name="toggle_my_position">내 위치 토글</string>
     <string name="user">사용자</string>
@@ -349,7 +332,6 @@
     <string name="gpio_pin_to_monitor">상태 모니터링 GPIO 핀</string>
     <string name="detection_trigger_type">디텍션 트리거 타입</string>
     <string name="use_input_pullup_mode">INPUT_PULLUP 모드 사용</string>
-    <string name="device_config">장치</string>
     <string name="rebroadcast_mode">중계 모드</string>
     <string name="nodeinfo_broadcast_interval">노드 정보 발송 주기</string>
     <string name="compass_north_top">나침반 상단을 북쪽으로 고정</string>
@@ -382,7 +364,6 @@
     <string name="use_modem_preset">프리셋 사용</string>
     <string name="bandwidth">대역폭</string>
     <string name="coding_rate">Coding rate</string>
-    <string name="frequency_offset_mhz">주파수 오프셋 (MHz)</string>
     <string name="region_frequency_plan">지역</string>
     <string name="tx_enabled">전송 활성화</string>
     <string name="tx_power_dbm">전송 출력</string>
@@ -407,7 +388,6 @@
     <string name="neighbor_info_enabled">이웃 정보 활성화</string>
     <string name="update_interval_seconds">업데이트 간격 (초)</string>
     <string name="transmit_over_lora">LoRa로 전송</string>
-    <string name="network_config">네트워크</string>
     <string name="enabled">활성화</string>
     <string name="wifi_enabled">WiFi 활성화</string>
     <string name="ssid">SSID</string>
@@ -423,19 +403,8 @@
     <string name="paxcounter_enabled">팍스카운터 활성화</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 임계값 (기본값 -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI 임계값 (기본값 -80)</string>
-    <string name="position_config">위치</string>
-    <string name="position_broadcast_interval_seconds">위치 송신 간격 (초)</string>
-    <string name="smart_position_enabled">스마트 위치 활성화</string>
-    <string name="smart_broadcast_minimum_distance_meters">스마트 위치 사용 최소 거리 간격 (m)</string>
-    <string name="smart_broadcast_minimum_interval_seconds">스마트 위치 사용 최소 시간 간격 (초)</string>
-    <string name="use_fixed_position">고정 위치 사용</string>
     <string name="latitude">위도</string>
     <string name="longitude">경도</string>
-    <string name="altitude_meters">고도 (m)</string>
-    <string name="gps_update_interval_seconds">GPS 업데이트 간격 (초)</string>
-    <string name="redefine_gps_rx_pin">GPS_RX_PIN 재정의</string>
-    <string name="redefine_gps_tx_pin">GPS_TX_PIN 재정의</string>
-    <string name="redefine_pin_gps_en">PIN_GPS_EN 재정의</string>
     <string name="power_config">전원 설정</string>
     <string name="enable_power_saving_mode">저전력 모드 설정</string>
     <string name="range_test_config">거리 테스트 설정</string>
@@ -444,7 +413,6 @@
     <string name="save_csv_in_storage_esp32_only">.CSV 파일 저장 (EPS32만 동작)</string>
     <string name="remote_hardware_config">원격 하드웨어 설정</string>
     <string name="remote_hardware_enabled">원격 하드웨어 활성화</string>
-    <string name="security_config">보안</string>
     <string name="public_key">공개 키</string>
     <string name="private_key">개인 키</string>
     <string name="admin_key">Admin 키</string>
@@ -503,7 +471,6 @@
     <string name="manual_position_request">수동 위치 요청 필요함</string>
     <string name="press_and_drag">누르고 드래그해서 순서 변경</string>
     <string name="unmute">음소거 해제</string>
-    <string name="scan_qr_code"> QR코드 스캔</string>
     <string name="share_contact">연락처 공유</string>
     <string name="import_shared_contact">공유된 연락처를 내려받겠습니까?</string>
     <string name="unmessageable">메시지 제한</string>
@@ -544,8 +511,6 @@
     <string name="remote">원격</string>
     <string name="react">반응</string>
     <string name="disconnect">연결 끊기</string>
-    <string name="no_network_devices">네트워크 장치를 찾을 수 없습니다.</string>
-    <string name="no_usb_devices">USB 시리얼 장치를 찾을 수 없습니다.</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="unknown">알 수 없는</string>
     <string name="advanced_title">고급</string>
@@ -561,7 +526,6 @@
     <string name="one_day">24 시간</string>
     <string name="two_days">48 시간</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_disconnecting">연결 끊는 중...</string>
     <string name="firmware_update_failed">업데이트 실패</string>
     <string name="interval_unset">해제</string>
     <!-- Compass -->

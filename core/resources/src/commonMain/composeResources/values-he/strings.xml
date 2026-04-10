@@ -19,7 +19,6 @@
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="node_filter_placeholder">פילטר</string>
     <string name="node_filter_include_unknown">כלול לא ידועים</string>
-    <string name="node_filter_show_details">הצג פרטים</string>
     <string name="node_sort_alpha">א-ת</string>
     <string name="node_sort_channel">ערוץ</string>
     <string name="node_sort_distance">מרחק</string>
@@ -29,25 +28,18 @@
     <string name="qr_code">קוד QR</string>
     <string name="unknown_username">שם המשתמש אינו מוכר</string>
     <string name="send">שלח</string>
-    <string name="warning_not_paired">עוד לא צימדת מכשיר תומך משטסטיק לטלפון זה. בבקשה צמד מכשיר והגדר שם משתמש.\n\nאפליקציית קוד פתוח זה נמצא בפיתוח, במקשר של בעיות בבקשה גש לפורום: https://github.com/orgs/meshtastic/discussions\n\n למידע נוסף בקרו באתר - www.meshtastic.org.</string>
     <string name="you">אתה</string>
     <string name="accept">אישור</string>
     <string name="cancel">בטל</string>
     <string name="save_changes">שמור</string>
     <string name="new_channel_rcvd">התקבל כתובת ערוץ חדשה</string>
-    <string name="report_bug">דווח על באג</string>
-    <string name="report_a_bug">דווח על באג</string>
-    <string name="report_bug_text">בטוח שתרצה לדווח על באג? לאחר דיווח, בבקשה תעלה פוסט לפורום https://github.com/orgs/meshtastic/discussions כדי שנוכל לחבר בין חווייתך לדווח זה.</string>
     <string name="report">דווח</string>
-    <string name="pairing_completed">צימוד הסתיים בהצלחה, מתחיל שירות</string>
-    <string name="pairing_failed_try_again">צימוד נכשל, בבקשה נסה שנית</string>
     <string name="location_disabled">שירותי מיקום כבויים, לא ניתן לספק מיקום לרשת משטסטיק.</string>
     <string name="share">שתף</string>
     <string name="disconnected">מנותק</string>
     <string name="device_sleeping">מכשיר במצב שינה</string>
     <string name="ip_address">‏כתובת IP:</string>
     <string name="ip_port">פורט:</string>
-    <string name="connected_to">מחובר למכשיר (%1$s)</string>
     <string name="not_connected">לא מחובר</string>
     <string name="connected_sleeping">מחובר למכשיר, אך הוא במצב שינה</string>
     <string name="app_too_old">נדרש עדכון של האפליקציה</string>

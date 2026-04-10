@@ -26,7 +26,6 @@
     <string name="node_filter_only_online">Сховати вузли не в мережі</string>
     <string name="node_filter_only_direct">Показувати лише прямі вузли</string>
     <string name="node_filter_ignored">Ви переглядаєте ігноровані вузли,\nНатисніть щоб повернутися до списку вузлів.</string>
-    <string name="node_filter_show_details">Показати деталі</string>
     <string name="node_sort_title">Сортувати за</string>
     <string name="node_sort_button">Опції сортування вузлів</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -53,32 +52,16 @@
     <string name="routing_error_pki_unknown_pubkey">Невідомий відкритий ключ</string>
     <string name="routing_error_admin_public_key_unauthorized">Несанкціонований відкритий ключ</string>
     <string name="routing_error_pki_send_fail_public_key">Помилка надсилання PKI, відсутній публічний ключ</string>
-    <string name="role_client">Клієнт</string>
     <string name="role_client_desc">Застосунок з'єднано або автономний режим обміну повідомленнями.</string>
-    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Пристрій, який не пересилає пакети з інших пристроїв.</string>
-    <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Розглядає пакети від або до улюблених вузлів так само як ROUTER_LATE, а всі інші пакети як CLIENT.</string>
-    <string name="role_router">Router</string>
     <string name="role_router_desc">Вузол інфраструктури для розширення покриття мережею повторними повідомленнями. Видимий у списку вузлів.</string>
-    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Комбінація ROUTER і CLIENT. Не для мобільних пристроїв.</string>
-    <string name="role_repeater">Repeater</string>
-    <string name="role_tracker">Трекер</string>
-    <string name="role_sensor">Датчик</string>
     <string name="role_sensor_desc">Пріоритетна передача пакетів телеметрії.</string>
-    <string name="role_tak">ТАК</string>
     <string name="role_tak_desc">Оптимізовано для з'єднання з системою ATAK, зменшує рутинні радіо трансляції.</string>
-    <string name="role_client_hidden">Client Hidden</string>
     <string name="role_client_hidden_desc">Пристрій, який передає лише у разі потреби для економії енергії або скритності.</string>
-    <string name="role_lost_and_found">Loast and Found</string>
-    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Увімкнути автоматичну передачу TAK PLI та зменшити кількість звичайних трансляцій.</string>
-    <string name="role_router_late">Router Late</string>
-    <string name="rebroadcast_mode_all">Усі</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Така сама поведінка, як і ВСІ (ALL), але пропускає декодування і просто пересилає їх. Доступно лише в ролі Repeater. Установка цієї опції на будь-які інші ролі призведе до поведінки ВСІ.</string>
-    <string name="rebroadcast_mode_local_only">Лише локальні</string>
-    <string name="rebroadcast_mode_known_only">Лише відомі</string>
     <string name="rebroadcast_mode_known_only_desc">Ігнорує отримані повідомлення від чужих мереж, як-от LOCAL ONLY, але робить крок далі, також ігноруючи повідомлення від вузлів, яких немає в списку відомих вузлів.</string>
     <string name="rebroadcast_mode_none_desc">Дозволяється лише для таких ролей, як SENSOR, TRACKER та TAK_TRACKER, і гальмуватиме всі перенаправлення, на відміну від ролі CLIENT_MUTE.</string>
     <string name="config_device_tzdef_summary">Часовий пояс для дати на екрані та журналі пристрою.</string>
@@ -117,7 +100,6 @@
     <string name="qr_code">QR код</string>
     <string name="unknown_username">Невідомий користувач</string>
     <string name="send">Надіслати</string>
-    <string name="warning_not_paired">Ви ще не підєднали пристрій, сумісний з Meshtastic. Будьласка приєднайте пристрій і введіть ім’я користувача.\n\nЦя програма з відкритим вихідним кодом знаходиться в розробці, якщо ви виявите проблеми, опублікуйте їх на нашому форумі: https://github.com/orgs/meshtastic/discussions\n\nДля отримання додаткової інформації відвідайте нашу веб-сторінку - www.meshtastic.org.</string>
     <string name="you">Ви</string>
     <string name="analytics_okay">Дозволити аналітику і звіти про збої</string>
     <string name="accept">Прийняти</string>
@@ -125,22 +107,15 @@
     <string name="discard_changes">Відхилити</string>
     <string name="save_changes">Зберегти</string>
     <string name="new_channel_rcvd">Отримано URL-адресу нового каналу</string>
-    <string name="report_bug">Повідомити про помилку</string>
-    <string name="report_a_bug">Повідомити про помилку</string>
-    <string name="report_bug_text">Ви впевнені, що бажаєте повідомити про помилку? Після звіту опублікуйте його в https://github.com/orgs/meshtastic/discussions, щоб ми могли зіставити звіт із тим, що ви знайшли.</string>
     <string name="report">Звіт</string>
-    <string name="pairing_completed">Пара створена, запуск сервісу</string>
-    <string name="pairing_failed_try_again">Не вдалося створити пару, виберіть ще раз</string>
     <string name="location_disabled">Доступ до місцезнаходження вимкнено, неможливо транслювати позицію.</string>
     <string name="share">Поділіться</string>
     <string name="new_node_seen">Виявлено новий вузол: %1$s</string>
     <string name="disconnected">Відключено</string>
     <string name="device_sleeping">Пристрій в режимі сну</string>
-    <string name="connected_count">Під'єднано: %1$s онлайн</string>
     <string name="ip_address">IP Адреса:</string>
     <string name="ip_port">Порт:</string>
     <string name="connected">Під’єднано</string>
-    <string name="connected_to">Підключено до радіомодуля (%1$s)</string>
     <string name="connection_status">Поточні з'єднання:</string>
     <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="ethernet_ip">IP Ethernet:</string>
@@ -155,7 +130,6 @@
     <string name="channel_invalid">URL-адреса цього каналу недійсна та не може бути використана</string>
     <string name="debug_panel">Панель налагодження</string>
     <string name="debug_logs_export">Експортувати журнали</string>
-    <string name="debug_export_cancelled">Експорт скасовано</string>
     <string name="debug_export_success">%1$d журналів експортовано</string>
     <string name="debug_export_failed">Не вдалося записати файл журналу: %1$s</string>
     <plurals name="log_retention_hours">
@@ -180,7 +154,6 @@
     <string name="debug_filter_clear">Очистити всі фільтри</string>
     <string name="debug_filter_add_custom">Додати свій фільтр</string>
     <string name="debug_filter_preset_title">Готові фільтри</string>
-    <string name="debug_filter_show_ignored">Показати лише ігноровані вузли</string>
     <string name="debug_clear">Очистити журнал</string>
     <string name="clear">Очистити</string>
     <string name="channel_label">Канал</string>
@@ -230,9 +203,7 @@
     <string name="shutdown">Вимкнути</string>
     <string name="cant_shutdown">Вимкнення не підтримується на цьому пристрої</string>
     <string name="shutdown_warning">⚠️ Це призведе до ВИМКНЕННЯ вузла. Знадобиться фізична взаємодія для його увімкнення.</string>
-    <string name="shutdown_critical_node">⚠️ Це критичний інфраструктурний вузол. Введіть назву вузла для підтвердження:</string>
     <string name="shutdown_node_name">Вузол: %1$s</string>
-    <string name="shutdown_type_name">Вузол: %1$s</string>
     <string name="reboot">Перевантажити</string>
     <string name="traceroute">Маршрут</string>
     <string name="intro_show">Показати підказки</string>
@@ -244,9 +215,7 @@
     <string name="quick_chat_instant">Миттєво відправити</string>
     <string name="quick_chat_show">Показати меню швидкого чату</string>
     <string name="quick_chat_hide">Приховати меню швидкого чату</string>
-    <string name="quick_chat_show_label">Показати швидкий чат</string>
     <string name="factory_reset">Скинути до заводських налаштувань</string>
-    <string name="bluetooth_disabled">Bluetooth вимкнено. Будь ласка, увімкніть його в налаштуваннях вашого пристрою.</string>
     <string name="open_settings">Відкрити налаштування</string>
     <string name="firmware_version">Версія прошивки: %1$s</string>
     <string name="direct_message">Пряме повідомлення</string>
@@ -286,7 +255,6 @@
     <string name="remove">Видалити</string>
     <string name="remove_node_text">Цей вузол буде видалений зі списку доки ваш вузол не отримає дані з нього знову.</string>
     <string name="mute_notifications">Вимкнути сповіщення</string>
-    <string name="mute_1_hour">1 година</string>
     <string name="mute_8_hours">8 годин</string>
     <string name="mute_1_week">1 тиждень</string>
     <string name="mute_always">Завжди</string>
@@ -306,7 +274,6 @@
     <string name="encryption_error">Не збігаються відкритий ключ</string>
     <string name="userinfo">Дані користувача</string>
     <string name="meshtastic_new_nodes_notifications">Сповіщення про нові вузли</string>
-    <string name="more_details">Докладніше</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Показник рівня потужності сигналу — вимірювання, що використовується для визначення рівня потужності, що приймається антеною. Вище значення RSSI зазвичай вказує на міцніше та стабільніше з'єднання.</string>
@@ -326,15 +293,12 @@
     <string name="view_on_map">Переглянути на мапі</string>
     <string name="traceroute_showing_nodes">Показується %1$d/%2$d вузлів</string>
     <string name="traceroute_duration">Тривалість: %1$s сек</string>
-    <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Маршрут у напрямку призначення:\n\n</string>
     <string name="traceroute_route_back_to_us">Зворотний маршрут до нас:\n\n</string>
     <string name="one_hour_short">1г</string>
     <string name="twenty_four_hours">24Г</string>
-    <string name="forty_eight_hours">48Г</string>
     <string name="one_week">1Т</string>
     <string name="two_weeks">2Т</string>
-    <string name="four_weeks">4Т</string>
     <string name="one_month">1м</string>
     <string name="max">Макс</string>
     <string name="copy">Копіювати</string>
@@ -356,8 +320,6 @@
     <string name="low_battery_title">Низький заряд батареї: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Сповіщення про низький рівень заряду акумулятора (улюблені вузли)</string>
     <string name="udp_enabled">Увімкнено</string>
-    <string name="udp_broadcast">UDP трансляція</string>
-    <string name="udp_config">Налаштування UDP</string>
     <string name="user">Користувач</string>
     <string name="channels">Канали</string>
     <string name="device">Пристрій</string>
@@ -406,7 +368,6 @@
     <string name="friendly_name">Дружня назва</string>
     <string name="gpio_pin_to_monitor">GPIO контакт для моніторингу</string>
     <string name="use_input_pullup_mode">Використовувати режим INPUT_PULLUP</string>
-    <string name="device_config">Пристрій</string>
     <string name="role">Роль пристрою</string>
     <string name="button_gpio">GPIO кнопки</string>
     <string name="buzzer_gpio">GPIO гудка</string>
@@ -432,7 +393,6 @@
     <string name="use_modem_preset">Використовувати пресет</string>
     <string name="modem_preset">Пресети</string>
     <string name="coding_rate">Швидкість кодування</string>
-    <string name="frequency_offset_mhz">Зсув частоти (МГц)</string>
     <string name="region_frequency_plan">Регіон</string>
     <string name="tx_power_dbm">Потужність передачі</string>
     <string name="frequency_slot">Слот частоти</string>
@@ -452,7 +412,6 @@
     <string name="neighbor_info_enabled">Інформацію про сусідів увімкнено</string>
     <string name="update_interval_seconds">Інтервал оновлення (секунд)</string>
     <string name="transmit_over_lora">Передавати через LoRa</string>
-    <string name="network_config">Мережа</string>
     <string name="wifi_config">Налаштування WiFi</string>
     <string name="enabled">Увімкнено</string>
     <string name="wifi_enabled">WiFi увімкнено</string>
@@ -468,24 +427,15 @@
     <string name="dns">DNS</string>
     <string name="wifi_rssi_threshold_defaults_to_80">RSSI поріг WiFi (за замовчуванням -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">RSSI поріг BLE (за замовчуванням -80)</string>
-    <string name="position_config">Місцезнаходження</string>
-    <string name="use_fixed_position">Використовувати зафіксоване місцезнаходження</string>
     <string name="latitude">Широта</string>
     <string name="longitude">Довгота</string>
-    <string name="altitude_meters">Висота (метри)</string>
-    <string name="gps_update_interval_seconds">Інтервал оновлення GPS (в секундах)</string>
-    <string name="redefine_gps_rx_pin">Перевизначити GPS_RX_PIN</string>
-    <string name="redefine_gps_tx_pin">Перевизначити GPS_TX_PIN</string>
-    <string name="redefine_pin_gps_en">Перевизначити PIN_GPS_EN</string>
     <string name="power_config">Налаштування живлення</string>
     <string name="enable_power_saving_mode">Увімкнути енергоощадний режим</string>
     <string name="shutdown_on_power_loss">Вимкнути при втраті живлення</string>
-    <string name="shutdown_on_battery_delay_seconds">Вимкнути при затримці батареї (секунд)</string>
     <string name="range_test_config">Налаштування тесту дальності</string>
     <string name="range_test_enabled">Тест на відстань увімкнений</string>
     <string name="save_csv_in_storage_esp32_only">Зберегти .CSV у сховищі (лише ESP32)</string>
     <string name="available_pins">Доступні піни</string>
-    <string name="security_config">Безпека</string>
     <string name="admin_keys">Ключ адміністратора</string>
     <string name="public_key">Відкритий ключ</string>
     <string name="private_key">Приватний ключ</string>
@@ -534,8 +484,6 @@
     <string name="user_id">ID користувача</string>
     <string name="uptime">Час роботи</string>
     <string name="load_indexed">Завантаження %1$d</string>
-    <string name="fetching_channel_indexed">Отримання каналу %1$d/%2$d</string>
-    <string name="fetching_config">Отримання %1$s</string>
     <string name="disk_free_indexed">Вільне місце %1$d</string>
     <string name="timestamp">Мітка часу</string>
     <string name="speed">Швидкість</string>
@@ -545,7 +493,6 @@
     <string name="secondary">Вторинний</string>
     <string name="press_and_drag">Натисніть і перетягніть, щоб змінити порядок</string>
     <string name="dynamic">Динамічна</string>
-    <string name="scan_qr_code">Сканувати QR-код</string>
     <string name="share_contact">Поділитися контактом</string>
     <string name="notes">Нотатки</string>
     <string name="add_a_note">Додати приватну нотатку…</string>
@@ -560,7 +507,6 @@
     <string name="request_environment_metrics">Екологічні показники</string>
     <string name="request_air_quality_metrics">Показники якості повітря</string>
     <string name="request_power_metrics">Показники живлення</string>
-    <string name="request_local_stats">Локальна статистика</string>
     <string name="request_host_metrics">Показники хоста</string>
     <string name="request_pax_metrics">Показники Pax</string>
     <string name="request_metadata">Метадані</string>
@@ -571,7 +517,6 @@
     <string name="host_metrics_log">Показники хоста</string>
     <string name="host">Хост</string>
     <string name="free_memory">Вільна пам'ять</string>
-    <string name="disk_free">Вільне місце</string>
     <string name="load">Завантажити</string>
     <string name="connections">Підключення</string>
     <string name="map">Мапа мережі</string>
@@ -594,7 +539,6 @@
     <string name="export_keys">Експортувати ключі</string>
     <string name="node_count_template">(%1$d онлайн / %2$d показані / %3$d загалом)</string>
     <string name="disconnect">Від'єднатись</string>
-    <string name="no_network_devices">Не знайдено жодного мережевого пристрою.</string>
     <string name="scroll_to_bottom">Прокрутити донизу</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="unknown_channel">Невідомий канал</string>
@@ -603,8 +547,6 @@
     <string name="clean_node_database_title">Очистити базу даних вузлів</string>
     <string name="clean_nodes_older_than">Очистити вузли, які не були онлайн більше %1$d дні(в)</string>
     <string name="clean_unknown_nodes">Очистити лише невідомі вузли</string>
-    <string name="clean_low_interaction_nodes">Очистити вузли з низькою/відсутньою взаємодією</string>
-    <string name="clean_ignored_nodes">Очистити проігноровані вузли</string>
     <string name="clean_now">Очистити зараз</string>
     <string name="clean_node_database_confirmation">Це призведе до вилучення %1$d вузлів з вашої бази даних. Цю дію не можна скасувати.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
@@ -615,7 +557,6 @@
     <string name="security_icon_help_show_all">Показати всі значення</string>
     <string name="security_icon_help_show_less">Показати поточний статус</string>
     <string name="security_icon_help_dismiss">Відхилити</string>
-    <string name="forget_connection">Забути з'єднання</string>
     <string name="cancel_reply">Скасувати відповідь</string>
     <string name="delete_messages_title">Видалити повідомлення?</string>
     <string name="message_input_label">Повідомлення</string>
@@ -623,7 +564,6 @@
     <string name="pax_metrics_log">Показники PAX</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Немає доступних показників PAX.</string>
-    <string name="bluetooth_paired_devices">Прив'язані пристрої</string>
     <string name="connected_device">Під'єднаний пристрій</string>
     <string name="view_release">Переглянути реліз</string>
     <string name="download">Завантажити</string>
@@ -653,16 +593,12 @@
     <string name="critical_alerts">Критичні сповіщення</string>
     <string name="configure_critical_alerts">Налаштування критичних оповіщень</string>
     <string name="next">Далі</string>
-    <string name="grant_permissions">Надати дозволи</string>
     <string name="nodes_queued_for_deletion">%1$d вузлів поставлено в чергу до видалення:</string>
-    <string name="connecting_to_device">Під'єднання до пристрою</string>
     <string name="map_type_normal">Нормальний</string>
     <string name="map_type_satellite">Супутниковий</string>
     <string name="map_type_terrain">Рельєф</string>
     <string name="map_type_hybrid">Гібридний</string>
     <string name="manage_map_layers">Керування шарами мап</string>
-    <string name="map_layers_title">Шари мапи</string>
-    <string name="add_layer_button">Додати шар</string>
     <string name="hide_layer">Сховати шар</string>
     <string name="show_layer">Показати шар</string>
     <string name="remove_layer">Видалити шар</string>
@@ -691,7 +627,6 @@
     <string name="learn_more">Докладніше</string>
     <string name="dont_show_again_for_device">Не показувати знову для цього пристрою</string>
     <string name="preserve_favorites">Зберегти улюблені?</string>
-    <string name="usb_devices">USB пристрої</string>
     <!-- Firmware Update -->
     <string name="firmware_update_title">Оновити прошивку</string>
     <string name="firmware_update_checking">Перевірка наявності оновлень...</string>
@@ -707,15 +642,12 @@
     <string name="firmware_update_success">Оновлення успішне!</string>
     <string name="firmware_update_done">Готово</string>
     <string name="firmware_update_starting_dfu">Запуск DFU...</string>
-    <string name="firmware_update_updating">Оновлення... %1$s</string>
     <string name="firmware_update_enabling_dfu">Увімкнення режиму DFU...</string>
     <string name="firmware_update_validating">Перевірка прошивки...</string>
-    <string name="firmware_update_disconnecting">Від'єднання...</string>
     <string name="firmware_update_unknown_hardware">Невідома модель обладнання: %1$d</string>
     <string name="firmware_update_no_device">Немає під'єднаних пристроїв</string>
     <string name="firmware_update_not_found_in_release">Не вдалося знайти прошивку %1$s в релізі.</string>
     <string name="firmware_update_extracting">Розпакування прошивки...</string>
-    <string name="firmware_update_starting_service">Відключення для запуску DFU сервісу...</string>
     <string name="firmware_update_failed">Помилка оновлення</string>
     <string name="firmware_update_hang_tight">Зачекайте, ми над цим працюємо...</string>
     <string name="firmware_update_keep_device_close">Тримайте пристрій близько до вашого телефону.</string>
@@ -730,7 +662,6 @@
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy каже: \"Тримайся напоготові!\"</string>
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Перезавантаження у DFU...</string>
-    <string name="firmware_update_waiting_for_device">Очікування пристрою DFU...</string>
     <string name="firmware_update_save_dfu_file">Будь ласка, збережіть .uf2 файл на DFU диск вашого пристрою.</string>
     <string name="firmware_update_flashing">Прошивка пристрою, будь ласка, зачекайте...</string>
     <string name="firmware_update_method_usb">Передача файлів через USB</string>
@@ -745,16 +676,10 @@
     <string name="firmware_update_target">Ціль: %1$s</string>
     <string name="firmware_update_release_notes">Примітки до релізу</string>
     <string name="firmware_update_unknown_error">Невідома помилка</string>
-    <string name="firmware_update_dfu_error">Помилка DFU: %1$s</string>
     <string name="firmware_update_retrieval_failed">Не вдалося отримати файл прошивки.</string>
-    <string name="firmware_update_loading">Завантаження прошивки...</string>
     <string name="firmware_update_connecting_attempt">Підключення до пристрою (спроба %1$d/%2$d)...</string>
-    <string name="firmware_update_checking_version">Перевірка версії пристрою...</string>
     <string name="firmware_update_starting_ota">Запуск OTA оновлення...</string>
     <string name="firmware_update_uploading">Завантаження прошивки...</string>
-    <string name="firmware_update_rebooting_device">Перезавантаження пристрою...</string>
-    <string name="firmware_update_channel_name">Оновити прошивку</string>
-    <string name="firmware_update_channel_description">Статус оновлення прошивки</string>
     <string name="firmware_update_erasing">Видалення...</string>
     <string name="back">Назад</string>
     <string name="interval_unset">Скинути</string>
@@ -772,7 +697,6 @@
     <string name="compass_bearing">Пеленг: %1$s</string>
     <string name="mark_as_read">Позначити як прочитане</string>
     <string name="now">Зараз</string>
-    <string name="add_channels_title">Додайте канали</string>
     <string name="loading">Завантаження</string>
     <!-- Message Filter -->
     <string name="filter_settings">Фільтр повідомлень</string>
@@ -783,7 +707,6 @@
     <string name="filter_add_placeholder">Додати слово або regex:pattern</string>
     <string name="filter_no_words">Жодного фільтра не налаштовано</string>
     <string name="filter_regex_pattern">Шаблон регулярного виразу</string>
-    <string name="filter_filtered_count">%1$d відфільтровано</string>
     <string name="filter_enable_for_contact">Увімкнути фільтрацію</string>
     <string name="filter_disable_for_contact">Вимкнути фільтрацію</string>
     <string name="generate_qr_code">Згенерувати QR-код</string>
@@ -795,7 +718,6 @@
     <string name="tak_team_red">Червоний</string>
     <string name="tak_team_blue">Синій</string>
     <string name="tak_team_green">Зелений</string>
-    <string name="no_device_connected">Немає під'єднаних пристроїв</string>
     <string name="connect">Під’єднатися</string>
     <string name="done">Готово</string>
 </resources>

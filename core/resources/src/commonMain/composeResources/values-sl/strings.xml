@@ -20,7 +20,6 @@
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">Počisti filtre vozlišča</string>
     <string name="node_filter_include_unknown">Vključi neznane</string>
-    <string name="node_filter_show_details">Prikaži podrobnosti</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Razdalja</string>
@@ -63,7 +62,6 @@
     <string name="rebroadcast_mode_all_skip_decoding_desc">Enako kot vedenje ALL, vendar preskoči dekodiranje paketkov in jih preprosto ponovno odda. Na voljo samo v vlogi Repeater. Če to nastavite za katero koli drugo vlogo, bo to povzročilo vedenje ALL.</string>
     <string name="rebroadcast_mode_local_only_desc">Ignorira opažena sporočila tujih odprtih mrež, ali tistih, ki jih ne more dešifrirati. Ponovno oddaja samo sporočila na lokalnih primarnih/sekundarnih kanalih vozlišč.</string>
     <string name="rebroadcast_mode_known_only_desc">Ignorira opažena sporočila iz tujih mrež, kot je LOCAL ONLY, vendar gre korak dlje, tako da ignorira tudi sporočila vozlišč, ki še niso na seznamu znanih.</string>
-    <string name="rebroadcast_mode_none">Brez</string>
     <string name="rebroadcast_mode_none_desc">Dovoljeno samo za vloge SENSOR, TRACKER in TAK_TRACKER, prepovedano bo vsakršnje ponovno oddajanje, v nasprotju z vlogo CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignorira nestandardne paketke, kot so: TAK, RangeTest, PaxCounter itd. Ponovno oddaja samo standardne paketke: NodeInfo, Text, Position, Telemetry in Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Obravnavaj dvojni pritisk na podprtih merilnikih pospeška kot pritisk uporabnika.</string>
@@ -74,24 +72,17 @@
     <string name="qr_code">QR koda</string>
     <string name="unknown_username">Neznano uporabniško ime</string>
     <string name="send">Pošlji</string>
-    <string name="warning_not_paired">S tem telefonom še niste seznanili združljivega Meshtastic radia. Prosimo povežite napravo in nastavite svoje uporabniško ime. \n\nTa odprtokodna aplikacija je v alfa testiranju, če imate težave, objavite na našem spletnem klepetu.\n\nZa več informacij glejte našo spletno stran - www.meshtastic.org.</string>
     <string name="you">Jaz</string>
     <string name="accept">Sprejmi</string>
     <string name="cancel">Prekliči/zavrzi</string>
     <string name="save_changes">Shrani</string>
     <string name="new_channel_rcvd">Prejet je bil novi URL kanala</string>
-    <string name="report_bug">Prijavi napako</string>
-    <string name="report_a_bug">Prijavite napako</string>
-    <string name="report_bug_text">Ali ste prepričani, da želite prijaviti napako? Po poročanju objavite v https://github.com/orgs/meshtastic/discussions, da bomo lahko primerjali poročilo s tistim, kar ste našli.</string>
     <string name="report">Poročilo</string>
-    <string name="pairing_completed">Seznanjanje zaključeno, zagon storitve</string>
-    <string name="pairing_failed_try_again">Seznanjanje ni uspelo. Prosimo, izberite znova</string>
     <string name="location_disabled">Dostop do lokacije je onemogočen, mreža ne more prikazati položaja.</string>
     <string name="share">Souporaba</string>
     <string name="disconnected">Prekinjeno</string>
     <string name="device_sleeping">Naprava je v \"spanju\"</string>
     <string name="ip_address">IP naslov:</string>
-    <string name="connected_to">Povezana z radiem (%1$s)</string>
     <string name="not_connected">Ni povezano</string>
     <string name="connected_sleeping">Povezan z radiem, vendar radio \"spi\"</string>
     <string name="app_too_old">Aplikacija je prestara</string>
@@ -204,7 +195,6 @@
     <string name="encryption_pkc">Šifriranje javnega ključa</string>
     <string name="encryption_error">Neujemanje javnega ključa</string>
     <string name="meshtastic_new_nodes_notifications">Obvestila novih vozlišč</string>
-    <string name="more_details">Več podrobnosti</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Razmerje med signalom in šumom je merilo, ki se uporablja v komunikacijah za količinsko opredelitev ravni želenega signala glede na raven hrupa v ozadju. V Meshtastic in drugih brezžičnih sistemih višji SNR pomeni jasnejši signal, ki lahko poveča zanesljivost in kakovost prenosa podatkov.</string>
     <string name="rssi">RSSI</string>
@@ -230,10 +220,8 @@
     </plurals>
     <string name="traceroute_diff">Skokov k %1$d Skokov nazaj %2$d</string>
     <string name="twenty_four_hours">24ur</string>
-    <string name="forty_eight_hours">48ur</string>
     <string name="one_week">1T</string>
     <string name="two_weeks">2T</string>
-    <string name="four_weeks">4T</string>
     <string name="max">Maks.</string>
     <string name="copy">Kopiraj</string>
     <string name="alert_bell_text">Znak opozorilnega zvonca!</string>

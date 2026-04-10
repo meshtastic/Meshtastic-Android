@@ -20,7 +20,6 @@
     <string name="node_filter_placeholder">Filtrimi</string>
     <string name="desc_node_filter_clear">pastro filtrin e nyjës</string>
     <string name="node_filter_include_unknown">Përfshi të panjohurat</string>
-    <string name="node_filter_show_details">Shfaq detajet</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Distanca</string>
     <string name="node_sort_hops_away">Hop-e larg</string>
@@ -61,7 +60,6 @@
     <string name="rebroadcast_mode_all_skip_decoding_desc">Po të njëjtën sjellje si ALL, por kalon pa dekoduar paketat dhe thjesht i ritransmeton. I disponueshëm vetëm për rolin Repeater. Vendosja e kësaj në rolet e tjera do të rezultojë në sjelljen e ALL.</string>
     <string name="rebroadcast_mode_local_only_desc">Injoron mesazhet e vëzhguara nga rrjete të huaja që janë të hapura ose ato që nuk mund t'i dekodoj. Vetëm ritransmeton mesazhe në kanalet lokale primare / dytësore të nyjës.</string>
     <string name="rebroadcast_mode_known_only_desc">Injoron mesazhet e vëzhguara nga rrjete të huaja si LOCAL ONLY, por e çon më tutje duke injoruar edhe mesazhet nga nyje që nuk janë në listën e njohur të nyjës.</string>
-    <string name="rebroadcast_mode_none">Asnjë</string>
     <string name="rebroadcast_mode_none_desc">Lejohet vetëm për rolet SENSOR, TRACKER dhe TAK_TRACKER, kjo do të pengojë të gjitha ritransmetimet, jo ndryshe nga roli CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Injoron paketat nga portnumra jo standardë si: TAK, RangeTest, PaxCounter, etj. Vetëm ritransmeton paketat me portnumra standard: NodeInfo, Text, Position, Telemetry, dhe Routing.</string>
     <!-- Position Config -->
@@ -69,24 +67,17 @@
     <string name="qr_code">Kodi QR</string>
     <string name="unknown_username">Emri i përdoruesit është i panjohur</string>
     <string name="send">Dërgo</string>
-    <string name="warning_not_paired">Ju ende nuk keni lidhur një paisje radio Meshtastic me këtë telefon. Ju lutem lidhni një paisje radio dhe vendosni emrin e përdoruesit.\n\nKy aplikacion është software i lire \"open-source\" dhe në variantin Alpha për testim. Nëse hasni probleme, ju lutem shkruani në çatin e faqes tonë të internetit: https://github.com/orgs/meshtastic/discussions\n\nPër më shumë informacione vizitoni faqen tonë në internet - www.meshtastic.org.</string>
     <string name="you">Ju</string>
     <string name="accept">Prano</string>
     <string name="cancel">Anullo</string>
     <string name="save_changes">Ruaj</string>
     <string name="new_channel_rcvd">Ju keni një kanal radio të ri URL</string>
-    <string name="report_bug">Raporto Bug</string>
-    <string name="report_a_bug">Raporto një bug</string>
-    <string name="report_bug_text">Jeni të sigurtë që dëshironi të raportoni një bug? Pas raportimit, ju lutem postoni në https://github.com/orgs/meshtastic/discussions që të mund të lidhim raportin me atë që keni gjetur.</string>
     <string name="report">Raporto</string>
-    <string name="pairing_completed">Lidhja u përfundua, duke nisur shërbimin</string>
-    <string name="pairing_failed_try_again">Lidhja dështoi, ju lutem zgjidhni përsëri</string>
     <string name="location_disabled">Aksesimi në vendndodhje është i fikur, nuk mund të ofrohet pozita për rrjetin mesh.</string>
     <string name="share">Ndaj</string>
     <string name="disconnected">I shkëputur</string>
     <string name="device_sleeping">Pajisja po fle</string>
     <string name="ip_address">Adresa IP:</string>
-    <string name="connected_to">E lidhur me radio (%1$s)</string>
     <string name="not_connected">Nuk është lidhur</string>
     <string name="connected_sleeping">E lidhur me radio, por është në gjumë</string>
     <string name="app_too_old">Përditësimi i aplikacionit kërkohet</string>
@@ -195,7 +186,6 @@
     <string name="encryption_pkc">Kriptimi me Çelës Publik</string>
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
     <string name="meshtastic_new_nodes_notifications">Njoftimet për nyje të reja</string>
-    <string name="more_details">Më shumë detaje</string>
     <string name="snr_definition">Raporti i Sinjalit në Zhurmë, një masë e përdorur në komunikime për të kuantifikuar nivelin e një sinjali të dëshiruar ndaj nivelit të zhurmës në background. Në Meshtastic dhe sisteme të tjera pa tel, një SNR më i lartë tregon një sinjal më të pastër që mund të rrisë besueshmërinë dhe cilësinë e transmetimit të të dhënave.</string>
     <string name="rssi_definition">Indikatori i Fuqisë së Sinjalit të Marrë, një matje e përdorur për të përcaktuar nivelin e energjisë që po merret nga antena. Një vlerë më e lartë RSSI zakonisht tregon një lidhje më të fortë dhe më të qëndrueshme.</string>
     <string name="iaq_definition">(Cilësia e Ajrit të Brendshëm) shkalla relative e vlerës IAQ siç matet nga Bosch BME680. Intervali i Vlerave 0–500.</string>
