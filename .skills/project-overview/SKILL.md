@@ -39,7 +39,6 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `feature/wifi-provision` | KMP WiFi provisioning via BLE (Nymea protocol). Uses `core:ble` Kable abstractions. |
 | `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi), native Nordic Secure DFU protocol (pure KMP), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
 | `desktop/` | Compose Desktop application. Thin host shell relying on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports. Versioning via `config.properties` + `GitVersionValueSource`. |
-| `mesh_service_example/` | **DEPRECATED.** Legacy sample app; not yet removed. See `core/api/README.md` for the current integration guide. |
 
 ## Namespacing
 - **Standard:** Use the `org.meshtastic.*` namespace for all code.

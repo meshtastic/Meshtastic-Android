@@ -51,7 +51,7 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as four p
 2. **`test-shards`** — A 3-shard matrix that runs unit tests in parallel (depends on `lint-check`):
    - `shard-core`: `allTests` for all `core:*` KMP modules.
    - `shard-feature`: `allTests` for all `feature:*` KMP modules.
-   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`, `mesh_service_example`).
+   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`).
    Each shard generates Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
    Downstream jobs use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
 3. **`android-check`** — Builds APKs for all flavors (depends on `lint-check`).

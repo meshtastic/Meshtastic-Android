@@ -57,10 +57,6 @@ component_management:
       name: Desktop
       paths:
         - desktop/**
-    - component_id: example
-      name: Example
-      paths:
-        - mesh_service_example/**
 
 ignore:
   - "**/build/**"

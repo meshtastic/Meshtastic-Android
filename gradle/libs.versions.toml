@@ -122,7 +122,6 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 androidx-work-testing = { module = "androidx.work:work-testing", version = "2.11.2" }
 
 # AndroidX Compose (explicit versions — BOM removed; CMP is the sole version authority)
-androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended", version.ref = "androidx-compose-material" } # Only used by deprecated mesh_service_example — remove when that module is deleted
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "compose-multiplatform" }
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose-multiplatform" } # Required by Robolectric Compose tests (registers ComponentActivity)
 
