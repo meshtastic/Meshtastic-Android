@@ -73,6 +73,8 @@ class MeshService : Service() {
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
+    private var isServiceInitialized = false
+
     private val myNodeNum: Int
         get() = nodeManager.myNodeNum.value ?: throw RadioNotConnectedException()
 
@@ -98,23 +100,29 @@ class MeshService : Service() {
     override fun onCreate() {
         try {
             super.onCreate()
-        } catch (e: IllegalStateException) {
-            // Koin can throw IllegalStateException in tests if the component is not created.
-            // This can happen if the service is started by the system (e.g. after a crash or on boot)
-            // before the test rule has a chance to create the component.
-            if (e.message?.contains("HiltAndroidRule") == true || e.message?.contains("Koin") == true) {
-                Logger.w(e) { "MeshService created before DI component was ready in test, stopping service" }
-                stopSelf()
-                return
-            }
-            throw e
-        }
-        Logger.i { "Creating mesh service" }
+            Logger.i { "Creating mesh service" }
 
-        orchestrator.start()
+            orchestrator.start()
+            isServiceInitialized = true
+        } catch (e: IllegalStateException) {
+            // DI can throw IllegalStateException if the component is not created.
+            // This can happen if the service is started by the system (e.g. after a crash or on boot)
+            // before the DI framework has a chance to initialize.
+            // In release builds, exception messages might be stripped by R8, so we don't rely strictly on message
+            // strings.
+            Logger.w(e) { "MeshService created before DI component was ready, stopping service" }
+            stopSelf()
+            return
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!isServiceInitialized) {
+            Logger.w { "onStartCommand called but service is not initialized (likely DI failure). Stopping." }
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         val a = radioInterfaceService.getDeviceAddress()
         val wantForeground = a != null && a != "n"
 
@@ -180,7 +188,9 @@ class MeshService : Service() {
     override fun onDestroy() {
         Logger.i { "Destroying mesh service" }
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        orchestrator.stop()
+        if (isServiceInitialized) {
+            orchestrator.stop()
+        }
         serviceJob.cancel()
         super.onDestroy()
     }
