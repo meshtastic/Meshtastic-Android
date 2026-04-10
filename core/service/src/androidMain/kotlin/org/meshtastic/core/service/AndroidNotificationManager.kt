@@ -40,11 +40,21 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
 
     private data class ChannelConfig(val id: String, val importance: Int)
 
-    init {
-        initChannels()
-    }
+    /**
+     * Tracks whether notification channels have been created.
+     *
+     * Channels are **not** created in the constructor because this singleton is instantiated by Koin during
+     * [org.meshtastic.core.service.MeshService.onCreate] on the main thread. The CMP [getString] helper uses
+     * [kotlinx.coroutines.runBlocking] which can fail in that context, crashing the entire service startup chain.
+     * Instead, channels are lazily ensured before the first [dispatch] call. Note that
+     * [MeshServiceNotificationsImpl.initChannels] already creates a superset of these channels when the orchestrator
+     * starts, so this lazy path is only a safety net for notifications dispatched before orchestrator initialization.
+     */
+    private var channelsInitialized = false
 
-    private fun initChannels() {
+    private fun ensureChannelsInitialized() {
+        if (channelsInitialized) return
+        channelsInitialized = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channels =
                 listOf(
@@ -91,6 +101,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
     }
 
     override fun dispatch(notification: Notification) {
+        ensureChannelsInitialized()
         val builder =
             NotificationCompat.Builder(context, notification.category.channelConfig().id)
                 .setContentTitle(notification.title)
