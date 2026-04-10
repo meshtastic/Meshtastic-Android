@@ -42,9 +42,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.env_metrics_log
@@ -67,7 +69,6 @@ import org.meshtastic.core.resources.wind_lull
 import org.meshtastic.core.resources.wind_speed
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
-import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
 
 @Composable
@@ -456,7 +457,7 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = CommonCharts.formatDateTime(time),
+                text = DateFormatter.formatDateTime(time),
                 style = MaterialTheme.typography.titleMediumEmphasized,
                 fontWeight = FontWeight.Bold,
             )

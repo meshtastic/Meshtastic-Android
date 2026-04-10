@@ -50,14 +50,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
 import org.meshtastic.core.resources.channel_2
@@ -72,7 +72,6 @@ import org.meshtastic.core.resources.power_metrics_log
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
-import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
 
 private enum class PowerMetric(val color: Color) {
@@ -178,10 +177,12 @@ private fun PowerMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    Column(modifier = modifier) {
-        if (telemetries.isEmpty()) return@Column
-
-        val modelProducer = remember(selectedChannel) { CartesianChartModelProducer() }
+    MetricChartScaffold(
+        isEmpty = telemetries.isEmpty(),
+        legendData = LEGEND_DATA,
+        modifier = modifier,
+        key = selectedChannel,
+    ) { modelProducer, chartModifier ->
         val currentColor = PowerMetric.CURRENT.color
         val voltageColor = PowerMetric.VOLTAGE.color
         val marker =
@@ -227,32 +228,25 @@ private fun PowerMetricsChart(
         }
 
         val currentLayer =
-            if (currentData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createBoldLine(currentColor)),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = currentData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createBoldLine(currentColor)),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+            )
 
         val voltageLayer =
-            if (voltageData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(voltageColor)),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = voltageData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(voltageColor)),
+                verticalAxisPosition = Axis.Position.Vertical.End,
+            )
 
         val layers = remember(currentLayer, voltageLayer) { listOfNotNull(currentLayer, voltageLayer) }
 
         if (layers.isNotEmpty()) {
             GenericMetricChart(
                 modelProducer = modelProducer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                modifier = chartModifier,
                 layers = layers,
                 startAxis =
                 if (currentData.isNotEmpty()) {
@@ -279,8 +273,6 @@ private fun PowerMetricsChart(
                 vicoScrollState = vicoScrollState,
             )
         }
-
-        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
 }
 
@@ -294,7 +286,7 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
                 /* Time */
                 Row {
                     Text(
-                        text = CommonCharts.formatDateTime(time),
+                        text = DateFormatter.formatDateTime(time),
                         style = MaterialTheme.typography.titleMediumEmphasized,
                         fontWeight = FontWeight.Bold,
                     )

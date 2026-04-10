@@ -972,6 +972,12 @@
     <string name="type_a_message">Type a message</string>
     <string name="pax_metrics_log">PAX Metrics</string>
     <string name="pax">PAX</string>
+    <string name="pax_total_format">PAX: %1$d</string>
+    <string name="pax_ble_format">B:%1$d</string>
+    <string name="pax_wifi_format">W:%1$d</string>
+    <string name="pax_total_marker">PAX: %1$s</string>
+    <string name="pax_ble_marker">BLE: %1$s</string>
+    <string name="pax_wifi_marker">WiFi: %1$s</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
     <string name="ble_devices">Bluetooth Devices</string>

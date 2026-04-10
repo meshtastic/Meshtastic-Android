@@ -56,6 +56,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.info
@@ -66,7 +67,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import kotlin.time.Duration.Companion.days
 
 object CommonCharts {
-    const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
     const val SCROLL_BIAS = 0.5f
 
@@ -101,8 +101,6 @@ object CommonCharts {
             else -> DateFormatter.formatDate(timestampMillis)
         }
     }
-
-    fun formatDateTime(timestampMillis: Long): String = DateFormatter.formatDateTime(timestampMillis)
 
     /**
      * Shared bottom time axis used by all metric chart screens.

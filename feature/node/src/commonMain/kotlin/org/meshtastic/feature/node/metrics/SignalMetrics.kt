@@ -47,12 +47,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.rssi_definition
@@ -62,7 +62,6 @@ import org.meshtastic.core.resources.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
-import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshPacket
 
 private enum class SignalMetric(val color: Color) {
@@ -137,10 +136,10 @@ private fun SignalMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    Column(modifier = modifier) {
-        if (meshPackets.isEmpty()) return@Column
-
-        val modelProducer = remember { CartesianChartModelProducer() }
+    MetricChartScaffold(isEmpty = meshPackets.isEmpty(), legendData = LEGEND_DATA, modifier = modifier) {
+            modelProducer,
+            chartModifier,
+        ->
         val rssiColor = SignalMetric.RSSI.color
         val snrColor = SignalMetric.SNR.color
 
@@ -172,31 +171,25 @@ private fun SignalMetricsChart(
             )
 
         val rssiLayer =
-            if (rssiData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createStyledLine(rssiColor)),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = rssiData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createStyledLine(rssiColor)),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+            )
 
         val snrLayer =
-            if (snrData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createDashedLine(snrColor)),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = snrData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createDashedLine(snrColor)),
+                verticalAxisPosition = Axis.Position.Vertical.End,
+            )
 
         val layers = remember(rssiLayer, snrLayer) { listOfNotNull(rssiLayer, snrLayer) }
 
         if (layers.isNotEmpty()) {
             GenericMetricChart(
                 modelProducer = modelProducer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                modifier = chartModifier,
                 layers = layers,
                 startAxis =
                 if (rssiData.isNotEmpty()) {
@@ -223,8 +216,6 @@ private fun SignalMetricsChart(
                 vicoScrollState = vicoScrollState,
             )
         }
-
-        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
 }
 
@@ -239,7 +230,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                     /* Time */
                     Row(horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
-                            text = CommonCharts.formatDateTime(time),
+                            text = DateFormatter.formatDateTime(time),
                             style = MaterialTheme.typography.titleMediumEmphasized,
                             fontWeight = FontWeight.Bold,
                         )

@@ -50,16 +50,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_util_definition
@@ -80,7 +80,6 @@ import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
-import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
 
 private enum class Device(val color: Color) {
@@ -209,10 +208,10 @@ private fun DeviceMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    Column(modifier = modifier) {
-        if (telemetries.isEmpty()) return@Column
-
-        val modelProducer = remember { CartesianChartModelProducer() }
+    MetricChartScaffold(isEmpty = telemetries.isEmpty(), legendData = legendData, modifier = modifier) {
+            modelProducer,
+            chartModifier,
+        ->
         val batteryColor = Device.BATTERY.color
         val voltageColor = Device.VOLTAGE.color
         val chUtilColor = Device.CH_UTIL.color
@@ -303,28 +302,20 @@ private fun DeviceMetricsChart(
         }
 
         val leftLayer =
-            if (leftLayerSeriesStyles.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0),
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = leftLayerSeriesStyles.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+                rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0),
+            )
 
         val rightLayer =
-            if (voltageData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(lineColor = voltageColor),
-                    ),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = voltageData.isNotEmpty(),
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(lineColor = voltageColor)),
+                verticalAxisPosition = Axis.Position.Vertical.End,
+            )
 
         val layers = remember(leftLayer, rightLayer) { listOfNotNull(leftLayer, rightLayer) }
 
@@ -337,7 +328,7 @@ private fun DeviceMetricsChart(
 
             GenericMetricChart(
                 modelProducer = modelProducer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                modifier = chartModifier,
                 layers = layers,
                 startAxis =
                 if (leftLayer != null) {
@@ -365,8 +356,6 @@ private fun DeviceMetricsChart(
                 vicoScrollState = vicoScrollState,
             )
         }
-
-        Legend(legendData = legendData, modifier = Modifier.padding(top = 0.dp))
     }
 }
 
@@ -415,7 +404,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
             /* Time, Battery, and Voltage */
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = CommonCharts.formatDateTime(time),
+                    text = DateFormatter.formatDateTime(time),
                     style = MaterialTheme.typography.titleMediumEmphasized,
                     fontWeight = FontWeight.Bold,
                 )

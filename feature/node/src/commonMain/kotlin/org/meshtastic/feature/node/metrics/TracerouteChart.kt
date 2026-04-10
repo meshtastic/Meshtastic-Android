@@ -18,22 +18,17 @@
 
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.fullRouteDiscovery
@@ -151,11 +146,10 @@ internal fun TracerouteMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    Column(modifier = modifier) {
-        if (points.isEmpty()) return@Column
-
-        val modelProducer = remember { CartesianChartModelProducer() }
-
+    MetricChartScaffold(isEmpty = points.isEmpty(), legendData = TRACEROUTE_LEGEND_DATA, modifier = modifier) {
+            modelProducer,
+            chartModifier,
+        ->
         val forwardData = remember(points) { points.filter { it.forwardHops != null } }
         val returnData = remember(points) { points.filter { it.returnHops != null } }
         val rttData = remember(points) { points.filter { it.roundTripSeconds != null } }
@@ -193,36 +187,27 @@ internal fun TracerouteMetricsChart(
             )
 
         val forwardLayer =
-            if (forwardData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createStyledLine(forwardColor)),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = forwardData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createStyledLine(forwardColor)),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+                rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
+            )
 
         val returnLayer =
-            if (returnData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createDashedLine(returnColor)),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = returnData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createDashedLine(returnColor)),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+                rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
+            )
 
         val rttLayer =
-            if (rttData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(rttColor)),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = rttData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(rttColor)),
+                verticalAxisPosition = Axis.Position.Vertical.End,
+            )
 
         val layers =
             remember(forwardLayer, returnLayer, rttLayer) { listOfNotNull(forwardLayer, returnLayer, rttLayer) }
@@ -230,7 +215,7 @@ internal fun TracerouteMetricsChart(
         if (layers.isNotEmpty()) {
             GenericMetricChart(
                 modelProducer = modelProducer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                modifier = chartModifier,
                 layers = layers,
                 startAxis =
                 if (forwardData.isNotEmpty() || returnData.isNotEmpty()) {
@@ -257,7 +242,5 @@ internal fun TracerouteMetricsChart(
                 vicoScrollState = vicoScrollState,
             )
         }
-
-        Legend(legendData = TRACEROUTE_LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
 }

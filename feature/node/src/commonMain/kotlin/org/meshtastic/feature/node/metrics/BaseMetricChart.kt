@@ -21,6 +21,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -127,6 +128,46 @@ fun GenericMetricChart(
         scrollState = vicoScrollState,
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
     )
+}
+
+/**
+ * Common scaffold for all metric chart composables. Provides:
+ * - A [Column] container with the supplied [modifier]
+ * - An empty-data guard (returns early when [isEmpty] is true)
+ * - A remembered [CartesianChartModelProducer] passed to [content]
+ * - A trailing [Legend] strip
+ *
+ * @param isEmpty Whether the chart data is empty — when true, nothing is rendered.
+ * @param legendData Legend items shown below the chart.
+ * @param key Optional key for the [CartesianChartModelProducer] (e.g. a selected channel). Pass a different value to
+ *   recreate the producer.
+ * @param hiddenSet Indices of hidden legend items (toggleable legend).
+ * @param onToggle Callback when a legend item is toggled; when null, a read-only legend is rendered.
+ * @param content Builder lambda receiving the [CartesianChartModelProducer] and a standard `Modifier.weight(1f)`
+ *   suitable for the chart area.
+ */
+@Composable
+fun MetricChartScaffold(
+    isEmpty: Boolean,
+    legendData: List<LegendData>,
+    modifier: Modifier = Modifier,
+    key: Any? = Unit,
+    hiddenSet: Set<Int> = emptySet(),
+    onToggle: ((Int) -> Unit)? = null,
+    content: @Composable ColumnScope.(CartesianChartModelProducer, Modifier) -> Unit,
+) {
+    Column(modifier = modifier) {
+        if (isEmpty) return@Column
+        val modelProducer = remember(key) { CartesianChartModelProducer() }
+        val chartModifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp)
+        content(modelProducer, chartModifier)
+        Legend(
+            legendData = legendData,
+            modifier = Modifier.padding(top = 0.dp),
+            hiddenSet = hiddenSet,
+            onToggle = onToggle,
+        )
+    }
 }
 
 /**
