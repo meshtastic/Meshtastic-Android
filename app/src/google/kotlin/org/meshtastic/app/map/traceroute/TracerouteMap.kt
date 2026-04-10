@@ -18,12 +18,14 @@ package org.meshtastic.app.map.traceroute
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.meshtastic.app.map.GoogleMapMode
+import org.meshtastic.app.map.MapView
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 
 /**
- * Flavor-unified entry point for the embeddable traceroute map. Delegates to the Google Maps implementation
- * ([TracerouteGoogleMap]).
+ * Flavor-unified entry point for the embeddable traceroute map. Delegates to [MapView] in [GoogleMapMode.Traceroute]
+ * mode, which provides the full shared map infrastructure (location tracking, tile providers, controls overlay).
  */
 @Composable
 fun TracerouteMap(
@@ -32,10 +34,13 @@ fun TracerouteMap(
     onMappableCountChanged: (shown: Int, total: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    TracerouteGoogleMap(
-        tracerouteOverlay = tracerouteOverlay,
-        tracerouteNodePositions = tracerouteNodePositions,
-        onMappableCountChanged = onMappableCountChanged,
+    MapView(
         modifier = modifier,
+        mode =
+        GoogleMapMode.Traceroute(
+            overlay = tracerouteOverlay,
+            nodePositions = tracerouteNodePositions,
+            onMappableCountChanged = onMappableCountChanged,
+        ),
     )
 }

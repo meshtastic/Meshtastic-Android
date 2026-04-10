@@ -16,9 +16,7 @@
  */
 package org.meshtastic.app.map
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.os.PowerManager
+import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -32,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import co.touchlab.kermit.Logger
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -40,29 +37,6 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
-
-@SuppressLint("WakelockTimeout")
-private fun PowerManager.WakeLock.safeAcquire() {
-    if (!isHeld) {
-        try {
-            acquire()
-        } catch (e: SecurityException) {
-            Logger.e { "WakeLock permission exception: ${e.message}" }
-        } catch (e: IllegalStateException) {
-            Logger.e { "WakeLock acquire() exception: ${e.message}" }
-        }
-    }
-}
-
-private fun PowerManager.WakeLock.safeRelease() {
-    if (isHeld) {
-        try {
-            release()
-        } catch (e: IllegalStateException) {
-            Logger.e { "WakeLock release() exception: ${e.message}" }
-        }
-    }
-}
 
 private const val MIN_ZOOM_LEVEL = 1.5
 private const val MAX_ZOOM_LEVEL = 20.0
@@ -136,22 +110,18 @@ internal fun rememberMapViewWithLifecycle(
     }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
-        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val activity = context as? android.app.Activity
 
-        @Suppress("DEPRECATION")
-        val wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "Meshtastic:MapViewLock")
-
-        wakeLock.safeAcquire()
+        // Keep the screen on while the map is actively displayed (replaces deprecated FULL_WAKE_LOCK).
+        activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
-                    wakeLock.safeRelease()
                     mapView.onPause()
                 }
 
                 Lifecycle.Event.ON_RESUME -> {
-                    wakeLock.safeAcquire()
                     mapView.onResume()
                 }
 
@@ -168,7 +138,7 @@ internal fun rememberMapViewWithLifecycle(
 
         onDispose {
             lifecycle.removeObserver(observer)
-            wakeLock.safeRelease()
+            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
     return mapView

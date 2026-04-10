@@ -21,18 +21,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.app.map.GoogleMapMode
+import org.meshtastic.app.map.MapView
 import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.proto.Position
 
 /**
  * Flavor-unified entry point for the embeddable node-track map. Resolves [destNum] to a
- * [org.meshtastic.core.model.Node] via [NodeMapViewModel] and delegates to the Google Maps implementation
- * ([NodeTrackGoogleMap]).
+ * [org.meshtastic.core.model.Node] via [NodeMapViewModel] and delegates to [MapView] in [GoogleMapMode.NodeTrack] mode,
+ * which provides the full shared map infrastructure (location tracking, tile providers, controls overlay with track
+ * filter).
  */
 @Composable
 fun NodeTrackMap(destNum: Int, positions: List<Position>, modifier: Modifier = Modifier) {
     val vm = koinViewModel<NodeMapViewModel>()
     vm.setDestNum(destNum)
     val focusedNode by vm.node.collectAsStateWithLifecycle()
-    NodeTrackGoogleMap(focusedNode = focusedNode, positions = positions, modifier = modifier)
+    MapView(modifier = modifier, mode = GoogleMapMode.NodeTrack(focusedNode = focusedNode, positions = positions))
 }

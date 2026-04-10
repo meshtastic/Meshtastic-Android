@@ -17,19 +17,38 @@
 package org.meshtastic.app.map.node
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.map.node.NodeMapViewModel
 
 @Composable
 fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) {
+    val node by nodeMapViewModel.node.collectAsStateWithLifecycle()
     val positions by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
-    NodeTrackOsmMap(
-        positions = positions,
-        applicationId = nodeMapViewModel.applicationId,
-        mapStyleId = nodeMapViewModel.mapStyleId,
-        modifier = Modifier.fillMaxSize(),
-    )
+
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = node?.user?.long_name ?: "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
+            )
+        },
+    ) { paddingValues ->
+        NodeTrackOsmMap(
+            positions = positions,
+            applicationId = nodeMapViewModel.applicationId,
+            mapStyleId = nodeMapViewModel.mapStyleId,
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
+        )
+    }
 }

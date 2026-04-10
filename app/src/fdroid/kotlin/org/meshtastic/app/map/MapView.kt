@@ -19,7 +19,6 @@ package org.meshtastic.app.map
 import android.Manifest
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -37,9 +36,11 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,6 +49,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,11 +78,13 @@ import org.meshtastic.app.map.component.CacheLayout
 import org.meshtastic.app.map.component.DownloadButton
 import org.meshtastic.app.map.component.EditWaypointDialog
 import org.meshtastic.app.map.component.MapButton
+import org.meshtastic.app.map.component.MapControlsOverlay
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
@@ -92,6 +96,7 @@ import org.meshtastic.core.resources.delete_for_everyone
 import org.meshtastic.core.resources.delete_for_me
 import org.meshtastic.core.resources.expires
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.last_heard_filter_label
 import org.meshtastic.core.resources.location_disabled
 import org.meshtastic.core.resources.map_cache_info
 import org.meshtastic.core.resources.map_cache_manager
@@ -101,7 +106,6 @@ import org.meshtastic.core.resources.map_clear_tiles
 import org.meshtastic.core.resources.map_download_complete
 import org.meshtastic.core.resources.map_download_errors
 import org.meshtastic.core.resources.map_download_region
-import org.meshtastic.core.resources.map_filter
 import org.meshtastic.core.resources.map_node_popup_details
 import org.meshtastic.core.resources.map_offline_manager
 import org.meshtastic.core.resources.map_purge_fail
@@ -112,7 +116,6 @@ import org.meshtastic.core.resources.map_tile_source
 import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
-import org.meshtastic.core.resources.toggle_my_position
 import org.meshtastic.core.resources.waypoint_delete
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BasicListItem
@@ -121,13 +124,11 @@ import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Lens
-import org.meshtastic.core.ui.icon.LocationDisabled
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.MyLocation
 import org.meshtastic.core.ui.icon.PinDrop
-import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
@@ -149,6 +150,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
+import kotlin.math.roundToInt
 
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
@@ -328,6 +330,13 @@ fun MapView(
         val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (mapFilterStateValue.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
+                return@mapNotNull null
+            }
+            if (
+                mapFilterStateValue.lastHeardFilter.seconds != 0L &&
+                (nowSeconds - node.lastHeard) > mapFilterStateValue.lastHeardFilter.seconds &&
+                node.num != ourNode?.num
+            ) {
                 return@mapNotNull null
             }
 
@@ -587,122 +596,34 @@ fun MapView(
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             } else {
-                @Suppress("MagicNumber")
-                Column(
-                    modifier = Modifier.padding(top = 16.dp, end = 16.dp).align(Alignment.TopEnd),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    MapButton(
-                        onClick = { showMapStyleDialog = true },
-                        icon = MeshtasticIcons.Layers,
-                        contentDescription = Res.string.map_style_selection,
-                    )
-                    Box(modifier = Modifier) {
-                        MapButton(
-                            onClick = { mapFilterExpanded = true },
-                            icon = MeshtasticIcons.Tune,
-                            contentDescription = stringResource(Res.string.map_filter),
-                        )
-                        DropdownMenu(
+                MapControlsOverlay(
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
+                    onToggleFilterMenu = { mapFilterExpanded = true },
+                    filterDropdownContent = {
+                        FdroidMainMapFilterDropdown(
                             expanded = mapFilterExpanded,
                             onDismissRequest = { mapFilterExpanded = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
-                        ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            imageVector = MeshtasticIcons.Favorite,
-                                            contentDescription = null,
-                                            modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        Text(
-                                            text = stringResource(Res.string.only_favorites),
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        Checkbox(
-                                            checked = mapFilterState.onlyFavorites,
-                                            onCheckedChange = { mapViewModel.toggleOnlyFavorites() },
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
-                                },
-                                onClick = { mapViewModel.toggleOnlyFavorites() },
-                            )
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            imageVector = MeshtasticIcons.PinDrop,
-                                            contentDescription = null,
-                                            modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        Text(
-                                            text = stringResource(Res.string.show_waypoints),
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        Checkbox(
-                                            checked = mapFilterState.showWaypoints,
-                                            onCheckedChange = { mapViewModel.toggleShowWaypointsOnMap() },
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
-                                },
-                                onClick = { mapViewModel.toggleShowWaypointsOnMap() },
-                            )
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            imageVector = MeshtasticIcons.Lens,
-                                            contentDescription = null,
-                                            modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        Text(
-                                            text = stringResource(Res.string.show_precision_circle),
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        @Suppress("MagicNumber")
-                                        Checkbox(
-                                            checked = mapFilterState.showPrecisionCircle,
-                                            onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
-                                },
-                                onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
-                            )
-                        }
-                    }
-                    MapButton(
-                        icon =
-                        if (myLocationOverlay == null) {
-                            MeshtasticIcons.MyLocation
-                        } else {
-                            MeshtasticIcons.LocationDisabled
-                        },
-                        contentDescription = stringResource(Res.string.toggle_my_position),
-                    ) {
+                            mapFilterState = mapFilterState,
+                            mapViewModel = mapViewModel,
+                        )
+                    },
+                    mapTypeContent = {
+                        MapButton(
+                            icon = MeshtasticIcons.Layers,
+                            contentDescription = stringResource(Res.string.map_style_selection),
+                            onClick = { showMapStyleDialog = true },
+                        )
+                    },
+                    isLocationTrackingEnabled = myLocationOverlay != null,
+                    onToggleLocationTracking = {
                         if (locationPermissionsState.allPermissionsGranted) {
                             map.toggleMyLocation()
                         } else {
                             triggerLocationToggleAfterPermission = true
                             locationPermissionsState.launchMultiplePermissionRequest()
                         }
-                    }
-                }
+                    },
+                )
             }
         }
     }
@@ -778,6 +699,103 @@ fun MapView(
                 showEditWaypointDialog = null
             },
         )
+    }
+}
+
+/** F-Droid main map filter dropdown — favorites, waypoints, precision circle, and last-heard time filter slider. */
+@Composable
+private fun FdroidMainMapFilterDropdown(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    mapFilterState: org.meshtastic.feature.map.BaseMapViewModel.MapFilterState,
+    mapViewModel: MapViewModel,
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+    ) {
+        DropdownMenuItem(
+            text = {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = MeshtasticIcons.Favorite,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(text = stringResource(Res.string.only_favorites), modifier = Modifier.weight(1f))
+                    Checkbox(
+                        checked = mapFilterState.onlyFavorites,
+                        onCheckedChange = { mapViewModel.toggleOnlyFavorites() },
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+            },
+            onClick = { mapViewModel.toggleOnlyFavorites() },
+        )
+        DropdownMenuItem(
+            text = {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = MeshtasticIcons.PinDrop,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(text = stringResource(Res.string.show_waypoints), modifier = Modifier.weight(1f))
+                    Checkbox(
+                        checked = mapFilterState.showWaypoints,
+                        onCheckedChange = { mapViewModel.toggleShowWaypointsOnMap() },
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+            },
+            onClick = { mapViewModel.toggleShowWaypointsOnMap() },
+        )
+        DropdownMenuItem(
+            text = {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = MeshtasticIcons.Lens,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(text = stringResource(Res.string.show_precision_circle), modifier = Modifier.weight(1f))
+                    Checkbox(
+                        checked = mapFilterState.showPrecisionCircle,
+                        onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+            },
+            onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
+        )
+        HorizontalDivider()
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            val filterOptions = LastHeardFilter.entries
+            val selectedIndex = filterOptions.indexOf(mapFilterState.lastHeardFilter)
+            var sliderPosition by remember(selectedIndex) { mutableFloatStateOf(selectedIndex.toFloat()) }
+            Text(
+                text =
+                stringResource(
+                    Res.string.last_heard_filter_label,
+                    stringResource(mapFilterState.lastHeardFilter.label),
+                ),
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Slider(
+                value = sliderPosition,
+                onValueChange = { sliderPosition = it },
+                onValueChangeFinished = {
+                    val newIndex = sliderPosition.roundToInt().coerceIn(0, filterOptions.size - 1)
+                    mapViewModel.setLastHeardFilter(filterOptions[newIndex])
+                },
+                valueRange = 0f..(filterOptions.size - 1).toFloat(),
+                steps = filterOptions.size - 2,
+            )
+        }
     }
 }
 
