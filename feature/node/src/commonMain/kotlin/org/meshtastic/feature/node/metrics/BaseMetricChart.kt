@@ -76,7 +76,9 @@ import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.max
 import org.meshtastic.core.resources.min
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.BarChart
 import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 
@@ -257,9 +259,9 @@ fun <T> BaseMetricScreen(
                         Icon(
                             imageVector =
                             if (isChartExpanded) {
-                                Icons.AutoMirrored.Rounded.List
+                                MeshtasticIcons.List
                             } else {
-                                Icons.Rounded.BarChart
+                                MeshtasticIcons.BarChart
                             },
                             contentDescription =
                             stringResource(

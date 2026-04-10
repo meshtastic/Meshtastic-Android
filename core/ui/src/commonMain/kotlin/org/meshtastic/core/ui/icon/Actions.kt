@@ -22,6 +22,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_add
 import org.meshtastic.core.resources.ic_add_reaction
+import org.meshtastic.core.resources.ic_bar_chart
 import org.meshtastic.core.resources.ic_clear
 import org.meshtastic.core.resources.ic_close
 import org.meshtastic.core.resources.ic_content_copy
@@ -35,6 +36,7 @@ import org.meshtastic.core.resources.ic_filter_alt
 import org.meshtastic.core.resources.ic_filter_alt_off
 import org.meshtastic.core.resources.ic_folder
 import org.meshtastic.core.resources.ic_folder_open
+import org.meshtastic.core.resources.ic_list
 import org.meshtastic.core.resources.ic_mark_chat_read
 import org.meshtastic.core.resources.ic_more_vert
 import org.meshtastic.core.resources.ic_offline_share
@@ -133,3 +135,7 @@ val MeshtasticIcons.PowerSettingsNew: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_power_settings_new)
 val MeshtasticIcons.FactoryReset: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_restore)
+val MeshtasticIcons.BarChart: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_bar_chart)
+val MeshtasticIcons.List: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_list)
