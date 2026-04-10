@@ -401,6 +401,7 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Trasa do miejsca docelowego:\n\n</string>
     <string name="traceroute_route_back_to_us">Trasa do nas:\n\n</string>
+    <string name="traceroute_no_response">Brak odpowiedzi</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1W</string>

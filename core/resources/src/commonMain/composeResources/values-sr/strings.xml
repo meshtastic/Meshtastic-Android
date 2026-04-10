@@ -287,6 +287,7 @@
         <item quantity="other">%d skokova</item>
     </plurals>
     <string name="traceroute_diff">Skokova ka %1$d Skokova nazad %2$d</string>
+    <string name="traceroute_no_response">Нема одговора</string>
     <string name="twenty_four_hours">28č</string>
     <string name="forty_eight_hours">48č</string>
     <string name="one_week">1n</string>
@@ -398,6 +399,7 @@
     <string name="long_name">Дуго име</string>
     <string name="short_name">Кратко име</string>
     <string name="distance">Udaljenost</string>
+    <string name="wind_speed">Брзина ветра</string>
     <string name="store_forward_config"><![CDATA[Сачувај и проследи подешавања]]></string>
     <string name="indoor_air_quality_iaq">Квалитет ваздуха у затвореном простору (IAQ)</string>
     <string name="hardware">Хардвер</string>

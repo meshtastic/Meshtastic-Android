@@ -432,6 +432,7 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">路由追踪到目的地：\n\n</string>
     <string name="traceroute_route_back_to_us">路由回退到当前节点：\n\n</string>
+    <string name="traceroute_no_response">无响应</string>
     <string name="one_hour_short">1H</string>
     <string name="twenty_four_hours">24 小时</string>
     <string name="forty_eight_hours">48 小时</string>
