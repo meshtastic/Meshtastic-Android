@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -64,6 +65,7 @@ import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.time.Duration.Companion.days
 
 object CommonCharts {
@@ -244,7 +246,8 @@ fun MetricIndicator(color: Color, modifier: Modifier = Modifier) {
     Box(modifier = modifier.size(8.dp).clip(CircleShape).background(color))
 }
 
-@Suppress("UnusedPrivateMember") // Compose preview
+@PreviewLightDark
+@Suppress("unused") // Compose preview
 @Composable
 private fun LegendPreview() {
     val data =
@@ -252,10 +255,12 @@ private fun LegendPreview() {
             LegendData(nameRes = Res.string.rssi, color = Color.Red, isLine = true),
             LegendData(nameRes = Res.string.snr, color = Color.Green, isLine = true),
         )
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        // Read-only legend
-        Legend(legendData = data)
-        // Toggleable legend
-        Legend(legendData = data, hiddenSet = setOf(1), onToggle = {})
+    AppTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Read-only legend
+            Legend(legendData = data)
+            // Toggleable legend
+            Legend(legendData = data, hiddenSet = setOf(1), onToggle = {})
+        }
     }
 }

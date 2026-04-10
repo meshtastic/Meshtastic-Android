@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
@@ -359,7 +360,8 @@ private fun DeviceMetricsChart(
     }
 }
 
-@Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
+@PreviewLightDark
+@Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
 private fun DeviceMetricsChartPreview() {
     val now = nowSeconds.toInt()
@@ -465,7 +467,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
     }
 }
 
-@Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
+@PreviewLightDark
+@Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
 private fun DeviceMetricsCardPreview() {
     val now = nowSeconds.toInt()
@@ -484,7 +487,8 @@ private fun DeviceMetricsCardPreview() {
     AppTheme { DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {}) }
 }
 
-@Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
+@PreviewLightDark
+@Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
 private fun DeviceMetricsScreenPreview() {
     val now = nowSeconds.toInt()

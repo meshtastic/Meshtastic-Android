@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
@@ -69,6 +70,7 @@ import org.meshtastic.core.resources.wind_lull
 import org.meshtastic.core.resources.wind_speed
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.Telemetry
 
 @Composable
@@ -481,7 +483,8 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
     }
 }
 
-@Suppress("MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
+@PreviewLightDark
+@Suppress("MagicNumber") // Compose preview with fake data
 @Composable
 private fun PreviewEnvironmentMetricsContent() {
     val fakeEnvMetrics =
@@ -506,7 +509,5 @@ private fun PreviewEnvironmentMetricsContent() {
             rainfall_24h = 12.3f,
         )
     val fakeTelemetry = Telemetry(time = nowSeconds.toInt(), environment_metrics = fakeEnvMetrics)
-    MaterialTheme {
-        Surface { EnvironmentMetricsContent(telemetry = fakeTelemetry, environmentDisplayFahrenheit = false) }
-    }
+    AppTheme { Surface { EnvironmentMetricsContent(telemetry = fakeTelemetry, environmentDisplayFahrenheit = false) } }
 }
