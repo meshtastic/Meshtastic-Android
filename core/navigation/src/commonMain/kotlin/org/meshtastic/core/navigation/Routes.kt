@@ -25,160 +25,169 @@ interface Route : NavKey
 
 interface Graph : Route
 
-object ChannelsRoutes {
-    @Serializable data object ChannelsGraph : Graph
+@Serializable
+sealed interface ChannelsRoute : Route {
+    @Serializable data object ChannelsGraph : ChannelsRoute, Graph
 
-    @Serializable data object Channels : Route
+    @Serializable data object Channels : ChannelsRoute
 }
 
-object ConnectionsRoutes {
-    @Serializable data object ConnectionsGraph : Graph
+@Serializable
+sealed interface ConnectionsRoute : Route {
+    @Serializable data object ConnectionsGraph : ConnectionsRoute, Graph
 
-    @Serializable data object Connections : Route
+    @Serializable data object Connections : ConnectionsRoute
 }
 
-object ContactsRoutes {
-    @Serializable data object ContactsGraph : Graph
+@Serializable
+sealed interface ContactsRoute : Route {
+    @Serializable data object ContactsGraph : ContactsRoute, Graph
 
-    @Serializable data object Contacts : Route
+    @Serializable data object Contacts : ContactsRoute
 
-    @Serializable data class Messages(val contactKey: String, val message: String = "") : Route
+    @Serializable data class Messages(val contactKey: String, val message: String = "") : ContactsRoute
 
-    @Serializable data class Share(val message: String) : Route
+    @Serializable data class Share(val message: String) : ContactsRoute
 
-    @Serializable data object QuickChat : Route
+    @Serializable data object QuickChat : ContactsRoute
 }
 
-object MapRoutes {
-    @Serializable data class Map(val waypointId: Int? = null) : Route
+@Serializable
+sealed interface MapRoute : Route {
+    @Serializable data class Map(val waypointId: Int? = null) : MapRoute
 }
 
-object NodesRoutes {
-    @Serializable data object NodesGraph : Graph
+@Serializable
+sealed interface NodesRoute : Route {
+    @Serializable data object NodesGraph : NodesRoute, Graph
 
-    @Serializable data object Nodes : Route
+    @Serializable data object Nodes : NodesRoute
 
-    @Serializable data class NodeDetailGraph(val destNum: Int? = null) : Graph
+    @Serializable data class NodeDetailGraph(val destNum: Int? = null) : NodesRoute, Graph
 
-    @Serializable data class NodeDetail(val destNum: Int? = null) : Route
+    @Serializable data class NodeDetail(val destNum: Int? = null) : NodesRoute
 }
 
-object NodeDetailRoutes {
-    @Serializable data class DeviceMetrics(val destNum: Int) : Route
+@Serializable
+sealed interface NodeDetailRoute : Route {
+    @Serializable data class DeviceMetrics(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class NodeMap(val destNum: Int) : Route
+    @Serializable data class NodeMap(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class PositionLog(val destNum: Int) : Route
+    @Serializable data class PositionLog(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class EnvironmentMetrics(val destNum: Int) : Route
+    @Serializable data class EnvironmentMetrics(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class SignalMetrics(val destNum: Int) : Route
+    @Serializable data class SignalMetrics(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class PowerMetrics(val destNum: Int) : Route
+    @Serializable data class PowerMetrics(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class TracerouteLog(val destNum: Int) : Route
+    @Serializable data class TracerouteLog(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class TracerouteMap(val destNum: Int, val requestId: Int, val logUuid: String? = null) : Route
+    @Serializable data class TracerouteMap(val destNum: Int, val requestId: Int, val logUuid: String? = null) : NodeDetailRoute
 
-    @Serializable data class HostMetricsLog(val destNum: Int) : Route
+    @Serializable data class HostMetricsLog(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class PaxMetrics(val destNum: Int) : Route
+    @Serializable data class PaxMetrics(val destNum: Int) : NodeDetailRoute
 
-    @Serializable data class NeighborInfoLog(val destNum: Int) : Route
+    @Serializable data class NeighborInfoLog(val destNum: Int) : NodeDetailRoute
 }
 
-object SettingsRoutes {
-    @Serializable data class SettingsGraph(val destNum: Int? = null) : Graph
+@Serializable
+sealed interface SettingsRoute : Route {
+    @Serializable data class SettingsGraph(val destNum: Int? = null) : SettingsRoute, Graph
 
-    @Serializable data class Settings(val destNum: Int? = null) : Route
+    @Serializable data class Settings(val destNum: Int? = null) : SettingsRoute
 
-    @Serializable data object DeviceConfiguration : Route
+    @Serializable data object DeviceConfiguration : SettingsRoute
 
-    @Serializable data object ModuleConfiguration : Route
+    @Serializable data object ModuleConfiguration : SettingsRoute
 
-    @Serializable data object Administration : Route
+    @Serializable data object Administration : SettingsRoute
 
     // region radio Config Routes
 
-    @Serializable data object User : Route
+    @Serializable data object User : SettingsRoute
 
-    @Serializable data object ChannelConfig : Route
+    @Serializable data object ChannelConfig : SettingsRoute
 
-    @Serializable data object Device : Route
+    @Serializable data object Device : SettingsRoute
 
-    @Serializable data object Position : Route
+    @Serializable data object Position : SettingsRoute
 
-    @Serializable data object Power : Route
+    @Serializable data object Power : SettingsRoute
 
-    @Serializable data object Network : Route
+    @Serializable data object Network : SettingsRoute
 
-    @Serializable data object Display : Route
+    @Serializable data object Display : SettingsRoute
 
-    @Serializable data object LoRa : Route
+    @Serializable data object LoRa : SettingsRoute
 
-    @Serializable data object Bluetooth : Route
+    @Serializable data object Bluetooth : SettingsRoute
 
-    @Serializable data object Security : Route
+    @Serializable data object Security : SettingsRoute
 
     // endregion
 
     // region module config routes
 
-    @Serializable data object MQTT : Route
+    @Serializable data object MQTT : SettingsRoute
 
-    @Serializable data object Serial : Route
+    @Serializable data object Serial : SettingsRoute
 
-    @Serializable data object ExtNotification : Route
+    @Serializable data object ExtNotification : SettingsRoute
 
-    @Serializable data object StoreForward : Route
+    @Serializable data object StoreForward : SettingsRoute
 
-    @Serializable data object RangeTest : Route
+    @Serializable data object RangeTest : SettingsRoute
 
-    @Serializable data object Telemetry : Route
+    @Serializable data object Telemetry : SettingsRoute
 
-    @Serializable data object CannedMessage : Route
+    @Serializable data object CannedMessage : SettingsRoute
 
-    @Serializable data object Audio : Route
+    @Serializable data object Audio : SettingsRoute
 
-    @Serializable data object RemoteHardware : Route
+    @Serializable data object RemoteHardware : SettingsRoute
 
-    @Serializable data object NeighborInfo : Route
+    @Serializable data object NeighborInfo : SettingsRoute
 
-    @Serializable data object AmbientLighting : Route
+    @Serializable data object AmbientLighting : SettingsRoute
 
-    @Serializable data object DetectionSensor : Route
+    @Serializable data object DetectionSensor : SettingsRoute
 
-    @Serializable data object Paxcounter : Route
+    @Serializable data object Paxcounter : SettingsRoute
 
-    @Serializable data object StatusMessage : Route
+    @Serializable data object StatusMessage : SettingsRoute
 
-    @Serializable data object TrafficManagement : Route
+    @Serializable data object TrafficManagement : SettingsRoute
 
-    @Serializable data object TAK : Route
+    @Serializable data object TAK : SettingsRoute
 
     // endregion
 
     // region advanced config routes
 
-    @Serializable data object CleanNodeDb : Route
+    @Serializable data object CleanNodeDb : SettingsRoute
 
-    @Serializable data object DebugPanel : Route
+    @Serializable data object DebugPanel : SettingsRoute
 
-    @Serializable data object About : Route
+    @Serializable data object About : SettingsRoute
 
-    @Serializable data object FilterSettings : Route
+    @Serializable data object FilterSettings : SettingsRoute
 
     // endregion
 }
 
-object FirmwareRoutes {
-    @Serializable data object FirmwareGraph : Graph
+@Serializable
+sealed interface FirmwareRoute : Route {
+    @Serializable data object FirmwareGraph : FirmwareRoute, Graph
 
-    @Serializable data object FirmwareUpdate : Route
+    @Serializable data object FirmwareUpdate : FirmwareRoute
 }
 
-object WifiProvisionRoutes {
-    @Serializable data object WifiProvisionGraph : Graph
+@Serializable
+sealed interface WifiProvisionRoute : Route {
+    @Serializable data object WifiProvisionGraph : WifiProvisionRoute, Graph
 
-    @Serializable data class WifiProvision(val address: String? = null) : Route
+    @Serializable data class WifiProvision(val address: String? = null) : WifiProvisionRoute
 }

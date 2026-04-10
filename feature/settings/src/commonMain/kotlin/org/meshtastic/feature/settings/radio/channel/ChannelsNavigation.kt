@@ -20,12 +20,12 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.ChannelsRoutes
+import org.meshtastic.core.navigation.ChannelsRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
-/** Navigation graph for for the top level ChannelScreen - [ChannelsRoutes.Channels]. */
+/** Navigation graph for for the top level ChannelScreen - [ChannelsRoute.Channels]. */
 fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
-    entry<ChannelsRoutes.ChannelsGraph> {
+    entry<ChannelsRoute.ChannelsGraph> {
         ChannelScreen(
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onNavigate = { route -> backStack.add(route) },
@@ -33,7 +33,7 @@ fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
         )
     }
 
-    entry<ChannelsRoutes.Channels> {
+    entry<ChannelsRoute.Channels> {
         ChannelScreen(
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onNavigate = { route -> backStack.add(route) },

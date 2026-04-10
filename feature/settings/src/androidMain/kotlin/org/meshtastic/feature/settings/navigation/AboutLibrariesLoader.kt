@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.settings.navigation
 
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 
 actual fun getAboutLibrariesJson(): String =
-    SettingsRoutes::class.java.getResource("/aboutlibraries.json")?.readText() ?: ""
+    SettingsRoute::class.java.getResource("/aboutlibraries.json")?.readText() ?: ""

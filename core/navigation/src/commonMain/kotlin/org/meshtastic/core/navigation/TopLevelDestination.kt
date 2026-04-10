@@ -32,11 +32,11 @@ import org.meshtastic.core.resources.nodes
  * and Desktop navigation shells.
  */
 enum class TopLevelDestination(val label: StringResource, val route: Route) {
-    Conversations(Res.string.conversations, ContactsRoutes.ContactsGraph),
-    Nodes(Res.string.nodes, NodesRoutes.NodesGraph),
-    Map(Res.string.map, MapRoutes.Map()),
-    Settings(Res.string.bottom_nav_settings, SettingsRoutes.SettingsGraph()),
-    Connections(Res.string.connections, ConnectionsRoutes.ConnectionsGraph),
+    Conversations(Res.string.conversations, ContactsRoute.ContactsGraph),
+    Nodes(Res.string.nodes, NodesRoute.NodesGraph),
+    Map(Res.string.map, MapRoute.Map()),
+    Settings(Res.string.bottom_nav_settings, SettingsRoute.SettingsGraph()),
+    Connections(Res.string.connections, ConnectionsRoute.ConnectionsGraph),
     ;
 
     companion object {

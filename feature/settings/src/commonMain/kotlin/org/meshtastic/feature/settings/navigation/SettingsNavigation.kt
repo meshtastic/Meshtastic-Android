@@ -26,9 +26,9 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.AdministrationScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
@@ -74,10 +74,10 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewMod
     val viewModel = koinViewModel<RadioConfigViewModel>()
     val destNum =
         remember(backStack.toList()) {
-            backStack.lastOrNull { it is SettingsRoutes.Settings }?.let { (it as SettingsRoutes.Settings).destNum }
+            backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
                 ?: backStack
-                    .lastOrNull { it is SettingsRoutes.SettingsGraph }
-                    ?.let { (it as SettingsRoutes.SettingsGraph).destNum }
+                    .lastOrNull { it is SettingsRoute.SettingsGraph }
+                    ?.let { (it as SettingsRoute.SettingsGraph).destNum }
         }
     SideEffect { viewModel.initDestNum(destNum) }
     return viewModel
@@ -85,25 +85,25 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewMod
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
-    entry<SettingsRoutes.SettingsGraph> {
+    entry<SettingsRoute.SettingsGraph> {
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
             radioConfigViewModel = getRadioConfigViewModel(backStack),
-            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetail(it)) },
+            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
         )
     }
 
-    entry<SettingsRoutes.Settings> {
+    entry<SettingsRoute.Settings> {
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
             radioConfigViewModel = getRadioConfigViewModel(backStack),
-            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetail(it)) },
+            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
         )
     }
 
-    entry<SettingsRoutes.DeviceConfiguration> {
+    entry<SettingsRoute.DeviceConfiguration> {
         DeviceConfigurationScreen(
             viewModel = getRadioConfigViewModel(backStack),
             onBack = { backStack.removeLastOrNull() },
@@ -111,7 +111,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         )
     }
 
-    entry<SettingsRoutes.ModuleConfiguration> {
+    entry<SettingsRoute.ModuleConfiguration> {
         val settingsViewModel: SettingsViewModel = koinViewModel()
         val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
         ModuleConfigurationScreen(
@@ -122,11 +122,11 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         )
     }
 
-    entry<SettingsRoutes.Administration> {
+    entry<SettingsRoute.Administration> {
         AdministrationScreen(viewModel = getRadioConfigViewModel(backStack), onBack = { backStack.removeLastOrNull() })
     }
 
-    entry<SettingsRoutes.CleanNodeDb> {
+    entry<SettingsRoute.CleanNodeDb> {
         val viewModel: CleanNodeDatabaseViewModel = koinViewModel()
         CleanNodeDatabaseScreen(viewModel = viewModel)
     }
@@ -185,16 +185,16 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         }
     }
 
-    entry<SettingsRoutes.DebugPanel> {
+    entry<SettingsRoute.DebugPanel> {
         val viewModel: DebugViewModel = koinViewModel()
         DebugScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
     }
 
-    entry<SettingsRoutes.About> {
+    entry<SettingsRoute.About> {
         AboutScreen(onNavigateUp = { backStack.removeLastOrNull() }, jsonProvider = { getAboutLibrariesJson() })
     }
 
-    entry<SettingsRoutes.FilterSettings> {
+    entry<SettingsRoute.FilterSettings> {
         val viewModel: FilterSettingsViewModel = koinViewModel()
         FilterSettingsScreen(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
     }

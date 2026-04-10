@@ -21,8 +21,8 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.ChannelsRoutes
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.ChannelsRoute
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.node.list.NodeListScreen
 import org.meshtastic.feature.node.list.NodeListViewModel
@@ -37,8 +37,8 @@ fun AdaptiveNodeListScreen(
 
     NodeListScreen(
         viewModel = nodeListViewModel,
-        navigateToNodeDetails = { nodeId -> backStack.add(NodesRoutes.NodeDetail(nodeId)) },
-        onNavigateToChannels = { backStack.add(ChannelsRoutes.ChannelsGraph) },
+        navigateToNodeDetails = { nodeId -> backStack.add(NodesRoute.NodeDetail(nodeId)) },
+        onNavigateToChannels = { backStack.add(ChannelsRoute.ChannelsGraph) },
         scrollToTopEvents = scrollToTopEvents,
         activeNodeId = null,
         onHandleDeepLink = onHandleDeepLink,

@@ -12,7 +12,7 @@ Contains serializable `NavKey` route classes/objects used by shared feature grap
 Parses Meshtastic deep-link URIs and synthesizes a typed backstack (for example `/nodes/1234/device-metrics`).
 
 ### 3. `NavigationConfig.kt`
-Defines `MeshtasticNavSavedStateConfig` so Navigation 3 backstacks can be persisted/restored safely.
+Defines `MeshtasticNavSavedStateConfig` using sealed interface hierarchies so Navigation 3 backstacks can be persisted/restored safely — new routes are auto-registered at compile time.
 
 ## Features
 - **Type-Safety**: Uses serializable `NavKey` routes instead of ad-hoc string routes.
@@ -25,10 +25,10 @@ Feature modules depend on this module to define their entry points and navigate 
 ```kotlin
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.NodesRoute
 
 fun openNodeDetail(backStack: NavBackStack<NavKey>, destNum: Int) {
-    backStack.add(NodesRoutes.NodeDetail(destNum))
+    backStack.add(NodesRoute.NodeDetail(destNum))
 }
 ```
 

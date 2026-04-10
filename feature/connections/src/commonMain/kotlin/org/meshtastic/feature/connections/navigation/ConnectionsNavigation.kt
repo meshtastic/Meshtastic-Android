@@ -20,30 +20,30 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.ConnectionsRoutes
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.ConnectionsRoute
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.ui.ConnectionsScreen
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
-/** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections]. */
+/** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoute.Connections]. */
 fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>) {
-    entry<ConnectionsRoutes.ConnectionsGraph> {
+    entry<ConnectionsRoute.ConnectionsGraph> {
         ConnectionsScreen(
             scanModel = koinViewModel<ScannerViewModel>(),
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
-            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetail(it)) },
-            onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetail(it)) },
+            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
+            onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) },
             onConfigNavigate = { route -> backStack.add(route) },
         )
     }
 
-    entry<ConnectionsRoutes.Connections> {
+    entry<ConnectionsRoute.Connections> {
         ConnectionsScreen(
             scanModel = koinViewModel<ScannerViewModel>(),
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
-            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetail(it)) },
-            onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetail(it)) },
+            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
+            onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) },
             onConfigNavigate = { route -> backStack.add(route) },
         )
     }

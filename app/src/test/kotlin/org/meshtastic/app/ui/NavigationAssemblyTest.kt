@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
@@ -44,7 +44,7 @@ class NavigationAssemblyTest {
     @Test
     fun verifyNavigationGraphsAssembleWithoutCrashing() {
         composeTestRule.setContent {
-            val backStack = rememberNavBackStack(NodesRoutes.NodesGraph)
+            val backStack = rememberNavBackStack(NodesRoute.NodesGraph)
             entryProvider<NavKey> {
                 contactsGraph(backStack, emptyFlow())
                 nodesGraph(backStack = backStack, scrollToTopEvents = emptyFlow())

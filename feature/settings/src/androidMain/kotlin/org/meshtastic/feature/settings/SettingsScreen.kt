@@ -41,8 +41,8 @@ import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.navigation.WifiProvisionRoutes
+import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.export_configuration
@@ -233,7 +233,7 @@ fun SettingsScreen(
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
-                        onNavigate(WifiProvisionRoutes.WifiProvision())
+                        onNavigate(WifiProvisionRoute.WifiProvision())
                     }
                 }
 
@@ -249,7 +249,7 @@ fun SettingsScreen(
                     excludedModulesUnlocked = excludedModulesUnlocked,
                     onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
                     onShowAppIntro = { settingsViewModel.showAppIntro() },
-                    onNavigateToAbout = { onNavigate(SettingsRoutes.About) },
+                    onNavigateToAbout = { onNavigate(SettingsRoute.About) },
                 )
             }
         }
