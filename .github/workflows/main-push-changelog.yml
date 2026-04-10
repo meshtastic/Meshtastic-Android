@@ -39,6 +39,10 @@ jobs:
           fromTag: ${{ steps.last_prod_tag.outputs.tag }}
           toTag: ${{ github.sha }}
           outputFile: main-push-changelog.md
+          fetchViaCommits: true
+          fetchReviewers: false
+          fetchReleaseInformation: false
+          fetchReviews: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
