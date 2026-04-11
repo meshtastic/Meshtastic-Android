@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -155,7 +156,12 @@ sealed interface GoogleMapMode {
     data object Main : GoogleMapMode
 
     /** Focused node position track: polyline + gradient markers for historical positions. */
-    data class NodeTrack(val focusedNode: Node?, val positions: List<Position>) : GoogleMapMode
+    data class NodeTrack(
+        val focusedNode: Node?,
+        val positions: List<Position>,
+        val selectedPositionTime: Int? = null,
+        val onPositionSelected: ((Int) -> Unit)? = null,
+    ) : GoogleMapMode
 
     /** Traceroute visualization: offset forward/return polylines + hop markers. */
     data class Traceroute(
@@ -424,6 +430,17 @@ fun MapView(
                 Logger.d { "Error centering track map: ${e.message}" }
             }
         }
+
+        // Animate to selected position marker when card is tapped in the list
+        LaunchedEffect(mode.selectedPositionTime) {
+            val selectedTime = mode.selectedPositionTime ?: return@LaunchedEffect
+            val selectedPos = sortedTrackPositions.find { it.time == selectedTime } ?: return@LaunchedEffect
+            try {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLng(selectedPos.toLatLng()))
+            } catch (e: IllegalStateException) {
+                Logger.d { "Error animating to selected position: ${e.message}" }
+            }
+        }
     }
 
     if (mode is GoogleMapMode.Traceroute) {
@@ -577,6 +594,8 @@ fun MapView(
                             sortedPositions = sortedTrackPositions,
                             displayUnits = displayUnits,
                             myNodeNum = myNodeNum,
+                            selectedPositionTime = mode.selectedPositionTime,
+                            onPositionSelected = mode.onPositionSelected,
                         )
                     }
                 }
@@ -808,17 +827,24 @@ private fun MainMapContent(
  * Renders the position track polyline segments and markers inside a [GoogleMap] content scope. Each marker fades from
  * transparent (oldest) to opaque (newest). The newest position shows the node's [NodeChip]; older positions show a
  * [TripOrigin] dot with an info-window on tap.
+ *
+ * When [selectedPositionTime] matches a marker's `Position.time`, that marker is highlighted with the primary color and
+ * elevated z-index. Tapping a marker invokes [onPositionSelected] for list synchronization.
  */
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
+@Suppress("LongMethod")
 private fun NodeTrackOverlay(
     focusedNode: Node,
     sortedPositions: List<Position>,
     displayUnits: DisplayUnits,
     myNodeNum: Int?,
+    selectedPositionTime: Int? = null,
+    onPositionSelected: ((Int) -> Unit)? = null,
 ) {
     val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
     val activeNodeZIndex = if (isHighPriority) 5f else 4f
+    val selectedColor = MaterialTheme.colorScheme.primary
 
     sortedPositions.forEachIndexed { index, position ->
         key(position.time) {
@@ -829,13 +855,23 @@ private fun NodeTrackOverlay(
                 } else {
                     1f
                 }
-            val color = Color(focusedNode.colors.second).copy(alpha = alpha)
+            val isSelected = position.time == selectedPositionTime
+            val color =
+                if (isSelected) {
+                    selectedColor
+                } else {
+                    Color(focusedNode.colors.second).copy(alpha = alpha)
+                }
 
             if (index == sortedPositions.lastIndex) {
                 MarkerComposable(
                     state = markerState,
                     zIndex = activeNodeZIndex,
                     alpha = if (isHighPriority) 1.0f else 0.9f,
+                    onClick = {
+                        onPositionSelected?.invoke(position.time)
+                        false // Allow default info window behavior
+                    },
                 ) {
                     NodeChip(node = focusedNode)
                 }
@@ -844,13 +880,18 @@ private fun NodeTrackOverlay(
                     state = markerState,
                     title = stringResource(Res.string.position),
                     snippet = formatAgo(position.time),
-                    zIndex = 1f + alpha,
+                    zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + alpha,
+                    onClick = {
+                        onPositionSelected?.invoke(position.time)
+                        false // Allow default info window behavior
+                    },
                     infoContent = { PositionInfoWindowContent(position = position, displayUnits = displayUnits) },
                 ) {
                     Icon(
                         imageVector = MeshtasticIcons.TripOrigin,
                         contentDescription = stringResource(Res.string.track_point),
                         tint = color,
+                        modifier = if (isSelected) Modifier.size(32.dp) else Modifier,
                     )
                 }
             }

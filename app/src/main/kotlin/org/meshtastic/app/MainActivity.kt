@@ -175,8 +175,14 @@ class MainActivity : ComponentActivity() {
             LocalMapViewProvider provides getMapViewProvider(),
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
             LocalNodeTrackMapProvider provides
-                { destNum, positions, modifier ->
-                    org.meshtastic.app.map.node.NodeTrackMap(destNum, positions, modifier)
+                { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
+                    org.meshtastic.app.map.node.NodeTrackMap(
+                        destNum,
+                        positions,
+                        modifier,
+                        selectedPositionTime,
+                        onPositionSelected,
+                    )
                 },
             LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),
             LocalTracerouteMapProvider provides

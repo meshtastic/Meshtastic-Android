@@ -31,11 +31,28 @@ import org.meshtastic.proto.Position
  * [org.meshtastic.core.model.Node] via [NodeMapViewModel] and delegates to [MapView] in [GoogleMapMode.NodeTrack] mode,
  * which provides the full shared map infrastructure (location tracking, tile providers, controls overlay with track
  * filter).
+ *
+ * Supports optional synchronized selection via [selectedPositionTime] and [onPositionSelected].
  */
 @Composable
-fun NodeTrackMap(destNum: Int, positions: List<Position>, modifier: Modifier = Modifier) {
+fun NodeTrackMap(
+    destNum: Int,
+    positions: List<Position>,
+    modifier: Modifier = Modifier,
+    selectedPositionTime: Int? = null,
+    onPositionSelected: ((Int) -> Unit)? = null,
+) {
     val vm = koinViewModel<NodeMapViewModel>()
     vm.setDestNum(destNum)
     val focusedNode by vm.node.collectAsStateWithLifecycle()
-    MapView(modifier = modifier, mode = GoogleMapMode.NodeTrack(focusedNode = focusedNode, positions = positions))
+    MapView(
+        modifier = modifier,
+        mode =
+        GoogleMapMode.NodeTrack(
+            focusedNode = focusedNode,
+            positions = positions,
+            selectedPositionTime = selectedPositionTime,
+            onPositionSelected = onPositionSelected,
+        ),
+    )
 }

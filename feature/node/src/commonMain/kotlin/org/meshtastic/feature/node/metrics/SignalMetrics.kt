@@ -55,13 +55,12 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.rssi
-import org.meshtastic.core.resources.rssi_definition
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.snr
-import org.meshtastic.core.resources.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
+import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.MeshPacket
 
 private enum class SignalMetric(val color: Color) {
@@ -83,6 +82,8 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.signalMetrics.filter { it.rx_time.toLong() >= timeFrame.timeThreshold() }
 
+    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveSignalMetricsCSV(uri, data) }
+
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.LOCAL_STATS,
@@ -91,11 +92,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         data = data,
         timeProvider = { it.rx_time.toDouble() },
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) },
-        infoData =
-        listOf(
-            InfoDialogData(Res.string.snr, Res.string.snr_definition, SignalMetric.SNR.color),
-            InfoDialogData(Res.string.rssi, Res.string.rssi_definition, SignalMetric.RSSI.color),
-        ),
+        onExportCsv = { exportLauncher("signal_metrics.csv", "text/csv") },
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,

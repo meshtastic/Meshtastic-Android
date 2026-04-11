@@ -27,10 +27,24 @@ import org.meshtastic.proto.Position
  * Unlike [LocalNodeMapScreenProvider], this does **not** include a Scaffold or AppBar — it is designed to be embedded
  * inside another screen layout (e.g. the position-log adaptive layout).
  *
+ * Supports optional synchronized selection:
+ * - [selectedPositionTime]: the `Position.time` of the currently selected position (or `null` for no selection). When
+ *   non-null, the map should visually highlight the corresponding marker and center the camera on it.
+ * - [onPositionSelected]: callback invoked when a position marker is tapped on the map, passing the `Position.time` so
+ *   the host can synchronize the card list.
+ *
  * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen].
  */
 @Suppress("Wrapping")
 val LocalNodeTrackMapProvider =
-    compositionLocalOf<@Composable (destNum: Int, positions: List<Position>, modifier: Modifier) -> Unit> {
-        { _, _, _ -> PlaceholderScreen("Position Track Map") }
+    compositionLocalOf<
+        @Composable (
+            destNum: Int,
+            positions: List<Position>,
+            modifier: Modifier,
+            selectedPositionTime: Int?,
+            onPositionSelected: ((Int) -> Unit)?,
+        ) -> Unit,
+        > {
+        { _, _, _, _, _ -> PlaceholderScreen("Position Track Map") }
     }

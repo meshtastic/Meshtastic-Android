@@ -81,6 +81,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
+import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
 
 private enum class Device(val color: Color) {
@@ -115,6 +116,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.deviceMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
+
+    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveDeviceMetricsCSV(uri, data) }
 
     val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
     val hasVoltage = remember(data) { data.any { it.device_metrics?.voltage != null } }
@@ -167,6 +170,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         timeProvider = { it.time.toDouble() },
         infoData = infoItems,
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.DEVICE) },
+        onExportCsv = { exportLauncher("device_metrics.csv", "text/csv") },
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
