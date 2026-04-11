@@ -18,9 +18,11 @@ package org.meshtastic.core.ble
 
 import co.touchlab.kermit.Logger
 import com.juul.kable.Peripheral
+import com.juul.kable.PeripheralBuilder
 import com.juul.kable.State
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
+import com.juul.kable.logs.Logging
 import com.juul.kable.writeWithoutResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +32,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
@@ -39,6 +40,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 /** [BleService] implementation backed by a Kable [Peripheral] for a specific GATT service. */
@@ -49,6 +51,9 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
 
     override fun observe(characteristic: BleCharacteristic) =
         peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid))
+
+    override fun observe(characteristic: BleCharacteristic, onSubscription: suspend () -> Unit) =
+        peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid), onSubscription)
 
     override suspend fun read(characteristic: BleCharacteristic): ByteArray =
         peripheral.read(characteristicOf(serviceUuid, characteristic.uuid))
@@ -78,8 +83,11 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
 /**
  * [BleConnection] implementation using Kable for cross-platform BLE communication.
  *
- * Manages peripheral lifecycle (connect with exponential backoff, disconnect, reconnect), connection state tracking,
- * and GATT service profile access.
+ * Manages peripheral lifecycle, connection state tracking, and GATT service profile access.
+ *
+ * Connection attempts follow Kable's recommended pattern from the SensorTag sample: try a direct connect first, then
+ * fall back to `autoConnect = true` on failure. Only two attempts are made per [connect] call — the caller
+ * ([BleRadioInterface]) owns the macro-level retry/backoff loop.
  */
 class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
@@ -88,10 +96,8 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
     private var connectionScope: CoroutineScope? = null
 
     companion object {
-        private const val INITIAL_RETRY_DELAY_MS = 1000L
-        private const val MAX_RETRY_DELAY_MS = 30_000L
-        private const val MAX_CONNECT_RETRIES = 15
-        private const val BACKOFF_MULTIPLIER = 2
+        /** Settle delay between a direct connect failure and the autoConnect fallback attempt. */
+        private val AUTOCONNECT_FALLBACK_DELAY = 1.seconds
     }
 
     private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
@@ -108,47 +114,32 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         )
     override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
 
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     override suspend fun connect(device: BleDevice) {
-        val autoConnect = MutableStateFlow(device is DirectBleDevice)
+        val meshtasticDevice = device as? MeshtasticBleDevice ?: error("Unsupported BleDevice type: ${device::class}")
+        var autoConnect = meshtasticDevice.advertisement == null
+
+        /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
+        fun PeripheralBuilder.commonConfig() {
+            logging {
+                engine = KermitLogEngine
+                level = Logging.Level.Events
+                identifier = device.address
+            }
+            observationExceptionHandler { cause ->
+                Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+            }
+            platformConfig(device) { autoConnect }
+        }
 
         val p =
-            when (device) {
-                is KableBleDevice ->
-                    Peripheral(device.advertisement) {
-                        observationExceptionHandler { cause ->
-                            Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
-                        }
-                        platformConfig(device) { autoConnect.value }
-                    }
-                is DirectBleDevice ->
-                    createPeripheral(device.address) {
-                        observationExceptionHandler { cause ->
-                            Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
-                        }
-                        platformConfig(device) { autoConnect.value }
-                    }
-                else -> error("Unsupported BleDevice type: ${device::class}")
-            }
+            meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
+                ?: createPeripheral(device.address) { commonConfig() }
 
-        // Clean up previous peripheral under NonCancellable to prevent GATT resource leaks
-        // if the calling coroutine is cancelled during teardown.
-        withContext(NonCancellable) {
-            try {
-                peripheral?.disconnect()
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.w(e) { "[${device.address}] Failed to disconnect previous peripheral" }
-            }
-            try {
-                peripheral?.close()
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.w(e) { "[${device.address}] Failed to close previous peripheral" }
-            }
-        }
+        cleanUpPeripheral(device.address)
         peripheral = p
 
-        ActiveBleConnection.activePeripheral = p
-        ActiveBleConnection.activeAddress = device.address
+        ActiveBleConnection.active = ActiveConnection(p, device.address)
 
         _deviceFlow.emit(device)
 
@@ -162,21 +153,15 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                         hasStartedConnecting = true
                     }
 
-                    when (device) {
-                        is KableBleDevice -> device.updateState(mappedState)
-                        is DirectBleDevice -> device.updateState(mappedState)
-                    }
+                    meshtasticDevice.updateState(mappedState)
 
                     _connectionState.emit(mappedState)
                 }
                 .launchIn(scope)
 
-        var retryCount = 0
-        var retryDelayMs = INITIAL_RETRY_DELAY_MS
         while (p.state.value !is State.Connected) {
-            autoConnect.value =
+            autoConnect =
                 try {
-                    // Cancel any previous connectionScope to avoid leaking the old coroutine scope.
                     connectionScope?.let { oldScope ->
                         Logger.d { "[${device.address}] Cancelling previous connectionScope before reconnect" }
                         oldScope.coroutineContext.job.cancel()
@@ -185,52 +170,50 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                     false
                 } catch (e: CancellationException) {
                     throw e
-                } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") _: Exception) {
-                    retryCount++
-                    if (retryCount > MAX_CONNECT_RETRIES) {
-                        Logger.w { "[${device.address}] Max connect retries ($MAX_CONNECT_RETRIES) exceeded" }
-                        _connectionState.emit(BleConnectionState.Disconnected)
-                        return
+                } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
+                    if (autoConnect) {
+                        // autoConnect already true and still failed — don't loop forever.
+                        Logger.w { "[${device.address}] autoConnect attempt failed, giving up" }
+                        _connectionState.emit(BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed))
+                        throw e
                     }
-                    Logger.d { "[${device.address}] Connect retry $retryCount, backoff ${retryDelayMs}ms" }
-                    delay(retryDelayMs)
-                    retryDelayMs = (retryDelayMs * BACKOFF_MULTIPLIER).coerceAtMost(MAX_RETRY_DELAY_MS)
+                    Logger.d { "[${device.address}] Direct connect failed, falling back to autoConnect" }
+                    delay(AUTOCONNECT_FALLBACK_DELAY)
                     true
                 }
         }
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState = try {
-        withTimeout(timeoutMs) {
+    override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState = try {
+        withTimeout(timeout) {
             connect(device)
             BleConnectionState.Connected
         }
     } catch (_: TimeoutCancellationException) {
         // Our own timeout expired — treat as a failed attempt so callers can retry.
-        BleConnectionState.Disconnected
+        BleConnectionState.Disconnected(DisconnectReason.Timeout)
     } catch (e: CancellationException) {
         // External cancellation (scope closed) — must propagate.
         throw e
     } catch (_: Exception) {
-        BleConnectionState.Disconnected
+        BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed)
     }
 
     override suspend fun disconnect() = withContext(NonCancellable) {
         // Emit Disconnected before cancelling stateJob so downstream collectors see the
         // state transition. If we cancel stateJob first, the peripheral's state flow
         // emission of Disconnected is never forwarded to _connectionState.
-        _connectionState.emit(BleConnectionState.Disconnected)
+        _connectionState.emit(BleConnectionState.Disconnected(DisconnectReason.LocalDisconnect))
 
         stateJob?.cancel()
         stateJob = null
-        peripheral?.disconnect()
-        peripheral?.close()
+
+        safeClosePeripheral("disconnect")
         peripheral = null
         connectionScope = null
 
-        ActiveBleConnection.activePeripheral = null
-        ActiveBleConnection.activeAddress = null
+        ActiveBleConnection.active = null
 
         _deviceFlow.emit(null)
     }
@@ -247,4 +230,29 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength()
+
+    /** Ensures the previous peripheral's GATT resources are fully released. */
+    private suspend fun cleanUpPeripheral(tag: String) {
+        withContext(NonCancellable) { safeClosePeripheral(tag) }
+    }
+
+    /**
+     * Safely disconnects and closes the current [peripheral], logging any failures.
+     *
+     * Kable requires `close()` to release broadcast receivers on Android (Kable issue #359). Separate try/catch blocks
+     * ensure `close()` always runs even if `disconnect()` throws.
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun safeClosePeripheral(tag: String) {
+        try {
+            peripheral?.disconnect()
+        } catch (e: Exception) {
+            Logger.w(e) { "[$tag] Failed to disconnect peripheral" }
+        }
+        try {
+            peripheral?.close()
+        } catch (e: Exception) {
+            Logger.w(e) { "[$tag] Failed to close peripheral" }
+        }
+    }
 }

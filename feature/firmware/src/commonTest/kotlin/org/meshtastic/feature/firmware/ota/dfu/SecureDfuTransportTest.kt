@@ -614,8 +614,8 @@ class SecureDfuTransportTest {
 
         override suspend fun connect(device: BleDevice) = delegate.connect(device)
 
-        override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long) =
-            delegate.connectAndAwait(device, timeoutMs)
+        override suspend fun connectAndAwait(device: BleDevice, timeout: Duration) =
+            delegate.connectAndAwait(device, timeout)
 
         override suspend fun disconnect() = delegate.disconnect()
 

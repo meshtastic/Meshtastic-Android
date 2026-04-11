@@ -48,6 +48,9 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.DEFAULT_BLE_WRITE_VALUE_LENGTH
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Kable-based transport for the Nordic Secure DFU (Secure DFU over BLE) protocol.
@@ -96,7 +99,7 @@ class SecureDfuTransport(
                 ?: throw DfuException.ConnectionFailed("Device $address not found for buttonless DFU trigger")
 
         Logger.i { "DFU: Connecting to $address to trigger buttonless DFU..." }
-        bleConnection.connectAndAwait(device, CONNECT_TIMEOUT_MS)
+        bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
 
         bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
             val buttonlessChar = service.characteristic(SecureDfuUuids.BUTTONLESS_NO_BONDS)
@@ -111,7 +114,7 @@ class SecureDfuTransport(
                     .catch { e -> Logger.d(e) { "DFU: Buttonless indication stream ended (expected on disconnect)" } }
                     .launchIn(this)
 
-            delay(SUBSCRIPTION_SETTLE_MS)
+            delay(SUBSCRIPTION_SETTLE)
 
             Logger.i { "DFU: Writing buttonless DFU trigger..." }
             service.write(buttonlessChar, byteArrayOf(0x01), BleWriteType.WITH_RESPONSE)
@@ -119,7 +122,7 @@ class SecureDfuTransport(
             // Wait for the indication response (0x20-01-STATUS). The device may disconnect before we receive it —
             // that's expected and treated as success, matching the Nordic DFU library's behavior.
             try {
-                withTimeout(BUTTONLESS_RESPONSE_TIMEOUT_MS) {
+                withTimeout(BUTTONLESS_RESPONSE_TIMEOUT) {
                     val response = indicationChannel.receive()
                     if (response.size >= 3 && response[0] == BUTTONLESS_RESPONSE_CODE && response[2] != 0x01.toByte()) {
                         Logger.w { "DFU: Buttonless DFU response indicates error: ${response.toHexString()}" }
@@ -162,7 +165,7 @@ class SecureDfuTransport(
 
         bleConnection.connectionState.onEach { Logger.d { "DFU: Connection state → $it" } }.launchIn(transportScope)
 
-        val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT_MS)
+        val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
         if (connected is BleConnectionState.Disconnected) {
             throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address}")
         }
@@ -188,7 +191,7 @@ class SecureDfuTransport(
                 }
                 .launchIn(this)
 
-            delay(SUBSCRIPTION_SETTLE_MS)
+            delay(SUBSCRIPTION_SETTLE)
             if (!subscribed.isCompleted) subscribed.complete(Unit)
             subscribed.await()
 
@@ -286,7 +289,7 @@ class SecureDfuTransport(
             } catch (e: Throwable) {
                 lastError = e
                 Logger.w(e) { "DFU: Object transfer failed (attempt ${attempt + 1}/$OBJECT_RETRY_COUNT): ${e.message}" }
-                if (attempt < OBJECT_RETRY_COUNT - 1) delay(RETRY_DELAY_MS)
+                if (attempt < OBJECT_RETRY_COUNT - 1) delay(RETRY_DELAY)
             }
         }
         throw lastError ?: DfuException.TransferFailed("Object transfer failed after $OBJECT_RETRY_COUNT attempts")
@@ -347,7 +350,7 @@ class SecureDfuTransport(
             // First-chunk delay: some older bootloaders need time to prepare flash after Create.
             // The Nordic DFU library uses 400ms for the first chunk.
             if (isFirstChunk) {
-                delay(FIRST_CHUNK_DELAY_MS)
+                delay(FIRST_CHUNK_DELAY)
                 isFirstChunk = false
             }
 
@@ -399,7 +402,7 @@ class SecureDfuTransport(
             } catch (e: DfuException.ProtocolError) {
                 if (e.resultCode == DfuResultCode.INVALID_OBJECT && offset + objectSize >= totalBytes) {
                     Logger.w { "DFU: Execute returned INVALID_OBJECT on final object, retrying once..." }
-                    delay(RETRY_DELAY_MS)
+                    delay(RETRY_DELAY)
                     sendExecute()
                 } else {
                     throw e
@@ -440,7 +443,7 @@ class SecureDfuTransport(
                 // Wait for the device's PRN receipt notification, then validate CRC.
                 // Skip the wait on the last packet — the final CALCULATE_CHECKSUM covers it.
                 if (prnInterval > 0 && packetsSincePrn >= prnInterval && pos < until) {
-                    val response = awaitNotification(COMMAND_TIMEOUT_MS)
+                    val response = awaitNotification(COMMAND_TIMEOUT)
                     if (response is DfuResponse.ChecksumResult) {
                         val expectedCrc = DfuCrc32.calculate(data, length = pos)
                         if (response.offset != pos || response.crc32 != expectedCrc) {
@@ -459,7 +462,7 @@ class SecureDfuTransport(
             val controlChar = service.characteristic(SecureDfuUuids.CONTROL_POINT)
             service.write(controlChar, payload, BleWriteType.WITH_RESPONSE)
         }
-        return awaitNotification(COMMAND_TIMEOUT_MS)
+        return awaitNotification(COMMAND_TIMEOUT)
     }
 
     private suspend fun setPrn(value: Int) {
@@ -506,13 +509,13 @@ class SecureDfuTransport(
         Logger.d { "DFU: Object executed." }
     }
 
-    private suspend fun awaitNotification(timeoutMs: Long): DfuResponse = try {
-        withTimeout(timeoutMs) {
+    private suspend fun awaitNotification(timeout: Duration): DfuResponse = try {
+        withTimeout(timeout) {
             val bytes = notificationChannel.receive()
             DfuResponse.parse(bytes).also { Logger.d { "DFU: Notification → $it" } }
         }
     } catch (_: TimeoutCancellationException) {
-        throw DfuException.Timeout("No response from Control Point after ${timeoutMs}ms")
+        throw DfuException.Timeout("No response from Control Point after $timeout")
     }
 
     private fun DfuResponse.requireSuccess(expectedOpcode: Byte) {
@@ -541,7 +544,7 @@ class SecureDfuTransport(
         tag = "DFU",
         serviceUuid = SecureDfuUuids.SERVICE,
         retryCount = SCAN_RETRY_COUNT,
-        retryDelayMs = SCAN_RETRY_DELAY_MS,
+        retryDelay = SCAN_RETRY_DELAY,
         predicate = predicate,
     )
 
@@ -550,14 +553,14 @@ class SecureDfuTransport(
     // ---------------------------------------------------------------------------
 
     companion object {
-        private const val CONNECT_TIMEOUT_MS = 15_000L
-        private const val COMMAND_TIMEOUT_MS = 30_000L
-        private const val SUBSCRIPTION_SETTLE_MS = 500L
-        private const val BUTTONLESS_RESPONSE_TIMEOUT_MS = 3_000L
+        private val CONNECT_TIMEOUT = 15.seconds
+        private val COMMAND_TIMEOUT = 30.seconds
+        private val SUBSCRIPTION_SETTLE = 500.milliseconds
+        private val BUTTONLESS_RESPONSE_TIMEOUT = 3.seconds
         private const val SCAN_RETRY_COUNT = 3
-        private const val SCAN_RETRY_DELAY_MS = 2_000L
-        private const val RETRY_DELAY_MS = 2_000L
-        private const val FIRST_CHUNK_DELAY_MS = 400L
+        private val SCAN_RETRY_DELAY = 2.seconds
+        private val RETRY_DELAY = 2.seconds
+        private val FIRST_CHUNK_DELAY = 400.milliseconds
 
         /** Response code prefix for Buttonless DFU indications (0x20 = response). */
         private const val BUTTONLESS_RESPONSE_CODE: Byte = 0x20

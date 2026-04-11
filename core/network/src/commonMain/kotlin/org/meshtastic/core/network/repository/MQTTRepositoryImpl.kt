@@ -44,6 +44,7 @@ import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.MqttClientProxyMessage
+import kotlin.concurrent.Volatile
 
 @Single(binds = [MQTTRepository::class])
 class MQTTRepositoryImpl(
@@ -62,7 +63,7 @@ class MQTTRepositoryImpl(
         private const val RECONNECT_BACKOFF_MULTIPLIER = 2
     }
 
-    private var client: MQTTClient? = null
+    @Volatile private var client: MQTTClient? = null
 
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
@@ -70,7 +71,8 @@ class MQTTRepositoryImpl(
         exceptionsWithDebugInfo = false
     }
     private val scope = CoroutineScope(dispatchers.default + SupervisorJob())
-    private var clientJob: Job? = null
+
+    @Volatile private var clientJob: Job? = null
     private val publishSemaphore = Semaphore(20)
 
     @Suppress("TooGenericExceptionCaught")
@@ -149,12 +151,10 @@ class MQTTRepositoryImpl(
                 while (true) {
                     try {
                         Logger.i { "MQTT Starting client loop for $host:$port" }
-                        // Reset backoff on each successful connection establishment. If the broker
-                        // disconnects cleanly after hours of operation, the next reconnect should
-                        // start with the minimum delay rather than whatever was accumulated.
-                        reconnectDelay = INITIAL_RECONNECT_DELAY_MS
                         newClient.runSuspend()
-                        // runSuspend returned normally — broker closed connection. Retry.
+                        // runSuspend returned normally — broker closed connection cleanly.
+                        // Reset backoff so the next reconnect starts with the minimum delay.
+                        reconnectDelay = INITIAL_RECONNECT_DELAY_MS
                         Logger.w { "MQTT client loop ended normally, reconnecting in ${reconnectDelay}ms" }
                     } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
                         Logger.e(e) { "MQTT Client loop error (MQTT), reconnecting in ${reconnectDelay}ms" }
@@ -199,15 +199,25 @@ class MQTTRepositoryImpl(
 
     @OptIn(ExperimentalUnsignedTypes::class)
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {
+        val currentClient = client
+        if (currentClient == null) {
+            Logger.w { "MQTT publish to $topic dropped: client not connected" }
+            return
+        }
         Logger.d { "MQTT publishing message to topic $topic (size: ${data.size} bytes, retained: $retained)" }
         scope.launch {
             publishSemaphore.withPermit {
-                client?.publish(
-                    retain = retained,
-                    qos = Qos.AT_LEAST_ONCE,
-                    topic = topic,
-                    payload = data.toUByteArray(),
-                )
+                @Suppress("TooGenericExceptionCaught")
+                try {
+                    currentClient.publish(
+                        retain = retained,
+                        qos = Qos.AT_LEAST_ONCE,
+                        topic = topic,
+                        payload = data.toUByteArray(),
+                    )
+                } catch (e: Exception) {
+                    Logger.w(e) { "MQTT publish to $topic failed" }
+                }
             }
         }
     }

@@ -42,11 +42,11 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : R
      *
      * @param waitForStopped if true we should wait for the manager to finish - must be false if called from inside the
      *   manager callbacks
+     * @param isPermanent true if the device is definitely gone (e.g. USB unplugged), false if it may come back (e.g.
+     *   TCP transient disconnect). Defaults to true for serial — subclasses like [TCPInterface] override with false.
      */
-    protected open fun onDeviceDisconnect(waitForStopped: Boolean) {
-        service.onDisconnect(
-            isPermanent = true,
-        ) // if USB device disconnects it is definitely permanently gone, not sleeping)
+    protected open fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean = true) {
+        service.onDisconnect(isPermanent = isPermanent)
     }
 
     protected open fun connect() {

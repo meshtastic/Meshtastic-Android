@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.wifiprovision
 
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 /**
@@ -62,14 +64,14 @@ internal object NymeaBleConstants {
     /** JSON stream terminator — marks the end of a reassembled message. */
     const val STREAM_TERMINATOR = '\n'
 
-    /** Scan + connect timeout in milliseconds. */
-    const val SCAN_TIMEOUT_MS = 10_000L
+    /** Scan + connect timeout. */
+    val SCAN_TIMEOUT = 10.seconds
 
     /** Maximum time to wait for a command response. */
-    const val RESPONSE_TIMEOUT_MS = 15_000L
+    val RESPONSE_TIMEOUT = 15.seconds
 
     /** Settle time after subscribing to notifications before sending commands. */
-    const val SUBSCRIPTION_SETTLE_MS = 300L
+    val SUBSCRIPTION_SETTLE = 300.milliseconds
     // endregion
 
     // region Wireless Commander command codes

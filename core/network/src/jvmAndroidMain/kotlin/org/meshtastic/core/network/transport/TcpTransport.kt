@@ -65,6 +65,10 @@ class TcpTransport(
     }
 
     companion object {
+        /**
+         * Maximum reconnect retries. Set to [Int.MAX_VALUE] to retry indefinitely — the caller ([TcpTransport.stop])
+         * owns the cancellation lifecycle.
+         */
         const val MAX_RECONNECT_RETRIES = Int.MAX_VALUE
         const val MIN_BACKOFF_MILLIS = 1_000L
         const val MAX_BACKOFF_MILLIS = 5 * 60 * 1_000L
@@ -84,18 +88,26 @@ class TcpTransport(
         )
 
     // TCP socket state
-    private var socket: Socket? = null
-    private var outStream: OutputStream? = null
-    private var connectionJob: Job? = null
-    private var currentAddress: String? = null
+    @Volatile private var socket: Socket? = null
+
+    @Volatile private var outStream: OutputStream? = null
+
+    @Volatile private var connectionJob: Job? = null
+
+    @Volatile private var currentAddress: String? = null
 
     // Metrics
-    private var connectionStartTime: Long = 0
-    private var packetsReceived: Int = 0
-    private var packetsSent: Int = 0
-    private var bytesReceived: Long = 0
-    private var bytesSent: Long = 0
-    private var timeoutEvents: Int = 0
+    @Volatile private var connectionStartTime: Long = 0
+
+    @Volatile private var packetsReceived: Int = 0
+
+    @Volatile private var packetsSent: Int = 0
+
+    @Volatile private var bytesReceived: Long = 0
+
+    @Volatile private var bytesSent: Long = 0
+
+    @Volatile private var timeoutEvents: Int = 0
 
     /** Whether the transport is currently connected. */
     val isConnected: Boolean

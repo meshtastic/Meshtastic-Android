@@ -20,14 +20,28 @@ import co.touchlab.kermit.Logger
 import com.juul.kable.AndroidPeripheral
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
+import com.juul.kable.PooledThreadingStrategy
 import com.juul.kable.toIdentifier
 
+/**
+ * Shared thread pool for Kable BLE connections.
+ *
+ * [PooledThreadingStrategy] reuses handler threads across reconnect cycles, avoiding the overhead of creating a new
+ * thread per connection attempt that [OnDemandThreadingStrategy][com.juul.kable.OnDemandThreadingStrategy] incurs. Idle
+ * threads are evicted after 1 minute (default).
+ *
+ * A single app-wide instance is used because Kable recommends exactly one pool per application.
+ */
+private val sharedThreadingStrategy = PooledThreadingStrategy()
+
 internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) {
-    // If we're connecting blindly to a bonded device without a fresh scan (DirectBleDevice),
-    // we MUST use autoConnect = true. Otherwise, Android's direct connect algorithm will often fail
-    // immediately with GATT 133 or timeout, especially if the device uses random resolvable addresses.
-    // If we just scanned the device (KableBleDevice), direct connection (autoConnect = false) is faster.
+    // Bonded devices without a fresh advertisement must use autoConnect = true. Otherwise,
+    // Android's direct connect algorithm often fails with GATT 133 or times out, especially
+    // if the device uses random resolvable addresses. Scanned devices (advertisement != null)
+    // use direct connection (autoConnect = false) for faster initial connects.
     autoConnectIf(autoConnect)
+
+    threadingStrategy = sharedThreadingStrategy
 
     onServicesDiscovered {
         try {

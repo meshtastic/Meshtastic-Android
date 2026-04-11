@@ -42,7 +42,7 @@ import kotlin.uuid.Uuid
 class FakeBleDevice(
     override val address: String,
     override val name: String? = "Fake Device",
-    initialState: BleConnectionState = BleConnectionState.Disconnected,
+    initialState: BleConnectionState = BleConnectionState.Disconnected(),
 ) : BaseFake(),
     BleDevice {
     private val _state = mutableStateFlow(initialState)
@@ -124,11 +124,11 @@ class FakeBleConnection :
         }
     }
 
-    override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState {
+    override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState {
         connectException?.let { throw it }
         if (failNextN > 0) {
             failNextN--
-            return BleConnectionState.Disconnected
+            return BleConnectionState.Disconnected()
         }
         connect(device)
         return BleConnectionState.Connected
@@ -137,9 +137,9 @@ class FakeBleConnection :
     override suspend fun disconnect() {
         disconnectCalls++
         val currentDevice = _device.value
-        _connectionState.emit(BleConnectionState.Disconnected)
+        _connectionState.emit(BleConnectionState.Disconnected())
         if (currentDevice is FakeBleDevice) {
-            currentDevice.setState(BleConnectionState.Disconnected)
+            currentDevice.setState(BleConnectionState.Disconnected())
         }
         _device.value = null
         _deviceFlow.emit(null)

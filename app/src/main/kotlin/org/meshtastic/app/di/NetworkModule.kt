@@ -40,6 +40,7 @@ import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.network.KermitHttpLogger
 
 private const val DISK_CACHE_PERCENT = 0.02
 private const val MEMORY_CACHE_PERCENT = 0.25
@@ -84,7 +85,10 @@ class NetworkModule {
         HttpClient(engineFactory = Android) {
             install(plugin = ContentNegotiation) { json(json) }
             if (buildConfigProvider.isDebug) {
-                install(plugin = Logging) { level = LogLevel.BODY }
+                install(plugin = Logging) {
+                    logger = KermitHttpLogger
+                    level = LogLevel.BODY
+                }
             }
         }
 }

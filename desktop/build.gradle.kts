@@ -285,6 +285,7 @@ dependencies {
     // Ktor HttpClient (Java engine for JVM/Desktop)
     implementation(libs.ktor.client.java)
     implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.logging)
     implementation(libs.ktor.serialization.kotlinx.json)
 
     implementation(libs.androidx.paging.common)

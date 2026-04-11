@@ -17,16 +17,53 @@
 package org.meshtastic.core.ble
 
 /** Represents the state of a BLE connection. */
-sealed class BleConnectionState {
-    /** The peripheral is disconnected. */
-    object Disconnected : BleConnectionState()
+sealed interface BleConnectionState {
+
+    /**
+     * The peripheral is disconnected.
+     *
+     * @param reason why the disconnect occurred. [DisconnectReason.Unknown] when the platform doesn't provide status
+     *   information (e.g. JavaScript) or when the disconnect was synthesised locally without a GATT callback.
+     */
+    data class Disconnected(val reason: DisconnectReason = DisconnectReason.Unknown) : BleConnectionState
 
     /** The peripheral is connecting. */
-    object Connecting : BleConnectionState()
+    data object Connecting : BleConnectionState
 
     /** The peripheral is connected. */
-    object Connected : BleConnectionState()
+    data object Connected : BleConnectionState
 
     /** The peripheral is disconnecting. */
-    object Disconnecting : BleConnectionState()
+    data object Disconnecting : BleConnectionState
+}
+
+/**
+ * Platform-agnostic reason for a BLE disconnect.
+ *
+ * Mapped from Kable's [com.juul.kable.State.Disconnected.Status] in `KableStateMapping`.
+ */
+sealed interface DisconnectReason {
+    /** Cause is unknown or the platform did not report one. */
+    data object Unknown : DisconnectReason
+
+    /** The local app/central initiated the disconnect. */
+    data object LocalDisconnect : DisconnectReason
+
+    /** The remote peripheral (firmware) initiated the disconnect. */
+    data object RemoteDisconnect : DisconnectReason
+
+    /** A connection attempt failed to establish. */
+    data object ConnectionFailed : DisconnectReason
+
+    /** The BLE link supervision timed out (device went out of range). */
+    data object Timeout : DisconnectReason
+
+    /** The connection was explicitly cancelled. */
+    data object Cancelled : DisconnectReason
+
+    /** An encryption or authentication failure occurred. */
+    data object EncryptionFailed : DisconnectReason
+
+    /** Platform-specific status code that doesn't map to a known reason. */
+    data class PlatformSpecific(val code: Int) : DisconnectReason
 }
