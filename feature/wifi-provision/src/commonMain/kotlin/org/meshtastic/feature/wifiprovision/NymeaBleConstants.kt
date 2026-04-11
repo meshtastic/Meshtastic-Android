@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.wifiprovision
 
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
 /**
@@ -66,8 +66,8 @@ internal object NymeaBleConstants {
     /** Scan + connect timeout in milliseconds. */
     const val SCAN_TIMEOUT_MS = 10_000L
 
-    /** Scan + connect timeout as a [Duration]. */
-    val SCAN_TIMEOUT = 10.seconds
+    /** Scan + connect timeout as a [Duration]. Derived from [SCAN_TIMEOUT_MS]. */
+    val SCAN_TIMEOUT = SCAN_TIMEOUT_MS.milliseconds
 
     /** Maximum time to wait for a command response. */
     const val RESPONSE_TIMEOUT_MS = 15_000L

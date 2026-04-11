@@ -174,9 +174,11 @@ private fun desktopPlatformStubsModule() = module {
     single<HttpClient> {
         HttpClient(Java) {
             install(ContentNegotiation) { json(get<Json>()) }
-            install(Logging) {
-                logger = KermitHttpLogger
-                level = LogLevel.HEADERS
+            if (org.meshtastic.desktop.DesktopBuildConfig.IS_DEBUG) {
+                install(Logging) {
+                    logger = KermitHttpLogger
+                    level = LogLevel.HEADERS
+                }
             }
         }
     }
