@@ -19,7 +19,7 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +36,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.hide_password
 import org.meshtastic.core.resources.show_password
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
 
 @Composable
@@ -63,10 +64,9 @@ fun EditPasswordPreference(
         onFocusChanged = {},
         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
-            IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+            IconToggleButton(checked = isPasswordVisible, onCheckedChange = { isPasswordVisible = it }) {
                 Icon(
-                    imageVector =
-                    if (isPasswordVisible) MeshtasticIcons.VisibilityOff else MeshtasticIcons.VisibilityOff,
+                    imageVector = if (isPasswordVisible) MeshtasticIcons.VisibilityOff else MeshtasticIcons.Visibility,
                     contentDescription =
                     if (isPasswordVisible) {
                         stringResource(Res.string.hide_password)

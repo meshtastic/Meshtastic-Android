@@ -52,6 +52,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -414,7 +415,7 @@ internal fun ConnectedContent(
             singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                IconToggleButton(checked = passwordVisible, onCheckedChange = { passwordVisible = it }) {
                     Icon(
                         imageVector =
                         if (passwordVisible) MeshtasticIcons.VisibilityOff else MeshtasticIcons.Visibility,

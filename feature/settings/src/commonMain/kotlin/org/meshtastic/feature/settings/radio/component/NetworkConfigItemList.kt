@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -220,12 +222,19 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         onValueChanged = { formState.value = formState.value.copy(wifi_psk = it) },
                     )
                     HorizontalDivider()
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                    val mediumHeight = ButtonDefaults.MediumContainerHeight
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
                     Button(
                         onClick = { barcodeScanner.startScan() },
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(48.dp),
+                        shapes = ButtonDefaults.shapesFor(mediumHeight),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(mediumHeight),
                         enabled = state.connected,
                     ) {
-                        Text(text = stringResource(Res.string.wifi_qr_code_scan))
+                        Text(
+                            text = stringResource(Res.string.wifi_qr_code_scan),
+                            style = ButtonDefaults.textStyleFor(mediumHeight),
+                        )
                     }
                 }
             }

@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -240,21 +241,33 @@ fun ScannedQrCodeDialog(
                         val unselectedColors =
                             ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
 
+                        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                        val mediumHeight = ButtonDefaults.MediumContainerHeight
+                        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
                         OutlinedButton(
                             onClick = { shouldReplace = false },
-                            modifier = Modifier.height(48.dp).weight(1f),
+                            shapes = ButtonDefaults.shapesFor(mediumHeight),
+                            modifier = Modifier.height(mediumHeight).weight(1f),
                             colors = if (!shouldReplace) selectedColors else unselectedColors,
                         ) {
-                            Text(text = stringResource(Res.string.add))
+                            Text(
+                                text = stringResource(Res.string.add),
+                                style = ButtonDefaults.textStyleFor(mediumHeight),
+                            )
                         }
 
+                        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
                         OutlinedButton(
                             onClick = { shouldReplace = true },
-                            modifier = Modifier.height(48.dp).weight(1f),
+                            shapes = ButtonDefaults.shapesFor(mediumHeight),
+                            modifier = Modifier.height(mediumHeight).weight(1f),
                             enabled = incoming.lora_config != null,
                             colors = if (shouldReplace) selectedColors else unselectedColors,
                         ) {
-                            Text(text = stringResource(Res.string.replace))
+                            Text(
+                                text = stringResource(Res.string.replace),
+                                style = ButtonDefaults.textStyleFor(mediumHeight),
+                            )
                         }
                     }
                 }

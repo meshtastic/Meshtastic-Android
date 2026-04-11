@@ -36,7 +36,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
@@ -155,7 +154,6 @@ private fun HostMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: 
 }
 
 /** Card body showing timestamp, load averages with progress bars, memory, disk, and uptime. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun HostMetricsCardContent(time: String, hostMetrics: org.meshtastic.proto.HostMetrics?) {
     Column(modifier = Modifier.padding(12.dp)) {

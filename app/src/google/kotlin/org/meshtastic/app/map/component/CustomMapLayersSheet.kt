@@ -31,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -125,7 +126,10 @@ fun CustomMapLayersSheet(
                                     }
                                 }
                             }
-                            IconButton(onClick = { onToggleVisibility(layer.id) }) {
+                            IconToggleButton(
+                                checked = layer.isVisible,
+                                onCheckedChange = { onToggleVisibility(layer.id) },
+                            ) {
                                 Icon(
                                     imageVector =
                                     if (layer.isVisible) {
