@@ -39,7 +39,6 @@ jobs:
               - 'desktop/**'
               - 'core/**'
               - 'feature/**'
-              - 'mesh_service_example/**'
               # Shared build infrastructure
               - 'build-logic/**'
               - 'config/**'
