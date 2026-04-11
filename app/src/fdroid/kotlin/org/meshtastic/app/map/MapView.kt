@@ -77,8 +77,6 @@ import org.meshtastic.app.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.app.map.component.CacheLayout
 import org.meshtastic.app.map.component.DownloadButton
 import org.meshtastic.app.map.component.EditWaypointDialog
-import org.meshtastic.app.map.component.MapButton
-import org.meshtastic.app.map.component.MapControlsOverlay
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.model.MarkerWithLabel
 import org.meshtastic.core.common.gpsDisabled
@@ -130,6 +128,8 @@ import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.MapButton
+import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
