@@ -19,6 +19,7 @@ package org.meshtastic.core.ble
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.onStart
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
@@ -81,11 +82,12 @@ interface BleService {
      * Observes notifications/indications from the characteristic with an [onSubscription] action that fires **after**
      * notifications are enabled (CCCD written).
      *
-     * The [onSubscription] is re-invoked on every reconnect while the returned [Flow] is active. Implementations that
-     * don't support subscription callbacks delegate to [observe] and ignore [onSubscription].
+     * The [onSubscription] is re-invoked on every reconnect while the returned [Flow] is active. The default
+     * implementation invokes [onSubscription] eagerly on flow start so non-Kable implementations still signal
+     * readiness.
      */
     fun observe(characteristic: BleCharacteristic, onSubscription: suspend () -> Unit): Flow<ByteArray> =
-        observe(characteristic)
+        observe(characteristic).onStart { onSubscription() }
 
     /** Reads the characteristic value once. */
     suspend fun read(characteristic: BleCharacteristic): ByteArray

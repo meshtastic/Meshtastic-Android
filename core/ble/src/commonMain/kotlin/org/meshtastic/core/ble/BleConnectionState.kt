@@ -66,6 +66,4 @@ sealed class DisconnectReason {
 
     /** Platform-specific status code that doesn't map to a known reason. */
     data class PlatformSpecific(val code: Int) : DisconnectReason()
-
-    override fun toString(): String = this::class.simpleName ?: "DisconnectReason"
 }
