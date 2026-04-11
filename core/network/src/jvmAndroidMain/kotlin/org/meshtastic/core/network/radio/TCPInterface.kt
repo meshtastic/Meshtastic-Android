@@ -52,7 +52,8 @@ open class TCPInterface(
 
                 override fun onDisconnected() {
                     // Transport already performed teardown; only propagate lifecycle to StreamInterface.
-                    super@TCPInterface.onDeviceDisconnect(false)
+                    // TCP disconnects are transient (not permanent) — the transport will auto-reconnect.
+                    super@TCPInterface.onDeviceDisconnect(false, isPermanent = false)
                 }
 
                 override fun onPacketReceived(bytes: ByteArray) {
@@ -71,9 +72,9 @@ open class TCPInterface(
         Logger.d { "[$address] TCPInterface.sendBytes delegated to transport" }
     }
 
-    override fun onDeviceDisconnect(waitForStopped: Boolean) {
+    override fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean) {
         transport.stop()
-        super.onDeviceDisconnect(waitForStopped)
+        super.onDeviceDisconnect(waitForStopped, isPermanent = false)
     }
 
     override fun connect() {

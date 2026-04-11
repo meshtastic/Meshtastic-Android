@@ -184,8 +184,8 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState = try {
-        withTimeout(timeoutMs) {
+    override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState = try {
+        withTimeout(timeout) {
             connect(device)
             BleConnectionState.Connected
         }

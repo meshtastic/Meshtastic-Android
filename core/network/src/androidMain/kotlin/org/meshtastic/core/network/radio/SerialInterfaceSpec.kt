@@ -33,19 +33,12 @@ class SerialInterfaceSpec(
         factory.create(rest, service)
 
     override fun addressValid(rest: String): Boolean {
-        usbRepository.serialDevices.value.filterValues { usbManager.hasPermission(it.device) }
-        findSerial(rest)?.let { d ->
-            return usbManager.hasPermission(d.device)
-        }
-        return false
+        val driver = findSerial(rest) ?: return false
+        return usbManager.hasPermission(driver.device)
     }
 
     internal fun findSerial(rest: String): UsbSerialDriver? {
         val deviceMap = usbRepository.serialDevices.value
-        return if (deviceMap.containsKey(rest)) {
-            deviceMap[rest]!!
-        } else {
-            deviceMap.map { (_, driver) -> driver }.firstOrNull()
-        }
+        return deviceMap[rest] ?: deviceMap.values.firstOrNull()
     }
 }

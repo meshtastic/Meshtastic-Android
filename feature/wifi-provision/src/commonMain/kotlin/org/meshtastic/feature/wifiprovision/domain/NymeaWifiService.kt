@@ -44,6 +44,7 @@ import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_SCAN
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_SUCCESS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_TIMEOUT_MS
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT_MS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SUBSCRIPTION_SETTLE_MS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_COMMANDER_UUID
@@ -106,7 +107,7 @@ class NymeaWifiService(
         val deviceName = device.name ?: device.address
         Logger.i { "$TAG: Found device: ${device.name} @ ${device.address}" }
 
-        val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT_MS)
+        val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT)
         check(state is BleConnectionState.Connected) { "Failed to connect to ${device.address} — final state: $state" }
 
         Logger.i { "$TAG: Connected. Discovering wireless service…" }

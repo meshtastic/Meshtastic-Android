@@ -36,14 +36,14 @@ class InterfaceFactory(
 ) {
     internal val nopInterface by lazy { nopInterfaceFactory.create("") }
 
-    private val specMap: Map<InterfaceId, InterfaceSpec<*>>
-        get() =
-            mapOf(
-                InterfaceId.MOCK to mockSpec.value,
-                InterfaceId.NOP to NopInterfaceSpec(nopInterfaceFactory),
-                InterfaceId.SERIAL to serialSpec.value,
-                InterfaceId.TCP to tcpSpec.value,
-            )
+    private val specMap: Map<InterfaceId, InterfaceSpec<*>> by lazy {
+        mapOf(
+            InterfaceId.MOCK to mockSpec.value,
+            InterfaceId.NOP to NopInterfaceSpec(nopInterfaceFactory),
+            InterfaceId.SERIAL to serialSpec.value,
+            InterfaceId.TCP to tcpSpec.value,
+        )
+    }
 
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 

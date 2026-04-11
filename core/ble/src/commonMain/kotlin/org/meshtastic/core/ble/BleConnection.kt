@@ -50,8 +50,8 @@ interface BleConnection {
     /** Connects to the given [BleDevice]. */
     suspend fun connect(device: BleDevice)
 
-    /** Connects to the given [BleDevice] and waits for a terminal state. */
-    suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState
+    /** Connects to the given [BleDevice] and waits for a terminal state or [timeout]. */
+    suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState
 
     /** Disconnects from the current device. */
     suspend fun disconnect()

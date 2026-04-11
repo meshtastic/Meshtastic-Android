@@ -63,7 +63,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3
 private const val SCAN_RETRY_DELAY_MS = 1000L
-private const val CONNECTION_TIMEOUT_MS = 15_000L
+private val CONNECTION_TIMEOUT = 15.seconds
 private const val RECONNECT_FAILURE_THRESHOLD = 3
 private const val RECONNECT_BASE_DELAY_MS = 5_000L
 private const val RECONNECT_MAX_DELAY_MS = 60_000L
@@ -131,7 +131,7 @@ class BleRadioInterface(
     private val bluetoothRepository: BluetoothRepository,
     private val connectionFactory: BleConnectionFactory,
     private val service: RadioInterfaceService,
-    val address: String,
+    internal val address: String,
 ) : RadioTransport {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
@@ -237,7 +237,7 @@ class BleRadioInterface(
                             }
                         }
 
-                        val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                        val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
 
                         if (state !is BleConnectionState.Connected) {
                             throw RadioNotConnectedException("Failed to connect to device at address $address")

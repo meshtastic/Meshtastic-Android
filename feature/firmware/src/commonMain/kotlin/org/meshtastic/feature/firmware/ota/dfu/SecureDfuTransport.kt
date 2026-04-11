@@ -48,6 +48,7 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.DEFAULT_BLE_WRITE_VALUE_LENGTH
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Kable-based transport for the Nordic Secure DFU (Secure DFU over BLE) protocol.
@@ -96,7 +97,7 @@ class SecureDfuTransport(
                 ?: throw DfuException.ConnectionFailed("Device $address not found for buttonless DFU trigger")
 
         Logger.i { "DFU: Connecting to $address to trigger buttonless DFU..." }
-        bleConnection.connectAndAwait(device, CONNECT_TIMEOUT_MS)
+        bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
 
         bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
             val buttonlessChar = service.characteristic(SecureDfuUuids.BUTTONLESS_NO_BONDS)
@@ -162,7 +163,7 @@ class SecureDfuTransport(
 
         bleConnection.connectionState.onEach { Logger.d { "DFU: Connection state → $it" } }.launchIn(transportScope)
 
-        val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT_MS)
+        val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
         if (connected is BleConnectionState.Disconnected) {
             throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address}")
         }
@@ -550,7 +551,7 @@ class SecureDfuTransport(
     // ---------------------------------------------------------------------------
 
     companion object {
-        private const val CONNECT_TIMEOUT_MS = 15_000L
+        private val CONNECT_TIMEOUT = 15.seconds
         private const val COMMAND_TIMEOUT_MS = 30_000L
         private const val SUBSCRIPTION_SETTLE_MS = 500L
         private const val BUTTONLESS_RESPONSE_TIMEOUT_MS = 3_000L

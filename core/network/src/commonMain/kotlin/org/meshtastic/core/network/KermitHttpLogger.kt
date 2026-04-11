@@ -14,18 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.ble
+package org.meshtastic.core.network
 
-import kotlinx.coroutines.CoroutineScope
-import org.koin.core.annotation.Single
+import co.touchlab.kermit.Logger
+import io.ktor.client.plugins.logging.Logger as KtorLogger
 
-@Single
-class KableBleConnectionFactory : BleConnectionFactory {
-    /**
-     * Creates a new [KableBleConnection].
-     *
-     * [tag] is unused because Kable's own log identifier is set per-peripheral inside [KableBleConnection.connect]
-     * using the device address, which provides more precise context than a factory-time tag.
-     */
-    override fun create(scope: CoroutineScope, tag: String): BleConnection = KableBleConnection(scope)
+/**
+ * Bridges Ktor's HTTP client logging to [Kermit][Logger] so HTTP request/response events appear in the standard app
+ * logs rather than going to [System.out] via Ktor's default [io.ktor.client.plugins.logging.Logger.DEFAULT].
+ *
+ * Usage:
+ * ```
+ * HttpClient(engine) {
+ *     install(Logging) {
+ *         logger = KermitHttpLogger
+ *         level = LogLevel.HEADERS
+ *     }
+ * }
+ * ```
+ */
+object KermitHttpLogger : KtorLogger {
+    override fun log(message: String) {
+        Logger.d { message }
+    }
 }

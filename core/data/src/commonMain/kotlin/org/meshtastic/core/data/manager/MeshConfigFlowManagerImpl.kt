@@ -84,7 +84,7 @@ class MeshConfigFlowManagerImpl(
          * [rawMyNodeInfo] arrives first (my_info packet); [metadata] may arrive shortly after. Both are consumed
          * together by [buildMyNodeInfo] at Stage 1 completion.
          */
-        data class ReceivingConfig(val rawMyNodeInfo: ProtoMyNodeInfo, var metadata: DeviceMetadata? = null) :
+        data class ReceivingConfig(val rawMyNodeInfo: ProtoMyNodeInfo, val metadata: DeviceMetadata? = null) :
             HandshakeState()
 
         /**
@@ -231,7 +231,7 @@ class MeshConfigFlowManagerImpl(
         Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
         val state = handshakeState
         if (state is HandshakeState.ReceivingConfig) {
-            state.metadata = metadata
+            handshakeState = state.copy(metadata = metadata)
             // Persist the metadata immediately — buildMyNodeInfo() reads it at Stage 1 complete,
             // but the DB write does not need to wait until then.
             if (metadata != DeviceMetadata()) {

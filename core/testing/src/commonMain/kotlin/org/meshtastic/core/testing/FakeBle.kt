@@ -124,7 +124,7 @@ class FakeBleConnection :
         }
     }
 
-    override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState {
+    override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState {
         connectException?.let { throw it }
         if (failNextN > 0) {
             failNextN--

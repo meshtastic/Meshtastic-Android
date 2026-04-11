@@ -38,19 +38,14 @@ class SerialInterface(
         connect()
     }
 
-    override fun onDeviceDisconnect(waitForStopped: Boolean) {
+    override fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean) {
         connRef.get()?.close(waitForStopped)
-        super.onDeviceDisconnect(waitForStopped)
+        super.onDeviceDisconnect(waitForStopped, isPermanent)
     }
 
     override fun connect() {
         val deviceMap = usbRepository.serialDevices.value
-        val device =
-            if (deviceMap.containsKey(address)) {
-                deviceMap[address]!!
-            } else {
-                deviceMap.map { (_, driver) -> driver }.firstOrNull()
-            }
+        val device = deviceMap[address] ?: deviceMap.values.firstOrNull()
         if (device == null) {
             Logger.e { "[$address] Serial device not found at address" }
         } else {

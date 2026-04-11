@@ -38,6 +38,7 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
+import kotlin.time.Duration.Companion.seconds
 
 /** BLE transport implementation for ESP32 Unified OTA protocol using Kable. */
 class BleOtaTransport(
@@ -96,7 +97,7 @@ class BleOtaTransport(
             .launchIn(transportScope)
 
         try {
-            val finalState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+            val finalState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
             if (finalState is BleConnectionState.Disconnected) {
                 Logger.w { "BLE OTA: Failed to connect to ${device.address} (state=$finalState)" }
                 throw OtaProtocolException.ConnectionFailed("Failed to connect to device at address ${device.address}")
@@ -281,7 +282,7 @@ class BleOtaTransport(
     }
 
     companion object {
-        private const val CONNECTION_TIMEOUT_MS = 15_000L
+        private val CONNECTION_TIMEOUT = 15.seconds
         private const val SUBSCRIPTION_SETTLE_MS = 500L
         private const val ERASING_TIMEOUT_MS = 60_000L
         private const val ACK_TIMEOUT_MS = 10_000L

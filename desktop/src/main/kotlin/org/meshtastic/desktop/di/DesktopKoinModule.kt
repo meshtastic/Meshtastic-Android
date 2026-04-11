@@ -20,6 +20,8 @@ package org.meshtastic.desktop.di
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.java.Java
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
@@ -30,6 +32,7 @@ import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.LocationRepository
@@ -168,7 +171,15 @@ private fun desktopPlatformStubsModule() = module {
     }
 
     // Ktor HttpClient for JVM/Desktop (equivalent of CoreNetworkAndroidModule on Android)
-    single<HttpClient> { HttpClient(Java) { install(ContentNegotiation) { json(get<Json>()) } } }
+    single<HttpClient> {
+        HttpClient(Java) {
+            install(ContentNegotiation) { json(get<Json>()) }
+            install(Logging) {
+                logger = KermitHttpLogger
+                level = LogLevel.HEADERS
+            }
+        }
+    }
 
     // Desktop stubs for data sources that load from Android assets on mobile
     single<FirmwareReleaseJsonDataSource> {
