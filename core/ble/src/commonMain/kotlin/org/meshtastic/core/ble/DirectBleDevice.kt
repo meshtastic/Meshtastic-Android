@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 /** Represents a BLE device known by address only (e.g. from bonded list) without an active advertisement. */
 class DirectBleDevice(override val address: String, override val name: String? = null) : BleDevice {
-    private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
+    private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
     override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
 
     override val isBonded: Boolean = true

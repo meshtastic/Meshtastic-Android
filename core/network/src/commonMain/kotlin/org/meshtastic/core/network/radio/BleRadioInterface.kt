@@ -45,7 +45,9 @@ import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.ble.DisconnectReason
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
+import org.meshtastic.core.ble.classifyBleException
 import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.ble.toMeshtasticRadioProfile
 import org.meshtastic.core.common.util.nowMillis
@@ -94,6 +96,17 @@ internal fun computeReconnectBackoffMs(consecutiveFailures: Int): Long {
 // burst from the radio can arrive before notifications are enabled, causing the first
 // handshake attempt to look like a stall.
 private const val CCCD_SETTLE_MS = 50L
+
+/**
+ * Milliseconds to wait after writing a heartbeat before re-polling FROMRADIO.
+ *
+ * The ESP32 firmware processes TORADIO writes asynchronously (NimBLE callback → FreeRTOS main task queue →
+ * `handleToRadio()` → `heartbeatReceived = true`). The immediate drain trigger in
+ * [KableMeshtasticRadioProfile.sendToRadio] fires before this completes, so the `queueStatus` response is not yet
+ * available. 200 ms is well above observed ESP32 task scheduling latency (~10–50 ms) while remaining imperceptible to
+ * the user.
+ */
+private const val HEARTBEAT_DRAIN_DELAY_MS = 200L
 
 private val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
@@ -252,11 +265,13 @@ class BleRadioInterface(
                         // Use coroutineScope so that the connectionState listener is scoped to this
                         // iteration only. When the inner scope exits (on disconnect), the listener is
                         // cancelled automatically before the next reconnect cycle starts a fresh one.
+                        var disconnectReason: DisconnectReason = DisconnectReason.Unknown
                         coroutineScope {
                             bleConnection.connectionState
                                 .onEach { s ->
                                     if (s is BleConnectionState.Disconnected && isFullyConnected) {
                                         isFullyConnected = false
+                                        disconnectReason = s.reason
                                         onDisconnected()
                                     }
                                 }
@@ -269,7 +284,16 @@ class BleRadioInterface(
                             bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
                         }
 
-                        Logger.i { "[$address] BLE connection dropped, preparing to reconnect" }
+                        Logger.i {
+                            "[$address] BLE connection dropped (reason: $disconnectReason), preparing to reconnect"
+                        }
+
+                        // Local disconnects are intentional (close() or device switch) — don't
+                        // count them as failures or attempt reconnection.
+                        if (disconnectReason is DisconnectReason.LocalDisconnect) {
+                            consecutiveFailures = 0
+                            continue
+                        }
 
                         // Only reset the failure counter if the connection was stable (lasted
                         // longer than MIN_STABLE_CONNECTION_MS). A connection that drops within
@@ -481,6 +505,17 @@ class BleRadioInterface(
         val nonce = heartbeatNonce.fetchAndAdd(1)
         Logger.v { "[$address] BLE keepAlive — sending ToRadio heartbeat (nonce=$nonce)" }
         handleSendToRadio(ToRadio(heartbeat = Heartbeat(nonce = nonce)).encode())
+
+        // The firmware responds to heartbeats by queuing a `queueStatus` FromRadio packet
+        // on the next getFromRadio() call, but it does NOT send a FROMNUM notification for
+        // it. The immediate drain trigger in sendToRadio() fires before the ESP32's async
+        // task queue has processed the heartbeat, so the response sits unread. Schedule a
+        // delayed re-drain to pick it up.
+        connectionScope.launch {
+            @Suppress("MagicNumber")
+            delay(HEARTBEAT_DRAIN_DELAY_MS)
+            radioService?.requestDrain()
+        }
     }
 
     /** Closes the connection to the device. */
@@ -526,16 +561,22 @@ class BleRadioInterface(
     }
 
     private fun Throwable.toDisconnectReason(): Pair<Boolean, String> {
-        val isPermanent =
-            this::class.simpleName == "BluetoothUnavailableException" ||
-                this::class.simpleName == "ManagerClosedException"
+        // Classify known Kable exceptions first. This replaces the previous approach of matching
+        // on class name strings, which was broken — the string literals ("GattException",
+        // "BluetoothUnavailableException", "ManagerClosedException") didn't match any actual Kable
+        // exception class names and were dead code.
+        classifyBleException()?.let {
+            return Pair(it.isPermanent, it.message)
+        }
+
         val msg =
-            when {
-                this is RadioNotConnectedException -> this.message ?: "Device not found"
-                this is NoSuchElementException || this is IllegalArgumentException -> "Required characteristic missing"
-                this::class.simpleName == "GattException" -> "GATT Error: ${this.message}"
+            when (this) {
+                is RadioNotConnectedException -> this.message ?: "Device not found"
+                is NoSuchElementException,
+                is IllegalArgumentException,
+                -> "Required characteristic missing"
                 else -> this.message ?: this::class.simpleName ?: "Unknown"
             }
-        return Pair(isPermanent, msg)
+        return Pair(false, msg)
     }
 }

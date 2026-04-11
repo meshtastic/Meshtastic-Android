@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
-import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIOSYNC_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
@@ -33,14 +32,14 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 /**
  * [MeshtasticRadioProfile] implementation using Kable BLE characteristics.
  *
- * Supports both the modern `FROMRADIOSYNC` characteristic (single observe stream) and the legacy `FROMNUM` +
- * `FROMRADIO` polling fallback for older firmware versions.
+ * Uses the standard Meshtastic BLE protocol: FROMNUM notifications trigger polling reads on the FROMRADIO
+ * characteristic. The firmware gates FROMNUM notifications behind `STATE_SEND_PACKETS`, so during the config handshake
+ * we seed the drain trigger to poll proactively.
  */
 class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticRadioProfile {
 
     private val toRadio = service.characteristic(TORADIO_CHARACTERISTIC)
     private val fromRadioChar = service.characteristic(FROMRADIO_CHARACTERISTIC)
-    private val fromRadioSync = service.characteristic(FROMRADIOSYNC_CHARACTERISTIC)
     private val fromNum = service.characteristic(FROMNUM_CHARACTERISTIC)
     private val logRadioChar = service.characteristic(LOGRADIO_CHARACTERISTIC)
 
@@ -52,55 +51,41 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
     // collector immediately on subscription. This is what drives the initial FROMRADIO poll
     // during the config-handshake phase, where the firmware suppresses FROMNUM notifications
     // (it only emits them in STATE_SEND_PACKETS). Without the initial replay the entire config
-    // stream would be silently skipped on devices that lack FROMRADIOSYNC.
+    // stream would be silently skipped.
     private val triggerDrain =
         MutableSharedFlow<Unit>(replay = 1, extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
-    // Using observe() for fromRadioSync or legacy read loop for fromRadio
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override val fromRadio: Flow<ByteArray> = channelFlow {
-        // Try to observe FROMRADIOSYNC if available. If it fails, fallback to FROMNUM/FROMRADIO.
-        // This mirrors the robust fallback logic originally established in the legacy Android Nordic implementation.
         launch {
-            try {
-                if (service.hasCharacteristic(fromRadioSync)) {
-                    service.observe(fromRadioSync).collect { send(it) }
-                } else {
-                    error("fromRadioSync missing")
+            // Wire up FROMNUM notifications for steady-state packet delivery.
+            launch {
+                if (service.hasCharacteristic(fromNum)) {
+                    service.observe(fromNum).collect { triggerDrain.tryEmit(Unit) }
                 }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Exception) {
-                // Fallback to legacy FROMNUM/FROMRADIO polling.
-                // Wire up FROMNUM notifications for steady-state packet delivery.
-                launch {
-                    if (service.hasCharacteristic(fromNum)) {
-                        service.observe(fromNum).collect { triggerDrain.tryEmit(Unit) }
-                    }
-                }
-                // Seed the replay buffer so the collector below starts draining immediately.
-                // The firmware does NOT send FROMNUM notifications during the config handshake
-                // (it gates them on STATE_SEND_PACKETS). Without this seed the entire config
-                // stream would never be read on devices that lack FROMRADIOSYNC.
-                triggerDrain.tryEmit(Unit)
-                triggerDrain.collect {
-                    var keepReading = true
-                    while (keepReading) {
-                        try {
-                            if (!service.hasCharacteristic(fromRadioChar)) {
-                                keepReading = false
-                                continue
-                            }
-                            val packet = service.read(fromRadioChar)
-                            if (packet.isEmpty()) keepReading = false else send(packet)
-                        } catch (e: CancellationException) {
-                            throw e
-                        } catch (e: Exception) {
-                            Logger.w(e) { "FROMRADIO read error, pausing before next drain trigger" }
+            }
+            // Seed the replay buffer so the collector below starts draining immediately.
+            // The firmware does NOT send FROMNUM notifications during the config handshake
+            // (it gates them on STATE_SEND_PACKETS). Without this seed the entire config
+            // stream would never be read.
+            triggerDrain.tryEmit(Unit)
+            triggerDrain.collect {
+                var keepReading = true
+                while (keepReading) {
+                    try {
+                        if (!service.hasCharacteristic(fromRadioChar)) {
                             keepReading = false
-                            // Don't permanently stop — the next triggerDrain emission will retry.
-                            delay(TRANSIENT_RETRY_DELAY_MS)
+                            continue
                         }
+                        val packet = service.read(fromRadioChar)
+                        if (packet.isEmpty()) keepReading = false else send(packet)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Logger.w(e) { "FROMRADIO read error, pausing before next drain trigger" }
+                        keepReading = false
+                        // Don't permanently stop — the next triggerDrain emission will retry.
+                        delay(TRANSIENT_RETRY_DELAY_MS)
                     }
                 }
             }
@@ -122,6 +107,10 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
 
     override suspend fun sendToRadio(packet: ByteArray) {
         service.write(toRadio, packet, service.preferredWriteType(toRadio))
+        triggerDrain.tryEmit(Unit)
+    }
+
+    override fun requestDrain() {
         triggerDrain.tryEmit(Unit)
     }
 }

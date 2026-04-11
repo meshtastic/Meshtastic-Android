@@ -28,4 +28,13 @@ interface MeshtasticRadioProfile {
 
     /** Sends a packet to the radio. */
     suspend fun sendToRadio(packet: ByteArray)
+
+    /**
+     * Requests a drain of the FROMRADIO characteristic without writing to TORADIO.
+     *
+     * This is useful when the firmware has queued a response (e.g. `queueStatus` after a heartbeat) but did not send a
+     * FROMNUM notification. Without an explicit drain trigger the response would sit unread until the next unrelated
+     * FROMNUM notification arrives.
+     */
+    fun requestDrain() {}
 }

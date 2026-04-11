@@ -27,7 +27,7 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
     override val address: String
         get() = advertisement.identifier.toString()
 
-    private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
+    private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
     override val state: StateFlow<BleConnectionState> = _state
 
     // Bonding is handled by the OS pairing dialog on Android; on desktop Kable connects directly.

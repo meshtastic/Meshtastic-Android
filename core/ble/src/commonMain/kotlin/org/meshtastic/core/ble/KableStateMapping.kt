@@ -32,7 +32,30 @@ fun State.toBleConnectionState(hasStartedConnecting: Boolean): BleConnectionStat
         is State.Disconnecting -> BleConnectionState.Disconnecting
         is State.Disconnected -> {
             if (!hasStartedConnecting) return null
-            BleConnectionState.Disconnected
+            BleConnectionState.Disconnected(status.toDisconnectReason())
         }
     }
+}
+
+/**
+ * Maps Kable's [State.Disconnected.Status] to [DisconnectReason].
+ *
+ * Groups platform-specific GATT/CBError codes into broad categories that the reconnect logic can act on without leaking
+ * platform details.
+ */
+fun State.Disconnected.Status?.toDisconnectReason(): DisconnectReason = when (this) {
+    null -> DisconnectReason.Unknown
+    State.Disconnected.Status.CentralDisconnected -> DisconnectReason.LocalDisconnect
+    State.Disconnected.Status.PeripheralDisconnected -> DisconnectReason.RemoteDisconnect
+    State.Disconnected.Status.Failed,
+    State.Disconnected.Status.L2CapFailure,
+    -> DisconnectReason.ConnectionFailed
+    State.Disconnected.Status.Timeout,
+    State.Disconnected.Status.LinkManagerProtocolTimeout,
+    -> DisconnectReason.Timeout
+    State.Disconnected.Status.Cancelled -> DisconnectReason.Cancelled
+    State.Disconnected.Status.EncryptionTimedOut -> DisconnectReason.EncryptionFailed
+    State.Disconnected.Status.ConnectionLimitReached -> DisconnectReason.ConnectionFailed
+    State.Disconnected.Status.UnknownDevice -> DisconnectReason.ConnectionFailed
+    is State.Disconnected.Status.Unknown -> DisconnectReason.PlatformSpecific(status)
 }
