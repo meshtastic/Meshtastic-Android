@@ -36,6 +36,7 @@ import org.meshtastic.core.testing.FakeBluetoothRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleRadioInterfaceTest {
@@ -164,14 +165,14 @@ class BleRadioInterfaceTest {
     }
 
     @Test
-    fun `computeReconnectBackoffMs returns correct backoff values`() {
-        assertEquals(5_000L, computeReconnectBackoffMs(0))
-        assertEquals(5_000L, computeReconnectBackoffMs(1))
-        assertEquals(10_000L, computeReconnectBackoffMs(2))
-        assertEquals(20_000L, computeReconnectBackoffMs(3))
-        assertEquals(40_000L, computeReconnectBackoffMs(4))
-        assertEquals(60_000L, computeReconnectBackoffMs(5))
-        assertEquals(60_000L, computeReconnectBackoffMs(10))
-        assertEquals(60_000L, computeReconnectBackoffMs(100))
+    fun `computeReconnectBackoff returns correct backoff values`() {
+        assertEquals(5.seconds, computeReconnectBackoff(0))
+        assertEquals(5.seconds, computeReconnectBackoff(1))
+        assertEquals(10.seconds, computeReconnectBackoff(2))
+        assertEquals(20.seconds, computeReconnectBackoff(3))
+        assertEquals(40.seconds, computeReconnectBackoff(4))
+        assertEquals(60.seconds, computeReconnectBackoff(5))
+        assertEquals(60.seconds, computeReconnectBackoff(10))
+        assertEquals(60.seconds, computeReconnectBackoff(100))
     }
 }

@@ -59,23 +59,23 @@ import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3
-private const val SCAN_RETRY_DELAY_MS = 1000L
+private val SCAN_RETRY_DELAY = 1.seconds
 private val CONNECTION_TIMEOUT = 15.seconds
 private const val RECONNECT_FAILURE_THRESHOLD = 3
-private const val RECONNECT_BASE_DELAY_MS = 5_000L
-private const val RECONNECT_MAX_DELAY_MS = 60_000L
+private val RECONNECT_BASE_DELAY = 5.seconds
+private val RECONNECT_MAX_DELAY = 60.seconds
 private const val RECONNECT_MAX_FAILURES = 10
 
-/**
- * Settle delay (ms) before each connection attempt to let the Android BLE stack finish any pending disconnect cleanup.
- */
-private const val SETTLE_DELAY_MS = 1000L
+/** Settle delay before each connection attempt to let the Android BLE stack finish any pending disconnect cleanup. */
+private val SETTLE_DELAY = 1.seconds
 
 /**
- * Minimum milliseconds a BLE connection must stay up before we consider it "stable" and reset
+ * Minimum time a BLE connection must stay up before we consider it "stable" and reset
  * [BleRadioInterface.consecutiveFailures]. Without this, a device at the edge of BLE range can repeatedly connect for a
  * fraction of a second and drop — each brief connection resets the failure counter so [RECONNECT_FAILURE_THRESHOLD] is
  * never reached, and the app never signals [ConnectionState.DeviceSleep].
@@ -83,20 +83,21 @@ private const val SETTLE_DELAY_MS = 1000L
  * The value (5 s) is long enough that only connections that survive past the initial GATT setup are treated as genuine,
  * but short enough that normal reconnects after light-sleep still reset the counter promptly.
  */
-private const val MIN_STABLE_CONNECTION_MS = 5_000L
+private val MIN_STABLE_CONNECTION = 5.seconds
 
 /**
- * Returns the reconnect backoff delay in milliseconds for a given consecutive failure count.
+ * Returns the reconnect backoff delay for a given consecutive failure count.
  *
  * Backoff schedule: 1 failure → 5 s 2 failures → 10 s 3 failures → 20 s 4 failures → 40 s 5+ failures → 60 s (capped)
  */
-internal fun computeReconnectBackoffMs(consecutiveFailures: Int): Long {
-    if (consecutiveFailures <= 0) return RECONNECT_BASE_DELAY_MS
-    return minOf(RECONNECT_BASE_DELAY_MS * (1L shl (consecutiveFailures - 1).coerceAtMost(4)), RECONNECT_MAX_DELAY_MS)
+internal fun computeReconnectBackoff(consecutiveFailures: Int): Duration {
+    if (consecutiveFailures <= 0) return RECONNECT_BASE_DELAY
+    val multiplier = 1 shl (consecutiveFailures - 1).coerceAtMost(4)
+    return minOf(RECONNECT_BASE_DELAY * multiplier, RECONNECT_MAX_DELAY)
 }
 
 /**
- * Milliseconds to wait after writing a heartbeat before re-polling FROMRADIO.
+ * Delay after writing a heartbeat before re-polling FROMRADIO.
  *
  * The ESP32 firmware processes TORADIO writes asynchronously (NimBLE callback → FreeRTOS main task queue →
  * `handleToRadio()` → `heartbeatReceived = true`). The immediate drain trigger in
@@ -104,7 +105,7 @@ internal fun computeReconnectBackoffMs(consecutiveFailures: Int): Long {
  * available. 200 ms is well above observed ESP32 task scheduling latency (~10–50 ms) while remaining imperceptible to
  * the user.
  */
-private const val HEARTBEAT_DRAIN_DELAY_MS = 200L
+private val HEARTBEAT_DRAIN_DELAY = 200.milliseconds
 
 private val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
@@ -201,7 +202,7 @@ class BleRadioInterface(
             }
 
             if (attempt < SCAN_RETRY_COUNT - 1) {
-                delay(SCAN_RETRY_DELAY_MS)
+                delay(SCAN_RETRY_DELAY)
             }
         }
 
@@ -216,7 +217,7 @@ class BleRadioInterface(
                     try {
                         // Settle delay: let the Android BLE stack finish any pending
                         // disconnect cleanup before starting a new connection attempt.
-                        delay(SETTLE_DELAY_MS)
+                        delay(SETTLE_DELAY)
 
                         connectionStartTime = nowMillis
                         Logger.i { "[$address] BLE connection attempt started" }
@@ -243,7 +244,7 @@ class BleRadioInterface(
                             throw RadioNotConnectedException("Failed to connect to device at address $address")
                         }
 
-                        // Only reset failures if connection was stable (see MIN_STABLE_CONNECTION_MS).
+                        // Only reset failures if connection was stable (see MIN_STABLE_CONNECTION).
                         val gattConnectedAt = nowMillis
                         isFullyConnected = true
                         onConnected()
@@ -278,17 +279,17 @@ class BleRadioInterface(
                             continue
                         }
 
-                        // A connection that drops almost immediately (< MIN_STABLE_CONNECTION_MS)
+                        // A connection that drops almost immediately (< MIN_STABLE_CONNECTION)
                         // is treated as a failure — the BLE stack may have "connected" to a
                         // cached GATT profile before realising the device is gone.
-                        val connectionUptime = nowMillis - gattConnectedAt
-                        if (connectionUptime >= MIN_STABLE_CONNECTION_MS) {
+                        val connectionUptime = (nowMillis - gattConnectedAt).milliseconds
+                        if (connectionUptime >= MIN_STABLE_CONNECTION) {
                             consecutiveFailures = 0
                         } else {
                             consecutiveFailures++
                             Logger.w {
-                                "[$address] Connection lasted only ${connectionUptime}ms " +
-                                    "(< ${MIN_STABLE_CONNECTION_MS}ms) — treating as failure " +
+                                "[$address] Connection lasted only $connectionUptime " +
+                                    "(< $MIN_STABLE_CONNECTION) — treating as failure " +
                                     "(consecutive failures: $consecutiveFailures)"
                             }
                             if (consecutiveFailures >= RECONNECT_MAX_FAILURES) {
@@ -310,10 +311,10 @@ class BleRadioInterface(
                         Logger.d { "[$address] BLE connection coroutine cancelled" }
                         throw e
                     } catch (e: Exception) {
-                        val failureTime = nowMillis - connectionStartTime
+                        val failureTime = (nowMillis - connectionStartTime).milliseconds
                         consecutiveFailures++
                         Logger.w(e) {
-                            "[$address] Failed to connect to device after ${failureTime}ms " +
+                            "[$address] Failed to connect to device after $failureTime " +
                                 "(consecutive failures: $consecutiveFailures)"
                         }
 
@@ -330,9 +331,9 @@ class BleRadioInterface(
                             handleFailure(e)
                         }
 
-                        val backoffMs = computeReconnectBackoffMs(consecutiveFailures)
-                        Logger.d { "[$address] Retrying in ${backoffMs}ms (failure #$consecutiveFailures)" }
-                        delay(backoffMs)
+                        val backoff = computeReconnectBackoff(consecutiveFailures)
+                        Logger.d { "[$address] Retrying in $backoff (failure #$consecutiveFailures)" }
+                        delay(backoff)
                     }
                 }
             }
@@ -463,8 +464,7 @@ class BleRadioInterface(
         // task queue has processed the heartbeat, so the response sits unread. Schedule a
         // delayed re-drain to pick it up.
         connectionScope.launch {
-            @Suppress("MagicNumber")
-            delay(HEARTBEAT_DRAIN_DELAY_MS)
+            delay(HEARTBEAT_DRAIN_DELAY)
             radioService?.requestDrain()
         }
     }

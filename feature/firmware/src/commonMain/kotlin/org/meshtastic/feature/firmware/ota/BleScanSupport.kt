@@ -26,7 +26,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 internal const val DEFAULT_SCAN_RETRY_COUNT = 3
-internal const val DEFAULT_SCAN_RETRY_DELAY_MS = 2_000L
+internal val DEFAULT_SCAN_RETRY_DELAY: Duration = 2.seconds
 internal val DEFAULT_SCAN_TIMEOUT: Duration = 10.seconds
 
 private const val MAC_PARTS_COUNT = 6
@@ -59,7 +59,7 @@ internal suspend fun scanForBleDevice(
     tag: String,
     serviceUuid: kotlin.uuid.Uuid,
     retryCount: Int = DEFAULT_SCAN_RETRY_COUNT,
-    retryDelayMs: Long = DEFAULT_SCAN_RETRY_DELAY_MS,
+    retryDelay: Duration = DEFAULT_SCAN_RETRY_DELAY,
     scanTimeout: Duration = DEFAULT_SCAN_TIMEOUT,
     predicate: (BleDevice) -> Boolean,
 ): BleDevice? {
@@ -80,7 +80,7 @@ internal suspend fun scanForBleDevice(
             return device
         }
         Logger.w { "$tag: Target not in ${foundDevices.size} devices found" }
-        if (attempt < retryCount - 1) delay(retryDelayMs)
+        if (attempt < retryCount - 1) delay(retryDelay)
     }
     return null
 }

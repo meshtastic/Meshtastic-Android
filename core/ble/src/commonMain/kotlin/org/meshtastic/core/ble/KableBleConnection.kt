@@ -40,6 +40,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 /** [BleService] implementation backed by a Kable [Peripheral] for a specific GATT service. */
@@ -96,7 +97,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
     companion object {
         /** Settle delay between a direct connect failure and the autoConnect fallback attempt. */
-        private const val AUTOCONNECT_FALLBACK_DELAY_MS = 1000L
+        private val AUTOCONNECT_FALLBACK_DELAY = 1.seconds
     }
 
     private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
@@ -177,7 +178,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                         throw e
                     }
                     Logger.d { "[${device.address}] Direct connect failed, falling back to autoConnect" }
-                    delay(AUTOCONNECT_FALLBACK_DELAY_MS)
+                    delay(AUTOCONNECT_FALLBACK_DELAY)
                     true
                 }
         }

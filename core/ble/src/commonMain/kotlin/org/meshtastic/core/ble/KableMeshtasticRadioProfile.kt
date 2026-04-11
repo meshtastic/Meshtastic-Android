@@ -31,6 +31,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * [MeshtasticRadioProfile] implementation using Kable BLE characteristics.
@@ -47,7 +48,7 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
     private val logRadioChar = service.characteristic(LOGRADIO_CHARACTERISTIC)
 
     companion object {
-        private const val TRANSIENT_RETRY_DELAY_MS = 500L
+        private val TRANSIENT_RETRY_DELAY = 500.milliseconds
     }
 
     private val subscriptionReady = CompletableDeferred<Unit>()
@@ -86,7 +87,7 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
                 } catch (e: Exception) {
                     Logger.w(e) { "FROMRADIO read error, pausing before next drain trigger" }
                     keepReading = false
-                    delay(TRANSIENT_RETRY_DELAY_MS)
+                    delay(TRANSIENT_RETRY_DELAY)
                 }
             }
         }
