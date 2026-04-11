@@ -35,10 +35,10 @@ import com.juul.kable.toIdentifier
 private val sharedThreadingStrategy = PooledThreadingStrategy()
 
 internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) {
-    // If we're connecting blindly to a bonded device without a fresh scan (DirectBleDevice),
-    // we MUST use autoConnect = true. Otherwise, Android's direct connect algorithm will often fail
-    // immediately with GATT 133 or timeout, especially if the device uses random resolvable addresses.
-    // If we just scanned the device (KableBleDevice), direct connection (autoConnect = false) is faster.
+    // Bonded devices without a fresh advertisement must use autoConnect = true. Otherwise,
+    // Android's direct connect algorithm often fails with GATT 133 or times out, especially
+    // if the device uses random resolvable addresses. Scanned devices (advertisement != null)
+    // use direct connection (autoConnect = false) for faster initial connects.
     autoConnectIf(autoConnect)
 
     threadingStrategy = sharedThreadingStrategy

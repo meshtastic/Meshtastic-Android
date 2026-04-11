@@ -16,17 +16,28 @@
  */
 package org.meshtastic.core.ble
 
+import com.juul.kable.Advertisement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Base implementation of [BleDevice] that consolidates shared state management, connection tracking, and RSSI reading.
+ * Unified [BleDevice] implementation for all BLE devices — scanned, bonded, or both.
  *
- * Subclasses only need to provide [name], [address], and [fallbackRssi] — everything else (state flow, bonded flag,
- * connection check, live RSSI via the active peripheral, bond no-op) is handled here.
+ * When created from a live BLE scan, [advertisement] is populated and used for optimal peripheral construction via
+ * `Peripheral(advertisement)`. When created from the OS bonded device list (address only), [advertisement] is `null`
+ * and the peripheral is constructed via `createPeripheral(address)` with `autoConnect = true`.
+ *
+ * @param address The device's MAC address (or platform identifier string).
+ * @param name The device's display name, if known.
+ * @param advertisement The Kable [Advertisement] from a live scan, or `null` for bonded-only devices.
  */
-abstract class BaseBleDevice : BleDevice {
+class MeshtasticBleDevice(
+    override val address: String,
+    override val name: String? = null,
+    val advertisement: Advertisement? = null,
+) : BleDevice {
+
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
     override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
 
@@ -36,19 +47,13 @@ abstract class BaseBleDevice : BleDevice {
     override val isConnected: Boolean
         get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.active?.address == address
 
-    /**
-     * Returns the RSSI value to use when no active peripheral is available (e.g. the cached advertisement RSSI for
-     * scanned devices, or 0 for bonded-only devices).
-     */
-    protected abstract fun fallbackRssi(): Int
-
     @OptIn(com.juul.kable.ExperimentalApi::class)
     override suspend fun readRssi(): Int {
         val active = ActiveBleConnection.active
         return if (active != null && active.address == address) {
             active.peripheral.rssi()
         } else {
-            fallbackRssi()
+            advertisement?.rssi ?: 0
         }
     }
 

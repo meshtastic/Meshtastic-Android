@@ -48,7 +48,15 @@ class KableBleScanner : BleScanner {
         // By wrapping it in a channelFlow with a timeout, we enforce the BleScanner contract cleanly.
         return channelFlow {
             withTimeoutOrNull(timeout) {
-                scanner.advertisements.collect { advertisement -> send(KableBleDevice(advertisement)) }
+                scanner.advertisements.collect { advertisement ->
+                    send(
+                        MeshtasticBleDevice(
+                            address = advertisement.identifier.toString(),
+                            name = advertisement.name,
+                            advertisement = advertisement,
+                        ),
+                    )
+                }
             }
         }
     }

@@ -115,7 +115,8 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override suspend fun connect(device: BleDevice) {
-        var autoConnect = device is DirectBleDevice
+        val meshtasticDevice = device as? MeshtasticBleDevice ?: error("Unsupported BleDevice type: ${device::class}")
+        var autoConnect = meshtasticDevice.advertisement == null
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
@@ -131,11 +132,8 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         }
 
         val p =
-            when (device) {
-                is KableBleDevice -> Peripheral(device.advertisement) { commonConfig() }
-                is DirectBleDevice -> createPeripheral(device.address) { commonConfig() }
-                else -> error("Unsupported BleDevice type: ${device::class}")
-            }
+            meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
+                ?: createPeripheral(device.address) { commonConfig() }
 
         cleanUpPeripheral(device.address)
         peripheral = p
@@ -154,7 +152,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                         hasStartedConnecting = true
                     }
 
-                    (device as BaseBleDevice).updateState(mappedState)
+                    meshtasticDevice.updateState(mappedState)
 
                     _connectionState.emit(mappedState)
                 }
