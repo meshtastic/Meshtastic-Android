@@ -97,7 +97,7 @@ jobs:
 
       - name: Lint, Analysis & KMP Smoke Compile
         if: inputs.run_lint == true
-        run: ./gradlew spotlessCheck detekt app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug mesh_service_example:lintDebug kmpSmokeCompile -Pci=true --continue --scan
+        run: ./gradlew spotlessCheck detekt app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug kmpSmokeCompile -Pci=true --continue --scan
 
       - name: KMP Smoke Compile (lint skipped)
         if: inputs.run_lint == false
@@ -176,14 +176,12 @@ jobs:
               :desktop:test
               :core:barcode:testFdroidDebugUnitTest
               :core:barcode:testGoogleDebugUnitTest
-              :mesh_service_example:test
             kover: >-
               :app:koverXmlReportFdroidDebug
               :app:koverXmlReportGoogleDebug
               :core:barcode:koverXmlReportFdroidDebug
               :core:barcode:koverXmlReportGoogleDebug
               :desktop:koverXmlReport
-              :mesh_service_example:koverXmlReportDebug
 
     steps:
       - name: Checkout code
@@ -287,7 +285,6 @@ jobs:
           tasks=(
             "app:assembleFdroidDebug"
             "app:assembleGoogleDebug"
-            "mesh_service_example:assembleDebug"
           )
 
           if [[ "${{ inputs.run_instrumented_tests }}" == "true" ]]; then
