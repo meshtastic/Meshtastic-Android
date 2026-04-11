@@ -77,6 +77,16 @@ interface BleService {
     /** Observes notifications/indications from the characteristic. */
     fun observe(characteristic: BleCharacteristic): Flow<ByteArray>
 
+    /**
+     * Observes notifications/indications from the characteristic with an [onSubscription] action that fires **after**
+     * notifications are enabled (CCCD written).
+     *
+     * The [onSubscription] is re-invoked on every reconnect while the returned [Flow] is active. Implementations that
+     * don't support subscription callbacks delegate to [observe] and ignore [onSubscription].
+     */
+    fun observe(characteristic: BleCharacteristic, onSubscription: suspend () -> Unit): Flow<ByteArray> =
+        observe(characteristic)
+
     /** Reads the characteristic value once. */
     suspend fun read(characteristic: BleCharacteristic): ByteArray
 

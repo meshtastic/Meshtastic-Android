@@ -51,6 +51,9 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
     override fun observe(characteristic: BleCharacteristic) =
         peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid))
 
+    override fun observe(characteristic: BleCharacteristic, onSubscription: suspend () -> Unit) =
+        peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid), onSubscription)
+
     override suspend fun read(characteristic: BleCharacteristic): ByteArray =
         peripheral.read(characteristicOf(serviceUuid, characteristic.uuid))
 
@@ -143,8 +146,6 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                 else -> error("Unsupported BleDevice type: ${device::class}")
             }
 
-        // Clean up previous peripheral under NonCancellable to prevent GATT resource leaks
-        // if the calling coroutine is cancelled during teardown.
         cleanUpPeripheral(device.address)
         peripheral = p
 
@@ -172,12 +173,9 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                 }
                 .launchIn(scope)
 
-        // Kable SensorTag pattern: try direct connect, fall back to autoConnect on failure.
-        // Only two attempts — the outer loop in BleRadioInterface owns retries and backoff.
         while (p.state.value !is State.Connected) {
             autoConnect.value =
                 try {
-                    // Cancel any previous connectionScope to avoid leaking the old coroutine scope.
                     connectionScope?.let { oldScope ->
                         Logger.d { "[${device.address}] Cancelling previous connectionScope before reconnect" }
                         oldScope.coroutineContext.job.cancel()

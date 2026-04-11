@@ -18,6 +18,7 @@ package org.meshtastic.core.ble
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -47,27 +48,27 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
         private const val TRANSIENT_RETRY_DELAY_MS = 500L
     }
 
-    // replay = 1: a seed emission placed here before the collector starts is replayed to the
-    // collector immediately on subscription. This is what drives the initial FROMRADIO poll
-    // during the config-handshake phase, where the firmware suppresses FROMNUM notifications
-    // (it only emits them in STATE_SEND_PACKETS). Without the initial replay the entire config
-    // stream would be silently skipped.
+    private val subscriptionReady = CompletableDeferred<Unit>()
+
+    /** Seed with replay=1 so the config-handshake drain starts before FROMNUM notifications are gated in. */
     private val triggerDrain =
         MutableSharedFlow<Unit>(replay = 1, extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override val fromRadio: Flow<ByteArray> = channelFlow {
         launch {
-            // Wire up FROMNUM notifications for steady-state packet delivery.
             launch {
                 if (service.hasCharacteristic(fromNum)) {
-                    service.observe(fromNum).collect { triggerDrain.tryEmit(Unit) }
+                    service
+                        .observe(fromNum) {
+                            Logger.d { "FROMNUM CCCD written — notifications enabled" }
+                            subscriptionReady.complete(Unit)
+                        }
+                        .collect { triggerDrain.tryEmit(Unit) }
+                } else {
+                    subscriptionReady.complete(Unit)
                 }
             }
-            // Seed the replay buffer so the collector below starts draining immediately.
-            // The firmware does NOT send FROMNUM notifications during the config handshake
-            // (it gates them on STATE_SEND_PACKETS). Without this seed the entire config
-            // stream would never be read.
             triggerDrain.tryEmit(Unit)
             triggerDrain.collect {
                 var keepReading = true
@@ -84,7 +85,6 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
                     } catch (e: Exception) {
                         Logger.w(e) { "FROMRADIO read error, pausing before next drain trigger" }
                         keepReading = false
-                        // Don't permanently stop — the next triggerDrain emission will retry.
                         delay(TRANSIENT_RETRY_DELAY_MS)
                     }
                 }
@@ -112,5 +112,9 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
 
     override fun requestDrain() {
         triggerDrain.tryEmit(Unit)
+    }
+
+    override suspend fun awaitSubscriptionReady() {
+        subscriptionReady.await()
     }
 }

@@ -90,13 +90,6 @@ internal fun computeReconnectBackoffMs(consecutiveFailures: Int): Long {
     return minOf(RECONNECT_BASE_DELAY_MS * (1L shl (consecutiveFailures - 1).coerceAtMost(4)), RECONNECT_MAX_DELAY_MS)
 }
 
-// Milliseconds to wait after launching characteristic observations before triggering the
-// Meshtastic handshake. Both fromRadio and logRadio observation flows write the CCCD
-// asynchronously via Kable's GATT queue. Without this settle window the want_config_id
-// burst from the radio can arrive before notifications are enabled, causing the first
-// handshake attempt to look like a stall.
-private const val CCCD_SETTLE_MS = 50L
-
 /**
  * Milliseconds to wait after writing a heartbeat before re-polling FROMRADIO.
  *
@@ -212,8 +205,8 @@ class BleRadioInterface(
             connectionScope.launch {
                 while (isActive) {
                     try {
-                        // Allow any pending background disconnects to complete and the Android BLE stack
-                        // to settle before we attempt a new connection.
+                        // Settle delay: let the Android BLE stack finish any pending
+                        // disconnect cleanup before starting a new connection attempt.
                         @Suppress("MagicNumber")
                         val connectDelayMs = 1000L
                         delay(connectDelayMs)
@@ -223,12 +216,9 @@ class BleRadioInterface(
 
                         val device = findDevice()
 
-                        // Ensure the device is bonded before connecting. On Android, the
-                        // firmware may require an encrypted link (pairing mode != NO_PIN).
-                        // Without an explicit bond the GATT connection will fail with
-                        // insufficient-authentication (status 5) or the dreaded status 133.
-                        // On Desktop/JVM this is a no-op since the OS handles pairing during
-                        // the GATT connection when the peripheral requires it.
+                        // Bond before connecting: firmware may require an encrypted link,
+                        // and without a bond Android fails with status 5 or 133.
+                        // No-op on Desktop/JVM where the OS handles pairing automatically.
                         if (!bluetoothRepository.isBonded(address)) {
                             Logger.i { "[$address] Device not bonded, initiating bonding" }
                             @Suppress("TooGenericExceptionCaught")
@@ -243,9 +233,8 @@ class BleRadioInterface(
                         var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
 
                         if (state !is BleConnectionState.Connected) {
-                            // Kable on Android occasionally fails the first connection attempt with
-                            // NotConnectedException if the previous peripheral wasn't fully cleaned
-                            // up by the OS. A quick retry resolves it.
+                            // Kable sometimes fails the first attempt if the previous GATT
+                            // session wasn't fully cleaned up by the OS. One retry resolves it.
                             Logger.d { "[$address] First connection attempt failed, retrying in 1.5s" }
                             @Suppress("MagicNumber")
                             delay(1500L)
@@ -256,15 +245,13 @@ class BleRadioInterface(
                             throw RadioNotConnectedException("Failed to connect to device at address $address")
                         }
 
-                        // Connection succeeded — only reset the failure counter if the
-                        // connection stays up long enough. See MIN_STABLE_CONNECTION_MS.
+                        // Only reset failures if connection was stable (see MIN_STABLE_CONNECTION_MS).
                         val gattConnectedAt = nowMillis
                         isFullyConnected = true
                         onConnected()
 
-                        // Use coroutineScope so that the connectionState listener is scoped to this
-                        // iteration only. When the inner scope exits (on disconnect), the listener is
-                        // cancelled automatically before the next reconnect cycle starts a fresh one.
+                        // Scope the connectionState listener to this iteration so it's
+                        // cancelled automatically before the next reconnect cycle.
                         var disconnectReason: DisconnectReason = DisconnectReason.Unknown
                         coroutineScope {
                             bleConnection.connectionState
@@ -280,7 +267,6 @@ class BleRadioInterface(
 
                             discoverServicesAndSetupCharacteristics()
 
-                            // Suspend here until Kable drops the connection
                             bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
                         }
 
@@ -288,20 +274,15 @@ class BleRadioInterface(
                             "[$address] BLE connection dropped (reason: $disconnectReason), preparing to reconnect"
                         }
 
-                        // Local disconnects are intentional (close() or device switch) — don't
-                        // count them as failures or attempt reconnection.
+                        // Skip failure counting for intentional disconnects.
                         if (disconnectReason is DisconnectReason.LocalDisconnect) {
                             consecutiveFailures = 0
                             continue
                         }
 
-                        // Only reset the failure counter if the connection was stable (lasted
-                        // longer than MIN_STABLE_CONNECTION_MS). A connection that drops within
-                        // seconds typically means the device is at the edge of BLE range or
-                        // powered off — the Android BLE stack may briefly "connect" to a cached
-                        // GATT profile before realising the device is gone. Without this guard,
-                        // the failure counter resets on every brief connect, preventing us from
-                        // ever reaching RECONNECT_FAILURE_THRESHOLD and signalling DeviceSleep.
+                        // A connection that drops almost immediately (< MIN_STABLE_CONNECTION_MS)
+                        // is treated as a failure — the BLE stack may have "connected" to a
+                        // cached GATT profile before realising the device is gone.
                         val connectionUptime = nowMillis - gattConnectedAt
                         if (connectionUptime >= MIN_STABLE_CONNECTION_MS) {
                             consecutiveFailures = 0
@@ -338,9 +319,7 @@ class BleRadioInterface(
                                 "(consecutive failures: $consecutiveFailures)"
                         }
 
-                        // After exceeding the max failure limit, give up permanently to stop
-                        // draining battery on a device that is genuinely offline. The user
-                        // must manually reconnect from the connections screen.
+                        // Give up permanently to stop draining battery.
                         if (consecutiveFailures >= RECONNECT_MAX_FAILURES) {
                             Logger.e { "[$address] Giving up after $consecutiveFailures consecutive failures" }
                             val (_, msg) = e.toDisconnectReason()
@@ -348,15 +327,11 @@ class BleRadioInterface(
                             return@launch
                         }
 
-                        // At the failure threshold, signal DeviceSleep so
-                        // MeshConnectionManagerImpl can start its sleep timeout.
+                        // Signal DeviceSleep so MeshConnectionManagerImpl starts its sleep timeout.
                         if (consecutiveFailures >= RECONNECT_FAILURE_THRESHOLD) {
                             handleFailure(e)
                         }
 
-                        // Exponential backoff: 5s → 10s → 20s → 40s → capped at 60s.
-                        // Reduces BLE stack pressure and battery drain when the device is genuinely
-                        // out of range, while still recovering quickly from transient drops.
                         val backoffMs = computeReconnectBackoffMs(consecutiveFailures)
                         Logger.d { "[$address] Retrying in ${backoffMs}ms (failure #$consecutiveFailures)" }
                         delay(backoffMs)
@@ -391,10 +366,7 @@ class BleRadioInterface(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        // Signal DeviceSleep immediately so the UI reflects the disconnect while the
-        // reconnect loop continues in the background. The previous approach suppressed
-        // this signal until RECONNECT_FAILURE_THRESHOLD consecutive failures, leaving the
-        // UI stuck on "Connected" for 35+ seconds after the device disappeared.
+        // Signal immediately so the UI reflects the disconnect while reconnect continues.
         service.onDisconnect(isPermanent = false)
     }
 
@@ -403,7 +375,6 @@ class BleRadioInterface(
             bleConnection.profile(serviceUuid = SERVICE_UUID) { service ->
                 val radioService = service.toMeshtasticRadioProfile()
 
-                // Wire up notifications
                 radioService.fromRadio
                     .onEach { packet ->
                         Logger.v { "[$address] Received packet fromRadio (${packet.size} bytes)" }
@@ -426,16 +397,12 @@ class BleRadioInterface(
                     }
                     .launchIn(this)
 
-                // Store reference for handleSendToRadio
                 this@BleRadioInterface.radioService = radioService
 
                 Logger.i { "[$address] Profile service active and characteristics subscribed" }
 
-                // Give Kable's async CCCD writes time to complete before triggering the
-                // Meshtastic handshake. The fromRadio/logRadio observation flows register
-                // notifications through the GATT queue asynchronously. Without this settle
-                // window, the want_config_id burst arrives before notifications are enabled.
-                delay(CCCD_SETTLE_MS)
+                // Wait for FROMNUM CCCD write before triggering the Meshtastic handshake.
+                radioService.awaitSubscriptionReady()
 
                 // Log negotiated MTU for diagnostics
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
@@ -445,10 +412,8 @@ class BleRadioInterface(
             }
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
-            // Ensure the peripheral is disconnected so the outer reconnect loop sees a clean
-            // Disconnected state. Do NOT call handleFailure here — the reconnect loop tracks
-            // consecutive failures and calls handleFailure after RECONNECT_FAILURE_THRESHOLD,
-            // preventing premature onDisconnect signals to the service on transient errors.
+            // Disconnect to let the outer reconnect loop see a clean Disconnected state.
+            // Do NOT call handleFailure here — the reconnect loop owns failure counting.
             try {
                 bleConnection.disconnect()
             } catch (ignored: Exception) {
@@ -527,14 +492,10 @@ class BleRadioInterface(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        // Cancel the connection scope to break the while(isActive) reconnect loop.
         connectionScope.cancel("close() called")
-        // GATT cleanup must survive serviceScope cancellation. SharedRadioInterfaceService calls
-        // close() and then immediately cancels serviceScope — a coroutine launched on serviceScope
-        // may never be dispatched, leaving the BluetoothGatt object leaked (causes GATT 133 on the
-        // next connect attempt). GlobalScope is the correct tool here: the cleanup is short-lived,
-        // fire-and-forget, and must outlive any application-managed scope.
-        // onDisconnect is handled by SharedRadioInterfaceService.stopInterfaceLocked() directly.
+        // GATT cleanup must outlive serviceScope cancellation — GlobalScope is intentional.
+        // SharedRadioInterfaceService cancels serviceScope immediately after close(), so a
+        // coroutine launched there may never run, leaking BluetoothGatt (causes GATT 133).
         @OptIn(DelicateCoroutinesApi::class)
         GlobalScope.launch {
             try {
@@ -561,10 +522,6 @@ class BleRadioInterface(
     }
 
     private fun Throwable.toDisconnectReason(): Pair<Boolean, String> {
-        // Classify known Kable exceptions first. This replaces the previous approach of matching
-        // on class name strings, which was broken — the string literals ("GattException",
-        // "BluetoothUnavailableException", "ManagerClosedException") didn't match any actual Kable
-        // exception class names and were dead code.
         classifyBleException()?.let {
             return Pair(it.isPermanent, it.message)
         }

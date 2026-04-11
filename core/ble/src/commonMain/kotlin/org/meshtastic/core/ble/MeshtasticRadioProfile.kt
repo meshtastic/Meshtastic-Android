@@ -37,4 +37,13 @@ interface MeshtasticRadioProfile {
      * FROMNUM notification arrives.
      */
     fun requestDrain() {}
+
+    /**
+     * Suspends until GATT notifications are enabled (CCCD written) for the primary observation characteristic.
+     *
+     * Callers should await this before triggering the Meshtastic handshake (`want_config_id`) to guarantee that FROMNUM
+     * notifications will be delivered. The default implementation returns immediately for profiles where CCCD readiness
+     * is not observable (e.g. fakes and non-BLE transports).
+     */
+    suspend fun awaitSubscriptionReady() {}
 }
