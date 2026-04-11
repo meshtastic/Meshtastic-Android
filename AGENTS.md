@@ -54,7 +54,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `wifi-provision`, `widget`). All are KMP with `jvm()` and `ios()` targets except `widget`. Use `meshtastic.kmp.feature` convention plugin. |
 | `feature/wifi-provision` | KMP WiFi provisioning via BLE (Nymea protocol). Scans for provisioning devices, lists available networks, applies credentials. Uses `core:ble` Kable abstractions. |
 | `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi via Kable/Ktor), native Nordic Secure DFU protocol (pure KMP, no Nordic library), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
-| `desktop/` | Compose Desktop application — first non-Android KMP target. Thin host shell relying entirely on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports with `want_config` handshake. |
+| `desktop/` | Compose Desktop application — first non-Android KMP target. Thin host shell relying entirely on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports with `want_config` handshake. Versioning mirrors Android via `config.properties` + `GitVersionValueSource`; a `generateDesktopBuildConfig` task produces `DesktopBuildConfig.kt` at build time. |
 | `mesh_service_example/` | **DEPRECATED — scheduled for removal.** Legacy sample app showing `core:api` service integration. Do not add code here. See `core/api/README.md` for the current integration guide. |
 
 ## 3. Development Guidelines & Coding Standards
@@ -168,7 +168,7 @@ Always run commands in the following order to ensure reliability. Do not attempt
       Each shard generates its own Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
       Downstream jobs (test-shards, android-check, build-desktop) use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
    3. **`android-check`** — Builds APKs and runs instrumented tests (depends on `lint-check`).
-  4. **`build-desktop`** — Desktop packaging (depends on `lint-check`).
+  4. **`build-desktop`** — Multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) that builds runnable desktop distributions via `createDistributable` (depends on `lint-check`). The Kotlin/Native host-platform warning on `linux-aarch64` is non-fatal; only JVM targets are compiled for desktop.
 - Test sharding uses `fail-fast: false` so a failure in one shard does not cancel the others.
 - JUnit Platform parallel execution is enabled project-wide with classes running sequentially (`junit.jupiter.execution.parallel.mode.classes.default=same_thread`) to avoid `Dispatchers.setMain()` races (JVM-global singleton used by 19+ ViewModel test classes). Cross-module parallelism comes from Gradle forks (`maxParallelForks`).
 - `test-retry` plugin (maxRetries=2, maxFailures=10) is applied to all module types: `AndroidApplicationConventionPlugin`, `AndroidLibraryConventionPlugin`, and `KmpLibraryConventionPlugin`.
@@ -180,7 +180,7 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - **Runner strategy (three tiers):**
   - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). These run only shell scripts or GitHub API calls and benefit from ARM runners' shorter queue times.
   - **`ubuntu-24.04`** — Main Gradle-heavy jobs (CI `lint-check`/`test-shards`/`android-check`, release builds, Dokka, CodeQL, publish, dependency-submission). Pin where possible for reproducibility.
-  - **Desktop runners:** Reusable CI uses `ubuntu-24.04` for the `build-desktop` job in `.github/workflows/reusable-check.yml`; release packaging matrix remains `[macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]`.
+  - **Desktop runners:** Reusable CI uses a multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) for the `build-desktop` job in `.github/workflows/reusable-check.yml`; release packaging matrix remains `[macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]`.
 - **CI Gradle properties:** `gradle.properties` is tuned for local dev (8g heap, 4g Kotlin daemon). CI uses `.github/ci-gradle.properties`, which the `gradle-setup` composite action copies to `~/.gradle/gradle.properties` before any Gradle invocation. Key CI overrides: `org.gradle.daemon=false` (single-use runners), `kotlin.incremental=false` (fresh checkouts), `-Xmx4g` Gradle heap, `-Xmx2g` Kotlin daemon, VFS watching disabled, workers capped at 4, `org.gradle.isolated-projects=true` for better parallelism. Disables unused Android build features (`resvalues`, `shaders`). This follows the nowinandroid `ci-gradle.properties` pattern.
 - **CI optimization strategies (2026):** Applied comprehensive CI optimizations (P0-P3):
   - **P0 (merged Gradle invocations):** `lint-check` merges spotlessCheck, detekt, android lint, and kmpSmokeCompile into a single Gradle invocation to avoid 3x cold-start overhead. Uses `filter: 'blob:none'` for blobless git clone. Switches submodules from `'recursive'` to boolean (saves overhead on nested submodule discovery).

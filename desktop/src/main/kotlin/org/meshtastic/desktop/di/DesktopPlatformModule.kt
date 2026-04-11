@@ -39,6 +39,7 @@ import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
+import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -90,15 +91,15 @@ fun desktopPlatformModule() = module {
 
     includes(desktopPreferencesDataStoreModule(dataStoreScope), desktopProtoDataStoreModule(dataStoreScope))
 
-    // -- Build config --
+    // -- Build config (values generated at build time by generateDesktopBuildConfig) --
     single<BuildConfigProvider> {
         object : BuildConfigProvider {
-            override val isDebug: Boolean = true
-            override val applicationId: String = "org.meshtastic.desktop"
-            override val versionCode: Int = 1
-            override val versionName: String = "2.7.14"
-            override val absoluteMinFwVersion: String = "2.3.15"
-            override val minFwVersion: String = "2.5.14"
+            override val isDebug: Boolean = DesktopBuildConfig.IS_DEBUG
+            override val applicationId: String = DesktopBuildConfig.APPLICATION_ID
+            override val versionCode: Int = DesktopBuildConfig.VERSION_CODE
+            override val versionName: String = DesktopBuildConfig.VERSION_NAME
+            override val absoluteMinFwVersion: String = DesktopBuildConfig.ABS_MIN_FW_VERSION
+            override val minFwVersion: String = DesktopBuildConfig.MIN_FW_VERSION
         }
     }
 

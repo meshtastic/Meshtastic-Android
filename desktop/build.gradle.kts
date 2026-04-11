@@ -20,6 +20,8 @@ import com.mikepenz.aboutlibraries.plugin.DuplicateRule
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.meshtastic.buildlogic.GitVersionValueSource
+import org.meshtastic.buildlogic.configProperties
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -31,6 +33,71 @@ plugins {
     id("meshtastic.kover")
     alias(libs.plugins.aboutlibraries)
 }
+
+// ── Version resolution (mirrors app/build.gradle.kts) ────────────────────────
+val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
+
+val vcOffset = configProperties.getProperty("VERSION_CODE_OFFSET")?.toInt() ?: 0
+val resolvedVersionCode: Int =
+    project.findProperty("android.injected.version.code")?.toString()?.toInt()
+        ?: System.getenv("VERSION_CODE")?.toInt()
+        ?: (gitVersionProvider.get().toInt() + vcOffset)
+val resolvedVersionName: String =
+    project.findProperty("android.injected.version.name")?.toString()
+        ?: project.findProperty("appVersionName")?.toString()
+        ?: System.getenv("VERSION_NAME")
+        ?: configProperties.getProperty("VERSION_NAME_BASE")
+        ?: "1.0.0"
+val resolvedIsDebug: Boolean = project.findProperty("desktop.release")?.toString()?.toBoolean()?.not() ?: true
+val resolvedMinFwVersion: String = configProperties.getProperty("MIN_FW_VERSION") ?: ""
+val resolvedAbsMinFwVersion: String = configProperties.getProperty("ABS_MIN_FW_VERSION") ?: ""
+
+// ── Generate DesktopBuildConfig ──────────────────────────────────────────────
+// Mirrors AGP's BuildConfig for Android so the desktop runtime has access to the
+// same version metadata without hardcoding.
+// Uses an abstract task with typed properties so the configuration cache can
+// serialise it without capturing build-script object references.
+@CacheableTask
+abstract class GenerateBuildConfigTask : DefaultTask() {
+    @get:Input abstract val content: Property<String>
+
+    @get:OutputDirectory abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val dir = outputDir.get().asFile
+        dir.mkdirs()
+        dir.resolve("DesktopBuildConfig.kt").writeText(content.get())
+    }
+}
+
+val buildConfigOutputDir = layout.buildDirectory.dir("generated/buildconfig")
+
+val generateBuildConfig =
+    tasks.register<GenerateBuildConfigTask>("generateDesktopBuildConfig") {
+        content.set(
+            """
+            |package org.meshtastic.desktop
+            |
+            |/**
+            | * Auto-generated build configuration for Meshtastic Desktop.
+            | * Do not edit — values are derived from config.properties and git at build time.
+            | */
+            |object DesktopBuildConfig {
+            |    const val VERSION_CODE: Int = $resolvedVersionCode
+            |    const val VERSION_NAME: String = "$resolvedVersionName"
+            |    const val IS_DEBUG: Boolean = $resolvedIsDebug
+            |    const val APPLICATION_ID: String = "org.meshtastic.desktop"
+            |    const val MIN_FW_VERSION: String = "$resolvedMinFwVersion"
+            |    const val ABS_MIN_FW_VERSION: String = "$resolvedAbsMinFwVersion"
+            |}
+            """
+                .trimMargin(),
+        )
+        outputDir.set(buildConfigOutputDir.map { it.dir("org/meshtastic/desktop") })
+    }
+
+sourceSets.main { kotlin.srcDir(generateBuildConfig.map { buildConfigOutputDir }) }
 
 kotlin {
     jvmToolchain {
@@ -70,6 +137,7 @@ compose.desktop {
             // jdeps might miss some of these if they are loaded via reflection or JNI.
             modules(
                 "java.net.http", // Ktor Java client
+                "jdk.accessibility", // Java Access Bridge for screen readers (JAWS, NVDA, VoiceOver)
                 "jdk.crypto.ec", // Required for SSL/TLS HTTPS requests
                 "jdk.unsupported", // sun.misc.Unsafe used by Coroutines & Okio
                 "java.sql", // Sometimes required by SQLite JNI
@@ -95,6 +163,17 @@ compose.desktop {
                         """
                         <key>NSUserNotificationAlertStyle</key>
                         <string>alert</string>
+                        <key>CFBundleURLTypes</key>
+                        <array>
+                          <dict>
+                            <key>CFBundleURLName</key>
+                            <string>Meshtastic deep link</string>
+                            <key>CFBundleURLSchemes</key>
+                            <array>
+                              <string>meshtastic</string>
+                            </array>
+                          </dict>
+                        </array>
                         """
                             .trimIndent()
                 }
@@ -125,14 +204,9 @@ compose.desktop {
                 else -> targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
             }
 
-            // Read version from project properties (passed by CI) or default to 1.0.0
-            // Native installers require strict numeric semantic versions (X.Y.Z) without suffixes
-            val rawVersion =
-                project.findProperty("android.injected.version.name")?.toString()
-                    ?: project.findProperty("appVersionName")?.toString()
-                    ?: System.getenv("VERSION_NAME")
-                    ?: "1.0.0"
-            val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(rawVersion)?.value ?: "1.0.0"
+            // Reuse the resolved version from the top of this script (mirrors app/build.gradle.kts).
+            // Native installers require strict numeric semantic versions (X.Y.Z) without suffixes.
+            val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(resolvedVersionName)?.value ?: "1.0.0"
             packageVersion = sanitizedVersion
 
             description = "Meshtastic Desktop Application"

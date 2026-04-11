@@ -357,12 +357,16 @@ jobs:
 
   # ── Desktop Build ───────────────────────────────────────────────────
   build-desktop:
-    name: Build Desktop Debug
-    runs-on: ubuntu-24.04
+    name: Build Desktop Debug (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     timeout-minutes: 60
     needs: lint-check
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
     env:
       VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
 
@@ -380,12 +384,12 @@ jobs:
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
       - name: Build Desktop
-        run: ./gradlew :desktop:packageDistributionForCurrentOS -Pci=true --scan
+        run: ./gradlew :desktop:createDistributable -Pci=true --scan
 
       - name: Upload Desktop artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
-          name: desktop-app
-          path: desktop/build/compose/binaries/main/app/Meshtastic/bin/*
+          name: desktop-app-${{ runner.os }}-${{ runner.arch }}
+          path: desktop/build/compose/binaries/main/app/
           retention-days: 7
