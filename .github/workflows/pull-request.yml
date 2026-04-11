@@ -74,7 +74,8 @@ jobs:
           }
 
           allowed_extra_roots = {'baselineprofile'}
-          expected_roots = module_roots | allowed_extra_roots
+          excluded_roots = {'mesh_service_example'}
+          expected_roots = (module_roots | allowed_extra_roots) - excluded_roots
 
           filter_paths = {
               path.split('/')[0]
