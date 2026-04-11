@@ -138,14 +138,6 @@ private fun rememberTelemetricFeatures(
                 isVisible = { !isLocal },
             ),
             TelemetricFeature(
-                titleRes = LogsType.POSITIONS.titleRes,
-                icon = LogsType.POSITIONS.icon,
-                requestAction = if (isLocal) null else { n -> NodeMenuAction.RequestPosition(n) },
-                logsType = LogsType.POSITIONS,
-                content = { node, action -> PositionInlineContent(node, ourNode, displayUnits, action) },
-                hasContent = { it.latitude != 0.0 || it.longitude != 0.0 },
-            ),
-            TelemetricFeature(
                 titleRes = LogsType.TRACEROUTE.titleRes,
                 icon = LogsType.TRACEROUTE.icon,
                 requestAction = { NodeMenuAction.TraceRoute(it) },
@@ -207,6 +199,14 @@ private fun rememberTelemetricFeatures(
                 icon = LogsType.PAX.icon,
                 requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.PAX) },
                 logsType = LogsType.PAX,
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.POSITIONS.titleRes,
+                icon = LogsType.POSITIONS.icon,
+                requestAction = if (isLocal) null else { n -> NodeMenuAction.RequestPosition(n) },
+                logsType = LogsType.POSITIONS,
+                content = { node, action -> PositionInlineContent(node, ourNode, displayUnits, action) },
+                hasContent = { it.latitude != 0.0 || it.longitude != 0.0 },
             ),
         )
     }
