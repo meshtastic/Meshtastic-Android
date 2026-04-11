@@ -25,16 +25,12 @@ import com.juul.kable.State
  *   state emitted by StateFlow upon subscription.
  * @return the mapped [BleConnectionState], or null if the state should be ignored.
  */
-fun State.toBleConnectionState(hasStartedConnecting: Boolean): BleConnectionState? {
-    return when (this) {
-        is State.Connecting -> BleConnectionState.Connecting
-        is State.Connected -> BleConnectionState.Connected
-        is State.Disconnecting -> BleConnectionState.Disconnecting
-        is State.Disconnected -> {
-            if (!hasStartedConnecting) return null
-            BleConnectionState.Disconnected(status.toDisconnectReason())
-        }
-    }
+fun State.toBleConnectionState(hasStartedConnecting: Boolean): BleConnectionState? = when (this) {
+    is State.Connecting -> BleConnectionState.Connecting
+    is State.Connected -> BleConnectionState.Connected
+    is State.Disconnecting -> BleConnectionState.Disconnecting
+    is State.Disconnected ->
+        if (hasStartedConnecting) BleConnectionState.Disconnected(status.toDisconnectReason()) else null
 }
 
 /**

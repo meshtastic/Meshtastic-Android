@@ -19,6 +19,7 @@ package org.meshtastic.core.ble
 import com.juul.kable.Advertisement
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class KableBleDevice(val advertisement: Advertisement) : BleDevice {
     override val name: String?
@@ -28,7 +29,7 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
         get() = advertisement.identifier.toString()
 
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
-    override val state: StateFlow<BleConnectionState> = _state
+    override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
 
     // Bonding is handled by the OS pairing dialog on Android; on desktop Kable connects directly.
     override val isBonded: Boolean = true

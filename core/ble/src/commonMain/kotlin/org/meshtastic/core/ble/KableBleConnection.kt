@@ -223,21 +223,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         stateJob?.cancel()
         stateJob = null
 
-        // Separate try/catch blocks ensure close() is always called even if disconnect()
-        // throws. Kable requires close() to release broadcast receivers on Android (Kable
-        // issue #359: "Too many receivers"). Skipping it leaks native resources.
-        @Suppress("TooGenericExceptionCaught")
-        try {
-            peripheral?.disconnect()
-        } catch (e: Exception) {
-            Logger.w(e) { "Failed to disconnect peripheral" }
-        }
-        @Suppress("TooGenericExceptionCaught")
-        try {
-            peripheral?.close()
-        } catch (e: Exception) {
-            Logger.w(e) { "Failed to close peripheral" }
-        }
+        safeClosePeripheral("disconnect")
         peripheral = null
         connectionScope = null
 
@@ -262,19 +248,26 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
     /** Ensures the previous peripheral's GATT resources are fully released. */
     private suspend fun cleanUpPeripheral(tag: String) {
-        withContext(NonCancellable) {
-            @Suppress("TooGenericExceptionCaught")
-            try {
-                peripheral?.disconnect()
-            } catch (e: Exception) {
-                Logger.w(e) { "[$tag] Failed to disconnect previous peripheral" }
-            }
-            @Suppress("TooGenericExceptionCaught")
-            try {
-                peripheral?.close()
-            } catch (e: Exception) {
-                Logger.w(e) { "[$tag] Failed to close previous peripheral" }
-            }
+        withContext(NonCancellable) { safeClosePeripheral(tag) }
+    }
+
+    /**
+     * Safely disconnects and closes the current [peripheral], logging any failures.
+     *
+     * Kable requires `close()` to release broadcast receivers on Android (Kable issue #359). Separate try/catch blocks
+     * ensure `close()` always runs even if `disconnect()` throws.
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun safeClosePeripheral(tag: String) {
+        try {
+            peripheral?.disconnect()
+        } catch (e: Exception) {
+            Logger.w(e) { "[$tag] Failed to disconnect peripheral" }
+        }
+        try {
+            peripheral?.close()
+        } catch (e: Exception) {
+            Logger.w(e) { "[$tag] Failed to close peripheral" }
         }
     }
 }

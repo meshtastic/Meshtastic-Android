@@ -354,12 +354,7 @@ class BleRadioInterface(
     private fun onDisconnected() {
         radioService = null
 
-        val uptime =
-            if (connectionStartTime > 0) {
-                nowMillis - connectionStartTime
-            } else {
-                0
-            }
+        val uptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
         Logger.i {
             "[$address] BLE disconnected - " +
                 "Uptime: ${uptime}ms, " +
@@ -523,7 +518,7 @@ class BleRadioInterface(
 
     private fun Throwable.toDisconnectReason(): Pair<Boolean, String> {
         classifyBleException()?.let {
-            return Pair(it.isPermanent, it.message)
+            return it.isPermanent to it.message
         }
 
         val msg =
@@ -534,6 +529,6 @@ class BleRadioInterface(
                 -> "Required characteristic missing"
                 else -> this.message ?: this::class.simpleName ?: "Unknown"
             }
-        return Pair(false, msg)
+        return false to msg
     }
 }

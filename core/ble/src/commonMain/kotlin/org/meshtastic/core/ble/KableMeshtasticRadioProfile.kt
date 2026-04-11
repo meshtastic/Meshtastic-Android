@@ -23,7 +23,9 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
@@ -57,53 +59,48 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override val fromRadio: Flow<ByteArray> = channelFlow {
         launch {
-            launch {
-                if (service.hasCharacteristic(fromNum)) {
-                    service
-                        .observe(fromNum) {
-                            Logger.d { "FROMNUM CCCD written — notifications enabled" }
-                            subscriptionReady.complete(Unit)
-                        }
-                        .collect { triggerDrain.tryEmit(Unit) }
-                } else {
-                    subscriptionReady.complete(Unit)
-                }
-            }
-            triggerDrain.tryEmit(Unit)
-            triggerDrain.collect {
-                var keepReading = true
-                while (keepReading) {
-                    try {
-                        if (!service.hasCharacteristic(fromRadioChar)) {
-                            keepReading = false
-                            continue
-                        }
-                        val packet = service.read(fromRadioChar)
-                        if (packet.isEmpty()) keepReading = false else send(packet)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        Logger.w(e) { "FROMRADIO read error, pausing before next drain trigger" }
-                        keepReading = false
-                        delay(TRANSIENT_RETRY_DELAY_MS)
+            if (service.hasCharacteristic(fromNum)) {
+                service
+                    .observe(fromNum) {
+                        Logger.d { "FROMNUM CCCD written — notifications enabled" }
+                        subscriptionReady.complete(Unit)
                     }
+                    .collect { triggerDrain.tryEmit(Unit) }
+            } else {
+                subscriptionReady.complete(Unit)
+            }
+        }
+        triggerDrain.tryEmit(Unit)
+        triggerDrain.collect {
+            var keepReading = true
+            while (keepReading) {
+                try {
+                    if (!service.hasCharacteristic(fromRadioChar)) {
+                        keepReading = false
+                        continue
+                    }
+                    val packet = service.read(fromRadioChar)
+                    if (packet.isEmpty()) keepReading = false else send(packet)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.w(e) { "FROMRADIO read error, pausing before next drain trigger" }
+                    keepReading = false
+                    delay(TRANSIENT_RETRY_DELAY_MS)
                 }
             }
         }
     }
 
-    @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    override val logRadio: Flow<ByteArray> = channelFlow {
-        try {
-            if (service.hasCharacteristic(logRadioChar)) {
-                service.observe(logRadioChar).collect { send(it) }
+    override val logRadio: Flow<ByteArray> =
+        if (service.hasCharacteristic(logRadioChar)) {
+            service.observe(logRadioChar).catch { e ->
+                if (e is CancellationException) throw e
+                // logRadio is optional — swallow observation errors silently.
             }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Exception) {
-            // logRadio is optional, ignore if not found
+        } else {
+            emptyFlow()
         }
-    }
 
     override suspend fun sendToRadio(packet: ByteArray) {
         service.write(toRadio, packet, service.preferredWriteType(toRadio))
