@@ -89,7 +89,7 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 /** JVM — Reads text from a file URI. */
 @Composable
-actual fun rememberReadTextFromUri(): suspend (CommonUri, Int) -> String? = { uri, maxChars ->
+actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { uri, maxChars ->
     withContext(Dispatchers.IO) {
         @Suppress("TooGenericExceptionCaught")
         try {

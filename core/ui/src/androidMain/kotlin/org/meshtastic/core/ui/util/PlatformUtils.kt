@@ -139,7 +139,7 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Suppress("Wrapping")
 @Composable
-actual fun rememberReadTextFromUri(): suspend (CommonUri, Int) -> String? {
+actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? {
     val context = LocalContext.current
     return remember(context) {
         { uri, maxChars ->
