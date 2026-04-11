@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -273,7 +274,7 @@ fun <T> BaseMetricScreen(
                             )
                         }
                     }
-                    IconButton(onClick = { isChartExpanded = !isChartExpanded }) {
+                    IconToggleButton(checked = isChartExpanded, onCheckedChange = { isChartExpanded = it }) {
                         Icon(
                             imageVector =
                             if (isChartExpanded) {

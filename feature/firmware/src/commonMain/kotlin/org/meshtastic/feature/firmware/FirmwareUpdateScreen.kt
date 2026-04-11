@@ -35,15 +35,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -381,24 +384,35 @@ private fun ReadyState(
     Spacer(Modifier.height(16.dp))
 
     if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val largeHeight = ButtonDefaults.LargeContainerHeight
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showDisclaimer = true
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shapes = ButtonDefaults.shapesFor(largeHeight),
+            modifier = Modifier.fillMaxWidth().height(largeHeight),
         ) {
             Icon(MeshtasticIcons.Folder, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(Res.string.firmware_update_select_file))
+            Text(
+                stringResource(Res.string.firmware_update_select_file),
+                style = ButtonDefaults.textStyleFor(largeHeight),
+            )
         }
     } else if (state.release != null) {
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val largeHeight = ButtonDefaults.LargeContainerHeight
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showDisclaimer = true
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shapes = ButtonDefaults.shapesFor(largeHeight),
+            modifier = Modifier.fillMaxWidth().height(largeHeight),
         ) {
             Icon(
                 imageVector =
@@ -416,6 +430,7 @@ private fun ReadyState(
                     resource = Res.string.firmware_update_method_detail,
                     stringResource(state.updateMethod.description),
                 ),
+                style = ButtonDefaults.textStyleFor(largeHeight),
             )
         }
         Spacer(Modifier.height(24.dp))
@@ -680,7 +695,8 @@ private fun ProgressContent(
                 tint = MaterialTheme.colorScheme.primary,
             )
         } else {
-            CircularProgressIndicator(
+            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+            CircularWavyProgressIndicator(
                 progress = { if (isUpdating) progressState.progress else 1f },
                 modifier = Modifier.size(64.dp),
             )
@@ -708,7 +724,8 @@ private fun ProgressContent(
         Spacer(Modifier.height(12.dp))
 
         if (isDownloading || isUpdating) {
-            LinearProgressIndicator(
+            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+            LinearWavyProgressIndicator(
                 progress = { progressState.progress },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             )
@@ -850,8 +867,15 @@ private fun SuccessState(onDone: () -> Unit) {
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(32.dp))
-        Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text(stringResource(Res.string.firmware_update_done))
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val largeHeight = ButtonDefaults.LargeContainerHeight
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        Button(
+            onClick = onDone,
+            shapes = ButtonDefaults.shapesFor(largeHeight),
+            modifier = Modifier.fillMaxWidth().height(largeHeight),
+        ) {
+            Text(stringResource(Res.string.firmware_update_done), style = ButtonDefaults.textStyleFor(largeHeight))
         }
     }
 }

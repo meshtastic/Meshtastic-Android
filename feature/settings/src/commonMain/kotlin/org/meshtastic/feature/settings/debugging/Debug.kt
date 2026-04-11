@@ -35,6 +35,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -138,7 +139,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
-                    IconButton(onClick = { showSettings = !showSettings }) {
+                    IconToggleButton(checked = showSettings, onCheckedChange = { showSettings = it }) {
                         Icon(imageVector = MeshtasticIcons.Settings, contentDescription = null)
                     }
                     DebugMenuActions(deleteLogs = { viewModel.requestDeleteAllLogs() })

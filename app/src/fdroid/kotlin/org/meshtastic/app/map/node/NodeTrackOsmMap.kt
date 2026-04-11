@@ -42,7 +42,6 @@ import org.meshtastic.app.map.addCopyright
 import org.meshtastic.app.map.addPolyline
 import org.meshtastic.app.map.addPositionMarkers
 import org.meshtastic.app.map.addScaleBarOverlay
-import org.meshtastic.app.map.component.MapControlsOverlay
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.rememberMapViewWithLifecycle
 import org.meshtastic.core.common.util.nowSeconds
@@ -50,6 +49,7 @@ import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.last_heard_filter_label
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.proto.Position
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
@@ -61,8 +61,8 @@ import kotlin.math.roundToInt
  *
  * Applies the [lastHeardTrackFilter][org.meshtastic.feature.map.BaseMapViewModel.MapFilterState.lastHeardTrackFilter]
  * from [MapViewModel] to filter positions by time, matching the behavior of the Google Maps implementation. Includes a
- * minimal [MapControlsOverlay][org.meshtastic.app.map.component.MapControlsOverlay] with a track time filter slider so
- * users can adjust the time range directly from the map.
+ * minimal [MapControlsOverlay][org.meshtastic.feature.map.component.MapControlsOverlay] with a track time filter slider
+ * so users can adjust the time range directly from the map.
  *
  * Supports optional synchronized selection via [selectedPositionTime] and [onPositionSelected].
  *

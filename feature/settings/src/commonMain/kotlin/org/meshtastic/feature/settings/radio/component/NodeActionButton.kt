@@ -24,9 +24,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,14 +38,22 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun NodeActionButton(
-    modifier: Modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).height(48.dp),
+    modifier: Modifier = Modifier,
     title: String,
     enabled: Boolean,
     icon: ImageVector? = null,
     iconTint: Color? = null,
     onClick: () -> Unit,
 ) {
-    Button(onClick = { onClick() }, enabled = enabled, modifier = modifier) {
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    val mediumHeight = ButtonDefaults.MediumContainerHeight
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    Button(
+        onClick = { onClick() },
+        shapes = ButtonDefaults.shapesFor(mediumHeight),
+        enabled = enabled,
+        modifier = modifier.then(Modifier.fillMaxWidth().padding(vertical = 4.dp).height(mediumHeight)),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (icon != null) {
                 Icon(
@@ -55,7 +64,7 @@ fun NodeActionButton(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Text(text = title, style = ButtonDefaults.textStyleFor(mediumHeight), modifier = Modifier.weight(1f))
         }
     }
 }

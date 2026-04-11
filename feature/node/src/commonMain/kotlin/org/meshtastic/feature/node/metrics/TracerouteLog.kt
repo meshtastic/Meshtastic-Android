@@ -36,7 +36,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -242,7 +241,6 @@ private fun TracerouteCard(
 
 /** Card body showing timestamp, route summary text/icon, and metric indicators. */
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun TracerouteCardContent(time: String, summaryText: String, icon: ImageVector, point: TraceroutePoint) {
     Column(modifier = Modifier.padding(12.dp)) {
         Row(

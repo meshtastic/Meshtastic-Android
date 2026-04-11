@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,17 +75,20 @@ fun ConnectingDeviceInfo(
             }
         }
 
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val largeHeight = ButtonDefaults.LargeContainerHeight
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         Button(
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = MaterialTheme.shapes.medium,
+            onClick = onClickDisconnect,
+            shapes = ButtonDefaults.shapesFor(largeHeight),
+            modifier = Modifier.fillMaxWidth().height(largeHeight),
             colors =
             ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.StatusRed,
                 contentColor = Color.White,
             ),
-            onClick = onClickDisconnect,
         ) {
-            Text(stringResource(Res.string.disconnect), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(Res.string.disconnect), style = ButtonDefaults.textStyleFor(largeHeight))
         }
     }
 }

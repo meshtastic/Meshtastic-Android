@@ -14,13 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.component
+package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -41,8 +43,9 @@ import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 /**
- * Shared map controls overlay used by both Google and F-Droid map views. Provides compass, filter button, location
- * tracking button, and optional slots for flavor-specific content (map type selector, layers, refresh).
+ * Shared map controls overlay using [HorizontalFloatingToolbar] for Material 3 Expressive styling. Provides compass,
+ * filter button, location tracking button, and optional slots for flavor-specific content (map type selector, layers,
+ * refresh).
  *
  * @param onToggleFilterMenu Callback to open/close the filter dropdown.
  * @param filterDropdownContent Composable rendered inside a [Box] alongside the filter button — typically a
@@ -54,6 +57,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
  * @param isRefreshing Whether a refresh is currently in progress.
  * @param onRefresh Callback when the refresh button is clicked.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongParameterList")
 @Composable
 fun MapControlsOverlay(
@@ -71,7 +75,11 @@ fun MapControlsOverlay(
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
 ) {
-    Row(modifier = modifier) {
+    HorizontalFloatingToolbar(
+        expanded = true,
+        modifier = modifier,
+        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(),
+    ) {
         // Compass
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
 
