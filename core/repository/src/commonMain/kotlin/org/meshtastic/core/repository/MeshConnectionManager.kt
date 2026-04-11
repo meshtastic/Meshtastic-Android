@@ -16,14 +16,10 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.Telemetry
 
 /** Interface for managing the connection lifecycle and status with the mesh radio. */
 interface MeshConnectionManager {
-    /** Starts the connection manager with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Called when the radio configuration has been fully loaded. */
     fun onRadioConfigLoaded()
 

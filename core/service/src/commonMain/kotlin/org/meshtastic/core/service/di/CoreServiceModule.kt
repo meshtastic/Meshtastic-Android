@@ -16,9 +16,19 @@
  */
 package org.meshtastic.core.service.di
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
+import org.meshtastic.core.di.CoroutineDispatchers
 
 @Module
 @ComponentScan("org.meshtastic.core.service")
-class CoreServiceModule
+class CoreServiceModule {
+    @Single
+    @Named("ServiceScope")
+    fun provideServiceScope(dispatchers: CoroutineDispatchers): CoroutineScope =
+        CoroutineScope(dispatchers.default + SupervisorJob())
+}

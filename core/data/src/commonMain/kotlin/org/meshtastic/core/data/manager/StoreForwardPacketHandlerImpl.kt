@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import okio.ByteString.Companion.toByteString
 import okio.IOException
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.DataPacket
@@ -45,12 +46,8 @@ class StoreForwardPacketHandlerImpl(
     private val serviceBroadcasts: ServiceBroadcasts,
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : StoreForwardPacketHandler {
-    private lateinit var scope: CoroutineScope
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     override fun handleStoreAndForward(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return

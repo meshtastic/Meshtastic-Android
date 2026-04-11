@@ -72,8 +72,8 @@ class StoreForwardPacketHandlerImplTest {
                 serviceBroadcasts = serviceBroadcasts,
                 historyManager = historyManager,
                 dataHandler = lazy { dataHandler },
+                scope = testScope,
             )
-        handler.start(testScope)
     }
 
     private fun makeSfPacket(from: Int, sf: StoreAndForward): MeshPacket {

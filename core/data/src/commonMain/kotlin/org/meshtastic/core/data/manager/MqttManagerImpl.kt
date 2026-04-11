@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.MqttManager
@@ -36,12 +37,11 @@ class MqttManagerImpl(
     private val mqttRepository: MQTTRepository,
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MqttManager {
-    private lateinit var scope: CoroutineScope
     private var mqttMessageFlow: Job? = null
 
-    override fun start(scope: CoroutineScope, enabled: Boolean, proxyToClientEnabled: Boolean) {
-        this.scope = scope
+    override fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean) {
         if (mqttMessageFlow?.isActive == true) return
         if (enabled && proxyToClientEnabled) {
             mqttMessageFlow =

@@ -24,7 +24,7 @@ import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -60,7 +60,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class MeshConnectionManagerImplTest {
     private val radioInterfaceService = mock<RadioInterfaceService>(MockMode.autofill)
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
@@ -108,28 +108,28 @@ class MeshConnectionManagerImplTest {
         every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap<Int, Node>()
         every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-
-        manager =
-            MeshConnectionManagerImpl(
-                radioInterfaceService,
-                serviceRepository,
-                serviceBroadcasts,
-                serviceNotifications,
-                uiPrefs,
-                packetHandler,
-                nodeRepository,
-                locationManager,
-                mqttManager,
-                historyManager,
-                radioConfigRepository,
-                commandSender,
-                nodeManager,
-                analytics,
-                packetRepository,
-                workerManager,
-                appWidgetUpdater,
-            )
     }
+
+    private fun createManager(scope: CoroutineScope): MeshConnectionManagerImpl = MeshConnectionManagerImpl(
+        radioInterfaceService,
+        serviceRepository,
+        serviceBroadcasts,
+        serviceNotifications,
+        uiPrefs,
+        packetHandler,
+        nodeRepository,
+        locationManager,
+        mqttManager,
+        historyManager,
+        radioConfigRepository,
+        commandSender,
+        nodeManager,
+        analytics,
+        packetRepository,
+        workerManager,
+        appWidgetUpdater,
+        scope,
+    )
 
     @AfterTest fun tearDown() {}
 
@@ -138,7 +138,7 @@ class MeshConnectionManagerImplTest {
         every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
 
-        manager.start(backgroundScope)
+        manager = createManager(backgroundScope)
         radioConnectionState.value = ConnectionState.Connected
         advanceUntilIdle()
 
@@ -163,7 +163,7 @@ class MeshConnectionManagerImplTest {
         every { locationManager.stop() } returns Unit
         every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-        manager.start(backgroundScope)
+        manager = createManager(backgroundScope)
         // Transition to Connected first so that Disconnected actually does something
         radioConnectionState.value = ConnectionState.Connected
         advanceUntilIdle()
@@ -197,7 +197,7 @@ class MeshConnectionManagerImplTest {
         every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
-        manager.start(backgroundScope)
+        manager = createManager(backgroundScope)
         advanceUntilIdle()
 
         radioConnectionState.value = ConnectionState.DeviceSleep
@@ -221,7 +221,7 @@ class MeshConnectionManagerImplTest {
         every { locationManager.stop() } returns Unit
         every { mqttManager.stop() } returns Unit
 
-        manager.start(backgroundScope)
+        manager = createManager(backgroundScope)
         advanceUntilIdle()
 
         radioConnectionState.value = ConnectionState.DeviceSleep
@@ -236,7 +236,7 @@ class MeshConnectionManagerImplTest {
 
     @Test
     fun `onRadioConfigLoaded enqueues queued packets and sets time`() = runTest(testDispatcher) {
-        manager.start(backgroundScope)
+        manager = createManager(backgroundScope)
         val packetId = 456
         everySuspend { packetRepository.getQueuedPackets() } returns listOf(dataPacket)
         every { workerManager.enqueueSendMessage(any()) } returns Unit
@@ -257,15 +257,15 @@ class MeshConnectionManagerImplTest {
         moduleConfigFlow.value = moduleConfig
         every { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
-        every { mqttManager.start(any(), any(), any()) } returns Unit
+        every { mqttManager.startProxy(any(), any()) } returns Unit
         every { historyManager.requestHistoryReplay(any(), any(), any(), any()) } returns Unit
         every { nodeManager.getMyNodeInfo() } returns null
 
-        manager.start(backgroundScope)
+        manager = createManager(backgroundScope)
         manager.onNodeDbReady()
         advanceUntilIdle()
 
-        verify { mqttManager.start(any(), true, true) }
+        verify { mqttManager.startProxy(true, true) }
         verify { historyManager.requestHistoryReplay(any(), any(), any(), any()) }
     }
 
@@ -286,7 +286,7 @@ class MeshConnectionManagerImplTest {
         every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
-        manager.start(backgroundScope)
+        manager = createManager(backgroundScope)
         advanceUntilIdle()
 
         // Transition to Connected then DeviceSleep

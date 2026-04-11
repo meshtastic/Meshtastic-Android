@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
@@ -53,8 +54,8 @@ class MeshMessageProcessorImpl(
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val router: Lazy<MeshRouter>,
     private val fromRadioDispatcher: FromRadioPacketHandler,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshMessageProcessor {
-    private lateinit var scope: CoroutineScope
 
     private val mapsMutex = Mutex()
     private val logUuidByPacketId = mutableMapOf<Int, String>()
@@ -75,8 +76,7 @@ class MeshMessageProcessorImpl(
         scope.launch { earlyMutex.withLock { earlyReceivedPackets.clear() } }
     }
 
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
+    init {
         nodeManager.isNodeDbReady
             .onEach { ready ->
                 if (ready) {

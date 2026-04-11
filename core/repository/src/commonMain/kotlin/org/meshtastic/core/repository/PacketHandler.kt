@@ -16,16 +16,12 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
 
 /** Interface for handling the transmission of packets to the radio and managing the packet queue. */
 interface PacketHandler {
-    /** Starts the packet handler with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Sends a command/packet directly to the radio. */
     fun sendToRadio(p: ToRadio)
 

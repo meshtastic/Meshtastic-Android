@@ -25,6 +25,7 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.not
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -89,28 +90,28 @@ class MeshActionHandlerImplTest {
         every { nodeManager.myNodeNum } returns myNodeNumFlow
         every { nodeManager.getMyId() } returns "!12345678"
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-
-        handler =
-            MeshActionHandlerImpl(
-                nodeManager = nodeManager,
-                commandSender = commandSender,
-                packetRepository = lazy { packetRepository },
-                serviceBroadcasts = serviceBroadcasts,
-                dataHandler = lazy { dataHandler },
-                analytics = analytics,
-                meshPrefs = meshPrefs,
-                databaseManager = databaseManager,
-                notificationManager = notificationManager,
-                messageProcessor = lazy { messageProcessor },
-                radioConfigRepository = radioConfigRepository,
-            )
     }
+
+    private fun createHandler(scope: CoroutineScope): MeshActionHandlerImpl = MeshActionHandlerImpl(
+        nodeManager = nodeManager,
+        commandSender = commandSender,
+        packetRepository = lazy { packetRepository },
+        serviceBroadcasts = serviceBroadcasts,
+        dataHandler = lazy { dataHandler },
+        analytics = analytics,
+        meshPrefs = meshPrefs,
+        databaseManager = databaseManager,
+        notificationManager = notificationManager,
+        messageProcessor = lazy { messageProcessor },
+        radioConfigRepository = radioConfigRepository,
+        scope = scope,
+    )
 
     // ---- handleUpdateLastAddress (device-switch path — P0 critical) ----
 
     @Test
     fun handleUpdateLastAddress_differentAddress_switchesDatabaseAndClearsState() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
 
         every { meshPrefs.deviceAddress } returns MutableStateFlow("old_addr")
         everySuspend { databaseManager.switchActiveDatabase(any()) } returns Unit
@@ -128,7 +129,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleUpdateLastAddress_sameAddress_noOp() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
 
         every { meshPrefs.deviceAddress } returns MutableStateFlow("same_addr")
 
@@ -141,7 +142,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleUpdateLastAddress_nullAddress_switchesIfDifferent() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
 
         every { meshPrefs.deviceAddress } returns MutableStateFlow("old_addr")
         everySuspend { databaseManager.switchActiveDatabase(any()) } returns Unit
@@ -156,7 +157,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleUpdateLastAddress_nullToNull_noOp() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
 
         every { meshPrefs.deviceAddress } returns MutableStateFlow(null)
 
@@ -168,7 +169,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleUpdateLastAddress_executesStepsInOrder() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
 
         every { meshPrefs.deviceAddress } returns MutableStateFlow("old")
         everySuspend { databaseManager.switchActiveDatabase(any()) } returns Unit
@@ -187,7 +188,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_nullMyNodeNum_doesNothing() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         myNodeNumFlow.value = null
 
         val node = createTestNode(REMOTE_NODE_NUM)
@@ -201,7 +202,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_favorite_sendsSetFavoriteWhenNotFavorite() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val node = createTestNode(REMOTE_NODE_NUM, isFavorite = false)
 
         handler.onServiceAction(ServiceAction.Favorite(node))
@@ -213,7 +214,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_favorite_sendsRemoveFavoriteWhenAlreadyFavorite() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val node = createTestNode(REMOTE_NODE_NUM, isFavorite = true)
 
         handler.onServiceAction(ServiceAction.Favorite(node))
@@ -227,7 +228,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_ignore_togglesAndUpdatesFilteredBySender() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val node = createTestNode(REMOTE_NODE_NUM, isIgnored = false)
 
         handler.onServiceAction(ServiceAction.Ignore(node))
@@ -242,7 +243,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_mute_togglesMutedState() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val node = createTestNode(REMOTE_NODE_NUM, isMuted = false)
 
         handler.onServiceAction(ServiceAction.Mute(node))
@@ -256,7 +257,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_getDeviceMetadata_sendsAdminRequest() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
 
         handler.onServiceAction(ServiceAction.GetDeviceMetadata(REMOTE_NODE_NUM))
         advanceUntilIdle()
@@ -268,7 +269,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_sendContact_completesWithTrueOnSuccess() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
 
         val action = ServiceAction.SendContact(SharedContact())
@@ -281,7 +282,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_sendContact_completesWithFalseOnFailure() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns false
 
         val action = ServiceAction.SendContact(SharedContact())
@@ -296,7 +297,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun onServiceAction_importContact_sendsAdminAndUpdatesNode() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
 
         val contact =
             SharedContact(node_num = REMOTE_NODE_NUM, user = User(id = "!abcdef12", long_name = "TestUser"))
@@ -311,7 +312,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetOwner_sendsAdminAndUpdatesLocalNode() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
         val meshUser =
             MeshUser(
                 id = "!12345678",
@@ -331,7 +332,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSend_sendsDataAndBroadcastsStatus() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
         val packet = DataPacket(to = "!deadbeef", dataType = 1, bytes = null, channel = 0)
 
         handler.handleSend(packet, MY_NODE_NUM)
@@ -345,7 +346,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleRequestPosition_sameNode_doesNothing() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         handler.handleRequestPosition(MY_NODE_NUM, Position(0.0, 0.0, 0), MY_NODE_NUM)
 
@@ -354,7 +355,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleRequestPosition_provideLocation_validPosition_usesGivenPosition() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
         every { meshPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(true)
 
         val validPosition = Position(37.7749, -122.4194, 10)
@@ -365,7 +366,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleRequestPosition_provideLocation_invalidPosition_fallsBackToNodeDB() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
         every { meshPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(true)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
@@ -378,7 +379,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleRequestPosition_doNotProvide_sendsZeroPosition() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
         every { meshPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(false)
 
         val validPosition = Position(37.7749, -122.4194, 10)
@@ -392,7 +393,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetConfig_decodesAndSendsAdmin_thenPersistsLocally() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         everySuspend { radioConfigRepository.setLocalConfig(any()) } returns Unit
 
         val config = Config(lora = Config.LoRaConfig(hop_limit = 5))
@@ -409,7 +410,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetModuleConfig_ownNode_persistsLocally() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         myNodeNumFlow.value = MY_NODE_NUM
         everySuspend { radioConfigRepository.setLocalModuleConfig(any()) } returns Unit
 
@@ -425,7 +426,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetModuleConfig_remoteNode_doesNotPersistLocally() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         myNodeNumFlow.value = MY_NODE_NUM
 
         val moduleConfig = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
@@ -442,7 +443,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetChannel_nonNullPayload_decodesAndPersists() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         everySuspend { radioConfigRepository.updateChannelSettings(any()) } returns Unit
 
         val channel = Channel(index = 1)
@@ -457,7 +458,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetChannel_nullPayload_doesNothing() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         handler.handleSetChannel(null, MY_NODE_NUM)
 
@@ -468,7 +469,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleRemoveByNodenum_removesAndSendsAdmin() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         handler.handleRemoveByNodenum(REMOTE_NODE_NUM, 99, MY_NODE_NUM)
 
@@ -480,7 +481,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetRemoteOwner_decodesAndSendsAdmin() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         val user = User(id = "!remote01", long_name = "Remote", short_name = "RM")
         val payload = User.ADAPTER.encode(user)
@@ -495,7 +496,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleGetRemoteConfig_sessionkeyConfig_sendsDeviceMetadataRequest() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         handler.handleGetRemoteConfig(1, REMOTE_NODE_NUM, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value)
 
@@ -504,7 +505,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleGetRemoteConfig_regularConfig_sendsConfigRequest() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         handler.handleGetRemoteConfig(1, REMOTE_NODE_NUM, AdminMessage.ConfigType.LORA_CONFIG.value)
 
@@ -515,7 +516,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetRemoteChannel_nullPayload_doesNothing() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         handler.handleSetRemoteChannel(1, REMOTE_NODE_NUM, null)
 
@@ -524,7 +525,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleSetRemoteChannel_nonNullPayload_decodesAndSendsAdmin() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         val channel = Channel(index = 2)
         val payload = Channel.ADAPTER.encode(channel)
@@ -538,7 +539,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleRequestRebootOta_withNullHash_sendsAdmin() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         handler.handleRequestRebootOta(1, REMOTE_NODE_NUM, 0, null)
 
@@ -547,7 +548,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleRequestRebootOta_withHash_sendsAdmin() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         val hash = byteArrayOf(0x01, 0x02, 0x03)
         handler.handleRequestRebootOta(1, REMOTE_NODE_NUM, 1, hash)
@@ -559,7 +560,7 @@ class MeshActionHandlerImplTest {
 
     @Test
     fun handleRequestNodedbReset_sendsAdminWithPreserveFavorites() {
-        handler.start(testScope)
+        handler = createHandler(testScope)
 
         handler.handleRequestNodedbReset(1, REMOTE_NODE_NUM, preserveFavorites = true)
 

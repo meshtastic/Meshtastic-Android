@@ -16,13 +16,8 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
-
 /** Interface for the central router that orchestrates specialized mesh packet handlers. */
 interface MeshRouter {
-    /** Starts the router and its sub-components with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Access to the data handler. */
     val dataHandler: MeshDataHandler
 

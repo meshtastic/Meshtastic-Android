@@ -70,8 +70,8 @@ class PacketHandlerImplTest {
                 radioInterfaceService,
                 lazy { meshLogRepository },
                 serviceRepository,
+                testScope,
             )
-        handler.start(testScope)
     }
 
     @Test

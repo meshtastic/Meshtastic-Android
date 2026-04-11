@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -27,9 +26,6 @@ import org.meshtastic.proto.ModuleConfig
 
 /** Interface for handling device and module configuration updates. */
 interface MeshConfigHandler {
-    /** Starts the handler with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Reactive local configuration. */
     val localConfig: StateFlow<LocalConfig>
 

@@ -16,15 +16,11 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import org.meshtastic.proto.MeshPacket
 
 /** Interface for handling traceroute responses from the mesh. */
 interface TracerouteHandler {
-    /** Starts the traceroute handler with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Records the start time for a traceroute request. */
     fun recordStartTime(requestId: Int)
 

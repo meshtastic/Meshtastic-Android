@@ -25,23 +25,21 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
@@ -57,12 +55,10 @@ class MeshServiceOrchestratorTest {
 
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
-    private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
     private val commandSender: CommandSender = mock(MockMode.autofill)
-    private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
     private val router: MeshRouter = mock(MockMode.autofill)
     private val actionHandler: MeshActionHandler = mock(MockMode.autofill)
     private val meshConfigHandler: MeshConfigHandler = mock(MockMode.autofill)
@@ -73,7 +69,7 @@ class MeshServiceOrchestratorTest {
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
+    private val testScope = CoroutineScope(testDispatcher)
 
     /** Stubs the shared flow dependencies used by every test and returns an orchestrator. */
     private fun createOrchestrator(
@@ -107,18 +103,15 @@ class MeshServiceOrchestratorTest {
         return MeshServiceOrchestrator(
             radioInterfaceService = radioInterfaceService,
             serviceRepository = serviceRepository,
-            packetHandler = packetHandler,
             nodeManager = nodeManager,
             messageProcessor = messageProcessor,
-            commandSender = commandSender,
-            connectionManager = connectionManager,
             router = router,
             serviceNotifications = serviceNotifications,
             takServerManager = takServerManager,
             takMeshIntegration = takMeshIntegration,
             takPrefs = takPrefs,
-            dispatchers = dispatchers,
             databaseManager = databaseManager,
+            scope = testScope,
         )
     }
 
@@ -131,7 +124,6 @@ class MeshServiceOrchestratorTest {
         assertTrue(orchestrator.isRunning)
 
         verify { serviceNotifications.initChannels() }
-        verify { packetHandler.start(any()) }
         verify { nodeManager.loadCachedNodeDB() }
 
         orchestrator.stop()
@@ -217,7 +209,6 @@ class MeshServiceOrchestratorTest {
 
         // Components should only be initialized once
         verify(exactly(1)) { serviceNotifications.initChannels() }
-        verify(exactly(1)) { packetHandler.start(any()) }
         verify(exactly(1)) { nodeManager.loadCachedNodeDB() }
 
         orchestrator.stop()

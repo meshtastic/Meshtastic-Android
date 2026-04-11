@@ -16,16 +16,12 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 
 /** Interface for handling incoming mesh data packets and routing them to the appropriate handlers. */
 interface MeshDataHandler {
-    /** Starts the handler with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /**
      * Processes a received mesh packet.
      *

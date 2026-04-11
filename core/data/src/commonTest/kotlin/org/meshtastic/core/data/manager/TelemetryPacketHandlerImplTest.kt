@@ -62,8 +62,8 @@ class TelemetryPacketHandlerImplTest {
                 nodeManager = nodeManager,
                 connectionManager = lazy { connectionManager },
                 notificationManager = notificationManager,
+                scope = testScope,
             )
-        handler.start(testScope)
     }
 
     private fun makeTelemetryPacket(from: Int, telemetry: Telemetry): MeshPacket {

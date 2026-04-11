@@ -16,13 +16,12 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.MqttClientProxyMessage
 
 /** Interface for managing MQTT proxy communication. */
 interface MqttManager {
-    /** Starts the MQTT manager with the given coroutine scope and settings. */
-    fun start(scope: CoroutineScope, enabled: Boolean, proxyToClientEnabled: Boolean)
+    /** Starts the MQTT proxy with the given settings. */
+    fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean)
 
     /** Stops the MQTT manager. */
     fun stop()

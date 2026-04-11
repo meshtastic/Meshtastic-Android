@@ -22,6 +22,7 @@ import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.handledLaunch
@@ -42,14 +43,10 @@ class TracerouteHandlerImpl(
     private val serviceRepository: ServiceRepository,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRepository: NodeRepository,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : TracerouteHandler {
-    private lateinit var scope: CoroutineScope
 
     private val startTimes = atomic(persistentMapOf<Int, Long>())
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     override fun recordStartTime(requestId: Int) {
         startTimes.update { it.put(requestId, nowMillis) }

@@ -22,16 +22,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
@@ -51,25 +49,22 @@ import org.meshtastic.core.takserver.TAKServerManager
 class MeshServiceOrchestrator(
     private val radioInterfaceService: RadioInterfaceService,
     private val serviceRepository: ServiceRepository,
-    private val packetHandler: PacketHandler,
     private val nodeManager: NodeManager,
     private val messageProcessor: MeshMessageProcessor,
-    private val commandSender: CommandSender,
-    private val connectionManager: MeshConnectionManager,
     private val router: MeshRouter,
     private val serviceNotifications: MeshServiceNotifications,
     private val takServerManager: TAKServerManager,
     private val takMeshIntegration: TAKMeshIntegration,
     private val takPrefs: TakPrefs,
-    private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
     private val databaseManager: DatabaseManager,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) {
     private var serviceJob: Job? = null
     private var takJob: Job? = null
 
-    /** The coroutine scope for the service. Available after [start] is called. */
-    var serviceScope: CoroutineScope? = null
-        private set
+    /** The coroutine scope for the service. */
+    val serviceScope: CoroutineScope
+        get() = scope
 
     /** Whether the orchestrator is currently running. */
     val isRunning: Boolean
@@ -78,8 +73,8 @@ class MeshServiceOrchestrator(
     /**
      * Starts the mesh service components and wires up data flows.
      *
-     * This is the KMP equivalent of `MeshService.onCreate()`. It starts all managers, connects to the radio, and wires
-     * incoming radio data to the message processor and service actions to the router's action handler.
+     * This is the KMP equivalent of `MeshService.onCreate()`. It connects to the radio and wires incoming radio data to
+     * the message processor and service actions to the router's action handler.
      */
     fun start() {
         if (isRunning) {
@@ -90,17 +85,8 @@ class MeshServiceOrchestrator(
         Logger.i { "Starting mesh service orchestrator" }
         val job = Job()
         serviceJob = job
-        val scope = CoroutineScope(dispatchers.default + job)
-        serviceScope = scope
 
         serviceNotifications.initChannels()
-
-        packetHandler.start(scope)
-        router.start(scope)
-        nodeManager.start(scope)
-        connectionManager.start(scope)
-        messageProcessor.start(scope)
-        commandSender.start(scope)
 
         // Observe TAK server pref to start/stop
         takJob =
@@ -161,6 +147,5 @@ class MeshServiceOrchestrator(
         }
         serviceJob?.cancel()
         serviceJob = null
-        serviceScope = null
     }
 }

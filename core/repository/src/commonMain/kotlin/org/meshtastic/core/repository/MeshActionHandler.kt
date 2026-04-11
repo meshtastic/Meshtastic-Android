@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.Position
@@ -25,9 +24,6 @@ import org.meshtastic.core.model.service.ServiceAction
 /** Interface for handling UI-triggered actions and administrative commands for the mesh. */
 @Suppress("TooManyFunctions")
 interface MeshActionHandler {
-    /** Starts the handler with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Processes a service action from the UI. */
     suspend fun onServiceAction(action: ServiceAction)
 

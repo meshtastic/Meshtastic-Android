@@ -23,6 +23,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -65,22 +66,22 @@ class MeshMessageProcessorImplTest {
         every { nodeManager.isNodeDbReady } returns isNodeDbReady
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNodeNum)
         every { router.dataHandler } returns dataHandler
-
-        processor =
-            MeshMessageProcessorImpl(
-                nodeManager = nodeManager,
-                serviceRepository = serviceRepository,
-                meshLogRepository = lazy { meshLogRepository },
-                router = lazy { router },
-                fromRadioDispatcher = fromRadioDispatcher,
-            )
     }
+
+    private fun createProcessor(scope: CoroutineScope): MeshMessageProcessorImpl = MeshMessageProcessorImpl(
+        nodeManager = nodeManager,
+        serviceRepository = serviceRepository,
+        meshLogRepository = lazy { meshLogRepository },
+        router = lazy { router },
+        fromRadioDispatcher = fromRadioDispatcher,
+        scope = scope,
+    )
 
     // ---------- handleFromRadio: non-packet variants ----------
 
     @Test
     fun `handleFromRadio dispatches non-packet variants to fromRadioDispatcher`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         val logRecord = LogRecord(message = "test log")
         val fromRadio = FromRadio(log_record = logRecord)
         val bytes = FromRadio.ADAPTER.encode(fromRadio)
@@ -93,7 +94,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `handleFromRadio falls back to LogRecord parsing when FromRadio fails`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         // Encode a raw LogRecord (not wrapped in FromRadio) — first decode as FromRadio fails,
         // fallback decode as LogRecord succeeds
         val logRecord = LogRecord(message = "fallback log")
@@ -108,7 +109,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `handleFromRadio with completely invalid bytes does not crash`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         // Invalid protobuf bytes — both parses should fail
         val garbage = byteArrayOf(0xFF.toByte(), 0xFE.toByte(), 0xFD.toByte())
 
@@ -121,7 +122,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `packets are buffered when node DB is not ready`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = false
 
         val packet =
@@ -141,7 +142,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `buffered packets are flushed when node DB becomes ready`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = false
 
         val packet =
@@ -165,7 +166,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `early buffer overflow drops oldest packet`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = false
 
         // The maxEarlyPacketBuffer is 10240 — we won't actually fill it in this test,
@@ -195,7 +196,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `packets with rx_time 0 get current time`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = true
 
         val packet =
@@ -214,7 +215,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `packets with non-zero rx_time keep their time`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = true
 
         val packet =
@@ -235,7 +236,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `processReceivedMeshPacket updates myNode lastHeard`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = true
 
         val packet =
@@ -255,7 +256,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `processReceivedMeshPacket updates sender node`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = true
 
         val senderNode = 999
@@ -279,7 +280,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `packet with null decoded is skipped`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = true
 
         val packet = MeshPacket(id = 1, from = 999, decoded = null)
@@ -293,7 +294,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `processReceivedMeshPacket with null myNodeNum skips node updates`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = true
 
         val packet =
@@ -315,7 +316,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `clearEarlyPackets empties the buffer`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         isNodeDbReady.value = false
 
         val packet =
@@ -342,7 +343,7 @@ class MeshMessageProcessorImplTest {
 
     @Test
     fun `FromRadio log_record variant is logged as MeshLog`() = runTest(testDispatcher) {
-        processor.start(backgroundScope)
+        processor = createProcessor(backgroundScope)
         val logRecord = LogRecord(message = "device log")
         val fromRadio = FromRadio(log_record = logRecord)
         val bytes = FromRadio.ADAPTER.encode(fromRadio)

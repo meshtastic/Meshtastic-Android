@@ -16,15 +16,11 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 
 /** Interface for handling telemetry packets from the mesh, including battery notifications. */
 interface TelemetryPacketHandler {
-    /** Starts the handler with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /**
      * Processes a telemetry packet.
      *
