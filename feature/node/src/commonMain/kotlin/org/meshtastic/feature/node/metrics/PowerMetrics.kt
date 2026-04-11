@@ -40,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -72,6 +73,7 @@ import org.meshtastic.core.resources.power_metrics_log
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
+import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
 
 private enum class PowerMetric(val color: Color) {
@@ -103,13 +105,16 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.powerMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
+
+    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.savePowerMetricsCSV(uri, data) }
+
     val availableChannels =
         remember(data) {
             PowerChannel.entries.filter { channel ->
                 data.any { !retrieveVoltage(channel, it).isNaN() || !retrieveCurrent(channel, it).isNaN() }
             }
         }
-    var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
+    var selectedChannel by rememberSaveable { mutableStateOf(PowerChannel.ONE) }
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
@@ -119,6 +124,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         data = data,
         timeProvider = { it.time.toDouble() },
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.POWER) },
+        onExportCsv = { exportLauncher("power_metrics.csv", "text/csv") },
         controlPart = {
             Column {
                 TimeFrameSelector(

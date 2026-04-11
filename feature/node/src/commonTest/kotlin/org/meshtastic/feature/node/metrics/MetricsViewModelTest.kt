@@ -211,7 +211,7 @@ class MetricsViewModelTest {
             awaitItem() // with position
 
             val uri = MeshtasticUri("content://test")
-            vm.savePositionCSV(uri)
+            vm.savePositionCSV(uri, listOf(testPosition))
             runCurrent()
 
             verifySuspend { fileService.write(uri, any()) }

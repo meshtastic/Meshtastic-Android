@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -68,12 +69,14 @@ import org.meshtastic.core.resources.collapse_chart
 import org.meshtastic.core.resources.expand_chart
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.logs
+import org.meshtastic.core.resources.save
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.BarChart
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Save
 
 /**
  * A generic chart host for Meshtastic metric charts. Handles common boilerplate for markers, scrolling, and point
@@ -217,8 +220,10 @@ fun AdaptiveMetricLayout(
  * A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and chart-to-list
  * synchronisation.
  *
- * @param extraActions Additional composable actions rendered in the app bar before the expand/collapse toggle (e.g. a
+ * @param extraActions Additional composable actions rendered in the app bar before the standard buttons (e.g. a
  *   cooldown traceroute button).
+ * @param onExportCsv When non-null, a Save [IconButton] is rendered in the app bar that invokes this callback. This
+ *   centralises the CSV export affordance so individual screens only need to provide the export logic.
  */
 @Composable
 @Suppress("LongMethod")
@@ -231,13 +236,14 @@ fun <T> BaseMetricScreen(
     timeProvider: (T) -> Double,
     infoData: List<InfoDialogData> = emptyList(),
     onRequestTelemetry: (() -> Unit)? = null,
+    onExportCsv: (() -> Unit)? = null,
     extraActions: @Composable () -> Unit = {},
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
     listPart: @Composable (Modifier, Double?, LazyListState, (Double) -> Unit) -> Unit,
     controlPart: @Composable () -> Unit = {},
 ) {
-    var displayInfoDialog by remember { mutableStateOf(false) }
-    var isChartExpanded by remember { mutableStateOf(false) }
+    var displayInfoDialog by rememberSaveable { mutableStateOf(false) }
+    var isChartExpanded by rememberSaveable { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
     val vicoScrollState =
@@ -259,6 +265,14 @@ fun <T> BaseMetricScreen(
                 onNavigateUp = onNavigateUp,
                 actions = {
                     extraActions()
+                    if (onExportCsv != null && data.isNotEmpty()) {
+                        IconButton(onClick = onExportCsv) {
+                            Icon(
+                                imageVector = MeshtasticIcons.Save,
+                                contentDescription = stringResource(Res.string.save),
+                            )
+                        }
+                    }
                     IconButton(onClick = { isChartExpanded = !isChartExpanded }) {
                         Icon(
                             imageVector =

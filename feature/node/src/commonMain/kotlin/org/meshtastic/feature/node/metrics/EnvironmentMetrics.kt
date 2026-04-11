@@ -71,6 +71,7 @@ import org.meshtastic.core.resources.wind_speed
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
 
 @Composable
@@ -81,6 +82,10 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
 
+    val exportLauncher = rememberSaveFileLauncher { uri ->
+        viewModel.saveEnvironmentMetricsCSV(uri, filteredTelemetries)
+    }
+
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.ENVIRONMENT,
@@ -90,6 +95,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         timeProvider = { it.time.toDouble() },
         infoData = listOf(InfoDialogData(Res.string.iaq, Res.string.iaq_definition, Environment.IAQ.color)),
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.ENVIRONMENT) },
+        onExportCsv = { exportLauncher("environment_metrics.csv", "text/csv") },
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,

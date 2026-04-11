@@ -14,27 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
@@ -43,69 +48,95 @@ import org.meshtastic.core.resources.heading
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.sats
-import org.meshtastic.core.resources.speed
 import org.meshtastic.core.resources.speed_kmh
-import org.meshtastic.core.resources.timestamp
-import org.meshtastic.core.ui.util.formatPositionTime
+import org.meshtastic.core.ui.theme.GraphColors
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
 
+/**
+ * A [SelectableMetricCard]-based position item that matches the visual style of [DeviceMetricsCard],
+ * [SignalMetricsCard], and other metric cards. Replaces the previous table-row layout with a card that shows timestamp,
+ * coordinates, satellites, altitude, speed, and heading.
+ */
 @Composable
-private fun RowScope.PositionText(text: String, weight: Float) {
-    Text(
-        text = text,
-        modifier = Modifier.weight(weight),
-        textAlign = TextAlign.Center,
-        overflow = TextOverflow.Ellipsis,
-        maxLines = 1,
-    )
-}
-
-private const val WEIGHT_10 = .10f
-private const val WEIGHT_15 = .15f
-private const val WEIGHT_20 = .20f
-private const val WEIGHT_40 = .40f
-
-@Composable
-fun PositionLogHeader(compactWidth: Boolean) {
-    Row(modifier = Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        PositionText(stringResource(Res.string.latitude), WEIGHT_20)
-        PositionText(stringResource(Res.string.longitude), WEIGHT_20)
-        PositionText(stringResource(Res.string.sats), WEIGHT_10)
-        PositionText(stringResource(Res.string.alt), WEIGHT_15)
-        if (!compactWidth) {
-            PositionText(stringResource(Res.string.speed), WEIGHT_15)
-            PositionText(stringResource(Res.string.heading), WEIGHT_15)
-        }
-        PositionText(stringResource(Res.string.timestamp), WEIGHT_40)
-    }
-}
-
-@Composable
-fun PositionItem(compactWidth: Boolean, position: Position, system: Config.DisplayConfig.DisplayUnits) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        PositionText(formatString("%.5f", (position.latitude_i ?: 0) * DEG_D), WEIGHT_20)
-        PositionText(formatString("%.5f", (position.longitude_i ?: 0) * DEG_D), WEIGHT_20)
-        PositionText(position.sats_in_view.toString(), WEIGHT_10)
-        PositionText((position.altitude ?: 0).metersIn(system).toString(system), WEIGHT_15)
-        if (!compactWidth) {
-            PositionText(stringResource(Res.string.speed_kmh, position.ground_speed ?: 0), WEIGHT_15)
-            PositionText(formatString("%.0f°", (position.ground_track ?: 0) * HEADING_DEG), WEIGHT_15)
-        }
-        PositionText(position.formatPositionTime(), WEIGHT_40)
-    }
-}
-
-@Composable
-fun ColumnScope.PositionList(
-    compactWidth: Boolean,
-    positions: List<Position>,
+@Suppress("LongMethod")
+fun PositionCard(
+    position: Position,
     displayUnits: Config.DisplayConfig.DisplayUnits,
+    isSelected: Boolean,
+    onClick: () -> Unit,
 ) {
-    LazyColumn(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-        items(positions) { position -> PositionItem(compactWidth, position, displayUnits) }
+    val time = position.time.toLong() * MS_PER_SEC
+    val latitude = formatString("%.5f", (position.latitude_i ?: 0) * DEG_D)
+    val longitude = formatString("%.5f", (position.longitude_i ?: 0) * DEG_D)
+
+    SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+            /* Timestamp */
+            Text(
+                text = DateFormatter.formatDateTime(time),
+                style = MaterialTheme.typography.titleMediumEmphasized,
+                fontWeight = FontWeight.Bold,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            /* Coordinates */
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricValueRow(color = GraphColors.Blue, text = "${stringResource(Res.string.latitude)}: $latitude")
+                    Spacer(Modifier.width(12.dp))
+                    MetricValueRow(
+                        color = GraphColors.Green,
+                        text = "${stringResource(Res.string.longitude)}: $longitude",
+                    )
+                }
+                Text(
+                    text = "${stringResource(Res.string.sats)}: ${position.sats_in_view}",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            /* Alt, Speed, Heading */
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricValueRow(
+                        color = GraphColors.Purple,
+                        text =
+                        "${stringResource(Res.string.alt)}: ${
+                            (position.altitude ?: 0).metersIn(displayUnits).toString(displayUnits)
+                        }",
+                    )
+                    if (position.ground_speed != null && position.ground_speed != 0) {
+                        Spacer(Modifier.width(12.dp))
+                        MetricValueRow(
+                            color = GraphColors.Gold,
+                            text = stringResource(Res.string.speed_kmh, position.ground_speed ?: 0),
+                        )
+                    }
+                }
+                if (position.ground_track != null && position.ground_track != 0) {
+                    Text(
+                        text =
+                        "${stringResource(Res.string.heading)}: ${
+                            formatString("%.0f", (position.ground_track ?: 0) * HEADING_DEG)
+                        }\u00B0",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                }
+            }
+        }
     }
 }

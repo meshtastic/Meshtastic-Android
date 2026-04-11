@@ -64,6 +64,8 @@ import kotlin.math.roundToInt
  * minimal [MapControlsOverlay][org.meshtastic.app.map.component.MapControlsOverlay] with a track time filter slider so
  * users can adjust the time range directly from the map.
  *
+ * Supports optional synchronized selection via [selectedPositionTime] and [onPositionSelected].
+ *
  * Unlike the main [org.meshtastic.app.map.MapView], this composable does **not** include node clusters, waypoints, or
  * location tracking. It is designed to be embedded inside the position-log adaptive layout.
  */
@@ -73,6 +75,8 @@ fun NodeTrackOsmMap(
     applicationId: String,
     mapStyleId: Int,
     modifier: Modifier = Modifier,
+    selectedPositionTime: Int? = null,
+    onPositionSelected: ((Int) -> Unit)? = null,
     mapViewModel: MapViewModel = koinViewModel(),
 ) {
     val density = LocalDensity.current
@@ -109,7 +113,15 @@ fun NodeTrackOsmMap(
                 map.addCopyright()
                 map.addScaleBarOverlay(density)
                 map.addPolyline(density, geoPoints) {}
-                map.addPositionMarkers(filteredPositions) {}
+                map.addPositionMarkers(filteredPositions) { time -> onPositionSelected?.invoke(time) }
+                // Center on selected position
+                if (selectedPositionTime != null) {
+                    val selected = filteredPositions.find { it.time == selectedPositionTime }
+                    if (selected != null) {
+                        val point = GeoPoint((selected.latitude_i ?: 0) * DEG_D, (selected.longitude_i ?: 0) * DEG_D)
+                        map.controller.animateTo(point)
+                    }
+                }
             },
         )
 

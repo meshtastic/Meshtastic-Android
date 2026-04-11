@@ -67,6 +67,7 @@ import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import kotlin.time.Instant
@@ -320,34 +321,110 @@ open class MetricsViewModel(
         Logger.d { "MetricsViewModel cleared" }
     }
 
-    fun savePositionCSV(uri: MeshtasticUri) {
-        viewModelScope.launch(dispatchers.main) {
-            val positions = state.value.positionLogs
+    // region --- CSV Export ---
+
+    /**
+     * Shared CSV export helper. Writes [header] then iterates [rows], converting each item to a CSV line via
+     * [rowMapper]. The mapper returns only the data columns; date and time columns are prepended automatically from the
+     * epoch-seconds timestamp extracted by [epochSeconds].
+     */
+    private fun <T> exportCsv(
+        uri: MeshtasticUri,
+        header: String,
+        rows: List<T>,
+        epochSeconds: (T) -> Long,
+        rowMapper: (T) -> String,
+    ) {
+        viewModelScope.launch(dispatchers.io) {
             fileService.write(uri) { sink ->
-                sink.writeUtf8(
-                    "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n",
-                )
-
-                positions.forEach { position ->
-                    val localDateTime =
-                        Instant.fromEpochSeconds(position.time.toLong())
-                            .toLocalDateTime(TimeZone.currentSystemDefault())
-                    val rxDateTime = "\"${localDateTime.date}\",\"${localDateTime.time}\""
-
-                    val latitude = (position.latitude_i ?: 0) * GeoConstants.DEG_D
-                    val longitude = (position.longitude_i ?: 0) * GeoConstants.DEG_D
-                    val altitude = position.altitude
-                    val satsInView = position.sats_in_view
-                    val speed = position.ground_speed
-                    val heading = formatString("%.2f", (position.ground_track ?: 0) * GeoConstants.HEADING_DEG)
-
-                    sink.writeUtf8(
-                        "$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n",
-                    )
+                sink.writeUtf8(header)
+                rows.forEach { item ->
+                    val dt =
+                        Instant.fromEpochSeconds(epochSeconds(item)).toLocalDateTime(TimeZone.currentSystemDefault())
+                    sink.writeUtf8("\"${dt.date}\",\"${dt.time}\",${rowMapper(item)}\n")
                 }
             }
         }
     }
+
+    fun savePositionCSV(uri: MeshtasticUri, data: List<org.meshtastic.proto.Position>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\"," + "\"satsInView\",\"speed\",\"heading\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { pos ->
+            val lat = (pos.latitude_i ?: 0) * GeoConstants.DEG_D
+            val lon = (pos.longitude_i ?: 0) * GeoConstants.DEG_D
+            val heading = formatString("%.2f", (pos.ground_track ?: 0) * GeoConstants.HEADING_DEG)
+            "\"$lat\",\"$lon\",\"${pos.altitude}\",\"${pos.sats_in_view}\",\"${pos.ground_speed}\",\"$heading\""
+        }
+    }
+
+    fun saveDeviceMetricsCSV(uri: MeshtasticUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"batteryLevel\",\"voltage\",\"channelUtilization\"," +
+                "\"airUtilTx\",\"uptimeSeconds\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { t ->
+            val dm = t.device_metrics
+            "\"${dm?.battery_level ?: ""}\",\"${dm?.voltage ?: ""}\"," +
+                "\"${dm?.channel_utilization ?: ""}\",\"${dm?.air_util_tx ?: ""}\"," +
+                "\"${dm?.uptime_seconds ?: ""}\""
+        }
+    }
+
+    fun saveEnvironmentMetricsCSV(uri: MeshtasticUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\"," +
+                "\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\"," +
+                "\"soilMoisture\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { t ->
+            val em = t.environment_metrics
+            "\"${em?.temperature ?: ""}\",\"${em?.relative_humidity ?: ""}\"," +
+                "\"${em?.barometric_pressure ?: ""}\",\"${em?.gas_resistance ?: ""}\"," +
+                "\"${em?.iaq ?: ""}\",\"${em?.wind_speed ?: ""}\"," +
+                "\"${em?.wind_direction ?: ""}\",\"${em?.soil_temperature ?: ""}\"," +
+                "\"${em?.soil_moisture ?: ""}\""
+        }
+    }
+
+    fun saveSignalMetricsCSV(uri: MeshtasticUri, data: List<MeshPacket>) {
+        exportCsv(
+            uri = uri,
+            header = "\"date\",\"time\",\"rssi\",\"snr\"\n",
+            rows = data,
+            epochSeconds = { it.rx_time.toLong() },
+        ) { p ->
+            "\"${p.rx_rssi}\",\"${p.rx_snr}\""
+        }
+    }
+
+    fun savePowerMetricsCSV(uri: MeshtasticUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"ch1Voltage\",\"ch1Current\",\"ch2Voltage\",\"ch2Current\"," +
+                "\"ch3Voltage\",\"ch3Current\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { t ->
+            val pm = t.power_metrics
+            "\"${pm?.ch1_voltage ?: ""}\",\"${pm?.ch1_current ?: ""}\"," +
+                "\"${pm?.ch2_voltage ?: ""}\",\"${pm?.ch2_current ?: ""}\"," +
+                "\"${pm?.ch3_voltage ?: ""}\",\"${pm?.ch3_current ?: ""}\""
+        }
+    }
+
+    // endregion
 
     @Suppress("MagicNumber", "CyclomaticComplexMethod", "ReturnCount")
     fun decodePaxFromLog(log: MeshLog): ProtoPaxcount? {
