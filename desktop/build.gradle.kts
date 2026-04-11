@@ -55,22 +55,28 @@ val resolvedAbsMinFwVersion: String = configProperties.getProperty("ABS_MIN_FW_V
 // ── Generate DesktopBuildConfig ──────────────────────────────────────────────
 // Mirrors AGP's BuildConfig for Android so the desktop runtime has access to the
 // same version metadata without hardcoding.
+// Uses an abstract task with typed properties so the configuration cache can
+// serialise it without capturing build-script object references.
+@CacheableTask
+abstract class GenerateBuildConfigTask : DefaultTask() {
+    @get:Input abstract val content: Property<String>
+
+    @get:OutputDirectory abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val dir = outputDir.get().asFile
+        dir.mkdirs()
+        dir.resolve("DesktopBuildConfig.kt").writeText(content.get())
+    }
+}
+
+val buildConfigOutputDir = layout.buildDirectory.dir("generated/buildconfig")
+
 val generateBuildConfig =
-    tasks.register("generateDesktopBuildConfig") {
-        val outputDir = layout.buildDirectory.dir("generated/buildconfig/org/meshtastic/desktop")
-        outputs.dir(outputDir)
-        // Re-run when any of these inputs change
-        inputs.property("versionCode", resolvedVersionCode)
-        inputs.property("versionName", resolvedVersionName)
-        inputs.property("isDebug", resolvedIsDebug)
-        inputs.property("minFwVersion", resolvedMinFwVersion)
-        inputs.property("absMinFwVersion", resolvedAbsMinFwVersion)
-        doLast {
-            val dir = outputDir.get().asFile
-            dir.mkdirs()
-            dir.resolve("DesktopBuildConfig.kt")
-                .writeText(
-                    """
+    tasks.register<GenerateBuildConfigTask>("generateDesktopBuildConfig") {
+        content.set(
+            """
             |package org.meshtastic.desktop
             |
             |/**
@@ -86,12 +92,12 @@ val generateBuildConfig =
             |    const val ABS_MIN_FW_VERSION: String = "$resolvedAbsMinFwVersion"
             |}
             """
-                        .trimMargin(),
-                )
-        }
+                .trimMargin(),
+        )
+        outputDir.set(buildConfigOutputDir.map { it.dir("org/meshtastic/desktop") })
     }
 
-sourceSets.main { kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") }) }
+sourceSets.main { kotlin.srcDir(generateBuildConfig.map { buildConfigOutputDir }) }
 
 kotlin {
     jvmToolchain {
