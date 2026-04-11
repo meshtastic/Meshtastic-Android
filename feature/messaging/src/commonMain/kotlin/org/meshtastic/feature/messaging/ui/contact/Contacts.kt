@@ -64,6 +64,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.util.TimeConstants
@@ -232,7 +233,7 @@ fun ContactsScreen(
             MainAppBar(
                 title = stringResource(Res.string.conversations),
                 ourNode = ourNode,
-                showNodeChip = ourNode != null && connectionState.isConnected(),
+                showNodeChip = ourNode != null && connectionState is ConnectionState.Connected,
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {
@@ -250,7 +251,7 @@ fun ContactsScreen(
             )
         },
         floatingActionButton = {
-            if (connectionState.isConnected()) {
+            if (connectionState is ConnectionState.Connected) {
                 MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
                     onImport = { uriString ->

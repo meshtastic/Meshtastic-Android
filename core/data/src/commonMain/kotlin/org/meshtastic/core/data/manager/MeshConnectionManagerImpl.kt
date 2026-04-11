@@ -347,11 +347,12 @@ class MeshConnectionManagerImpl(
         updateStatusNotification(t)
     }
 
-    override fun updateStatusNotification(telemetry: Telemetry?): Any =
+    override fun updateStatusNotification(telemetry: Telemetry?) {
         serviceNotifications.updateServiceStateNotification(
             serviceRepository.connectionState.value,
             telemetry = telemetry,
         )
+    }
 
     companion object {
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30

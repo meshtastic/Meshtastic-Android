@@ -28,7 +28,7 @@ interface MeshServiceNotifications {
 
     fun initChannels()
 
-    fun updateServiceStateNotification(state: org.meshtastic.core.model.ConnectionState, telemetry: Telemetry?): Any
+    fun updateServiceStateNotification(state: org.meshtastic.core.model.ConnectionState, telemetry: Telemetry?)
 
     suspend fun updateMessageNotification(
         contactKey: String,

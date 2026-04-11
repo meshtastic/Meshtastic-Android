@@ -16,7 +16,6 @@
  */
 package org.meshtastic.app.service
 
-import android.app.Notification
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import org.meshtastic.core.model.Node
@@ -37,7 +36,7 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
     override fun updateServiceStateNotification(
         state: org.meshtastic.core.model.ConnectionState,
         telemetry: Telemetry?,
-    ): Notification = mock(MockMode.autofill)
+    ) {}
 
     override suspend fun updateMessageNotification(
         contactKey: String,

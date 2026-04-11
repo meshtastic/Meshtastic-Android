@@ -42,6 +42,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
@@ -66,6 +67,12 @@ class MeshService : Service() {
     private val locationManager: MeshLocationManager by inject()
 
     private val connectionManager: MeshConnectionManager by inject()
+
+    private val notifications: MeshServiceNotifications by inject()
+
+    /** Android-typed accessor for the foreground service notification. */
+    private val androidNotifications: MeshServiceNotificationsImpl
+        get() = notifications as MeshServiceNotificationsImpl
 
     private val orchestrator: MeshServiceOrchestrator by inject()
 
@@ -130,7 +137,8 @@ class MeshService : Service() {
         val a = radioInterfaceService.getDeviceAddress()
         val wantForeground = a != null && a != "n"
 
-        val notification = connectionManager.updateStatusNotification() as android.app.Notification
+        connectionManager.updateStatusNotification()
+        val notification = androidNotifications.getServiceNotification()
 
         val foregroundServiceType =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

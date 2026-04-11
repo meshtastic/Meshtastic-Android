@@ -288,13 +288,25 @@ class MeshServiceNotificationsImpl(
     private var cachedLocalStats: LocalStats? = null
     private var nextStatsUpdateMillis: Long = 0
     private var cachedMessage: String? = null
+    private var cachedServiceNotification: Notification? = null
+
+    /**
+     * Returns the last-built service state notification, or builds a default one if none exists. This is used by
+     * [MeshService] for [android.app.Service.startForeground].
+     */
+    fun getServiceNotification(): Notification = cachedServiceNotification
+        ?: createServiceStateNotification(
+            name = getString(Res.string.meshtastic_app_name),
+            message = null,
+            nextUpdateAt = 0,
+        )
 
     // region Public Notification Methods
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     override fun updateServiceStateNotification(
         state: org.meshtastic.core.model.ConnectionState,
         telemetry: Telemetry?,
-    ): Notification {
+    ) {
         val summaryString =
             when (state) {
                 is org.meshtastic.core.model.ConnectionState.Connected ->
@@ -357,8 +369,8 @@ class MeshServiceNotificationsImpl(
                 message = cachedMessage,
                 nextUpdateAt = nextStatsUpdateMillis,
             )
+        cachedServiceNotification = notification
         notificationManager.notify(SERVICE_NOTIFY_ID, notification)
-        return notification
     }
 
     override suspend fun updateMessageNotification(

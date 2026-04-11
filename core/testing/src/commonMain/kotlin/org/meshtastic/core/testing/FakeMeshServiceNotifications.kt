@@ -31,7 +31,7 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
     override fun updateServiceStateNotification(
         state: org.meshtastic.core.model.ConnectionState,
         telemetry: Telemetry?,
-    ): Any = Any()
+    ) {}
 
     override suspend fun updateMessageNotification(
         contactKey: String,

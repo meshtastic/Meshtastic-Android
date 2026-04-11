@@ -28,12 +28,4 @@ sealed class ConnectionState {
 
     /** The device is in a light sleep state, and we are waiting for it to wake up and reconnect to us. */
     data object DeviceSleep : ConnectionState()
-
-    fun isConnected() = this == Connected
-
-    fun isConnecting() = this == Connecting
-
-    fun isDisconnected() = this == Disconnected
-
-    fun isDeviceSleep() = this == DeviceSleep
 }

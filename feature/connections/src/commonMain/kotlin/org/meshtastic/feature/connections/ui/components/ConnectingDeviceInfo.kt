@@ -51,7 +51,7 @@ fun ConnectingDeviceInfo(
     modifier: Modifier = Modifier,
 ) {
     val statusText =
-        if (connectionState.isConnected()) {
+        if (connectionState is ConnectionState.Connected) {
             stringResource(Res.string.connected)
         } else {
             stringResource(Res.string.connecting)
