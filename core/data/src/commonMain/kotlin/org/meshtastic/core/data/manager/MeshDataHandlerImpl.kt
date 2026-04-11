@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
@@ -94,14 +95,8 @@ class MeshDataHandlerImpl(
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
-    private lateinit var scope: CoroutineScope
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-        storeForwardHandler.start(scope)
-        telemetryHandler.start(scope)
-    }
 
     private val rememberDataType =
         setOf(

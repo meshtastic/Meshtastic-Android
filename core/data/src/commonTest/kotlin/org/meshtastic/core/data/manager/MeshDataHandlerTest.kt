@@ -108,8 +108,8 @@ class MeshDataHandlerTest {
                 storeForwardHandler = storeForwardHandler,
                 telemetryHandler = telemetryHandler,
                 adminPacketHandler = adminPacketHandler,
+                scope = testScope,
             )
-        handler.start(testScope)
 
         // Default: mapper returns null for empty packets, which is the safe default
         every { dataMapper.toDataPacket(any()) } returns null

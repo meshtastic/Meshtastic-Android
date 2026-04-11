@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import okio.ByteString
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.DataPacket
@@ -59,8 +60,8 @@ class NodeManagerImpl(
     private val nodeRepository: NodeRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val notificationManager: NotificationManager,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : NodeManager {
-    private lateinit var scope: CoroutineScope
 
     private val _nodeDBbyNodeNum = atomic(persistentMapOf<Int, Node>())
     private val _nodeDBbyID = atomic(persistentMapOf<String, Node>())
@@ -86,10 +87,6 @@ class NodeManagerImpl(
 
     override fun setMyNodeNum(num: Int?) {
         myNodeNum.value = num
-    }
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
     }
 
     companion object {

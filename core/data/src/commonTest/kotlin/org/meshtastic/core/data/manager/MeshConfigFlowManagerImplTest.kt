@@ -98,8 +98,8 @@ class MeshConfigFlowManagerImplTest {
                 analytics = analytics,
                 commandSender = commandSender,
                 packetHandler = packetHandler,
+                scope = testScope,
             )
-        manager.start(testScope)
     }
 
     // ---------- handleMyInfo ----------

@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
@@ -37,15 +36,10 @@ class NeighborInfoHandlerImpl(
     private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
 ) : NeighborInfoHandler {
-    private lateinit var scope: CoroutineScope
 
     private val startTimes = atomic(persistentMapOf<Int, Long>())
 
     override var lastNeighborInfo: NeighborInfo? = null
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     override fun recordStartTime(requestId: Int) {
         startTimes.update { it.put(requestId, nowMillis) }

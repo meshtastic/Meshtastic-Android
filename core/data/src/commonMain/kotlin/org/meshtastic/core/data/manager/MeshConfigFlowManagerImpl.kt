@@ -21,6 +21,7 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import okio.IOException
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.ConnectionState
@@ -56,16 +57,12 @@ class MeshConfigFlowManagerImpl(
     private val analytics: PlatformAnalytics,
     private val commandSender: CommandSender,
     private val packetHandler: PacketHandler,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigFlowManager {
-    private lateinit var scope: CoroutineScope
     private val wantConfigDelay = 100L
 
     /** Monotonically increasing generation so async clears from a stale handshake are discarded. */
     private val handshakeGeneration = atomic(0L)
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     /**
      * Type-safe handshake state machine. Each state carries exactly the data that is valid during that phase,

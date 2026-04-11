@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.MyNodeInfo
@@ -24,9 +23,6 @@ import org.meshtastic.proto.NodeInfo
 
 /** Interface for managing the configuration flow, including local node info and metadata. */
 interface MeshConfigFlowManager {
-    /** Starts the manager with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Handles received local node information. */
     fun handleMyInfo(myInfo: MyNodeInfo)
 

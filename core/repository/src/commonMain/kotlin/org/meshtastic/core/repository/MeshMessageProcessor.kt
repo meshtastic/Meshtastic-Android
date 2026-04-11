@@ -16,14 +16,10 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.MeshPacket
 
 /** Interface for processing incoming radio messages and mesh packets. */
 interface MeshMessageProcessor {
-    /** Starts the processor with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Handles a raw message received from the radio. */
     fun handleFromRadio(bytes: ByteArray, myNodeNum: Int?)
 

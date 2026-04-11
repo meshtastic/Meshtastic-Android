@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import okio.ByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
@@ -27,9 +26,6 @@ import org.meshtastic.proto.LocalConfig
 /** Interface for sending commands and packets to the mesh network. */
 @Suppress("TooManyFunctions")
 interface CommandSender {
-    /** Starts the command sender with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Returns the current packet ID. */
     fun getCurrentPacketId(): Long
 

@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.MeshConfigHandler
@@ -40,8 +41,8 @@ class MeshConfigHandlerImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeManager: NodeManager,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigHandler {
-    private lateinit var scope: CoroutineScope
 
     private val _localConfig = MutableStateFlow(LocalConfig())
     override val localConfig = _localConfig.asStateFlow()
@@ -49,8 +50,7 @@ class MeshConfigHandlerImpl(
     private val _moduleConfig = MutableStateFlow(LocalModuleConfig())
     override val moduleConfig = _moduleConfig.asStateFlow()
 
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
+    init {
         radioConfigRepository.localConfigFlow.onEach { _localConfig.value = it }.launchIn(scope)
         radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(scope)
     }

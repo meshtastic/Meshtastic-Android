@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.data.manager
 
-import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -64,13 +63,4 @@ class MeshRouterImpl(
 
     override val xmodemManager: XModemManager
         get() = xmodemManagerLazy.value
-
-    override fun start(scope: CoroutineScope) {
-        dataHandler.start(scope)
-        configHandler.start(scope)
-        tracerouteHandler.start(scope)
-        neighborInfoHandler.start(scope)
-        configFlowManager.start(scope)
-        actionHandler.start(scope)
-    }
 }

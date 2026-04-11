@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -50,9 +49,6 @@ interface NodeManager : NodeIdLookup {
 
     /** Sets whether node database writes are allowed. */
     fun setAllowNodeDbWrites(allowed: Boolean)
-
-    /** Starts the node manager with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
 
     /** The local node number as a thread-safe [StateFlow]. */
     val myNodeNum: StateFlow<Int?>

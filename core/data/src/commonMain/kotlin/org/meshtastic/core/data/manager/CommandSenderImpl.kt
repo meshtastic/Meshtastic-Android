@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
@@ -59,8 +60,8 @@ class CommandSenderImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : CommandSender {
-    private lateinit var scope: CoroutineScope
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
     private val sessionPasskey = atomic(ByteString.EMPTY)
 
@@ -71,8 +72,7 @@ class CommandSenderImpl(
     // maybe via ServiceRepository or similar.
     // For now I'll assume it's injected or available.
 
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
+    init {
         radioConfigRepository.localConfigFlow.onEach { localConfig.value = it }.launchIn(scope)
         radioConfigRepository.channelSetFlow.onEach { channelSet.value = it }.launchIn(scope)
     }

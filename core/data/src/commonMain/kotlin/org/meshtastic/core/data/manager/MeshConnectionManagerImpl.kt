@@ -19,13 +19,13 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
@@ -81,17 +81,15 @@ class MeshConnectionManagerImpl(
     private val packetRepository: PacketRepository,
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConnectionManager {
-    private lateinit var scope: CoroutineScope
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
     private var handshakeTimeout: Job? = null
     private var connectTimeMsec = 0L
     private var connectionRestored = false
 
-    @OptIn(FlowPreview::class)
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
+    init {
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
@@ -302,8 +300,7 @@ class MeshConnectionManagerImpl(
         // Start MQTT if enabled
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
-            mqttManager.start(
-                scope,
+            mqttManager.startProxy(
                 moduleConfig.mqtt?.enabled == true,
                 moduleConfig.mqtt?.proxy_to_client_enabled == true,
             )

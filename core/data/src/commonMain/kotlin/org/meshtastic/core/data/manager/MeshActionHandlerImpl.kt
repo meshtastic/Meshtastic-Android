@@ -19,6 +19,7 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import okio.ByteString.Companion.toByteString
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
@@ -64,12 +65,8 @@ class MeshActionHandlerImpl(
     private val notificationManager: NotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     private val radioConfigRepository: RadioConfigRepository,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshActionHandler {
-    private lateinit var scope: CoroutineScope
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     companion object {
         private const val DEFAULT_REBOOT_DELAY = 5

@@ -28,6 +28,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
@@ -60,6 +61,7 @@ class PacketHandlerImpl(
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val serviceRepository: ServiceRepository,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : PacketHandler {
 
     companion object {
@@ -67,7 +69,6 @@ class PacketHandlerImpl(
     }
 
     private var queueJob: Job? = null
-    private lateinit var scope: CoroutineScope
 
     private val queueMutex = Mutex()
     private val queuedPackets = mutableListOf<MeshPacket>()
@@ -78,11 +79,6 @@ class PacketHandlerImpl(
 
     private val responseMutex = Mutex()
     private val queueResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-        queueStopped = false // Safe: called before any concurrent operations on this scope.
-    }
 
     override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }

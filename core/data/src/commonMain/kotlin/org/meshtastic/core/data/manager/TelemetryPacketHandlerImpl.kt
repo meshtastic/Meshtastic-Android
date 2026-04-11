@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
@@ -49,15 +50,11 @@ class TelemetryPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val notificationManager: NotificationManager,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : TelemetryPacketHandler {
-    private lateinit var scope: CoroutineScope
 
     private val batteryMutex = Mutex()
     private val batteryPercentCooldowns = mutableMapOf<Int, Long>()
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
