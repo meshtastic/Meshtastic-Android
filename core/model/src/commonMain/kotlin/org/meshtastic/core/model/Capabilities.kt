@@ -49,8 +49,8 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for sharing contact information via QR codes. Supported since firmware v2.6.8. */
     val supportsQrCodeSharing = atLeast(V2_6_8)
 
-    /** Support for Status Message module. Supported since firmware v2.7.17. */
-    val supportsStatusMessage = atLeast(V2_7_17)
+    /** Support for Status Message module. Supported since firmware v2.8.0. */
+    val supportsStatusMessage = atLeast(V2_8_0)
 
     /** Support for Traffic Management module. Supported since firmware v3.0.0. */
     val supportsTrafficManagementConfig = atLeast(V3_0_0)
@@ -69,9 +69,9 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_6_9 = DeviceVersion("2.6.9")
         private val V2_6_10 = DeviceVersion("2.6.10")
         private val V2_7_12 = DeviceVersion("2.7.12")
-        private val V2_7_17 = DeviceVersion("2.7.17")
         private val V2_7_18 = DeviceVersion("2.7.18")
         private val V2_7_19 = DeviceVersion("2.7.19")
+        private val V2_8_0 = DeviceVersion("2.8.0")
         private val V3_0_0 = DeviceVersion("3.0.0")
         private val UNRELEASED = DeviceVersion("9.9.9")
     }

@@ -68,9 +68,9 @@ class CapabilitiesTest {
     }
 
     @Test
-    fun supportsStatusMessage_requires_V2_7_17() {
-        assertFalse(caps("2.7.16").supportsStatusMessage)
-        assertTrue(caps("2.7.17").supportsStatusMessage)
+    fun supportsStatusMessage_requires_V2_8_0() {
+        assertFalse(caps("2.7.21").supportsStatusMessage)
+        assertTrue(caps("2.8.0").supportsStatusMessage)
     }
 
     @Test
