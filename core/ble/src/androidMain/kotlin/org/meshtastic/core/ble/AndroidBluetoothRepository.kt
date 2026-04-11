@@ -180,14 +180,15 @@ class AndroidBluetoothRepository(
         // user renamed the device in firmware since the cache was populated.
         deviceCache.keys.retainAll(bondedAddresses)
         return bonded.map { device ->
-            deviceCache
-                .getOrPut(device.address) { DirectBleDevice(device.address, device.name) }
-                .also { cached ->
-                    // Refresh name if it changed (firmware rename, etc.)
-                    if (cached.name != device.name) {
-                        deviceCache[device.address] = DirectBleDevice(device.address, device.name)
-                    }
-                }
+            val cached = deviceCache.getOrPut(device.address) { DirectBleDevice(device.address, device.name) }
+            // If the name changed (firmware rename, etc.), replace the cached entry and return the new one.
+            if (cached.name != device.name) {
+                val updated = DirectBleDevice(device.address, device.name)
+                deviceCache[device.address] = updated
+                updated
+            } else {
+                cached
+            }
         }
     }
 

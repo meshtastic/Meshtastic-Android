@@ -17,41 +17,14 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Advertisement
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
-class KableBleDevice(val advertisement: Advertisement) : BleDevice {
+/** A [BleDevice] backed by a Kable [Advertisement] discovered during scanning. */
+class KableBleDevice(val advertisement: Advertisement) : BaseBleDevice() {
     override val name: String?
         get() = advertisement.name
 
     override val address: String
         get() = advertisement.identifier.toString()
 
-    private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
-    override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
-
-    // Bonding is handled by the OS pairing dialog on Android; on desktop Kable connects directly.
-    override val isBonded: Boolean = true
-
-    override val isConnected: Boolean
-        get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.activeAddress == address
-
-    @OptIn(com.juul.kable.ExperimentalApi::class)
-    override suspend fun readRssi(): Int {
-        val peripheral = ActiveBleConnection.activePeripheral
-        return if (peripheral != null && ActiveBleConnection.activeAddress == address) {
-            peripheral.rssi()
-        } else {
-            advertisement.rssi
-        }
-    }
-
-    override suspend fun bond() {
-        // No-op: bonding is OS-managed on Android and not required on desktop.
-    }
-
-    internal fun updateState(newState: BleConnectionState) {
-        _state.value = newState
-    }
+    override fun fallbackRssi(): Int = advertisement.rssi
 }

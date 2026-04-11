@@ -18,6 +18,7 @@ package org.meshtastic.core.ble
 
 import co.touchlab.kermit.Logger
 import com.juul.kable.Peripheral
+import com.juul.kable.PeripheralBuilder
 import com.juul.kable.State
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
@@ -31,7 +32,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
@@ -115,42 +115,32 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override suspend fun connect(device: BleDevice) {
-        val autoConnect = MutableStateFlow(device is DirectBleDevice)
+        var autoConnect = device is DirectBleDevice
+
+        /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
+        fun PeripheralBuilder.commonConfig() {
+            logging {
+                engine = KermitLogEngine
+                level = Logging.Level.Events
+                identifier = device.address
+            }
+            observationExceptionHandler { cause ->
+                Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+            }
+            platformConfig(device) { autoConnect }
+        }
 
         val p =
             when (device) {
-                is KableBleDevice ->
-                    Peripheral(device.advertisement) {
-                        logging {
-                            engine = KermitLogEngine
-                            level = Logging.Level.Events
-                            identifier = device.address
-                        }
-                        observationExceptionHandler { cause ->
-                            Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
-                        }
-                        platformConfig(device) { autoConnect.value }
-                    }
-                is DirectBleDevice ->
-                    createPeripheral(device.address) {
-                        logging {
-                            engine = KermitLogEngine
-                            level = Logging.Level.Events
-                            identifier = device.address
-                        }
-                        observationExceptionHandler { cause ->
-                            Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
-                        }
-                        platformConfig(device) { autoConnect.value }
-                    }
+                is KableBleDevice -> Peripheral(device.advertisement) { commonConfig() }
+                is DirectBleDevice -> createPeripheral(device.address) { commonConfig() }
                 else -> error("Unsupported BleDevice type: ${device::class}")
             }
 
         cleanUpPeripheral(device.address)
         peripheral = p
 
-        ActiveBleConnection.activePeripheral = p
-        ActiveBleConnection.activeAddress = device.address
+        ActiveBleConnection.active = ActiveConnection(p, device.address)
 
         _deviceFlow.emit(device)
 
@@ -164,17 +154,14 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                         hasStartedConnecting = true
                     }
 
-                    when (device) {
-                        is KableBleDevice -> device.updateState(mappedState)
-                        is DirectBleDevice -> device.updateState(mappedState)
-                    }
+                    (device as BaseBleDevice).updateState(mappedState)
 
                     _connectionState.emit(mappedState)
                 }
                 .launchIn(scope)
 
         while (p.state.value !is State.Connected) {
-            autoConnect.value =
+            autoConnect =
                 try {
                     connectionScope?.let { oldScope ->
                         Logger.d { "[${device.address}] Cancelling previous connectionScope before reconnect" }
@@ -185,11 +172,11 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                 } catch (e: CancellationException) {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
-                    if (autoConnect.value) {
+                    if (autoConnect) {
                         // autoConnect already true and still failed — don't loop forever.
                         Logger.w { "[${device.address}] autoConnect attempt failed, giving up" }
                         _connectionState.emit(BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed))
-                        return
+                        throw e
                     }
                     Logger.d { "[${device.address}] Direct connect failed, falling back to autoConnect" }
                     delay(AUTOCONNECT_FALLBACK_DELAY_MS)
@@ -227,8 +214,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         peripheral = null
         connectionScope = null
 
-        ActiveBleConnection.activePeripheral = null
-        ActiveBleConnection.activeAddress = null
+        ActiveBleConnection.active = null
 
         _deviceFlow.emit(null)
     }

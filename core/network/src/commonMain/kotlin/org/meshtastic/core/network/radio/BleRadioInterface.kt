@@ -70,6 +70,11 @@ private const val RECONNECT_MAX_DELAY_MS = 60_000L
 private const val RECONNECT_MAX_FAILURES = 10
 
 /**
+ * Settle delay (ms) before each connection attempt to let the Android BLE stack finish any pending disconnect cleanup.
+ */
+private const val SETTLE_DELAY_MS = 1000L
+
+/**
  * Minimum milliseconds a BLE connection must stay up before we consider it "stable" and reset
  * [BleRadioInterface.consecutiveFailures]. Without this, a device at the edge of BLE range can repeatedly connect for a
  * fraction of a second and drop — each brief connection resets the failure counter so [RECONNECT_FAILURE_THRESHOLD] is
@@ -149,11 +154,15 @@ class BleRadioInterface(
     private val bleConnection: BleConnection = connectionFactory.create(connectionScope, address)
     private val writeMutex: Mutex = Mutex()
 
-    private var connectionStartTime: Long = 0
-    private var packetsReceived: Int = 0
-    private var packetsSent: Int = 0
-    private var bytesReceived: Long = 0
-    private var bytesSent: Long = 0
+    @Volatile private var connectionStartTime: Long = 0
+
+    @Volatile private var packetsReceived: Int = 0
+
+    @Volatile private var packetsSent: Int = 0
+
+    @Volatile private var bytesReceived: Long = 0
+
+    @Volatile private var bytesSent: Long = 0
 
     @Volatile private var isFullyConnected = false
     private var connectionJob: Job? = null
@@ -207,9 +216,7 @@ class BleRadioInterface(
                     try {
                         // Settle delay: let the Android BLE stack finish any pending
                         // disconnect cleanup before starting a new connection attempt.
-                        @Suppress("MagicNumber")
-                        val connectDelayMs = 1000L
-                        delay(connectDelayMs)
+                        delay(SETTLE_DELAY_MS)
 
                         connectionStartTime = nowMillis
                         Logger.i { "[$address] BLE connection attempt started" }
@@ -230,16 +237,7 @@ class BleRadioInterface(
                             }
                         }
 
-                        var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
-
-                        if (state !is BleConnectionState.Connected) {
-                            // Kable sometimes fails the first attempt if the previous GATT
-                            // session wasn't fully cleaned up by the OS. One retry resolves it.
-                            Logger.d { "[$address] First connection attempt failed, retrying in 1.5s" }
-                            @Suppress("MagicNumber")
-                            delay(1500L)
-                            state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
-                        }
+                        val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
 
                         if (state !is BleConnectionState.Connected) {
                             throw RadioNotConnectedException("Failed to connect to device at address $address")
@@ -353,14 +351,7 @@ class BleRadioInterface(
 
     private fun onDisconnected() {
         radioService = null
-
-        val uptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
-        Logger.i {
-            "[$address] BLE disconnected - " +
-                "Uptime: ${uptime}ms, " +
-                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                "Packets TX: $packetsSent ($bytesSent bytes)"
-        }
+        Logger.i { "[$address] BLE disconnected - ${formatSessionStats()}" }
         // Signal immediately so the UI reflects the disconnect while reconnect continues.
         service.onDisconnect(isPermanent = false)
     }
@@ -480,13 +471,7 @@ class BleRadioInterface(
 
     /** Closes the connection to the device. */
     override fun close() {
-        val uptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
-        Logger.i {
-            "[$address] Disconnecting. " +
-                "Uptime: ${uptime}ms, " +
-                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                "Packets TX: $packetsSent ($bytesSent bytes)"
-        }
+        Logger.i { "[$address] Disconnecting. ${formatSessionStats()}" }
         connectionScope.cancel("close() called")
         // GATT cleanup must outlive serviceScope cancellation — GlobalScope is intentional.
         // SharedRadioInterfaceService cancels serviceScope immediately after close(), so a
@@ -514,6 +499,14 @@ class BleRadioInterface(
     private fun handleFailure(throwable: Throwable) {
         val (isPermanent, msg) = throwable.toDisconnectReason()
         service.onDisconnect(isPermanent, errorMessage = msg)
+    }
+
+    /** Formats a one-line session statistics summary for logging. */
+    private fun formatSessionStats(): String {
+        val uptime = if (connectionStartTime > 0) nowMillis - connectionStartTime else 0
+        return "Uptime: ${uptime}ms, " +
+            "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+            "Packets TX: $packetsSent ($bytesSent bytes)"
     }
 
     private fun Throwable.toDisconnectReason(): Pair<Boolean, String> {
