@@ -39,6 +39,6 @@ interface MeshConnectionManager {
     /** Updates the telemetry information for the local node. */
     fun updateTelemetry(t: Telemetry)
 
-    /** Updates and returns the current status notification. */
-    fun updateStatusNotification(telemetry: Telemetry? = null): Any
+    /** Updates the current status notification. */
+    fun updateStatusNotification(telemetry: Telemetry? = null)
 }

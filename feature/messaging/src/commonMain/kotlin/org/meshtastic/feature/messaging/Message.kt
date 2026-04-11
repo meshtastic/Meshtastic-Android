@@ -65,6 +65,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getChannel
@@ -327,7 +328,7 @@ fun MessageScreen(
             Column {
                 AnimatedVisibility(visible = showQuickChat) {
                     QuickChatRow(
-                        enabled = connectionState.isConnected(),
+                        enabled = connectionState is ConnectionState.Connected,
                         actions = quickChatActions,
                         onClick = { action ->
                             handleQuickChatAction(
@@ -344,7 +345,7 @@ fun MessageScreen(
                     ourNode = ourNode,
                 )
                 MessageInput(
-                    isEnabled = connectionState.isConnected(),
+                    isEnabled = connectionState is ConnectionState.Connected,
                     isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
                     textFieldState = messageInputState,
                     onSendMessage = {

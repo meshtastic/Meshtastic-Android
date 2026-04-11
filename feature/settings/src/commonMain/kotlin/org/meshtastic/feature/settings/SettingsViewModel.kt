@@ -41,6 +41,7 @@ import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
@@ -84,7 +85,9 @@ class SettingsViewModel(
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     val isConnected =
-        radioController.connectionState.map { it.isConnected() }.stateInWhileSubscribed(initialValue = false)
+        radioController.connectionState
+            .map { it is ConnectionState.Connected }
+            .stateInWhileSubscribed(initialValue = false)
 
     val localConfig: StateFlow<LocalConfig> =
         radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())

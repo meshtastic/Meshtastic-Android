@@ -114,7 +114,7 @@ class NoopMeshServiceNotifications : MeshServiceNotifications {
     override fun updateServiceStateNotification(
         state: org.meshtastic.core.model.ConnectionState,
         telemetry: Telemetry?,
-    ): Any = Unit
+    ) {}
 
     override suspend fun updateMessageNotification(
         contactKey: String,

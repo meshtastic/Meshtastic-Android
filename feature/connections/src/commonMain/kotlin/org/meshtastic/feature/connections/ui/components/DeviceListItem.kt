@@ -90,9 +90,9 @@ fun DeviceListItem(
     val icon =
         when (device) {
             is DeviceListEntry.Ble ->
-                if (connectionState.isConnected()) {
+                if (connectionState is ConnectionState.Connected) {
                     MeshtasticIcons.BluetoothConnected
-                } else if (connectionState.isConnecting()) {
+                } else if (connectionState is ConnectionState.Connecting) {
                     MeshtasticIcons.BluetoothSearching
                 } else {
                     MeshtasticIcons.Bluetooth
@@ -132,7 +132,7 @@ fun DeviceListItem(
                 contentDescription = contentDescription,
                 modifier = Modifier.size(32.dp),
                 tint =
-                if (connectionState.isConnected()) {
+                if (connectionState is ConnectionState.Connected) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
@@ -146,10 +146,10 @@ fun DeviceListItem(
                     Rssi(rssi = displayedRssi)
                 }
 
-                if (connectionState.isConnecting()) {
+                if (connectionState is ConnectionState.Connecting) {
                     CircularProgressIndicator(modifier = Modifier.size(32.dp))
                 } else {
-                    RadioButton(selected = connectionState.isConnected(), onClick = null)
+                    RadioButton(selected = connectionState is ConnectionState.Connected, onClick = null)
                 }
             }
         },

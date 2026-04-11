@@ -151,7 +151,7 @@ fun ConnectionsScreen(
             MainAppBar(
                 title = stringResource(Res.string.connections),
                 ourNode = ourNode,
-                showNodeChip = ourNode != null && connectionState.isConnected(),
+                showNodeChip = ourNode != null && connectionState is ConnectionState.Connected,
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
@@ -167,8 +167,8 @@ fun ConnectionsScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 val uiState =
                     when {
-                        connectionState.isConnected() && ourNode != null -> 2
-                        connectionState.isConnected() ||
+                        connectionState is ConnectionState.Connected && ourNode != null -> 2
+                        connectionState is ConnectionState.Connected ||
                             connectionState == ConnectionState.Connecting ||
                             selectedDevice != NO_DEVICE_SELECTED -> 1
 
