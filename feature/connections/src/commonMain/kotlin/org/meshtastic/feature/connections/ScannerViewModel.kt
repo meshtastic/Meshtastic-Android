@@ -206,6 +206,7 @@ open class ScannerViewModel(
                 changeDeviceAddress(it.fullAddress)
                 true
             } else {
+                radioPrefs.setDevName(it.name)
                 requestBonding(it)
                 false
             }
@@ -216,6 +217,7 @@ open class ScannerViewModel(
                 changeDeviceAddress(it.fullAddress)
                 true
             } else {
+                radioPrefs.setDevName(it.name)
                 requestPermission(it)
                 false
             }
