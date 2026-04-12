@@ -44,7 +44,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.jetbrains.lifecycle.viewmodel.compose)
     implementation(libs.jetbrains.lifecycle.runtime)
-    implementation(libs.androidx.compose.material3)
+    implementation(libs.compose.multiplatform.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.material)
 

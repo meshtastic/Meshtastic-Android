@@ -26,11 +26,6 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
 
     val hasAndroidTest = project.projectDir.resolve("src/androidTest").exists()
     dependencies {
-        val bom = libs.library("androidx-compose-bom")
-        "implementation"(platform(bom))
-        if (hasAndroidTest) {
-            "androidTestImplementation"(platform(bom))
-        }
         "debugImplementation"(libs.library("compose-multiplatform-ui-tooling"))
         "implementation"(libs.library("compose-multiplatform-runtime"))
         "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
