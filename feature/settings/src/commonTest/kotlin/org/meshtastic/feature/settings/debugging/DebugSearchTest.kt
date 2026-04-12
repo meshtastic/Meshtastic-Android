@@ -23,17 +23,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_active_filters
 import org.meshtastic.core.resources.debug_default_search
@@ -42,18 +39,15 @@ import org.meshtastic.core.resources.getString
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchMatch
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState
-import org.robolectric.annotation.Config
+import kotlin.test.Test
 
-@RunWith(AndroidJUnit4::class)
-@Config(sdk = [34])
+@OptIn(ExperimentalTestApi::class)
 class DebugSearchTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
-
     @Test
-    fun debugSearchBar_showsPlaceholder() {
+    fun debugSearchBar_showsPlaceholder() = runComposeUiTest {
         val placeholder = getString(Res.string.debug_default_search)
-        composeTestRule.setContent {
+        setContent {
             DebugSearchBar(
                 searchState = SearchState(),
                 onSearchTextChange = {},
@@ -62,13 +56,13 @@ class DebugSearchTest {
                 onClearSearch = {},
             )
         }
-        composeTestRule.onNodeWithText(placeholder).assertIsDisplayed()
+        onNodeWithText(placeholder).assertIsDisplayed()
     }
 
     @Test
-    fun debugSearchBar_showsClearButtonWhenTextEntered() {
+    fun debugSearchBar_showsClearButtonWhenTextEntered() = runComposeUiTest {
         val placeholder = getString(Res.string.debug_default_search)
-        composeTestRule.setContent {
+        setContent {
             var searchText by remember { mutableStateOf("test") }
             DebugSearchBar(
                 searchState = SearchState(searchText = searchText),
@@ -78,17 +72,17 @@ class DebugSearchTest {
                 onClearSearch = { searchText = "" },
             )
         }
-        composeTestRule.onNodeWithContentDescription("Clear search").assertIsDisplayed().performClick()
-        composeTestRule.onNodeWithText(placeholder).assertIsDisplayed()
+        onNodeWithContentDescription("Clear search").assertIsDisplayed().performClick()
+        onNodeWithText(placeholder).assertIsDisplayed()
     }
 
     @Test
-    fun debugSearchBar_searchFor_showsArrowsClearAndValues() {
+    fun debugSearchBar_searchFor_showsArrowsClearAndValues() = runComposeUiTest {
         val searchText = "test"
         val matchCount = 3
         val currentMatchIndex = 1
 
-        composeTestRule.setContent {
+        setContent {
             DebugSearchBar(
                 searchState =
                 SearchState(
@@ -104,18 +98,18 @@ class DebugSearchTest {
             )
         }
         // Check the match count display (e.g., '2/3')
-        composeTestRule.onNodeWithText("${currentMatchIndex + 1}/$matchCount").assertIsDisplayed()
+        onNodeWithText("${currentMatchIndex + 1}/$matchCount").assertIsDisplayed()
         // Check the navigation arrows
-        composeTestRule.onNodeWithContentDescription("Previous match").assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription("Next match").assertIsDisplayed()
+        onNodeWithContentDescription("Previous match").assertIsDisplayed()
+        onNodeWithContentDescription("Next match").assertIsDisplayed()
         // Check the clear button
-        composeTestRule.onNodeWithContentDescription("Clear search").assertIsDisplayed()
+        onNodeWithContentDescription("Clear search").assertIsDisplayed()
     }
 
     @Test
-    fun debugFilterBar_showsFilterButtonAndMenu() {
+    fun debugFilterBar_showsFilterButtonAndMenu() = runComposeUiTest {
         val filterLabel = getString(Res.string.debug_filters)
-        composeTestRule.setContent {
+        setContent {
             var filterTexts by remember { mutableStateOf(listOf<String>()) }
             var customFilterText by remember { mutableStateOf("") }
             val presetFilters = listOf("Error", "Warning", "Info")
@@ -138,13 +132,13 @@ class DebugSearchTest {
             )
         }
         // The filter button should be visible
-        composeTestRule.onNodeWithText(filterLabel).assertIsDisplayed()
+        onNodeWithText(filterLabel).assertIsDisplayed()
     }
 
     @Test
-    fun debugFilterBar_addCustomFilter_displaysActiveFilter() {
+    fun debugFilterBar_addCustomFilter_displaysActiveFilter() = runComposeUiTest {
         val activeFiltersLabel = getString(Res.string.debug_active_filters)
-        composeTestRule.setContent {
+        setContent {
             var filterTexts by remember { mutableStateOf(listOf<String>()) }
             var customFilterText by remember { mutableStateOf("") }
             Column(modifier = Modifier.padding(16.dp)) {
@@ -162,18 +156,16 @@ class DebugSearchTest {
                 )
             }
         }
-        with(composeTestRule) {
-            onNodeWithText("Add custom filter").performTextInput("MyFilter")
-            onNodeWithContentDescription("Add filter").performClick()
-            onNodeWithText(activeFiltersLabel).assertIsDisplayed()
-            onNodeWithText("MyFilter").assertIsDisplayed()
-        }
+        onNodeWithText("Add custom filter").performTextInput("MyFilter")
+        onNodeWithContentDescription("Add filter").performClick()
+        onNodeWithText(activeFiltersLabel).assertIsDisplayed()
+        onNodeWithText("MyFilter").assertIsDisplayed()
     }
 
     @Test
-    fun debugActiveFilters_clearAllFilters_removesFilters() {
+    fun debugActiveFilters_clearAllFilters_removesFilters() = runComposeUiTest {
         val activeFiltersLabel = getString(Res.string.debug_active_filters)
-        composeTestRule.setContent {
+        setContent {
             var filterTexts by remember { mutableStateOf(listOf("A", "B")) }
             DebugActiveFilters(
                 filterTexts = filterTexts,
@@ -183,13 +175,13 @@ class DebugSearchTest {
             )
         }
         // The active filters label and chips should be visible
-        composeTestRule.onNodeWithText(activeFiltersLabel).assertIsDisplayed()
-        composeTestRule.onNodeWithText("A").assertIsDisplayed()
-        composeTestRule.onNodeWithText("B").assertIsDisplayed()
+        onNodeWithText(activeFiltersLabel).assertIsDisplayed()
+        onNodeWithText("A").assertIsDisplayed()
+        onNodeWithText("B").assertIsDisplayed()
         // Click the clear all filters button
-        composeTestRule.onNodeWithContentDescription("Clear all filters").performClick()
+        onNodeWithContentDescription("Clear all filters").performClick()
         // The filter chips should no longer be visible
-        composeTestRule.onNodeWithText("A").assertDoesNotExist()
-        composeTestRule.onNodeWithText("B").assertDoesNotExist()
+        onNodeWithText("A").assertDoesNotExist()
+        onNodeWithText("B").assertDoesNotExist()
     }
 }

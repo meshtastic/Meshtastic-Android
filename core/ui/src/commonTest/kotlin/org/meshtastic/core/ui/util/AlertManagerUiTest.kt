@@ -18,22 +18,21 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.junit.Rule
-import org.junit.Test
+import androidx.compose.ui.test.runComposeUiTest
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
+@OptIn(ExperimentalTestApi::class)
 class AlertManagerUiTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
-
-    private val alertManager = AlertManager()
-
     @Test
-    fun alertManager_showsAlert_whenRequested() {
-        composeTestRule.setContent {
+    fun alertManager_showsAlert_whenRequested() = runComposeUiTest {
+        val alertManager = AlertManager()
+        setContent {
             val alertData by alertManager.currentAlert.collectAsState()
             alertData?.let { data -> AlertPreviewRenderer(data) }
         }
@@ -43,29 +42,24 @@ class AlertManagerUiTest {
 
         alertManager.showAlert(title = title, message = message)
 
-        composeTestRule.onNodeWithText(title).assertIsDisplayed()
-        composeTestRule.onNodeWithText(message).assertIsDisplayed()
+        onNodeWithText(title).assertIsDisplayed()
+        onNodeWithText(message).assertIsDisplayed()
     }
 
     @Test
-    fun alertManager_confirmButton_triggersCallbackAndDismisses() {
+    fun alertManager_confirmButton_triggersCallbackAndDismisses() = runComposeUiTest {
+        val alertManager = AlertManager()
         var confirmClicked = false
-        composeTestRule.setContent {
+        setContent {
             val alertData by alertManager.currentAlert.collectAsState()
             alertData?.let { data -> AlertPreviewRenderer(data) }
         }
 
-        alertManager.showAlert(title = "Confirm Title", onConfirm = { confirmClicked = true })
-
-        // Default confirm text is "Okay" from resources, but AlertPreviewRenderer uses it
-        // We'll search for the text "Okay" (assuming it matches the resource value)
-        // Since we are in a test, we might need to use a hardcoded string or a resource
-        // But for this test, let's just use the confirmText parameter to be sure
         alertManager.showAlert(title = "Confirm Title", confirmText = "Yes", onConfirm = { confirmClicked = true })
 
-        composeTestRule.onNodeWithText("Yes").performClick()
+        onNodeWithText("Yes").performClick()
 
-        assert(confirmClicked)
-        composeTestRule.onNodeWithText("Confirm Title").assertDoesNotExist()
+        assertTrue(confirmClicked)
+        onNodeWithText("Confirm Title").assertDoesNotExist()
     }
 }

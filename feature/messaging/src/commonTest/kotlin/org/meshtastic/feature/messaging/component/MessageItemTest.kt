@@ -16,25 +16,21 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.tooling.preview.NodePreviewParameterProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
+import androidx.compose.ui.test.runComposeUiTest
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
+import kotlin.test.Test
 
-@RunWith(AndroidJUnit4::class)
+@OptIn(ExperimentalTestApi::class)
 class MessageItemTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
-
     @Test
-    fun mqttIconIsDisplayedWhenViaMqttIsTrue() {
+    fun mqttIconIsDisplayedWhenViaMqttIsTrue() = runComposeUiTest {
         val testNode = NodePreviewParameterProvider().minnieMouse
         val messageWithMqtt =
             Message(
@@ -56,7 +52,7 @@ class MessageItemTest {
                 viaMqtt = true,
             )
 
-        composeTestRule.setContent {
+        setContent {
             MessageItem(
                 message = messageWithMqtt,
                 node = testNode,
@@ -69,11 +65,11 @@ class MessageItemTest {
         }
 
         // Check that the MQTT icon is displayed
-        composeTestRule.onNodeWithContentDescription("via MQTT").assertIsDisplayed()
+        onNodeWithContentDescription("via MQTT").assertIsDisplayed()
     }
 
     @Test
-    fun mqttIconIsNotDisplayedWhenViaMqttIsFalse() {
+    fun mqttIconIsNotDisplayedWhenViaMqttIsFalse() = runComposeUiTest {
         val testNode = NodePreviewParameterProvider().minnieMouse
         val messageWithoutMqtt =
             Message(
@@ -95,7 +91,7 @@ class MessageItemTest {
                 viaMqtt = false,
             )
 
-        composeTestRule.setContent {
+        setContent {
             MessageItem(
                 message = messageWithoutMqtt,
                 node = testNode,
@@ -108,11 +104,11 @@ class MessageItemTest {
         }
 
         // Check that the MQTT icon is not displayed
-        composeTestRule.onNodeWithContentDescription("via MQTT").assertDoesNotExist()
+        onNodeWithContentDescription("via MQTT").assertDoesNotExist()
     }
 
     @Test
-    fun messageItem_hasCorrectSemanticContentDescription() {
+    fun messageItem_hasCorrectSemanticContentDescription() = runComposeUiTest {
         val testNode = NodePreviewParameterProvider().minnieMouse
         val message =
             Message(
@@ -134,7 +130,7 @@ class MessageItemTest {
                 viaMqtt = false,
             )
 
-        composeTestRule.setContent {
+        setContent {
             MessageItem(
                 message = message,
                 node = testNode,
@@ -147,8 +143,6 @@ class MessageItemTest {
         }
 
         // Verify that the node containing the message text exists and matches the text
-        composeTestRule
-            .onNodeWithContentDescription("Message from ${testNode.user.long_name}: Hello World")
-            .assertIsDisplayed()
+        onNodeWithContentDescription("Message from ${testNode.user.long_name}: Hello World").assertIsDisplayed()
     }
 }

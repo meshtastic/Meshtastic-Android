@@ -70,8 +70,9 @@ kotlin {
             implementation(projects.core.testing)
             implementation(libs.junit)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.compose.multiplatform.ui.test)
         }
 
-        val androidHostTest by getting { dependencies { implementation(libs.androidx.test.runner) } }
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }

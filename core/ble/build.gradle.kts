@@ -50,12 +50,5 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(projects.core.testing)
         }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.androidx.lifecycle.testing)
-            }
-        }
     }
 }

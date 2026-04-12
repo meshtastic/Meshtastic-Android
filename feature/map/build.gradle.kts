@@ -43,12 +43,5 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.di)
         }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.kotlinx.coroutines.test)
-            }
-        }
     }
 }

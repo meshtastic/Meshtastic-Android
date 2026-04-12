@@ -18,27 +18,25 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import org.junit.Rule
-import org.junit.Test
+import androidx.compose.ui.test.runComposeUiTest
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
+import kotlin.test.Test
 
+@OptIn(ExperimentalTestApi::class)
 class ImportFabUiTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
-
     @Test
-    fun importFab_expands_onButtonClick_whenSupported() {
+    fun importFab_expands_onButtonClick_whenSupported() = runComposeUiTest {
         val testTag = "import_fab"
-        composeTestRule.setContent {
+        setContent {
             CompositionLocalProvider(
                 LocalBarcodeScannerSupported provides true,
                 LocalNfcScannerSupported provides true,
@@ -48,18 +46,18 @@ class ImportFabUiTest {
         }
 
         // Expand the FAB
-        composeTestRule.onNodeWithTag(testTag).performClick()
+        onNodeWithTag(testTag).performClick()
 
         // Verify menu items are visible using their tags
-        composeTestRule.onNodeWithTag("nfc_import").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("qr_import").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("url_import").assertIsDisplayed()
+        onNodeWithTag("nfc_import").assertIsDisplayed()
+        onNodeWithTag("qr_import").assertIsDisplayed()
+        onNodeWithTag("url_import").assertIsDisplayed()
     }
 
     @Test
-    fun importFab_hidesNfcAndQr_whenNotSupported() {
+    fun importFab_hidesNfcAndQr_whenNotSupported() = runComposeUiTest {
         val testTag = "import_fab"
-        composeTestRule.setContent {
+        setContent {
             CompositionLocalProvider(
                 LocalBarcodeScannerSupported provides false,
                 LocalNfcScannerSupported provides false,
@@ -69,41 +67,41 @@ class ImportFabUiTest {
         }
 
         // Expand the FAB
-        composeTestRule.onNodeWithTag(testTag).performClick()
+        onNodeWithTag(testTag).performClick()
 
         // Verify menu items are visible using their tags
-        composeTestRule.onNodeWithTag("nfc_import").assertDoesNotExist()
-        composeTestRule.onNodeWithTag("qr_import").assertDoesNotExist()
-        composeTestRule.onNodeWithTag("url_import").assertIsDisplayed()
+        onNodeWithTag("nfc_import").assertDoesNotExist()
+        onNodeWithTag("qr_import").assertDoesNotExist()
+        onNodeWithTag("url_import").assertIsDisplayed()
     }
 
     @Test
-    fun importFab_showsUrlDialog_whenUrlItemClicked() {
+    fun importFab_showsUrlDialog_whenUrlItemClicked() = runComposeUiTest {
         val testTag = "import_fab"
-        composeTestRule.setContent { MeshtasticImportFAB(onImport = {}, isContactContext = true, testTag = testTag) }
+        setContent { MeshtasticImportFAB(onImport = {}, isContactContext = true, testTag = testTag) }
 
-        composeTestRule.onNodeWithTag(testTag).performClick()
-        composeTestRule.onNodeWithTag("url_import").performClick()
+        onNodeWithTag(testTag).performClick()
+        onNodeWithTag("url_import").performClick()
 
         // The URL dialog should be shown.
         // We'll search for its title indirectly or check if an AlertDialog appeared.
     }
 
     @Test
-    fun importFab_showsShareChannels_whenCallbackProvided() {
+    fun importFab_showsShareChannels_whenCallbackProvided() = runComposeUiTest {
         val testTag = "import_fab"
-        composeTestRule.setContent {
+        setContent {
             MeshtasticImportFAB(onImport = {}, onShareChannels = {}, isContactContext = false, testTag = testTag)
         }
 
-        composeTestRule.onNodeWithTag(testTag).performClick()
-        composeTestRule.onNodeWithTag("share_channels").assertIsDisplayed()
+        onNodeWithTag(testTag).performClick()
+        onNodeWithTag("share_channels").assertIsDisplayed()
     }
 
     @Test
-    fun importFab_showsSharedContactDialog_whenProvided() {
+    fun importFab_showsSharedContactDialog_whenProvided() = runComposeUiTest {
         val contact = SharedContact(user = User(long_name = "Suzume Goddess"), node_num = 1)
-        composeTestRule.setContent {
+        setContent {
             MeshtasticImportFAB(
                 onImport = {},
                 sharedContact = contact,
@@ -113,6 +111,6 @@ class ImportFabUiTest {
         }
 
         // Check if goddess is here
-        composeTestRule.onNodeWithText("Importing Suzume Goddess").assertIsDisplayed()
+        onNodeWithText("Importing Suzume Goddess").assertIsDisplayed()
     }
 }

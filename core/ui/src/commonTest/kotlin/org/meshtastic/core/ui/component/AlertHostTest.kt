@@ -16,28 +16,46 @@
  */
 package org.meshtastic.core.ui.component
 
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import org.junit.Rule
-import org.junit.Test
+import androidx.compose.ui.test.runComposeUiTest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.ui.util.AlertManager
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
+@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
 class AlertHostTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
 
     @Test
-    fun alertHost_showsDialog_whenAlertIsTriggered() {
+    fun alertHost_showsDialog_whenAlertIsTriggered() = runComposeUiTest {
         val alertManager = AlertManager()
         val title = "Alert Title"
         val message = "Alert Message"
 
-        composeTestRule.setContent { AlertHost(alertManager = alertManager) }
+        setContent { AlertHost(alertManager = alertManager) }
 
         alertManager.showAlert(title = title, message = message)
 
-        composeTestRule.onNodeWithText(title).assertIsDisplayed()
-        composeTestRule.onNodeWithText(message).assertIsDisplayed()
+        onNodeWithText(title).assertIsDisplayed()
+        onNodeWithText(message).assertIsDisplayed()
     }
 }
