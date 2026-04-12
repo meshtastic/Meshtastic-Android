@@ -18,6 +18,9 @@ on:
       api_levels:
         type: string
         default: '[35]'
+      run_desktop_builds:
+        type: boolean
+        default: true
       upload_artifacts:
         type: boolean
         default: true
@@ -358,6 +361,7 @@ jobs:
   # ── Desktop Build ───────────────────────────────────────────────────
   build-desktop:
     name: Build Desktop Debug (${{ matrix.os }})
+    if: inputs.run_desktop_builds == true
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read

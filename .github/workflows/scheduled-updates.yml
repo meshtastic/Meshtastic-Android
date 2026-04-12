@@ -2,8 +2,8 @@ name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
   schedule:
-    - cron: '0 * * * *' # Run every hour
-  workflow_dispatch:     # Allow manual triggering
+    - cron: '0 */4 * * *' # Run every 4 hours (was hourly — reduced to cut cascade CI cost)
+  workflow_dispatch:       # Allow manual triggering
 
 jobs:
   update_assets:
