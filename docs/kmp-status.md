@@ -176,5 +176,5 @@ Remaining to be extracted from `:app` or unified in `commonMain`:
 
 - Roadmap: [`docs/roadmap.md`](./roadmap.md)
 - Agent guide: [`AGENTS.md`](../AGENTS.md)
-- Playbooks: [`docs/agent-playbooks/`](./agent-playbooks/)
+- Agent skills: [`.skills/`](../.skills/)
 - Decision records: [`docs/decisions/`](./decisions/)

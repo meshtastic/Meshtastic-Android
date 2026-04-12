@@ -1,6 +1,6 @@
-# Meshtastic Android - Agent Guide
+# Meshtastic Android - Google Gemini Guide
 
-**Canonical instructions live in [`AGENTS.md`](AGENTS.md).** This file exists as `GEMINI.md` so Google Gemini discovers it automatically.
+> **Note:** The canonical instructions for all AI Agents have been deduplicated. 
 
-See [AGENTS.md](AGENTS.md) for architecture, conventions, execution protocol, and coding standards.
-See [docs/agent-playbooks/README.md](docs/agent-playbooks/README.md) for version baselines and task recipes.
+You MUST immediately read and internalize the unified instructions located at the root of the repository in `AGENTS.md`. 
+After reading `AGENTS.md`, consult the `.skills/` directory for task-specific playbooks.

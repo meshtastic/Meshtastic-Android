@@ -1,0 +1,27 @@
+# Ignore build artifacts and generated files from Copilot indexing
+# This saves context window tokens and prevents Copilot from hallucinating off of minified code.
+
+# Build directories
+**/build/**
+.gradle/
+.idea/
+
+# Android generated files
+**/generated/**
+.cxx/
+.externalNativeBuild/
+
+# Git history & worktrees
+.git/
+.worktrees/
+
+# Protobuf (Prevents Copilot from suggesting raw protobuf byte buffers)
+core/proto/
+
+# Environment and secrets
+local.properties
+secrets.properties
+*.jks
+
+# Agent References (Prevents pollution of project space with external code)
+.agent_refs/

@@ -53,3 +53,5 @@ wireless-install.sh
 .worktrees/
 /firebase-debug.log.jdk/
 firebase-debug.log
+.agent_plans/
+.agent_refs/
