@@ -18,14 +18,14 @@ package org.meshtastic.app
 
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
-import org.meshtastic.core.ui.preview.AlertDialogPreview
-import org.meshtastic.core.ui.preview.ButtonVariantsPreview
-import org.meshtastic.core.ui.preview.CardVariantsPreview
-import org.meshtastic.core.ui.preview.CheckboxAndTogglePreview
-import org.meshtastic.core.ui.preview.ChipVariantsPreview
-import org.meshtastic.core.ui.preview.IconsPreview
-import org.meshtastic.core.ui.preview.InputFieldVariantsPreview
-import org.meshtastic.core.ui.preview.TextVariantsPreview
+import org.meshtastic.app.preview.AlertDialogPreview
+import org.meshtastic.app.preview.ButtonVariantsPreview
+import org.meshtastic.app.preview.CardVariantsPreview
+import org.meshtastic.app.preview.CheckboxAndTogglePreview
+import org.meshtastic.app.preview.ChipVariantsPreview
+import org.meshtastic.app.preview.IconsPreview
+import org.meshtastic.app.preview.InputFieldVariantsPreview
+import org.meshtastic.app.preview.TextVariantsPreview
 
 /**
  * Screenshot tests for core UI components. These tests validate the visual appearance of composable previews across

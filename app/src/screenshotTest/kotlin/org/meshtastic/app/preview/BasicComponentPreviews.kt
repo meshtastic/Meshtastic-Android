@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.ui.preview
+package org.meshtastic.app.preview
 
+import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,24 +28,27 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.MeshtasticTheme
 
 /**
- * Multi-preview annotation for testing components in light and dark themes. Usage: @MultiPreview @Composable fun
- * ComponentPreview() { ... }
+ * Multi-preview annotation for testing components in light and dark themes.
+ *
+ * Usage: `@MultiPreview @Composable fun ComponentPreview() { ... }`
+ *
+ * This annotation is Android-only (uses [Configuration.UI_MODE_NIGHT_YES]) and must live in an Android source set, not
+ * `commonMain`.
  */
-@androidx.compose.ui.tooling.preview.Preview(name = "Light", showBackground = true)
-@androidx.compose.ui.tooling.preview.Preview(
-    name = "Dark",
-    showBackground = true,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES,
-)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 annotation class MultiPreview
 
 @MultiPreview
@@ -53,33 +57,33 @@ fun ButtonVariantsPreview() {
     MeshtasticTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                Text("Filled Button", style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
+                Text("Filled Button", style = MaterialTheme.typography.labelMedium)
                 Button(onClick = {}) { Text("Click Me") }
 
                 Text(
                     "Elevated Button",
-                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(top = 12.dp),
                 )
                 ElevatedButton(onClick = {}) { Text("Elevated") }
 
                 Text(
                     "Filled Tonal Button",
-                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(top = 12.dp),
                 )
                 FilledTonalButton(onClick = {}) { Text("Tonal") }
 
                 Text(
                     "Outlined Button",
-                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(top = 12.dp),
                 )
                 OutlinedButton(onClick = {}) { Text("Outlined") }
 
                 Text(
                     "Button with Icon",
-                    style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(top = 12.dp),
                 )
                 Button(onClick = {}) {
@@ -97,41 +101,37 @@ fun TextVariantsPreview() {
     MeshtasticTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                Text("Display Large", style = androidx.compose.material3.MaterialTheme.typography.displayLarge)
-                Text("Display Medium", style = androidx.compose.material3.MaterialTheme.typography.displayMedium)
-                Text("Display Small", style = androidx.compose.material3.MaterialTheme.typography.displaySmall)
+                Text("Display Large", style = MaterialTheme.typography.displayLarge)
+                Text("Display Medium", style = MaterialTheme.typography.displayMedium)
+                Text("Display Small", style = MaterialTheme.typography.displaySmall)
 
                 Text(
                     "Headline Large",
-                    style = androidx.compose.material3.MaterialTheme.typography.headlineLarge,
+                    style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier.padding(top = 12.dp),
                 )
-                Text("Headline Medium", style = androidx.compose.material3.MaterialTheme.typography.headlinesMedium)
-                Text("Headline Small", style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
+                Text("Headline Medium", style = MaterialTheme.typography.headlineMedium)
+                Text("Headline Small", style = MaterialTheme.typography.headlineSmall)
 
                 Text(
                     "Title Large",
-                    style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(top = 12.dp),
                 )
-                Text("Title Medium", style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
-                Text("Title Small", style = androidx.compose.material3.MaterialTheme.typography.titleSmall)
+                Text("Title Medium", style = MaterialTheme.typography.titleMedium)
+                Text("Title Small", style = MaterialTheme.typography.titleSmall)
 
-                Text(
-                    "Body Large",
-                    style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(top = 12.dp),
-                )
-                Text("Body Medium", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium)
-                Text("Body Small", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                Text("Body Large", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 12.dp))
+                Text("Body Medium", style = MaterialTheme.typography.bodyMedium)
+                Text("Body Small", style = MaterialTheme.typography.bodySmall)
 
                 Text(
                     "Label Large",
-                    style = androidx.compose.material3.MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(top = 12.dp),
                 )
-                Text("Label Medium", style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
-                Text("Label Small", style = androidx.compose.material3.MaterialTheme.typography.labelSmall)
+                Text("Label Medium", style = MaterialTheme.typography.labelMedium)
+                Text("Label Small", style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -143,15 +143,11 @@ fun IconsPreview() {
     MeshtasticTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                Text("Icon Buttons", style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
+                Text("Icon Buttons", style = MaterialTheme.typography.labelMedium)
 
-                androidx.compose.material3.IconButton(onClick = {}) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
-                }
+                IconButton(onClick = {}) { Icon(Icons.Filled.Add, contentDescription = "Add") }
 
-                androidx.compose.material3.IconButton(onClick = {}) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Delete")
-                }
+                IconButton(onClick = {}) { Icon(Icons.Filled.Delete, contentDescription = "Delete") }
             }
         }
     }

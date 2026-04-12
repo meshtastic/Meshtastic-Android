@@ -14,22 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.ui.preview
+package org.meshtastic.app.preview
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -72,7 +82,7 @@ fun InputFieldVariantsPreview() {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Text Input Fields", style = MaterialTheme.typography.labelMedium)
 
-                androidx.compose.material3.TextField(
+                TextField(
                     value = "Sample input",
                     onValueChange = {},
                     label = { Text("Standard") },
@@ -81,7 +91,7 @@ fun InputFieldVariantsPreview() {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = "Sample input",
                     onValueChange = {},
                     label = { Text("Outlined") },
@@ -90,7 +100,7 @@ fun InputFieldVariantsPreview() {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                androidx.compose.material3.TextField(
+                TextField(
                     value = "Disabled input",
                     onValueChange = {},
                     label = { Text("Disabled") },
@@ -110,30 +120,30 @@ fun CheckboxAndTogglePreview() {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Checkboxes", style = MaterialTheme.typography.labelMedium)
 
-                androidx.compose.material3.Row(modifier = Modifier.fillMaxWidth()) {
-                    androidx.compose.material3.Checkbox(checked = true, onCheckedChange = {})
-                    androidx.compose.material3.Checkbox(checked = false, onCheckedChange = {})
-                    androidx.compose.material3.Checkbox(checked = true, onCheckedChange = {}, enabled = false)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Checkbox(checked = true, onCheckedChange = {})
+                    Checkbox(checked = false, onCheckedChange = {})
+                    Checkbox(checked = true, onCheckedChange = {}, enabled = false)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text("Radio Buttons", style = MaterialTheme.typography.labelMedium)
 
-                androidx.compose.material3.Row(modifier = Modifier.fillMaxWidth()) {
-                    androidx.compose.material3.RadioButton(selected = true, onClick = {})
-                    androidx.compose.material3.RadioButton(selected = false, onClick = {})
-                    androidx.compose.material3.RadioButton(selected = false, onClick = {}, enabled = false)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    RadioButton(selected = true, onClick = {})
+                    RadioButton(selected = false, onClick = {})
+                    RadioButton(selected = false, onClick = {}, enabled = false)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text("Switches", style = MaterialTheme.typography.labelMedium)
 
-                androidx.compose.material3.Row(modifier = Modifier.fillMaxWidth()) {
-                    androidx.compose.material3.Switch(checked = true, onCheckedChange = {})
-                    androidx.compose.material3.Switch(checked = false, onCheckedChange = {})
-                    androidx.compose.material3.Switch(checked = true, onCheckedChange = {}, enabled = false)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Switch(checked = true, onCheckedChange = {})
+                    Switch(checked = false, onCheckedChange = {})
+                    Switch(checked = true, onCheckedChange = {}, enabled = false)
                 }
             }
         }
@@ -164,13 +174,13 @@ fun ChipVariantsPreview() {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Chips", style = MaterialTheme.typography.labelMedium)
 
-                androidx.compose.material3.AssistChip(onClick = {}, label = { Text("Assist Chip") })
+                AssistChip(onClick = {}, label = { Text("Assist Chip") })
 
-                androidx.compose.material3.FilterChip(selected = true, onClick = {}, label = { Text("Filter Chip") })
+                FilterChip(selected = true, onClick = {}, label = { Text("Filter Chip") })
 
-                androidx.compose.material3.InputChip(selected = true, onClick = {}, label = { Text("Input Chip") })
+                InputChip(selected = true, onClick = {}, label = { Text("Input Chip") })
 
-                androidx.compose.material3.SuggestionChip(onClick = {}, label = { Text("Suggestion Chip") })
+                SuggestionChip(onClick = {}, label = { Text("Suggestion Chip") })
             }
         }
     }

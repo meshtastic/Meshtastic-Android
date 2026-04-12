@@ -29,7 +29,10 @@ Multiplatform Preview Screenshot Testing has been successfully configured for Me
 
 ### 3. CMP UI Previews (Phase 2) ✅
 
-**core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/preview/**
+**app/src/screenshotTest/kotlin/org/meshtastic/app/preview/**
+
+> Preview files use Android-only `@Preview` annotations (including `uiMode`)
+> and live in the `screenshotTest` source set, **not** in `commonMain`.
 
 - `BasicComponentPreviews.kt`: 
   - Button variants (filled, elevated, tonal, outlined, with icon)
@@ -53,7 +56,7 @@ Multiplatform Preview Screenshot Testing has been successfully configured for Me
 
 - `CoreComponentScreenshotTests.kt`: 8 screenshot test methods
   - Each test marked with `@PreviewTest` annotation
-  - References preview composables from `core/ui`
+  - References preview composables from `app/preview` package
   - Validates appearance in light and dark themes
 
 ### 5. Documentation (Phase 5) ✅
@@ -120,20 +123,19 @@ gradle/
 
 app/build.gradle.kts                  [plugin & experimental flag]
 
-build-logic/convention/src/main/kotlin/org/meshtastic/buildlogic/
-  ├── ScreenshotTesting.kt            [configuration function]
-  └── build.gradle.kts                [plugin registration]
-  └── ScreenshotTestingConventionPlugin.kt  [plugin class]
-
-core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/preview/
-  ├── BasicComponentPreviews.kt       [buttons, text, icons]
-  └── ExtendedComponentPreviews.kt    [cards, inputs, dialogs, chips]
+build-logic/convention/src/main/kotlin/
+  ├── ScreenshotTestingConventionPlugin.kt  [plugin class]
+  └── org/meshtastic/buildlogic/
+      └── ScreenshotTesting.kt        [configuration function]
 
 app/src/screenshotTest/kotlin/org/meshtastic/app/
-  └── CoreComponentScreenshotTests.kt [8 screenshot tests]
+  ├── CoreComponentScreenshotTests.kt [8 screenshot tests]
+  └── preview/
+      ├── BasicComponentPreviews.kt   [buttons, text, icons]
+      └── ExtendedComponentPreviews.kt [cards, inputs, dialogs, chips]
 
 app/src/screenshotTest{Variant}/reference/
-  └── com.example.app.CoreComponentScreenshotTests_*.png  [reference images]
+  └── *.png                           [reference images]
 
 app/build/reports/screenshotTest/preview/{variant}/
   └── index.html                      [HTML test report]

@@ -35,6 +35,7 @@ plugins {
     alias(libs.plugins.aboutlibraries)
     id("dev.mokkery")
     alias(libs.plugins.screenshot)
+    id("meshtastic.screenshot.testing")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -46,8 +47,6 @@ if (keystorePropertiesFile.exists()) {
 
 configure<ApplicationExtension> {
     namespace = "org.meshtastic.app"
-
-    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     signingConfigs {
         create("release") {
@@ -279,9 +278,6 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)
-
-    screenshotTestImplementation(libs.screenshot.validation.api)
-    screenshotTestImplementation(libs.androidx.ui.tooling)
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)

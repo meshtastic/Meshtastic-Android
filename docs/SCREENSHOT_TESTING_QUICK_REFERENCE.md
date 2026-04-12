@@ -17,7 +17,7 @@
 ## File Locations
 
 ```
-core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/preview/
+app/src/screenshotTest/kotlin/org/meshtastic/app/preview/
   - BasicComponentPreviews.kt          ← Buttons, text, icons
   - ExtendedComponentPreviews.kt       ← Cards, inputs, dialogs, chips
 
@@ -32,9 +32,15 @@ app/build/reports/screenshotTest/preview/{variant}/
 
 ## Basic Preview Pattern
 
+> **Important:** Previews use Android-only `@Preview` annotations and must
+> live in an Android source set (e.g. `screenshotTest`), **not** in `commonMain`.
+
 ```kotlin
-@androidx.compose.ui.tooling.preview.Preview(name = "Light")
-@androidx.compose.ui.tooling.preview.Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+
+@Preview(name = "Light")
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES)
 annotation class MultiPreview
 
 @MultiPreview

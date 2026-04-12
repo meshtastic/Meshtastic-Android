@@ -12,19 +12,23 @@ Screenshot testing automatically validates UI appearance across different device
 
 ### 1. Write a Composable Preview
 
-Create previews in `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/preview/`:
+Create previews in `app/src/screenshotTest/kotlin/org/meshtastic/app/preview/`:
+
+> **Important:** Preview files use Android-specific `@Preview` annotations (including
+> `uiMode = Configuration.UI_MODE_NIGHT_YES`) and must live in an Android source set,
+> **not** in `commonMain`. The `screenshotTest` source set is the correct location.
 
 ```kotlin
-package org.meshtastic.core.ui.preview
+package org.meshtastic.app.preview
 
+import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 
-@androidx.compose.ui.tooling.preview.Preview(name = "Light", showBackground = true)
-@androidx.compose.ui.tooling.preview.Preview(name = "Dark", showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 annotation class MultiPreview
 
 @MultiPreview
@@ -197,7 +201,11 @@ app/
 │   │   └── kotlin/org/meshtastic/app/
 │   │       ├── CoreComponentScreenshotTests.kt
 │   │       ├── DialogScreenshotTests.kt
-│   │       └── NavigationScreenshotTests.kt
+│   │       ├── NavigationScreenshotTests.kt
+│   │       └── preview/
+│   │           ├── BasicComponentPreviews.kt
+│   │           ├── ExtendedComponentPreviews.kt
+│   │           └── ... (Android-only preview composables)
 │   └── screenshotTest{Variant}/
 │       └── reference/
 │           ├── org.meshtastic.app.CoreComponentScreenshotTests_light_da39a3ee_*.png
@@ -211,15 +219,6 @@ app/
                     ├── index.html          ← Open this in browser
                     ├── diffs/
                     └── images/
-
-core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/
-├── preview/
-│   ├── BasicComponentPreviews.kt
-│   ├── DialogPreviews.kt
-│   ├── NavigationPreviews.kt
-│   └── ThemePreviews.kt
-└── component/
-    └── (existing composables)
 ```
 
 ## Preview File Naming Convention

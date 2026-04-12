@@ -21,10 +21,19 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.meshtastic.buildlogic.configureScreenshotTesting
 
+/**
+ * Convention plugin that configures Compose Preview Screenshot Testing.
+ *
+ * Requires the `com.android.compose.screenshot` plugin to be applied first
+ * via `alias(libs.plugins.screenshot)` in the consumer's `plugins {}` block,
+ * because the screenshot plugin is not on the build-logic classpath.
+ */
 class ScreenshotTestingConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            plugins.apply("com.android.compose.screenshot")
+            check(plugins.hasPlugin("com.android.compose.screenshot")) {
+                "The 'com.android.compose.screenshot' plugin must be applied before 'meshtastic.screenshot.testing'."
+            }
 
             extensions.configure<ApplicationExtension> {
                 configureScreenshotTesting(this)

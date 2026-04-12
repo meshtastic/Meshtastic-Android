@@ -18,7 +18,6 @@ package org.meshtastic.buildlogic
 
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
 /** Configure screenshot testing for Compose Multiplatform UI components */
