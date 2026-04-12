@@ -17,10 +17,10 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.DropDownPreferencePreview
 import org.meshtastic.app.preview.EditTextPreferencePreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.PreferenceCategoryPreview
 import org.meshtastic.app.preview.PreferenceFooterPreview
 import org.meshtastic.app.preview.RegularPreferencePreview
@@ -31,56 +31,56 @@ import org.meshtastic.app.preview.TextDividerPreferencePreview
 /** Screenshot tests for Meshtastic preference/settings components. */
 class PreferenceScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun switchPreferenceScreenshot() {
         SwitchPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun sliderPreferenceScreenshot() {
         SliderPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun regularPreferenceScreenshot() {
         RegularPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun editTextPreferenceScreenshot() {
         EditTextPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun dropDownPreferenceScreenshot() {
         DropDownPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun preferenceCategoryScreenshot() {
         PreferenceCategoryPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun textDividerPreferenceScreenshot() {
         TextDividerPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun preferenceFooterScreenshot() {
         PreferenceFooterPreview()

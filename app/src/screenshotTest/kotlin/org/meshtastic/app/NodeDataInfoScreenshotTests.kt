@@ -17,54 +17,54 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.ChannelInfoPreview
 import org.meshtastic.app.preview.DistanceInfoPreview
 import org.meshtastic.app.preview.HopsInfoPreview
 import org.meshtastic.app.preview.IconInfoPreview
 import org.meshtastic.app.preview.LastHeardInfoPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.SnrRssiPreview
 
 /** Screenshot tests for node data info components (distance, last heard, hops, channel, icons, SNR/RSSI). */
 class NodeDataInfoScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun distanceInfoScreenshot() {
         DistanceInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun lastHeardInfoScreenshot() {
         LastHeardInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun hopsInfoScreenshot() {
         HopsInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun channelInfoScreenshot() {
         ChannelInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun iconInfoScreenshot() {
         IconInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun snrRssiScreenshot() {
         SnrRssiPreview()

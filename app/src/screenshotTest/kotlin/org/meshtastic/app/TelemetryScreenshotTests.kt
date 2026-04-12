@@ -17,38 +17,38 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.DeviceTelemetryPreview
 import org.meshtastic.app.preview.IndoorAirQualityPreview
 import org.meshtastic.app.preview.LoraSignalPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.TemperatureAndHumidityPreview
 
 /** Screenshot tests for telemetry and signal display components. */
 class TelemetryScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun temperatureAndHumidityScreenshot() {
         TemperatureAndHumidityPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun deviceTelemetryScreenshot() {
         DeviceTelemetryPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun loraSignalScreenshot() {
         LoraSignalPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun indoorAirQualityScreenshot() {
         IndoorAirQualityPreview()

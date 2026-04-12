@@ -17,13 +17,13 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.ExpressiveSectionPreview
 import org.meshtastic.app.preview.HomoglyphSettingPreview
 import org.meshtastic.app.preview.LoadingOverlayPreview
 import org.meshtastic.app.preview.LogLinePreview
 import org.meshtastic.app.preview.MapReportingPreferencePreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.NodeActionButtonPreview
 import org.meshtastic.app.preview.NodeFilterTextFieldPreview
 import org.meshtastic.app.preview.NotificationSectionPreview
@@ -33,70 +33,70 @@ import org.meshtastic.app.preview.WarningDialogPreview
 /** Screenshot tests for feature module components (node, messaging, settings). */
 class FeatureComponentScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun logLineScreenshot() {
         LogLinePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun nodeFilterTextFieldScreenshot() {
         NodeFilterTextFieldPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun expressiveSectionScreenshot() {
         ExpressiveSectionPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun themePickerDialogScreenshot() {
         ThemePickerDialogPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun homoglyphSettingScreenshot() {
         HomoglyphSettingPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun notificationSectionScreenshot() {
         NotificationSectionPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun warningDialogScreenshot() {
         WarningDialogPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun nodeActionButtonScreenshot() {
         NodeActionButtonPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun loadingOverlayScreenshot() {
         LoadingOverlayPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun mapReportingPreferenceScreenshot() {
         MapReportingPreferencePreview()

@@ -17,7 +17,6 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.AlertDialogPreview
 import org.meshtastic.app.preview.ButtonVariantsPreview
@@ -26,6 +25,7 @@ import org.meshtastic.app.preview.CheckboxAndTogglePreview
 import org.meshtastic.app.preview.ChipVariantsPreview
 import org.meshtastic.app.preview.IconsPreview
 import org.meshtastic.app.preview.InputFieldVariantsPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.TextVariantsPreview
 
 /**
@@ -42,56 +42,56 @@ import org.meshtastic.app.preview.TextVariantsPreview
  */
 class CoreComponentScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun buttonVariantsScreenshot() {
         ButtonVariantsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun textVariantsScreenshot() {
         TextVariantsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun iconsScreenshot() {
         IconsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun cardVariantsScreenshot() {
         CardVariantsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun inputFieldVariantsScreenshot() {
         InputFieldVariantsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun checkboxAndToggleScreenshot() {
         CheckboxAndTogglePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun alertDialogScreenshot() {
         AlertDialogPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun chipVariantsScreenshot() {
         ChipVariantsPreview()

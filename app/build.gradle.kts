@@ -180,7 +180,13 @@ configure<ApplicationExtension> {
     }
     bundle { language { enableSplit = false } }
 
-    testOptions { unitTests { isIncludeAndroidResources = true } }
+    testOptions {
+        unitTests { isIncludeAndroidResources = true }
+        @Suppress("MagicNumber")
+        screenshotTests {
+            imageDifferenceThreshold = 0.0005f // 0.05% tolerance for cross-machine rendering
+        }
+    }
 }
 
 secrets {

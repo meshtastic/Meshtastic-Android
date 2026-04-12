@@ -17,54 +17,54 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.AdaptiveTwoPanePreview
 import org.meshtastic.app.preview.BottomSheetDialogPreview
 import org.meshtastic.app.preview.ElevationInfoPreview
 import org.meshtastic.app.preview.MenuFABPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.SecurityIconPreview
 import org.meshtastic.app.preview.SignedIntegerEditTextPreferencePreview
 
 /** Screenshot tests for advanced core UI components (elevation, preferences, two-pane, FAB, security). */
 class AdvancedCoreUiScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun elevationInfoScreenshot() {
         ElevationInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun signedIntegerEditTextPreferenceScreenshot() {
         SignedIntegerEditTextPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun adaptiveTwoPaneScreenshot() {
         AdaptiveTwoPanePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun bottomSheetDialogScreenshot() {
         BottomSheetDialogPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun menuFABScreenshot() {
         MenuFABPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun securityIconScreenshot() {
         SecurityIconPreview()

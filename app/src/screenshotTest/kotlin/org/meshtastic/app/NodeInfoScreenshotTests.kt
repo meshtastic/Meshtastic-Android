@@ -17,9 +17,9 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.BatteryInfoPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.NodeChipPreview
 import org.meshtastic.app.preview.SatelliteCountPreview
 import org.meshtastic.app.preview.SignalInfoPreview
@@ -27,28 +27,28 @@ import org.meshtastic.app.preview.SignalInfoPreview
 /** Screenshot tests for node information display components. */
 class NodeInfoScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun batteryInfoScreenshot() {
         BatteryInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun signalInfoScreenshot() {
         SignalInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun satelliteCountScreenshot() {
         SatelliteCountPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun nodeChipScreenshot() {
         NodeChipPreview()

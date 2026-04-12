@@ -17,38 +17,38 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.ActionModeTopBarPreview
 import org.meshtastic.app.preview.DeleteMessageDialogPreview
 import org.meshtastic.app.preview.MessageStatusIconsPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.UnreadMessagesDividerPreview
 
 /** Screenshot tests for messaging feature components. */
 class MessagingComponentScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun messageStatusIconsScreenshot() {
         MessageStatusIconsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun deleteMessageDialogScreenshot() {
         DeleteMessageDialogPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun unreadMessagesDividerScreenshot() {
         UnreadMessagesDividerPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun actionModeTopBarScreenshot() {
         ActionModeTopBarPreview()

@@ -17,13 +17,13 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.CooldownButtonsPreview
 import org.meshtastic.app.preview.InfoCardPreview
 import org.meshtastic.app.preview.LegendIndicatorsPreview
 import org.meshtastic.app.preview.MetricLogComponentsPreview
 import org.meshtastic.app.preview.MetricValueRowPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.NodeStatusIconsPreview
 import org.meshtastic.app.preview.SelectableMetricCardPreview
 import org.meshtastic.app.preview.TimeFrameSelectorPreview
@@ -31,56 +31,56 @@ import org.meshtastic.app.preview.TimeFrameSelectorPreview
 /** Screenshot tests for node feature components (InfoCard, NodeStatusIcons, metrics, etc.). */
 class NodeComponentScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun infoCardScreenshot() {
         InfoCardPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun nodeStatusIconsScreenshot() {
         NodeStatusIconsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun timeFrameSelectorScreenshot() {
         TimeFrameSelectorPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun metricLogComponentsScreenshot() {
         MetricLogComponentsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun selectableMetricCardScreenshot() {
         SelectableMetricCardPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun metricValueRowScreenshot() {
         MetricValueRowPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun legendIndicatorsScreenshot() {
         LegendIndicatorsPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun cooldownButtonsScreenshot() {
         CooldownButtonsPreview()

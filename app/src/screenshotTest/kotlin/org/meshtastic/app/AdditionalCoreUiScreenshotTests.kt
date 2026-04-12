@@ -17,7 +17,6 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.BitwisePreferencePreview
 import org.meshtastic.app.preview.ChannelItemPreview
@@ -25,62 +24,63 @@ import org.meshtastic.app.preview.EditBase64PreferencePreview
 import org.meshtastic.app.preview.EditIPv4PreferencePreview
 import org.meshtastic.app.preview.EditPasswordPreferencePreview
 import org.meshtastic.app.preview.EmptyDetailPlaceholderPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.PositionPrecisionPreferencePreview
 import org.meshtastic.app.preview.PreferenceDividerPreview
 
 /** Screenshot tests for additional core UI components (channel, placeholders, advanced preferences). */
 class AdditionalCoreUiScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun channelItemScreenshot() {
         ChannelItemPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun emptyDetailPlaceholderScreenshot() {
         EmptyDetailPlaceholderPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun preferenceDividerScreenshot() {
         PreferenceDividerPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun editPasswordPreferenceScreenshot() {
         EditPasswordPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun editIPv4PreferenceScreenshot() {
         EditIPv4PreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun editBase64PreferenceScreenshot() {
         EditBase64PreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun positionPrecisionPreferenceScreenshot() {
         PositionPrecisionPreferencePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun bitwisePreferenceScreenshot() {
         BitwisePreferencePreview()

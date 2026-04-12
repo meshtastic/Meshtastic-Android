@@ -121,8 +121,8 @@ app/build/reports/screenshotTest/preview/     # HTML diff reports
 > Do NOT use bare `updateDebugScreenshotTest` — it is ambiguous with product flavors.
 
 ### Writing a Preview + Test
-1. Create a preview composable in `app/src/screenshotTest/.../preview/` using `@MultiPreview` (light + dark) and wrapping in `MeshtasticTheme`.
-2. Create a test class in `app/src/screenshotTest/.../` with methods annotated `@PreviewTest` + `@Preview(showBackground = true)` that call the preview composable.
+1. Create a preview composable in `app/src/screenshotTest/.../preview/` using `@MultiPreview` (light + dark) and wrapping in `AppTheme`.
+2. Create a test class in `app/src/screenshotTest/.../` with methods annotated `@PreviewTest` + `@MultiPreview` that call the preview composable.
 3. Run `updateGoogleDebugScreenshotTest` to generate baselines, commit the `.png` files.
 
 ### Convention Plugin

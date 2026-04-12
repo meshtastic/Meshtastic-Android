@@ -17,7 +17,6 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.AutoLinkTextPreview
 import org.meshtastic.app.preview.ConnectionsNavIconPreview
@@ -25,6 +24,7 @@ import org.meshtastic.app.preview.CopyIconButtonPreview
 import org.meshtastic.app.preview.IAQScalePreview
 import org.meshtastic.app.preview.InsetDividerPreview
 import org.meshtastic.app.preview.MaterialBluetoothSignalInfoPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.NodeKeyStatusIconPreview
 import org.meshtastic.app.preview.PlaceholderScreenPreview
 import org.meshtastic.app.preview.SlidingSelectorPreview
@@ -33,70 +33,70 @@ import org.meshtastic.app.preview.TransportIconPreview
 /** Screenshot tests for utility components (transport, copy, bluetooth, key status, links, selectors, etc.). */
 class UtilityComponentScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun transportIconScreenshot() {
         TransportIconPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun copyIconButtonScreenshot() {
         CopyIconButtonPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun materialBluetoothSignalInfoScreenshot() {
         MaterialBluetoothSignalInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun nodeKeyStatusIconScreenshot() {
         NodeKeyStatusIconPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun autoLinkTextScreenshot() {
         AutoLinkTextPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun slidingSelectorScreenshot() {
         SlidingSelectorPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun insetDividerScreenshot() {
         InsetDividerPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun placeholderScreenScreenshot() {
         PlaceholderScreenPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun iaqScaleScreenshot() {
         IAQScalePreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun connectionsNavIconScreenshot() {
         ConnectionsNavIconPreview()

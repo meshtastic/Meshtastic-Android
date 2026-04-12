@@ -17,11 +17,11 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.DebugCustomFilterInputPreview
 import org.meshtastic.app.preview.DeviceListItemPreview
 import org.meshtastic.app.preview.FirmwareReleaseSheetContentPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.QuickChatRowPreview
 import org.meshtastic.app.preview.RouterRoleConfirmationDialogPreview
 
@@ -30,35 +30,35 @@ import org.meshtastic.app.preview.RouterRoleConfirmationDialogPreview
  */
 class AdvancedFeatureScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun debugCustomFilterInputScreenshot() {
         DebugCustomFilterInputPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun routerRoleConfirmationDialogScreenshot() {
         RouterRoleConfirmationDialogPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun firmwareReleaseSheetContentScreenshot() {
         FirmwareReleaseSheetContentPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun quickChatRowScreenshot() {
         QuickChatRowPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun deviceListItemScreenshot() {
         DeviceListItemPreview()

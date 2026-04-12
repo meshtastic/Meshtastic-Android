@@ -17,30 +17,30 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.IconDialogPreview
+import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.MultipleChoiceDialogPreview
 import org.meshtastic.app.preview.SimpleDialogPreview
 
 /** Screenshot tests for Meshtastic dialog components. */
 class DialogScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun simpleDialogScreenshot() {
         SimpleDialogPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun iconDialogScreenshot() {
         IconDialogPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun multipleChoiceDialogScreenshot() {
         MultipleChoiceDialogPreview()

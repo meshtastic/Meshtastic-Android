@@ -17,30 +17,30 @@
 package org.meshtastic.app
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.ConnectingDeviceInfoPreview
 import org.meshtastic.app.preview.ConnectionsSegmentedBarPreview
 import org.meshtastic.app.preview.EmptyStateContentPreview
+import org.meshtastic.app.preview.MultiPreview
 
 /** Screenshot tests for connections feature components. */
 class ConnectionComponentScreenshotTests {
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun emptyStateContentScreenshot() {
         EmptyStateContentPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun connectingDeviceInfoScreenshot() {
         ConnectingDeviceInfoPreview()
     }
 
     @PreviewTest
-    @Preview(showBackground = true)
+    @MultiPreview
     @Composable
     fun connectionsSegmentedBarScreenshot() {
         ConnectionsSegmentedBarPreview()
