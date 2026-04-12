@@ -170,6 +170,7 @@ jobs:
             tasks: >-
               :app:testFdroidDebugUnitTest
               :app:testGoogleDebugUnitTest
+              :app:validateGoogleDebugScreenshotTest
               :desktop:test
               :core:barcode:testFdroidDebugUnitTest
               :core:barcode:testGoogleDebugUnitTest
