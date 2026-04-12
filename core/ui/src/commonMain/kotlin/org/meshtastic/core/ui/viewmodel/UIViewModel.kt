@@ -18,6 +18,7 @@ package org.meshtastic.core.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.MeshActivity
@@ -43,6 +45,7 @@ import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
+import org.meshtastic.core.navigation.DeepLinkRouter
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -84,7 +87,7 @@ class UIViewModel(
     val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
-    private val _navigationDeepLink = MutableSharedFlow<List<androidx.navigation3.runtime.NavKey>>(replay = 1)
+    private val _navigationDeepLink = MutableSharedFlow<List<NavKey>>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
     /**
@@ -97,10 +100,10 @@ class UIViewModel(
      *    [dispatchMeshtasticUri]. This triggers import dialogs for shared nodes or channel configurations.
      */
     fun handleDeepLink(uri: MeshtasticUri, onInvalid: () -> Unit = {}) {
-        val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
+        val commonUri = CommonUri.parse(uri.uriString)
 
         // Try navigation routing first
-        val navKeys = org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri)
+        val navKeys = DeepLinkRouter.route(commonUri)
         if (navKeys != null) {
             _navigationDeepLink.tryEmit(navKeys)
             return
@@ -236,7 +239,7 @@ class UIViewModel(
         _sharedContactRequested.value = contact
     }
 
-    /** Called immediately after activity observes requestChannelUrl */
+    /** Clears the pending shared contact request. */
     fun clearSharedContactRequested() {
         _sharedContactRequested.value = null
     }
@@ -255,7 +258,7 @@ class UIViewModel(
 
     val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
 
-    /** Called immediately after activity observes requestChannelUrl */
+    /** Clears the pending channel set import request. */
     fun clearRequestChannelUrl() {
         _requestChannelSet.value = null
     }

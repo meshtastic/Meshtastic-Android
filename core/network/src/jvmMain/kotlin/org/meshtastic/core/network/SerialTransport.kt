@@ -19,13 +19,15 @@ package org.meshtastic.core.network
 import co.touchlab.kermit.Logger
 import com.fazecast.jSerialComm.SerialPort
 import com.fazecast.jSerialComm.SerialPortTimeoutException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.radio.StreamTransport
 import org.meshtastic.core.network.transport.HeartbeatSender
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioTransportCallback
 import java.io.File
 
 /**
@@ -39,9 +41,10 @@ class SerialTransport
 private constructor(
     private val portName: String,
     private val baudRate: Int = DEFAULT_BAUD_RATE,
-    service: RadioInterfaceService,
+    callback: RadioTransportCallback,
+    scope: CoroutineScope,
     private val dispatchers: CoroutineDispatchers,
-) : StreamTransport(service, service.serviceScope) {
+) : StreamTransport(callback, scope) {
     private var serialPort: SerialPort? = null
     private var readJob: Job? = null
 
@@ -58,7 +61,7 @@ private constructor(
                 port.setDTR()
                 port.setRTS()
                 Logger.i { "[$portName] Serial port opened (baud=$baudRate)" }
-                super.connect() // Sends WAKE_BYTES and signals service.onConnect()
+                super.connect() // Sends WAKE_BYTES and signals callback.onConnect()
                 startReadLoop(port)
                 true
             } else {
@@ -75,7 +78,7 @@ private constructor(
     private fun startReadLoop(port: SerialPort) {
         Logger.d { "[$portName] Starting serial read loop" }
         readJob =
-            serviceScope.launch(dispatchers.io) {
+            scope.launch(dispatchers.io) {
                 val input = port.inputStream
                 val buffer = ByteArray(READ_BUFFER_SIZE)
                 try {
@@ -92,7 +95,7 @@ private constructor(
                             }
                         } catch (_: SerialPortTimeoutException) {
                             // Expected timeout when no data is available
-                        } catch (e: kotlinx.coroutines.CancellationException) {
+                        } catch (e: CancellationException) {
                             throw e
                         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                             if (isActive) {
@@ -103,7 +106,7 @@ private constructor(
                             reading = false
                         }
                     }
-                } catch (e: kotlinx.coroutines.CancellationException) {
+                } catch (e: CancellationException) {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     if (isActive) {
@@ -143,7 +146,7 @@ private constructor(
     override fun keepAlive() {
         // Delegate to HeartbeatSender which sends a ToRadio heartbeat to prove the
         // serial link is alive.
-        serviceScope.launch { heartbeatSender.sendHeartbeat() }
+        scope.launch { heartbeatSender.sendHeartbeat() }
     }
 
     private fun closePortResources() {
@@ -167,19 +170,20 @@ private constructor(
 
         /**
          * Creates and opens a [SerialTransport]. If the port cannot be opened, the transport signals a permanent
-         * disconnect to the [service] and returns the (non-connected) instance.
+         * disconnect to the [callback] and returns the (non-connected) instance.
          */
         fun open(
             portName: String,
             baudRate: Int = DEFAULT_BAUD_RATE,
-            service: RadioInterfaceService,
+            callback: RadioTransportCallback,
+            scope: CoroutineScope,
             dispatchers: CoroutineDispatchers,
         ): SerialTransport {
-            val transport = SerialTransport(portName, baudRate, service, dispatchers)
+            val transport = SerialTransport(portName, baudRate, callback, scope, dispatchers)
             if (!transport.startConnection()) {
                 val errorMessage = diagnoseOpenFailure(portName)
                 Logger.w { "[$portName] Serial port could not be opened; signalling disconnect. $errorMessage" }
-                service.onDisconnect(isPermanent = true, errorMessage = errorMessage)
+                callback.onDisconnect(isPermanent = true, errorMessage = errorMessage)
             }
             return transport
         }

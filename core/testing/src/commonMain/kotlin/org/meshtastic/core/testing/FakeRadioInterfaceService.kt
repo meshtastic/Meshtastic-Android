@@ -60,7 +60,7 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     val sentToRadio = mutableListOf<ByteArray>()
     var connectCalled = false
 
-    override fun isMockInterface(): Boolean = true
+    override fun isMockTransport(): Boolean = true
 
     override fun sendToRadio(bytes: ByteArray) {
         sentToRadio.add(bytes)

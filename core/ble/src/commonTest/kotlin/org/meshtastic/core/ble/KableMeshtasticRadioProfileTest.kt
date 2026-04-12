@@ -18,6 +18,7 @@ package org.meshtastic.core.ble
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -118,8 +119,8 @@ class KableMeshtasticRadioProfileTest {
     fun `MeshtasticRadioProfile default awaitSubscriptionReady returns immediately`() = runTest {
         val profile =
             object : MeshtasticRadioProfile {
-                override val fromRadio = kotlinx.coroutines.flow.emptyFlow<ByteArray>()
-                override val logRadio = kotlinx.coroutines.flow.emptyFlow<ByteArray>()
+                override val fromRadio = emptyFlow<ByteArray>()
+                override val logRadio = emptyFlow<ByteArray>()
 
                 override suspend fun sendToRadio(packet: ByteArray) {}
             }

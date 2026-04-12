@@ -53,21 +53,21 @@ abstract class BaseRadioTransportFactory(
             when {
                 address.startsWith(InterfaceId.BLUETOOTH.id) -> {
                     BleRadioTransport(
-                        serviceScope = service.serviceScope,
+                        scope = service.serviceScope,
                         scanner = scanner,
                         bluetoothRepository = bluetoothRepository,
                         connectionFactory = connectionFactory,
-                        service = service,
+                        callback = service,
                         address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()),
                     )
                 }
                 address.startsWith("!") -> {
                     BleRadioTransport(
-                        serviceScope = service.serviceScope,
+                        scope = service.serviceScope,
                         scanner = scanner,
                         bluetoothRepository = bluetoothRepository,
                         connectionFactory = connectionFactory,
-                        service = service,
+                        callback = service,
                         address = address.removePrefix("!"),
                     )
                 }
@@ -77,6 +77,6 @@ abstract class BaseRadioTransportFactory(
         return transport
     }
 
-    /** Delegate to platform for Mock, TCP, or Serial/USB interfaces. */
+    /** Delegate to platform for Mock, TCP, or Serial/USB transports. */
     protected abstract fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport
 }

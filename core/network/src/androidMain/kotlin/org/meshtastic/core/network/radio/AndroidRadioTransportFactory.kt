@@ -51,7 +51,7 @@ class AndroidRadioTransportFactory(
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
 
-    override fun isMockInterface(): Boolean =
+    override fun isMockTransport(): Boolean =
         buildConfigProvider.isDebug || Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
 
     override fun isPlatformAddressValid(address: String): Boolean {
@@ -76,16 +76,21 @@ class AndroidRadioTransportFactory(
         val rest = address.substring(1)
 
         return when (interfaceId) {
-            InterfaceId.MOCK ->
-                MockRadioTransport(service = service, serviceScope = service.serviceScope, address = rest)
+            InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
             InterfaceId.TCP ->
                 TcpRadioTransport(
-                    service = service,
-                    serviceScope = service.serviceScope,
+                    callback = service,
+                    scope = service.serviceScope,
                     dispatchers = dispatchers,
                     address = rest,
                 )
-            InterfaceId.SERIAL -> SerialRadioTransport(service = service, usbRepository = usbRepository, address = rest)
+            InterfaceId.SERIAL ->
+                SerialRadioTransport(
+                    callback = service,
+                    scope = service.serviceScope,
+                    usbRepository = usbRepository,
+                    address = rest,
+                )
             InterfaceId.NOP,
             null,
             -> NopRadioTransport(rest)

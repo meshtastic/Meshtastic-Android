@@ -19,8 +19,13 @@ package org.meshtastic.core.testing
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.User
 
 /**
  * A test double for [RadioController] that provides a no-op implementation and tracks calls for assertions in tests.
@@ -79,19 +84,19 @@ class FakeRadioController :
         return true
     }
 
-    override suspend fun setLocalConfig(config: org.meshtastic.proto.Config) {}
+    override suspend fun setLocalConfig(config: Config) {}
 
-    override suspend fun setLocalChannel(channel: org.meshtastic.proto.Channel) {}
+    override suspend fun setLocalChannel(channel: Channel) {}
 
-    override suspend fun setOwner(destNum: Int, user: org.meshtastic.proto.User, packetId: Int) {}
+    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {}
 
-    override suspend fun setConfig(destNum: Int, config: org.meshtastic.proto.Config, packetId: Int) {}
+    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {}
 
-    override suspend fun setModuleConfig(destNum: Int, config: org.meshtastic.proto.ModuleConfig, packetId: Int) {}
+    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {}
 
-    override suspend fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel, packetId: Int) {}
+    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {}
 
-    override suspend fun setFixedPosition(destNum: Int, position: org.meshtastic.core.model.Position) {}
+    override suspend fun setFixedPosition(destNum: Int, position: Position) {}
 
     override suspend fun setRingtone(destNum: Int, ringtone: String) {}
 
@@ -125,7 +130,7 @@ class FakeRadioController :
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: org.meshtastic.core.model.Position) {}
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {}
 
     override suspend fun requestUserInfo(destNum: Int) {}
 

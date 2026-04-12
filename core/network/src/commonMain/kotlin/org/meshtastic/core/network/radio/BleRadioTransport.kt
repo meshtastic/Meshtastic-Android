@@ -19,6 +19,7 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -47,6 +48,7 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.DisconnectReason
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
+import org.meshtastic.core.ble.MeshtasticRadioProfile
 import org.meshtastic.core.ble.classifyBleException
 import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.ble.toMeshtasticRadioProfile
@@ -118,25 +120,25 @@ private val GATT_CLEANUP_TIMEOUT = 5.seconds
  * - MTU and connection parameter monitoring.
  * - Routing raw byte packets between the radio and [RadioTransportCallback].
  *
- * @param serviceScope The coroutine scope to use for launching coroutines.
+ * @param scope The coroutine scope to use for launching coroutines.
  * @param scanner The BLE scanner.
  * @param bluetoothRepository The Bluetooth repository.
  * @param connectionFactory The BLE connection factory.
- * @param service The [RadioTransportCallback] to use for handling radio events.
+ * @param callback The [RadioTransportCallback] to use for handling radio events.
  * @param address The BLE address of the device to connect to.
  */
 class BleRadioTransport(
-    private val serviceScope: CoroutineScope,
+    private val scope: CoroutineScope,
     private val scanner: BleScanner,
     private val bluetoothRepository: BluetoothRepository,
     private val connectionFactory: BleConnectionFactory,
-    private val service: RadioTransportCallback,
+    private val callback: RadioTransportCallback,
     internal val address: String,
 ) : RadioTransport {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Logger.w(throwable) { "[$address] Uncaught exception in connectionScope" }
-        serviceScope.launch {
+        scope.launch {
             try {
                 bleConnection.disconnect()
             } catch (e: Exception) {
@@ -144,13 +146,11 @@ class BleRadioTransport(
             }
         }
         val (isPermanent, msg) = throwable.toDisconnectReason()
-        service.onDisconnect(isPermanent, errorMessage = msg)
+        callback.onDisconnect(isPermanent, errorMessage = msg)
     }
 
     private val connectionScope: CoroutineScope =
-        CoroutineScope(
-            serviceScope.coroutineContext + SupervisorJob(serviceScope.coroutineContext.job) + exceptionHandler,
-        )
+        CoroutineScope(scope.coroutineContext + SupervisorJob(scope.coroutineContext.job) + exceptionHandler)
     private val bleConnection: BleConnection = connectionFactory.create(connectionScope, address)
     private val writeMutex: Mutex = Mutex()
 
@@ -300,20 +300,20 @@ class BleRadioTransport(
                             }
                             if (consecutiveFailures >= RECONNECT_MAX_FAILURES) {
                                 Logger.e { "[$address] Giving up after $consecutiveFailures unstable connections" }
-                                service.onDisconnect(
+                                callback.onDisconnect(
                                     isPermanent = true,
                                     errorMessage = "Device unreachable (unstable connection)",
                                 )
                                 return@launch
                             }
                             if (consecutiveFailures >= RECONNECT_FAILURE_THRESHOLD) {
-                                service.onDisconnect(
+                                callback.onDisconnect(
                                     isPermanent = false,
                                     errorMessage = "Device unreachable (unstable connection)",
                                 )
                             }
                         }
-                    } catch (e: kotlinx.coroutines.CancellationException) {
+                    } catch (e: CancellationException) {
                         Logger.d { "[$address] BLE connection coroutine cancelled" }
                         throw e
                     } catch (e: Exception) {
@@ -328,7 +328,7 @@ class BleRadioTransport(
                         if (consecutiveFailures >= RECONNECT_MAX_FAILURES) {
                             Logger.e { "[$address] Giving up after $consecutiveFailures consecutive failures" }
                             val (_, msg) = e.toDisconnectReason()
-                            service.onDisconnect(isPermanent = true, errorMessage = msg)
+                            callback.onDisconnect(isPermanent = true, errorMessage = msg)
                             return@launch
                         }
 
@@ -360,7 +360,7 @@ class BleRadioTransport(
         radioService = null
         Logger.i { "[$address] BLE disconnected - ${formatSessionStats()}" }
         // Signal immediately so the UI reflects the disconnect while reconnect continues.
-        service.onDisconnect(isPermanent = false)
+        callback.onDisconnect(isPermanent = false)
     }
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
@@ -401,7 +401,7 @@ class BleRadioTransport(
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
 
-                this@BleRadioTransport.service.onConnect()
+                this@BleRadioTransport.callback.onConnect()
             }
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
@@ -415,7 +415,7 @@ class BleRadioTransport(
         }
     }
 
-    @Volatile private var radioService: org.meshtastic.core.ble.MeshtasticRadioProfile? = null
+    @Volatile private var radioService: MeshtasticRadioProfile? = null
 
     // --- RadioTransport Implementation ---
 
@@ -462,8 +462,8 @@ class BleRadioTransport(
     override fun close() {
         Logger.i { "[$address] Disconnecting. ${formatSessionStats()}" }
         connectionScope.cancel("close() called")
-        // GATT cleanup must outlive serviceScope cancellation — GlobalScope is intentional.
-        // SharedRadioInterfaceService cancels serviceScope immediately after close(), so a
+        // GATT cleanup must outlive scope cancellation — GlobalScope is intentional.
+        // SharedRadioInterfaceService cancels the scope immediately after close(), so a
         // coroutine launched there may never run, leaking BluetoothGatt (causes GATT 133).
         @OptIn(DelicateCoroutinesApi::class)
         GlobalScope.launch {
@@ -482,12 +482,12 @@ class BleRadioTransport(
             "[$address] Dispatching packet #$packetsReceived " +
                 "(${packet.size} bytes, total RX: $bytesReceived bytes)"
         }
-        service.handleFromRadio(packet)
+        callback.handleFromRadio(packet)
     }
 
     private fun handleFailure(throwable: Throwable) {
         val (isPermanent, msg) = throwable.toDisconnectReason()
-        service.onDisconnect(isPermanent, errorMessage = msg)
+        callback.onDisconnect(isPermanent, errorMessage = msg)
     }
 
     /** Formats a one-line session statistics summary for logging. */

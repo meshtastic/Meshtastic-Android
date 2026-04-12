@@ -62,11 +62,11 @@ class BleRadioTransportTest {
 
         val bleTransport =
             BleRadioTransport(
-                serviceScope = testScope,
+                scope = testScope,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
-                service = service,
+                callback = service,
                 address = address,
             )
         bleTransport.start()
@@ -81,11 +81,11 @@ class BleRadioTransportTest {
     fun `address returns correct value`() {
         val bleTransport =
             BleRadioTransport(
-                serviceScope = testScope,
+                scope = testScope,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
-                service = service,
+                callback = service,
                 address = address,
             )
         assertEquals(address, bleTransport.address)
@@ -110,11 +110,11 @@ class BleRadioTransportTest {
 
         val bleTransport =
             BleRadioTransport(
-                serviceScope = this,
+                scope = this,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
-                service = service,
+                callback = service,
                 address = address,
             )
         bleTransport.start()
@@ -149,11 +149,11 @@ class BleRadioTransportTest {
 
         val bleTransport =
             BleRadioTransport(
-                serviceScope = this,
+                scope = this,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
-                service = service,
+                callback = service,
                 address = address,
             )
         bleTransport.start()

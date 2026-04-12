@@ -17,21 +17,23 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.network.repository.SerialConnection
 import org.meshtastic.core.network.repository.SerialConnectionListener
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.network.transport.HeartbeatSender
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioTransportCallback
 import java.util.concurrent.atomic.AtomicReference
 
 /** An Android USB/serial [RadioTransport] implementation. */
 class SerialRadioTransport(
-    service: RadioInterfaceService,
+    callback: RadioTransportCallback,
+    scope: CoroutineScope,
     private val usbRepository: UsbRepository,
     private val address: String,
-) : StreamTransport(service, service.serviceScope) {
+) : StreamTransport(callback, scope) {
     private var connRef = AtomicReference<SerialConnection?>()
 
     private val heartbeatSender = HeartbeatSender(sendToRadio = ::handleSendToRadio, logTag = "Serial[$address]")
@@ -120,7 +122,7 @@ class SerialRadioTransport(
     override fun keepAlive() {
         // Delegate to HeartbeatSender which sends a ToRadio heartbeat to prove the serial
         // link is alive and keep the local node's lastHeard timestamp current.
-        serviceScope.handledLaunch { heartbeatSender.sendHeartbeat() }
+        scope.handledLaunch { heartbeatSender.sendHeartbeat() }
     }
 
     override fun sendBytes(p: ByteArray) {

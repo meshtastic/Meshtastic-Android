@@ -53,7 +53,7 @@ class ScannerViewModelTest {
 
     @BeforeTest
     fun setUp() {
-        every { radioInterfaceService.isMockInterface() } returns false
+        every { radioInterfaceService.isMockTransport() } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
         every { radioInterfaceService.supportedDeviceTypes } returns emptyList()
 

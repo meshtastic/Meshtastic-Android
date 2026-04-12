@@ -42,6 +42,10 @@ import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
+/**
+ * Displays the currently connecting (or connected) device with its name, address, connection status, and a disconnect
+ * button.
+ */
 @Composable
 fun ConnectingDeviceInfo(
     connectionState: ConnectionState,

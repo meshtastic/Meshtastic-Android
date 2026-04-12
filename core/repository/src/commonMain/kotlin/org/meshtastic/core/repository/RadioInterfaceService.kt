@@ -65,8 +65,8 @@ interface RadioInterfaceService : RadioTransportCallback {
     /** Flow of the current device address. */
     val currentDeviceAddressFlow: StateFlow<String?>
 
-    /** Whether we are currently using a mock interface. */
-    fun isMockInterface(): Boolean
+    /** Whether we are currently using a mock transport. */
+    fun isMockTransport(): Boolean
 
     /** Flow of raw data received from the radio. */
     val receivedData: SharedFlow<ByteArray>

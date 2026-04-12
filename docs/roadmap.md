@@ -57,7 +57,7 @@ These items address structural gaps identified in the March 2026 architecture re
 | TCP | Desktop (JVM) | ✅ Done — shared `StreamFrameCodec` + `TcpTransport` in `core:network` |
 | Serial/USB | Desktop (JVM) | ✅ Done — jSerialComm |
 | MQTT | All (KMP) | ✅ Completed — KMQTT in commonMain |
-| BLE | All (KMP) | ✅ Done — Kable in `commonMain` (`BleRadioInterface`) |
+| BLE | All (KMP) | ✅ Done — Kable in `commonMain` (`BleRadioTransport`) |
 
 ### Desktop Feature Gaps
 

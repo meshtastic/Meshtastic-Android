@@ -29,12 +29,11 @@ import org.meshtastic.core.repository.RadioTransportCallback
  *
  * Delegates framing logic to [StreamFrameCodec] from `core:network`.
  */
-abstract class StreamTransport(
-    protected val service: RadioTransportCallback,
-    protected val serviceScope: CoroutineScope,
-) : RadioTransport {
+abstract class StreamTransport(protected val callback: RadioTransportCallback, protected val scope: CoroutineScope) :
+    RadioTransport {
 
-    private val codec = StreamFrameCodec(onPacketReceived = { service.handleFromRadio(it) }, logTag = "StreamTransport")
+    private val codec =
+        StreamFrameCodec(onPacketReceived = { callback.handleFromRadio(it) }, logTag = "StreamTransport")
 
     override fun close() {
         Logger.d { "Closing stream for good" }
@@ -42,33 +41,34 @@ abstract class StreamTransport(
     }
 
     /**
-     * Tell MeshService our device has gone away, but wait for it to come back
+     * Notify the transport callback that our device has gone away, but wait for it to come back.
      *
-     * @param waitForStopped if true we should wait for the manager to finish - must be false if called from inside the
-     *   manager callbacks
+     * @param waitForStopped if true we should wait for the transport to finish - must be false if called from inside
+     *   transport callbacks
      * @param isPermanent true if the device is definitely gone (e.g. USB unplugged), false if it may come back (e.g.
      *   TCP transient disconnect). Defaults to true for serial — subclasses may override with false.
      */
     protected open fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean = true) {
-        service.onDisconnect(isPermanent = isPermanent)
+        callback.onDisconnect(isPermanent = isPermanent)
     }
 
     protected open fun connect() {
-        // Before telling mesh service, send a few START1s to wake a sleeping device
+        // Before connecting, send a few START1s to wake a sleeping device
         sendBytes(StreamFrameCodec.WAKE_BYTES)
 
         // Now tell clients they can (finally use the api)
-        service.onConnect()
+        callback.onConnect()
     }
 
+    /** Writes raw bytes to the underlying stream (serial port, TCP socket, etc.). */
     abstract fun sendBytes(p: ByteArray)
 
-    // If subclasses need to flush at the end of a packet they can implement
+    /** Flushes buffered bytes to the underlying stream. No-op by default. */
     open fun flushBytes() {}
 
     override fun handleSendToRadio(p: ByteArray) {
         // This method is called from a continuation and it might show up late, so check for uart being null
-        serviceScope.handledLaunch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }
+        scope.handledLaunch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }
     }
 
     /** Process a single incoming byte through the stream framing state machine. */

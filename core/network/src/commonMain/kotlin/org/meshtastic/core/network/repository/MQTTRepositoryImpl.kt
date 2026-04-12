@@ -18,12 +18,15 @@ package org.meshtastic.core.network.repository
 
 import co.touchlab.kermit.Logger
 import io.github.davidepianca98.MQTTClient
+import io.github.davidepianca98.mqtt.MQTTException
 import io.github.davidepianca98.mqtt.MQTTVersion
 import io.github.davidepianca98.mqtt.Subscription
 import io.github.davidepianca98.mqtt.packets.Qos
 import io.github.davidepianca98.mqtt.packets.mqttv5.ReasonCode
 import io.github.davidepianca98.mqtt.packets.mqttv5.SubscriptionOptions
+import io.github.davidepianca98.socket.IOException
 import io.github.davidepianca98.socket.tls.TLSClientSettings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -36,9 +39,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecodingException
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.repository.NodeRepository
@@ -50,7 +56,7 @@ import kotlin.concurrent.Volatile
 class MQTTRepositoryImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val nodeRepository: NodeRepository,
-    dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
+    dispatchers: CoroutineDispatchers,
 ) : MQTTRepository {
 
     companion object {
@@ -123,10 +129,10 @@ class MQTTRepositoryImpl(
                             Logger.d { "MQTT parsed JSON payload successfully" }
 
                             trySend(MqttClientProxyMessage(topic = topic, text = jsonStr, retained = packet.retain))
-                        } catch (e: kotlinx.serialization.json.JsonDecodingException) {
+                        } catch (e: JsonDecodingException) {
                             @OptIn(ExperimentalSerializationApi::class)
                             Logger.e(e) { "Failed to parse MQTT JSON: ${e.shortMessage} (path: ${e.path})" }
-                        } catch (e: kotlinx.serialization.SerializationException) {
+                        } catch (e: SerializationException) {
                             Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
                         } catch (e: IllegalArgumentException) {
                             Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
@@ -180,11 +186,11 @@ class MQTTRepositoryImpl(
                         // Reset backoff so the next reconnect starts with the minimum delay.
                         reconnectDelay = INITIAL_RECONNECT_DELAY_MS
                         Logger.w { "MQTT client loop ended normally, reconnecting in ${reconnectDelay}ms" }
-                    } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
+                    } catch (e: MQTTException) {
                         Logger.e(e) { "MQTT Client loop error (MQTT), reconnecting in ${reconnectDelay}ms" }
-                    } catch (e: io.github.davidepianca98.socket.IOException) {
+                    } catch (e: IOException) {
                         Logger.e(e) { "MQTT Client loop error (IO), reconnecting in ${reconnectDelay}ms" }
-                    } catch (e: kotlinx.coroutines.CancellationException) {
+                    } catch (e: CancellationException) {
                         Logger.i { "MQTT Client loop cancelled" }
                         throw e
                     }

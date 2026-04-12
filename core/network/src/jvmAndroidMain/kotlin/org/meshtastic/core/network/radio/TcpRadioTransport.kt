@@ -24,6 +24,7 @@ import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.core.network.transport.TcpTransport
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
+import kotlin.concurrent.Volatile
 
 /**
  * TCP radio transport — thin adapter over the shared [TcpTransport] from `core:network`.
@@ -33,8 +34,8 @@ import org.meshtastic.core.repository.RadioTransportCallback
  * [StreamTransport] which created a dead [StreamFrameCodec] and required overriding `sendBytes` as a no-op.
  */
 open class TcpRadioTransport(
-    private val service: RadioTransportCallback,
-    private val serviceScope: CoroutineScope,
+    private val callback: RadioTransportCallback,
+    private val scope: CoroutineScope,
     private val dispatchers: CoroutineDispatchers,
     private val address: String,
 ) : RadioTransport {
@@ -43,23 +44,27 @@ open class TcpRadioTransport(
         const val SERVICE_PORT = StreamFrameCodec.DEFAULT_TCP_PORT
     }
 
+    /** Guards against a double [RadioTransportCallback.onDisconnect] when [close] triggers [TcpTransport.stop]. */
+    @Volatile private var closing = false
+
     private val transport =
         TcpTransport(
             dispatchers = dispatchers,
-            scope = serviceScope,
+            scope = scope,
             listener =
             object : TcpTransport.Listener {
                 override fun onConnected() {
-                    service.onConnect()
+                    callback.onConnect()
                 }
 
                 override fun onDisconnected() {
+                    if (closing) return // close() will fire the permanent disconnect itself
                     // TCP disconnects are transient (not permanent) — the transport will auto-reconnect.
-                    service.onDisconnect(isPermanent = false)
+                    callback.onDisconnect(isPermanent = false)
                 }
 
                 override fun onPacketReceived(bytes: ByteArray) {
-                    service.handleFromRadio(bytes)
+                    callback.handleFromRadio(bytes)
                 }
             },
             logTag = "TcpRadioTransport[$address]",
@@ -71,16 +76,17 @@ open class TcpRadioTransport(
 
     override fun close() {
         Logger.d { "[$address] Closing TCP transport" }
+        closing = true
         transport.stop()
-        service.onDisconnect(isPermanent = true)
+        callback.onDisconnect(isPermanent = true)
     }
 
     override fun keepAlive() {
         Logger.d { "[$address] TCP keepAlive" }
-        serviceScope.handledLaunch { transport.sendHeartbeat() }
+        scope.handledLaunch { transport.sendHeartbeat() }
     }
 
     override fun handleSendToRadio(p: ByteArray) {
-        serviceScope.handledLaunch { transport.sendPacket(p) }
+        scope.handledLaunch { transport.sendPacket(p) }
     }
 }

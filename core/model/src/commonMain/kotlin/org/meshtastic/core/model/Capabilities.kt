@@ -34,7 +34,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Ability to mute notifications from specific nodes via admin messages. */
     val canMuteNode = atLeast(V2_7_18)
 
-    /** FIXME: Ability to request neighbor information from other nodes. Disabled until working better. */
+    /** Ability to request neighbor information from other nodes. Gated to [UNRELEASED] until working reliably. */
     val canRequestNeighborInfo = atLeast(UNRELEASED)
 
     /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */

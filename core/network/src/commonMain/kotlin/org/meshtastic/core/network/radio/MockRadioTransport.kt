@@ -59,8 +59,8 @@ private val defaultChannel = ProtoChannel(settings = Channel.default.settings, r
 /** A simulated transport that is used for testing in the simulator. */
 @Suppress("detekt:TooManyFunctions", "detekt:MagicNumber")
 class MockRadioTransport(
-    private val service: RadioTransportCallback,
-    private val serviceScope: CoroutineScope,
+    private val callback: RadioTransportCallback,
+    private val scope: CoroutineScope,
     val address: String,
 ) : RadioTransport {
 
@@ -74,8 +74,8 @@ class MockRadioTransport(
     private val packetIdSequence = generateSequence { currentPacketId++ }.iterator()
 
     override fun start() {
-        Logger.i { "Starting the mock interface" }
-        service.onConnect() // Tell clients they can use the API
+        Logger.i { "Starting the mock transport" }
+        callback.onConnect() // Tell clients they can use the API
     }
 
     override fun handleSendToRadio(p: ByteArray) {
@@ -100,7 +100,7 @@ class MockRadioTransport(
             data != null && data.portnum == PortNum.ADMIN_APP ->
                 handleAdminPacket(pr, AdminMessage.ADAPTER.decode(data.payload))
             packet != null && packet.want_ack == true -> sendFakeAck(pr)
-            else -> Logger.i { "Ignoring data sent to mock interface $pr" }
+            else -> Logger.i { "Ignoring data sent to mock transport $pr" }
         }
     }
 
@@ -140,12 +140,12 @@ class MockRadioTransport(
                     )
                 }
 
-            else -> Logger.i { "Ignoring admin sent to mock interface $d" }
+            else -> Logger.i { "Ignoring admin sent to mock transport $d" }
         }
     }
 
     override fun close() {
-        Logger.i { "Closing the mock interface" }
+        Logger.i { "Closing the mock transport" }
     }
 
     // / Generate a fake text message from a node
@@ -292,7 +292,7 @@ class MockRadioTransport(
         Data(portnum = PortNum.ROUTING_APP, payload = Routing().encode().toByteString(), request_id = msgId),
     )
 
-    private fun sendQueueStatus(msgId: Int) = service.handleFromRadio(
+    private fun sendQueueStatus(msgId: Int) = callback.handleFromRadio(
         FromRadio(queueStatus = QueueStatus(res = 0, free = 16, mesh_packet_id = msgId)).encode(),
     )
 
@@ -304,14 +304,14 @@ class MockRadioTransport(
                 toIn,
                 Data(portnum = PortNum.ADMIN_APP, payload = adminMsg.encode().toByteString(), request_id = reqId),
             )
-        service.handleFromRadio(p.encode())
+        callback.handleFromRadio(p.encode())
     }
 
     // / Send a fake ack packet back if the sender asked for want_ack
-    private fun sendFakeAck(pr: ToRadio) = serviceScope.handledLaunch {
+    private fun sendFakeAck(pr: ToRadio) = scope.handledLaunch {
         val packet = pr.packet ?: return@handledLaunch
         delay(2000)
-        service.handleFromRadio(makeAck(MY_NODE + 1, packet.from, packet.id).encode())
+        callback.handleFromRadio(makeAck(MY_NODE + 1, packet.from, packet.id).encode())
     }
 
     private fun sendConfigResponse(configId: Int) {
@@ -366,6 +366,6 @@ class MockRadioTransport(
                 makeNodeStatus(MY_NODE + 1),
             )
 
-        packets.forEach { p -> service.handleFromRadio(p.encode()) }
+        packets.forEach { p -> callback.handleFromRadio(p.encode()) }
     }
 }
