@@ -181,9 +181,10 @@ Android uses `@Module`-annotated classes (`CoreDataModule`, `CoreBleAndroidModul
 36 `commonTest` files exist but are concentrated in `core:domain` (22 files) and `core:data` (10 files). Limited or zero tests in:
 - `core:service` (has `ServiceRepositoryImpl`, `DirectRadioControllerImpl`, `MeshServiceOrchestrator`)
 - `core:network` (has `StreamFrameCodecTest` — 10 tests; `TcpTransport` untested)
-- `core:prefs` (preference flows, default values)
 - `core:ble` (connection state machine)
 - `core:ui` (utility functions)
+
+`core:prefs` now has 12 `commonTest` tests (3 files: `FilterPrefsTest`, `TakPrefsTest`, `NotificationPrefsTest`) migrated from `androidHostTest` using Okio + `PreferenceDataStoreFactory.createWithPath()` for KMP compatibility.
 
 ### D4. Desktop has 2 tests
 

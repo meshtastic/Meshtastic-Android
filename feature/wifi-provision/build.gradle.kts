@@ -24,6 +24,7 @@ kotlin {
     android {
         namespace = "org.meshtastic.feature.wifiprovision"
         androidResources.enable = false
+        withHostTest {}
     }
 
     sourceSets {

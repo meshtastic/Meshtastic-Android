@@ -22,6 +22,7 @@ kotlin {
     android {
         namespace = "org.meshtastic.core.testing"
         androidResources.enable = false
+        withHostTest {}
     }
 
     sourceSets {

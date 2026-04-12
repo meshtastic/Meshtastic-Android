@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.prefs.tak
+package org.meshtastic.core.prefs.filter
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -22,20 +22,25 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import okio.FileSystem
+import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.repository.FilterPrefs
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
-class TakPrefsTest {
-    @get:Rule val tmpFolder: TemporaryFolder = TemporaryFolder.builder().assureDeletion().build()
+@OptIn(ExperimentalUuidApi::class)
+class FilterPrefsTest {
+    private lateinit var tmpDir: Path
 
     private lateinit var dataStore: DataStore<Preferences>
-    private lateinit var takPrefs: TakPrefs
+    private lateinit var filterPrefs: FilterPrefs
     private lateinit var dispatchers: CoroutineDispatchers
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -43,24 +48,38 @@ class TakPrefsTest {
 
     @BeforeTest
     fun setup() {
+        tmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "filterPrefsTest-${Uuid.random()}"
+        FileSystem.SYSTEM.createDirectories(tmpDir)
         dataStore =
-            PreferenceDataStoreFactory.create(
+            PreferenceDataStoreFactory.createWithPath(
                 scope = testScope,
-                produceFile = { tmpFolder.newFile("test.preferences_pb") },
+                produceFile = { tmpDir / "test.preferences_pb" },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        takPrefs = TakPrefsImpl(dataStore, dispatchers)
+        filterPrefs = FilterPrefsImpl(dataStore, dispatchers)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        FileSystem.SYSTEM.deleteRecursively(tmpDir)
+    }
+
+    @Test fun `filterEnabled defaults to false`() = testScope.runTest { assertFalse(filterPrefs.filterEnabled.value) }
+
+    @Test
+    fun `filterWords defaults to empty set`() =
+        testScope.runTest { assertTrue(filterPrefs.filterWords.value.isEmpty()) }
+
+    @Test
+    fun `setting filterEnabled updates preference`() = testScope.runTest {
+        filterPrefs.setFilterEnabled(true)
+        assertTrue(filterPrefs.filterEnabled.value)
     }
 
     @Test
-    fun `isTakServerEnabled defaults to false`() = testScope.runTest { assertFalse(takPrefs.isTakServerEnabled.value) }
-
-    @Test
-    fun `setting isTakServerEnabled updates preference`() = testScope.runTest {
-        takPrefs.setTakServerEnabled(true)
-        assertTrue(takPrefs.isTakServerEnabled.value)
-
-        takPrefs.setTakServerEnabled(false)
-        assertFalse(takPrefs.isTakServerEnabled.value)
+    fun `setting filterWords updates preference`() = testScope.runTest {
+        val words = setOf("test", "word")
+        filterPrefs.setFilterWords(words)
+        assertEquals(words, filterPrefs.filterWords.value)
     }
 }
