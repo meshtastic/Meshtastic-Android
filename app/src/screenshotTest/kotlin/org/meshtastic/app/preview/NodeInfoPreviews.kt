@@ -109,7 +109,8 @@ fun NodeChipPreview() {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 NodeChip(node = provider.mickeyMouse)
-                NodeChip(node = provider.minnieMouse)
+                // Use a fixed num to avoid Random.nextInt() producing different chip colors per run
+                NodeChip(node = provider.minnieMouse.copy(num = 2024))
             }
         }
     }
