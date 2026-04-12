@@ -21,9 +21,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
@@ -37,7 +34,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.ui.theme.MeshtasticTheme
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 
 /**
  * Multi-preview annotation for testing components in light and dark themes.
@@ -54,7 +54,7 @@ annotation class MultiPreview
 @MultiPreview
 @Composable
 fun ButtonVariantsPreview() {
-    MeshtasticTheme(isSystemInDarkTheme()) {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Filled Button", style = MaterialTheme.typography.labelMedium)
@@ -87,7 +87,7 @@ fun ButtonVariantsPreview() {
                     modifier = Modifier.padding(top = 12.dp),
                 )
                 Button(onClick = {}) {
-                    Icon(Icons.Filled.Add, contentDescription = "Add")
+                    Icon(MeshtasticIcons.Add, contentDescription = "Add")
                     Text("Add Item")
                 }
             }
@@ -98,7 +98,7 @@ fun ButtonVariantsPreview() {
 @MultiPreview
 @Composable
 fun TextVariantsPreview() {
-    MeshtasticTheme(isSystemInDarkTheme()) {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Display Large", style = MaterialTheme.typography.displayLarge)
@@ -140,14 +140,14 @@ fun TextVariantsPreview() {
 @MultiPreview
 @Composable
 fun IconsPreview() {
-    MeshtasticTheme(isSystemInDarkTheme()) {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Icon Buttons", style = MaterialTheme.typography.labelMedium)
 
-                IconButton(onClick = {}) { Icon(Icons.Filled.Add, contentDescription = "Add") }
+                IconButton(onClick = {}) { Icon(MeshtasticIcons.Add, contentDescription = "Add") }
 
-                IconButton(onClick = {}) { Icon(Icons.Filled.Delete, contentDescription = "Delete") }
+                IconButton(onClick = {}) { Icon(MeshtasticIcons.Delete, contentDescription = "Delete") }
             }
         }
     }

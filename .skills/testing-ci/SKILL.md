@@ -86,11 +86,54 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as four p
 - **Path filtering:** `check-changes` in `pull-request.yml` must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.).
 - **AboutLibraries:** Runs in `offlineMode` by default (no GitHub/SPDX API calls). Release builds pass `-PaboutLibraries.release=true` via Fastlane/Gradle CLI to enable remote license fetching. Do NOT re-gate on `CI` or `GITHUB_TOKEN` alone.
 
-## 5) Shell & Tooling Conventions
+## 5) Screenshot Testing (Compose Preview)
+
+The project uses the Google `com.android.compose.screenshot` plugin (v0.0.1-alpha14) for visual regression testing of CMP UI components.
+
+### KMP Limitations
+- **Android-only plugin**: Only works with `com.android.application` / `com.android.library` — not `com.android.kotlin.multiplatform.library`. Tests live in the `app` module.
+- **AndroidX `@Preview` required**: The plugin recognizes `androidx.compose.ui.tooling.preview.Preview` only, not the JetBrains `org.jetbrains.compose.ui.tooling.preview.Preview`.
+- Preview files use Android-specific annotations (e.g. `uiMode = Configuration.UI_MODE_NIGHT_YES`) and must live in `app/src/screenshotTest/`, **never** in `commonMain`.
+
+### File Layout
+```
+app/src/screenshotTest/kotlin/org/meshtastic/app/
+  ├── CoreComponentScreenshotTests.kt        # @PreviewTest classes
+  └── preview/
+      ├── BasicComponentPreviews.kt          # Buttons, text, icons
+      └── ExtendedComponentPreviews.kt       # Cards, inputs, dialogs, chips
+
+app/src/screenshotTest{Variant}/reference/   # Committed .png baselines
+app/build/reports/screenshotTest/preview/     # HTML diff reports
+```
+
+### Commands
+```bash
+# Generate/update reference images
+./gradlew updateGoogleDebugScreenshotTest    # Google flavor
+./gradlew updateFdroidDebugScreenshotTest    # F-Droid flavor
+
+# Validate against references
+./gradlew validateGoogleDebugScreenshotTest
+./gradlew validateFdroidDebugScreenshotTest
+```
+
+> Do NOT use bare `updateDebugScreenshotTest` — it is ambiguous with product flavors.
+
+### Writing a Preview + Test
+1. Create a preview composable in `app/src/screenshotTest/.../preview/` using `@MultiPreview` (light + dark) and wrapping in `MeshtasticTheme`.
+2. Create a test class in `app/src/screenshotTest/.../` with methods annotated `@PreviewTest` + `@Preview(showBackground = true)` that call the preview composable.
+3. Run `updateGoogleDebugScreenshotTest` to generate baselines, commit the `.png` files.
+
+### Convention Plugin
+- `meshtastic.screenshot.testing` (in `build-logic/convention`) configures the experimental flag and `screenshotTestImplementation` dependencies.
+- Must be applied **after** `alias(libs.plugins.screenshot)` in the consumer's `plugins {}` block.
+
+## 6) Shell & Tooling Conventions
 - **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent getting stuck in an interactive prompt.
 - **Text Search:** Prefer `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.
 
-## 6) Agent/Developer Guidance
+## 7) Agent/Developer Guidance
 - Start with the smallest set that validates your touched area.
 - If unable to run full validation locally, report exactly what ran and what remains.
 - Keep documentation synced in `AGENTS.md` and `.skills/` directories.

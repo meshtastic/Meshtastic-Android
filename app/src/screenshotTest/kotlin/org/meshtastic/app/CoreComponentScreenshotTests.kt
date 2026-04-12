@@ -16,6 +16,7 @@
  */
 package org.meshtastic.app
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.AlertDialogPreview
@@ -42,48 +43,56 @@ import org.meshtastic.app.preview.TextVariantsPreview
 class CoreComponentScreenshotTests {
     @PreviewTest
     @Preview(showBackground = true)
+    @Composable
     fun buttonVariantsScreenshot() {
         ButtonVariantsPreview()
     }
 
     @PreviewTest
     @Preview(showBackground = true)
+    @Composable
     fun textVariantsScreenshot() {
         TextVariantsPreview()
     }
 
     @PreviewTest
     @Preview(showBackground = true)
+    @Composable
     fun iconsScreenshot() {
         IconsPreview()
     }
 
     @PreviewTest
     @Preview(showBackground = true)
+    @Composable
     fun cardVariantsScreenshot() {
         CardVariantsPreview()
     }
 
     @PreviewTest
     @Preview(showBackground = true)
+    @Composable
     fun inputFieldVariantsScreenshot() {
         InputFieldVariantsPreview()
     }
 
     @PreviewTest
     @Preview(showBackground = true)
+    @Composable
     fun checkboxAndToggleScreenshot() {
         CheckboxAndTogglePreview()
     }
 
     @PreviewTest
     @Preview(showBackground = true)
+    @Composable
     fun alertDialogScreenshot() {
         AlertDialogPreview()
     }
 
     @PreviewTest
     @Preview(showBackground = true)
+    @Composable
     fun chipVariantsScreenshot() {
         ChipVariantsPreview()
     }

@@ -43,12 +43,12 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.ui.theme.MeshtasticTheme
+import org.meshtastic.core.ui.theme.AppTheme
 
 @MultiPreview
 @Composable
 fun CardVariantsPreview() {
-    MeshtasticTheme(isSystemInDarkTheme()) {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Standard Card", style = MaterialTheme.typography.labelMedium)
@@ -77,7 +77,7 @@ fun CardVariantsPreview() {
 @MultiPreview
 @Composable
 fun InputFieldVariantsPreview() {
-    MeshtasticTheme(isSystemInDarkTheme()) {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Text Input Fields", style = MaterialTheme.typography.labelMedium)
@@ -115,7 +115,7 @@ fun InputFieldVariantsPreview() {
 @MultiPreview
 @Composable
 fun CheckboxAndTogglePreview() {
-    MeshtasticTheme(isSystemInDarkTheme()) {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Checkboxes", style = MaterialTheme.typography.labelMedium)
@@ -153,7 +153,7 @@ fun CheckboxAndTogglePreview() {
 @MultiPreview
 @Composable
 fun AlertDialogPreview() {
-    MeshtasticTheme(isSystemInDarkTheme()) {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             AlertDialog(
                 onDismissRequest = {},
@@ -169,7 +169,7 @@ fun AlertDialogPreview() {
 @MultiPreview
 @Composable
 fun ChipVariantsPreview() {
-    MeshtasticTheme(isSystemInDarkTheme()) {
+    AppTheme(isSystemInDarkTheme()) {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("Chips", style = MaterialTheme.typography.labelMedium)
