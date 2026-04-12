@@ -36,10 +36,9 @@ import org.meshtastic.core.testing.FakeBluetoothRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class BleRadioInterfaceTest {
+class BleRadioTransportTest {
 
     private val testScope = TestScope()
     private val scanner = FakeBleScanner()
@@ -56,66 +55,69 @@ class BleRadioInterfaceTest {
     }
 
     @Test
-    fun `connect attempts to scan and connect via init`() = runTest {
+    fun `connect attempts to scan and connect via start`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         scanner.emitDevice(device)
 
-        val bleInterface =
-            BleRadioInterface(
-                serviceScope = testScope,
+        val bleTransport =
+            BleRadioTransport(
+                scope = testScope,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
-                service = service,
+                callback = service,
                 address = address,
             )
+        bleTransport.start()
 
-        // init starts connect() which is async
+        // start() begins connect() which is async
         // In a real test we'd verify the connection state,
         // but for now this confirms it works with the fakes.
-        assertEquals(address, bleInterface.address)
+        assertEquals(address, bleTransport.address)
     }
 
     @Test
     fun `address returns correct value`() {
-        val bleInterface =
-            BleRadioInterface(
-                serviceScope = testScope,
+        val bleTransport =
+            BleRadioTransport(
+                scope = testScope,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
-                service = service,
+                callback = service,
                 address = address,
             )
-        assertEquals(address, bleInterface.address)
+        assertEquals(address, bleTransport.address)
     }
 
     /**
-     * After [RECONNECT_FAILURE_THRESHOLD] consecutive connection failures, [RadioInterfaceService.onDisconnect] must be
-     * called so the higher layers can react (e.g. start the device-sleep timeout in [MeshConnectionManagerImpl]).
+     * After [BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD] consecutive connection failures,
+     * [RadioInterfaceService.onDisconnect] must be called so the higher layers can react (e.g. start the device-sleep
+     * timeout in [MeshConnectionManagerImpl]).
      *
-     * Virtual-time breakdown (RECONNECT_FAILURE_THRESHOLD = 3): t = 1 000 ms — iteration 1 settle delay elapses,
+     * Virtual-time breakdown (DEFAULT_FAILURE_THRESHOLD = 3): t = 1 000 ms — iteration 1 settle delay elapses,
      * connectAndAwait throws, backoff 5 s starts t = 6 000 ms — backoff ends t = 7 000 ms — iteration 2 settle delay
      * elapses, connectAndAwait throws, backoff 10 s starts t = 17 000 ms — backoff ends t = 18 000 ms — iteration 3
      * settle delay elapses, connectAndAwait throws → onDisconnect called
      */
     @Test
-    fun `onDisconnect is called after RECONNECT_FAILURE_THRESHOLD consecutive failures`() = runTest {
+    fun `onDisconnect is called after DEFAULT_FAILURE_THRESHOLD consecutive failures`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device) // skip BLE scan — device is already bonded
 
         // Make every connectAndAwait call throw so each iteration counts as one failure.
         connection.connectException = RadioNotConnectedException("simulated failure")
 
-        val bleInterface =
-            BleRadioInterface(
-                serviceScope = this,
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
-                service = service,
+                callback = service,
                 address = address,
             )
+        bleTransport.start()
 
         // Advance through exactly 3 failure iterations (≈18 001 ms virtual time).
         // The 4th iteration's backoff hasn't elapsed yet, so the coroutine is suspended
@@ -125,12 +127,12 @@ class BleRadioInterfaceTest {
         verify { service.onDisconnect(any(), any()) }
 
         // Cancel the reconnect loop so runTest can complete.
-        bleInterface.close()
+        bleTransport.close()
     }
 
     /**
-     * After [RECONNECT_MAX_FAILURES] (10) consecutive failures, the reconnect loop should stop and signal a permanent
-     * disconnect. This prevents infinite battery drain when the device is genuinely offline.
+     * After [BleReconnectPolicy.DEFAULT_MAX_FAILURES] (10) consecutive failures, the reconnect loop should stop and
+     * signal a permanent disconnect. This prevents infinite battery drain when the device is genuinely offline.
      *
      * Time budget for 10 failures with bonded device (no scan): Each iteration = 1s settle + connectAndAwait throw +
      * backoff Backoffs: 5s, 10s, 20s, 40s, 60s, 60s, 60s, 60s, 60s, (exit at failure 10 before backoff) Total ≈ 10×1s
@@ -138,22 +140,23 @@ class BleRadioInterfaceTest {
      * variance.
      */
     @Test
-    fun `reconnect loop stops after RECONNECT_MAX_FAILURES with permanent disconnect`() = runTest {
+    fun `reconnect loop stops after DEFAULT_MAX_FAILURES with permanent disconnect`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device)
 
         connection.connectException = RadioNotConnectedException("simulated failure")
         every { service.onDisconnect(any(), any()) } returns Unit
 
-        val bleInterface =
-            BleRadioInterface(
-                serviceScope = this,
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
-                service = service,
+                callback = service,
                 address = address,
             )
+        bleTransport.start()
 
         // Advance enough time for all 10 failures to occur.
         advanceTimeBy(400_001L)
@@ -161,18 +164,6 @@ class BleRadioInterfaceTest {
         // Should have been called with isPermanent=true at least once (the final call).
         verify { service.onDisconnect(isPermanent = true, errorMessage = any()) }
 
-        bleInterface.close()
-    }
-
-    @Test
-    fun `computeReconnectBackoff returns correct backoff values`() {
-        assertEquals(5.seconds, computeReconnectBackoff(0))
-        assertEquals(5.seconds, computeReconnectBackoff(1))
-        assertEquals(10.seconds, computeReconnectBackoff(2))
-        assertEquals(20.seconds, computeReconnectBackoff(3))
-        assertEquals(40.seconds, computeReconnectBackoff(4))
-        assertEquals(60.seconds, computeReconnectBackoff(5))
-        assertEquals(60.seconds, computeReconnectBackoff(10))
-        assertEquals(60.seconds, computeReconnectBackoff(100))
+        bleTransport.close()
     }
 }

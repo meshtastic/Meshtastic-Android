@@ -60,7 +60,7 @@ The core transport abstraction was previously locked in `app/repository/radio/` 
 1. Defined `RadioTransport` interface in `core:repository/commonMain` (replacing `IRadioInterface`)
 2. Moved `StreamFrameCodec`-based framing to `core:network/commonMain`
 3. Moved TCP transport to `core:network/jvmAndroidMain`
-4. The remaining `app/repository/radio/` implementations (BLE, Serial, Mock) now implement `RadioTransport`.
+4. BLE, Serial, and Mock transports now reside in `core:network` and implement `RadioTransport`.
 
 **Recommended next steps:**
 1. Move BLE transport to `core:ble/androidMain`

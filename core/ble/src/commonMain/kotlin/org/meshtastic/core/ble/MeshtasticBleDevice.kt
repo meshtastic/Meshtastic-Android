@@ -17,6 +17,7 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Advertisement
+import com.juul.kable.ExperimentalApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,7 +48,7 @@ class MeshtasticBleDevice(
     override val isConnected: Boolean
         get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.active?.address == address
 
-    @OptIn(com.juul.kable.ExperimentalApi::class)
+    @OptIn(ExperimentalApi::class)
     override suspend fun readRssi(): Int {
         val active = ActiveBleConnection.active
         return if (active != null && active.address == address) {

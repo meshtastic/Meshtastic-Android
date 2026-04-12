@@ -38,40 +38,41 @@ abstract class BaseRadioTransportFactory(
 
     override fun isAddressValid(address: String?): Boolean {
         val spec = address?.firstOrNull() ?: return false
-        return spec in
-            listOf(InterfaceId.TCP.id, InterfaceId.SERIAL.id, InterfaceId.BLUETOOTH.id, InterfaceId.MOCK.id) ||
-            spec == '!' ||
-            isPlatformAddressValid(address)
+        return when (spec) {
+            InterfaceId.TCP.id,
+            InterfaceId.SERIAL.id,
+            InterfaceId.BLUETOOTH.id,
+            InterfaceId.MOCK.id,
+            '!',
+            -> true
+            else -> isPlatformAddressValid(address)
+        }
     }
 
     protected open fun isPlatformAddressValid(address: String): Boolean = false
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
-    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
-        address.startsWith(InterfaceId.BLUETOOTH.id) -> {
-            BleRadioInterface(
-                serviceScope = service.serviceScope,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                service = service,
-                address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()),
-            )
-        }
-        address.startsWith("!") -> {
-            BleRadioInterface(
-                serviceScope = service.serviceScope,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                service = service,
-                address = address.removePrefix("!"),
-            )
-        }
-        else -> createPlatformTransport(address, service)
+    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport {
+        val transport =
+            when {
+                address.startsWith(InterfaceId.BLUETOOTH.id) || address.startsWith("!") -> {
+                    val bleAddress = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()).removePrefix("!")
+                    BleRadioTransport(
+                        scope = service.serviceScope,
+                        scanner = scanner,
+                        bluetoothRepository = bluetoothRepository,
+                        connectionFactory = connectionFactory,
+                        callback = service,
+                        address = bleAddress,
+                    )
+                }
+                else -> createPlatformTransport(address, service)
+            }
+        transport.start()
+        return transport
     }
 
-    /** Delegate to platform for Mock, TCP, or Serial/USB interfaces. */
+    /** Delegate to platform for Mock, TCP, or Serial/USB transports. */
     protected abstract fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport
 }

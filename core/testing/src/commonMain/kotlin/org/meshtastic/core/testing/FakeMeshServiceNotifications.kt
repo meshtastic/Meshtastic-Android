@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.testing
 
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.proto.ClientNotification
@@ -28,10 +29,7 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
 
     override fun initChannels() {}
 
-    override fun updateServiceStateNotification(
-        state: org.meshtastic.core.model.ConnectionState,
-        telemetry: Telemetry?,
-    ) {}
+    override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {}
 
     override suspend fun updateMessageNotification(
         contactKey: String,

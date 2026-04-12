@@ -17,24 +17,28 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.network.repository.SerialConnection
 import org.meshtastic.core.network.repository.SerialConnectionListener
 import org.meshtastic.core.network.repository.UsbRepository
-import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.proto.Heartbeat
-import org.meshtastic.proto.ToRadio
+import org.meshtastic.core.network.transport.HeartbeatSender
+import org.meshtastic.core.repository.RadioTransportCallback
 import java.util.concurrent.atomic.AtomicReference
 
-/** An interface that assumes we are talking to a meshtastic device via USB serial */
-class SerialInterface(
-    service: RadioInterfaceService,
+/** An Android USB/serial [RadioTransport] implementation. */
+class SerialRadioTransport(
+    callback: RadioTransportCallback,
+    scope: CoroutineScope,
     private val usbRepository: UsbRepository,
     private val address: String,
-) : StreamInterface(service) {
+) : StreamTransport(callback, scope) {
     private var connRef = AtomicReference<SerialConnection?>()
 
-    init {
+    private val heartbeatSender = HeartbeatSender(sendToRadio = ::handleSendToRadio, logTag = "Serial[$address]")
+
+    override fun start() {
         connect()
     }
 
@@ -116,14 +120,9 @@ class SerialInterface(
     }
 
     override fun keepAlive() {
-        // Send a ToRadio heartbeat so the firmware resets its idle timer and responds with
-        // a FromRadio queueStatus — proving the serial link is alive. Without this, the
-        // serial transport has no way to detect a silently dead device (battery depleted,
-        // firmware crash without the `rebooted` flag). The queueStatus response also feeds
-        // into MeshMessageProcessorImpl.refreshLocalNodeLastHeard() to keep the local
-        // node's lastHeard timestamp current.
-        Logger.d { "[$address] Serial keepAlive — sending heartbeat" }
-        handleSendToRadio(ToRadio(heartbeat = Heartbeat()).encode())
+        // Delegate to HeartbeatSender which sends a ToRadio heartbeat to prove the serial
+        // link is alive and keep the local node's lastHeard timestamp current.
+        scope.handledLaunch { heartbeatSender.sendHeartbeat() }
     }
 
     override fun sendBytes(p: ByteArray) {

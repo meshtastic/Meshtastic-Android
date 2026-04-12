@@ -39,18 +39,26 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Constants
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.HostMetrics
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Neighbor
 import org.meshtastic.proto.NeighborInfo
+import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.Telemetry
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
+import org.meshtastic.proto.Position as ProtoPosition
 
 @Suppress("TooManyFunctions", "CyclomaticComplexMethod")
 @Single
@@ -67,10 +75,6 @@ class CommandSenderImpl(
 
     private val localConfig = MutableStateFlow(LocalConfig())
     private val channelSet = MutableStateFlow(ChannelSet())
-
-    // We'll need a way to track connection state in shared code,
-    // maybe via ServiceRepository or similar.
-    // For now I'll assume it's injected or available.
 
     init {
         radioConfigRepository.localConfigFlow.onEach { localConfig.value = it }.launchIn(scope)
@@ -141,14 +145,11 @@ class CommandSenderImpl(
         if (!Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)) {
             val actualSize = Data.ADAPTER.encodedSize(data)
             p.status = MessageStatus.ERROR
-            // throw RemoteException("Message too long: $actualSize bytes (max ${Constants.DATA_PAYLOAD_LEN.value})")
-            // RemoteException is Android specific. For KMP we might want a custom exception.
             error("Message too long: $actualSize bytes")
         } else {
             p.status = MessageStatus.QUEUED
         }
 
-        // TODO: Check connection state
         sendNow(p)
     }
 
@@ -191,7 +192,7 @@ class CommandSenderImpl(
         return packetHandler.sendToRadioAndAwait(packet)
     }
 
-    override fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {
+    override fun sendPosition(pos: ProtoPosition, destNum: Int?, wantResponse: Boolean) {
         val myNum = nodeManager.myNodeNum.value ?: return
         val idNum = destNum ?: myNum
         Logger.d { "Sending our position/time to=$idNum $pos" }
@@ -217,7 +218,7 @@ class CommandSenderImpl(
 
     override fun requestPosition(destNum: Int, currentPosition: Position) {
         val meshPosition =
-            org.meshtastic.proto.Position(
+            ProtoPosition(
                 latitude_i = Position.degI(currentPosition.latitude),
                 longitude_i = Position.degI(currentPosition.longitude),
                 altitude = currentPosition.altitude,
@@ -240,7 +241,7 @@ class CommandSenderImpl(
 
     override fun setFixedPosition(destNum: Int, pos: Position) {
         val meshPos =
-            org.meshtastic.proto.Position(
+            ProtoPosition(
                 latitude_i = Position.degI(pos.latitude),
                 longitude_i = Position.degI(pos.longitude),
                 altitude = pos.altitude,
@@ -293,21 +294,17 @@ class CommandSenderImpl(
 
         if (type == TelemetryType.PAX) {
             portNum = PortNum.PAXCOUNTER_APP
-            payloadBytes = org.meshtastic.proto.Paxcount().encode().toByteString()
+            payloadBytes = Paxcount().encode().toByteString()
         } else {
             portNum = PortNum.TELEMETRY_APP
             payloadBytes =
                 Telemetry(
-                    device_metrics =
-                    if (type == TelemetryType.DEVICE) org.meshtastic.proto.DeviceMetrics() else null,
-                    environment_metrics =
-                    if (type == TelemetryType.ENVIRONMENT) org.meshtastic.proto.EnvironmentMetrics() else null,
-                    air_quality_metrics =
-                    if (type == TelemetryType.AIR_QUALITY) org.meshtastic.proto.AirQualityMetrics() else null,
-                    power_metrics = if (type == TelemetryType.POWER) org.meshtastic.proto.PowerMetrics() else null,
-                    local_stats =
-                    if (type == TelemetryType.LOCAL_STATS) org.meshtastic.proto.LocalStats() else null,
-                    host_metrics = if (type == TelemetryType.HOST) org.meshtastic.proto.HostMetrics() else null,
+                    device_metrics = if (type == TelemetryType.DEVICE) DeviceMetrics() else null,
+                    environment_metrics = if (type == TelemetryType.ENVIRONMENT) EnvironmentMetrics() else null,
+                    air_quality_metrics = if (type == TelemetryType.AIR_QUALITY) AirQualityMetrics() else null,
+                    power_metrics = if (type == TelemetryType.POWER) PowerMetrics() else null,
+                    local_stats = if (type == TelemetryType.LOCAL_STATS) LocalStats() else null,
+                    host_metrics = if (type == TelemetryType.HOST) HostMetrics() else null,
                 )
                     .encode()
                     .toByteString()

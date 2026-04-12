@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okio.ByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
@@ -221,7 +222,7 @@ class MeshConnectionManagerImpl(
 
     private fun tearDownConnection() {
         packetHandler.stopPacketQueue()
-        commandSender.setSessionPasskey(okio.ByteString.EMPTY) // Prevent stale passkey on reconnect.
+        commandSender.setSessionPasskey(ByteString.EMPTY) // Prevent stale passkey on reconnect.
         locationManager.stop()
         mqttManager.stop()
     }

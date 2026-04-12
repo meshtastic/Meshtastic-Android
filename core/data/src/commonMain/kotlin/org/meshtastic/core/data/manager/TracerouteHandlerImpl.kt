@@ -65,7 +65,7 @@ class TracerouteHandlerImpl(
             routeDiscovery.getTracerouteResponse(
                 getUser = { num ->
                     nodeManager.nodeDBbyNodeNum[num]?.let { "${it.user.long_name} (${it.user.short_name})" }
-                        ?: "Unknown" // TODO: Use core:resources once available in core:data
+                        ?: "Unknown"
                 },
                 headerTowards = "Route towards destination:",
                 headerBack = "Route back to us:",

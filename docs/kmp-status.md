@@ -27,7 +27,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `core:database` | ✅ | ✅ | Room KMP |
 | `core:domain` | ✅ | ✅ | UseCases |
 | `core:prefs` | ✅ | ✅ | Preferences layer |
-| `core:network` | ✅ | ✅ | Ktor, `StreamFrameCodec`, `TcpTransport`, `SerialTransport`, `BleRadioInterface` |
+| `core:network` | ✅ | ✅ | Ktor, `StreamFrameCodec`, `TcpTransport`, `SerialTransport`, `BleRadioTransport` |
 | `core:data` | ✅ | ✅ | Data orchestration |
 | `core:ble` | ✅ | ✅ | Kable multiplatform BLE abstractions in commonMain |
 | `core:nfc` | ✅ | ✅ | NFC contract in commonMain; hardware in androidMain |
@@ -116,7 +116,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | **Transport Lifecycle Unification** | ✅ Done | `SharedRadioInterfaceService` orchestrates auto-reconnect, connection state, and heartbeat uniformly across Android and Desktop. |
 | **Database Parity** | ✅ Done | `DatabaseManager` is pure KMP, giving iOS and Desktop support for multiple connected nodes with LRU caching. On JVM/Desktop, inactive databases are explicitly closed on switch (Room KMP's `setAutoCloseTimeout` is Android-only), and `desktopDataDir()` in `core:database/jvmMain` is the single source for data directory resolution. |
 | Emoji picker unification | ✅ Done | Single commonMain implementation replacing 3 platform variants |
-| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `MeshtasticNavDisplay`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BleRadioInterface`, and `BaseRadioTransportFactory` to `commonMain`; eliminated ~1,200 lines of duplicated Compose UI code across Android/desktop |
+| Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `MeshtasticNavDisplay`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BleRadioTransport`, and `BaseRadioTransportFactory` to `commonMain`; eliminated ~1,200 lines of duplicated Compose UI code across Android/desktop |
 
 ## Navigation Parity Note
 
@@ -150,7 +150,7 @@ Extracted to shared `commonMain` (no longer app-only):
 Extracted to core KMP modules:
 - Android Services, WorkManager Workers, and BroadcastReceivers → `core:service/androidMain`
 - USB/Serial radio connections → `core:network/androidMain`
-- TCP radio connections, BLE radio connections (`BleRadioInterface`), and mDNS/NSD Service Discovery → `core:network/commonMain` (with Android `NsdManager` and Desktop `JmDNS` implementations)
+- TCP radio connections, BLE radio connections (`BleRadioTransport`), and mDNS/NSD Service Discovery → `core:network/commonMain` (with Android `NsdManager` and Desktop `JmDNS` implementations)
 
 Remaining to be extracted from `:app` or unified in `commonMain`:
 - `MapViewModel` (Unify Google/F-Droid flavors into a single `commonMain` class consuming a `MapConfigProvider` interface. `MapViewProvider` interface simplified — track rendering and traceroute rendering extracted to dedicated provider contracts)

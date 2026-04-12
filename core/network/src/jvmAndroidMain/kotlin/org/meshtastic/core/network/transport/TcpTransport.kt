@@ -24,7 +24,6 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -34,13 +33,14 @@ import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Shared JVM TCP transport for Meshtastic radios.
  *
  * Manages the TCP socket lifecycle (connect, read loop, reconnect with backoff) and uses [StreamFrameCodec] for the
- * START1/START2 stream framing protocol. Heartbeat scheduling is owned by [SharedRadioInterfaceService]; this class
- * only exposes [sendHeartbeat] for external callers.
+ * START1/START2 stream framing protocol. [sendHeartbeat] sends a heartbeat with a monotonically-increasing nonce so the
+ * firmware's per-connection duplicate-write filter does not silently drop it.
  *
  * Used by Android and Desktop via the shared `SharedRadioInterfaceService`.
  */
@@ -109,6 +109,8 @@ class TcpTransport(
 
     @Volatile private var timeoutEvents: Int = 0
 
+    private val heartbeatNonce = AtomicInteger(0)
+
     /** Whether the transport is currently connected. */
     val isConnected: Boolean
         get() {
@@ -146,9 +148,10 @@ class TcpTransport(
         bytesSent += payload.size
     }
 
-    /** Send a heartbeat packet to keep the connection alive. */
+    /** Send a heartbeat packet with a monotonically-increasing nonce to keep the connection alive. */
     suspend fun sendHeartbeat() {
-        val heartbeat = ToRadio(heartbeat = Heartbeat())
+        val nonce = heartbeatNonce.getAndIncrement()
+        val heartbeat = ToRadio(heartbeat = org.meshtastic.proto.Heartbeat(nonce = nonce))
         sendPacket(heartbeat.encode())
     }
 

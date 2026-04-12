@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -86,7 +87,7 @@ class AndroidBluetoothRepository(
             return
         }
 
-        kotlinx.coroutines.suspendCancellableCoroutine<Unit> { cont ->
+        suspendCancellableCoroutine<Unit> { cont ->
             val receiver =
                 object : android.content.BroadcastReceiver() {
                     @SuppressLint("MissingPermission")

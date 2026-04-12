@@ -87,7 +87,7 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
  *
  * Connection attempts follow Kable's recommended pattern from the SensorTag sample: try a direct connect first, then
  * fall back to `autoConnect = true` on failure. Only two attempts are made per [connect] call — the caller
- * ([BleRadioInterface]) owns the macro-level retry/backoff loop.
+ * ([BleRadioTransport]) owns the macro-level retry/backoff loop.
  */
 class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 

@@ -34,16 +34,25 @@ import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.repository.MQTTRepository
+import org.meshtastic.core.network.service.ApiService
+import org.meshtastic.core.network.service.ApiServiceImpl
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.service.DirectRadioControllerImpl
+import org.meshtastic.core.service.ServiceRepositoryImpl
+import org.meshtastic.desktop.DesktopBuildConfig
+import org.meshtastic.desktop.DesktopNotificationManager
+import org.meshtastic.desktop.notification.DesktopMeshServiceNotifications
+import org.meshtastic.desktop.radio.DesktopMessageQueue
 import org.meshtastic.desktop.radio.DesktopRadioTransportFactory
 import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
 import org.meshtastic.desktop.stub.NoopCompassHeadingProvider
@@ -55,6 +64,9 @@ import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
 import org.meshtastic.desktop.stub.NoopServiceBroadcasts
+import org.meshtastic.feature.node.compass.CompassHeadingProvider
+import org.meshtastic.feature.node.compass.MagneticFieldProvider
+import org.meshtastic.feature.node.compass.PhoneLocationProvider
 import org.meshtastic.core.ble.di.module as coreBleModule
 import org.meshtastic.core.common.di.module as coreCommonModule
 import org.meshtastic.core.data.di.module as coreDataModule
@@ -124,7 +136,7 @@ fun desktopModule() = module {
  */
 @Suppress("LongMethod")
 private fun desktopPlatformStubsModule() = module {
-    single<ServiceRepository> { org.meshtastic.core.service.ServiceRepositoryImpl() }
+    single<ServiceRepository> { ServiceRepositoryImpl() }
     single<RadioTransportFactory> {
         DesktopRadioTransportFactory(
             dispatchers = get(),
@@ -134,7 +146,7 @@ private fun desktopPlatformStubsModule() = module {
         )
     }
     single<RadioController> {
-        org.meshtastic.core.service.DirectRadioControllerImpl(
+        DirectRadioControllerImpl(
             serviceRepository = get(),
             nodeRepository = get(),
             commandSender = get(),
@@ -144,37 +156,29 @@ private fun desktopPlatformStubsModule() = module {
             locationManager = get(),
         )
     }
-    single { org.meshtastic.desktop.DesktopNotificationManager(prefs = get()) }
-    single<org.meshtastic.core.repository.NotificationManager> {
-        get<org.meshtastic.desktop.DesktopNotificationManager>()
-    }
-    single<MeshServiceNotifications> {
-        org.meshtastic.desktop.notification.DesktopMeshServiceNotifications(notificationManager = get())
-    }
+    single { DesktopNotificationManager(prefs = get()) }
+    single<NotificationManager> { get<DesktopNotificationManager>() }
+    single<MeshServiceNotifications> { DesktopMeshServiceNotifications(notificationManager = get()) }
     single<PlatformAnalytics> { NoopPlatformAnalytics() }
     single<ServiceBroadcasts> { NoopServiceBroadcasts() }
     single<AppWidgetUpdater> { NoopAppWidgetUpdater() }
     single<MeshWorkerManager> { NoopMeshWorkerManager() }
-    single<MessageQueue> {
-        org.meshtastic.desktop.radio.DesktopMessageQueue(packetRepository = get(), radioController = get())
-    }
+    single<MessageQueue> { DesktopMessageQueue(packetRepository = get(), radioController = get()) }
     single<MeshLocationManager> { NoopMeshLocationManager() }
     single<LocationRepository> { NoopLocationRepository() }
     single<MQTTRepository> { NoopMQTTRepository() }
-    single<org.meshtastic.feature.node.compass.CompassHeadingProvider> { NoopCompassHeadingProvider() }
-    single<org.meshtastic.feature.node.compass.PhoneLocationProvider> { NoopPhoneLocationProvider() }
-    single<org.meshtastic.feature.node.compass.MagneticFieldProvider> { NoopMagneticFieldProvider() }
+    single<CompassHeadingProvider> { NoopCompassHeadingProvider() }
+    single<PhoneLocationProvider> { NoopPhoneLocationProvider() }
+    single<MagneticFieldProvider> { NoopMagneticFieldProvider() }
 
     // Desktop uses the real ApiService implementation (no flavor stub needed)
-    single<org.meshtastic.core.network.service.ApiService> {
-        org.meshtastic.core.network.service.ApiServiceImpl(client = get())
-    }
+    single<ApiService> { ApiServiceImpl(client = get()) }
 
     // Ktor HttpClient for JVM/Desktop (equivalent of CoreNetworkAndroidModule on Android)
     single<HttpClient> {
         HttpClient(Java) {
             install(ContentNegotiation) { json(get<Json>()) }
-            if (org.meshtastic.desktop.DesktopBuildConfig.IS_DEBUG) {
+            if (DesktopBuildConfig.IS_DEBUG) {
                 install(Logging) {
                     logger = KermitHttpLogger
                     level = LogLevel.HEADERS

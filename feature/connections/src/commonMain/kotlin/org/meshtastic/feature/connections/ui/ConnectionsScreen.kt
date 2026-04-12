@@ -167,17 +167,19 @@ fun ConnectionsScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 val uiState =
                     when {
-                        connectionState is ConnectionState.Connected && ourNode != null -> 2
+                        connectionState is ConnectionState.Connected && ourNode != null ->
+                            ConnectionUiState.CONNECTED_WITH_NODE
+
                         connectionState is ConnectionState.Connected ||
                             connectionState == ConnectionState.Connecting ||
-                            selectedDevice != NO_DEVICE_SELECTED -> 1
+                            selectedDevice != NO_DEVICE_SELECTED -> ConnectionUiState.CONNECTING
 
-                        else -> 0
+                        else -> ConnectionUiState.NO_DEVICE
                     }
 
                 Crossfade(targetState = uiState, label = "connection_state") { state ->
                     when (state) {
-                        2 ->
+                        ConnectionUiState.CONNECTED_WITH_NODE ->
                             ConnectedDeviceContent(
                                 ourNode = ourNode,
                                 regionUnset = regionUnset,
@@ -191,7 +193,7 @@ fun ConnectionsScreen(
                                 },
                             )
 
-                        1 ->
+                        ConnectionUiState.CONNECTING ->
                             ConnectingDeviceContent(
                                 connectionState = connectionState,
                                 selectedDevice = selectedDevice,
@@ -208,7 +210,9 @@ fun ConnectionsScreen(
                 }
 
                 var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
-                LaunchedEffect(Unit) { DeviceType.fromAddress(selectedDevice)?.let { selectedDeviceType = it } }
+                LaunchedEffect(selectedDevice) {
+                    DeviceType.fromAddress(selectedDevice)?.let { selectedDeviceType = it }
+                }
 
                 val supportedDeviceTypes = scanModel.supportedDeviceTypes
 
@@ -368,4 +372,16 @@ private fun NoDeviceContent() {
             modifier = Modifier.height(160.dp),
         )
     }
+}
+
+/** Visual state for the connection screen's [Crossfade] animation. */
+private enum class ConnectionUiState {
+    /** No device is selected. */
+    NO_DEVICE,
+
+    /** A device is selected or we are actively connecting. */
+    CONNECTING,
+
+    /** Connected with node info available. */
+    CONNECTED_WITH_NODE,
 }

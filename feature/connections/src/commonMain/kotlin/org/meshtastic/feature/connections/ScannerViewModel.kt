@@ -54,8 +54,8 @@ open class ScannerViewModel(
     private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
     private val bleScanner: org.meshtastic.core.ble.BleScanner? = null,
 ) : ViewModel() {
-    private val _showMockInterface = MutableStateFlow(false)
-    val showMockInterface: StateFlow<Boolean> = _showMockInterface.asStateFlow()
+    private val _showMockTransport = MutableStateFlow(false)
+    val showMockTransport: StateFlow<Boolean> = _showMockTransport.asStateFlow()
 
     private val _errorText = MutableStateFlow<String?>(null)
     val errorText: StateFlow<String?> = _errorText.asStateFlow()
@@ -68,7 +68,7 @@ open class ScannerViewModel(
     private var scanJob: kotlinx.coroutines.Job? = null
 
     init {
-        _showMockInterface.value = radioInterfaceService.isMockInterface()
+        _showMockTransport.value = radioInterfaceService.isMockTransport()
     }
 
     fun startBleScan() {
@@ -77,25 +77,26 @@ open class ScannerViewModel(
         isBleScanningState.value = true
         scannedBleDevices.value = emptyMap()
 
-        scanJob = viewModelScope.launch {
-            try {
-                bleScanner
-                    .scan(
-                        timeout = kotlin.time.Duration.INFINITE,
-                        serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
-                    )
-                    .flowOn(dispatchers.io)
-                    .collect { device ->
-                        if (!scannedBleDevices.value.containsKey(device.address)) {
-                            scannedBleDevices.update { current -> current + (device.address to device) }
+        scanJob =
+            viewModelScope.launch {
+                try {
+                    bleScanner
+                        .scan(
+                            timeout = kotlin.time.Duration.INFINITE,
+                            serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
+                        )
+                        .flowOn(dispatchers.io)
+                        .collect { device ->
+                            if (!scannedBleDevices.value.containsKey(device.address)) {
+                                scannedBleDevices.update { current -> current + (device.address to device) }
+                            }
                         }
-                    }
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                co.touchlab.kermit.Logger.w(e) { "BLE scan failed" }
-            } finally {
-                isBleScanningState.value = false
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    co.touchlab.kermit.Logger.w(e) { "BLE scan failed" }
+                } finally {
+                    isBleScanningState.value = false
+                }
             }
-        }
     }
 
     fun stopBleScan() {
@@ -105,7 +106,7 @@ open class ScannerViewModel(
     }
 
     private val discoveredDevicesFlow =
-        showMockInterface
+        showMockTransport
             .flatMapLatest { showMock -> getDiscoveredDevicesUseCase.invoke(showMock) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 

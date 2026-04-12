@@ -50,6 +50,12 @@ import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.PortNum
 
+/**
+ * Android foreground service that hosts the Meshtastic mesh radio connection.
+ *
+ * Acts as the lifecycle anchor for the [MeshServiceOrchestrator], which manages all manager initialization and
+ * connection state. Exposes an AIDL binder for external client integration via [core:api].
+ */
 // IMeshService is deprecated but still required for AIDL binding
 @Suppress("TooManyFunctions", "LargeClass", "DEPRECATION")
 class MeshService : Service() {

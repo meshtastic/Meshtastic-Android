@@ -41,6 +41,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
@@ -303,17 +304,14 @@ class MeshServiceNotificationsImpl(
 
     // region Public Notification Methods
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
-    override fun updateServiceStateNotification(
-        state: org.meshtastic.core.model.ConnectionState,
-        telemetry: Telemetry?,
-    ) {
+    override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {
         val summaryString =
             when (state) {
-                is org.meshtastic.core.model.ConnectionState.Connected ->
+                is ConnectionState.Connected ->
                     getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
-                is org.meshtastic.core.model.ConnectionState.Disconnected -> getString(Res.string.disconnected)
-                is org.meshtastic.core.model.ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
-                is org.meshtastic.core.model.ConnectionState.Connecting -> getString(Res.string.connecting)
+                is ConnectionState.Disconnected -> getString(Res.string.disconnected)
+                is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
+                is ConnectionState.Connecting -> getString(Res.string.connecting)
             }
 
         // Update caches if telemetry is provided

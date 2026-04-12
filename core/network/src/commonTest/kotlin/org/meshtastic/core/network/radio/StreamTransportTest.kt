@@ -17,8 +17,6 @@
 package org.meshtastic.core.network.radio
 
 import dev.mokkery.MockMode
-import dev.mokkery.answering.returns
-import dev.mokkery.every
 import dev.mokkery.mock
 import dev.mokkery.verify
 import io.kotest.property.Arb
@@ -29,17 +27,16 @@ import io.kotest.property.checkAll
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.network.transport.StreamFrameCodec
-import org.meshtastic.core.repository.RadioInterfaceService
-import kotlin.test.BeforeTest
+import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class StreamInterfaceTest {
+class StreamTransportTest {
 
-    private val radioService: RadioInterfaceService = mock(MockMode.autofill)
-    private lateinit var fakeStream: FakeStreamInterface
+    private val callback: RadioTransportCallback = mock(MockMode.autofill)
+    private lateinit var fakeStream: FakeStreamTransport
 
-    class FakeStreamInterface(service: RadioInterfaceService) : StreamInterface(service) {
+    class FakeStreamTransport(callback: RadioTransportCallback, scope: TestScope) : StreamTransport(callback, scope) {
         val sentBytes = mutableListOf<ByteArray>()
 
         override fun sendBytes(p: ByteArray) {
@@ -59,21 +56,18 @@ class StreamInterfaceTest {
         public override fun connect() = super.connect()
     }
 
-    @BeforeTest
-    fun setUp() {
-        every { radioService.serviceScope } returns TestScope()
-    }
+    private val testScope = TestScope()
 
     @Test
     fun `handleSendToRadio property test`() = runTest {
-        fakeStream = FakeStreamInterface(radioService)
+        fakeStream = FakeStreamTransport(callback, testScope)
 
         checkAll(Arb.byteArray(Arb.int(0, 512), Arb.byte())) { payload -> fakeStream.handleSendToRadio(payload) }
     }
 
     @Test
     fun `readChar property test`() = runTest {
-        fakeStream = FakeStreamInterface(radioService)
+        fakeStream = FakeStreamTransport(callback, testScope)
 
         checkAll(Arb.byteArray(Arb.int(0, 100), Arb.byte())) { data ->
             data.forEach { fakeStream.feed(it) }
@@ -83,11 +77,11 @@ class StreamInterfaceTest {
 
     @Test
     fun `connect sends wake bytes`() {
-        fakeStream = FakeStreamInterface(radioService)
+        fakeStream = FakeStreamTransport(callback, testScope)
         fakeStream.connect()
 
         assertTrue(fakeStream.sentBytes.isNotEmpty())
         assertTrue(fakeStream.sentBytes[0].contentEquals(StreamFrameCodec.WAKE_BYTES))
-        verify { radioService.onConnect() }
+        verify { callback.onConnect() }
     }
 }

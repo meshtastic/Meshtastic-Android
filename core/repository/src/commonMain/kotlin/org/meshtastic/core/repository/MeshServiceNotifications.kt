@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
@@ -28,7 +29,7 @@ interface MeshServiceNotifications {
 
     fun initChannels()
 
-    fun updateServiceStateNotification(state: org.meshtastic.core.model.ConnectionState, telemetry: Telemetry?)
+    fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?)
 
     suspend fun updateMessageNotification(
         contactKey: String,

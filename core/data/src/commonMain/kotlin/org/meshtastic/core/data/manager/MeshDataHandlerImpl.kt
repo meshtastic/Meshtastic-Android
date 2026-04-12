@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import okio.ByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
@@ -247,7 +248,7 @@ class MeshDataHandlerImpl(
         val payload = packet.decoded?.payload ?: return
         val u =
             User.ADAPTER.decode(payload)
-                .let { if (it.is_licensed == true) it.copy(public_key = okio.ByteString.EMPTY) else it }
+                .let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
                 .let {
                     if (packet.via_mqtt == true && !it.long_name.endsWith(" (MQTT)")) {
                         it.copy(long_name = "${it.long_name} (MQTT)")

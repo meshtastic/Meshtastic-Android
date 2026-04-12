@@ -19,9 +19,12 @@ package org.meshtastic.core.service
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -96,10 +99,7 @@ class SharedRadioInterfaceService(
     override val receivedData: SharedFlow<ByteArray> = _receivedData
 
     private val _meshActivity =
-        MutableSharedFlow<MeshActivity>(
-            extraBufferCapacity = 64,
-            onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
-        )
+        MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
 
     private val _connectionError = MutableSharedFlow<String>(extraBufferCapacity = 64)
@@ -109,12 +109,12 @@ class SharedRadioInterfaceService(
         get() = _serviceScope
 
     private var _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
-    private var radioIf: RadioTransport? = null
-    private var runningInterfaceId: InterfaceId? = null
+    private var radioTransport: RadioTransport? = null
+    private var runningTransportId: InterfaceId? = null
     private var isStarted = false
 
-    private val listenersInitialized = kotlinx.atomicfu.atomic(false)
-    private var heartbeatJob: kotlinx.coroutines.Job? = null
+    private val listenersInitialized = atomic(false)
+    private var heartbeatJob: Job? = null
     private var lastHeartbeatMillis = 0L
 
     @Volatile private var lastDataReceivedMillis = 0L
@@ -130,7 +130,7 @@ class SharedRadioInterfaceService(
     }
 
     private val initLock = Mutex()
-    private val interfaceMutex = Mutex()
+    private val transportMutex = Mutex()
 
     private fun initStateListeners() {
         if (listenersInitialized.value) return
@@ -141,10 +141,10 @@ class SharedRadioInterfaceService(
 
                 radioPrefs.devAddr
                     .onEach { addr ->
-                        interfaceMutex.withLock {
+                        transportMutex.withLock {
                             if (_currentDeviceAddressFlow.value != addr) {
                                 _currentDeviceAddressFlow.value = addr
-                                startInterfaceLocked()
+                                startTransportLocked()
                             }
                         }
                     }
@@ -152,11 +152,11 @@ class SharedRadioInterfaceService(
 
                 bluetoothRepository.state
                     .onEach { state ->
-                        interfaceMutex.withLock {
+                        transportMutex.withLock {
                             if (state.enabled) {
-                                startInterfaceLocked()
-                            } else if (runningInterfaceId == InterfaceId.BLUETOOTH) {
-                                stopInterfaceLocked()
+                                startTransportLocked()
+                            } else if (runningTransportId == InterfaceId.BLUETOOTH) {
+                                stopTransportLocked()
                             }
                         }
                     }
@@ -165,11 +165,11 @@ class SharedRadioInterfaceService(
 
                 networkRepository.networkAvailable
                     .onEach { state ->
-                        interfaceMutex.withLock {
+                        transportMutex.withLock {
                             if (state) {
-                                startInterfaceLocked()
-                            } else if (runningInterfaceId == InterfaceId.TCP) {
-                                stopInterfaceLocked()
+                                startTransportLocked()
+                            } else if (runningTransportId == InterfaceId.TCP) {
+                                stopTransportLocked()
                             }
                         }
                     }
@@ -180,11 +180,11 @@ class SharedRadioInterfaceService(
     }
 
     override fun connect() {
-        processLifecycle.coroutineScope.launch { interfaceMutex.withLock { startInterfaceLocked() } }
+        processLifecycle.coroutineScope.launch { transportMutex.withLock { startTransportLocked() } }
         initStateListeners()
     }
 
-    override fun isMockInterface(): Boolean = transportFactory.isMockInterface()
+    override fun isMockTransport(): Boolean = transportFactory.isMockTransport()
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
         transportFactory.toInterfaceAddress(interfaceId, rest)
@@ -215,17 +215,17 @@ class SharedRadioInterfaceService(
         _currentDeviceAddressFlow.value = sanitized
 
         processLifecycle.coroutineScope.launch {
-            interfaceMutex.withLock {
-                ignoreException { stopInterfaceLocked() }
-                startInterfaceLocked()
+            transportMutex.withLock {
+                ignoreException { stopTransportLocked() }
+                startTransportLocked()
             }
         }
         return true
     }
 
-    /** Must be called under [interfaceMutex]. */
-    private fun startInterfaceLocked() {
-        if (radioIf != null) return
+    /** Must be called under [transportMutex]. */
+    private fun startTransportLocked() {
+        if (radioTransport != null) return
 
         // Never autoconnect to the simulated node. The mock transport may be offered in the
         // device-picker UI on debug builds, but it must only connect when the user explicitly
@@ -237,26 +237,26 @@ class SharedRadioInterfaceService(
             return
         }
 
-        Logger.i { "Starting radio interface for ${address.anonymize}" }
+        Logger.i { "Starting radio transport for ${address.anonymize}" }
         isStarted = true
-        runningInterfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
-        radioIf = transportFactory.createTransport(address, this)
+        runningTransportId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) }
+        radioTransport = transportFactory.createTransport(address, this)
         startHeartbeat()
     }
 
-    /** Must be called under [interfaceMutex]. */
-    private fun stopInterfaceLocked() {
-        val currentIf = radioIf
-        Logger.i { "Stopping interface $currentIf" }
+    /** Must be called under [transportMutex]. */
+    private fun stopTransportLocked() {
+        val currentTransport = radioTransport
+        Logger.i { "Stopping transport $currentTransport" }
         isStarted = false
-        radioIf = null
-        runningInterfaceId = null
-        currentIf?.close()
+        radioTransport = null
+        runningTransportId = null
+        currentTransport?.close()
 
-        _serviceScope.cancel("stopping interface")
+        _serviceScope.cancel("stopping transport")
         _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
-        if (currentIf != null) {
+        if (currentTransport != null) {
             onDisconnect(isPermanent = true)
         }
     }
@@ -295,23 +295,25 @@ class SharedRadioInterfaceService(
 
     fun keepAlive(now: Long = nowMillis) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
-            radioIf?.keepAlive()
+            radioTransport?.keepAlive()
             lastHeartbeatMillis = now
         }
     }
 
     override fun sendToRadio(bytes: ByteArray) {
-        // Capture radioIf reference atomically to avoid racing with stopInterfaceLocked()
-        // which sets radioIf = null and cancels _serviceScope. Without this snapshot,
-        // we could read a non-null radioIf but launch into an already-cancelled scope.
-        val currentIf =
-            radioIf
+        // Snapshot the transport to avoid calling handleSendToRadio on a null reference.
+        // There is still a benign race: stopTransportLocked() may cancel _serviceScope
+        // between the null-check and the launch, causing the coroutine to be silently
+        // dropped. This is acceptable — if the transport is shutting down, dropping the
+        // send is the correct behavior.
+        val currentTransport =
+            radioTransport
                 ?: run {
-                    Logger.w { "sendToRadio: no active radio interface, dropping ${bytes.size} bytes" }
+                    Logger.w { "sendToRadio: no active radio transport, dropping ${bytes.size} bytes" }
                     return
                 }
         _serviceScope.handledLaunch {
-            currentIf.handleSendToRadio(bytes)
+            currentTransport.handleSendToRadio(bytes)
             _meshActivity.tryEmit(MeshActivity.Send)
         }
     }

@@ -27,6 +27,14 @@ interface RadioTransport : Closeable {
     fun handleSendToRadio(p: ByteArray)
 
     /**
+     * Initializes the transport after construction. Called by the factory once the transport has been fully created.
+     *
+     * This separates construction from side effects (connecting, launching coroutines), making transports easier to
+     * test and reason about.
+     */
+    fun start() {}
+
+    /**
      * If we think we are connected, but we don't hear anything from the device, we might be in a zombie state. This
      * function can be implemented by transports to see if we are really connected.
      */

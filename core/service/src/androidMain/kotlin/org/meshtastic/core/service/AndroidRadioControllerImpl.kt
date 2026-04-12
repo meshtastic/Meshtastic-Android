@@ -17,15 +17,22 @@
 package org.meshtastic.core.service
 
 import android.content.Context
+import android.content.Intent
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.SharedContact
+import org.meshtastic.proto.User
 
 /**
  * Android [RadioController] implementation that delegates to the bound [MeshService] via AIDL.
@@ -69,41 +76,37 @@ class AndroidRadioControllerImpl(
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
         val nodeDef = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
         val contact =
-            org.meshtastic.proto.SharedContact(
-                node_num = nodeDef.num,
-                user = nodeDef.user,
-                manually_verified = nodeDef.manuallyVerified,
-            )
+            SharedContact(node_num = nodeDef.num, user = nodeDef.user, manually_verified = nodeDef.manuallyVerified)
         val action = ServiceAction.SendContact(contact)
         serviceRepository.onServiceAction(action)
         return action.result.await()
     }
 
-    override suspend fun setLocalConfig(config: org.meshtastic.proto.Config) {
+    override suspend fun setLocalConfig(config: Config) {
         serviceRepository.meshService?.setConfig(config.encode())
     }
 
-    override suspend fun setLocalChannel(channel: org.meshtastic.proto.Channel) {
+    override suspend fun setLocalChannel(channel: Channel) {
         serviceRepository.meshService?.setChannel(channel.encode())
     }
 
-    override suspend fun setOwner(destNum: Int, user: org.meshtastic.proto.User, packetId: Int) {
+    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
         serviceRepository.meshService?.setRemoteOwner(packetId, destNum, user.encode())
     }
 
-    override suspend fun setConfig(destNum: Int, config: org.meshtastic.proto.Config, packetId: Int) {
+    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
         serviceRepository.meshService?.setRemoteConfig(packetId, destNum, config.encode())
     }
 
-    override suspend fun setModuleConfig(destNum: Int, config: org.meshtastic.proto.ModuleConfig, packetId: Int) {
+    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
         serviceRepository.meshService?.setModuleConfig(packetId, destNum, config.encode())
     }
 
-    override suspend fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel, packetId: Int) {
+    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
         serviceRepository.meshService?.setRemoteChannel(packetId, destNum, channel.encode())
     }
 
-    override suspend fun setFixedPosition(destNum: Int, position: org.meshtastic.core.model.Position) {
+    override suspend fun setFixedPosition(destNum: Int, position: Position) {
         serviceRepository.meshService?.setFixedPosition(destNum, position)
     }
 
@@ -171,7 +174,7 @@ class AndroidRadioControllerImpl(
         serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
     }
 
-    override suspend fun requestPosition(destNum: Int, currentPosition: org.meshtastic.core.model.Position) {
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
         serviceRepository.meshService?.requestPosition(destNum, currentPosition)
     }
 
@@ -214,10 +217,7 @@ class AndroidRadioControllerImpl(
         @Suppress("DEPRECATION") // Internal use: routes address change through AIDL binder
         serviceRepository.meshService?.setDeviceAddress(address)
         // Ensure service is running/restarted to handle the new address
-        val intent =
-            android.content.Intent().apply {
-                setClassName("com.geeksville.mesh", "org.meshtastic.core.service.MeshService")
-            }
+        val intent = Intent().apply { setClassName("com.geeksville.mesh", "org.meshtastic.core.service.MeshService") }
         context.startForegroundService(intent)
     }
 }

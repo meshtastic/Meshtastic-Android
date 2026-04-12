@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -199,7 +200,7 @@ class MeshActionHandlerImpl(
         commandSender.sendData(p)
         serviceBroadcasts.broadcastMessageStatus(p.id, p.status ?: MessageStatus.UNKNOWN)
         dataHandler.value.rememberDataPacket(p, myNodeNum, false)
-        val bytes = p.bytes ?: okio.ByteString.EMPTY
+        val bytes = p.bytes ?: ByteString.EMPTY
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
     }
 
@@ -356,7 +357,7 @@ class MeshActionHandlerImpl(
     override fun handleRequestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
         val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
         val otaEvent =
-            AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: okio.ByteString.EMPTY)
+            AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: ByteString.EMPTY)
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(ota_request = otaEvent) }
     }
 

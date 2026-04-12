@@ -132,13 +132,10 @@ class MeshConnectionManagerImplTest {
         scope,
     )
 
-    @AfterTest fun tearDown() {}
+    @AfterTest fun tearDown() = Unit
 
     @Test
     fun `Connected state triggers broadcast and config start`() = runTest(testDispatcher) {
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-
         manager = createManager(backgroundScope)
         radioConnectionState.value = ConnectionState.Connected
         advanceUntilIdle()
@@ -153,16 +150,6 @@ class MeshConnectionManagerImplTest {
 
     @Test
     fun `Disconnected state stops services`() = runTest(testDispatcher) {
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
-        every { locationManager.stop() } returns Unit
-        every { mqttManager.stop() } returns Unit
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
-        every { locationManager.stop() } returns Unit
-        every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         manager = createManager(backgroundScope)
         // Transition to Connected first so that Disconnected actually does something
@@ -191,11 +178,6 @@ class MeshConnectionManagerImplTest {
                 device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT),
             )
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
-        every { locationManager.stop() } returns Unit
-        every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
         manager = createManager(backgroundScope)
@@ -216,11 +198,6 @@ class MeshConnectionManagerImplTest {
         // Power saving enabled
         val config = LocalConfig(power = Config.PowerConfig(is_power_saving = true))
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
-        every { locationManager.stop() } returns Unit
-        every { mqttManager.stop() } returns Unit
 
         manager = createManager(backgroundScope)
         advanceUntilIdle()
@@ -280,11 +257,6 @@ class MeshConnectionManagerImplTest {
                 device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER),
             )
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
-        every { locationManager.stop() } returns Unit
-        every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
         manager = createManager(backgroundScope)
@@ -317,11 +289,6 @@ class MeshConnectionManagerImplTest {
         // Power saving enabled so DeviceSleep is preserved (not mapped to Disconnected)
         val config = LocalConfig(power = Config.PowerConfig(is_power_saving = true))
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { packetHandler.stopPacketQueue() } returns Unit
-        every { locationManager.stop() } returns Unit
-        every { mqttManager.stop() } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
         // Record every state transition so we can verify ordering
@@ -367,11 +334,6 @@ class MeshConnectionManagerImplTest {
             // Power saving enabled with a short ls_secs so the sleep timeout fires quickly
             val config = LocalConfig(power = Config.PowerConfig(is_power_saving = true, ls_secs = 1))
             every { radioConfigRepository.localConfigFlow } returns flowOf(config)
-            every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
-            every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-            every { packetHandler.stopPacketQueue() } returns Unit
-            every { locationManager.stop() } returns Unit
-            every { mqttManager.stop() } returns Unit
             every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
             val observed = mutableListOf<ConnectionState>()

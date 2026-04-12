@@ -24,7 +24,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.network.SerialTransport
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
-import org.meshtastic.core.network.radio.TCPInterface
+import org.meshtastic.core.network.radio.TcpRadioTransport
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
@@ -45,16 +45,22 @@ class DesktopRadioTransportFactory(
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
 
-    override fun isMockInterface(): Boolean = false
+    override fun isMockTransport(): Boolean = false
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
         address.startsWith(InterfaceId.TCP.id) -> {
-            TCPInterface(service, dispatchers, address.removePrefix(InterfaceId.TCP.id.toString()))
+            TcpRadioTransport(
+                callback = service,
+                scope = service.serviceScope,
+                dispatchers = dispatchers,
+                address = address.removePrefix(InterfaceId.TCP.id.toString()),
+            )
         }
         address.startsWith(InterfaceId.SERIAL.id) -> {
             SerialTransport.open(
                 portName = address.removePrefix(InterfaceId.SERIAL.id.toString()),
-                service = service,
+                callback = service,
+                scope = service.serviceScope,
                 dispatchers = dispatchers,
             )
         }

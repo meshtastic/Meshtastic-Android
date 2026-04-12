@@ -69,7 +69,7 @@ class MeshMessageProcessorImpl(
     @Volatile private var lastLocalNodeRefreshMs = 0L
 
     private val earlyMutex = Mutex()
-    private val earlyReceivedPackets = kotlin.collections.ArrayDeque<MeshPacket>()
+    private val earlyReceivedPackets = ArrayDeque<MeshPacket>()
     private val maxEarlyPacketBuffer = 10240
 
     override fun clearEarlyPackets() {
