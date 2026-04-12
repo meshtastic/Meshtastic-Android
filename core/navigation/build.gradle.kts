@@ -22,10 +22,7 @@ plugins {
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.navigation"
-        withHostTest {}
-    }
+    android { namespace = "org.meshtastic.core.navigation" }
 
     sourceSets {
         commonMain.dependencies {
