@@ -22,17 +22,21 @@ import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import okio.FileSystem
+import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.NotificationPrefs
-import java.io.File
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 class NotificationPrefsTest {
-    private lateinit var tmpFolder: File
+    private lateinit var tmpDir: Path
 
     private lateinit var dataStore: DataStore<Preferences>
     private lateinit var notificationPrefs: NotificationPrefs
@@ -43,15 +47,12 @@ class NotificationPrefsTest {
 
     @BeforeTest
     fun setup() {
-        tmpFolder =
-            File.createTempFile("notificationPrefsTest", null).apply {
-                delete()
-                mkdirs()
-            }
+        tmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "notificationPrefsTest-${Uuid.random()}"
+        FileSystem.SYSTEM.createDirectories(tmpDir)
         dataStore =
-            PreferenceDataStoreFactory.create(
+            PreferenceDataStoreFactory.createWithPath(
                 scope = testScope,
-                produceFile = { File(tmpFolder, "test.preferences_pb").also { it.createNewFile() } },
+                produceFile = { tmpDir / "test.preferences_pb" },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
         notificationPrefs = NotificationPrefsImpl(dataStore, dispatchers)
@@ -59,7 +60,7 @@ class NotificationPrefsTest {
 
     @AfterTest
     fun tearDown() {
-        tmpFolder.deleteRecursively()
+        FileSystem.SYSTEM.deleteRecursively(tmpDir)
     }
 
     @Test
