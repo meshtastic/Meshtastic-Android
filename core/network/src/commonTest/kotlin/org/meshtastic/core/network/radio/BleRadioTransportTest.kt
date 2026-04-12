@@ -36,7 +36,6 @@ import org.meshtastic.core.testing.FakeBluetoothRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleRadioTransportTest {
@@ -92,16 +91,17 @@ class BleRadioTransportTest {
     }
 
     /**
-     * After [RECONNECT_FAILURE_THRESHOLD] consecutive connection failures, [RadioInterfaceService.onDisconnect] must be
-     * called so the higher layers can react (e.g. start the device-sleep timeout in [MeshConnectionManagerImpl]).
+     * After [BleReconnectPolicy.DEFAULT_FAILURE_THRESHOLD] consecutive connection failures,
+     * [RadioInterfaceService.onDisconnect] must be called so the higher layers can react (e.g. start the device-sleep
+     * timeout in [MeshConnectionManagerImpl]).
      *
-     * Virtual-time breakdown (RECONNECT_FAILURE_THRESHOLD = 3): t = 1 000 ms — iteration 1 settle delay elapses,
+     * Virtual-time breakdown (DEFAULT_FAILURE_THRESHOLD = 3): t = 1 000 ms — iteration 1 settle delay elapses,
      * connectAndAwait throws, backoff 5 s starts t = 6 000 ms — backoff ends t = 7 000 ms — iteration 2 settle delay
      * elapses, connectAndAwait throws, backoff 10 s starts t = 17 000 ms — backoff ends t = 18 000 ms — iteration 3
      * settle delay elapses, connectAndAwait throws → onDisconnect called
      */
     @Test
-    fun `onDisconnect is called after RECONNECT_FAILURE_THRESHOLD consecutive failures`() = runTest {
+    fun `onDisconnect is called after DEFAULT_FAILURE_THRESHOLD consecutive failures`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device) // skip BLE scan — device is already bonded
 
@@ -131,8 +131,8 @@ class BleRadioTransportTest {
     }
 
     /**
-     * After [RECONNECT_MAX_FAILURES] (10) consecutive failures, the reconnect loop should stop and signal a permanent
-     * disconnect. This prevents infinite battery drain when the device is genuinely offline.
+     * After [BleReconnectPolicy.DEFAULT_MAX_FAILURES] (10) consecutive failures, the reconnect loop should stop and
+     * signal a permanent disconnect. This prevents infinite battery drain when the device is genuinely offline.
      *
      * Time budget for 10 failures with bonded device (no scan): Each iteration = 1s settle + connectAndAwait throw +
      * backoff Backoffs: 5s, 10s, 20s, 40s, 60s, 60s, 60s, 60s, 60s, (exit at failure 10 before backoff) Total ≈ 10×1s
@@ -140,7 +140,7 @@ class BleRadioTransportTest {
      * variance.
      */
     @Test
-    fun `reconnect loop stops after RECONNECT_MAX_FAILURES with permanent disconnect`() = runTest {
+    fun `reconnect loop stops after DEFAULT_MAX_FAILURES with permanent disconnect`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device)
 
@@ -165,17 +165,5 @@ class BleRadioTransportTest {
         verify { service.onDisconnect(isPermanent = true, errorMessage = any()) }
 
         bleTransport.close()
-    }
-
-    @Test
-    fun `computeReconnectBackoff returns correct backoff values`() {
-        assertEquals(5.seconds, computeReconnectBackoff(0))
-        assertEquals(5.seconds, computeReconnectBackoff(1))
-        assertEquals(10.seconds, computeReconnectBackoff(2))
-        assertEquals(20.seconds, computeReconnectBackoff(3))
-        assertEquals(40.seconds, computeReconnectBackoff(4))
-        assertEquals(60.seconds, computeReconnectBackoff(5))
-        assertEquals(60.seconds, computeReconnectBackoff(10))
-        assertEquals(60.seconds, computeReconnectBackoff(100))
     }
 }

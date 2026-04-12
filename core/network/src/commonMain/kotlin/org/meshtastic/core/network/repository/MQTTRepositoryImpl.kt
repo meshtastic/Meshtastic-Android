@@ -84,14 +84,15 @@ class MQTTRepositoryImpl(
     @Suppress("TooGenericExceptionCaught")
     override fun disconnect() {
         Logger.i { "MQTT Disconnecting" }
+        val c = client
+        client = null // Null first to prevent re-entrant disconnect
         try {
-            client?.disconnect(ReasonCode.SUCCESS)
+            c?.disconnect(ReasonCode.SUCCESS)
         } catch (e: Exception) {
             Logger.w(e) { "MQTT clean disconnect failed" }
         }
         clientJob?.cancel()
         clientJob = null
-        client = null
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)

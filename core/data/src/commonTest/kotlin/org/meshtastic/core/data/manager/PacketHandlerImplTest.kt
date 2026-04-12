@@ -21,6 +21,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.int
@@ -84,6 +85,8 @@ class PacketHandlerImplTest {
         val toRadio = ToRadio(packet = MeshPacket(id = 123))
 
         handler.sendToRadio(toRadio)
+
+        verify { radioInterfaceService.sendToRadio(any()) }
     }
 
     @Test
@@ -93,6 +96,8 @@ class PacketHandlerImplTest {
 
         handler.sendToRadio(packet)
         testScheduler.runCurrent()
+
+        verify { radioInterfaceService.sendToRadio(any()) }
     }
 
     @Test

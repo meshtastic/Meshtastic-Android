@@ -150,5 +150,21 @@ class BleReconnectPolicy(
         const val DEFAULT_FAILURE_THRESHOLD = 3
         val DEFAULT_SETTLE_DELAY = 1.seconds
         val DEFAULT_MIN_STABLE_CONNECTION = 5.seconds
+
+        internal val RECONNECT_BASE_DELAY = 5.seconds
+        internal val RECONNECT_MAX_DELAY = 60.seconds
+        internal const val BACKOFF_MAX_EXPONENT = 4
     }
+}
+
+/**
+ * Returns the reconnect backoff delay for a given consecutive failure count.
+ *
+ * Backoff schedule: 1 failure → 5 s, 2 failures → 10 s, 3 failures → 20 s, 4 failures → 40 s, 5+ failures → 60 s
+ * (capped).
+ */
+internal fun computeReconnectBackoff(consecutiveFailures: Int): Duration {
+    if (consecutiveFailures <= 0) return BleReconnectPolicy.RECONNECT_BASE_DELAY
+    val multiplier = 1 shl (consecutiveFailures - 1).coerceAtMost(BleReconnectPolicy.BACKOFF_MAX_EXPONENT)
+    return minOf(BleReconnectPolicy.RECONNECT_BASE_DELAY * multiplier, BleReconnectPolicy.RECONNECT_MAX_DELAY)
 }

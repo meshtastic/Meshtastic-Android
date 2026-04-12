@@ -301,9 +301,11 @@ class SharedRadioInterfaceService(
     }
 
     override fun sendToRadio(bytes: ByteArray) {
-        // Capture radioTransport reference atomically to avoid racing with stopTransportLocked()
-        // which sets radioTransport = null and cancels _serviceScope. Without this snapshot,
-        // we could read a non-null radioTransport but launch into an already-cancelled scope.
+        // Snapshot the transport to avoid calling handleSendToRadio on a null reference.
+        // There is still a benign race: stopTransportLocked() may cancel _serviceScope
+        // between the null-check and the launch, causing the coroutine to be silently
+        // dropped. This is acceptable — if the transport is shutting down, dropping the
+        // send is the correct behavior.
         val currentTransport =
             radioTransport
                 ?: run {

@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -58,44 +57,12 @@ import org.meshtastic.core.network.transport.HeartbeatSender
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.concurrent.Volatile
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3
 private val SCAN_RETRY_DELAY = 1.seconds
 private val CONNECTION_TIMEOUT = 15.seconds
-private const val RECONNECT_FAILURE_THRESHOLD = 3
-private val RECONNECT_BASE_DELAY = 5.seconds
-private val RECONNECT_MAX_DELAY = 60.seconds
-private const val RECONNECT_MAX_FAILURES = 10
-
-/** Settle delay before each connection attempt to let the Android BLE stack finish any pending disconnect cleanup. */
-private val SETTLE_DELAY = 1.seconds
-
-/**
- * Minimum time a BLE connection must stay up before we consider it "stable" and reset
- * [BleRadioTransport.consecutiveFailures]. Without this, a device at the edge of BLE range can repeatedly connect for a
- * fraction of a second and drop — each brief connection resets the failure counter so [RECONNECT_FAILURE_THRESHOLD] is
- * never reached, and the app never signals [ConnectionState.DeviceSleep].
- *
- * The value (5 s) is long enough that only connections that survive past the initial GATT setup are treated as genuine,
- * but short enough that normal reconnects after light-sleep still reset the counter promptly.
- */
-private val MIN_STABLE_CONNECTION = 5.seconds
-
-/**
- * Returns the reconnect backoff delay for a given consecutive failure count.
- *
- * Backoff schedule: 1 failure → 5 s 2 failures → 10 s 3 failures → 20 s 4 failures → 40 s 5+ failures → 60 s (capped)
- */
-private const val BACKOFF_MAX_EXPONENT = 4
-
-internal fun computeReconnectBackoff(consecutiveFailures: Int): Duration {
-    if (consecutiveFailures <= 0) return RECONNECT_BASE_DELAY
-    val multiplier = 1 shl (consecutiveFailures - 1).coerceAtMost(BACKOFF_MAX_EXPONENT)
-    return minOf(RECONNECT_BASE_DELAY * multiplier, RECONNECT_MAX_DELAY)
-}
 
 /**
  * Delay after writing a heartbeat before re-polling FROMRADIO.
@@ -166,7 +133,7 @@ class BleRadioTransport(
 
     @Volatile private var isFullyConnected = false
     private var connectionJob: Job? = null
-    private var consecutiveFailures = 0
+    private val reconnectPolicy = BleReconnectPolicy()
 
     private val heartbeatSender =
         HeartbeatSender(
@@ -215,134 +182,104 @@ class BleRadioTransport(
         throw RadioNotConnectedException("Device not found at address $address")
     }
 
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
     private fun connect() {
         connectionJob =
             connectionScope.launch {
-                while (isActive) {
-                    try {
-                        // Settle delay: let the Android BLE stack finish any pending
-                        // disconnect cleanup before starting a new connection attempt.
-                        delay(SETTLE_DELAY)
-
-                        connectionStartTime = nowMillis
-                        Logger.i { "[$address] BLE connection attempt started" }
-
-                        val device = findDevice()
-
-                        // Bond before connecting: firmware may require an encrypted link,
-                        // and without a bond Android fails with status 5 or 133.
-                        // No-op on Desktop/JVM where the OS handles pairing automatically.
-                        if (!bluetoothRepository.isBonded(address)) {
-                            Logger.i { "[$address] Device not bonded, initiating bonding" }
-                            @Suppress("TooGenericExceptionCaught")
-                            try {
-                                bluetoothRepository.bond(device)
-                                Logger.i { "[$address] Bonding successful" }
-                            } catch (e: Exception) {
-                                Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
-                            }
+                reconnectPolicy.execute(
+                    attempt = {
+                        try {
+                            attemptConnection()
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            val failureTime = (nowMillis - connectionStartTime).milliseconds
+                            Logger.w(e) { "[$address] Failed to connect after $failureTime" }
+                            BleReconnectPolicy.Outcome.Failed(e)
                         }
+                    },
+                    onTransientDisconnect = { error ->
+                        val msg = error?.toDisconnectReason()?.second ?: "Device unreachable"
+                        callback.onDisconnect(isPermanent = false, errorMessage = msg)
+                    },
+                    onPermanentDisconnect = { error ->
+                        val msg = error?.toDisconnectReason()?.second ?: "Device unreachable"
+                        callback.onDisconnect(isPermanent = true, errorMessage = msg)
+                    },
+                )
+            }
+    }
 
-                        val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
+    /**
+     * Performs a single BLE connect-and-wait cycle.
+     *
+     * Finds the device, bonds if needed, connects, discovers services, and waits for disconnect. Returns a
+     * [BleReconnectPolicy.Outcome] describing how the connection ended.
+     */
+    @Suppress("CyclomaticComplexMethod")
+    private suspend fun attemptConnection(): BleReconnectPolicy.Outcome {
+        connectionStartTime = nowMillis
+        Logger.i { "[$address] BLE connection attempt started" }
 
-                        if (state !is BleConnectionState.Connected) {
-                            throw RadioNotConnectedException("Failed to connect to device at address $address")
-                        }
+        val device = findDevice()
 
-                        // Only reset failures if connection was stable (see MIN_STABLE_CONNECTION).
-                        val gattConnectedAt = nowMillis
-                        isFullyConnected = true
-                        onConnected()
+        // Bond before connecting: firmware may require an encrypted link,
+        // and without a bond Android fails with status 5 or 133.
+        // No-op on Desktop/JVM where the OS handles pairing automatically.
+        if (!bluetoothRepository.isBonded(address)) {
+            Logger.i { "[$address] Device not bonded, initiating bonding" }
+            @Suppress("TooGenericExceptionCaught")
+            try {
+                bluetoothRepository.bond(device)
+                Logger.i { "[$address] Bonding successful" }
+            } catch (e: Exception) {
+                Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
+            }
+        }
 
-                        // Scope the connectionState listener to this iteration so it's
-                        // cancelled automatically before the next reconnect cycle.
-                        var disconnectReason: DisconnectReason = DisconnectReason.Unknown
-                        coroutineScope {
-                            bleConnection.connectionState
-                                .onEach { s ->
-                                    if (s is BleConnectionState.Disconnected && isFullyConnected) {
-                                        isFullyConnected = false
-                                        disconnectReason = s.reason
-                                        onDisconnected()
-                                    }
-                                }
-                                .catch { e -> Logger.w(e) { "[$address] bleConnection.connectionState flow crashed" } }
-                                .launchIn(this)
+        val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
 
-                            discoverServicesAndSetupCharacteristics()
+        if (state !is BleConnectionState.Connected) {
+            throw RadioNotConnectedException("Failed to connect to device at address $address")
+        }
 
-                            bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
-                        }
+        val gattConnectedAt = nowMillis
+        isFullyConnected = true
+        onConnected()
 
-                        Logger.i {
-                            "[$address] BLE connection dropped (reason: $disconnectReason), preparing to reconnect"
-                        }
-
-                        // Skip failure counting for intentional disconnects.
-                        if (disconnectReason is DisconnectReason.LocalDisconnect) {
-                            consecutiveFailures = 0
-                            continue
-                        }
-
-                        // A connection that drops almost immediately (< MIN_STABLE_CONNECTION)
-                        // is treated as a failure — the BLE stack may have "connected" to a
-                        // cached GATT profile before realising the device is gone.
-                        val connectionUptime = (nowMillis - gattConnectedAt).milliseconds
-                        if (connectionUptime >= MIN_STABLE_CONNECTION) {
-                            consecutiveFailures = 0
-                        } else {
-                            consecutiveFailures++
-                            Logger.w {
-                                "[$address] Connection lasted only $connectionUptime " +
-                                    "(< $MIN_STABLE_CONNECTION) — treating as failure " +
-                                    "(consecutive failures: $consecutiveFailures)"
-                            }
-                            if (consecutiveFailures >= RECONNECT_MAX_FAILURES) {
-                                Logger.e { "[$address] Giving up after $consecutiveFailures unstable connections" }
-                                callback.onDisconnect(
-                                    isPermanent = true,
-                                    errorMessage = "Device unreachable (unstable connection)",
-                                )
-                                return@launch
-                            }
-                            if (consecutiveFailures >= RECONNECT_FAILURE_THRESHOLD) {
-                                callback.onDisconnect(
-                                    isPermanent = false,
-                                    errorMessage = "Device unreachable (unstable connection)",
-                                )
-                            }
-                        }
-                    } catch (e: CancellationException) {
-                        Logger.d { "[$address] BLE connection coroutine cancelled" }
-                        throw e
-                    } catch (e: Exception) {
-                        val failureTime = (nowMillis - connectionStartTime).milliseconds
-                        consecutiveFailures++
-                        Logger.w(e) {
-                            "[$address] Failed to connect to device after $failureTime " +
-                                "(consecutive failures: $consecutiveFailures)"
-                        }
-
-                        // Give up permanently to stop draining battery.
-                        if (consecutiveFailures >= RECONNECT_MAX_FAILURES) {
-                            Logger.e { "[$address] Giving up after $consecutiveFailures consecutive failures" }
-                            val (_, msg) = e.toDisconnectReason()
-                            callback.onDisconnect(isPermanent = true, errorMessage = msg)
-                            return@launch
-                        }
-
-                        // Signal DeviceSleep so MeshConnectionManagerImpl starts its sleep timeout.
-                        if (consecutiveFailures >= RECONNECT_FAILURE_THRESHOLD) {
-                            handleFailure(e)
-                        }
-
-                        val backoff = computeReconnectBackoff(consecutiveFailures)
-                        Logger.d { "[$address] Retrying in $backoff (failure #$consecutiveFailures)" }
-                        delay(backoff)
+        // Scope the connectionState listener to this iteration so it's
+        // cancelled automatically before the next reconnect cycle.
+        var disconnectReason: DisconnectReason = DisconnectReason.Unknown
+        coroutineScope {
+            bleConnection.connectionState
+                .onEach { s ->
+                    if (s is BleConnectionState.Disconnected && isFullyConnected) {
+                        isFullyConnected = false
+                        disconnectReason = s.reason
+                        onDisconnected()
                     }
                 }
+                .catch { e -> Logger.w(e) { "[$address] bleConnection.connectionState flow crashed" } }
+                .launchIn(this)
+
+            discoverServicesAndSetupCharacteristics()
+
+            bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+        }
+
+        Logger.i { "[$address] BLE connection dropped (reason: $disconnectReason), preparing to reconnect" }
+
+        val wasIntentional = disconnectReason is DisconnectReason.LocalDisconnect
+        val connectionUptime = (nowMillis - gattConnectedAt).milliseconds
+        val wasStable = connectionUptime >= reconnectPolicy.minStableConnection
+
+        if (!wasStable && !wasIntentional) {
+            Logger.w {
+                "[$address] Connection lasted only $connectionUptime " +
+                    "(< ${reconnectPolicy.minStableConnection}) — treating as unstable"
             }
+        }
+
+        return BleReconnectPolicy.Outcome.Disconnected(wasStable = wasStable, wasIntentional = wasIntentional)
     }
 
     private suspend fun onConnected() {
