@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
@@ -83,6 +85,12 @@ class MeshConnectionManagerImpl(
     private val appWidgetUpdater: AppWidgetUpdater,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConnectionManager {
+    /**
+     * Serializes [onConnectionChanged] to prevent TOCTOU races when multiple coroutines emit state transitions
+     * concurrently (e.g. flow collector vs. sleep-timeout coroutine).
+     */
+    private val connectionMutex = Mutex()
+
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
     private var handshakeTimeout: Job? = null
@@ -139,14 +147,14 @@ class MeshConnectionManagerImpl(
         onConnectionChanged(effectiveState)
     }
 
-    private fun onConnectionChanged(c: ConnectionState) {
+    private suspend fun onConnectionChanged(c: ConnectionState) = connectionMutex.withLock {
         val current = serviceRepository.connectionState.value
-        if (current == c) return
+        if (current == c) return@withLock
 
         // If the transport reports 'Connected', but we are already in the middle of a handshake (Connecting)
         if (c is ConnectionState.Connected && current is ConnectionState.Connecting) {
             Logger.d { "Ignoring redundant transport connection signal while handshake is in progress" }
-            return
+            return@withLock
         }
 
         Logger.i { "onConnectionChanged: $current -> $c" }
