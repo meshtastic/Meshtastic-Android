@@ -56,9 +56,6 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                 }
 
                 sourceSets.getByName("androidMain").dependencies {
-                    // Compose BOM for consistent Android Compose versions
-                    implementation(target.dependencies.platform(libs.library("androidx-compose-bom")))
-
                     // Common Android Compose dependencies
                     implementation(libs.library("accompanist-permissions"))
                     implementation(libs.library("androidx-activity-compose"))
