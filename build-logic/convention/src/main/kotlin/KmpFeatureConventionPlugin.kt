@@ -62,10 +62,10 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                     // Common Android Compose dependencies
                     implementation(libs.library("accompanist-permissions"))
                     implementation(libs.library("androidx-activity-compose"))
-                    implementation(libs.library("androidx-compose-material3"))
+                    implementation(libs.library("compose-multiplatform-material3"))
 
-                    implementation(libs.library("androidx-compose-ui-text"))
-                    implementation(libs.library("androidx-compose-ui-tooling-preview"))
+                    implementation(libs.library("compose-multiplatform-ui"))
+                    implementation(libs.library("compose-multiplatform-ui-tooling-preview"))
                 }
 
                 sourceSets.getByName("commonTest").dependencies { implementation(project(":core:testing")) }

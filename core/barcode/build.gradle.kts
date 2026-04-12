@@ -33,9 +33,9 @@ dependencies {
     implementation(projects.core.ui)
 
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.runtime)
-    implementation(libs.androidx.compose.ui)
+    implementation(libs.compose.multiplatform.material3)
+    implementation(libs.compose.multiplatform.runtime)
+    implementation(libs.compose.multiplatform.ui)
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
 
