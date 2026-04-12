@@ -139,6 +139,7 @@ jobs:
           gh release edit ${{ inputs.tag_name }} \
             --tag ${{ inputs.final_tag }} \
             --title "${{ inputs.release_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
+            --draft=false \
             --prerelease=${{ inputs.channel != 'production' }}
 
       - name: Notify Discord
