@@ -42,6 +42,7 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
             extensions.configure<KotlinMultiplatformExtension> {
                 sourceSets.getByName("commonMain").dependencies {
                     // Compose Multiplatform UI
+                    implementation(libs.library("compose-multiplatform-animation"))
                     implementation(libs.library("compose-multiplatform-material3"))
 
                     // Lifecycle & ViewModel (JetBrains KMP forks — safe in commonMain)

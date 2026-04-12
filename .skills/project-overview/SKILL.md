@@ -62,10 +62,31 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
    datadogClientToken=dummy_token
    ```
 
-## 5. Troubleshooting
+## 5. Workspace Bootstrap (MUST run before any build)
+Agents **MUST** perform these steps automatically at the start of every session before running any Gradle task. Do not wait for the user to tell you.
+
+1. **Android SDK:** `ANDROID_HOME` may not be set in agent workspaces. Detect and export it:
+   ```bash
+   # Check common macOS/Linux locations in order of preference
+   if [ -z "$ANDROID_HOME" ]; then
+     for dir in "$HOME/Library/Android/sdk" "$HOME/Android/Sdk" "/opt/android-sdk"; do
+       if [ -d "$dir" ]; then export ANDROID_HOME="$dir"; break; fi
+     done
+   fi
+   ```
+   All `./gradlew` invocations must include `ANDROID_HOME` in the environment. If the SDK cannot be found, ask the user for the path.
+
+2. **Proto submodule:** `core/proto/src/main/proto` is a Git submodule containing Protobuf definitions. It must be initialized or builds will fail with proto generation errors:
+   ```bash
+   git submodule update --init
+   ```
+
+## 6. Troubleshooting
 - **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.
 - **Missing Secrets:** Check `local.properties` (see Environment Setup above).
 - **JDK Version:** JDK 21 is required.
+- **SDK location not found:** See Workspace Bootstrap step 1 above.
+- **Proto generation failures:** See Workspace Bootstrap step 2 above.
 - **Configuration Cache:** Add `--no-configuration-cache` flag if cache-related issues persist.
 - **Koin Injection Failures:** Verify the KMP component is included in `app` root module wiring (`AppKoinModule`).
 

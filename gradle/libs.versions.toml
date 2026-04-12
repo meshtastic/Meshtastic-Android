@@ -125,6 +125,7 @@ androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version = "1.11.0-rc01" }
 
 # Compose Multiplatform
+compose-multiplatform-animation = { module = "org.jetbrains.compose.animation:animation", version.ref = "compose-multiplatform" }
 compose-multiplatform-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
 compose-multiplatform-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
 compose-multiplatform-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }

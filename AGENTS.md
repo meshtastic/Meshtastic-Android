@@ -22,6 +22,9 @@ You are an expert Android and Kotlin Multiplatform (KMP) engineer working on Mes
 </context_and_memory>
 
 <process>
+- **Workspace Bootstrap (MUST run first):** Before executing any Gradle task in a new workspace, agents MUST automatically:
+  1. **Find the Android SDK** — `ANDROID_HOME` is often unset in agent worktrees. Probe `~/Library/Android/sdk`, `~/Android/Sdk`, and `/opt/android-sdk`. Export the first one found. If none exist, ask the user.
+  2. **Init the proto submodule** — Run `git submodule update --init`. The `core/proto/src/main/proto` submodule contains Protobuf definitions required for builds.
 - **Think First:** Reason through the problem before writing code. For complex KMP tasks involving multiple modules or source sets, outline your approach step-by-step before executing.
 - **Plan Before Execution:** Use the git-ignored `.agent_plans/` directory to write markdown implementation plans (`plan.md`) and Mermaid diagrams (`.mmd`) for complex refactors before modifying code.
 - **Atomic Execution:** Follow your plan step-by-step. Do not jump ahead. Use TDD where feasible (write `commonTest` fakes first).

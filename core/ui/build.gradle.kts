@@ -42,6 +42,7 @@ kotlin {
             implementation(projects.core.resources)
             implementation(projects.core.service)
 
+            implementation(libs.compose.multiplatform.animation)
             implementation(libs.compose.multiplatform.material3)
             implementation(libs.compose.multiplatform.ui)
             implementation(libs.compose.multiplatform.foundation)
