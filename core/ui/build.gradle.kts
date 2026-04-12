@@ -26,7 +26,6 @@ kotlin {
     android {
         namespace = "org.meshtastic.core.ui"
         androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets {
