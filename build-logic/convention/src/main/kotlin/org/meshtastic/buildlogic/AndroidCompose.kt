@@ -31,11 +31,10 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
         if (hasAndroidTest) {
             "androidTestImplementation"(platform(bom))
         }
-        "debugImplementation"(libs.library("androidx-compose-ui-tooling"))
-        "implementation"(libs.library("androidx-compose-runtime"))
+        "debugImplementation"(libs.library("compose-multiplatform-ui-tooling"))
+        "implementation"(libs.library("compose-multiplatform-runtime"))
         "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
 
-        "implementation"(libs.library("compose-multiplatform-runtime"))
         "implementation"(libs.library("compose-multiplatform-resources"))
 
         // Add Espresso explicitly to avoid version mismatch issues on newer Android versions
