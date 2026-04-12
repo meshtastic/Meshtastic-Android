@@ -241,7 +241,7 @@ class UIViewModel(
         _sharedContactRequested.value = null
     }
 
-    // Connection state to our radio device
+    /** Canonical app-level connection state, sourced from [ServiceRepository.connectionState]. */
     val connectionState
         get() = serviceRepository.connectionState
 

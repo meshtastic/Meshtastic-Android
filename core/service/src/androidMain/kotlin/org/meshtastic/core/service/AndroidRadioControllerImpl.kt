@@ -41,6 +41,7 @@ class AndroidRadioControllerImpl(
     private val nodeRepository: NodeRepository,
 ) : RadioController {
 
+    /** Delegates to [ServiceRepository.connectionState] — the canonical app-level source of truth. */
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState
 

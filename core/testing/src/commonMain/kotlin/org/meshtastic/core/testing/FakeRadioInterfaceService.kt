@@ -28,12 +28,20 @@ import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.repository.RadioInterfaceService
 
-/** A test double for [RadioInterfaceService] that provides an in-memory implementation. */
+/**
+ * A test double for [RadioInterfaceService] that provides an in-memory implementation.
+ *
+ * The [connectionState] here mirrors the transport-level semantics of the real implementation. In production, only
+ * [MeshConnectionManager][org.meshtastic.core.repository.MeshConnectionManager] observes this flow; tests should verify
+ * that bridging behavior rather than consuming it directly from UI/feature test code (use
+ * [FakeServiceRepository.connectionState] instead).
+ */
 @Suppress("TooManyFunctions")
 class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = MainScope()) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<DeviceType> = emptyList()
 
+    /** Transport-level connection state (raw hardware link status). */
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState
 

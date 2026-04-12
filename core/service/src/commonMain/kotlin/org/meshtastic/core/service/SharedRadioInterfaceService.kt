@@ -77,6 +77,15 @@ class SharedRadioInterfaceService(
     override val supportedDeviceTypes: List<DeviceType>
         get() = transportFactory.supportedDeviceTypes
 
+    /**
+     * Transport-level connection state reflecting the raw hardware link status.
+     *
+     * Updated directly by [onConnect] and [onDisconnect] when the physical transport (BLE, TCP, Serial) connects or
+     * disconnects. This is consumed exclusively by
+     * [MeshConnectionManager][org.meshtastic.core.repository.MeshConnectionManager], which reconciles it into the
+     * canonical app-level
+     * [ServiceRepository.connectionState][org.meshtastic.core.repository.ServiceRepository.connectionState].
+     */
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 

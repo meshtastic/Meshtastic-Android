@@ -31,6 +31,7 @@ import org.meshtastic.proto.MeshPacket
 
 @Suppress("TooManyFunctions")
 class FakeServiceRepository : ServiceRepository {
+    /** Canonical app-level connection state — the single source of truth for UI/feature tests. */
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState
 

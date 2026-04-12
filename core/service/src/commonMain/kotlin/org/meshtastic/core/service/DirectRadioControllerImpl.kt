@@ -63,6 +63,7 @@ class DirectRadioControllerImpl(
     private val myNodeNum: Int
         get() = nodeManager.myNodeNum.value ?: 0
 
+    /** Delegates to [ServiceRepository.connectionState] — the canonical app-level source of truth. */
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState
 

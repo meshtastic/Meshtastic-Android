@@ -98,6 +98,9 @@ class MeshConnectionManagerImpl(
     private var connectionRestored = false
 
     init {
+        // Bridge transport-level state into the canonical app-level state.
+        // This is the ONLY consumer of RadioInterfaceService.connectionState — it applies
+        // light-sleep policy and handshake awareness before writing to ServiceRepository.
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
@@ -131,6 +134,13 @@ class MeshConnectionManagerImpl(
             .launchIn(scope)
     }
 
+    /**
+     * Bridges a transport-level [ConnectionState] into the canonical app-level state.
+     *
+     * Applies light-sleep policy (power-saving / router role) to decide whether a [ConnectionState.DeviceSleep] event
+     * should be surfaced as sleep or as a full disconnect, then delegates to [onConnectionChanged] for the actual state
+     * transition.
+     */
     private suspend fun onRadioConnectionState(newState: ConnectionState) {
         val localConfig = radioConfigRepository.localConfigFlow.first()
         val isRouter = localConfig.device?.role == Config.DeviceConfig.Role.ROUTER

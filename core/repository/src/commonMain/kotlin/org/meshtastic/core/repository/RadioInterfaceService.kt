@@ -24,12 +24,42 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 
-/** Interface for the low-level radio interface that handles raw byte communication. */
+/**
+ * Interface for the low-level radio interface that handles raw byte communication.
+ *
+ * This is the **transport layer** — it manages the raw hardware connection (BLE, TCP, Serial, USB) to a Meshtastic
+ * radio. Its [connectionState] reflects whether the physical link is up or down, **before** any handshake or
+ * config-loading logic is applied.
+ *
+ * **Important:** UI and feature modules should **never** observe [connectionState] directly. Instead, they should use
+ * [ServiceRepository.connectionState], which is the canonical app-level connection state that accounts for handshake
+ * progress, light-sleep policy, and other higher-level concerns. The only legitimate consumer of this transport-level
+ * flow is [MeshConnectionManager], which bridges transport state changes into the app-level
+ * [ServiceRepository.connectionState].
+ *
+ * @see ServiceRepository.connectionState
+ */
 interface RadioInterfaceService {
     /** The device types supported by this platform's radio interface. */
     val supportedDeviceTypes: List<DeviceType>
 
-    /** Reactive connection state of the radio. */
+    /**
+     * Transport-level connection state of the radio hardware.
+     *
+     * This flow reflects the raw state of the physical link (BLE, TCP, Serial, USB):
+     * - [ConnectionState.Connected] — the transport link is established
+     * - [ConnectionState.Disconnected] — the transport link is down (permanent)
+     * - [ConnectionState.DeviceSleep] — the transport link is down (transient, device sleeping)
+     *
+     * **This is NOT the canonical app-level connection state.** The transport may report [ConnectionState.Connected]
+     * while the app is still performing the mesh handshake (config + node-info exchange), during which the app-level
+     * state remains [ConnectionState.Connecting].
+     *
+     * Only [MeshConnectionManager] should observe this flow. All other consumers (ViewModels, feature modules, UI) must
+     * use [ServiceRepository.connectionState].
+     *
+     * @see ServiceRepository.connectionState
+     */
     val connectionState: StateFlow<ConnectionState>
 
     /** Flow of the current device address. */

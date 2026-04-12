@@ -42,7 +42,7 @@ import org.meshtastic.proto.MeshPacket
 @Suppress("TooManyFunctions")
 open class ServiceRepositoryImpl : ServiceRepository {
 
-    // Connection state to our radio device
+    // Canonical app-level connection state — written exclusively by MeshConnectionManager.
     private val _connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState>
         get() = _connectionState
