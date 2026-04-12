@@ -21,8 +21,6 @@ jobs:
     with:
       run_lint: true
       run_unit_tests: false
-      run_instrumented_tests: false
       run_desktop_builds: false
-      api_levels: '[35]'
       upload_artifacts: true
     secrets: inherit

@@ -34,14 +34,13 @@ Run in this order for routine changes to ensure code formatting, analysis, and b
 - `worker/service/background` changes: Broad tests, targeted WorkManager checks.
 - `BLE/networking/core repository`: `spotlessCheck`, `detekt`, `assembleDebug`, `test allTests`.
 
-## 3) Flavor and instrumentation checks
+## 3) Flavor checks
 
 Run these when relevant to map, provider, or flavor-specific behavior:
 
 ```bash
 ./gradlew lintFdroidDebug lintGoogleDebug
 ./gradlew testFdroidDebug testGoogleDebug
-./gradlew connectedAndroidTest
 ```
 
 ## 4) CI Pipeline Architecture
@@ -55,12 +54,12 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as four p
    - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`, `mesh_service_example`).
    Each shard generates Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
    Downstream jobs use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
-3. **`android-check`** — Builds APKs and runs instrumented tests (depends on `lint-check`).
+3. **`android-check`** — Builds APKs for all flavors (depends on `lint-check`).
 4. **`build-desktop`** — Multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) that builds desktop distributions via `createDistributable` (depends on `lint-check`).
 
 ### Runner Strategy (Three Tiers)
 - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). Benefits from ARM runners' shorter queue times.
-- **`ubuntu-24.04`** — Main Gradle-heavy jobs (CI `lint-check`/`test-shards`/`android-check`, release builds, Dokka, CodeQL, publish, dependency-submission). Pin for reproducibility.
+- **`ubuntu-24.04`** — Main Gradle-heavy jobs (CI `lint-check`/`test-shards`/`android-check`, release builds, Dokka, publish, dependency-submission). Pin for reproducibility.
 - **Desktop runners:** Multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) for the `build-desktop` job and release packaging.
 
 ### CI Gradle Properties

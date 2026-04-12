@@ -9,15 +9,9 @@ on:
       run_unit_tests:
         type: boolean
         default: true
-      run_instrumented_tests:
-        type: boolean
-        default: true
       run_coverage:
         type: boolean
         default: true
-      api_levels:
-        type: string
-        default: '[35]'
       run_desktop_builds:
         type: boolean
         default: true
@@ -238,7 +232,7 @@ jobs:
             **/build/test-results
           retention-days: 7
 
-  # ── Android Build & Instrumented Tests ──────────────────────────────
+  # ── Android Build ────────────────────────────────────────────────────
   android-check:
     runs-on: ubuntu-24.04
     permissions:
@@ -247,10 +241,6 @@ jobs:
     needs: lint-check
     env:
       VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
-    strategy:
-      fail-fast: true
-      matrix:
-        api_level: ${{ fromJson(inputs.api_levels) }}
 
     steps:
       - name: Checkout code
@@ -265,98 +255,24 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
-      - name: Determine matrix metadata
-        id: matrix_meta
-        shell: bash
-        run: |
-          first_api=$(python3 - <<'PY'
-          import json
-          print(json.loads('${{ inputs.api_levels }}')[0])
-          PY
-          )
-
-          if [[ "${{ matrix.api_level }}" == "$first_api" ]]; then
-            echo "is_first_api=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_first_api=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Determine Android tasks
-        id: tasks
-        shell: bash
-        run: |
-          tasks=(
-            "app:assembleFdroidDebug"
-            "app:assembleGoogleDebug"
-          )
-
-          if [[ "${{ inputs.run_instrumented_tests }}" == "true" ]]; then
-            tasks+=(
-              "app:connectedFdroidDebugAndroidTest"
-              "app:connectedGoogleDebugAndroidTest"
-            )
-          fi
-
-          printf 'tasks=%s\n' "${tasks[*]}" >> "$GITHUB_OUTPUT"
-
-      - name: Enable KVM group perms
-        if: inputs.run_instrumented_tests == true
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Run Android Build & Instrumented Tests
-        if: inputs.run_instrumented_tests == true
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api_level }}
-          arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true --parallel --configuration-cache --continue --scan
-
-      - name: Run Android Build
-        if: inputs.run_instrumented_tests == false
-        run: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true --parallel --configuration-cache --continue --scan
-
-      - name: Upload instrumented test results to Codecov
-        if: ${{ !cancelled() && inputs.run_instrumented_tests && steps.matrix_meta.outputs.is_first_api == 'true' }}
-        uses: codecov/codecov-action@v6
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: meshtastic/Meshtastic-Android
-          flags: android-instrumented
-          fail_ci_if_error: false
-          report_type: test_results
-          files: "**/build/outputs/androidTest-results/**/*.xml"
+      - name: Build Android APKs
+        run: ./gradlew app:assembleFdroidDebug app:assembleGoogleDebug -Pci=true --parallel --configuration-cache --continue --scan
 
       - name: Upload debug artifact
-        if: ${{ steps.matrix_meta.outputs.is_first_api == 'true' && inputs.upload_artifacts }}
+        if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
           name: app-debug-apks
           path: app/build/outputs/apk/*/debug/*.apk
-          retention-days: 14
+          retention-days: 7
 
       - name: Report App Size
-        if: ${{ always() && steps.matrix_meta.outputs.is_first_api == 'true' }}
+        if: always()
         run: |
           echo "### App Size Report" >> $GITHUB_STEP_SUMMARY
           echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           find app/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload Android reports
-        if: ${{ always() && inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: reports-android-api-${{ matrix.api_level }}
-          path: |
-            **/build/outputs/androidTest-results
-          retention-days: 7
-          if-no-files-found: ignore
 
   # ── Desktop Build ───────────────────────────────────────────────────
   build-desktop:

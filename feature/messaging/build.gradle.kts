@@ -24,7 +24,6 @@ kotlin {
     android {
         namespace = "org.meshtastic.feature.messaging"
         androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets {
@@ -56,6 +55,8 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.androidx.work.runtime.ktx) }
 
-        val androidHostTest by getting { dependencies { implementation(libs.androidx.work.testing) } }
+        commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
+
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }

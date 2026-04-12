@@ -38,12 +38,5 @@ kotlin {
 
             implementation(libs.jetbrains.navigation3.ui)
         }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.kotlinx.coroutines.test)
-            }
-        }
     }
 }

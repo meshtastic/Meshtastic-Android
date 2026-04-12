@@ -297,12 +297,6 @@ dependencies {
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
     fdroidImplementation(libs.osmbonuspack)
 
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.kotlinx.coroutines.test)
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.koin.test)
-
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.koin.test)

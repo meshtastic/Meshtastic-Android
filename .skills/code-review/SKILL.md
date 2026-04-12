@@ -56,6 +56,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Compose Multiplatform:** Ensure `compose-multiplatform-*` aliases are used instead of plain `androidx.compose` in all KMP modules.
 
 ### 7. Testing
+- [ ] **Test Placement:** New Compose UI tests must go in `commonTest` using `runComposeUiTest {}` + `kotlin.test.Test`. Do not add `androidTest` (instrumented) tests.
 - [ ] **Shared Test Utilities:** Test fakes, doubles, and utilities should be placed in `core:testing`.
 - [ ] **Libraries:** Verify usage of `Turbine` for Flow testing, `Kotest` for property-based testing, and `Mokkery` for mocking.
 - [ ] **Robolectric Configuration:** Check that Compose UI tests running via Robolectric on JVM are pinned to `@Config(sdk = [34])` to prevent Java 21 / SDK 35 compatibility issues.

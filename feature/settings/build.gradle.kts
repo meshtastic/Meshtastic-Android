@@ -26,7 +26,6 @@ kotlin {
     android {
         namespace = "org.meshtastic.feature.settings"
         androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets {
@@ -57,17 +56,11 @@ kotlin {
             implementation(libs.androidx.appcompat)
         }
 
-        commonTest.dependencies { implementation(project(":core:datastore")) }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(project(":core:datastore"))
-                implementation(libs.junit)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.compose.ui.test.junit4)
-                implementation(libs.androidx.compose.ui.test.manifest)
-                implementation(libs.androidx.test.ext.junit)
-            }
+        commonTest.dependencies {
+            implementation(project(":core:datastore"))
+            implementation(libs.compose.multiplatform.ui.test)
         }
+
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }
