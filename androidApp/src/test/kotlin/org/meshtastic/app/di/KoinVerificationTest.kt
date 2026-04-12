@@ -29,10 +29,10 @@ import org.koin.plugin.module.dsl.koinApplication
 import org.koin.test.verify.definition
 import org.koin.test.verify.injectedParameters
 import org.koin.test.verify.verify
-import org.meshtastic.app.map.MapViewModel
 import org.meshtastic.core.ble.BleLogFormat
 import org.meshtastic.core.ble.BleLogLevel
 import org.meshtastic.core.model.util.NodeIdLookup
+import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.node.metrics.MetricsViewModel
 import kotlin.test.Test
 

@@ -25,6 +25,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.collections.immutable)
+            api(libs.maplibre.compose)
+            implementation(libs.maplibre.compose.material3)
             implementation(projects.core.data)
             implementation(projects.core.database)
             implementation(projects.core.datastore)
