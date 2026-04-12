@@ -20,8 +20,10 @@ import androidx.compose.runtime.Composable
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.DebugCustomFilterInputPreview
 import org.meshtastic.app.preview.DeviceListItemPreview
+import org.meshtastic.app.preview.DeviceListSectionPreview
 import org.meshtastic.app.preview.FirmwareReleaseSheetContentPreview
 import org.meshtastic.app.preview.MultiPreview
+import org.meshtastic.app.preview.PrivateKeyRegenerateDialogPreview
 import org.meshtastic.app.preview.QuickChatRowPreview
 import org.meshtastic.app.preview.RouterRoleConfirmationDialogPreview
 
@@ -62,5 +64,19 @@ class AdvancedFeatureScreenshotTests {
     @Composable
     fun deviceListItemScreenshot() {
         DeviceListItemPreview()
+    }
+
+    @PreviewTest
+    @MultiPreview
+    @Composable
+    fun deviceListSectionScreenshot() {
+        DeviceListSectionPreview()
+    }
+
+    @PreviewTest
+    @MultiPreview
+    @Composable
+    fun privateKeyRegenerateDialogScreenshot() {
+        PrivateKeyRegenerateDialogPreview()
     }
 }

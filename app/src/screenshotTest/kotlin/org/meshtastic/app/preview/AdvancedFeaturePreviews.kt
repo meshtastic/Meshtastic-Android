@@ -34,9 +34,11 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.ui.components.DeviceListItem
+import org.meshtastic.feature.connections.ui.components.DeviceListSection
 import org.meshtastic.feature.messaging.component.QuickChatRow
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
 import org.meshtastic.feature.settings.debugging.DebugCustomFilterInput
+import org.meshtastic.feature.settings.radio.component.PrivateKeyRegenerateDialog
 import org.meshtastic.feature.settings.radio.component.RouterRoleConfirmationDialog
 
 @MultiPreview
@@ -173,5 +175,39 @@ fun DeviceListItemPreview() {
                 )
             }
         }
+    }
+}
+
+@MultiPreview
+@Composable
+fun DeviceListSectionPreview() {
+    AppTheme(isSystemInDarkTheme()) {
+        Surface {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf(
+                    DeviceListEntry.Tcp(name = "meshtastic.local", fullAddress = "x192.168.1.100"),
+                    DeviceListEntry.Tcp(name = "10.0.0.42", fullAddress = "x10.0.0.42"),
+                    DeviceListEntry.Mock(name = "Simulator Node"),
+                )
+                    .DeviceListSection(
+                        title = "TCP Devices",
+                        connectionState = ConnectionState.Connected,
+                        selectedDevice = "x192.168.1.100",
+                        onSelect = {},
+                        onDelete = {},
+                    )
+            }
+        }
+    }
+}
+
+@MultiPreview
+@Composable
+fun PrivateKeyRegenerateDialogPreview() {
+    AppTheme(isSystemInDarkTheme()) {
+        Surface { PrivateKeyRegenerateDialog(showKeyGenerationDialog = true, onConfirm = {}, onDismiss = {}) }
     }
 }
