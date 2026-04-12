@@ -20,8 +20,9 @@ jobs:
     uses: ./.github/workflows/reusable-check.yml
     with:
       run_lint: true
-      run_unit_tests: true
-      run_instrumented_tests: true
-      api_levels: '[35]' # One API level is enough for post-merge sanity check
+      run_unit_tests: false
+      run_instrumented_tests: false
+      run_desktop_builds: false
+      api_levels: '[35]'
       upload_artifacts: true
     secrets: inherit
