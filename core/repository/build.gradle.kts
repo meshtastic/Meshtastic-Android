@@ -22,7 +22,10 @@ plugins {
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    android { androidResources.enable = false }
+    android {
+        androidResources.enable = false
+        withHostTest {}
+    }
 
     sourceSets {
         commonMain.dependencies {
