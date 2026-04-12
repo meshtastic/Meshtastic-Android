@@ -48,28 +48,33 @@ abstract class BaseRadioTransportFactory(
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
-    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
-        address.startsWith(InterfaceId.BLUETOOTH.id) -> {
-            BleRadioInterface(
-                serviceScope = service.serviceScope,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                service = service,
-                address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()),
-            )
-        }
-        address.startsWith("!") -> {
-            BleRadioInterface(
-                serviceScope = service.serviceScope,
-                scanner = scanner,
-                bluetoothRepository = bluetoothRepository,
-                connectionFactory = connectionFactory,
-                service = service,
-                address = address.removePrefix("!"),
-            )
-        }
-        else -> createPlatformTransport(address, service)
+    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport {
+        val transport =
+            when {
+                address.startsWith(InterfaceId.BLUETOOTH.id) -> {
+                    BleRadioTransport(
+                        serviceScope = service.serviceScope,
+                        scanner = scanner,
+                        bluetoothRepository = bluetoothRepository,
+                        connectionFactory = connectionFactory,
+                        service = service,
+                        address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()),
+                    )
+                }
+                address.startsWith("!") -> {
+                    BleRadioTransport(
+                        serviceScope = service.serviceScope,
+                        scanner = scanner,
+                        bluetoothRepository = bluetoothRepository,
+                        connectionFactory = connectionFactory,
+                        service = service,
+                        address = address.removePrefix("!"),
+                    )
+                }
+                else -> createPlatformTransport(address, service)
+            }
+        transport.start()
+        return transport
     }
 
     /** Delegate to platform for Mock, TCP, or Serial/USB interfaces. */

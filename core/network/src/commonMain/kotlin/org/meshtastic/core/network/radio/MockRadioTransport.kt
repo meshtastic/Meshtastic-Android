@@ -17,6 +17,7 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
@@ -25,8 +26,8 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getInitials
-import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
+import org.meshtastic.core.repository.RadioTransportCallback
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
@@ -55,9 +56,13 @@ private val defaultLoRaConfig = Config.LoRaConfig(use_preset = true, region = Co
 
 private val defaultChannel = ProtoChannel(settings = Channel.default.settings, role = ProtoChannel.Role.PRIMARY)
 
-/** A simulated interface that is used for testing in the simulator */
+/** A simulated transport that is used for testing in the simulator. */
 @Suppress("detekt:TooManyFunctions", "detekt:MagicNumber")
-class MockInterface(private val service: RadioInterfaceService, val address: String) : RadioTransport {
+class MockRadioTransport(
+    private val service: RadioTransportCallback,
+    private val serviceScope: CoroutineScope,
+    val address: String,
+) : RadioTransport {
 
     companion object {
         private const val MY_NODE = 0x42424242
@@ -68,13 +73,22 @@ class MockInterface(private val service: RadioInterfaceService, val address: Str
     // an infinite sequence of ints
     private val packetIdSequence = generateSequence { currentPacketId++ }.iterator()
 
-    init {
+    override fun start() {
         Logger.i { "Starting the mock interface" }
         service.onConnect() // Tell clients they can use the API
     }
 
     override fun handleSendToRadio(p: ByteArray) {
         val pr = ToRadio.ADAPTER.decode(p)
+
+        // Intercept want_config handshake — send config response only when requested,
+        // mirroring the behaviour of real firmware which waits for want_config_id.
+        val wantConfigId = pr.want_config_id ?: 0
+        if (wantConfigId != 0) {
+            sendConfigResponse(wantConfigId)
+            return
+        }
+
         val packet = pr.packet
         if (packet != null) {
             sendQueueStatus(packet.id)
@@ -83,7 +97,6 @@ class MockInterface(private val service: RadioInterfaceService, val address: Str
         val data = packet?.decoded
 
         when {
-            (pr.want_config_id ?: 0) != 0 -> sendConfigResponse(pr.want_config_id ?: 0)
             data != null && data.portnum == PortNum.ADMIN_APP ->
                 handleAdminPacket(pr, AdminMessage.ADAPTER.decode(data.payload))
             packet != null && packet.want_ack == true -> sendFakeAck(pr)
@@ -295,7 +308,7 @@ class MockInterface(private val service: RadioInterfaceService, val address: Str
     }
 
     // / Send a fake ack packet back if the sender asked for want_ack
-    private fun sendFakeAck(pr: ToRadio) = service.serviceScope.handledLaunch {
+    private fun sendFakeAck(pr: ToRadio) = serviceScope.handledLaunch {
         val packet = pr.packet ?: return@handledLaunch
         delay(2000)
         service.handleFromRadio(makeAck(MY_NODE + 1, packet.from, packet.id).encode())

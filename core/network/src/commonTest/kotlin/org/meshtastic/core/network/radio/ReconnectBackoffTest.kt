@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Tests the exponential backoff schedule used by [BleRadioInterface] when consecutive connection attempts fail. The
+ * Tests the exponential backoff schedule used by [BleRadioTransport] when consecutive connection attempts fail. The
  * schedule is: failure #1 → 5 s failure #2 → 10 s failure #3 → 20 s failure #4 → 40 s failure #5+ → 60 s (capped)
  */
 class ReconnectBackoffTest {

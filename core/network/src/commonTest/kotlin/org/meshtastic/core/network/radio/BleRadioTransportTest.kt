@@ -39,7 +39,7 @@ import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class BleRadioInterfaceTest {
+class BleRadioTransportTest {
 
     private val testScope = TestScope()
     private val scanner = FakeBleScanner()
@@ -56,12 +56,12 @@ class BleRadioInterfaceTest {
     }
 
     @Test
-    fun `connect attempts to scan and connect via init`() = runTest {
+    fun `connect attempts to scan and connect via start`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         scanner.emitDevice(device)
 
-        val bleInterface =
-            BleRadioInterface(
+        val bleTransport =
+            BleRadioTransport(
                 serviceScope = testScope,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
@@ -69,17 +69,18 @@ class BleRadioInterfaceTest {
                 service = service,
                 address = address,
             )
+        bleTransport.start()
 
-        // init starts connect() which is async
+        // start() begins connect() which is async
         // In a real test we'd verify the connection state,
         // but for now this confirms it works with the fakes.
-        assertEquals(address, bleInterface.address)
+        assertEquals(address, bleTransport.address)
     }
 
     @Test
     fun `address returns correct value`() {
-        val bleInterface =
-            BleRadioInterface(
+        val bleTransport =
+            BleRadioTransport(
                 serviceScope = testScope,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
@@ -87,7 +88,7 @@ class BleRadioInterfaceTest {
                 service = service,
                 address = address,
             )
-        assertEquals(address, bleInterface.address)
+        assertEquals(address, bleTransport.address)
     }
 
     /**
@@ -107,8 +108,8 @@ class BleRadioInterfaceTest {
         // Make every connectAndAwait call throw so each iteration counts as one failure.
         connection.connectException = RadioNotConnectedException("simulated failure")
 
-        val bleInterface =
-            BleRadioInterface(
+        val bleTransport =
+            BleRadioTransport(
                 serviceScope = this,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
@@ -116,6 +117,7 @@ class BleRadioInterfaceTest {
                 service = service,
                 address = address,
             )
+        bleTransport.start()
 
         // Advance through exactly 3 failure iterations (≈18 001 ms virtual time).
         // The 4th iteration's backoff hasn't elapsed yet, so the coroutine is suspended
@@ -125,7 +127,7 @@ class BleRadioInterfaceTest {
         verify { service.onDisconnect(any(), any()) }
 
         // Cancel the reconnect loop so runTest can complete.
-        bleInterface.close()
+        bleTransport.close()
     }
 
     /**
@@ -145,8 +147,8 @@ class BleRadioInterfaceTest {
         connection.connectException = RadioNotConnectedException("simulated failure")
         every { service.onDisconnect(any(), any()) } returns Unit
 
-        val bleInterface =
-            BleRadioInterface(
+        val bleTransport =
+            BleRadioTransport(
                 serviceScope = this,
                 scanner = scanner,
                 bluetoothRepository = bluetoothRepository,
@@ -154,6 +156,7 @@ class BleRadioInterfaceTest {
                 service = service,
                 address = address,
             )
+        bleTransport.start()
 
         // Advance enough time for all 10 failures to occur.
         advanceTimeBy(400_001L)
@@ -161,7 +164,7 @@ class BleRadioInterfaceTest {
         // Should have been called with isPermanent=true at least once (the final call).
         verify { service.onDisconnect(isPermanent = true, errorMessage = any()) }
 
-        bleInterface.close()
+        bleTransport.close()
     }
 
     @Test

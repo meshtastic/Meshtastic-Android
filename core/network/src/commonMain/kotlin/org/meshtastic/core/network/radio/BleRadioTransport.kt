@@ -52,13 +52,10 @@ import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.ble.toMeshtasticRadioProfile
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.network.transport.HeartbeatSender
 import org.meshtastic.core.repository.RadioTransport
-import org.meshtastic.proto.Heartbeat
-import org.meshtastic.proto.ToRadio
+import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.concurrent.Volatile
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -76,7 +73,7 @@ private val SETTLE_DELAY = 1.seconds
 
 /**
  * Minimum time a BLE connection must stay up before we consider it "stable" and reset
- * [BleRadioInterface.consecutiveFailures]. Without this, a device at the edge of BLE range can repeatedly connect for a
+ * [BleRadioTransport.consecutiveFailures]. Without this, a device at the edge of BLE range can repeatedly connect for a
  * fraction of a second and drop — each brief connection resets the failure counter so [RECONNECT_FAILURE_THRESHOLD] is
  * never reached, and the app never signals [ConnectionState.DeviceSleep].
  *
@@ -90,9 +87,11 @@ private val MIN_STABLE_CONNECTION = 5.seconds
  *
  * Backoff schedule: 1 failure → 5 s 2 failures → 10 s 3 failures → 20 s 4 failures → 40 s 5+ failures → 60 s (capped)
  */
+private const val BACKOFF_MAX_EXPONENT = 4
+
 internal fun computeReconnectBackoff(consecutiveFailures: Int): Duration {
     if (consecutiveFailures <= 0) return RECONNECT_BASE_DELAY
-    val multiplier = 1 shl (consecutiveFailures - 1).coerceAtMost(4)
+    val multiplier = 1 shl (consecutiveFailures - 1).coerceAtMost(BACKOFF_MAX_EXPONENT)
     return minOf(RECONNECT_BASE_DELAY * multiplier, RECONNECT_MAX_DELAY)
 }
 
@@ -117,21 +116,21 @@ private val GATT_CLEANUP_TIMEOUT = 5.seconds
  * - Bonding and discovery.
  * - Automatic reconnection logic.
  * - MTU and connection parameter monitoring.
- * - Routing raw byte packets between the radio and [RadioInterfaceService].
+ * - Routing raw byte packets between the radio and [RadioTransportCallback].
  *
  * @param serviceScope The coroutine scope to use for launching coroutines.
  * @param scanner The BLE scanner.
  * @param bluetoothRepository The Bluetooth repository.
  * @param connectionFactory The BLE connection factory.
- * @param service The [RadioInterfaceService] to use for handling radio events.
+ * @param service The [RadioTransportCallback] to use for handling radio events.
  * @param address The BLE address of the device to connect to.
  */
-class BleRadioInterface(
+class BleRadioTransport(
     private val serviceScope: CoroutineScope,
     private val scanner: BleScanner,
     private val bluetoothRepository: BluetoothRepository,
     private val connectionFactory: BleConnectionFactory,
-    private val service: RadioInterfaceService,
+    private val service: RadioTransportCallback,
     internal val address: String,
 ) : RadioTransport {
 
@@ -169,10 +168,17 @@ class BleRadioInterface(
     private var connectionJob: Job? = null
     private var consecutiveFailures = 0
 
-    @OptIn(ExperimentalAtomicApi::class)
-    private val heartbeatNonce = AtomicInt(0)
+    private val heartbeatSender =
+        HeartbeatSender(
+            sendToRadio = ::handleSendToRadio,
+            afterHeartbeat = {
+                delay(HEARTBEAT_DRAIN_DELAY)
+                radioService?.requestDrain()
+            },
+            logTag = address,
+        )
 
-    init {
+    override fun start() {
         connect()
     }
 
@@ -384,7 +390,7 @@ class BleRadioInterface(
                     }
                     .launchIn(this)
 
-                this@BleRadioInterface.radioService = radioService
+                this@BleRadioTransport.radioService = radioService
 
                 Logger.i { "[$address] Profile service active and characteristics subscribed" }
 
@@ -395,7 +401,7 @@ class BleRadioInterface(
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
 
-                this@BleRadioInterface.service.onConnect()
+                this@BleRadioTransport.service.onConnect()
             }
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
@@ -445,28 +451,11 @@ class BleRadioInterface(
         }
     }
 
-    @OptIn(ExperimentalAtomicApi::class)
     override fun keepAlive() {
-        // Send a ToRadio heartbeat so the firmware resets its power-saving idle timer.
-        // The firmware only resets the timer on writes to the TORADIO characteristic; a
-        // BLE-level GATT keepalive is invisible to it. Without this the device may enter
-        // light-sleep and drop the BLE connection after ~60 s of application inactivity.
-        //
-        // Each heartbeat uses a distinct nonce to vary the wire bytes, preventing the
-        // firmware's per-connection duplicate-write filter from silently dropping it.
-        val nonce = heartbeatNonce.fetchAndAdd(1)
-        Logger.v { "[$address] BLE keepAlive — sending ToRadio heartbeat (nonce=$nonce)" }
-        handleSendToRadio(ToRadio(heartbeat = Heartbeat(nonce = nonce)).encode())
-
-        // The firmware responds to heartbeats by queuing a `queueStatus` FromRadio packet
-        // on the next getFromRadio() call, but it does NOT send a FROMNUM notification for
-        // it. The immediate drain trigger in sendToRadio() fires before the ESP32's async
-        // task queue has processed the heartbeat, so the response sits unread. Schedule a
-        // delayed re-drain to pick it up.
-        connectionScope.launch {
-            delay(HEARTBEAT_DRAIN_DELAY)
-            radioService?.requestDrain()
-        }
+        // Delegate to HeartbeatSender which sends a ToRadio heartbeat with a unique nonce
+        // so the firmware resets its power-saving idle timer. After sending, it schedules
+        // a delayed re-drain to pick up the queueStatus response.
+        connectionScope.launch { heartbeatSender.sendHeartbeat() }
     }
 
     /** Closes the connection to the device. */

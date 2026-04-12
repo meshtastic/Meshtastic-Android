@@ -17,10 +17,11 @@
 package org.meshtastic.core.network.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.network.transport.StreamFrameCodec
-import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
+import org.meshtastic.core.repository.RadioTransportCallback
 
 /**
  * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP
@@ -28,9 +29,12 @@ import org.meshtastic.core.repository.RadioTransport
  *
  * Delegates framing logic to [StreamFrameCodec] from `core:network`.
  */
-abstract class StreamInterface(protected val service: RadioInterfaceService) : RadioTransport {
+abstract class StreamTransport(
+    protected val service: RadioTransportCallback,
+    protected val serviceScope: CoroutineScope,
+) : RadioTransport {
 
-    private val codec = StreamFrameCodec(onPacketReceived = { service.handleFromRadio(it) }, logTag = "StreamInterface")
+    private val codec = StreamFrameCodec(onPacketReceived = { service.handleFromRadio(it) }, logTag = "StreamTransport")
 
     override fun close() {
         Logger.d { "Closing stream for good" }
@@ -43,7 +47,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : R
      * @param waitForStopped if true we should wait for the manager to finish - must be false if called from inside the
      *   manager callbacks
      * @param isPermanent true if the device is definitely gone (e.g. USB unplugged), false if it may come back (e.g.
-     *   TCP transient disconnect). Defaults to true for serial — subclasses like [TCPInterface] override with false.
+     *   TCP transient disconnect). Defaults to true for serial — subclasses may override with false.
      */
     protected open fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean = true) {
         service.onDisconnect(isPermanent = isPermanent)
@@ -64,7 +68,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : R
 
     override fun handleSendToRadio(p: ByteArray) {
         // This method is called from a continuation and it might show up late, so check for uart being null
-        service.serviceScope.handledLaunch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }
+        serviceScope.handledLaunch { codec.frameAndSend(p, ::sendBytes, ::flushBytes) }
     }
 
     /** Process a single incoming byte through the stream framing state machine. */

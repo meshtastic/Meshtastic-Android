@@ -39,7 +39,7 @@ import org.meshtastic.core.model.MeshActivity
  *
  * @see ServiceRepository.connectionState
  */
-interface RadioInterfaceService {
+interface RadioInterfaceService : RadioTransportCallback {
     /** The device types supported by this platform's radio interface. */
     val supportedDeviceTypes: List<DeviceType>
 
@@ -88,15 +88,6 @@ interface RadioInterfaceService {
 
     /** Constructs a full radio address for the specific interface type. */
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String
-
-    /** Called by an interface when it has successfully connected. */
-    fun onConnect()
-
-    /** Called by an interface when it has disconnected. */
-    fun onDisconnect(isPermanent: Boolean, errorMessage: String? = null)
-
-    /** Called by an interface when it has received raw data from the radio. */
-    fun handleFromRadio(bytes: ByteArray)
 
     /** Flow of user-facing connection error messages (e.g. permission failures). */
     val connectionError: SharedFlow<String>

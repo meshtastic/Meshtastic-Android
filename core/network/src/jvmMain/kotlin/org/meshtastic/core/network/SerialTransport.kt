@@ -23,14 +23,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.network.radio.StreamInterface
+import org.meshtastic.core.network.radio.StreamTransport
+import org.meshtastic.core.network.transport.HeartbeatSender
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.proto.Heartbeat
-import org.meshtastic.proto.ToRadio
 import java.io.File
 
 /**
- * JVM-specific implementation of [RadioTransport] using jSerialComm. Uses [StreamInterface] for START1/START2 packet
+ * JVM-specific implementation of [RadioTransport] using jSerialComm. Uses [StreamTransport] for START1/START2 packet
  * framing.
  *
  * Use the [open] factory method instead of the constructor directly to ensure the serial port is opened and the read
@@ -42,9 +41,11 @@ private constructor(
     private val baudRate: Int = DEFAULT_BAUD_RATE,
     service: RadioInterfaceService,
     private val dispatchers: CoroutineDispatchers,
-) : StreamInterface(service) {
+) : StreamTransport(service, service.serviceScope) {
     private var serialPort: SerialPort? = null
     private var readJob: Job? = null
+
+    private val heartbeatSender = HeartbeatSender(sendToRadio = ::handleSendToRadio, logTag = "Serial[$portName]")
 
     /** Attempts to open the serial port and starts the read loop. Returns true if successful, false otherwise. */
     private fun startConnection(): Boolean {
@@ -74,7 +75,7 @@ private constructor(
     private fun startReadLoop(port: SerialPort) {
         Logger.d { "[$portName] Starting serial read loop" }
         readJob =
-            service.serviceScope.launch(dispatchers.io) {
+            serviceScope.launch(dispatchers.io) {
                 val input = port.inputStream
                 val buffer = ByteArray(READ_BUFFER_SIZE)
                 try {
@@ -140,11 +141,9 @@ private constructor(
     }
 
     override fun keepAlive() {
-        // Send a ToRadio heartbeat so the firmware resets its idle timer and responds with
-        // a FromRadio queueStatus — proving the serial link is alive. Without this, the
-        // serial transport has no way to detect a silently dead device.
-        Logger.d { "[$portName] Serial keepAlive — sending heartbeat" }
-        handleSendToRadio(ToRadio(heartbeat = Heartbeat()).encode())
+        // Delegate to HeartbeatSender which sends a ToRadio heartbeat to prove the
+        // serial link is alive.
+        serviceScope.launch { heartbeatSender.sendHeartbeat() }
     }
 
     private fun closePortResources() {

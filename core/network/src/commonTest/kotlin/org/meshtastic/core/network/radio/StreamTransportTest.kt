@@ -34,12 +34,12 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class StreamInterfaceTest {
+class StreamTransportTest {
 
     private val radioService: RadioInterfaceService = mock(MockMode.autofill)
-    private lateinit var fakeStream: FakeStreamInterface
+    private lateinit var fakeStream: FakeStreamTransport
 
-    class FakeStreamInterface(service: RadioInterfaceService) : StreamInterface(service) {
+    class FakeStreamTransport(service: RadioInterfaceService, scope: TestScope) : StreamTransport(service, scope) {
         val sentBytes = mutableListOf<ByteArray>()
 
         override fun sendBytes(p: ByteArray) {
@@ -59,21 +59,23 @@ class StreamInterfaceTest {
         public override fun connect() = super.connect()
     }
 
+    private val testScope = TestScope()
+
     @BeforeTest
     fun setUp() {
-        every { radioService.serviceScope } returns TestScope()
+        every { radioService.serviceScope } returns testScope
     }
 
     @Test
     fun `handleSendToRadio property test`() = runTest {
-        fakeStream = FakeStreamInterface(radioService)
+        fakeStream = FakeStreamTransport(radioService, testScope)
 
         checkAll(Arb.byteArray(Arb.int(0, 512), Arb.byte())) { payload -> fakeStream.handleSendToRadio(payload) }
     }
 
     @Test
     fun `readChar property test`() = runTest {
-        fakeStream = FakeStreamInterface(radioService)
+        fakeStream = FakeStreamTransport(radioService, testScope)
 
         checkAll(Arb.byteArray(Arb.int(0, 100), Arb.byte())) { data ->
             data.forEach { fakeStream.feed(it) }
@@ -83,7 +85,7 @@ class StreamInterfaceTest {
 
     @Test
     fun `connect sends wake bytes`() {
-        fakeStream = FakeStreamInterface(radioService)
+        fakeStream = FakeStreamTransport(radioService, testScope)
         fakeStream.connect()
 
         assertTrue(fakeStream.sentBytes.isNotEmpty())

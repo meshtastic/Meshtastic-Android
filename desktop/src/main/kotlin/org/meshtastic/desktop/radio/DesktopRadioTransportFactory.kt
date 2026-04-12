@@ -24,7 +24,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.network.SerialTransport
 import org.meshtastic.core.network.radio.BaseRadioTransportFactory
-import org.meshtastic.core.network.radio.TCPInterface
+import org.meshtastic.core.network.radio.TcpRadioTransport
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
@@ -49,7 +49,12 @@ class DesktopRadioTransportFactory(
 
     override fun createPlatformTransport(address: String, service: RadioInterfaceService): RadioTransport = when {
         address.startsWith(InterfaceId.TCP.id) -> {
-            TCPInterface(service, dispatchers, address.removePrefix(InterfaceId.TCP.id.toString()))
+            TcpRadioTransport(
+                service = service,
+                serviceScope = service.serviceScope,
+                dispatchers = dispatchers,
+                address = address.removePrefix(InterfaceId.TCP.id.toString()),
+            )
         }
         address.startsWith(InterfaceId.SERIAL.id) -> {
             SerialTransport.open(
