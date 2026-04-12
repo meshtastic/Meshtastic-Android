@@ -43,7 +43,7 @@ import org.meshtastic.core.resources.open_compass
 import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.util.LocalInlineMapProvider
+import org.meshtastic.feature.map.component.InlineMap
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.proto.Config
 
@@ -85,7 +85,7 @@ internal fun PositionInlineContent(
 private fun PositionMap(node: Node, distance: String?) {
     Box(modifier = Modifier.padding(vertical = 4.dp)) {
         Surface(shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth().height(MAP_HEIGHT_DP.dp)) {
-            LocalInlineMapProvider.current(node, Modifier.fillMaxSize())
+            InlineMap(node, Modifier.fillMaxSize())
         }
         if (distance != null && distance.isNotEmpty()) {
             Surface(

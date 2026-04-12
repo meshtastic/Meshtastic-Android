@@ -1159,6 +1159,11 @@
     <string name="bluetooth_feature_config">Configuration</string>
     <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
     <string name="map_style_selection">Map style selection</string>
+    <string name="map_style_osm">OpenStreetMap</string>
+    <string name="map_style_satellite">Satellite</string>
+    <string name="map_style_terrain">Terrain</string>
+    <string name="map_style_hybrid">Hybrid</string>
+    <string name="map_style_dark">Dark</string>
 
     <string name="local_stats_battery">Battery: %1$d%</string>
     <string name="local_stats_nodes">Nodes: %1$d online / %2$d total</string>

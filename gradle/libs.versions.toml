@@ -43,8 +43,8 @@ compose-multiplatform-material3 = "1.11.0-alpha06"
 androidx-compose-material = "1.7.8"
 jetbrains-adaptive = "1.3.0-alpha06"
 
-# Google
-maps-compose = "8.3.0"
+# MapLibre
+maplibre-compose = "0.12.1"
 
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"
@@ -69,7 +69,6 @@ google-services-gradle = "4.4.4"
 markdownRenderer = "0.40.2"
 okio = "3.17.0"
 uri-kmp = "0.0.21"
-osmdroid-android = "6.1.20"
 spotless = "8.4.0"
 wire = "6.2.0"
 vico = "3.1.0"
@@ -156,11 +155,9 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", ver
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
-maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
-maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
-maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
+maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
+maplibre-compose-material3 = { module = "org.maplibre.compose:maplibre-compose-material3", version.ref = "maplibre-compose" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode-scanning" }
-play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcode-kotlin" }
@@ -230,8 +227,6 @@ jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm"
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
-osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
-osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
 kermit = { module = "co.touchlab:kermit", version = "2.1.0" }
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }

@@ -276,11 +276,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)
 
-    googleImplementation(libs.location.services)
-    googleImplementation(libs.play.services.maps)
-    googleImplementation(libs.maps.compose)
-    googleImplementation(libs.maps.compose.utils)
-    googleImplementation(libs.maps.compose.widgets)
     googleImplementation(libs.dd.sdk.android.compose)
     googleImplementation(libs.dd.sdk.android.logs)
     googleImplementation(libs.dd.sdk.android.rum)
@@ -292,10 +287,6 @@ dependencies {
     googleImplementation(platform(libs.firebase.bom))
     googleImplementation(libs.firebase.analytics)
     googleImplementation(libs.firebase.crashlytics)
-
-    fdroidImplementation(libs.osmdroid.android)
-    fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
-    fdroidImplementation(libs.osmbonuspack)
 
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.androidx.work.testing)

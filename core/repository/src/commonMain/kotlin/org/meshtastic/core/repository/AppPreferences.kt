@@ -171,6 +171,41 @@ interface MapPrefs {
     fun setLastHeardTrackFilter(seconds: Long)
 }
 
+/** Reactive interface for map camera position persistence. */
+interface MapCameraPrefs {
+    val cameraLat: StateFlow<Double>
+
+    fun setCameraLat(value: Double)
+
+    val cameraLng: StateFlow<Double>
+
+    fun setCameraLng(value: Double)
+
+    val cameraZoom: StateFlow<Float>
+
+    fun setCameraZoom(value: Float)
+
+    val cameraTilt: StateFlow<Float>
+
+    fun setCameraTilt(value: Float)
+
+    val cameraBearing: StateFlow<Float>
+
+    fun setCameraBearing(value: Float)
+
+    val selectedStyleUri: StateFlow<String>
+
+    fun setSelectedStyleUri(value: String)
+
+    val hiddenLayerUrls: StateFlow<Set<String>>
+
+    fun setHiddenLayerUrls(value: Set<String>)
+
+    val networkMapLayers: StateFlow<Set<String>>
+
+    fun setNetworkMapLayers(value: Set<String>)
+}
+
 /** Reactive interface for map consent. */
 interface MapConsentPrefs {
     fun shouldReportLocation(nodeNum: Int?): StateFlow<Boolean>
@@ -238,6 +273,7 @@ interface AppPreferences {
     val emoji: CustomEmojiPrefs
     val ui: UiPrefs
     val map: MapPrefs
+    val mapCamera: MapCameraPrefs
     val mapConsent: MapConsentPrefs
     val mapTileProvider: MapTileProviderPrefs
     val radio: RadioPrefs

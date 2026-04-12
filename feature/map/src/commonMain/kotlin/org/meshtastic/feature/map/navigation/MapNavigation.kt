@@ -19,16 +19,20 @@ package org.meshtastic.feature.map.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.NodesRoute
+import org.meshtastic.feature.map.MapScreen
+import org.meshtastic.feature.map.MapViewModel
 
 fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
     entry<MapRoute.Map> { args ->
-        val mapScreen = org.meshtastic.core.ui.util.LocalMapMainScreenProvider.current
-        mapScreen(
-            { id -> backStack.add(NodesRoute.NodeDetail(id)) }, // onClickNodeChip
-            { id -> backStack.add(NodesRoute.NodeDetail(id)) }, // navigateToNodeDetails
-            args.waypointId,
+        val viewModel = koinViewModel<MapViewModel>()
+        MapScreen(
+            viewModel = viewModel,
+            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
+            navigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) },
+            waypointId = args.waypointId,
         )
     }
 }

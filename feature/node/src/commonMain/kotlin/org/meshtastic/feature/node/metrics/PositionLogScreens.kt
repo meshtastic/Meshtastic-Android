@@ -31,8 +31,8 @@ import org.meshtastic.core.resources.position_log
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
-import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
+import org.meshtastic.feature.map.component.NodeTrackMap
 
 @Composable
 fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
@@ -40,9 +40,6 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val positions = state.positionLogs
 
     val exportPositionLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri, positions) }
-
-    val trackMap = LocalNodeTrackMapProvider.current
-    val destNum = state.node?.num ?: 0
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
@@ -66,7 +63,12 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         },
         chartPart = { modifier, selectedX, _, onPointSelected ->
             val selectedTime = selectedX?.toInt()
-            trackMap(destNum, positions, modifier, selectedTime) { time -> onPointSelected(time.toDouble()) }
+            NodeTrackMap(
+                positions = positions,
+                modifier = modifier,
+                selectedPositionTime = selectedTime,
+                onPositionSelected = { time -> onPointSelected(time.toDouble()) },
+            )
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {

@@ -23,6 +23,7 @@ import org.meshtastic.core.repository.AppPreferences
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MapCameraPrefs
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MapTileProviderPrefs
@@ -198,6 +199,56 @@ class FakeMapPrefs : MapPrefs {
     }
 }
 
+class FakeMapCameraPrefs : MapCameraPrefs {
+    override val cameraLat = MutableStateFlow(0.0)
+
+    override fun setCameraLat(value: Double) {
+        cameraLat.value = value
+    }
+
+    override val cameraLng = MutableStateFlow(0.0)
+
+    override fun setCameraLng(value: Double) {
+        cameraLng.value = value
+    }
+
+    override val cameraZoom = MutableStateFlow(7f)
+
+    override fun setCameraZoom(value: Float) {
+        cameraZoom.value = value
+    }
+
+    override val cameraTilt = MutableStateFlow(0f)
+
+    override fun setCameraTilt(value: Float) {
+        cameraTilt.value = value
+    }
+
+    override val cameraBearing = MutableStateFlow(0f)
+
+    override fun setCameraBearing(value: Float) {
+        cameraBearing.value = value
+    }
+
+    override val selectedStyleUri = MutableStateFlow("")
+
+    override fun setSelectedStyleUri(value: String) {
+        selectedStyleUri.value = value
+    }
+
+    override val hiddenLayerUrls = MutableStateFlow(emptySet<String>())
+
+    override fun setHiddenLayerUrls(value: Set<String>) {
+        hiddenLayerUrls.value = value
+    }
+
+    override val networkMapLayers = MutableStateFlow(emptySet<String>())
+
+    override fun setNetworkMapLayers(value: Set<String>) {
+        networkMapLayers.value = value
+    }
+}
+
 class FakeMapConsentPrefs : MapConsentPrefs {
     private val consent = mutableMapOf<Int?, MutableStateFlow<Boolean>>()
 
@@ -264,6 +315,7 @@ class FakeAppPreferences : AppPreferences {
     override val emoji = FakeCustomEmojiPrefs()
     override val ui = FakeUiPrefs()
     override val map = FakeMapPrefs()
+    override val mapCamera = FakeMapCameraPrefs()
     override val mapConsent = FakeMapConsentPrefs()
     override val mapTileProvider = FakeMapTileProviderPrefs()
     override val radio = FakeRadioPrefs()
