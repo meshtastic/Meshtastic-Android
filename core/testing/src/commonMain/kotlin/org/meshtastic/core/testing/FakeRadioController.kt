@@ -30,6 +30,7 @@ class FakeRadioController :
     BaseFake(),
     RadioController {
 
+    /** Canonical app-level connection state, mirroring [ServiceRepository][connectionState] semantics. */
     private val _connectionState = mutableStateFlow<ConnectionState>(ConnectionState.Connected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState
 
