@@ -328,7 +328,7 @@ jobs:
           path: ./artifacts
 
       - name: Create or Update GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.tag_name }}
           target_commitish: ${{ inputs.commit_sha || github.sha }}
@@ -341,7 +341,7 @@ jobs:
       - name: Create or Update internal GitHub Release
         continue-on-error: true
         if: ${{ env.INTERNAL_BUILDS_HOST != '' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           repository: ${{ secrets.INTERNAL_BUILDS_HOST }}
           token: ${{ secrets.INTERNAL_BUILDS_HOST_PAT }}
