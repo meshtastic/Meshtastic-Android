@@ -161,16 +161,16 @@ Android uses `@Module`-annotated classes (`CoreDataModule`, `CoreBleAndroidModul
 
 ### D1. Zero `commonTest` in feature modules *(resolved 2026-03-12)*
 
-| Module | `commonTest` | `test`/`androidUnitTest` | `androidTest` |
-|---|---:|---:|---:|
-| `feature:settings` | 22 | 20 | 15 |
-| `feature:node` | 24 | 9 | 0 |
-| `feature:messaging` | 18 | 5 | 3 |
-| `feature:connections` | 27 | 0 | 0 |
-| `feature:firmware` | 15 | 25 | 0 |
-| `feature:wifi-provision` | 62 | 0 | 0 |
+| Module | `commonTest` | `test`/`androidUnitTest` |
+|---|---:|---:|
+| `feature:settings` | 33 | 20 |
+| `feature:node` | 24 | 9 |
+| `feature:messaging` | 21 | 5 |
+| `feature:connections` | 27 | 0 |
+| `feature:firmware` | 15 | 25 |
+| `feature:wifi-provision` | 62 | 0 |
 
-**Outcome:** All 8 feature modules now have `commonTest` coverage (193 shared tests). Combined with 70 platform unit tests and 18 instrumented tests, feature modules have 281 tests total.
+**Outcome:** All 8 feature modules now have `commonTest` coverage (211 shared tests). Combined with 70 platform unit tests, feature modules have 281 tests total. All Compose UI tests have been migrated from `androidTest` to `commonTest` using CMP `runComposeUiTest`; instrumented test infrastructure has been removed from CI.
 
 ### D2. No shared test fixtures *(resolved 2026-03-12)*
 

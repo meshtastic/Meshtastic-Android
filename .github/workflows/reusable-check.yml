@@ -51,7 +51,7 @@ env:
 jobs:
   # ── Lint & Static Analysis ──────────────────────────────────────────
   lint-check:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     timeout-minutes: 30
