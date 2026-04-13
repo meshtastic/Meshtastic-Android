@@ -50,7 +50,6 @@ jobs:
               - 'build-logic/**'
               - 'gradle/libs.versions.toml'
               - '.github/workflows/screenshot-tests.yml'
-              - '.github/scripts/**'
               - '.github/actions/gradle-setup/**'
 
   screenshot-check:
@@ -81,33 +80,6 @@ jobs:
         continue-on-error: true
         run: ./gradlew :app:validateGoogleDebugScreenshotTest -Pci=true --scan
 
-      - name: Install ImageMagick
-        if: always() && steps.screenshotsverify.outcome != 'cancelled'
-        run: |
-          if ! command -v convert &>/dev/null; then
-            sudo apt-get update -qq && sudo apt-get install -yqq imagemagick
-          fi
-
-      - name: Generate screenshot summary and gallery
-        if: always() && steps.screenshotsverify.outcome != 'cancelled'
-        shell: bash
-        run: |
-          chmod +x .github/scripts/screenshot-summary.sh
-          .github/scripts/screenshot-summary.sh \
-            "${{ steps.screenshotsverify.outcome }}" \
-            "app/build/outputs/screenshotTest-results/preview/debug/google/rendered" \
-            "app/src/screenshotTestGoogleDebug/reference" \
-            "app/build/outputs/screenshotTest-results/preview/debug/google/diffs" \
-            "app/build/screenshot-gallery/gallery.html"
-
-      - name: Upload screenshot gallery
-        if: always() && steps.screenshotsverify.outcome != 'cancelled'
-        uses: actions/upload-artifact@v7
-        with:
-          name: screenshot-gallery
-          path: app/build/screenshot-gallery/
-          retention-days: 14
-
       - name: Upload screenshot diffs
         if: >-
           always()
@@ -119,6 +91,37 @@ jobs:
             app/build/outputs/screenshotTest-results/preview/debug/google/diffs/
             app/build/outputs/screenshotTest-results/preview/debug/google/rendered/
           retention-days: 7
+
+      - name: Screenshot test summary
+        if: always() && steps.screenshotsverify.outcome != 'cancelled'
+        shell: bash
+        run: |
+          DIFFS_DIR="app/build/outputs/screenshotTest-results/preview/debug/google/diffs"
+          {
+            if [ "${{ steps.screenshotsverify.outcome }}" = "failure" ]; then
+              FAIL_COUNT=$(find "$DIFFS_DIR" -name "*.png" 2>/dev/null | wc -l | tr -d ' ')
+              echo "## :x: Screenshot Tests — ${FAIL_COUNT} image(s) differ"
+              echo ""
+              echo "Download the **screenshot-diffs** artifact to inspect diff images."
+              echo ""
+              echo "<details>"
+              echo "<summary>Failed images</summary>"
+              echo ""
+              find "$DIFFS_DIR" -name "*.png" 2>/dev/null | sort | while read -r f; do
+                echo "- \`$(basename "$f" .png)\`"
+              done
+              echo ""
+              echo "</details>"
+              echo ""
+              echo '```bash'
+              echo "./gradlew updateGoogleDebugScreenshotTest"
+              echo '```'
+              echo "Commit the updated images under \`app/src/screenshotTestGoogleDebug/reference/\`."
+            else
+              REF_COUNT=$(find app/src/screenshotTestGoogleDebug/reference -name "*.png" 2>/dev/null | wc -l | tr -d ' ')
+              echo "## :white_check_mark: Screenshot Tests — ${REF_COUNT} images verified"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Fail screenshot tests (fork PR)
         if: >-
