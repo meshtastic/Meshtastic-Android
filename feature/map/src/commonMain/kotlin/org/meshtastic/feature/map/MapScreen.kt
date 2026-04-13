@@ -161,7 +161,7 @@ fun MapScreen(
                     longPressPosition = null
                     showWaypointDialog = true
                 },
-                locationState = if (isLocationTrackingEnabled && locationAvailable) locationState else null,
+                locationState = if (locationAvailable) locationState else null,
             )
 
             // Auto-pan camera when location tracking is enabled
