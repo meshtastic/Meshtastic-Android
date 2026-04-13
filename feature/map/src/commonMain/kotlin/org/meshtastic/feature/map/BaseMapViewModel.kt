@@ -147,7 +147,7 @@ open class BaseMapViewModel(
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
     fun deleteWaypoint(id: Int) =
-        safeLaunch(dispatcher = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
+        safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
 
     fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
@@ -159,7 +159,7 @@ open class BaseMapViewModel(
     }
 
     private fun sendDataPacket(p: DataPacket) {
-        safeLaunch(dispatcher = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
+        safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
     }
 
     fun generatePacketId(): Int = radioController.getPacketId()

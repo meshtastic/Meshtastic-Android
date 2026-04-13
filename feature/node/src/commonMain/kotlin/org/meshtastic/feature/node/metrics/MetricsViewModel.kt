@@ -182,7 +182,7 @@ open class MetricsViewModel(
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
     fun deleteLog(uuid: String) =
-        safeLaunch(dispatcher = dispatchers.io, tag = "deleteLog") { meshLogRepository.deleteLog(uuid) }
+        safeLaunch(context = dispatchers.io, tag = "deleteLog") { meshLogRepository.deleteLog(uuid) }
 
     fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
         val cached = tracerouteOverlayCache.value[requestId]
@@ -233,7 +233,7 @@ open class MetricsViewModel(
         Logger.d { "MetricsViewModel created" }
     }
 
-    fun clearPosition() = safeLaunch(dispatcher = dispatchers.io, tag = "clearPosition") {
+    fun clearPosition() = safeLaunch(context = dispatchers.io, tag = "clearPosition") {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
             meshLogRepository.deleteLogs(it, PortNum.POSITION_APP.value)
         }
@@ -337,7 +337,7 @@ open class MetricsViewModel(
         epochSeconds: (T) -> Long,
         rowMapper: (T) -> String,
     ) {
-        safeLaunch(dispatcher = dispatchers.io, tag = "exportCsv") {
+        safeLaunch(context = dispatchers.io, tag = "exportCsv") {
             fileService.write(uri) { sink ->
                 sink.writeUtf8(header)
                 rows.forEach { item ->

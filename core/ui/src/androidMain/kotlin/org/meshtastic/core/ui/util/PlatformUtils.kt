@@ -27,10 +27,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -224,9 +229,11 @@ actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: (
         // On pre-Android 12, BLE scanning is gated by location permission, not Bluetooth.
         return remember { { onGranted() } }
     }
+    val currentOnGranted = rememberUpdatedState(onGranted)
+    val currentOnDenied = rememberUpdatedState(onDenied)
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.values.all { it }) onGranted() else onDenied()
+            if (permissions.values.all { it }) currentOnGranted.value() else currentOnDenied.value()
         }
     return remember(launcher) {
         {
@@ -243,9 +250,11 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
         // Pre-Android 13, no runtime notification permission required.
         return remember { { onGranted() } }
     }
+    val currentOnGranted = rememberUpdatedState(onGranted)
+    val currentOnDenied = rememberUpdatedState(onDenied)
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) onGranted() else onDenied()
+            if (granted) currentOnGranted.value() else currentOnDenied.value()
         }
     return remember(launcher) { { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) } }
 }
@@ -253,45 +262,36 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
 @Composable
 actual fun isLocationPermissionGranted(): Boolean {
     val context = LocalContext.current
-    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
-    val granted =
-        androidx.compose.runtime.mutableStateOf(
-            androidx.core.content.ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED,
-        )
-    DisposableEffect(lifecycleOwner) {
-        val observer =
-            androidx.lifecycle.LifecycleEventObserver { _, event ->
-                if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                    granted.value =
-                        androidx.core.content.ContextCompat.checkSelfPermission(
-                            context,
-                            android.Manifest.permission.ACCESS_FINE_LOCATION,
-                        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-                }
-            }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    return rememberOnResumeState {
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
-    return granted.value
 }
 
 @Composable
 actual fun isGpsDisabled(): Boolean {
     val context = LocalContext.current
-    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
-    val disabled = androidx.compose.runtime.mutableStateOf(context.gpsDisabled())
+    return rememberOnResumeState { context.gpsDisabled() }
+}
+
+/**
+ * Remembers a boolean state that is re-evaluated on each [Lifecycle.Event.ON_RESUME], ensuring the value stays fresh
+ * when the user returns from a permission dialog or system settings screen.
+ */
+@Composable
+private fun rememberOnResumeState(check: () -> Boolean): Boolean {
+    val state = remember { mutableStateOf(check()) }
+    val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer =
-            androidx.lifecycle.LifecycleEventObserver { _, event ->
-                if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                    disabled.value = context.gpsDisabled()
-                }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                state.value = check()
             }
+        }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
-    return disabled.value
+    return state.value
 }

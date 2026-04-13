@@ -90,6 +90,8 @@ open class ScannerViewModel(
                                 scannedBleDevices.update { current -> current + (device.address to device) }
                             }
                         }
+                } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+                    throw e
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     co.touchlab.kermit.Logger.w(e) { "BLE scan failed" }
                 } finally {

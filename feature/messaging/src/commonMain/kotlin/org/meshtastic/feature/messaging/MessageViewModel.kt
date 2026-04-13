@@ -190,7 +190,7 @@ class MessageViewModel(
     }
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        safeLaunch(dispatcher = ioDispatcher, tag = "setContactFilteringDisabled") {
+        safeLaunch(context = ioDispatcher, tag = "setContactFilteringDisabled") {
             packetRepository.setContactFilteringDisabled(contactKey, disabled)
         }
     }
@@ -221,10 +221,10 @@ class MessageViewModel(
     }
 
     fun deleteMessages(uuidList: List<Long>) =
-        safeLaunch(dispatcher = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
+        safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
 
     fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
-        safeLaunch(dispatcher = ioDispatcher, tag = "clearUnreadCount") {
+        safeLaunch(context = ioDispatcher, tag = "clearUnreadCount") {
             val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
             if (lastReadTimestamp <= existingTimestamp) {
                 return@safeLaunch

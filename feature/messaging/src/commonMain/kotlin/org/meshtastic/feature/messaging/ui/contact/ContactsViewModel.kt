@@ -188,18 +188,18 @@ class ContactsViewModel(
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
     fun deleteContacts(contacts: List<String>) =
-        safeLaunch(dispatcher = ioDispatcher, tag = "deleteContacts") { packetRepository.deleteContacts(contacts) }
+        safeLaunch(context = ioDispatcher, tag = "deleteContacts") { packetRepository.deleteContacts(contacts) }
 
     fun markAllAsRead() =
-        safeLaunch(dispatcher = ioDispatcher, tag = "markAllAsRead") { packetRepository.clearAllUnreadCounts() }
+        safeLaunch(context = ioDispatcher, tag = "markAllAsRead") { packetRepository.clearAllUnreadCounts() }
 
     fun setMuteUntil(contacts: List<String>, until: Long) =
-        safeLaunch(dispatcher = ioDispatcher, tag = "setMuteUntil") { packetRepository.setMuteUntil(contacts, until) }
+        safeLaunch(context = ioDispatcher, tag = "setMuteUntil") { packetRepository.setMuteUntil(contacts, until) }
 
     fun getContactSettings() = packetRepository.getContactSettings()
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        safeLaunch(dispatcher = ioDispatcher, tag = "setContactFilteringDisabled") {
+        safeLaunch(context = ioDispatcher, tag = "setContactFilteringDisabled") {
             packetRepository.setContactFilteringDisabled(contactKey, disabled)
         }
     }

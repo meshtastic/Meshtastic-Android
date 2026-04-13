@@ -21,20 +21,19 @@ package org.meshtastic.core.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.resources.UiText
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration
@@ -95,6 +94,9 @@ fun <T> Flow<T>.asUiState(stopTimeout: Duration = 5.seconds): StateFlow<UiState<
  * Launches a coroutine in [viewModelScope] that catches all exceptions except [CancellationException]. Non-cancellation
  * errors are logged and emitted to [errorEvents] (if provided) for one-shot UI consumption (e.g. snackbar / toast).
  *
+ * @param context optional [CoroutineContext] element (typically a dispatcher) merged into the launch. Defaults to
+ *   [EmptyCoroutineContext], inheriting [viewModelScope]'s dispatcher.
+ *
  * ```
  * // In a ViewModel:
  * safeLaunch(errorEvents = _errors) {
@@ -104,22 +106,19 @@ fun <T> Flow<T>.asUiState(stopTimeout: Duration = 5.seconds): StateFlow<UiState<
  */
 context(viewModel: ViewModel)
 fun safeLaunch(
-    dispatcher: CoroutineDispatcher? = null,
+    context: CoroutineContext = EmptyCoroutineContext,
     errorEvents: MutableSharedFlow<UiText>? = null,
     tag: String? = null,
     block: suspend CoroutineScope.() -> Unit,
-): Job {
-    val context = dispatcher ?: EmptyCoroutineContext
-    return viewModel.viewModelScope.launch(context) {
-        try {
-            block()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            val label = tag ?: "safeLaunch"
-            Logger.e(e) { "[$label] Unhandled exception" }
-            errorEvents?.emit(UiText.DynamicString(e.message ?: "Unknown error"))
-        }
+): Job = viewModel.viewModelScope.launch(context) {
+    try {
+        block()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        val label = tag ?: "safeLaunch"
+        Logger.e(e) { "[$label] Unhandled exception" }
+        errorEvents?.tryEmit(UiText.DynamicString(e.message ?: "Unknown error"))
     }
 }
 

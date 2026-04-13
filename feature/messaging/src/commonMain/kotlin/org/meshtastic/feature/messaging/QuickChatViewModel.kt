@@ -30,7 +30,7 @@ class QuickChatViewModel(private val quickChatActionRepository: QuickChatActionR
         get() = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
     fun updateActionPositions(actions: List<QuickChatAction>) {
-        safeLaunch(dispatcher = ioDispatcher, tag = "updateActionPositions") {
+        safeLaunch(context = ioDispatcher, tag = "updateActionPositions") {
             for (position in actions.indices) {
                 quickChatActionRepository.setItemPosition(actions[position].uuid, position)
             }
@@ -38,10 +38,8 @@ class QuickChatViewModel(private val quickChatActionRepository: QuickChatActionR
     }
 
     fun addQuickChatAction(action: QuickChatAction) =
-        safeLaunch(dispatcher = ioDispatcher, tag = "addQuickChatAction") { quickChatActionRepository.upsert(action) }
+        safeLaunch(context = ioDispatcher, tag = "addQuickChatAction") { quickChatActionRepository.upsert(action) }
 
     fun deleteQuickChatAction(action: QuickChatAction) =
-        safeLaunch(dispatcher = ioDispatcher, tag = "deleteQuickChatAction") {
-            quickChatActionRepository.delete(action)
-        }
+        safeLaunch(context = ioDispatcher, tag = "deleteQuickChatAction") { quickChatActionRepository.delete(action) }
 }

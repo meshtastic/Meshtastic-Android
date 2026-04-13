@@ -407,7 +407,7 @@ class DebugViewModel(
         )
     }
 
-    fun deleteAllLogs() = safeLaunch(dispatcher = ioDispatcher, tag = "deleteAllLogs") { meshLogRepository.deleteAll() }
+    fun deleteAllLogs() = safeLaunch(context = ioDispatcher, tag = "deleteAllLogs") { meshLogRepository.deleteAll() }
 
     @Immutable
     data class UiMeshLog(
