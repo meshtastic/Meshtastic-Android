@@ -96,7 +96,7 @@ fun PrivacySection(
 
 @Preview(showBackground = true)
 @Composable
-private fun PrivacySectionPreview() {
+fun PrivacySectionPreview() {
     AppTheme {
         PrivacySection(
             analyticsAvailable = true,

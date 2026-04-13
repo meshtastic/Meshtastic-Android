@@ -38,7 +38,7 @@ private val previewData = NodePreviewParameterProvider()
 
 @PreviewLightDark
 @Composable
-private fun NodeDetailContentRemotePreview() {
+fun NodeDetailContentRemotePreview() {
     val node = previewData.mickeyMouse
     AppTheme {
         Surface {
@@ -67,7 +67,7 @@ private fun NodeDetailContentRemotePreview() {
 
 @PreviewLightDark
 @Composable
-private fun NodeDetailContentLocalPreview() {
+fun NodeDetailContentLocalPreview() {
     val node = previewData.mickeyMouse
     AppTheme {
         Surface {
@@ -89,7 +89,7 @@ private fun NodeDetailContentLocalPreview() {
 
 @PreviewLightDark
 @Composable
-private fun NodeDetailContentLoadingPreview() {
+fun NodeDetailContentLoadingPreview() {
     AppTheme {
         Surface {
             NodeDetailContent(
@@ -104,7 +104,7 @@ private fun NodeDetailContentLoadingPreview() {
 
 @PreviewLightDark
 @Composable
-private fun NodeDetailContentMinimalPreview() {
+fun NodeDetailContentMinimalPreview() {
     val node = previewData.minnieMouse
     AppTheme {
         Surface {

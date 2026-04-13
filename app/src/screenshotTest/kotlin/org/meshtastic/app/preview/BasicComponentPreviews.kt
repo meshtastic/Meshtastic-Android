@@ -101,6 +101,8 @@ import org.meshtastic.core.ui.theme.AppTheme
     fontScale = 2f,
     device = "spec:width=1280dp,height=800dp,dpi=480",
 )
+@Preview(name = "RTL - Phone", showBackground = true, locale = "ar")
+@Preview(name = "RTL - Phone - Dark", showBackground = true, locale = "ar", uiMode = Configuration.UI_MODE_NIGHT_YES)
 annotation class MultiPreview
 
 @MultiPreview

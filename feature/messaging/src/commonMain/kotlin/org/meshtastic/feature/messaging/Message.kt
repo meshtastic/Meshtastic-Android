@@ -495,7 +495,7 @@ private fun MessageInput(
 
 @PreviewLightDark
 @Composable
-private fun MessageInputPreview() {
+fun MessageInputPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(8.dp)) {
