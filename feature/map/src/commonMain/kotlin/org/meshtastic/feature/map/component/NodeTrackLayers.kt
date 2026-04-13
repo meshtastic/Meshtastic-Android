@@ -25,6 +25,8 @@ import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.value.LineCap
+import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.sources.GeoJsonData
@@ -67,6 +69,8 @@ internal fun NodeTrackLayers(
         width = const(3.dp),
         color = const(TrackColor), // Blue
         opacity = const(TRACK_OPACITY),
+        cap = const(LineCap.Round),
+        join = const(LineJoin.Round),
     )
 
     // Position marker points

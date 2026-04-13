@@ -118,7 +118,7 @@ fun MaplibreMapContent(
         modifier = modifier,
         baseStyle = baseStyle,
         cameraState = cameraState,
-        options = MapOptions(gestureOptions = gestureOptions, ornamentOptions = OrnamentOptions.AllEnabled),
+        options = MapOptions(gestureOptions = gestureOptions, ornamentOptions = OrnamentOptions.OnlyLogo),
         onMapLongClick = { position, _ ->
             onMapLongClick(position)
             ClickResult.Consume
