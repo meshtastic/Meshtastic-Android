@@ -192,6 +192,20 @@ open class BaseMapViewModel(
                     lastHeardTrackFilter.value,
                 ),
             )
+
+    /** Nodes with position, filtered by favorites and last-heard preferences. */
+    val filteredNodes: StateFlow<List<Node>> =
+        combine(nodesWithPosition, mapFilterStateFlow) { nodes, filter ->
+            val myNum = myNodeNum
+            nodes
+                .filter { node -> !filter.onlyFavorites || node.isFavorite || node.num == myNum }
+                .filter { node ->
+                    filter.lastHeardFilter.seconds == 0L ||
+                        (nowSeconds - node.lastHeard) <= filter.lastHeardFilter.seconds ||
+                        node.num == myNum
+                }
+        }
+            .stateInWhileSubscribed(initialValue = emptyList())
 }
 
 /**

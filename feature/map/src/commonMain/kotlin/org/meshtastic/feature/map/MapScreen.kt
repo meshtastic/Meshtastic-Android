@@ -40,7 +40,6 @@ import org.maplibre.compose.location.LocationTrackingEffect
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.map.GestureOptions
-import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map
 import org.meshtastic.core.ui.component.MainAppBar
@@ -50,11 +49,9 @@ import org.meshtastic.feature.map.component.MapFilterDropdown
 import org.meshtastic.feature.map.component.MapStyleSelector
 import org.meshtastic.feature.map.component.MaplibreMapContent
 import org.meshtastic.feature.map.model.MapStyle
-import org.meshtastic.proto.Waypoint
+import org.meshtastic.feature.map.util.COORDINATE_SCALE
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
-/** Meshtastic stores lat/lng as integer microdegrees; multiply by this to get decimal degrees. */
-private const val COORDINATE_SCALE = 1e-7
 private const val WAYPOINT_ZOOM = 15.0
 
 /**
@@ -75,7 +72,7 @@ fun MapScreen(
 ) {
     val ourNodeInfo by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
-    val nodesWithPosition by viewModel.nodesWithPosition.collectAsStateWithLifecycle()
+    val filteredNodes by viewModel.filteredNodes.collectAsStateWithLifecycle()
     val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val baseStyle by viewModel.baseStyle.collectAsStateWithLifecycle()
@@ -129,19 +126,6 @@ fun MapScreen(
             )
         }
     }
-
-    // Apply favorites and last-heard filters to the node list
-    val myNum = viewModel.myNodeNum
-    val filteredNodes =
-        remember(nodesWithPosition, filterState, myNum) {
-            nodesWithPosition
-                .filter { node -> !filterState.onlyFavorites || node.isFavorite || node.num == myNum }
-                .filter { node ->
-                    filterState.lastHeardFilter.seconds == 0L ||
-                        (nowSeconds - node.lastHeard) <= filterState.lastHeardFilter.seconds ||
-                        node.num == myNum
-                }
-        }
 
     @Suppress("ViewModelForwarding")
     Scaffold(
@@ -264,29 +248,15 @@ fun MapScreen(
                 longPressPosition = null
             },
             onSend = { name, description, icon, locked, expire ->
-                val myNodeNum = viewModel.myNodeNum ?: 0
-                val wpt =
-                    Waypoint(
-                        id = editingWaypoint?.id ?: viewModel.generatePacketId(),
-                        name = name,
-                        description = description,
-                        icon = icon,
-                        locked_to = if (locked) myNodeNum else 0,
-                        latitude_i =
-                        if (editingWaypoint != null) {
-                            editingWaypoint.latitude_i
-                        } else {
-                            longPressPosition?.let { (it.latitude / COORDINATE_SCALE).toInt() } ?: 0
-                        },
-                        longitude_i =
-                        if (editingWaypoint != null) {
-                            editingWaypoint.longitude_i
-                        } else {
-                            longPressPosition?.let { (it.longitude / COORDINATE_SCALE).toInt() } ?: 0
-                        },
-                        expire = expire,
-                    )
-                viewModel.sendWaypoint(wpt)
+                viewModel.createAndSendWaypoint(
+                    name = name,
+                    description = description,
+                    icon = icon,
+                    locked = locked,
+                    expire = expire,
+                    existingWaypoint = editingWaypoint,
+                    position = longPressPosition,
+                )
             },
             onDelete = editingWaypoint?.let { wpt -> { viewModel.deleteWaypoint(wpt.id) } },
             initialName = editingWaypoint?.name ?: "",

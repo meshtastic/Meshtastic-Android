@@ -27,9 +27,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
-/** Meshtastic stores lat/lng as integer microdegrees; multiply by this to get decimal degrees. */
-private const val COORDINATE_SCALE = 1e-7
-
 private const val MIN_PRECISION_BITS = 10
 private const val MAX_PRECISION_BITS = 19
 

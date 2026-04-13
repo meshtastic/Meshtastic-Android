@@ -40,12 +40,12 @@ import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.feature.map.util.COORDINATE_SCALE
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private val ForwardRouteColor = Color(0xFF4CAF50)
 private val ReturnRouteColor = Color(0xFFF44336)
 private val HopMarkerColor = Color(0xFF9C27B0)
-private const val COORDINATE_SCALE = 1e-7
 private const val HEX_RADIX = 16
 private const val ROUTE_OPACITY = 0.8f
 
