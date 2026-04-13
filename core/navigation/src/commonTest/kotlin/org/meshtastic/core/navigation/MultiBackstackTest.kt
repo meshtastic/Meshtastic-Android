@@ -111,4 +111,35 @@ class MultiBackstackTest {
         assertEquals(2, multiBackstack.activeBackStack.size)
         assertEquals(SettingsRoute.About, multiBackstack.activeBackStack.last())
     }
+
+    @Test
+    fun `handleDeepLink from different tab switches tab and sets stack`() {
+        // Start on Connections tab
+        val startTab = TopLevelDestination.Connections.route
+        val multiBackstack = MultiBackstack(startTab)
+
+        val connectionsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connections.route)) }
+        val nodesStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route)) }
+
+        multiBackstack.backStacks =
+            mapOf(
+                TopLevelDestination.Connections.route to connectionsStack,
+                TopLevelDestination.Nodes.route to nodesStack,
+            )
+
+        // Verify we start on Connections
+        assertEquals(TopLevelDestination.Connections.route, multiBackstack.currentTabRoute)
+
+        // Deep-link to a TracerouteMap on the Nodes tab (this is the exact pattern
+        // MeshtasticAppShell uses for traceroute alert "View on Map")
+        val tracerouteMap = NodeDetailRoute.TracerouteMap(destNum = 100, requestId = 42, logUuid = "abc")
+        multiBackstack.handleDeepLink(listOf(NodesRoute.NodesGraph, tracerouteMap))
+
+        // Should have switched to the Nodes tab
+        assertEquals(TopLevelDestination.Nodes.route, multiBackstack.currentTabRoute)
+        // Stack should contain the graph root + the traceroute map route
+        assertEquals(2, multiBackstack.activeBackStack.size)
+        assertEquals(NodesRoute.NodesGraph, multiBackstack.activeBackStack.first())
+        assertEquals(tracerouteMap, multiBackstack.activeBackStack.last())
+    }
 }

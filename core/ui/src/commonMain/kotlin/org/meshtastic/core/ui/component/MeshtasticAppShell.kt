@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodeDetailRoute
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
@@ -43,8 +44,11 @@ fun MeshtasticAppShell(
     MeshtasticCommonAppSetup(
         uiViewModel = uiViewModel,
         onNavigateToTracerouteMap = { destNum, requestId, logUuid ->
-            multiBackstack.activeBackStack.add(
-                NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid),
+            multiBackstack.handleDeepLink(
+                listOf(
+                    NodesRoute.NodesGraph,
+                    NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid),
+                ),
             )
         },
     )

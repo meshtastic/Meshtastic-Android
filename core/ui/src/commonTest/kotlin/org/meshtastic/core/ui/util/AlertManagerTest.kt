@@ -68,4 +68,27 @@ class AlertManagerTest {
         assertEquals(true, dismissClicked)
         assertNull(alertManager.currentAlert.value)
     }
+
+    @Test
+    fun showAlert_inside_onConfirm_is_dismissed_by_wrapping_dismissAlert() {
+        // Documents the known race condition: AlertManager wraps onConfirm to call
+        // dismissAlert() AFTER the user callback, so a showAlert() inside onConfirm
+        // gets immediately cleared. Callers must defer via launch {} to work around this.
+        alertManager.showAlert(
+            title = "First",
+            onConfirm = {
+                // This simulates an error path where onConfirm shows a follow-up alert
+                alertManager.showAlert(title = "Second", message = "Error details")
+            },
+        )
+
+        // Trigger the wrapped onConfirm (user callback + dismissAlert)
+        alertManager.currentAlert.value?.onConfirm?.invoke()
+
+        // The second alert is wiped by dismissAlert() — currentAlert is null
+        assertNull(
+            alertManager.currentAlert.value,
+            "showAlert inside onConfirm is cleared by the wrapping dismissAlert; callers must defer via launch {}",
+        )
+    }
 }
