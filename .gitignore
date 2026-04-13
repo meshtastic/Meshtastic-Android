@@ -32,6 +32,13 @@ keystore.properties
 # VS code
 .vscode/settings.json
 
+# Eclipse / Buildship
+.project
+.classpath
+.settings/
+**/bin/main/
+**/bin/test/
+
 # Secrets
 /secrets.properties
 /fastlane/play-store-credentials.json
