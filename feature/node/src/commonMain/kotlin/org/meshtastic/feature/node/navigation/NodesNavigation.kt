@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.navigation
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -116,9 +117,9 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
             nodeId = destNum,
             viewModel = nodeDetailViewModel,
             compassViewModel = compassViewModel,
-            navigateToMessages = { backStack.add(ContactsRoute.Messages(it)) },
-            onNavigate = { backStack.add(it) },
-            onNavigateUp = { backStack.removeLastOrNull() },
+            navigateToMessages = { key -> backStack.add(ContactsRoute.Messages(key)) },
+            onNavigate = { route -> backStack.add(route) },
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
@@ -128,7 +129,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
 
         TracerouteLogScreen(
             viewModel = metricsViewModel,
-            onNavigateUp = { backStack.removeLastOrNull() },
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
             onViewOnMap = { requestId, responseLogUuid ->
                 backStack.add(
                     NodeDetailRoute.TracerouteMap(
@@ -182,7 +183,7 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
         val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(destNum) }
         metricsViewModel.setNodeId(destNum)
 
-        routeInfo.screenComposable(metricsViewModel) { backStack.removeLastOrNull() }
+        routeInfo.screenComposable(metricsViewModel, dropUnlessResumed { backStack.removeLastOrNull() })
     }
 }
 

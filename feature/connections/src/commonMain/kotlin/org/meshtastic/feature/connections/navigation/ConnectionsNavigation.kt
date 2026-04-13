@@ -32,8 +32,8 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         ConnectionsScreen(
             scanModel = koinViewModel<ScannerViewModel>(),
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
-            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
-            onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) },
+            onClickNodeChip = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
+            onNavigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onConfigNavigate = { route -> backStack.add(route) },
         )
     }
@@ -42,8 +42,8 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
         ConnectionsScreen(
             scanModel = koinViewModel<ScannerViewModel>(),
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
-            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
-            onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) },
+            onClickNodeChip = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
+            onNavigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onConfigNavigate = { route -> backStack.add(route) },
         )
     }

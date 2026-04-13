@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.settings.radio.channel
 
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -29,7 +30,7 @@ fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
         ChannelScreen(
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onNavigate = { route -> backStack.add(route) },
-            onNavigateUp = { backStack.removeLastOrNull() },
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
@@ -37,7 +38,7 @@ fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
         ChannelScreen(
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onNavigate = { route -> backStack.add(route) },
-            onNavigateUp = { backStack.removeLastOrNull() },
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 }

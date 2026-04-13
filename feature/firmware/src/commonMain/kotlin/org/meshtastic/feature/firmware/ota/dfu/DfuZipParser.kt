@@ -21,7 +21,11 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonDecodingException
 
-private val json = Json { ignoreUnknownKeys = true }
+@OptIn(ExperimentalSerializationApi::class)
+private val json = Json {
+    ignoreUnknownKeys = true
+    exceptionsWithDebugInfo = false
+}
 
 /**
  * Parse pre-extracted zip entries into a [DfuZipPackage].

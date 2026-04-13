@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware
 
 import co.touchlab.kermit.Logger
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -29,7 +30,11 @@ private const val FIRMWARE_BASE_URL = "https://raw.githubusercontent.com/meshtas
 /** OTA partition role in .mt.json manifests — the main application firmware. */
 private const val OTA_PART_NAME = "app0"
 
-private val manifestJson = Json { ignoreUnknownKeys = true }
+@OptIn(ExperimentalSerializationApi::class)
+private val manifestJson = Json {
+    ignoreUnknownKeys = true
+    exceptionsWithDebugInfo = false
+}
 
 /** Retrieves firmware files, either by direct download or by extracting from a release asset zip. */
 @Single
