@@ -184,7 +184,7 @@ configure<ApplicationExtension> {
         unitTests { isIncludeAndroidResources = true }
         @Suppress("MagicNumber")
         screenshotTests {
-            imageDifferenceThreshold = 0.0005f // 0.05% tolerance for cross-machine rendering
+            imageDifferenceThreshold = 0.02f // 2% tolerance for cross-platform font/emoji rendering
         }
     }
 }

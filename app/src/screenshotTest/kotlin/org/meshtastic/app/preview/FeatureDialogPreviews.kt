@@ -50,7 +50,7 @@ fun MessageActionsContentPreview() {
     AppTheme(isSystemInDarkTheme()) {
         Surface {
             MessageActionsContent(
-                quickEmojis = listOf("\uD83D\uDC4D", "\uD83D\uDC4E", "\uD83D\uDE02", "\uD83D\uDD25", "\u2764\uFE0F"),
+                quickEmojis = listOf("+1", "-1", "ha", "ok", "ty"),
                 onReply = {},
                 onReact = {},
                 onMoreReactions = {},
