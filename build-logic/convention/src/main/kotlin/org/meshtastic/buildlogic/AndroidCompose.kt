@@ -42,10 +42,18 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
         "androidx.compose.runtime",
         "androidx.compose.ui",
     )
+
+    // The BOM exclusion above strips versions from transitive material deps
+    // (e.g. maps-compose-widgets, datadog). Pin the material group to the
+    // AndroidX version that matches this CMP release.
+    val materialVersion = libs.version("androidx-compose-material")
+
     configurations.configureEach {
         resolutionStrategy.eachDependency {
             if (requested.group in cmpAlignedGroups) {
                 useVersion(cmpVersion)
+            } else if (requested.group == "androidx.compose.material") {
+                useVersion(materialVersion)
             }
         }
     }
