@@ -42,6 +42,7 @@ import org.meshtastic.core.ui.icon.NearMe
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import kotlin.math.abs
 
 /**
  * Shared map controls overlay using [HorizontalFloatingToolbar] for Material 3 Expressive styling. Provides compass,
@@ -131,12 +132,14 @@ fun MapControlsOverlay(
     }
 }
 
+private const val BEARING_NORTH_THRESHOLD = 0.5f
+
 @Composable
 private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Boolean) {
     val iconTint =
         when {
             isFollowing -> MaterialTheme.colorScheme.primary
-            bearing == 0f -> MaterialTheme.colorScheme.StatusRed
+            abs(bearing) < BEARING_NORTH_THRESHOLD -> MaterialTheme.colorScheme.StatusRed
             else -> null
         }
     MapButton(
