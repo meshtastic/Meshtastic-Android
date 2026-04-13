@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.ui.component.ChannelInfo
 import org.meshtastic.core.ui.component.DistanceInfo
 import org.meshtastic.core.ui.component.HopsInfo
@@ -66,9 +67,9 @@ fun LastHeardInfoPreview() {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text("With label:", style = MaterialTheme.typography.labelSmall)
-                LastHeardInfo(lastHeard = (System.currentTimeMillis() / 1000 - 300).toInt())
+                LastHeardInfo(lastHeard = (nowSeconds - 300).toInt())
                 Text("Without label:", style = MaterialTheme.typography.labelSmall)
-                LastHeardInfo(lastHeard = (System.currentTimeMillis() / 1000 - 3600).toInt(), showLabel = false)
+                LastHeardInfo(lastHeard = (nowSeconds - 3600).toInt(), showLabel = false)
                 Text("Never heard:", style = MaterialTheme.typography.labelSmall)
                 LastHeardInfo(lastHeard = 0)
             }

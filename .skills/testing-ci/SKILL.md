@@ -99,13 +99,21 @@ The project uses the Google `com.android.compose.screenshot` plugin (v0.0.1-alph
 ### File Layout
 ```
 app/src/screenshotTest/kotlin/org/meshtastic/app/
-  ├── CoreComponentScreenshotTests.kt        # @PreviewTest classes
+  ├── CoreComponentScreenshotTests.kt        # @PreviewTest classes (26 test files total)
+  ├── PreferenceScreenshotTests.kt
+  ├── NodeInfoScreenshotTests.kt
+  ├── WifiProvisionScreenshotTests.kt
+  ├── ...                                    # (26 test files, 169 @PreviewTest methods)
   └── preview/
-      ├── BasicComponentPreviews.kt          # Buttons, text, icons
-      └── ExtendedComponentPreviews.kt       # Cards, inputs, dialogs, chips
+      ├── BasicComponentPreviews.kt          # Buttons, text, icons, @MultiPreview definition
+      ├── ExtendedComponentPreviews.kt       # Cards, inputs, dialogs, chips
+      ├── NodeDataInfoPreviews.kt            # Distance, LastHeard, Hops, Channel, SNR/RSSI
+      ├── WifiProvisionComponentPreviews.kt  # Wi-Fi provision re-exports
+      ├── NodeDetailComponentPreviews.kt     # Node detail re-exports
+      └── ...                                # (27 preview files total)
 
-app/src/screenshotTest{Variant}/reference/   # Committed .png baselines
-app/build/reports/screenshotTest/preview/     # HTML diff reports
+app/src/screenshotTestGoogleDebug/reference/  # 2,366 committed .png baselines
+app/build/reports/screenshotTest/preview/     # HTML diff reports (generated at validation time)
 ```
 
 ### Commands
@@ -127,12 +135,22 @@ app/build/reports/screenshotTest/preview/     # HTML diff reports
 3. Run `updateGoogleDebugScreenshotTest` to generate baselines, commit the `.png` files.
 
 ### @MultiPreview Coverage
-The `@MultiPreview` annotation generates a full cross-product of configuration variants:
+The `@MultiPreview` annotation (defined in `BasicComponentPreviews.kt`) generates a full cross-product of configuration variants:
 - **Theme**: Light and Dark (`uiMode = Configuration.UI_MODE_NIGHT_YES`)
 - **Font scale**: 1x (default) and 2x (`fontScale = 2f`)
 - **Device form factor**: Phone (default), Foldable (`673dp x 841dp`), Tablet (`1280dp x 800dp`)
+- **Layout direction**: LTR (default) and RTL (light + dark)
 
-This produces **12 variants per test method** (2 themes × 2 font scales × 3 devices). With 112 test methods, the total is **1,344 reference images**.
+This produces **14 variants per test method** (2 themes × 2 font scales × 3 devices + 2 RTL). With **169 test methods** across **26 test files**, the total is **2,366 reference images**.
+
+### Component Coverage
+Screenshot tests cover components from the following modules:
+- **`core:ui`** — Buttons, text, icons, cards, preferences, dialogs, telemetry, node info, alerts, utility components
+- **`feature:node`** — Node detail components, metrics, status icons, data info
+- **`feature:messaging`** — QuickChat, reactions, message input, message actions, delivery info
+- **`feature:connections`** — Empty state, connecting device info, segmented bar, device list
+- **`feature:settings`** — AppInfo, Appearance, Persistence, Privacy sections, radio config dialogs
+- **`feature:wifi-provision`** — All 19 Wi-Fi provisioning UI components
 
 ### Convention Plugin
 - `meshtastic.screenshot.testing` (in `build-logic/convention`) configures the experimental flag and `screenshotTestImplementation` dependencies.
@@ -158,7 +176,7 @@ When screenshot tests fail in CI, behavior depends on the PR context:
 
 ### Reference Image Generation
 - **OS guidance**: Reference images are best generated on the same OS as CI (`ubuntu-24.04`). Generating locally on macOS is acceptable because the 2% threshold absorbs rendering differences.
-- **Determinism**: Preview composables must use fixed/deterministic data. Avoid `Random`, `currentTime()`, or other non-deterministic values in preview parameters. Use hardcoded constants instead.
+- **Determinism**: Preview composables must use fixed/deterministic data. Avoid `Random`, `currentTime()`, or other non-deterministic values in preview parameters. Use hardcoded constants instead. For relative-time displays (e.g. `LastHeardInfo`), use `nowSeconds - offset` so the rendered text (e.g. "5m") remains constant across runs.
 - **Updating references**: Run `./gradlew updateGoogleDebugScreenshotTest`, then commit the updated `.png` files under `app/src/screenshotTestGoogleDebug/reference/`.
 
 ### Debugging CI Failures
