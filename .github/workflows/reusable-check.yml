@@ -109,7 +109,7 @@ jobs:
   test-shards:
     runs-on: ubuntu-24.04
     permissions:
-      contents: read
+      contents: write  # Required for screenshot auto-commit on same-repo PRs
     timeout-minutes: 45
     needs: lint-check
     if: inputs.run_unit_tests == true
@@ -191,6 +191,9 @@ jobs:
         with:
           fetch-depth: 1
           submodules: true
+          # For screenshot auto-commit, use the PR head ref so we can push back
+          ref: ${{ github.head_ref || github.ref }}
+          token: ${{ github.token }}
 
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
@@ -198,7 +201,9 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
+      # ── Non-screenshot shards: run tests normally ──
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
+        if: matrix.shard.name != 'shard-screenshot'
         run: |
           kover_tasks=""
           if [[ "${{ inputs.run_coverage }}" == "true" ]]; then
@@ -206,8 +211,52 @@ jobs:
           fi
           ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue --scan
 
+      # ── Screenshot shard: validate → fork-check → auto-record → auto-commit ──
+      - name: Validate screenshot tests
+        id: screenshotsverify
+        if: matrix.shard.name == 'shard-screenshot'
+        continue-on-error: true
+        run: ./gradlew :app:validateGoogleDebugScreenshotTest -Pci=true --scan
+
+      - name: Prevent auto-update on fork PRs
+        if: >-
+          matrix.shard.name == 'shard-screenshot'
+          && steps.screenshotsverify.outcome == 'failure'
+          && github.event_name == 'pull_request'
+          && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "::error::Screenshot tests failed. Fork PRs cannot auto-update references."
+          echo "::error::Please run './gradlew updateGoogleDebugScreenshotTest' locally and push the updated images."
+          exit 1
+
+      - name: Auto-record updated screenshots
+        id: screenshotsrecord
+        if: >-
+          matrix.shard.name == 'shard-screenshot'
+          && steps.screenshotsverify.outcome == 'failure'
+          && github.event_name == 'pull_request'
+          && github.event.pull_request.head.repo.full_name == github.repository
+        run: ./gradlew :app:updateGoogleDebugScreenshotTest -Pci=true --scan
+
+      - name: Push updated screenshot references
+        if: steps.screenshotsrecord.outcome == 'success'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          file_pattern: 'app/src/screenshotTestGoogleDebug/reference/**/*.png'
+          disable_globbing: true
+          commit_message: "chore(test): auto-update screenshot references"
+
+      - name: Fail if screenshots failed on merge queue or main
+        if: >-
+          matrix.shard.name == 'shard-screenshot'
+          && steps.screenshotsverify.outcome == 'failure'
+          && github.event_name != 'pull_request'
+        run: |
+          echo "::error::Screenshot tests failed on merge queue / main. References must be updated in the PR."
+          exit 1
+
       - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.shard.name != 'shard-screenshot' }}
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -218,7 +267,7 @@ jobs:
           files: "**/build/test-results/**/*.xml"
 
       - name: Upload coverage to Codecov
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.shard.name != 'shard-screenshot' }}
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -237,16 +286,34 @@ jobs:
             **/build/test-results
           retention-days: 7
 
+      - name: Upload screenshot diff images
+        if: >-
+          always()
+          && matrix.shard.name == 'shard-screenshot'
+          && steps.screenshotsverify.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshot-diffs
+          path: app/build/reports/screenshotTest/preview/debug/google/
+          retention-days: 7
+
       - name: Screenshot test failure summary
-        if: ${{ failure() && matrix.shard.name == 'shard-screenshot' }}
+        if: >-
+          matrix.shard.name == 'shard-screenshot'
+          && steps.screenshotsverify.outcome == 'failure'
         shell: bash
         run: |
           DIFF_DIR="app/build/reports/screenshotTest/preview/debug/google"
           {
             echo "### Screenshot Test Failures"
             echo ""
-            echo "One or more screenshot tests failed visual comparison."
-            echo "Download the \`reports-shard-screenshot\` artifact to inspect diff images."
+            if [[ "${{ steps.screenshotsrecord.outcome }}" == "success" ]]; then
+              echo "References were **auto-updated** and pushed to this branch."
+              echo "Pull the latest changes to get the new reference images."
+            else
+              echo "One or more screenshot tests failed visual comparison."
+              echo "Download the \`screenshot-diffs\` artifact to inspect diff images."
+            fi
             echo ""
             if [ -d "$DIFF_DIR" ]; then
               FAILURES=$(find "$DIFF_DIR" -name "*_diff.png" 2>/dev/null | wc -l | tr -d ' ')
@@ -264,7 +331,7 @@ jobs:
               echo "_No diff directory found at \`${DIFF_DIR}\`. Check the build logs for details._"
             fi
             echo ""
-            echo "#### How to update reference images"
+            echo "#### How to update reference images locally"
             echo "\`\`\`bash"
             echo "./gradlew updateGoogleDebugScreenshotTest"
             echo "\`\`\`"
