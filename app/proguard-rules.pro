@@ -1,67 +1,61 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.kts.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ============================================================================
+# Meshtastic Android — ProGuard / R8 rules for release minification
+# ============================================================================
+# Open-source project: obfuscation is disabled. We rely on tree-shaking and
+# code optimization for APK size reduction.
+# ============================================================================
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ---- General ----------------------------------------------------------------
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
+# Preserve line numbers for meaningful crash stack traces
 -keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Open-source — no need to obfuscate
+-dontobfuscate
 
-# Room KMP: preserve generated database constructor (required for R8/ProGuard)
--keep class * extends androidx.room.RoomDatabase { <init>(); }
+# ---- Networking (transitive references from Ktor) ---------------------------
 
-# Needed for protobufs
--keep class com.google.protobuf.** { *; }
--keep class org.meshtastic.proto.** { *; }
-
-# Networking
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
 
-# ?
--dontwarn java.lang.reflect.**
--dontwarn com.google.errorprone.annotations.**
+# ---- Wire Protobuf ----------------------------------------------------------
 
-# Our app is opensource no need to obsfucate
--dontobfuscate
--optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
+# Wire-generated proto message classes (accessed via ADAPTER companion reflection)
+-keep class org.meshtastic.proto.** { *; }
 
-# Koin DI: prevent R8 from merging exception classes (observed as io.ktor.http.URLDecodeException
+# ---- Room KMP (room3) ------------------------------------------------------
+
+# Preserve generated database constructors (Room uses reflection to instantiate)
+-keep class * extends androidx.room3.RoomDatabase { <init>(); }
+
+# ---- Koin DI ----------------------------------------------------------------
+
+# Prevent R8 from merging exception classes (observed as io.ktor.http.URLDecodeException
 # replacing Koin's InstanceCreationException in stack traces, making crashes undiagnosable).
 -keep class org.koin.core.error.** { *; }
 
-# R8 optimization for Kotlin null checks (AGP 9.0+)
--processkotlinnullchecks remove
+# ---- Compose Multiplatform --------------------------------------------------
 
-# Compose Multiplatform resources: keep the resource library internals and generated Res
-# accessor classes so R8 does not tree-shake the resource loading infrastructure.
-# Without these rules the fdroid flavor (which has fewer transitive Compose dependencies
-# than google) crashes at startup with a misleading URLDecodeException due to R8
-# exception-class merging (see Koin keep rule above).
+# Keep resource library internals and generated Res accessor classes so R8 does
+# not tree-shake the resource loading infrastructure. Without these rules the
+# fdroid flavor crashes at startup with a misleading URLDecodeException due to
+# R8 exception-class merging.
 -keep class org.jetbrains.compose.resources.** { *; }
 -keep class org.meshtastic.core.resources.** { *; }
 
-# Compose Animation: R8 can tree-shake or merge animation spec classes (easing curves,
-# transition specs, Animatable internals) since they appear as small single-use types.
-# This causes animations to silently snap or skip in release builds.
--keep class androidx.compose.animation.** { *; }
--keep class androidx.compose.animation.core.** { *; }
-
-# Nordic BLE
--dontwarn no.nordicsemi.kotlin.ble.environment.android.mock.**
--keep class no.nordicsemi.kotlin.ble.environment.android.mock.** { *; }
--keep class no.nordicsemi.kotlin.ble.environment.android.compose.** { *; }
+# Compose Animation: prevent R8 from merging animation spec classes (easing
+# curves, transition specs, Animatable internals) which can cause animations to
+# silently snap in release builds.
+#
+# -keep prevents class merging (EnterTransition/ExitTransition into *Impl,
+#   VectorizedSpringSpec/TweenSpec elimination, etc.).
+# allowshrinking lets R8 remove genuinely unreachable classes (e.g.
+#   SharedTransition APIs, RepeatableSpec — unused by this app). Verified via
+#   dex analysis: 278 classes survive in release vs 139 without this rule;
+#   all actively used classes (AnimatedVisibility, Crossfade, SpringSpec,
+#   TweenSpec, EnterTransition, ExitTransition, etc.) are preserved.
+# allowobfuscation is moot (-dontobfuscate is set above) but explicit for
+#   clarity.
+# The ** wildcard is recursive and covers animation.core.* sub-packages.
+-keep,allowshrinking,allowobfuscation class androidx.compose.animation.** { *; }

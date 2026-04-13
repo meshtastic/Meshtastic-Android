@@ -44,18 +44,18 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
         compileSdk = compileSdkVersion
 
         defaultConfig.minSdk = minSdkVersion
+        defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         if (this is ApplicationExtension) {
             defaultConfig.targetSdk = targetSdkVersion
         }
 
-        val javaVersion = if (project.name in listOf("api", "model", "proto")) {
-            JavaVersion.VERSION_17
-        } else {
-            JavaVersion.VERSION_21
-        }
+        val javaVersion = if (project.name in PUBLISHED_MODULES) JavaVersion.VERSION_17 else JavaVersion.VERSION_21
         compileOptions.sourceCompatibility = javaVersion
         compileOptions.targetCompatibility = javaVersion
+
+        testOptions.animationsDisabled = true
+        testOptions.unitTests.isReturnDefaultValues = true
 
         // Exclude duplicate META-INF license files shipped by JUnit Platform JARs
         packaging.resources.excludes.addAll(
@@ -190,11 +190,25 @@ internal fun Project.configureKotlinJvm() {
     configureKotlin<KotlinJvmProjectExtension>()
 }
 
+/** Modules published for external consumers — use Java 17 for broader compatibility. */
+private val PUBLISHED_MODULES = setOf("api", "model", "proto")
+
+/** Compiler args shared across all Kotlin targets (JVM, Android, iOS, etc.). */
+private val SHARED_COMPILER_ARGS = listOf(
+    "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+    "-opt-in=kotlin.time.ExperimentalTime",
+    "-Xexpect-actual-classes",
+    "-Xcontext-parameters",
+    "-Xannotation-default-target=param-property",
+    "-Xskip-prerelease-check",
+)
+
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
+    val isPublishedModule = project.name in PUBLISHED_MODULES
+
     extensions.configure<T> {
-        val javaVersion = if (project.name in listOf("api", "model", "proto")) 17 else 21
-        val isPublishedModule = project.name in listOf("api", "model", "proto")
+        val javaVersion = if (isPublishedModule) 17 else 21
         // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older environments),
         // and Java 21 for the rest of the app.
         jvmToolchain(javaVersion)
@@ -208,14 +222,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                             if (!isPublishedModule) {
                                 freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
                             }
-                            freeCompilerArgs.addAll(
-                                "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-                                "-opt-in=kotlin.time.ExperimentalTime",
-                                "-Xexpect-actual-classes",
-                                "-Xcontext-parameters",
-                                "-Xannotation-default-target=param-property",
-                                "-Xskip-prerelease-check",
-                            )
+                            freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
                             if (isJvmTarget) {
                                 freeCompilerArgs.add("-jvm-default=no-compatibility")
                             }
@@ -230,21 +237,13 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            val isPublishedModule = project.name in listOf("api", "model", "proto")
             jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
             allWarningsAsErrors.set(warningsAsErrors)
             if (!isPublishedModule) {
                 freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
             }
-            freeCompilerArgs.addAll(
-                "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-                "-opt-in=kotlin.time.ExperimentalTime",
-                "-Xexpect-actual-classes",
-                "-Xcontext-parameters",
-                "-Xannotation-default-target=param-property",
-                "-Xskip-prerelease-check",
-                "-jvm-default=no-compatibility",
-            )
+            freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
+            freeCompilerArgs.add("-jvm-default=no-compatibility")
         }
     }
 }
