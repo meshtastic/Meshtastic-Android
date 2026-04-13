@@ -19,14 +19,6 @@ package org.meshtastic.feature.map
 import androidx.compose.runtime.Composable
 
 /**
- * Returns `true` if the platform supports offline map tile management.
- * - Android: `true` (backed by MapLibre Native).
- * - iOS: `true` (backed by MapLibre Native).
- * - Desktop/JS: `false` (no offline support).
- */
-@Composable expect fun isOfflineManagerAvailable(): Boolean
-
-/**
  * Renders platform-specific offline map management UI if the platform supports it. The composable receives the current
  * style URI and [cameraState] for downloading the visible region.
  *

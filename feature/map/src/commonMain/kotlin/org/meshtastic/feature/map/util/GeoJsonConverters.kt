@@ -123,7 +123,7 @@ fun positionsToPointFeatures(positions: List<org.meshtastic.proto.Position>): Fe
             if (lat == 0.0 && lng == 0.0) return@mapNotNull null
 
             val props = buildJsonObject {
-                put("time", pos.time ?: 0)
+                put("time", (pos.time ?: 0).toString())
                 put("altitude", pos.altitude ?: 0)
                 put("ground_speed", pos.ground_speed ?: 0)
                 put("sats_in_view", pos.sats_in_view ?: 0)

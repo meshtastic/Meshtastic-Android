@@ -199,6 +199,7 @@ fun MapScreen(
                 LaunchedEffect(cameraState.moveReason) {
                     if (cameraState.moveReason == CameraMoveReason.GESTURE && isLocationTrackingEnabled) {
                         isLocationTrackingEnabled = false
+                        bearingUpdate = BearingUpdate.IGNORE
                     }
                 }
             }

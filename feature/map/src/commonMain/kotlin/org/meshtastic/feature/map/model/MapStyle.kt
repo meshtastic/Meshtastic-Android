@@ -20,9 +20,9 @@ import org.jetbrains.compose.resources.StringResource
 import org.maplibre.compose.style.BaseStyle
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map_style_dark
-import org.meshtastic.core.resources.map_style_hybrid
+import org.meshtastic.core.resources.map_style_light
 import org.meshtastic.core.resources.map_style_osm
-import org.meshtastic.core.resources.map_style_satellite
+import org.meshtastic.core.resources.map_style_road_map
 import org.meshtastic.core.resources.map_style_terrain
 
 /**
@@ -35,15 +35,15 @@ enum class MapStyle(val label: StringResource, val styleUri: String) {
     OpenStreetMap(label = Res.string.map_style_osm, styleUri = "https://tiles.openfreemap.org/styles/liberty"),
 
     /** Clean, light cartographic style via OpenFreeMap Positron. */
-    Satellite(label = Res.string.map_style_satellite, styleUri = "https://tiles.openfreemap.org/styles/positron"),
+    Light(label = Res.string.map_style_light, styleUri = "https://tiles.openfreemap.org/styles/positron"),
 
     /** Topographic style via OpenFreeMap Bright. */
     Terrain(label = Res.string.map_style_terrain, styleUri = "https://tiles.openfreemap.org/styles/bright"),
 
     /** US road-map style via Americana. */
-    Hybrid(label = Res.string.map_style_hybrid, styleUri = "https://americanamap.org/style.json"),
+    RoadMap(label = Res.string.map_style_road_map, styleUri = "https://americanamap.org/style.json"),
 
-    /** Dark mode style via OpenFreeMap Bright (dark palette). */
+    /** Dark mode style via OpenFreeMap Fiord. */
     Dark(label = Res.string.map_style_dark, styleUri = "https://tiles.openfreemap.org/styles/fiord"),
     ;
 
