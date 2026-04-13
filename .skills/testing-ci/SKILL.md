@@ -112,7 +112,7 @@ app/src/screenshotTest/kotlin/org/meshtastic/app/
       ├── NodeDetailComponentPreviews.kt     # Node detail re-exports
       └── ...                                # (27 preview files total)
 
-app/src/screenshotTestGoogleDebug/reference/  # 2,296 committed .png baselines
+app/src/screenshotTestGoogleDebug/reference/  # 328 committed .png baselines
 app/build/reports/screenshotTest/preview/     # HTML diff reports (generated at validation time)
 ```
 
@@ -135,13 +135,11 @@ app/build/reports/screenshotTest/preview/     # HTML diff reports (generated at 
 3. Run `updateGoogleDebugScreenshotTest` to generate baselines, commit the `.png` files.
 
 ### @MultiPreview Coverage
-The `@MultiPreview` annotation (defined in `BasicComponentPreviews.kt`) generates a full cross-product of configuration variants:
-- **Theme**: Light and Dark (`uiMode = Configuration.UI_MODE_NIGHT_YES`)
-- **Font scale**: 1x (default) and 2x (`fontScale = 2f`)
-- **Device form factor**: Phone (default), Foldable (`673dp x 841dp`), Tablet (`1280dp x 800dp`)
-- **Layout direction**: LTR (default) and RTL (light + dark)
+The `@MultiPreview` annotation (defined in `BasicComponentPreviews.kt`) generates **2 variants per test method**: Light Phone and Dark Phone (`uiMode = Configuration.UI_MODE_NIGHT_YES`).
 
-This produces **14 variants per test method** (2 themes × 2 font scales × 3 devices + 2 RTL). With **164 test methods** across **26 test files**, the total is **2,296 reference images**.
+Additional variants (font scale, foldable, tablet, RTL) are commented out in `BasicComponentPreviews.kt` for future re-enablement once CI rendering times allow.
+
+With **164 test methods** across **26 test files**, the total is **328 reference images**.
 
 ### Component Coverage
 Screenshot tests cover components from the following modules:
@@ -161,7 +159,7 @@ Screenshot tests cover components from the following modules:
 - This means screenshot tests start immediately on push — they do NOT wait for lint-check or any other job to complete first.
 - The workflow uses `dorny/paths-filter` to detect UI-related file changes. When no UI files changed, the expensive Gradle validation is skipped and the status gate (`Screenshot Status`) passes immediately.
 - On `merge_group` events, screenshot validation always runs regardless of path filters.
-- The `screenshot-check` job runs on `ubuntu-24.04` with a **30-minute timeout**.
+- The `screenshot-check` job runs on `ubuntu-24.04` with a **45-minute timeout**.
 - On failure, a `GITHUB_STEP_SUMMARY` annotation lists the names of failed tests and directs reviewers to download the `screenshot-diffs` artifact for diff images.
 - The diff report (HTML with side-by-side expected/actual/diff views) is located at `app/build/reports/screenshotTest/preview/` inside the artifact.
 

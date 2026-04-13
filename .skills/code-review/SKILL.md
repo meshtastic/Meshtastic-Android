@@ -1,16 +1,7 @@
 # Skill: Code Review
 
 ## Description
-Perform comprehensive and precise code reviews for the `Meshtastic-Android` project. This skill ensures that incoming changes adhere strictly to the project's architecture guidelines, Kotlin Multiplatform (KMP) conventions, Modern Android Development (MAD) standards, and Jetpack Compose Multiplatform (CMP) best practices.
-
-## Context & Prerequisites
-The `Meshtastic-Android` codebase is a highly modernized Kotlin Multiplatform (KMP) application designed for off-grid, decentralized mesh networks.
-- **Language:** Kotlin (primary), JDK 21 required.
-- **Architecture:** KMP core with Android and Desktop host shells.
-- **UI:** Jetpack Compose Multiplatform (CMP) and Material 3 Adaptive.
-- **Navigation:** JetBrains Navigation 3 (Scene-based).
-- **DI:** Koin Annotations (with K2 compiler plugin).
-- **Async & I/O:** Kotlin Coroutines, Flow, Okio, Ktor.
+Perform comprehensive code reviews for `Meshtastic-Android`, ensuring changes adhere to KMP architecture, Kotlin Multiplatform conventions, MAD standards, and CMP best practices.
 
 ## Code Review Checklist
 
@@ -64,9 +55,3 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 ### 8. ProGuard / R8 Rules
 - [ ] **New Dependencies:** If a new reflection-heavy dependency is added (DI, serialization, JNI, ServiceLoader), verify keep rules exist in **both** `app/proguard-rules.pro` (R8) and `desktop/proguard-rules.pro` (ProGuard). The two files must stay aligned.
 - [ ] **Release Smoke-Test:** For dependency or ProGuard rule changes, verify `assembleRelease` and `./gradlew :desktop:runRelease` succeed.
-
-## Review Output Guidelines
-1. **Be Specific & Constructive:** Provide exact file references and code snippets illustrating the required project pattern.
-2. **Reference the Docs:** Cite `AGENTS.md` and project architecture playbooks to justify change requests (e.g., "Per AGENTS.md, `java.io.*` cannot be used in `commonMain`; please migrate to Okio").
-3. **Enforce Build Health:** Remind authors to run `./gradlew test allTests` locally to verify changes, especially since KMP `test` tasks are ambiguous.
-4. **Praise Good Patterns:** Acknowledge correct usage of complex architecture requirements, like proper Navigation 3 scene transitions or elegant `commonMain` helper extractions.

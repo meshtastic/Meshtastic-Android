@@ -1,21 +1,13 @@
 # Skill: Project Overview & Codebase Map
 
 ## Description
-High-level project context, module directory, namespacing conventions, environment setup, and troubleshooting for Meshtastic-Android.
+Module directory, namespacing conventions, environment setup, and troubleshooting for Meshtastic-Android.
 
-## 1. Project Vision & Architecture
-Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, decentralized mesh networks. The goal is to decouple business logic from the Android framework, enabling expansion to iOS and Desktop while maintaining a high-performance native Android experience.
+- **Build System:** Gradle (Kotlin DSL). JDK 21 REQUIRED. Target SDK: API 36. Min SDK: API 26.
+- **Flavors:** `fdroid` (OSS only) · `google` (Maps + DataDog analytics)
+- **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX). Shared contracts abstracted into `core:ui/commonMain`.
 
-- **Language:** Kotlin (primary), AIDL.
-- **Build System:** Gradle (Kotlin DSL). JDK 21 is REQUIRED.
-- **Target SDK:** API 36. Min SDK: API 26 (Android 8.0).
-- **Flavors:**
-  - `fdroid`: Open source only, no tracking/analytics.
-  - `google`: Includes Google Play Services (Maps) and DataDog analytics (RUM, Session Replay, Compose action tracking, custom `connect` RUM action). 100% sampling, Apple-parity environments ("Local"/"Production").
-- **KMP Modules:** Most `core:*` modules declare `jvm()`, `iosArm64()`, and `iosSimulatorArm64()` targets and compile clean across all.
-- **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
-
-## 2. Codebase Map
+## Codebase Map
 
 | Directory | Description |
 | :--- | :--- |
@@ -47,13 +39,13 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `feature/wifi-provision` | KMP WiFi provisioning via BLE (Nymea protocol). Uses `core:ble` Kable abstractions. |
 | `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi), native Nordic Secure DFU protocol (pure KMP), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
 | `desktop/` | Compose Desktop application. Thin host shell relying on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports. Versioning via `config.properties` + `GitVersionValueSource`. |
-| `mesh_service_example/` | **DEPRECATED — scheduled for removal.** Legacy sample app. See `core/api/README.md` for the current integration guide. |
+| `mesh_service_example/` | **DEPRECATED.** Legacy sample app; not yet removed. See `core/api/README.md` for the current integration guide. |
 
-## 3. Namespacing
+## Namespacing
 - **Standard:** Use the `org.meshtastic.*` namespace for all code.
 - **Legacy:** Maintain the `com.geeksville.mesh` Application ID.
 
-## 4. Environment Setup
+## Environment Setup
 1. **JDK 21 MUST be used** to prevent Gradle sync/build failures.
 2. **Secrets:** Copy `secrets.defaults.properties` to `local.properties`:
    ```properties
@@ -62,7 +54,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
    datadogClientToken=dummy_token
    ```
 
-## 5. Workspace Bootstrap (MUST run before any build)
+## Workspace Bootstrap (MUST run before any build)
 Agents **MUST** perform these steps automatically at the start of every session before running any Gradle task. Do not wait for the user to tell you.
 
 1. **Android SDK:** `ANDROID_HOME` may not be set in agent workspaces. Detect and export it:
@@ -81,17 +73,7 @@ Agents **MUST** perform these steps automatically at the start of every session 
    git submodule update --init
    ```
 
-## 6. Troubleshooting
+## Troubleshooting
 - **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.
-- **Missing Secrets:** Check `local.properties` (see Environment Setup above).
-- **JDK Version:** JDK 21 is required.
-- **SDK location not found:** See Workspace Bootstrap step 1 above.
-- **Proto generation failures:** See Workspace Bootstrap step 2 above.
-- **Configuration Cache:** Add `--no-configuration-cache` flag if cache-related issues persist.
-- **Koin Injection Failures:** Verify the KMP component is included in `app` root module wiring (`AppKoinModule`).
-
-## Reference Anchors
-- **KMP Migration Status:** `docs/kmp-status.md`
-- **Roadmap:** `docs/roadmap.md`
-- **Architecture Decision Records:** `docs/decisions/`
-- **Version Catalog:** `gradle/libs.versions.toml`
+- **Configuration Cache:** Add `--no-configuration-cache` if cache-related issues persist.
+- **Koin Injection Failures:** Verify the component is included in `AppKoinModule`.
