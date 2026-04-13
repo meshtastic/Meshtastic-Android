@@ -20,6 +20,7 @@ import org.maplibre.compose.style.BaseStyle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class MapStyleTest {
 
@@ -35,7 +36,7 @@ class MapStyleTest {
     @Test
     fun allStyles_haveNonBlankUri() {
         for (style in MapStyle.entries) {
-            assert(style.styleUri.isNotBlank()) { "${style.name} has a blank styleUri" }
+            assertTrue(style.styleUri.isNotBlank(), "${style.name} has a blank styleUri")
         }
     }
 

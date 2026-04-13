@@ -28,10 +28,10 @@ import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
-import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.feature.map.model.MapStyle
+import org.meshtastic.feature.map.util.computeBoundingBox
 import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.meshtastic.proto.Position
 
@@ -64,16 +64,7 @@ fun TracerouteMap(
 
     val center = remember(geoPositions) { geoPositions.firstOrNull() }
 
-    val boundingBox =
-        remember(geoPositions) {
-            if (geoPositions.size < 2) return@remember null
-            val lats = geoPositions.map { it.latitude }
-            val lngs = geoPositions.map { it.longitude }
-            BoundingBox(
-                southwest = org.maplibre.spatialk.geojson.Position(longitude = lngs.min(), latitude = lats.min()),
-                northeast = org.maplibre.spatialk.geojson.Position(longitude = lngs.max(), latitude = lats.max()),
-            )
-        }
+    val boundingBox = remember(geoPositions) { computeBoundingBox(geoPositions) }
 
     val cameraState =
         rememberCameraState(

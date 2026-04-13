@@ -61,6 +61,9 @@ import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.util.MARKER_STROKE_WIDTH
+import org.meshtastic.feature.map.util.NODE_MARKER_RADIUS
+import org.meshtastic.feature.map.util.PRECISION_CIRCLE_STROKE_ALPHA
 import org.meshtastic.feature.map.util.nodesToFeatureCollection
 import org.meshtastic.feature.map.util.waypointsToFeatureCollection
 import org.maplibre.spatialk.geojson.Position as GeoPosition
@@ -69,7 +72,6 @@ private val NodeMarkerColor = Color(0xFF6750A4)
 private const val CLUSTER_RADIUS = 50
 private const val CLUSTER_MIN_POINTS = 10
 private const val PRECISION_CIRCLE_FILL_ALPHA = 0.1f
-private const val PRECISION_CIRCLE_STROKE_ALPHA = 0.3f
 
 /**
  * Ground resolution at the equator: meters per pixel = 156543.03 / 2^zoom. We use an exponential(2) interpolation with
@@ -198,7 +200,7 @@ private fun NodeMarkerLayers(
         radius = const(20.dp),
         color = const(NodeMarkerColor), // Material primary
         opacity = const(CLUSTER_OPACITY),
-        strokeWidth = const(2.dp),
+        strokeWidth = const(MARKER_STROKE_WIDTH),
         strokeColor = const(Color.White),
         onClick = { features ->
             val cluster = features.firstOrNull() ?: return@CircleLayer ClickResult.Pass
@@ -230,9 +232,9 @@ private fun NodeMarkerLayers(
         id = "node-markers",
         source = nodesSource,
         filter = !feature.has("cluster"),
-        radius = const(8.dp),
+        radius = const(NODE_MARKER_RADIUS),
         color = feature["background_color"].convertToColor(const(NodeMarkerColor)),
-        strokeWidth = const(2.dp),
+        strokeWidth = const(MARKER_STROKE_WIDTH),
         strokeColor = const(Color.White),
         onClick = { features ->
             val nodeNum = features.firstOrNull()?.properties?.get("node_num")?.toString()?.toIntOrNull()

@@ -19,13 +19,13 @@ package org.meshtastic.feature.map.model
 import kotlin.uuid.Uuid
 
 /** Supported custom overlay layer formats. */
-enum class LayerType {
+internal enum class LayerType {
     KML,
     GEOJSON,
 }
 
 /** A user-importable map overlay layer (KML or GeoJSON file). */
-data class MapLayerItem(
+internal data class MapLayerItem(
     val id: String = Uuid.random().toString(),
     val name: String,
     val uriString: String? = null,

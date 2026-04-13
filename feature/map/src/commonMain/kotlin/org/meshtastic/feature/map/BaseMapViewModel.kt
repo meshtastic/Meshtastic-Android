@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -43,6 +43,7 @@ import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.core.common.util.ioDispatcher as defaultIoDispatcher
 
 /**
  * Shared base ViewModel for the map feature, providing node data, waypoints, map filter preferences, and traceroute
@@ -54,6 +55,7 @@ open class BaseMapViewModel(
     protected val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
+    private val ioDispatcher: CoroutineDispatcher = defaultIoDispatcher,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
@@ -208,14 +210,14 @@ open class BaseMapViewModel(
  * @property nodesForMarkers Nodes to render as map markers (with snapshot positions when available).
  * @property nodeLookup Node-num-keyed map for polyline coordinate resolution.
  */
-data class TracerouteNodeSelection(
+internal data class TracerouteNodeSelection(
     val overlayNodeNums: Set<Int>,
     val nodesForMarkers: List<Node>,
     val nodeLookup: Map<Int, Node>,
 )
 
 /** Convenience extension that delegates to [tracerouteNodeSelection] using the VM's [getNodeOrFallback]. */
-fun BaseMapViewModel.tracerouteNodeSelection(
+internal fun BaseMapViewModel.tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
     nodes: List<Node>,
@@ -232,7 +234,7 @@ fun BaseMapViewModel.tracerouteNodeSelection(
  *
  * @param getNodeOrFallback Provides a [Node] for a given num, falling back to a stub if not in the DB.
  */
-fun tracerouteNodeSelection(
+internal fun tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
     nodes: List<Node>,

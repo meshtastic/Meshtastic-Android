@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map
 
 import androidx.lifecycle.SavedStateHandle
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +35,7 @@ import org.meshtastic.feature.map.model.MapStyle
 import org.meshtastic.feature.map.util.COORDINATE_SCALE
 import org.meshtastic.proto.Waypoint
 import org.maplibre.spatialk.geojson.Position as GeoPosition
+import org.meshtastic.core.common.util.ioDispatcher as defaultIoDispatcher
 
 /**
  * Unified map ViewModel replacing the previous Google and F-Droid flavor-specific ViewModels.
@@ -49,7 +51,8 @@ class MapViewModel(
     packetRepository: PacketRepository,
     radioController: RadioController,
     savedStateHandle: SavedStateHandle,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController) {
+    ioDispatcher: CoroutineDispatcher = defaultIoDispatcher,
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController, ioDispatcher) {
 
     /** Currently selected waypoint to focus on map. */
     private val selectedWaypointIdInternal = MutableStateFlow<Int?>(savedStateHandle.get<Int?>("waypointId"))
