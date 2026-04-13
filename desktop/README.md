@@ -25,14 +25,18 @@ A Compose Desktop application target — the first full non-Android target for t
 
 ## ProGuard / Minification
 
-Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source.
+Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source. Rules are aligned with the Android R8 rules in `app/proguard-rules.pro` — both targets share the same anti-class-merging philosophy.
 
 **Configuration:**
 - `build.gradle.kts` — `buildTypes.release.proguard` block enables ProGuard with `optimize.set(true)` and `obfuscate.set(false)`.
-- `proguard-rules.pro` — Comprehensive keep-rules for all reflection/JNI-sensitive dependencies (Koin, kotlinx-serialization, Wire protobuf, Room KMP, Ktor, Kable BLE, Coil, SQLite JNI, Compose Multiplatform resources).
+- `proguard-rules.pro` — Keep-rules for reflection/JNI-sensitive dependencies (Koin, kotlinx-serialization, Wire protobuf, Room KMP `androidx.room3`, Ktor, Kable BLE, Coil, SQLite JNI, Compose Multiplatform resources) and an anti-merge rule for Compose animation classes.
+
+**Key rules:**
+- **Compose animation anti-merge** (`-keep,allowshrinking,allowobfuscation class androidx.compose.animation.** { *; }`) — Prevents ProGuard's optimizer from merging animation class hierarchies (e.g. `EnterTransition`/`ExitTransition` into `*Impl`), which causes animations to silently snap. Same rule as Android.
+- **Room KMP** — Uses `androidx.room3` package path (Room KMP 3.x).
 
 **Troubleshooting ProGuard issues:**
-- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule in `proguard-rules.pro`.
+- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule in `proguard-rules.pro` **and** the corresponding rule in `app/proguard-rules.pro` to keep both targets aligned.
 - To debug which classes ProGuard removes, temporarily add `-printusage proguard-usage.txt` to the rules file and inspect the output in `desktop/proguard-usage.txt`.
 - To see the full mapping of optimizations applied, add `-printseeds proguard-seeds.txt`.
 - Run `./gradlew :desktop:runRelease` for a quick smoke-test of the minified app before packaging.
