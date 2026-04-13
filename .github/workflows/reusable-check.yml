@@ -109,7 +109,7 @@ jobs:
   test-shards:
     runs-on: ubuntu-24.04
     permissions:
-      contents: write  # Required for screenshot auto-commit on same-repo PRs
+      contents: read
     timeout-minutes: 45
     needs: lint-check
     if: inputs.run_unit_tests == true
@@ -239,6 +239,8 @@ jobs:
         run: ./gradlew :app:updateGoogleDebugScreenshotTest -Pci=true --scan
 
       - name: Push updated screenshot references
+        # NOTE: Requires the calling workflow to grant `contents: write` permission.
+        # Fork PRs always get read-only tokens regardless.
         if: steps.screenshotsrecord.outcome == 'success'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
