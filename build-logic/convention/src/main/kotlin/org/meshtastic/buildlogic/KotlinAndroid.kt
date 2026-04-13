@@ -72,6 +72,21 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
 
 /** Configure Kotlin Multiplatform options */
 internal fun Project.configureKotlinMultiplatform() {
+    // Skiko is an internal CMP implementation detail; third-party KMP libraries
+    // (e.g. coil3) can carry an older skiko transitive requirement that Gradle
+    // upgrades to the CMP-bundled version, triggering a "Skiko dependencies'
+    // versions are incompatible" warning from CMP's compatibility checker.
+    // Force the version to match CMP so the checker sees a consistent graph.
+    val skikoVersion = libs.version("skiko")
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.jetbrains.skiko") {
+                useVersion(skikoVersion)
+                because("Align Skiko with the version bundled by Compose Multiplatform")
+            }
+        }
+    }
+
     extensions.configure<KotlinMultiplatformExtension> {
         // Standard KMP targets for Meshtastic
         jvm()

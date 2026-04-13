@@ -35,6 +35,11 @@ turbine = "1.2.1"
 
 # Compose Multiplatform
 compose-multiplatform = "1.11.0-beta02"
+# Skiko is an internal CMP implementation detail. Pin it to the version shipped by CMP to
+# silence the "Skiko dependencies' versions are incompatible" warning emitted when transitive
+# dependencies (e.g. coil3) carry an older skiko requirement that Gradle then upgrades to the
+# CMP-bundled version. Bump this together with compose-multiplatform.
+skiko = "0.144.5"
 compose-multiplatform-material3 = "1.11.0-alpha06"
 androidx-compose-material = "1.7.8"
 jetbrains-adaptive = "1.3.0-alpha06"
