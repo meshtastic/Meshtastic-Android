@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
@@ -44,8 +43,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
@@ -452,23 +450,12 @@ private fun UpdateUnreadCountPaged(
     onUnreadChange: (Long, Long) -> Unit,
 ) {
     val currentOnUnreadChange by rememberUpdatedState(onUnreadChange)
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var isResumed by remember {
-        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
-    }
+    var isResumed by remember { mutableStateOf(true) }
 
     // Track lifecycle state changes
-    DisposableEffect(lifecycleOwner) {
-        val observer =
-            androidx.lifecycle.LifecycleEventObserver { _, event ->
-                when (event) {
-                    Lifecycle.Event.ON_RESUME -> isResumed = true
-                    Lifecycle.Event.ON_PAUSE -> isResumed = false
-                    else -> {}
-                }
-            }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    LifecycleResumeEffect(Unit) {
+        isResumed = true
+        onPauseOrDispose { isResumed = false }
     }
 
     // Track remote message count to restart effect when remote messages change
