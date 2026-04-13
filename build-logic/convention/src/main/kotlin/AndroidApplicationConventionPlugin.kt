@@ -40,14 +40,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 configureKotlinAndroid(this)
                 
                 defaultConfig {
-                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                     vectorDrawables.useSupportLibrary = true
                 }
 
-                testOptions {
-                    animationsDisabled = true
-                    unitTests.isReturnDefaultValues = true
-                }
 
                 buildTypes {
                     getByName("release") {

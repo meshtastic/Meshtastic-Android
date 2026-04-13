@@ -129,27 +129,17 @@ kotlin {
 
 ### Example: Adding Android-specific test config
 
-**Pattern:** Add to `AndroidLibraryConventionPlugin.kt`:
+**Pattern:** Test options (`animationsDisabled`, `testInstrumentationRunner`, `unitTests.isReturnDefaultValues`) are centralized in `configureKotlinAndroid()` via `CommonExtension`, so they apply to both app and library modules automatically. To add new test config, update `KotlinAndroid.kt::configureKotlinAndroid()`:
 
 ```kotlin
-extensions.configure<LibraryExtension> {
-    configureKotlinAndroid(this)
-    testOptions.apply {
-        animationsDisabled = true
-        // NEW: Android-specific test config
-        unitTests.isIncludeAndroidResources = true
-    }
-}
-```
-
-**Alternative:** If it applies to both app and library, consider extracting a function:
-
-```kotlin
-internal fun Project.configureAndroidTestOptions() {
-    extensions.configure<CommonExtension> {
-        testOptions.apply {
+internal fun Project.configureKotlinAndroid(
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
+) {
+    commonExtension.apply {
+        testOptions {
             animationsDisabled = true
-            // Shared test options
+            unitTests.isReturnDefaultValues = true
+            // NEW: Add shared test options here
         }
     }
 }
@@ -177,6 +167,8 @@ internal fun Project.configureAndroidTestOptions() {
 | `AndroidApplicationFlavorsConventionPlugin` ≈ `AndroidLibraryFlavorsConventionPlugin` | **Kept Separate** | Different extension types; small duplication; explicit intent |
 | `configureKmpTestDependencies()` (7 modules) | **Consolidated** | Large duplication; single source of truth; all KMP modules benefit |
 | `jvmAndroidMain` hierarchy setup (4 modules) | **Consolidated** | Shared KMP hierarchy pattern; avoids manual `dependsOn(...)` edges and hierarchy warnings |
+| `PUBLISHED_MODULES` set (4 usages) | **Consolidated** | Was repeated as `listOf(...)` in 4 places; now a single `setOf(...)` constant in `KotlinAndroid.kt` |
+| `SHARED_COMPILER_ARGS` list (2 code paths) | **Consolidated** | Eliminates duplicated `-opt-in` flags between KMP target compilations and `KotlinCompile` task configuration |
 
 ## Testing Convention Changes
 
