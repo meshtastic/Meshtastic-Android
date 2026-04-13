@@ -361,7 +361,6 @@ private fun showTracerouteDetail(
         responseLogUuid = result.uuid,
         overlay = overlay,
         onViewOnMap = onViewOnMap,
-        onShowError = {},
     )
 }
 

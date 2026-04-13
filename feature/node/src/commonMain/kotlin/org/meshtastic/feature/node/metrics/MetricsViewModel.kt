@@ -277,7 +277,6 @@ open class MetricsViewModel(
         responseLogUuid: String,
         overlay: TracerouteOverlay?,
         onViewOnMap: (Int, String) -> Unit,
-        onShowError: (StringResource) -> Unit,
     ) {
         viewModelScope.launch {
             val snapshotPositions = tracerouteSnapshotRepository.getSnapshotPositions(responseLogUuid).first()
@@ -300,7 +299,11 @@ open class MetricsViewModel(
                         )
                     val errorRes = availability.toMessageRes()
                     if (errorRes != null) {
-                        onShowError(errorRes)
+                        // Post the error alert after the current alert is dismissed to avoid
+                        // the wrapping dismissAlert() in AlertManager immediately clearing it.
+                        viewModelScope.launch {
+                            alertManager.showAlert(titleRes = Res.string.traceroute, messageRes = errorRes)
+                        }
                     } else {
                         onViewOnMap(requestId, responseLogUuid)
                     }
