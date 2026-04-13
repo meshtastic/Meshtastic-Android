@@ -21,6 +21,7 @@ package org.meshtastic.core.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -102,18 +103,22 @@ fun <T> Flow<T>.asUiState(stopTimeout: Duration = 5.seconds): StateFlow<UiState<
  */
 context(viewModel: ViewModel)
 fun safeLaunch(
+    dispatcher: CoroutineDispatcher? = null,
     errorEvents: MutableSharedFlow<UiText>? = null,
     tag: String? = null,
     block: suspend CoroutineScope.() -> Unit,
-): Job = viewModel.viewModelScope.launch {
-    try {
-        block()
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        val label = tag ?: "safeLaunch"
-        Logger.e(e) { "[$label] Unhandled exception" }
-        errorEvents?.emit(UiText.DynamicString(e.message ?: "Unknown error"))
+): Job {
+    val context = dispatcher ?: viewModel.viewModelScope.coroutineContext
+    return viewModel.viewModelScope.launch(context) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            val label = tag ?: "safeLaunch"
+            Logger.e(e) { "[$label] Unhandled exception" }
+            errorEvents?.emit(UiText.DynamicString(e.message ?: "Unknown error"))
+        }
     }
 }
 

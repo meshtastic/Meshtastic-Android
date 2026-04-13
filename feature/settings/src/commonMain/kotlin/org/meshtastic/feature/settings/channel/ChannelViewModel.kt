@@ -17,11 +17,9 @@
 package org.meshtastic.feature.settings.channel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.RadioController
@@ -30,6 +28,7 @@ import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.util.getChannelList
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -86,7 +85,7 @@ class ChannelViewModel(
     }
 
     /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {
+    fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
         getChannelList(channelSet.settings, channels.value.settings).forEach(::setChannel)
         radioConfigRepository.replaceAllSettings(channelSet.settings)
 
@@ -97,12 +96,12 @@ class ChannelViewModel(
     }
 
     fun setChannel(channel: Channel) {
-        viewModelScope.launch { radioController.setLocalChannel(channel) }
+        safeLaunch(tag = "setChannel") { radioController.setLocalChannel(channel) }
     }
 
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: Config) {
-        viewModelScope.launch { radioController.setLocalConfig(config) }
+        safeLaunch(tag = "setConfig") { radioController.setLocalConfig(config) }
     }
 
     fun trackShare() {

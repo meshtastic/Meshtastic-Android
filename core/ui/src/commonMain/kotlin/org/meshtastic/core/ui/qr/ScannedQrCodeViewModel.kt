@@ -17,12 +17,11 @@
 package org.meshtastic.core.ui.qr
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.util.getChannelList
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
@@ -40,7 +39,7 @@ class ScannedQrCodeViewModel(
     private val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
     /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {
+    fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
         getChannelList(channelSet.settings, channels.value.settings).forEach(::setChannel)
         radioConfigRepository.replaceAllSettings(channelSet.settings)
 
@@ -51,11 +50,11 @@ class ScannedQrCodeViewModel(
     }
 
     private fun setChannel(channel: Channel) {
-        viewModelScope.launch { radioController.setLocalChannel(channel) }
+        safeLaunch(tag = "setChannel") { radioController.setLocalChannel(channel) }
     }
 
     // Set the radio config (also updates our saved copy in preferences)
     private fun setConfig(config: Config) {
-        viewModelScope.launch { radioController.setLocalConfig(config) }
+        safeLaunch(tag = "setConfig") { radioController.setLocalConfig(config) }
     }
 }

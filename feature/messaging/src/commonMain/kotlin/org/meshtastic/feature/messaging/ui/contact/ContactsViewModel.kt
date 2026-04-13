@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.Contact
@@ -37,6 +36,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
 import kotlin.collections.map as collectionsMap
@@ -188,17 +188,20 @@ class ContactsViewModel(
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
     fun deleteContacts(contacts: List<String>) =
-        viewModelScope.launch(ioDispatcher) { packetRepository.deleteContacts(contacts) }
+        safeLaunch(dispatcher = ioDispatcher, tag = "deleteContacts") { packetRepository.deleteContacts(contacts) }
 
-    fun markAllAsRead() = viewModelScope.launch(ioDispatcher) { packetRepository.clearAllUnreadCounts() }
+    fun markAllAsRead() =
+        safeLaunch(dispatcher = ioDispatcher, tag = "markAllAsRead") { packetRepository.clearAllUnreadCounts() }
 
     fun setMuteUntil(contacts: List<String>, until: Long) =
-        viewModelScope.launch(ioDispatcher) { packetRepository.setMuteUntil(contacts, until) }
+        safeLaunch(dispatcher = ioDispatcher, tag = "setMuteUntil") { packetRepository.setMuteUntil(contacts, until) }
 
     fun getContactSettings() = packetRepository.getContactSettings()
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        viewModelScope.launch(ioDispatcher) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
+        safeLaunch(dispatcher = ioDispatcher, tag = "setContactFilteringDisabled") {
+            packetRepository.setContactFilteringDisabled(contactKey, disabled)
+        }
     }
 
     /**

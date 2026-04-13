@@ -62,6 +62,7 @@ import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
 import org.meshtastic.core.resources.timeout
 import org.meshtastic.core.ui.util.getChannelList
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.proto.AdminMessage
@@ -385,46 +386,34 @@ open class RadioConfigViewModel(
     }
 
     fun importProfile(uri: MeshtasticUri, onResult: (DeviceProfile) -> Unit) {
-        viewModelScope.launch {
-            try {
-                var profile: DeviceProfile? = null
-                fileService.read(uri) { source ->
-                    importProfileUseCase(source).onSuccess { profile = it }.onFailure { throw it }
-                }
-                profile?.let { onResult(it) }
-            } catch (ex: Exception) {
-                Logger.e { "Import DeviceProfile error: ${ex.message}" }
+        safeLaunch(tag = "importProfile") {
+            var profile: DeviceProfile? = null
+            fileService.read(uri) { source ->
+                importProfileUseCase(source).onSuccess { profile = it }.onFailure { throw it }
             }
+            profile?.let { onResult(it) }
         }
     }
 
     fun exportProfile(uri: MeshtasticUri, profile: DeviceProfile) {
-        viewModelScope.launch {
-            try {
-                fileService.write(uri) { sink ->
-                    exportProfileUseCase(sink, profile).onSuccess { /* Success */ }.onFailure { throw it }
-                }
-            } catch (ex: Exception) {
-                Logger.e { "Can't write file error: ${ex.message}" }
+        safeLaunch(tag = "exportProfile") {
+            fileService.write(uri) { sink ->
+                exportProfileUseCase(sink, profile).onSuccess { /* Success */ }.onFailure { throw it }
             }
         }
     }
 
     fun exportSecurityConfig(uri: MeshtasticUri, securityConfig: Config.SecurityConfig) {
-        viewModelScope.launch {
-            try {
-                fileService.write(uri) { sink ->
-                    exportSecurityConfigUseCase(sink, securityConfig).onSuccess { /* Success */ }.onFailure { throw it }
-                }
-            } catch (ex: Exception) {
-                Logger.e { "Can't write security keys JSON error: ${ex.message}" }
+        safeLaunch(tag = "exportSecurityConfig") {
+            fileService.write(uri) { sink ->
+                exportSecurityConfigUseCase(sink, securityConfig).onSuccess { /* Success */ }.onFailure { throw it }
             }
         }
     }
 
     fun installProfile(protobuf: DeviceProfile) {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
+        safeLaunch(tag = "installProfile") { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
     }
 
     fun clearPacketResponse() {

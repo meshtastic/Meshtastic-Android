@@ -37,6 +37,7 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -185,11 +186,11 @@ open class ScannerViewModel(
 
     fun addRecentAddress(address: String, name: String) {
         if (!address.startsWith("t")) return
-        viewModelScope.launch { recentAddressesDataSource.add(RecentAddress(address, name)) }
+        safeLaunch(tag = "addRecentAddress") { recentAddressesDataSource.add(RecentAddress(address, name)) }
     }
 
     fun removeRecentAddress(address: String) {
-        viewModelScope.launch { recentAddressesDataSource.remove(address) }
+        safeLaunch(tag = "removeRecentAddress") { recentAddressesDataSource.remove(address) }
     }
 
     /**
@@ -221,7 +222,7 @@ open class ScannerViewModel(
             }
         }
         is DeviceListEntry.Tcp -> {
-            viewModelScope.launch {
+            safeLaunch(tag = "onSelectedTcp") {
                 radioPrefs.setDevName(it.name)
                 addRecentAddress(it.fullAddress, it.name)
                 changeDeviceAddress(it.fullAddress)

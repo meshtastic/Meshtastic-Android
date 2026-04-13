@@ -17,10 +17,8 @@
 package org.meshtastic.feature.settings.radio
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowSeconds
@@ -31,6 +29,7 @@ import org.meshtastic.core.resources.are_you_sure
 import org.meshtastic.core.resources.clean_node_database_confirmation
 import org.meshtastic.core.resources.clean_now
 import org.meshtastic.core.ui.util.AlertManager
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 
 private const val MIN_DAYS_THRESHOLD = 7f
 
@@ -65,7 +64,7 @@ class CleanNodeDatabaseViewModel(
 
     /** Updates the list of nodes to be deleted based on the current filter criteria. */
     fun getNodesToDelete() {
-        viewModelScope.launch {
+        safeLaunch(tag = "getNodesToDelete") {
             _nodesToDelete.value =
                 cleanNodeDatabaseUseCase.getNodesToClean(
                     olderThanDays = _olderThanDays.value,
@@ -76,7 +75,7 @@ class CleanNodeDatabaseViewModel(
     }
 
     fun requestCleanNodes() {
-        viewModelScope.launch {
+        safeLaunch(tag = "requestCleanNodes") {
             val count = _nodesToDelete.value.size
             val message = getString(Res.string.clean_node_database_confirmation, count)
             alertManager.showAlert(
@@ -93,7 +92,7 @@ class CleanNodeDatabaseViewModel(
      * them.
      */
     fun cleanNodes() {
-        viewModelScope.launch {
+        safeLaunch(tag = "cleanNodes") {
             val nodeNums = _nodesToDelete.value.map { it.num }
             cleanNodeDatabaseUseCase.cleanNodes(nodeNums)
             // Clear the list after deletion or if it was empty
