@@ -16,23 +16,12 @@
  */
 package org.meshtastic.feature.map
 
-import android.Manifest
 import androidx.compose.runtime.Composable
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import org.maplibre.compose.location.LocationProvider
-import org.maplibre.compose.location.rememberDefaultLocationProvider
+import org.maplibre.compose.camera.CameraState
 
-@OptIn(ExperimentalPermissionsApi::class)
+@Composable actual fun isOfflineManagerAvailable(): Boolean = false
+
 @Composable
-actual fun rememberLocationProviderOrNull(): LocationProvider? {
-    val locationPermissions =
-        rememberMultiplePermissionsState(
-            permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-        )
-    return if (locationPermissions.allPermissionsGranted) {
-        rememberDefaultLocationProvider()
-    } else {
-        null
-    }
+actual fun OfflineMapContent(styleUri: String, cameraState: CameraState) {
+    // Offline map management is not available on Desktop.
 }

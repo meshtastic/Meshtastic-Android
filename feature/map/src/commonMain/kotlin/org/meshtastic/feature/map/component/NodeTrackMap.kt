@@ -24,7 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.map.GestureOptions
+import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.feature.map.model.MapStyle
 import org.meshtastic.proto.Position
@@ -85,7 +88,13 @@ fun NodeTrackMap(
         boundingBox?.let { cameraState.animateTo(boundingBox = it, padding = PaddingValues(BOUNDS_PADDING_DP.dp)) }
     }
 
-    MaplibreMap(modifier = modifier, baseStyle = MapStyle.OpenStreetMap.toBaseStyle(), cameraState = cameraState) {
+    MaplibreMap(
+        modifier = modifier,
+        baseStyle = MapStyle.OpenStreetMap.toBaseStyle(),
+        cameraState = cameraState,
+        options =
+        MapOptions(gestureOptions = GestureOptions.RotationLocked, ornamentOptions = OrnamentOptions.AllEnabled),
+    ) {
         NodeTrackLayers(
             positions = positions,
             selectedPositionTime = selectedPositionTime,
