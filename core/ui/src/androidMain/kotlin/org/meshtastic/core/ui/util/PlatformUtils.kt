@@ -36,6 +36,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.MeshtasticUri
 import java.net.URLEncoder
@@ -215,4 +216,53 @@ actual fun rememberOpenLocationSettings(): () -> Unit {
         ) { _ ->
         }
     return remember(launcher) { { launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)) } }
+}
+
+@Composable
+actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // On pre-Android 12, BLE scanning is gated by location permission, not Bluetooth.
+        return remember { { onGranted() } }
+    }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.values.all { it }) onGranted() else onDenied()
+        }
+    return remember(launcher) {
+        {
+            launcher.launch(
+                arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT),
+            )
+        }
+    }
+}
+
+@Composable
+actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+        // Pre-Android 13, no runtime notification permission required.
+        return remember { { onGranted() } }
+    }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) onGranted() else onDenied()
+        }
+    return remember(launcher) { { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) } }
+}
+
+@Composable
+actual fun isLocationPermissionGranted(): Boolean {
+    val context = LocalContext.current
+    return remember(context) {
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+}
+
+@Composable
+actual fun isGpsDisabled(): Boolean {
+    val context = LocalContext.current
+    return remember(context) { context.gpsDisabled() }
 }

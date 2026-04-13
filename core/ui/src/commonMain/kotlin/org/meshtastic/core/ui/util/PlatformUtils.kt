@@ -64,3 +64,21 @@ expect fun rememberSaveFileLauncher(
 
 /** Returns a launcher to open the platform's location settings. */
 @Composable expect fun rememberOpenLocationSettings(): () -> Unit
+
+/** Returns a launcher to request Bluetooth scan + connect permissions. No-op on platforms without runtime BLE perms. */
+@Composable expect fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
+
+/** Returns a launcher to request the POST_NOTIFICATIONS permission. No-op on platforms that don't require it. */
+@Composable
+expect fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
+
+/**
+ * Returns whether location permissions are currently granted. Always `true` on platforms without runtime permissions.
+ */
+@Composable expect fun isLocationPermissionGranted(): Boolean
+
+/**
+ * Returns whether GPS/location services are currently disabled at the system level. Always `false` on platforms where
+ * this concept doesn't apply.
+ */
+@Composable expect fun isGpsDisabled(): Boolean
