@@ -37,12 +37,14 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.model.MapStyle
+import org.meshtastic.feature.map.util.MARKER_STROKE_WIDTH
+import org.meshtastic.feature.map.util.NODE_MARKER_RADIUS
+import org.meshtastic.feature.map.util.PRECISION_CIRCLE_STROKE_ALPHA
 import org.meshtastic.feature.map.util.precisionBitsToMeters
 import org.meshtastic.feature.map.util.toGeoPositionOrNull
 
 private const val DEFAULT_ZOOM = 15.0
 private const val PRECISION_CIRCLE_FILL_ALPHA = 0.15f
-private const val PRECISION_CIRCLE_STROKE_ALPHA = 0.3f
 
 /**
  * A compact, non-interactive map showing a single node's position. Used in node detail screens. Replaces both the
@@ -74,14 +76,14 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             CircleLayer(
                 id = "inline-node-marker",
                 source = source,
-                radius = const(8.dp),
+                radius = const(NODE_MARKER_RADIUS),
                 color = const(Color(node.colors.second)),
-                strokeWidth = const(2.dp),
+                strokeWidth = const(MARKER_STROKE_WIDTH),
                 strokeColor = const(Color.White),
             )
 
             // Precision circle — radius computed from precision_meters using latitude-aware metersPerDp
-            val precisionMeters = precisionBitsToMeters(position.precision_bits ?: 0)
+            val precisionMeters = precisionBitsToMeters(position.precision_bits)
             val metersPerDp = cameraState.metersPerDpAtTarget
             if (precisionMeters > 0 && metersPerDp > 0) {
                 val radiusDp = (precisionMeters / metersPerDp).dp

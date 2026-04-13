@@ -31,7 +31,7 @@ private const val MIN_PRECISION_BITS = 10
 private const val MAX_PRECISION_BITS = 19
 
 /** Convert a list of nodes to a GeoJSON [FeatureCollection] for map rendering. */
-fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): FeatureCollection<Point, JsonObject> {
+internal fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): FeatureCollection<Point, JsonObject> {
     val features =
         nodes.mapNotNull { node ->
             val pos = node.validPosition ?: return@mapNotNull null
@@ -51,8 +51,8 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
                 put("rssi", node.rssi)
                 put("foreground_color", intToHexColor(colors.first))
                 put("background_color", intToHexColor(colors.second))
-                put("has_precision", (pos.precision_bits ?: 0) in MIN_PRECISION_BITS..MAX_PRECISION_BITS)
-                put("precision_meters", precisionBitsToMeters(pos.precision_bits ?: 0))
+                put("has_precision", pos.precision_bits in MIN_PRECISION_BITS..MAX_PRECISION_BITS)
+                put("precision_meters", precisionBitsToMeters(pos.precision_bits))
             }
 
             Feature(geometry = Point(geoPos), properties = props)
@@ -62,7 +62,7 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
 }
 
 /** Convert waypoints to a GeoJSON [FeatureCollection]. */
-fun waypointsToFeatureCollection(waypoints: Map<Int, DataPacket>): FeatureCollection<Point, JsonObject> {
+internal fun waypointsToFeatureCollection(waypoints: Map<Int, DataPacket>): FeatureCollection<Point, JsonObject> {
     val features =
         waypoints.values.mapNotNull { packet ->
             val waypoint = packet.waypoint ?: return@mapNotNull null
@@ -87,7 +87,9 @@ fun waypointsToFeatureCollection(waypoints: Map<Int, DataPacket>): FeatureCollec
 }
 
 /** Convert position history to a GeoJSON [LineString] for track rendering. */
-fun positionsToLineString(positions: List<org.meshtastic.proto.Position>): FeatureCollection<LineString, JsonObject> {
+internal fun positionsToLineString(
+    positions: List<org.meshtastic.proto.Position>,
+): FeatureCollection<LineString, JsonObject> {
     val coords = positions.mapNotNull { pos -> toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) }
 
     if (coords.size < 2) return FeatureCollection(emptyList())
@@ -100,16 +102,18 @@ fun positionsToLineString(positions: List<org.meshtastic.proto.Position>): Featu
 }
 
 /** Convert position history to individual point features with time metadata. */
-fun positionsToPointFeatures(positions: List<org.meshtastic.proto.Position>): FeatureCollection<Point, JsonObject> {
+internal fun positionsToPointFeatures(
+    positions: List<org.meshtastic.proto.Position>,
+): FeatureCollection<Point, JsonObject> {
     val features =
         positions.mapNotNull { pos ->
             val geoPos = toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) ?: return@mapNotNull null
 
             val props = buildJsonObject {
-                put("time", (pos.time ?: 0).toString())
+                put("time", pos.time.toString())
                 put("altitude", pos.altitude ?: 0)
                 put("ground_speed", pos.ground_speed ?: 0)
-                put("sats_in_view", pos.sats_in_view ?: 0)
+                put("sats_in_view", pos.sats_in_view)
             }
 
             Feature(geometry = Point(geoPos), properties = props)
@@ -120,7 +124,7 @@ fun positionsToPointFeatures(positions: List<org.meshtastic.proto.Position>): Fe
 
 /** Approximate meters of positional uncertainty from precision_bits (10-19). */
 @Suppress("MagicNumber")
-fun precisionBitsToMeters(precisionBits: Int): Double = when (precisionBits) {
+internal fun precisionBitsToMeters(precisionBits: Int): Double = when (precisionBits) {
     10 -> 5886.0
     11 -> 2944.0
     12 -> 1472.0
@@ -137,12 +141,11 @@ fun precisionBitsToMeters(precisionBits: Int): Double = when (precisionBits) {
 private const val PIN_EMOJI = "\uD83D\uDCCD" // U+1F4CD Round Pushpin — same as DEFAULT_EMOJI in EditWaypointDialog
 
 /**
- * Wraps [FeatureCollection] constructor with an unchecked cast to the desired type parameters. Centralizes the single
- * unavoidable cast required by the spatialk GeoJSON API.
+ * Wraps [FeatureCollection] constructor with the desired type parameters. Centralizes the typed constructor call
+ * required by the spatialk GeoJSON API.
  */
-@Suppress("UNCHECKED_CAST")
 internal fun <G : Geometry, P> typedFeatureCollection(features: List<Feature<G, P>>): FeatureCollection<G, P> =
-    FeatureCollection(features) as FeatureCollection<G, P>
+    FeatureCollection(features)
 
 private const val BMP_MAX = 0xFFFF
 private const val SUPPLEMENTARY_OFFSET = 0x10000

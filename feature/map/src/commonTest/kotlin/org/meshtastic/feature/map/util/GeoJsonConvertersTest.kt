@@ -76,7 +76,7 @@ class GeoJsonConvertersTest {
         assertEquals(40.0, coords.latitude, 0.001)
         assertEquals(-74.0, coords.longitude, 0.001)
 
-        val props = feature.properties!!
+        val props = feature.properties
         assertEquals(42, props["node_num"]?.toString()?.toIntOrNull())
         assertEquals("\"AB\"", props["short_name"].toString())
         assertEquals("\"Alpha Bravo\"", props["long_name"].toString())
@@ -88,7 +88,7 @@ class GeoJsonConvertersTest {
     fun nodesToFeatureCollection_isMyNodeFalseForOtherNodes() {
         val node = Node(num = 10, position = Position(latitude_i = 400000000, longitude_i = -740000000))
         val result = nodesToFeatureCollection(listOf(node), myNodeNum = 42)
-        val props = result.features.first().properties!!
+        val props = result.features.first().properties
         assertEquals("false", props["is_my_node"].toString())
     }
 
@@ -141,7 +141,7 @@ class GeoJsonConvertersTest {
         assertEquals(51.5, coords.latitude, 0.001)
         assertEquals(-0.1, coords.longitude, 0.001)
 
-        val props = feature.properties!!
+        val props = feature.properties
         assertEquals(99, props["waypoint_id"]?.toString()?.toIntOrNull())
         assertEquals("\"Home\"", props["name"].toString())
     }
@@ -197,7 +197,7 @@ class GeoJsonConvertersTest {
         val positions = listOf(Position(latitude_i = 400000000, longitude_i = -740000000, time = 1000, altitude = 100))
         val result = positionsToPointFeatures(positions)
         assertEquals(1, result.features.size)
-        val props = result.features.first().properties!!
+        val props = result.features.first().properties
         assertEquals("\"1000\"", props["time"].toString())
         assertEquals(100, props["altitude"]?.toString()?.toIntOrNull())
     }
@@ -328,5 +328,29 @@ class GeoJsonConvertersTest {
             )
         val result = typedFeatureCollection(features)
         assertEquals(1, result.features.size)
+    }
+
+    // --- computeBoundingBox ---
+
+    @Test
+    fun computeBoundingBox_fewerThanTwoPositions_returnsNull() {
+        assertNull(computeBoundingBox(emptyList()))
+        assertNull(computeBoundingBox(listOf(org.maplibre.spatialk.geojson.Position(longitude = 1.0, latitude = 2.0))))
+    }
+
+    @Test
+    fun computeBoundingBox_twoOrMorePositions_returnsBounds() {
+        val positions =
+            listOf(
+                org.maplibre.spatialk.geojson.Position(longitude = -74.0, latitude = 40.0),
+                org.maplibre.spatialk.geojson.Position(longitude = -73.0, latitude = 41.0),
+                org.maplibre.spatialk.geojson.Position(longitude = -75.0, latitude = 39.0),
+            )
+        val bbox = computeBoundingBox(positions)
+        assertNotNull(bbox)
+        assertEquals(39.0, bbox.southwest.latitude, 0.001)
+        assertEquals(-75.0, bbox.southwest.longitude, 0.001)
+        assertEquals(41.0, bbox.northeast.latitude, 0.001)
+        assertEquals(-73.0, bbox.northeast.longitude, 0.001)
     }
 }

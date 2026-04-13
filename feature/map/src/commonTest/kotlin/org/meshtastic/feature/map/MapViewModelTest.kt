@@ -23,7 +23,6 @@ import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -78,6 +77,7 @@ class MapViewModelTest {
         packetRepository = packetRepository,
         radioController = radioController,
         savedStateHandle = savedStateHandle,
+        ioDispatcher = testDispatcher,
     )
 
     @Test
@@ -198,9 +198,6 @@ class MapViewModelTest {
             position = position,
         )
 
-        // sendWaypoint dispatches to ioDispatcher; give it time to execute
-        delay(100)
-
         // FakeRadioController.getPacketId() returns 1, and sendMessage appends to sentPackets
         assertEquals(1, radioController.sentPackets.size)
         val sent = radioController.sentPackets.first()
@@ -229,8 +226,6 @@ class MapViewModelTest {
             position = null,
         )
 
-        delay(100)
-
         assertEquals(1, radioController.sentPackets.size)
         val wpt = radioController.sentPackets.first().waypoint!!
         assertEquals(42, wpt.id) // Retains existing ID
@@ -256,8 +251,6 @@ class MapViewModelTest {
             position = position,
         )
 
-        delay(100)
-
         assertEquals(1, radioController.sentPackets.size)
         assertEquals(99, radioController.sentPackets.first().waypoint!!.locked_to)
     }
@@ -273,8 +266,6 @@ class MapViewModelTest {
             existingWaypoint = null,
             position = null,
         )
-
-        delay(100)
 
         assertEquals(1, radioController.sentPackets.size)
         val wpt = radioController.sentPackets.first().waypoint!!

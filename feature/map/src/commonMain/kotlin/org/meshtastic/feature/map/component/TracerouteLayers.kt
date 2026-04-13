@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.em
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
@@ -42,6 +43,10 @@ import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.unknown
+import org.meshtastic.feature.map.util.MARKER_STROKE_WIDTH
+import org.meshtastic.feature.map.util.NODE_MARKER_RADIUS
 import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.meshtastic.feature.map.util.typedFeatureCollection
 import org.maplibre.spatialk.geojson.Position as GeoPosition
@@ -65,8 +70,13 @@ internal fun TracerouteLayers(
 ) {
     if (overlay == null) return
 
+    val unknownNodeName = stringResource(Res.string.unknown)
+
     // Build route line features
-    val routeData = remember(overlay, nodePositions, nodes) { buildTracerouteGeoJson(overlay, nodePositions, nodes) }
+    val routeData =
+        remember(overlay, nodePositions, nodes, unknownNodeName) {
+            buildTracerouteGeoJson(overlay, nodePositions, nodes, unknownNodeName)
+        }
 
     // Report mappable count via side effect (avoid state updates during composition)
     val mappableCount = routeData.hopFeatures.features.size
@@ -108,9 +118,9 @@ internal fun TracerouteLayers(
         CircleLayer(
             id = "traceroute-hops",
             source = hopsSource,
-            radius = const(8.dp),
+            radius = const(NODE_MARKER_RADIUS),
             color = const(HopMarkerColor), // Purple
-            strokeWidth = const(2.dp),
+            strokeWidth = const(MARKER_STROKE_WIDTH),
             strokeColor = const(Color.White),
         )
         SymbolLayer(
@@ -134,6 +144,7 @@ private fun buildTracerouteGeoJson(
     overlay: TracerouteOverlay,
     nodePositions: Map<Int, org.meshtastic.proto.Position>,
     nodes: Map<Int, Node>,
+    unknownNodeName: String,
 ): TracerouteGeoJsonData {
     fun nodeToGeoPosition(nodeNum: Int): GeoPosition? {
         val pos = nodePositions[nodeNum] ?: return null
@@ -181,7 +192,7 @@ private fun buildTracerouteGeoJson(
                 buildJsonObject {
                     put("node_num", nodeNum)
                     put("short_name", node?.user?.short_name ?: nodeNum.toUInt().toString(HEX_RADIX))
-                    put("long_name", node?.user?.long_name ?: "Unknown")
+                    put("long_name", node?.user?.long_name ?: unknownNodeName)
                 },
             )
         }

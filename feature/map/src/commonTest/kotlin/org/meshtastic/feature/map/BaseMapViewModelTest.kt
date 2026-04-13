@@ -76,6 +76,7 @@ class BaseMapViewModelTest {
         nodeRepository = nodeRepository,
         packetRepository = packetRepository,
         radioController = radioController,
+        ioDispatcher = testDispatcher,
     )
 
     private fun nodeWithPosition(
