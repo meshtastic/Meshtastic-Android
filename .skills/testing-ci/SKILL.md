@@ -48,11 +48,12 @@ Run these when relevant to map, provider, or flavor-specific behavior:
 CI is defined in `.github/workflows/reusable-check.yml` and structured as four parallel job groups:
 
 1. **`lint-check`** — Runs spotless, detekt, Android lint, and KMP smoke compile in a single Gradle invocation (avoids 3x cold-start overhead). Uses `fetch-depth: 0` (full clone) for spotless ratcheting and version code calculation. Produces `cache_read_only` output and computed `version_code` for downstream jobs.
-2. **`test-shards`** — A 3-shard matrix that runs unit tests in parallel (depends on `lint-check`):
+2. **`test-shards`** — A 4-shard matrix that runs tests in parallel (depends on `lint-check`):
    - `shard-core`: `allTests` for all `core:*` KMP modules.
    - `shard-feature`: `allTests` for all `feature:*` KMP modules.
-   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`, `mesh_service_example`).
-   Each shard generates Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
+   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`).
+   - `shard-screenshot`: `validateGoogleDebugScreenshotTest` — visual regression tests for CMP UI components. On failure, writes a step summary listing failed tests and links to the `reports-shard-screenshot` artifact.
+   Each shard generates Kover XML coverage (except `shard-screenshot`) and uploads test results + coverage to Codecov with per-shard flags.
    Downstream jobs use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
 3. **`android-check`** — Builds APKs for all flavors (depends on `lint-check`).
 4. **`build-desktop`** — Multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) that builds desktop distributions via `createDistributable` (depends on `lint-check`).
@@ -122,12 +123,39 @@ app/build/reports/screenshotTest/preview/     # HTML diff reports
 
 ### Writing a Preview + Test
 1. Create a preview composable in `app/src/screenshotTest/.../preview/` using `@MultiPreview` (light + dark) and wrapping in `AppTheme`.
-2. Create a test class in `app/src/screenshotTest/.../` with methods annotated `@PreviewTest` + `@MultiPreview` that call the preview composable.
+2. Create a test class in `app/src/screenshotTest/.../` with methods annotated `@PreviewTest` + `@MultiPreview` + `@Composable` that call the preview composable.
 3. Run `updateGoogleDebugScreenshotTest` to generate baselines, commit the `.png` files.
 
 ### Convention Plugin
 - `meshtastic.screenshot.testing` (in `build-logic/convention`) configures the experimental flag and `screenshotTestImplementation` dependencies.
 - Must be applied **after** `alias(libs.plugins.screenshot)` in the consumer's `plugins {}` block.
+
+### CI Integration
+- Screenshot validation runs in a **dedicated `shard-screenshot` CI shard** (separate from unit tests in `shard-app`) via `:app:validateGoogleDebugScreenshotTest`.
+- The shard runs on `ubuntu-24.04` alongside other test shards with `fail-fast: false`, so a screenshot failure does not cancel unit test shards.
+- On failure, a `GITHUB_STEP_SUMMARY` annotation lists the names of failed tests and directs reviewers to download the `reports-shard-screenshot` artifact for diff images.
+- The diff report (HTML with side-by-side expected/actual/diff views) is located at `app/build/reports/screenshotTest/preview/` inside the artifact.
+
+### Image Difference Threshold
+- Configured at `app/build.gradle.kts` via `testOptions.screenshotTests.imageDifferenceThreshold = 0.02f` (2%).
+- **Rationale**: Compose Preview Screenshot Testing uses layoutlib for host-side rendering, but anti-aliasing and font hinting differ between macOS (where developers typically generate references) and Linux (CI runner). A 2% threshold absorbs these sub-pixel differences without masking real regressions.
+- Emoji characters (e.g. `🔔` in `QuickChatRow`) render with different glyphs across platforms and are the primary source of visual diff. Avoid emoji literals in preview data where possible.
+- Revisit this threshold when the plugin exits alpha or if false negatives appear.
+
+### Reference Image Generation
+- **OS guidance**: Reference images should ideally be generated on the same OS as CI (`ubuntu-24.04`). In practice, generating on macOS is acceptable because the 2% threshold absorbs rendering differences. If flakiness occurs, regenerate references in a Linux environment (e.g., Docker, WSL, or a CI workflow).
+- **Determinism**: Preview composables must use fixed/deterministic data. Avoid `Random`, `currentTime()`, or other non-deterministic values in preview parameters. Use hardcoded constants instead.
+- **Updating references**: Run `./gradlew updateGoogleDebugScreenshotTest`, then commit the updated `.png` files under `app/src/screenshotTestGoogleDebug/reference/`.
+
+### Debugging CI Failures
+1. **Check the job summary**: The `shard-screenshot` job writes a step summary listing which tests failed. Look for the "Screenshot Test Failures" section in the PR checks.
+2. **Download the artifact**: Download `reports-shard-screenshot` from the workflow run's artifacts page (retained for 7 days).
+3. **Inspect diff images**: Navigate to `app/build/reports/screenshotTest/preview/debug/google/` in the artifact. Each failed test has `_expected.png`, `_actual.png`, and `_diff.png` files.
+4. **Common causes**:
+   - Font rendering differences (macOS vs Linux) — usually within threshold; if not, regenerate on Linux.
+   - Non-deterministic preview data (random values, timestamps) — fix the preview to use constants.
+   - Emoji rendering (platform-specific glyphs) — avoid emoji in preview data or increase threshold.
+   - Genuine UI regression — update the component or regenerate references if the change is intentional.
 
 ## 6) Shell & Tooling Conventions
 - **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent getting stuck in an interactive prompt.

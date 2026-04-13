@@ -101,10 +101,11 @@ jobs:
         run: ./gradlew kmpSmokeCompile -Pci=true --continue --scan
 
   # ── Sharded Unit Tests ──────────────────────────────────────────────
-  # Tests are split into 3 shards that run in parallel:
-  #   shard-core:    core:* KMP module tests (allTests)
-  #   shard-feature: feature:* KMP module tests (allTests)
-  #   shard-app:     Pure-Android/JVM tests (app, desktop, core:barcode, etc.)
+  # Tests are split into 4 shards that run in parallel:
+  #   shard-core:       core:* KMP module tests (allTests)
+  #   shard-feature:    feature:* KMP module tests (allTests)
+  #   shard-app:        Pure-Android/JVM tests (app, desktop, core:barcode, etc.)
+  #   shard-screenshot: Compose Preview Screenshot visual regression tests
   test-shards:
     runs-on: ubuntu-24.04
     permissions:
@@ -170,7 +171,6 @@ jobs:
             tasks: >-
               :app:testFdroidDebugUnitTest
               :app:testGoogleDebugUnitTest
-              :app:validateGoogleDebugScreenshotTest
               :desktop:test
               :core:barcode:testFdroidDebugUnitTest
               :core:barcode:testGoogleDebugUnitTest
@@ -180,6 +180,10 @@ jobs:
               :core:barcode:koverXmlReportFdroidDebug
               :core:barcode:koverXmlReportGoogleDebug
               :desktop:koverXmlReport
+          - name: shard-screenshot
+            tasks: >-
+              :app:validateGoogleDebugScreenshotTest
+            kover: ""
 
     steps:
       - name: Checkout code
@@ -232,6 +236,40 @@ jobs:
             **/build/reports
             **/build/test-results
           retention-days: 7
+
+      - name: Screenshot test failure summary
+        if: ${{ failure() && matrix.shard.name == 'shard-screenshot' }}
+        shell: bash
+        run: |
+          DIFF_DIR="app/build/reports/screenshotTest/preview/debug/google"
+          {
+            echo "### Screenshot Test Failures"
+            echo ""
+            echo "One or more screenshot tests failed visual comparison."
+            echo "Download the \`reports-shard-screenshot\` artifact to inspect diff images."
+            echo ""
+            if [ -d "$DIFF_DIR" ]; then
+              FAILURES=$(find "$DIFF_DIR" -name "*_diff.png" 2>/dev/null | wc -l | tr -d ' ')
+              echo "**${FAILURES} diff image(s) generated.**"
+              echo ""
+              echo "<details>"
+              echo "<summary>Failed screenshot tests</summary>"
+              echo ""
+              find "$DIFF_DIR" -name "*_diff.png" -exec basename {} _diff.png \; | sort | while read -r name; do
+                echo "- \`${name}\`"
+              done
+              echo ""
+              echo "</details>"
+            else
+              echo "_No diff directory found at \`${DIFF_DIR}\`. Check the build logs for details._"
+            fi
+            echo ""
+            echo "#### How to update reference images"
+            echo "\`\`\`bash"
+            echo "./gradlew updateGoogleDebugScreenshotTest"
+            echo "\`\`\`"
+            echo "Commit the updated \`.png\` files under \`app/src/screenshotTestGoogleDebug/reference/\`."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # ── Android Build ────────────────────────────────────────────────────
   android-check:
