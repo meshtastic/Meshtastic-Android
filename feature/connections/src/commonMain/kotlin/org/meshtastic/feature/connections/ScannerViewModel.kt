@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.RecentAddressesDataSource
@@ -108,7 +106,7 @@ open class ScannerViewModel(
     private val discoveredDevicesFlow =
         showMockTransport
             .flatMapLatest { showMock -> getDiscoveredDevicesUseCase.invoke(showMock) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+            .stateInWhileSubscribed(initialValue = null)
 
     /** A combined list of bonded and scanned BLE devices for the UI. */
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
@@ -131,7 +129,7 @@ open class ScannerViewModel(
             }
             .flowOn(dispatchers.default)
             .distinctUntilChanged()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+            .stateInWhileSubscribed(initialValue = emptyList())
 
     /** UI StateFlow for USB devices. */
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
