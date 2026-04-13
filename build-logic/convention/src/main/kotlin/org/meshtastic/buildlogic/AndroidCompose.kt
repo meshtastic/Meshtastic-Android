@@ -24,6 +24,24 @@ import org.gradle.kotlin.dsl.dependencies
 internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     commonExtension.apply { buildFeatures.compose = true }
 
+    // CMP skips Android version enforcement; third-party BOMs and atomic-group alignment
+    // can silently override AndroidX Compose versions. Force core groups to the CMP version.
+    // Material/Material3 excluded — CMP maps those to different AndroidX version numbers.
+    val cmpVersion = libs.version("compose-multiplatform")
+    val cmpAlignedGroups = setOf(
+        "androidx.compose.animation",
+        "androidx.compose.foundation",
+        "androidx.compose.runtime",
+        "androidx.compose.ui",
+    )
+    configurations.configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group in cmpAlignedGroups) {
+                useVersion(cmpVersion)
+            }
+        }
+    }
+
     val hasAndroidTest = project.projectDir.resolve("src/androidTest").exists()
     dependencies {
         "debugImplementation"(libs.library("compose-multiplatform-ui-tooling"))

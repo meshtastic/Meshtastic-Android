@@ -16,21 +16,17 @@
  */
 package org.meshtastic.core.barcode
 
-import androidx.compose.ui.test.junit4.v2.createComposeRule
-import org.junit.Rule
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.runComposeUiTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+@OptIn(ExperimentalTestApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class BarcodeScannerTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
-
-    @Test
-    fun testRememberBarcodeScanner() {
-        composeTestRule.setContent { rememberBarcodeScanner { _ -> } }
-    }
+    @Test fun testRememberBarcodeScanner() = runComposeUiTest { setContent { rememberBarcodeScanner { _ -> } } }
 }

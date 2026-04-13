@@ -52,6 +52,6 @@ dependencies {
     testImplementation(libs.junit)
     testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.compose.multiplatform.ui.test)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
