@@ -71,7 +71,6 @@
         "!/^androidx\\.compose\\.material3:material3-adaptive-navigation-suite$/",
         "!/^androidx\\.test\\.espresso/",
         "!/^androidx\\.test\\.ext/",
-        "!/^androidx\\.compose\\.ui:ui-test-junit4$/",
         "!/^androidx\\.hilt/"
       ]
     },
@@ -118,8 +117,7 @@
       "groupSlug": "androidx-testing",
       "matchPackageNames": [
         "/^androidx\\.test\\.espresso/",
-        "/^androidx\\.test\\.ext/",
-        "/^androidx\\.compose\\.ui:ui-test-junit4$/"
+        "/^androidx\\.test\\.ext/"
       ],
       "automerge": true
     },

@@ -16,12 +16,12 @@
  */
 package org.meshtastic.app.ui
 
-import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.runComposeUiTest
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import kotlinx.coroutines.flow.emptyFlow
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.navigation.NodesRoute
@@ -35,15 +35,14 @@ import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+@OptIn(ExperimentalTestApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class NavigationAssemblyTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
-
     @Test
-    fun verifyNavigationGraphsAssembleWithoutCrashing() {
-        composeTestRule.setContent {
+    fun verifyNavigationGraphsAssembleWithoutCrashing() = runComposeUiTest {
+        setContent {
             val backStack = rememberNavBackStack(NodesRoute.NodesGraph)
             entryProvider<NavKey> {
                 contactsGraph(backStack, emptyFlow())
