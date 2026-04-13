@@ -374,6 +374,7 @@
     <string name="traceroute_duration">Durată: %1$s s</string>
     <string name="traceroute_route_towards_dest">Ruta trasată spre destinație:\n\n</string>
     <string name="traceroute_route_back_to_us">Ruta urmărită înapoi la noi:\n\n</string>
+    <string name="load_5_min_description">Media de încărcare sistem de cinci minute</string>
     <string name="twenty_four_hours">24H</string>
     <string name="one_week">1W</string>
     <string name="two_weeks">2W</string>
@@ -542,8 +543,10 @@
     <string name="enabled">Activat</string>
     <string name="paxcounter_config">Configurație Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter activat</string>
+    <string name="wifi_rssi_threshold_defaults_to_80">Pragul WiFi RSSI (implicit la -80)</string>
     <string name="timeout">Expirat</string>
     <string name="store_forward_enabled"><![CDATA[Reținere și redirecționare activată]]></string>
+    <string name="environment_metrics_use_fahrenheit">Valorile mediului utilizează Fahrenheit</string>
     <string name="long_name">Nume lung</string>
     <string name="short_name">Nume scurt</string>
     <string name="hardware_model">Model hardware</string>
@@ -555,10 +558,13 @@
     <string name="radiation">Radiație</string>
     <string name="store_forward_config"><![CDATA[Configurație reținere și redirecționare]]></string>
     <string name="url">URL</string>
+    <string name="unmonitored_or_infrastructure">Nemonitorizată sau infrastructură</string>
+    <string name="request_telemetry"></string>
     <string name="request_device_metrics">Valori dispozitiv</string>
     <string name="request_environment_metrics">Indicatori de mediu</string>
     <string name="request_power_metrics">Valori putere</string>
     <string name="show_waypoints">Arată repere</string>
+    <string name="regenerate_keys_confirmation">Ești sigur că vrei să-ți regenerezi cheia privata?\n\nNodurile care ar fi putut schimba anterior chei cu acest modul vor trebui să elimine acel nod şi să schimbe din nou cheile pentru a relua comunicarea securizată.</string>
     <string name="node_count_template">(%1$d online / %2$d afișate / %3$d în total)</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="advanced_title">Avansate</string>
@@ -567,6 +573,8 @@
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">Mesaj</string>
+    <string name="routing_error_rate_limit_exceeded">Rata limită depășită. Te rugăm să încerci din nou mai târziu.</string>
+    <string name="manage_map_layers">Administreaza Layers Hartă</string>
     <string name="downlink_feature_description">Mesajele provenite de la o un gateway public de internet sunt redirecționate către rețeaua locală. Datorită politicii de zero salturi, traficul provenit de la serverul MQTT implicit nu se va propaga mai departe de acest dispozitiv.</string>
     <string name="device_telemetry_enabled_summary">Activează/dezactivează modulul de telemetrie al dispozitivului pentru a trimite metrici către rețeaua mesh. Acestea sunt valori nominale. Rețelele mesh congestionate se vor scala automat la intervale mai lungi, în funcție de numărul de noduri online.</string>
     <string name="one_hour">O oră</string>
@@ -574,7 +582,9 @@
     <string name="one_day">24 Ore</string>
     <string name="two_days">48 Ore</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_stable">Stabil</string>
     <string name="firmware_update_failed">Actualizare eșuată</string>
+    <string name="firmware_update_connecting_attempt">Conectarea la dispozitiv (încercarea %1$d/%2$d)...</string>
     <string name="interval_unset">Nesetat</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d oră</item>
