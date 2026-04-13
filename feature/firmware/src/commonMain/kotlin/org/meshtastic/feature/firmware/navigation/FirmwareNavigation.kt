@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -27,8 +28,12 @@ import org.meshtastic.feature.firmware.FirmwareUpdateViewModel
 
 /** Registers the firmware update screen entries into the Navigation 3 entry provider. */
 fun EntryProviderScope<NavKey>.firmwareGraph(backStack: NavBackStack<NavKey>) {
-    entry<FirmwareRoute.FirmwareGraph> { FirmwareScreen(onNavigateUp = { backStack.removeLastOrNull() }) }
-    entry<FirmwareRoute.FirmwareUpdate> { FirmwareScreen(onNavigateUp = { backStack.removeLastOrNull() }) }
+    entry<FirmwareRoute.FirmwareGraph> {
+        FirmwareScreen(onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
+    entry<FirmwareRoute.FirmwareUpdate> {
+        FirmwareScreen(onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
 }
 
 @Composable

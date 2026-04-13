@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.wifiprovision.domain
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -33,9 +34,11 @@ import kotlinx.serialization.json.Json
 // Shared JSON codec — lenient so unknown fields are silently ignored
 // ---------------------------------------------------------------------------
 
+@OptIn(ExperimentalSerializationApi::class)
 internal val NymeaJson = Json {
     ignoreUnknownKeys = true
     isLenient = true
+    exceptionsWithDebugInfo = false
 }
 
 // ---------------------------------------------------------------------------

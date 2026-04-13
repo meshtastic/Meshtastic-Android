@@ -32,6 +32,7 @@ class FirmwareReleaseJsonDataSourceImpl(private val application: Application) : 
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
+        exceptionsWithDebugInfo = false
     }
 
     @OptIn(ExperimentalSerializationApi::class)

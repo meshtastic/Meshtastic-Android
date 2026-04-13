@@ -32,6 +32,7 @@ class DeviceHardwareJsonDataSourceImpl(private val application: Application) : D
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
+        exceptionsWithDebugInfo = false
     }
 
     @OptIn(ExperimentalSerializationApi::class)

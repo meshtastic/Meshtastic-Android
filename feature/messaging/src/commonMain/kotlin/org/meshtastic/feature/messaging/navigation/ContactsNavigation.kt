@@ -21,6 +21,7 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -61,9 +62,10 @@ fun EntryProviderScope<NavKey>.contactsGraph(
             contactKey = contactKey,
             message = args.message,
             viewModel = messageViewModel,
-            navigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) },
-            navigateToQuickChatOptions = { backStack.add(org.meshtastic.core.navigation.ContactsRoute.QuickChat) },
-            onNavigateBack = { backStack.removeLastOrNull() },
+            navigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
+            navigateToQuickChatOptions =
+            dropUnlessResumed { backStack.add(org.meshtastic.core.navigation.ContactsRoute.QuickChat) },
+            onNavigateBack = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
@@ -73,13 +75,13 @@ fun EntryProviderScope<NavKey>.contactsGraph(
         ShareScreen(
             viewModel = viewModel,
             onConfirm = { contactKey -> backStack.replaceLast(ContactsRoute.Messages(contactKey, message)) },
-            onNavigateUp = { backStack.removeLastOrNull() },
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
     entry<ContactsRoute.QuickChat>(metadata = { ListDetailSceneStrategy.extraPane() }) {
         val viewModel = koinViewModel<QuickChatViewModel>()
-        QuickChatScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
+        QuickChatScreen(viewModel = viewModel, onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() })
     }
 }
 

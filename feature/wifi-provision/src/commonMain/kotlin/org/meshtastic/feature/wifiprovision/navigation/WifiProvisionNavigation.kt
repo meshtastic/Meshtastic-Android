@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.wifiprovision.navigation
 
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -31,9 +32,9 @@ import org.meshtastic.feature.wifiprovision.ui.WifiProvisionScreen
  */
 fun EntryProviderScope<NavKey>.wifiProvisionGraph(backStack: NavBackStack<NavKey>) {
     entry<WifiProvisionRoute.WifiProvisionGraph> {
-        WifiProvisionScreen(onNavigateUp = { backStack.removeLastOrNull() })
+        WifiProvisionScreen(onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() })
     }
     entry<WifiProvisionRoute.WifiProvision> { key ->
-        WifiProvisionScreen(onNavigateUp = { backStack.removeLastOrNull() }, address = key.address)
+        WifiProvisionScreen(onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() }, address = key.address)
     }
 }
