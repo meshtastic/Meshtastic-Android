@@ -52,7 +52,7 @@ You are an expert Android and Kotlin Multiplatform (KMP) engineer working on Mes
 - `CLAUDE.md` — Claude Code entry point; imports `AGENTS.md` via `@AGENTS.md` and adds Claude-specific instructions.
 - `GEMINI.md` — Gemini redirect to `AGENTS.md`. Gemini CLI also configured via `.gemini/settings.json` to read `AGENTS.md` directly.
 
-Do NOT duplicate content into agent-specific files. When you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update `AGENTS.md`, `.skills/`, `docs/kmp-status.md`, and `docs/decisions/architecture-review-2026-03.md` as needed.
+Do NOT duplicate content into agent-specific files. When you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update `AGENTS.md`, `.skills/`, and `docs/kmp-status.md` as needed.
 </documentation_sync>
 
 <rules>
@@ -61,4 +61,8 @@ Do NOT duplicate content into agent-specific files. When you modify architecture
 - **Koin Annotations:** Use `@Single`, `@Factory`, and `@KoinViewModel` inside `commonMain` instead of manual constructor trees. Do not enable A1 module compile safety.
 - **CMP Over Android:** Use `compose-multiplatform` constraints (e.g., no float formatting in `stringResource`).
 - **Always Check Docs:** If unsure about an abstraction, search `core:ui/commonMain` or `core:navigation/commonMain` before assuming it doesn't exist.
+- **Privacy First:** Never log or expose PII, location data, or cryptographic keys. Meshtastic is used for sensitive off-grid communication — treat all user data with extreme caution.
+- **Dependency Discipline:** Never add a library without first checking `libs.versions.toml` and justifying its inclusion against the project's size and complexity goals. Prefer removing dependencies over adding them.
+- **Zero Lint Tolerance:** A task is incomplete if `detekt` fails or `spotlessCheck` does not pass for touched modules.
+- **Read Before Refactoring:** When a pattern contradicts best practices, analyze whether it is legacy debt or a deliberate architectural choice before proposing a change.
 </rules>

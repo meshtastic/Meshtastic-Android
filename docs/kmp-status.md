@@ -1,6 +1,6 @@
 # KMP Migration Status
 
-> Last updated: 2026-04-10
+> Last updated: 2026-04-13
 
 Single source of truth for Kotlin Multiplatform migration progress. For the forward-looking roadmap, see [`roadmap.md`](./roadmap.md). For completed decision records, see [`decisions/`](./decisions/).
 
@@ -49,7 +49,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; fully shared `contactsGraph`, `MessageScreen`, `ContactsScreen`, and `MessageListPaged` |
 | `feature:connections` | ✅ | ✅ Shared `ConnectionsScreen` with dynamic transport detection |
 | `feature:intro` | — | — | Screens remain in `androidMain`; shared ViewModel only |
-| `feature:map` | — | Placeholder; shared `NodeMapViewModel`, `BaseMapViewModel`, and `TracerouteNodeSelection`. Map rendering decomposed into 3 `CompositionLocal` provider contracts (`MapViewProvider`, `NodeTrackMapProvider`, `TracerouteMapProvider`) with per-flavor implementations in `:app` |
+| `feature:map` | — | Placeholder; shared `NodeMapViewModel`, `BaseMapViewModel`. Map rendering decomposed into 3 `CompositionLocal` provider contracts (`MapViewProvider`, `NodeTrackMapProvider`, `TracerouteMapProvider`) with per-flavor implementations in `:app` |
 | `feature:firmware` | ✅ | ✅ Fully KMP: Unified OTA, native Secure DFU, USB/UF2, FirmwareRetriever |
 | `feature:wifi-provision` | ✅ | ✅ KMP WiFi provisioning via BLE (Nymea protocol); shared UI and ViewModel |
 | `feature:widget` | ❌ | — | Android-only (Glance appwidgets). Intentional. |
@@ -79,9 +79,7 @@ Working Compose Desktop application with:
 | Multi-target readiness | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | **9/10** | 26 modules validated (including feature:wifi-provision); native release installers automated |
 | DI portability | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
-| Test maturity | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 9 features |
-
-> See [`decisions/architecture-review-2026-03.md`](./decisions/architecture-review-2026-03.md) for the full gap analysis.
+| Test maturity | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 9 features. Gaps: `core:service`, `core:network` (TcpTransport), `core:ble` state machine, `core:ui` utils, desktop navigation graphs |
 
 ## Completion Estimates
 
@@ -105,11 +103,11 @@ Based on the latest codebase investigation, the following steps are proposed to 
 
 | Decision | Status | Details |
 |---|---|---|
-| Navigation 3 parity model (shared `TopLevelDestination` + platform adapters) | ✅ Done | See [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md) |
+| Navigation 3 parity model (shared `TopLevelDestination` + platform adapters) | ✅ Done | Both shells use shared `TopLevelDestination` enum and `MeshtasticNavDisplay` from `core:ui/commonMain`; parity tests in `core:navigation/commonTest` |
 | Hilt → Koin | ✅ Done | See [`decisions/koin-migration.md`](./decisions/koin-migration.md) |
 | BLE abstraction (Kable) | ✅ Done | See [`decisions/ble-strategy.md`](./decisions/ble-strategy.md) |
 | Firmware KMP migration (pure Secure DFU) | ✅ Done | Native Nordic Secure DFU protocol reimplemented in pure KMP using Kable; desktop is first-class target |
-| Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-beta01`; supports Large (1200dp) and Extra-large (1600dp) breakpoints |
+| Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-beta02`; supports Large (1200dp) and Extra-large (1600dp) breakpoints |
 | JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
 | Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
 | Transport deduplication | ✅ Done | `StreamFrameCodec`, `TcpTransport`, and `SerialTransport` shared in `core:network` |
@@ -127,7 +125,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 - Firmware remains available as an in-flow route instead of a top-level destination, matching Android information architecture.
 - Android navigation graphs are decoupled and extracted into their respective feature modules, aligning with the Desktop architecture.
 - Parity tests exist in `core:navigation/commonTest` (`NavigationParityTest`) and `desktop/test` (`DesktopTopLevelDestinationParityTest`).
-- Remaining parity work is documented in [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md): serializer registration validation and platform exception tracking.
+- Remaining parity work: serializer registration validation and platform exception tracking.
 
 ## App Module Thinning Status
 
@@ -159,18 +157,16 @@ Remaining to be extracted from `:app` or unified in `commonMain`:
 
 | Dependency | Version | Why |
 |---|---|---|
-| Compose Multiplatform | `1.11.0-beta01` | Required for JetBrains Adaptive `1.3.0-alpha06` and Material 3 `1.11.0-alpha05` |
-| Compose Multiplatform Material 3 | `1.11.0-alpha05` | Material 3 components including `NavigationSuiteScaffold` |
-| Koin | `4.2.0` | Nav3 + K2 compiler plugin support |
-| JetBrains Lifecycle | `2.11.0-alpha02` | Multiplatform ViewModel/lifecycle; includes `lifecycle-viewmodel-navigation3` for entry-scoped ViewModels |
-| JetBrains Navigation 3 | `1.1.0-beta01` | Multiplatform navigation with Scene architecture, `NavEntry.metadata`, transition specs |
+| Compose Multiplatform | `1.11.0-beta02` | Required for JetBrains Adaptive `1.3.0-alpha06` and Material 3 `1.11.0-alpha06` |
+| Compose Multiplatform Material 3 | `1.11.0-alpha06` | Material 3 components including `NavigationSuiteScaffold` |
+| Koin | `4.2.1` | Nav3 + K2 compiler plugin support |
+| JetBrains Lifecycle | `2.11.0-alpha03` | Multiplatform ViewModel/lifecycle; includes `lifecycle-viewmodel-navigation3` for entry-scoped ViewModels |
+| JetBrains Navigation 3 | `1.1.0-rc01` | Multiplatform navigation with Scene architecture, `NavEntry.metadata`, transition specs |
 | JetBrains Navigation Event | `1.1.0-alpha01` | KMP `NavigationBackHandler` for predictive back |
 | JetBrains Material 3 Adaptive | `1.3.0-alpha06` | `ListDetailPaneScaffold`, `ThreePaneScaffold`, Large/XL breakpoints |
 | Kable BLE | `0.42.0` | Provides fully multiplatform BLE support |
 
 **Policy:** Stable by default. RC when it unlocks KMP functionality. Alpha only behind hard abstraction seams. Do not downgrade CMP or Koin — they enable critical KMP features.
-
-> See [`decisions/navigation3-api-alignment-2026-03.md`](./decisions/navigation3-api-alignment-2026-03.md) for the full Navigation 3 API surface audit and Scene architecture adoption plan.
 
 ## References
 

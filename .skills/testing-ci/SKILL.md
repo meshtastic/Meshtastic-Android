@@ -86,11 +86,3 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as four p
 - **Path filtering:** `check-changes` in `pull-request.yml` must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.).
 - **AboutLibraries:** Runs in `offlineMode` by default (no GitHub/SPDX API calls). Release builds pass `-PaboutLibraries.release=true` via Fastlane/Gradle CLI to enable remote license fetching. Do NOT re-gate on `CI` or `GITHUB_TOKEN` alone.
 
-## 5) Shell & Tooling Conventions
-- **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent getting stuck in an interactive prompt.
-- **Text Search:** Prefer `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.
-
-## 6) Agent/Developer Guidance
-- Start with the smallest set that validates your touched area.
-- If unable to run full validation locally, report exactly what ran and what remains.
-- Keep documentation synced in `AGENTS.md` and `.skills/` directories.
