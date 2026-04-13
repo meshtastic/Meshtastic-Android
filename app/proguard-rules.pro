@@ -55,6 +55,12 @@
 -keep class org.jetbrains.compose.resources.** { *; }
 -keep class org.meshtastic.core.resources.** { *; }
 
+# Compose Animation: R8 can tree-shake or merge animation spec classes (easing curves,
+# transition specs, Animatable internals) since they appear as small single-use types.
+# This causes animations to silently snap or skip in release builds.
+-keep class androidx.compose.animation.** { *; }
+-keep class androidx.compose.animation.core.** { *; }
+
 # Nordic BLE
 -dontwarn no.nordicsemi.kotlin.ble.environment.android.mock.**
 -keep class no.nordicsemi.kotlin.ble.environment.android.mock.** { *; }
