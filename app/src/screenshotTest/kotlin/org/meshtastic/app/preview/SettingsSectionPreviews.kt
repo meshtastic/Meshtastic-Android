@@ -20,7 +20,6 @@ import androidx.compose.runtime.Composable
 import org.meshtastic.feature.settings.component.AppInfoSectionPreview
 import org.meshtastic.feature.settings.component.AppearanceSectionPreview
 import org.meshtastic.feature.settings.component.PersistenceSectionPreview
-import org.meshtastic.feature.settings.component.PrivacySectionPreview
 
 /** Re-exports of internal settings section previews for screenshot testing. */
 @MultiPreview
@@ -39,10 +38,4 @@ fun SettingsAppearanceSectionPreview() {
 @Composable
 fun SettingsPersistenceSectionPreview() {
     PersistenceSectionPreview()
-}
-
-@MultiPreview
-@Composable
-fun SettingsPrivacySectionPreview() {
-    PrivacySectionPreview()
 }

@@ -32,15 +32,11 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NotesSection
-import org.meshtastic.feature.node.metrics.PositionCard
 import org.meshtastic.feature.settings.debugging.DebugActiveFilters
 import org.meshtastic.feature.settings.debugging.FilterMode
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 
 // ---------------------------------------------------------------------------
@@ -90,104 +86,6 @@ fun NotesSectionPreview() {
 fun NotesSectionEmptyPreview() {
     AppTheme(isSystemInDarkTheme()) {
         Surface { NotesSection(node = Node(num = 1928, isFavorite = true), onSaveNotes = { _, _ -> }) }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// PositionCard previews
-// ---------------------------------------------------------------------------
-
-@MultiPreview
-@Composable
-fun PositionCardPreview() {
-    AppTheme(isSystemInDarkTheme()) {
-        Surface {
-            PositionCard(
-                position =
-                Position(
-                    latitude_i = 338125110,
-                    longitude_i = -1179189760,
-                    altitude = 138,
-                    sats_in_view = 4,
-                    time = 1767225600,
-                ),
-                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
-                isSelected = false,
-                onClick = {},
-            )
-        }
-    }
-}
-
-@MultiPreview
-@Composable
-fun PositionCardSelectedPreview() {
-    AppTheme(isSystemInDarkTheme()) {
-        Surface {
-            PositionCard(
-                position =
-                Position(
-                    latitude_i = 338052347,
-                    longitude_i = -1179208460,
-                    altitude = 121,
-                    sats_in_view = 12,
-                    time = 1767225600,
-                ),
-                displayUnits = Config.DisplayConfig.DisplayUnits.IMPERIAL,
-                isSelected = true,
-                onClick = {},
-            )
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// NodeContextMenu previews
-// ---------------------------------------------------------------------------
-
-@MultiPreview
-@Composable
-fun NodeContextMenuPreview() {
-    AppTheme(isSystemInDarkTheme()) {
-        Surface {
-            NodeContextMenu(
-                expanded = true,
-                node =
-                Node(
-                    num = 1955,
-                    user = User(id = "mickeyMouseId", long_name = "Mickey Mouse", short_name = "MM"),
-                    isFavorite = false,
-                ),
-                onFavorite = {},
-                onIgnore = {},
-                onMute = {},
-                onRemove = {},
-                onDismiss = {},
-            )
-        }
-    }
-}
-
-@MultiPreview
-@Composable
-fun NodeContextMenuFavoritePreview() {
-    AppTheme(isSystemInDarkTheme()) {
-        Surface {
-            NodeContextMenu(
-                expanded = true,
-                node =
-                Node(
-                    num = 1955,
-                    user = User(id = "mickeyMouseId", long_name = "Mickey Mouse", short_name = "MM"),
-                    isFavorite = true,
-                ),
-                onFavorite = {},
-                onIgnore = {},
-                onMute = {},
-                onRemove = {},
-                onDismiss = {},
-            )
-        }
     }
 }
 

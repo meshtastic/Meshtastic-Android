@@ -103,7 +103,7 @@ app/src/screenshotTest/kotlin/org/meshtastic/app/
   ├── PreferenceScreenshotTests.kt
   ├── NodeInfoScreenshotTests.kt
   ├── WifiProvisionScreenshotTests.kt
-  ├── ...                                    # (26 test files, 169 @PreviewTest methods)
+  ├── ...                                    # (26 test files, 164 @PreviewTest methods)
   └── preview/
       ├── BasicComponentPreviews.kt          # Buttons, text, icons, @MultiPreview definition
       ├── ExtendedComponentPreviews.kt       # Cards, inputs, dialogs, chips
@@ -112,7 +112,7 @@ app/src/screenshotTest/kotlin/org/meshtastic/app/
       ├── NodeDetailComponentPreviews.kt     # Node detail re-exports
       └── ...                                # (27 preview files total)
 
-app/src/screenshotTestGoogleDebug/reference/  # 2,366 committed .png baselines
+app/src/screenshotTestGoogleDebug/reference/  # 2,296 committed .png baselines
 app/build/reports/screenshotTest/preview/     # HTML diff reports (generated at validation time)
 ```
 
@@ -141,7 +141,7 @@ The `@MultiPreview` annotation (defined in `BasicComponentPreviews.kt`) generate
 - **Device form factor**: Phone (default), Foldable (`673dp x 841dp`), Tablet (`1280dp x 800dp`)
 - **Layout direction**: LTR (default) and RTL (light + dark)
 
-This produces **14 variants per test method** (2 themes × 2 font scales × 3 devices + 2 RTL). With **169 test methods** across **26 test files**, the total is **2,366 reference images**.
+This produces **14 variants per test method** (2 themes × 2 font scales × 3 devices + 2 RTL). With **164 test methods** across **26 test files**, the total is **2,296 reference images**.
 
 ### Component Coverage
 Screenshot tests cover components from the following modules:
@@ -149,7 +149,7 @@ Screenshot tests cover components from the following modules:
 - **`feature:node`** — Node detail components, metrics, status icons, data info
 - **`feature:messaging`** — QuickChat, reactions, message input, message actions, delivery info
 - **`feature:connections`** — Empty state, connecting device info, segmented bar, device list
-- **`feature:settings`** — AppInfo, Appearance, Persistence, Privacy sections, radio config dialogs
+- **`feature:settings`** — AppInfo, Appearance, Persistence sections, radio config dialogs, debug filters
 - **`feature:wifi-provision`** — All 19 Wi-Fi provisioning UI components
 
 ### Convention Plugin

@@ -21,18 +21,14 @@ import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.app.preview.DebugActiveFiltersOrModePreview
 import org.meshtastic.app.preview.DebugActiveFiltersPreview
 import org.meshtastic.app.preview.MultiPreview
-import org.meshtastic.app.preview.NodeContextMenuFavoritePreview
-import org.meshtastic.app.preview.NodeContextMenuPreview
 import org.meshtastic.app.preview.NotesSectionEmptyPreview
 import org.meshtastic.app.preview.NotesSectionPreview
 import org.meshtastic.app.preview.PacketResponseErrorPreview
 import org.meshtastic.app.preview.PacketResponseLoadingPreview
 import org.meshtastic.app.preview.PacketResponseSuccessPreview
-import org.meshtastic.app.preview.PositionCardPreview
-import org.meshtastic.app.preview.PositionCardSelectedPreview
 import org.meshtastic.app.preview.QrDialogPreview
 
-/** Screenshot tests for additional feature composables (QrDialog, NotesSection, PositionCard, etc.). */
+/** Screenshot tests for additional feature composables (QrDialog, NotesSection, PacketResponse, etc.). */
 class AdditionalFeatureScreenshotTests {
     @PreviewTest
     @MultiPreview
@@ -53,34 +49,6 @@ class AdditionalFeatureScreenshotTests {
     @Composable
     fun notesSectionEmptyScreenshot() {
         NotesSectionEmptyPreview()
-    }
-
-    @PreviewTest
-    @MultiPreview
-    @Composable
-    fun positionCardScreenshot() {
-        PositionCardPreview()
-    }
-
-    @PreviewTest
-    @MultiPreview
-    @Composable
-    fun positionCardSelectedScreenshot() {
-        PositionCardSelectedPreview()
-    }
-
-    @PreviewTest
-    @MultiPreview
-    @Composable
-    fun nodeContextMenuScreenshot() {
-        NodeContextMenuPreview()
-    }
-
-    @PreviewTest
-    @MultiPreview
-    @Composable
-    fun nodeContextMenuFavoriteScreenshot() {
-        NodeContextMenuFavoritePreview()
     }
 
     @PreviewTest

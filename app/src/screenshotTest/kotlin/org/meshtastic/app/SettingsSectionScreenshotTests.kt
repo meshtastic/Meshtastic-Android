@@ -22,7 +22,6 @@ import org.meshtastic.app.preview.MultiPreview
 import org.meshtastic.app.preview.SettingsAppInfoSectionPreview
 import org.meshtastic.app.preview.SettingsAppearanceSectionPreview
 import org.meshtastic.app.preview.SettingsPersistenceSectionPreview
-import org.meshtastic.app.preview.SettingsPrivacySectionPreview
 
 /** Screenshot tests for settings section components. */
 class SettingsSectionScreenshotTests {
@@ -45,12 +44,5 @@ class SettingsSectionScreenshotTests {
     @Composable
     fun persistenceSectionScreenshot() {
         SettingsPersistenceSectionPreview()
-    }
-
-    @PreviewTest
-    @MultiPreview
-    @Composable
-    fun privacySectionScreenshot() {
-        SettingsPrivacySectionPreview()
     }
 }
