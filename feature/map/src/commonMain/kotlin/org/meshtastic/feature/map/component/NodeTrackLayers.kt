@@ -20,7 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.maplibre.compose.expressions.dsl.asNumber
 import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.eq
+import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.sources.GeoJsonData
@@ -93,6 +96,7 @@ fun NodeTrackLayers(
         CircleLayer(
             id = "node-track-selected",
             source = pointsSource,
+            filter = feature["time"].asNumber() eq const(selectedPositionTime.toFloat()),
             radius = const(10.dp),
             color = const(SelectedPointColor), // Red
             strokeWidth = const(2.dp),

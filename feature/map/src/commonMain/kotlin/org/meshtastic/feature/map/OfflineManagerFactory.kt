@@ -16,23 +16,20 @@
  */
 package org.meshtastic.feature.map
 
-import android.Manifest
 import androidx.compose.runtime.Composable
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import org.maplibre.compose.location.LocationProvider
-import org.maplibre.compose.location.rememberDefaultLocationProvider
 
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-actual fun rememberLocationProviderOrNull(): LocationProvider? {
-    val locationPermissions =
-        rememberMultiplePermissionsState(
-            permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
-        )
-    return if (locationPermissions.allPermissionsGranted) {
-        rememberDefaultLocationProvider()
-    } else {
-        null
-    }
-}
+/**
+ * Returns `true` if the platform supports offline map tile management.
+ * - Android: `true` (backed by MapLibre Native).
+ * - iOS: `true` (backed by MapLibre Native).
+ * - Desktop/JS: `false` (no offline support).
+ */
+@Composable expect fun isOfflineManagerAvailable(): Boolean
+
+/**
+ * Renders platform-specific offline map management UI if the platform supports it. The composable receives the current
+ * style URI and [cameraState] for downloading the visible region.
+ *
+ * On unsupported platforms, this is a no-op.
+ */
+@Composable expect fun OfflineMapContent(styleUri: String, cameraState: org.maplibre.compose.camera.CameraState)

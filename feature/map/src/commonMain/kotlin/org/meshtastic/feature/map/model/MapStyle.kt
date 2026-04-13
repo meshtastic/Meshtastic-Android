@@ -28,24 +28,23 @@ import org.meshtastic.core.resources.map_style_terrain
 /**
  * Predefined map tile styles available in the app.
  *
- * Uses free tile sources that do not require API keys. Custom XYZ tile URLs and offline sources can be configured
- * separately via [MapLayerItem].
+ * Uses free tile sources that do not require API keys. All styles are vector-based and work across platforms.
  */
 enum class MapStyle(val label: StringResource, val styleUri: String) {
     /** OpenStreetMap default tiles via OpenFreeMap Liberty style. */
     OpenStreetMap(label = Res.string.map_style_osm, styleUri = "https://tiles.openfreemap.org/styles/liberty"),
 
-    /** Satellite imagery — uses OpenFreeMap with a raster overlay switcher. */
-    Satellite(label = Res.string.map_style_satellite, styleUri = "https://tiles.openfreemap.org/styles/liberty"),
+    /** Clean, light cartographic style via OpenFreeMap Positron. */
+    Satellite(label = Res.string.map_style_satellite, styleUri = "https://tiles.openfreemap.org/styles/positron"),
 
-    /** Terrain style. */
-    Terrain(label = Res.string.map_style_terrain, styleUri = "https://tiles.openfreemap.org/styles/liberty"),
+    /** Topographic style via OpenFreeMap Bright. */
+    Terrain(label = Res.string.map_style_terrain, styleUri = "https://tiles.openfreemap.org/styles/bright"),
 
-    /** Satellite + labels hybrid. */
-    Hybrid(label = Res.string.map_style_hybrid, styleUri = "https://tiles.openfreemap.org/styles/liberty"),
+    /** US road-map style via Americana. */
+    Hybrid(label = Res.string.map_style_hybrid, styleUri = "https://americanamap.org/style.json"),
 
-    /** Dark mode style. */
-    Dark(label = Res.string.map_style_dark, styleUri = "https://tiles.openfreemap.org/styles/bright"),
+    /** Dark mode style via OpenFreeMap Bright (dark palette). */
+    Dark(label = Res.string.map_style_dark, styleUri = "https://tiles.openfreemap.org/styles/fiord"),
     ;
 
     fun toBaseStyle(): BaseStyle = BaseStyle.Uri(styleUri)

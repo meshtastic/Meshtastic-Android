@@ -36,13 +36,19 @@ import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.expressions.dsl.offset
 import org.maplibre.compose.layers.CircleLayer
+import org.maplibre.compose.layers.HillshadeLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.location.LocationPuck
 import org.maplibre.compose.location.UserLocationState
+import org.maplibre.compose.map.GestureOptions
+import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
+import org.maplibre.compose.sources.RasterDemEncoding
 import org.maplibre.compose.sources.rememberGeoJsonSource
+import org.maplibre.compose.sources.rememberRasterDemSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Point
@@ -60,6 +66,10 @@ private const val PRECISION_CIRCLE_STROKE_ALPHA = 0.3f
 private const val CLUSTER_OPACITY = 0.85f
 private const val LABEL_OFFSET_EM = 1.5f
 private const val CLUSTER_ZOOM_INCREMENT = 2.0
+private const val HILLSHADE_EXAGGERATION = 0.5f
+
+/** Free Terrain Tiles (Terrarium encoding) hosted on AWS. No API key required. */
+private val TERRAIN_TILES = listOf("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png")
 
 /**
  * Main map content composable using MapLibre Compose Multiplatform.
@@ -76,23 +86,36 @@ fun MaplibreMapContent(
     myNodeNum: Int?,
     showWaypoints: Boolean,
     showPrecisionCircle: Boolean,
+    showHillshade: Boolean,
     onNodeClick: (Int) -> Unit,
     onMapLongClick: (GeoPosition) -> Unit,
     modifier: Modifier = Modifier,
+    gestureOptions: GestureOptions = GestureOptions.Standard,
     onCameraMoved: (CameraPosition) -> Unit = {},
     onWaypointClick: (Int) -> Unit = {},
+    onMapLoadFinished: () -> Unit = {},
+    onMapLoadFailed: (String?) -> Unit = {},
     locationState: UserLocationState? = null,
 ) {
     MaplibreMap(
         modifier = modifier,
         baseStyle = baseStyle,
         cameraState = cameraState,
+        options = MapOptions(gestureOptions = gestureOptions, ornamentOptions = OrnamentOptions.AllEnabled),
         onMapLongClick = { position, _ ->
             onMapLongClick(position)
             ClickResult.Consume
         },
+        onMapLoadFinished = onMapLoadFinished,
+        onMapLoadFailed = onMapLoadFailed,
         onFrame = {},
     ) {
+        // --- Terrain hillshade overlay ---
+        if (showHillshade) {
+            val demSource = rememberRasterDemSource(tiles = TERRAIN_TILES, encoding = RasterDemEncoding.Terrarium)
+            HillshadeLayer(id = "terrain-hillshade", source = demSource, exaggeration = const(HILLSHADE_EXAGGERATION))
+        }
+
         // --- Node markers with clustering ---
         NodeMarkerLayers(
             nodes = nodes,

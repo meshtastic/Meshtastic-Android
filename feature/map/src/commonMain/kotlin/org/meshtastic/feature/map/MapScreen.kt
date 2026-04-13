@@ -32,11 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.maplibre.compose.camera.CameraMoveReason
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.location.BearingUpdate
 import org.maplibre.compose.location.LocationTrackingEffect
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
+import org.maplibre.compose.map.GestureOptions
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map
@@ -46,6 +49,7 @@ import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterDropdown
 import org.meshtastic.feature.map.component.MapStyleSelector
 import org.meshtastic.feature.map.component.MaplibreMapContent
+import org.meshtastic.feature.map.model.MapStyle
 import org.meshtastic.proto.Waypoint
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
@@ -90,11 +94,26 @@ fun MapScreen(
 
     val scope = rememberCoroutineScope()
 
-    // Location tracking state
+    // Location tracking state: 3-mode cycling (Off → Track → TrackBearing → Off)
     var isLocationTrackingEnabled by remember { mutableStateOf(false) }
+    var bearingUpdate by remember { mutableStateOf(BearingUpdate.TRACK_LOCATION) }
     val locationProvider = rememberLocationProviderOrNull()
     val locationState = rememberUserLocationState(locationProvider ?: rememberNullLocationProvider())
     val locationAvailable = locationProvider != null
+
+    // Derive gesture options from location tracking state
+    val gestureOptions =
+        remember(isLocationTrackingEnabled, bearingUpdate) {
+            if (isLocationTrackingEnabled) {
+                when (bearingUpdate) {
+                    BearingUpdate.IGNORE -> GestureOptions.PositionLocked
+                    BearingUpdate.ALWAYS_NORTH -> GestureOptions.ZoomOnly
+                    BearingUpdate.TRACK_LOCATION -> GestureOptions.ZoomOnly
+                }
+            } else {
+                GestureOptions.Standard
+            }
+        }
 
     // Animate to waypoint when waypointId is provided (deep-link)
     val selectedWaypointId by viewModel.selectedWaypointId.collectAsStateWithLifecycle()
@@ -148,6 +167,7 @@ fun MapScreen(
                 myNodeNum = viewModel.myNodeNum,
                 showWaypoints = filterState.showWaypoints,
                 showPrecisionCircle = filterState.showPrecisionCircle,
+                showHillshade = selectedMapStyle == MapStyle.Terrain,
                 onNodeClick = { nodeNum -> navigateToNodeDetails(nodeNum) },
                 onMapLongClick = { position ->
                     longPressPosition = position
@@ -155,6 +175,7 @@ fun MapScreen(
                     showWaypointDialog = true
                 },
                 modifier = Modifier.fillMaxSize(),
+                gestureOptions = gestureOptions,
                 onCameraMoved = { position -> viewModel.saveCameraPosition(position) },
                 onWaypointClick = { wpId ->
                     editingWaypointId = wpId
@@ -166,8 +187,19 @@ fun MapScreen(
 
             // Auto-pan camera when location tracking is enabled
             if (locationAvailable) {
-                LocationTrackingEffect(locationState = locationState, enabled = isLocationTrackingEnabled) {
-                    cameraState.updateFromLocation()
+                LocationTrackingEffect(
+                    locationState = locationState,
+                    enabled = isLocationTrackingEnabled,
+                    trackBearing = bearingUpdate == BearingUpdate.TRACK_LOCATION,
+                ) {
+                    cameraState.updateFromLocation(updateBearing = bearingUpdate)
+                }
+
+                // Cancel tracking when user manually pans the map
+                LaunchedEffect(cameraState.moveReason) {
+                    if (cameraState.moveReason == CameraMoveReason.GESTURE && isLocationTrackingEnabled) {
+                        isLocationTrackingEnabled = false
+                    }
                 }
             }
 
@@ -176,6 +208,7 @@ fun MapScreen(
                 modifier = Modifier.align(Alignment.TopEnd).padding(paddingValues),
                 bearing = cameraState.position.bearing.toFloat(),
                 onCompassClick = { scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0)) } },
+                followPhoneBearing = isLocationTrackingEnabled && bearingUpdate == BearingUpdate.TRACK_LOCATION,
                 filterDropdownContent = {
                     MapFilterDropdown(
                         expanded = filterMenuExpanded,
@@ -190,8 +223,30 @@ fun MapScreen(
                 mapTypeContent = {
                     MapStyleSelector(selectedStyle = selectedMapStyle, onSelectStyle = viewModel::selectMapStyle)
                 },
+                layersContent = { OfflineMapContent(styleUri = selectedMapStyle.styleUri, cameraState = cameraState) },
                 isLocationTrackingEnabled = isLocationTrackingEnabled,
-                onToggleLocationTracking = { isLocationTrackingEnabled = !isLocationTrackingEnabled },
+                isTrackingBearing = bearingUpdate == BearingUpdate.TRACK_LOCATION,
+                onToggleLocationTracking = {
+                    if (!isLocationTrackingEnabled) {
+                        // Off → Track with bearing
+                        bearingUpdate = BearingUpdate.TRACK_LOCATION
+                        isLocationTrackingEnabled = true
+                    } else {
+                        when (bearingUpdate) {
+                            BearingUpdate.TRACK_LOCATION -> {
+                                // TrackBearing → TrackNorth
+                                bearingUpdate = BearingUpdate.ALWAYS_NORTH
+                            }
+                            BearingUpdate.ALWAYS_NORTH -> {
+                                // TrackNorth → Off
+                                isLocationTrackingEnabled = false
+                            }
+                            BearingUpdate.IGNORE -> {
+                                isLocationTrackingEnabled = false
+                            }
+                        }
+                    }
+                },
             )
         }
     }

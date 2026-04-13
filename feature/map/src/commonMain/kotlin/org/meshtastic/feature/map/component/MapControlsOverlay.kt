@@ -40,6 +40,7 @@ import org.meshtastic.core.ui.icon.LocationDisabled
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
+import org.meshtastic.core.ui.icon.NearMe
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -72,6 +73,7 @@ fun MapControlsOverlay(
     mapTypeContent: @Composable () -> Unit = {},
     layersContent: @Composable () -> Unit = {},
     isLocationTrackingEnabled: Boolean = false,
+    isTrackingBearing: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
     showRefresh: Boolean = false,
     isRefreshing: Boolean = false,
@@ -116,10 +118,16 @@ fun MapControlsOverlay(
             }
         }
 
-        // Location tracking button
+        // Location tracking button — 3 states: Off (MyLocation), Tracking (LocationDisabled), TrackingBearing (NearMe)
         MapButton(
-            icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
+            icon =
+            when {
+                !isLocationTrackingEnabled -> MeshtasticIcons.MyLocation
+                isTrackingBearing -> MeshtasticIcons.NearMe
+                else -> MeshtasticIcons.LocationDisabled
+            },
             contentDescription = stringResource(Res.string.toggle_my_position),
+            iconTint = if (isLocationTrackingEnabled) MaterialTheme.colorScheme.primary else null,
             onClick = onToggleLocationTracking,
         )
     }
