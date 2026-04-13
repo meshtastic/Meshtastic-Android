@@ -46,12 +46,16 @@ import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.description
 import org.meshtastic.core.resources.name
 import org.meshtastic.core.resources.send
+import org.meshtastic.core.resources.waypoint_edit
+import org.meshtastic.core.resources.waypoint_lock_to_my_node
+import org.meshtastic.core.resources.waypoint_new
 import org.meshtastic.feature.map.util.convertIntToEmoji
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val MAX_NAME_LENGTH = 29
 private const val MAX_DESCRIPTION_LENGTH = 99
 private const val DEFAULT_EMOJI = 0x1F4CD // Round Pushpin
+private const val COORDINATE_PRECISION = 1_000_000L
 
 /**
  * Dialog for creating or editing a waypoint on the map.
@@ -81,7 +85,7 @@ fun EditWaypointDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = if (isEditing) "Edit Waypoint" else "New Waypoint",
+                text = stringResource(if (isEditing) Res.string.waypoint_edit else Res.string.waypoint_new),
                 style = MaterialTheme.typography.headlineSmall,
             )
         },
@@ -122,7 +126,10 @@ fun EditWaypointDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Lock to my node", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(Res.string.waypoint_lock_to_my_node),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                     Switch(checked = locked, onCheckedChange = { locked = it })
                 }
 
@@ -130,7 +137,7 @@ fun EditWaypointDialog(
                 if (position != null) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "${position.latitude}, ${position.longitude}",
+                        text = "${position.latitude.formatCoord()}, ${position.longitude.formatCoord()}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -165,4 +172,10 @@ fun EditWaypointDialog(
             }
         },
     )
+}
+
+/** Format a coordinate to 6 decimal places without using JVM-only String.format(). */
+private fun Double.formatCoord(): String {
+    val rounded = (this * COORDINATE_PRECISION).toLong() / COORDINATE_PRECISION.toDouble()
+    return rounded.toString()
 }

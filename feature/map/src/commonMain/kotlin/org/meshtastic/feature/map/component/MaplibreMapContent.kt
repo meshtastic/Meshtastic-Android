@@ -32,9 +32,13 @@ import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToColor
 import org.maplibre.compose.expressions.dsl.convertToNumber
 import org.maplibre.compose.expressions.dsl.dp
+import org.maplibre.compose.expressions.dsl.exponential
 import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.interpolate
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.expressions.dsl.offset
+import org.maplibre.compose.expressions.dsl.times
+import org.maplibre.compose.expressions.dsl.zoom
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.HillshadeLayer
 import org.maplibre.compose.layers.SymbolLayer
@@ -63,6 +67,19 @@ private const val CLUSTER_RADIUS = 50
 private const val CLUSTER_MIN_POINTS = 10
 private const val PRECISION_CIRCLE_FILL_ALPHA = 0.1f
 private const val PRECISION_CIRCLE_STROKE_ALPHA = 0.3f
+
+/**
+ * Ground resolution at the equator: meters per pixel = 156543.03 / 2^zoom. We use an exponential(2) interpolation with
+ * two stops to compute the conversion factor from meters to pixels at each zoom level. The result is multiplied by the
+ * per-feature `precision_meters` property to produce a screen-pixel radius.
+ */
+private const val EQUATORIAL_METERS_PER_PIXEL_ZOOM0 = 156543.03f
+private const val PRECISION_ZOOM_MIN = 0
+private const val PRECISION_ZOOM_MAX = 24
+private const val PRECISION_SCALE_MIN = 1f / EQUATORIAL_METERS_PER_PIXEL_ZOOM0
+
+@Suppress("MagicNumber")
+private const val PRECISION_SCALE_MAX = 16_777_216f / EQUATORIAL_METERS_PER_PIXEL_ZOOM0 // 2^24
 private const val CLUSTER_OPACITY = 0.85f
 private const val LABEL_OFFSET_EM = 1.5f
 private const val CLUSTER_ZOOM_INCREMENT = 2.0
@@ -232,13 +249,21 @@ private fun NodeMarkerLayers(
         iconAllowOverlap = const(true),
     )
 
-    // Precision circles — sized by precision_meters property
+    // Precision circles — sized by precision_meters property converted to screen pixels via zoom interpolation
     if (showPrecisionCircle) {
+        // Meters-to-pixels factor doubles with each zoom level (equatorial approximation)
+        val metersToPixels =
+            interpolate(
+                exponential(2f),
+                zoom(),
+                PRECISION_ZOOM_MIN to const(PRECISION_SCALE_MIN),
+                PRECISION_ZOOM_MAX to const(PRECISION_SCALE_MAX),
+            )
         CircleLayer(
             id = "node-precision",
             source = nodesSource,
             filter = !feature.has("cluster"),
-            radius = feature["precision_meters"].convertToNumber(const(0f)).dp,
+            radius = (feature["precision_meters"].convertToNumber(const(0f)) * metersToPixels).dp,
             color =
             feature["background_color"].convertToColor(
                 const(NodeMarkerColor.copy(alpha = PRECISION_CIRCLE_FILL_ALPHA)),
