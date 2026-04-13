@@ -21,11 +21,11 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
+import org.maplibre.spatialk.geojson.Geometry
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val MIN_PRECISION_BITS = 10
 private const val MAX_PRECISION_BITS = 19
@@ -35,9 +35,7 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
     val features =
         nodes.mapNotNull { node ->
             val pos = node.validPosition ?: return@mapNotNull null
-            val lat = (pos.latitude_i ?: 0) * COORDINATE_SCALE
-            val lng = (pos.longitude_i ?: 0) * COORDINATE_SCALE
-            if (lat == 0.0 && lng == 0.0) return@mapNotNull null
+            val geoPos = toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) ?: return@mapNotNull null
 
             val colors = node.colors
             val props = buildJsonObject {
@@ -57,11 +55,10 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
                 put("precision_meters", precisionBitsToMeters(pos.precision_bits ?: 0))
             }
 
-            Feature(geometry = Point(GeoPosition(longitude = lng, latitude = lat)), properties = props)
+            Feature(geometry = Point(geoPos), properties = props)
         }
 
-    @Suppress("UNCHECKED_CAST")
-    return FeatureCollection(features) as FeatureCollection<Point, JsonObject>
+    return typedFeatureCollection(features)
 }
 
 /** Convert waypoints to a GeoJSON [FeatureCollection]. */
@@ -69,9 +66,7 @@ fun waypointsToFeatureCollection(waypoints: Map<Int, DataPacket>): FeatureCollec
     val features =
         waypoints.values.mapNotNull { packet ->
             val waypoint = packet.waypoint ?: return@mapNotNull null
-            val lat = (waypoint.latitude_i ?: 0) * COORDINATE_SCALE
-            val lng = (waypoint.longitude_i ?: 0) * COORDINATE_SCALE
-            if (lat == 0.0 && lng == 0.0) return@mapNotNull null
+            val geoPos = toGeoPositionOrNull(waypoint.latitude_i, waypoint.longitude_i) ?: return@mapNotNull null
 
             val emoji = if (waypoint.icon != 0) convertIntToEmoji(waypoint.icon) else PIN_EMOJI
 
@@ -85,21 +80,15 @@ fun waypointsToFeatureCollection(waypoints: Map<Int, DataPacket>): FeatureCollec
                 put("expire", waypoint.expire)
             }
 
-            Feature(geometry = Point(GeoPosition(longitude = lng, latitude = lat)), properties = props)
+            Feature(geometry = Point(geoPos), properties = props)
         }
 
-    @Suppress("UNCHECKED_CAST")
-    return FeatureCollection(features) as FeatureCollection<Point, JsonObject>
+    return typedFeatureCollection(features)
 }
 
 /** Convert position history to a GeoJSON [LineString] for track rendering. */
 fun positionsToLineString(positions: List<org.meshtastic.proto.Position>): FeatureCollection<LineString, JsonObject> {
-    val coords =
-        positions.mapNotNull { pos ->
-            val lat = (pos.latitude_i ?: 0) * COORDINATE_SCALE
-            val lng = (pos.longitude_i ?: 0) * COORDINATE_SCALE
-            if (lat == 0.0 && lng == 0.0) null else GeoPosition(longitude = lng, latitude = lat)
-        }
+    val coords = positions.mapNotNull { pos -> toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) }
 
     if (coords.size < 2) return FeatureCollection(emptyList())
 
@@ -107,17 +96,14 @@ fun positionsToLineString(positions: List<org.meshtastic.proto.Position>): Featu
 
     val feature = Feature(geometry = LineString(coords), properties = props)
 
-    @Suppress("UNCHECKED_CAST")
-    return FeatureCollection(listOf(feature)) as FeatureCollection<LineString, JsonObject>
+    return typedFeatureCollection(listOf(feature))
 }
 
 /** Convert position history to individual point features with time metadata. */
 fun positionsToPointFeatures(positions: List<org.meshtastic.proto.Position>): FeatureCollection<Point, JsonObject> {
     val features =
         positions.mapNotNull { pos ->
-            val lat = (pos.latitude_i ?: 0) * COORDINATE_SCALE
-            val lng = (pos.longitude_i ?: 0) * COORDINATE_SCALE
-            if (lat == 0.0 && lng == 0.0) return@mapNotNull null
+            val geoPos = toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) ?: return@mapNotNull null
 
             val props = buildJsonObject {
                 put("time", (pos.time ?: 0).toString())
@@ -126,11 +112,10 @@ fun positionsToPointFeatures(positions: List<org.meshtastic.proto.Position>): Fe
                 put("sats_in_view", pos.sats_in_view ?: 0)
             }
 
-            Feature(geometry = Point(GeoPosition(longitude = lng, latitude = lat)), properties = props)
+            Feature(geometry = Point(geoPos), properties = props)
         }
 
-    @Suppress("UNCHECKED_CAST")
-    return FeatureCollection(features) as FeatureCollection<Point, JsonObject>
+    return typedFeatureCollection(features)
 }
 
 /** Approximate meters of positional uncertainty from precision_bits (10-19). */
@@ -149,7 +134,16 @@ fun precisionBitsToMeters(precisionBits: Int): Double = when (precisionBits) {
     else -> 0.0
 }
 
-private const val PIN_EMOJI = "\uD83D\uDCCD"
+private const val PIN_EMOJI = "\uD83D\uDCCD" // U+1F4CD Round Pushpin — same as DEFAULT_EMOJI in EditWaypointDialog
+
+/**
+ * Wraps [FeatureCollection] constructor with an unchecked cast to the desired type parameters. Centralizes the single
+ * unavoidable cast required by the spatialk GeoJSON API.
+ */
+@Suppress("UNCHECKED_CAST")
+internal fun <G : Geometry, P> typedFeatureCollection(features: List<Feature<G, P>>): FeatureCollection<G, P> =
+    FeatureCollection(features) as FeatureCollection<G, P>
+
 private const val BMP_MAX = 0xFFFF
 private const val SUPPLEMENTARY_OFFSET = 0x10000
 private const val HALF_SHIFT = 10

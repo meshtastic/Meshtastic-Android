@@ -55,8 +55,8 @@ import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val MAX_NAME_LENGTH = 29
 private const val MAX_DESCRIPTION_LENGTH = 99
-private const val DEFAULT_EMOJI = 0x1F4CD // Round Pushpin
-private const val COORDINATE_PRECISION = 1_000_000L
+private const val DEFAULT_EMOJI = 0x1F4CD // Round Pushpin (📍) — same as PIN_EMOJI in GeoJsonConverters
+private const val FORMAT_DECIMAL_FACTOR = 1_000_000L
 
 /**
  * Dialog for creating or editing a waypoint on the map.
@@ -181,7 +181,7 @@ private fun Double.formatCoord(): String {
     val negative = this < 0
     val absVal = abs(this)
     val wholePart = absVal.toLong()
-    val fracPart = ((absVal - wholePart) * COORDINATE_PRECISION + 0.5).toLong()
+    val fracPart = ((absVal - wholePart) * FORMAT_DECIMAL_FACTOR + 0.5).toLong()
     val fracStr = fracPart.toString().padStart(6, '0')
     return "${if (negative) "-" else ""}$wholePart.$fracStr"
 }

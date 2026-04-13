@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.map.util
 
+import org.maplibre.spatialk.geojson.Feature
+import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Position
@@ -23,6 +25,8 @@ import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @Suppress("MagicNumber")
@@ -271,5 +275,58 @@ class GeoJsonConvertersTest {
     fun convertIntToEmoji_maxBmpCharacter() {
         val result = convertIntToEmoji(0xFFFF)
         assertEquals(1, result.length)
+    }
+
+    @Test
+    fun convertIntToEmoji_negativeCodepoint_returnsNonEmptyString() {
+        // Negative code points wrap around in char conversion but should not crash
+        val result = convertIntToEmoji(-1)
+        assertTrue(result.isNotEmpty(), "Should return a non-empty string even for invalid code points")
+    }
+
+    // --- toGeoPositionOrNull ---
+
+    @Test
+    fun toGeoPositionOrNull_validCoords_returnsGeoPosition() {
+        val result = toGeoPositionOrNull(400000000, -740000000)
+        assertNotNull(result)
+        assertEquals(40.0, result.latitude, 0.001)
+        assertEquals(-74.0, result.longitude, 0.001)
+    }
+
+    @Test
+    fun toGeoPositionOrNull_zeroCoords_returnsNull() {
+        val result = toGeoPositionOrNull(0, 0)
+        assertNull(result)
+    }
+
+    @Test
+    fun toGeoPositionOrNull_nullCoords_returnsNull() {
+        val result = toGeoPositionOrNull(null, null)
+        assertNull(result)
+    }
+
+    @Test
+    fun toGeoPositionOrNull_onlyLatNull_treatedAsZero() {
+        // null lat = 0, non-zero lng -> lat=0.0 && lng!=0.0 -> not both zero -> returns position
+        val result = toGeoPositionOrNull(null, 100000000)
+        assertNotNull(result)
+        assertEquals(0.0, result.latitude, 0.001)
+        assertEquals(10.0, result.longitude, 0.001)
+    }
+
+    // --- typedFeatureCollection ---
+
+    @Test
+    fun typedFeatureCollection_preservesFeatures() {
+        val features =
+            listOf(
+                Feature(
+                    geometry = Point(org.maplibre.spatialk.geojson.Position(longitude = 1.0, latitude = 2.0)),
+                    properties = null,
+                ),
+            )
+        val result = typedFeatureCollection(features)
+        assertEquals(1, result.features.size)
     }
 }

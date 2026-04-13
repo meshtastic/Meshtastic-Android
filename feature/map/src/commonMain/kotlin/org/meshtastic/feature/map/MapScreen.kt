@@ -49,7 +49,7 @@ import org.meshtastic.feature.map.component.MapFilterDropdown
 import org.meshtastic.feature.map.component.MapStyleSelector
 import org.meshtastic.feature.map.component.MaplibreMapContent
 import org.meshtastic.feature.map.model.MapStyle
-import org.meshtastic.feature.map.util.COORDINATE_SCALE
+import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val WAYPOINT_ZOOM = 15.0
@@ -118,13 +118,8 @@ fun MapScreen(
         val wpId = selectedWaypointId ?: return@LaunchedEffect
         val packet = waypoints[wpId] ?: return@LaunchedEffect
         val wpt = packet.waypoint ?: return@LaunchedEffect
-        val lat = (wpt.latitude_i ?: 0) * COORDINATE_SCALE
-        val lng = (wpt.longitude_i ?: 0) * COORDINATE_SCALE
-        if (lat != 0.0 || lng != 0.0) {
-            cameraState.animateTo(
-                CameraPosition(target = GeoPosition(longitude = lng, latitude = lat), zoom = WAYPOINT_ZOOM),
-            )
-        }
+        val geoPos = toGeoPositionOrNull(wpt.latitude_i, wpt.longitude_i) ?: return@LaunchedEffect
+        cameraState.animateTo(CameraPosition(target = geoPos, zoom = WAYPOINT_ZOOM))
     }
 
     @Suppress("ViewModelForwarding")

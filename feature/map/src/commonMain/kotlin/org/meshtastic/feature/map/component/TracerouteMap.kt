@@ -32,9 +32,8 @@ import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.feature.map.model.MapStyle
-import org.meshtastic.feature.map.util.COORDINATE_SCALE
+import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.meshtastic.proto.Position
-import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val DEFAULT_TRACEROUTE_ZOOM = 10.0
 private const val BOUNDS_PADDING_DP = 64
@@ -60,11 +59,7 @@ fun TracerouteMap(
 ) {
     val geoPositions =
         remember(tracerouteNodePositions) {
-            tracerouteNodePositions.values.mapNotNull { pos ->
-                val lat = (pos.latitude_i ?: 0) * COORDINATE_SCALE
-                val lng = (pos.longitude_i ?: 0) * COORDINATE_SCALE
-                if (lat != 0.0 || lng != 0.0) GeoPosition(longitude = lng, latitude = lat) else null
-            }
+            tracerouteNodePositions.values.mapNotNull { pos -> toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) }
         }
 
     val center = remember(geoPositions) { geoPositions.firstOrNull() }
@@ -75,8 +70,8 @@ fun TracerouteMap(
             val lats = geoPositions.map { it.latitude }
             val lngs = geoPositions.map { it.longitude }
             BoundingBox(
-                southwest = GeoPosition(longitude = lngs.min(), latitude = lats.min()),
-                northeast = GeoPosition(longitude = lngs.max(), latitude = lats.max()),
+                southwest = org.maplibre.spatialk.geojson.Position(longitude = lngs.min(), latitude = lats.min()),
+                northeast = org.maplibre.spatialk.geojson.Position(longitude = lngs.max(), latitude = lats.max()),
             )
         }
 
@@ -84,7 +79,7 @@ fun TracerouteMap(
         rememberCameraState(
             firstPosition =
             CameraPosition(
-                target = center ?: GeoPosition(longitude = 0.0, latitude = 0.0),
+                target = center ?: org.maplibre.spatialk.geojson.Position(longitude = 0.0, latitude = 0.0),
                 zoom = DEFAULT_TRACEROUTE_ZOOM,
             ),
         )

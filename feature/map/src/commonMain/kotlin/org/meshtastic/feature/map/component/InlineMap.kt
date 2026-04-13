@@ -32,14 +32,13 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
-import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
-import org.meshtastic.feature.map.util.COORDINATE_SCALE
+import org.meshtastic.feature.map.model.MapStyle
 import org.meshtastic.feature.map.util.precisionBitsToMeters
-import org.maplibre.spatialk.geojson.Position as GeoPosition
+import org.meshtastic.feature.map.util.toGeoPositionOrNull
 
 private const val DEFAULT_ZOOM = 15.0
 private const val PRECISION_CIRCLE_FILL_ALPHA = 0.15f
@@ -55,27 +54,19 @@ private const val METERS_PER_PIXEL_ZOOM15 = 4.773
 @Composable
 fun InlineMap(node: Node, modifier: Modifier = Modifier) {
     val position = node.validPosition ?: return
-    val lat = (position.latitude_i ?: 0) * COORDINATE_SCALE
-    val lng = (position.longitude_i ?: 0) * COORDINATE_SCALE
-    if (lat == 0.0 && lng == 0.0) return
+    val geoPos = toGeoPositionOrNull(position.latitude_i, position.longitude_i) ?: return
 
     key(node.num) {
-        val cameraState =
-            rememberCameraState(
-                firstPosition =
-                CameraPosition(target = GeoPosition(longitude = lng, latitude = lat), zoom = DEFAULT_ZOOM),
-            )
+        val cameraState = rememberCameraState(firstPosition = CameraPosition(target = geoPos, zoom = DEFAULT_ZOOM))
 
         val nodeFeature =
-            remember(node.num, lat, lng) {
-                FeatureCollection(
-                    listOf(Feature(geometry = Point(GeoPosition(longitude = lng, latitude = lat)), properties = null)),
-                )
+            remember(node.num, geoPos) {
+                FeatureCollection(listOf(Feature(geometry = Point(geoPos), properties = null)))
             }
 
         MaplibreMap(
             modifier = modifier,
-            baseStyle = BaseStyle.Uri("https://tiles.openfreemap.org/styles/liberty"),
+            baseStyle = MapStyle.OpenStreetMap.toBaseStyle(),
             cameraState = cameraState,
             options =
             MapOptions(gestureOptions = GestureOptions.AllDisabled, ornamentOptions = OrnamentOptions.AllDisabled),

@@ -16,5 +16,17 @@
  */
 package org.meshtastic.feature.map.util
 
+import org.maplibre.spatialk.geojson.Position as GeoPosition
+
 /** Meshtastic stores lat/lng as integer microdegrees; multiply by this to get decimal degrees. */
 const val COORDINATE_SCALE = 1e-7
+
+/**
+ * Convert Meshtastic integer microdegree coordinates to a [GeoPosition], returning `null` if both latitude and
+ * longitude are zero (indicating no valid position).
+ */
+fun toGeoPositionOrNull(latI: Int?, lngI: Int?): GeoPosition? {
+    val lat = (latI ?: 0) * COORDINATE_SCALE
+    val lng = (lngI ?: 0) * COORDINATE_SCALE
+    return if (lat == 0.0 && lng == 0.0) null else GeoPosition(longitude = lng, latitude = lat)
+}
