@@ -32,7 +32,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.unknown_error
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
@@ -83,7 +85,10 @@ context(viewModel: ViewModel)
 fun <T> Flow<T>.asUiState(stopTimeout: Duration = 5.seconds): StateFlow<UiState<T>> =
     this.map<T, UiState<T>> { UiState.Content(it) }
         .onStart { emit(UiState.Loading) }
-        .catch { e -> emit(UiState.Error(UiText.DynamicString(e.message ?: "Unknown error"))) }
+        .catch { e ->
+            val message = e.message?.let { UiText.DynamicString(it) } ?: UiText.Resource(Res.string.unknown_error)
+            emit(UiState.Error(message))
+        }
         .stateInWhileSubscribed(initialValue = UiState.Loading, stopTimeout = stopTimeout)
 
 // ---------------------------------------------------------------------------
@@ -118,7 +123,8 @@ fun safeLaunch(
     } catch (e: Exception) {
         val label = tag ?: "safeLaunch"
         Logger.e(e) { "[$label] Unhandled exception" }
-        errorEvents?.tryEmit(UiText.DynamicString(e.message ?: "Unknown error"))
+        val message = e.message?.let { UiText.DynamicString(it) } ?: UiText.Resource(Res.string.unknown_error)
+        errorEvents?.tryEmit(message)
     }
 }
 

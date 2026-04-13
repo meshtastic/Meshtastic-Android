@@ -327,6 +327,7 @@
     <string name="delivery_confirmed">Delivery confirmed</string>
     <string name="delivery_confirmed_reboot_warning">Your device may disconnect and reboot while settings are applied.</string>
     <string name="error">Error</string>
+    <string name="unknown_error">Unknown error</string>
     <string name="ignore">Ignore</string>
     <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Add '%1$s' to ignore list?</string>

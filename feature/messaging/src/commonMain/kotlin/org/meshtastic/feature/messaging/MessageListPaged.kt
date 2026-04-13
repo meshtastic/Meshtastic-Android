@@ -450,7 +450,7 @@ private fun UpdateUnreadCountPaged(
     onUnreadChange: (Long, Long) -> Unit,
 ) {
     val currentOnUnreadChange by rememberUpdatedState(onUnreadChange)
-    var isResumed by remember { mutableStateOf(true) }
+    var isResumed by remember { mutableStateOf(false) }
 
     // Track lifecycle state changes
     LifecycleResumeEffect(Unit) {

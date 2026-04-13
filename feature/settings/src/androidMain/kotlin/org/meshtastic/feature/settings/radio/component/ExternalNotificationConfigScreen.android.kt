@@ -69,7 +69,7 @@ actual fun RingtoneTrailingIcon(ringtoneInput: String, onRingtoneImported: (Stri
                     }
                 } catch (e: Exception) {
                     Logger.e(e) { "Error importing ringtone" }
-                    val errorMsg = importErrorPrefix.replace(IMPORT_ERROR_PLACEHOLDER, e.message ?: "Unknown error")
+                    val errorMsg = importErrorPrefix.replace(IMPORT_ERROR_PLACEHOLDER, e.message ?: e.toString())
                     Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
                 }
             }
