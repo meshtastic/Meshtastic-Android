@@ -24,9 +24,17 @@ import org.gradle.kotlin.dsl.dependencies
 internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     commonExtension.apply { buildFeatures.compose = true }
 
-    // CMP skips Android version enforcement; third-party BOMs and atomic-group alignment
-    // can silently override AndroidX Compose versions. Force core groups to the CMP version.
-    // Material/Material3 excluded — CMP maps those to different AndroidX version numbers.
+    // CMP is the sole Compose version authority (BOM removed from the catalog).
+    // Third-party libraries (maps-compose, datadog, etc.) carry a transitive
+    // compose-bom whose constraints conflict with CMP-published AndroidX artifacts.
+    // Exclude it globally so CMP's own dependency graph wins.
+    configurations.configureEach {
+        exclude(mapOf("group" to "androidx.compose", "module" to "compose-bom"))
+    }
+
+    // CMP publishes these core AndroidX groups at the CMP version tag.
+    // Material, Material3, and Adaptive follow separate AndroidX version numbers
+    // and must NOT be included here (see CMP release notes for the mapping table).
     val cmpVersion = libs.version("compose-multiplatform")
     val cmpAlignedGroups = setOf(
         "androidx.compose.animation",
@@ -34,10 +42,18 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
         "androidx.compose.runtime",
         "androidx.compose.ui",
     )
+
+    // The BOM exclusion above strips versions from transitive material deps
+    // (e.g. maps-compose-widgets, datadog). Pin the material group to the
+    // AndroidX version that matches this CMP release.
+    val materialVersion = libs.version("androidx-compose-material")
+
     configurations.configureEach {
         resolutionStrategy.eachDependency {
             if (requested.group in cmpAlignedGroups) {
                 useVersion(cmpVersion)
+            } else if (requested.group == "androidx.compose.material") {
+                useVersion(materialVersion)
             }
         }
     }
