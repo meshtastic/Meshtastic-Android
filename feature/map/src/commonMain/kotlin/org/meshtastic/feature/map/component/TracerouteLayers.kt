@@ -40,7 +40,8 @@ import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
-import org.meshtastic.feature.map.util.COORDINATE_SCALE
+import org.meshtastic.feature.map.util.toGeoPositionOrNull
+import org.meshtastic.feature.map.util.typedFeatureCollection
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private val ForwardRouteColor = Color(0xFF4CAF50)
@@ -54,7 +55,7 @@ private const val ROUTE_OPACITY = 0.8f
  * polyline implementations.
  */
 @Composable
-fun TracerouteLayers(
+internal fun TracerouteLayers(
     overlay: TracerouteOverlay?,
     nodePositions: Map<Int, org.meshtastic.proto.Position>,
     nodes: Map<Int, Node>,
@@ -130,9 +131,7 @@ private fun buildTracerouteGeoJson(
 ): TracerouteGeoJsonData {
     fun nodeToGeoPosition(nodeNum: Int): GeoPosition? {
         val pos = nodePositions[nodeNum] ?: return null
-        val lat = (pos.latitude_i ?: 0) * COORDINATE_SCALE
-        val lng = (pos.longitude_i ?: 0) * COORDINATE_SCALE
-        return if (lat == 0.0 && lng == 0.0) null else GeoPosition(longitude = lng, latitude = lat)
+        return toGeoPositionOrNull(pos.latitude_i, pos.longitude_i)
     }
 
     // Build forward route line
@@ -144,11 +143,9 @@ private fun buildTracerouteGeoJson(
                     geometry = LineString(forwardCoords),
                     properties = buildJsonObject { put("direction", "forward") },
                 )
-            @Suppress("UNCHECKED_CAST")
-            FeatureCollection(listOf(feature)) as FeatureCollection<LineString, JsonObject>
+            typedFeatureCollection(listOf(feature))
         } else {
-            @Suppress("UNCHECKED_CAST")
-            FeatureCollection(emptyList<Feature<LineString, JsonObject>>()) as FeatureCollection<LineString, JsonObject>
+            typedFeatureCollection(emptyList<Feature<LineString, JsonObject>>())
         }
 
     // Build return route line
@@ -160,11 +157,9 @@ private fun buildTracerouteGeoJson(
                     geometry = LineString(returnCoords),
                     properties = buildJsonObject { put("direction", "return") },
                 )
-            @Suppress("UNCHECKED_CAST")
-            FeatureCollection(listOf(feature)) as FeatureCollection<LineString, JsonObject>
+            typedFeatureCollection(listOf(feature))
         } else {
-            @Suppress("UNCHECKED_CAST")
-            FeatureCollection(emptyList<Feature<LineString, JsonObject>>()) as FeatureCollection<LineString, JsonObject>
+            typedFeatureCollection(emptyList<Feature<LineString, JsonObject>>())
         }
 
     // Build hop marker points
@@ -185,10 +180,9 @@ private fun buildTracerouteGeoJson(
             )
         }
 
-    @Suppress("UNCHECKED_CAST")
     return TracerouteGeoJsonData(
         forwardLine = forwardLine,
         returnLine = returnLine,
-        hopFeatures = FeatureCollection(hopFeatures) as FeatureCollection<Point, JsonObject>,
+        hopFeatures = typedFeatureCollection(hopFeatures),
     )
 }

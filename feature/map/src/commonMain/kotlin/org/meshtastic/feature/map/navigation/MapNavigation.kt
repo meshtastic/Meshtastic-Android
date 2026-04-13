@@ -25,6 +25,7 @@ import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.MapViewModel
 
+/** Registers the map feature's navigation entries into a Navigation 3 [EntryProviderScope]. */
 fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
     entry<MapRoute.Map> { args ->
         val viewModel = koinViewModel<MapViewModel>()

@@ -46,9 +46,7 @@ import org.meshtastic.proto.Waypoint
 
 /**
  * Shared base ViewModel for the map feature, providing node data, waypoints, map filter preferences, and traceroute
- * overlay state.
- *
- * Platform-specific map ViewModels (fdroid/google) extend this to add flavor-specific map provider logic.
+ * overlay state. [MapViewModel] extends this with camera persistence and map style management.
  */
 @Suppress("TooManyFunctions")
 open class BaseMapViewModel(
@@ -65,14 +63,12 @@ open class BaseMapViewModel(
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
 
-    val myId = nodeRepository.myId
-
     val isConnected =
         radioController.connectionState
             .map { it is org.meshtastic.core.model.ConnectionState.Connected }
             .stateInWhileSubscribed(initialValue = false)
 
-    val nodes: StateFlow<List<Node>> =
+    private val nodes: StateFlow<List<Node>> =
         nodeRepository
             .getNodes()
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
@@ -88,8 +84,8 @@ open class BaseMapViewModel(
             .getWaypoints()
             .mapLatest { list ->
                 list
-                    .filter { it.waypoint != null }
-                    .associateBy { packet -> packet.waypoint!!.id }
+                    .mapNotNull { packet -> packet.waypoint?.let { wpt -> wpt.id to packet } }
+                    .toMap()
                     .filterValues {
                         val expire = it.waypoint?.expire ?: 0
                         expire == 0 || expire.toLong() > nowSeconds
@@ -140,9 +136,6 @@ open class BaseMapViewModel(
         lastHeardTrackFilterValue.value = filter
         mapPrefs.setLastHeardTrackFilter(filter.seconds)
     }
-
-    open fun getUser(userId: String?) =
-        nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
 
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 

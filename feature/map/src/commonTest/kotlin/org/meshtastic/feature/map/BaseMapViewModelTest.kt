@@ -276,6 +276,36 @@ class BaseMapViewModelTest {
         }
     }
 
+    @Test
+    fun filteredNodes_combinedFavoritesAndLastHeard_filtersCorrectly() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        val myNodeNum = 1
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = myNodeNum))
+        val nodes =
+            listOf(
+                nodeWithPosition(myNodeNum, lastHeard = now), // my node — always visible
+                nodeWithPosition(2, isFavorite = true, lastHeard = now), // favorite + recent
+                nodeWithPosition(3, isFavorite = true, lastHeard = now - 7200), // favorite + stale
+                nodeWithPosition(4, isFavorite = false, lastHeard = now), // non-favorite + recent
+            )
+        nodeRepository.setNodes(nodes)
+
+        // Enable both filters
+        viewModel.toggleOnlyFavorites()
+        viewModel.setLastHeardFilter(LastHeardFilter.OneHour)
+
+        viewModel.filteredNodes.test {
+            val result = expectMostRecentItem()
+            val nodeNums = result.map { it.num }.toSet()
+            // My node always visible, favorite+recent visible, favorite+stale filtered, non-favorite filtered
+            assertTrue(myNodeNum in nodeNums, "My node should always be visible")
+            assertTrue(2 in nodeNums, "Favorite + recent node should be visible")
+            assertFalse(3 in nodeNums, "Favorite + stale node should be filtered out by lastHeard")
+            assertFalse(4 in nodeNums, "Non-favorite node should be filtered out by favorites filter")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     // ---- getNodeOrFallback ----
 
     @Test

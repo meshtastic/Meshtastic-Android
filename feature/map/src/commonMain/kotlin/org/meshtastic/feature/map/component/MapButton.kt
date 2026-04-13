@@ -24,12 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
-/**
- * A compact icon button used in map control overlays. Uses [FilledIconButton] for a consistent, compact appearance
- * across both Google and F-Droid flavors.
- */
+/** A compact icon button used in map control overlays. Uses [FilledIconButton] for a consistent, compact appearance. */
 @Composable
-fun MapButton(
+internal fun MapButton(
     icon: ImageVector,
     contentDescription: String,
     onClick: () -> Unit,

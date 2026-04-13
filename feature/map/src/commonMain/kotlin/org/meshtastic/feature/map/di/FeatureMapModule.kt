@@ -19,6 +19,7 @@ package org.meshtastic.feature.map.di
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 
+/** Koin module for the map feature. Scans [org.meshtastic.feature.map] for annotated dependencies. */
 @Module
 @ComponentScan("org.meshtastic.feature.map")
 class FeatureMapModule

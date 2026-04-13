@@ -30,9 +30,8 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.feature.map.model.MapStyle
-import org.meshtastic.feature.map.util.COORDINATE_SCALE
+import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.meshtastic.proto.Position
-import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val DEFAULT_TRACK_ZOOM = 13.0
 private const val BOUNDS_PADDING_DP = 48
@@ -53,13 +52,7 @@ fun NodeTrackMap(
     onPositionSelected: ((Int) -> Unit)? = null,
 ) {
     val geoPositions =
-        remember(positions) {
-            positions.mapNotNull { pos ->
-                val lat = (pos.latitude_i ?: 0) * COORDINATE_SCALE
-                val lng = (pos.longitude_i ?: 0) * COORDINATE_SCALE
-                if (lat != 0.0 || lng != 0.0) GeoPosition(longitude = lng, latitude = lat) else null
-            }
-        }
+        remember(positions) { positions.mapNotNull { pos -> toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) } }
 
     val center = remember(geoPositions) { geoPositions.firstOrNull() }
 
@@ -69,8 +62,8 @@ fun NodeTrackMap(
             val lats = geoPositions.map { it.latitude }
             val lngs = geoPositions.map { it.longitude }
             BoundingBox(
-                southwest = GeoPosition(longitude = lngs.min(), latitude = lats.min()),
-                northeast = GeoPosition(longitude = lngs.max(), latitude = lats.max()),
+                southwest = org.maplibre.spatialk.geojson.Position(longitude = lngs.min(), latitude = lats.min()),
+                northeast = org.maplibre.spatialk.geojson.Position(longitude = lngs.max(), latitude = lats.max()),
             )
         }
 
@@ -78,7 +71,7 @@ fun NodeTrackMap(
         rememberCameraState(
             firstPosition =
             CameraPosition(
-                target = center ?: GeoPosition(longitude = 0.0, latitude = 0.0),
+                target = center ?: org.maplibre.spatialk.geojson.Position(longitude = 0.0, latitude = 0.0),
                 zoom = DEFAULT_TRACK_ZOOM,
             ),
         )

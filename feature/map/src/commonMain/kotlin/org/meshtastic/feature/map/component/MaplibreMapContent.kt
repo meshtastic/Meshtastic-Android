@@ -125,7 +125,6 @@ fun MaplibreMapContent(
         },
         onMapLoadFinished = onMapLoadFinished,
         onMapLoadFailed = onMapLoadFailed,
-        onFrame = {},
     ) {
         // --- Terrain hillshade overlay ---
         if (showHillshade) {

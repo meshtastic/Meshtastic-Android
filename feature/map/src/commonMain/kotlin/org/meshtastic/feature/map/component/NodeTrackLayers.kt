@@ -44,7 +44,7 @@ private const val SELECTED_OPACITY = 0.9f
  * and OSMDroid Polyline overlay implementations.
  */
 @Composable
-fun NodeTrackLayers(
+internal fun NodeTrackLayers(
     positions: List<org.meshtastic.proto.Position>,
     selectedPositionTime: Int? = null,
     onPositionSelected: ((Int) -> Unit)? = null,

@@ -28,9 +28,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.toList
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.MeshLog
-import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.ui.util.toPosition
@@ -43,8 +41,6 @@ class NodeMapViewModel(
     savedStateHandle: SavedStateHandle,
     nodeRepository: NodeRepository,
     meshLogRepository: MeshLogRepository,
-    buildConfigProvider: BuildConfigProvider,
-    private val mapPrefs: MapPrefs,
 ) : ViewModel() {
     private val destNumFromRoute = savedStateHandle.get<Int>("destNum")
     private val manualDestNum = MutableStateFlow<Int?>(null)
@@ -52,17 +48,11 @@ class NodeMapViewModel(
     private val destNumFlow =
         combine(MutableStateFlow(destNumFromRoute), manualDestNum) { route, manual -> manual ?: route ?: 0 }
 
-    fun setDestNum(num: Int) {
-        manualDestNum.value = num
-    }
-
     val node =
         destNumFlow
             .flatMapLatest { destNum -> nodeRepository.nodeDBbyNum.mapLatest { it[destNum] } }
             .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = null)
-
-    val applicationId = buildConfigProvider.applicationId
 
     private val ourNodeNumFlow = nodeRepository.myNodeInfo.map { it?.myNodeNum }.distinctUntilChanged()
 
@@ -84,7 +74,4 @@ class NodeMapViewModel(
                 }
             }
             .stateInWhileSubscribed(initialValue = emptyList())
-
-    val mapStyleId: Int
-        get() = mapPrefs.mapStyle.value
 }
