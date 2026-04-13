@@ -34,7 +34,7 @@ import org.meshtastic.core.resources.map_filter
 import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.toggle_my_position
-import org.meshtastic.core.ui.icon.LocationDisabled
+import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
@@ -116,13 +116,13 @@ fun MapControlsOverlay(
             }
         }
 
-        // Location tracking button — 3 states: Off (MyLocation), Tracking (LocationDisabled), TrackingBearing (NearMe)
+        // Location tracking button — 3 states: Off (MyLocation), Tracking (NearMe), TrackingNorth (LocationOn)
         MapButton(
             icon =
             when {
                 !isLocationTrackingEnabled -> MeshtasticIcons.MyLocation
                 isTrackingBearing -> MeshtasticIcons.NearMe
-                else -> MeshtasticIcons.LocationDisabled
+                else -> MeshtasticIcons.LocationOn
             },
             contentDescription = stringResource(Res.string.toggle_my_position),
             iconTint = if (isLocationTrackingEnabled) MaterialTheme.colorScheme.primary else null,

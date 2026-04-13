@@ -38,14 +38,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.material3.OfflinePackListItem
 import org.maplibre.compose.offline.OfflinePackDefinition
 import org.maplibre.compose.offline.rememberOfflineManager
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.done
+import org.meshtastic.core.resources.offline_download
+import org.meshtastic.core.resources.offline_download_visible_region
+import org.meshtastic.core.resources.offline_downloaded_regions
+import org.meshtastic.core.resources.offline_maps
+import org.meshtastic.core.resources.offline_saves_tiles
+import org.meshtastic.core.resources.offline_unnamed_region
 import org.meshtastic.core.ui.icon.CloudDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-
-@Composable actual fun isOfflineManagerAvailable(): Boolean = true
 
 @Suppress("LongMethod")
 @Composable
@@ -55,9 +62,10 @@ actual fun OfflineMapContent(styleUri: String, cameraState: CameraState) {
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
+        val unnamedRegion = stringResource(Res.string.offline_unnamed_region)
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Offline Maps") },
+            title = { Text(stringResource(Res.string.offline_maps)) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // Download button for current viewport
@@ -85,13 +93,16 @@ actual fun OfflineMapContent(styleUri: String, cameraState: CameraState) {
                     ) {
                         Icon(
                             imageVector = MeshtasticIcons.CloudDownload,
-                            contentDescription = "Download",
+                            contentDescription = stringResource(Res.string.offline_download),
                             modifier = Modifier.padding(end = 16.dp),
                         )
                         Column {
-                            Text(text = "Download visible region", style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                text = "Saves tiles for offline use",
+                                text = stringResource(Res.string.offline_download_visible_region),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Text(
+                                text = stringResource(Res.string.offline_saves_tiles),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -101,27 +112,27 @@ actual fun OfflineMapContent(styleUri: String, cameraState: CameraState) {
                     // Existing packs
                     if (offlineManager.packs.isNotEmpty()) {
                         Text(
-                            text = "Downloaded Regions",
+                            text = stringResource(Res.string.offline_downloaded_regions),
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                         )
                         offlineManager.packs.toList().forEach { pack ->
                             key(pack.hashCode()) {
                                 OfflinePackListItem(pack = pack, offlineManager = offlineManager) {
-                                    Text(pack.metadata?.decodeToString().orEmpty().ifBlank { "Unnamed Region" })
+                                    Text(pack.metadata?.decodeToString().orEmpty().ifBlank { unnamedRegion })
                                 }
                             }
                         }
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showDialog = false }) { Text("Done") } },
+            confirmButton = { TextButton(onClick = { showDialog = false }) { Text(stringResource(Res.string.done)) } },
         )
     }
 
     // Expose the toggle via a side effect — the parent screen will call this
     // by rendering OfflineMapContent and using the showDialog state
     IconButton(onClick = { showDialog = true }) {
-        Icon(imageVector = MeshtasticIcons.CloudDownload, contentDescription = "Offline Maps")
+        Icon(imageVector = MeshtasticIcons.CloudDownload, contentDescription = stringResource(Res.string.offline_maps))
     }
 }

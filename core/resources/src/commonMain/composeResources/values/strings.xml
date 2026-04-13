@@ -1160,10 +1160,16 @@
     <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
     <string name="map_style_selection">Map style selection</string>
     <string name="map_style_osm">OpenStreetMap</string>
-    <string name="map_style_satellite">Satellite</string>
+    <string name="map_style_light">Light</string>
     <string name="map_style_terrain">Terrain</string>
-    <string name="map_style_hybrid">Hybrid</string>
+    <string name="map_style_road_map">Road Map</string>
     <string name="map_style_dark">Dark</string>
+    <string name="offline_maps">Offline Maps</string>
+    <string name="offline_download">Download</string>
+    <string name="offline_download_visible_region">Download visible region</string>
+    <string name="offline_saves_tiles">Saves tiles for offline use</string>
+    <string name="offline_downloaded_regions">Downloaded Regions</string>
+    <string name="offline_unnamed_region">Unnamed Region</string>
 
     <string name="local_stats_battery">Battery: %1$d%</string>
     <string name="local_stats_nodes">Nodes: %1$d online / %2$d total</string>

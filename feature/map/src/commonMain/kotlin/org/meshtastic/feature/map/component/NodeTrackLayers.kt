@@ -20,7 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import org.maplibre.compose.expressions.dsl.asNumber
+import kotlinx.serialization.json.jsonPrimitive
+import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.feature
@@ -81,7 +82,7 @@ fun NodeTrackLayers(
         strokeWidth = const(1.dp),
         strokeColor = const(Color.White),
         onClick = { features ->
-            val time = features.firstOrNull()?.properties?.get("time")?.toString()?.toIntOrNull()
+            val time = features.firstOrNull()?.properties?.get("time")?.jsonPrimitive?.content?.toIntOrNull()
             if (time != null && onPositionSelected != null) {
                 onPositionSelected(time)
                 ClickResult.Consume
@@ -96,7 +97,7 @@ fun NodeTrackLayers(
         CircleLayer(
             id = "node-track-selected",
             source = pointsSource,
-            filter = feature["time"].asNumber() eq const(selectedPositionTime.toFloat()),
+            filter = feature["time"].asString() eq const(selectedPositionTime.toString()),
             radius = const(10.dp),
             color = const(SelectedPointColor), // Red
             strokeWidth = const(2.dp),

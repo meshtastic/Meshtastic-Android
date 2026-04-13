@@ -19,8 +19,6 @@ package org.meshtastic.feature.map
 import androidx.compose.runtime.Composable
 import org.maplibre.compose.camera.CameraState
 
-@Composable actual fun isOfflineManagerAvailable(): Boolean = false
-
 @Composable
 actual fun OfflineMapContent(styleUri: String, cameraState: CameraState) {
     // Offline map management is not available on Desktop.
