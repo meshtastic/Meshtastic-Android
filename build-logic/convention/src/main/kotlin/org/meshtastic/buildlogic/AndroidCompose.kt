@@ -24,13 +24,22 @@ import org.gradle.kotlin.dsl.dependencies
 internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     commonExtension.apply { buildFeatures.compose = true }
 
-    // CMP skips Android version enforcement; third-party BOMs and atomic-group alignment
-    // can silently override AndroidX Compose versions. Force core groups to the CMP version.
-    // Material/Material3 excluded — CMP maps those to different AndroidX version numbers.
+    // CMP is the sole Compose version authority (BOM removed from the catalog).
+    // Third-party libraries (maps-compose, datadog, etc.) carry a transitive
+    // compose-bom whose constraints conflict with CMP-published AndroidX artifacts.
+    // Exclude it globally so CMP's own dependency graph wins.
+    configurations.configureEach {
+        exclude(mapOf("group" to "androidx.compose", "module" to "compose-bom"))
+    }
+
+    // CMP publishes core AndroidX groups at the CMP version tag (e.g. 1.11.0-beta02).
+    // Material/Material3/Adaptive are intentionally excluded — CMP maps those to
+    // different AndroidX version numbers (see release notes for the mapping table).
     val cmpVersion = libs.version("compose-multiplatform")
     val cmpAlignedGroups = setOf(
         "androidx.compose.animation",
         "androidx.compose.foundation",
+        "androidx.compose.material",
         "androidx.compose.runtime",
         "androidx.compose.ui",
     )
