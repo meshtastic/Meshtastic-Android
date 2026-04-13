@@ -208,25 +208,24 @@ jobs:
           fi
           ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue --scan
 
-      # ── Screenshot shard: validate → fork-check → auto-record → auto-commit ──
+      # ── Screenshot shard: validate → fail with context-aware error ──
       - name: Validate screenshot tests
         id: screenshotsverify
         if: matrix.shard.name == 'shard-screenshot'
         continue-on-error: true
         run: ./gradlew :app:validateGoogleDebugScreenshotTest -Pci=true --scan
 
-      - name: Prevent auto-update on fork PRs
+      - name: Fail screenshot tests (fork PR)
         if: >-
           matrix.shard.name == 'shard-screenshot'
           && steps.screenshotsverify.outcome == 'failure'
           && github.event_name == 'pull_request'
           && github.event.pull_request.head.repo.full_name != github.repository
         run: |
-          echo "::error::Screenshot tests failed. Fork PRs cannot auto-update references."
-          echo "::error::Please run './gradlew updateGoogleDebugScreenshotTest' locally and push the updated images."
+          echo "::error::Screenshot tests failed. Please run './gradlew updateGoogleDebugScreenshotTest' locally and push the updated images."
           exit 1
 
-      - name: Fail if screenshots failed on same-repo PR or merge queue
+      - name: Fail screenshot tests (same-repo PR or merge queue)
         if: >-
           matrix.shard.name == 'shard-screenshot'
           && steps.screenshotsverify.outcome == 'failure'
