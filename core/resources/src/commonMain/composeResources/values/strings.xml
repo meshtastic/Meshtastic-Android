@@ -933,7 +933,24 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="discovered_network_devices">Discovered Network Devices</string>
+    <string name="scan_network_devices">Scan for network devices</string>
+    <string name="scanning_network">Scanning…</string>
+    <string name="scan_bluetooth_devices">Scan for Bluetooth devices</string>
+    <string name="scanning_bluetooth">Scanning…</string>
     <string name="bluetooth_available_devices">Available Bluetooth Devices</string>
+    <string name="add_network_device_manually">Add device manually…</string>
+    <string name="no_devices_found">No devices found</string>
+    <string name="no_bluetooth_devices_seen">No Bluetooth devices seen</string>
+    <string name="no_bluetooth_devices_hint">Ensure you\'re within range of the device.</string>
+    <string name="no_network_devices_seen">No network devices seen</string>
+    <string name="no_network_devices_hint">Ensure you\'re connected to the same network as the device.</string>
+    <string name="no_usb_devices_seen">No USB devices seen</string>
+    <string name="no_usb_devices_hint">Connect the device via serial or USB.</string>
+    <string name="nodes_empty_disconnected_title">No device connected</string>
+    <string name="nodes_empty_disconnected_hint">Connect to a device to discover nearby nodes.</string>
+    <string name="nodes_empty_searching_title">Searching for nodes</string>
+    <string name="nodes_empty_searching_hint">Nearby nodes will appear here as they\'re discovered.</string>
+    <string name="set_up_connection">Set up connection</string>
 
     <string name="get_started">Get started</string>
     <string name="intro_welcome">Welcome to</string>

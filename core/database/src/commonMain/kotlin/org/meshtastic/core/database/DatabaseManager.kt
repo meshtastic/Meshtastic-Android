@@ -192,12 +192,27 @@ open class DatabaseManager(
         }
     }
 
-    /** Returns true if a database exists for the given device address. */
+    /**
+     * Returns true if a database exists for the given device address. Android Room stores DB files without an
+     * extension; JVM/iOS append `.db`. We check both to stay platform-agnostic.
+     */
     override fun hasDatabaseFor(address: String?): Boolean {
         if (address.isNullOrBlank() || address == "n") return false
         val dbName = buildDbName(address)
-        val path = getDatabaseDirectory().resolve("$dbName.db")
-        return getFileSystem().exists(path)
+        return dbFileExists(dbName)
+    }
+
+    private fun dbFileExists(dbName: String): Boolean {
+        val dir = getDatabaseDirectory()
+        val fs = getFileSystem()
+        return fs.exists(dir.resolve(dbName)) || fs.exists(dir.resolve("$dbName.db"))
+    }
+
+    private fun dbFileMetadataMillis(dbName: String): Long? {
+        val dir = getDatabaseDirectory()
+        val fs = getFileSystem()
+        return fs.metadataOrNull(dir.resolve(dbName))?.lastModifiedAtMillis
+            ?: fs.metadataOrNull(dir.resolve("$dbName.db"))?.lastModifiedAtMillis
     }
 
     private fun markLastUsed(dbName: String) {
@@ -208,8 +223,7 @@ open class DatabaseManager(
         val key = lastUsedKey(dbName)
         val v = datastore.data.first()[key] ?: 0L
         return if (v == 0L) {
-            val path = getDatabaseDirectory().resolve("$dbName.db")
-            getFileSystem().metadataOrNull(path)?.lastModifiedAtMillis ?: 0L
+            dbFileMetadataMillis(dbName) ?: 0L
         } else {
             v
         }
@@ -221,11 +235,14 @@ open class DatabaseManager(
         if (!fs.exists(dir)) return emptyList()
 
         return fs.list(dir)
+            .asSequence()
             .map { it.name }
             .filter { it.startsWith(DatabaseConstants.DB_PREFIX) }
-            .filter { it.endsWith(".db") }
+            // Skip Room-internal sidecar files (-wal/-shm/-journal) and lock files so each DB appears exactly once.
+            .filterNot { it.endsWith("-wal") || it.endsWith("-shm") || it.endsWith("-journal") || it.endsWith(".lck") }
             .map { it.removeSuffix(".db") }
             .distinct()
+            .toList()
     }
 
     private suspend fun enforceCacheLimit(activeDbName: String) = mutex.withLock {
@@ -261,11 +278,7 @@ open class DatabaseManager(
             return@withLock
         }
 
-        val dir = getDatabaseDirectory()
-        val fs = getFileSystem()
-        val legacyPath = dir.resolve("$legacy.db")
-
-        if (fs.exists(legacyPath)) {
+        if (dbFileExists(legacy)) {
             runCatching {
                 // runCatching intentional: best-effort cleanup must not abort on cancellation
                 closeCachedDatabase(legacy)

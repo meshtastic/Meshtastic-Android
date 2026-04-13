@@ -60,10 +60,14 @@ class UsbRepository(
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            refreshStateInternal()
+            // Register the attach/detach receiver first so that events fired while we are
+            // scanning the current device list are not dropped. The receiver resolution must
+            // happen off the construction thread to avoid a Koin cycle
+            // (UsbRepository <-> UsbBroadcastReceiver).
             usbBroadcastReceiverLazy.value.let { receiver ->
                 application.registerReceiverCompat(receiver, receiver.intentFilter)
             }
+            refreshStateInternal()
         }
     }
 
