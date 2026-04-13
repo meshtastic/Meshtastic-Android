@@ -25,7 +25,10 @@ kotlin {
 
     @Suppress("UnstableApiUsage")
     android {
-        androidResources.enable = true
+        androidResources {
+            enable = true
+            resourcePrefix = "meshtastic_"
+        }
         withHostTest { isIncludeAndroidResources = true }
     }
 
