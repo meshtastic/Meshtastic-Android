@@ -19,25 +19,33 @@ package org.meshtastic.feature.map.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import kotlinx.coroutines.launch
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.convertToColor
+import org.maplibre.compose.expressions.dsl.convertToNumber
+import org.maplibre.compose.expressions.dsl.dp
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.expressions.dsl.offset
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.SymbolLayer
+import org.maplibre.compose.location.LocationPuck
+import org.maplibre.compose.location.UserLocationState
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.util.ClickResult
+import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.util.nodesToFeatureCollection
@@ -50,6 +58,8 @@ private const val CLUSTER_MIN_POINTS = 10
 private const val PRECISION_CIRCLE_FILL_ALPHA = 0.1f
 private const val PRECISION_CIRCLE_STROKE_ALPHA = 0.3f
 private const val CLUSTER_OPACITY = 0.85f
+private const val LABEL_OFFSET_EM = 1.5f
+private const val CLUSTER_ZOOM_INCREMENT = 2.0
 
 /**
  * Main map content composable using MapLibre Compose Multiplatform.
@@ -70,6 +80,8 @@ fun MaplibreMapContent(
     onMapLongClick: (GeoPosition) -> Unit,
     modifier: Modifier = Modifier,
     onCameraMoved: (CameraPosition) -> Unit = {},
+    onWaypointClick: (Int) -> Unit = {},
+    locationState: UserLocationState? = null,
 ) {
     MaplibreMap(
         modifier = modifier,
@@ -86,12 +98,18 @@ fun MaplibreMapContent(
             nodes = nodes,
             myNodeNum = myNodeNum,
             showPrecisionCircle = showPrecisionCircle,
+            cameraState = cameraState,
             onNodeClick = onNodeClick,
         )
 
         // --- Waypoint markers ---
         if (showWaypoints) {
-            WaypointMarkerLayers(waypoints = waypoints)
+            WaypointMarkerLayers(waypoints = waypoints, onWaypointClick = onWaypointClick)
+        }
+
+        // --- User location puck ---
+        if (locationState != null) {
+            LocationPuck(idPrefix = "user-location", locationState = locationState, cameraState = cameraState)
         }
     }
 
@@ -103,14 +121,17 @@ fun MaplibreMapContent(
     }
 }
 
-/** Node markers rendered as clustered circles and symbols using GeoJSON source. */
+/** Node markers rendered as clustered circles with per-node colors and short name labels. */
+@Suppress("LongMethod")
 @Composable
 private fun NodeMarkerLayers(
     nodes: List<Node>,
     myNodeNum: Int?,
     showPrecisionCircle: Boolean,
+    cameraState: CameraState,
     onNodeClick: (Int) -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val featureCollection = remember(nodes, myNodeNum) { nodesToFeatureCollection(nodes, myNodeNum) }
 
     val nodesSource =
@@ -120,7 +141,7 @@ private fun NodeMarkerLayers(
             GeoJsonOptions(cluster = true, clusterRadius = CLUSTER_RADIUS, clusterMinPoints = CLUSTER_MIN_POINTS),
         )
 
-    // Cluster circles
+    // Cluster circles — tap to zoom in toward expansion
     CircleLayer(
         id = "node-clusters",
         source = nodesSource,
@@ -130,6 +151,19 @@ private fun NodeMarkerLayers(
         opacity = const(CLUSTER_OPACITY),
         strokeWidth = const(2.dp),
         strokeColor = const(Color.White),
+        onClick = { features ->
+            val cluster = features.firstOrNull() ?: return@CircleLayer ClickResult.Pass
+            val target = (cluster.geometry as? Point)?.coordinates ?: return@CircleLayer ClickResult.Pass
+            coroutineScope.launch {
+                cameraState.animateTo(
+                    cameraState.position.copy(
+                        target = target,
+                        zoom = cameraState.position.zoom + CLUSTER_ZOOM_INCREMENT,
+                    ),
+                )
+            }
+            ClickResult.Consume
+        },
     )
 
     // Cluster count labels
@@ -142,13 +176,13 @@ private fun NodeMarkerLayers(
         textSize = const(1.2f.em),
     )
 
-    // Individual node markers
+    // Individual node markers with per-node background color
     CircleLayer(
         id = "node-markers",
         source = nodesSource,
         filter = !feature.has("cluster"),
         radius = const(8.dp),
-        color = const(NodeMarkerColor),
+        color = feature["background_color"].convertToColor(const(NodeMarkerColor)),
         strokeWidth = const(2.dp),
         strokeColor = const(Color.White),
         onClick = { features ->
@@ -162,23 +196,44 @@ private fun NodeMarkerLayers(
         },
     )
 
-    // Precision circles
+    // Short name labels below node markers
+    SymbolLayer(
+        id = "node-labels",
+        source = nodesSource,
+        filter = !feature.has("cluster"),
+        textField = feature["short_name"].asString(),
+        textSize = const(0.9f.em),
+        textOffset = offset(0f.em, LABEL_OFFSET_EM.em),
+        textColor = const(Color.DarkGray),
+        textAllowOverlap = const(true),
+        iconAllowOverlap = const(true),
+    )
+
+    // Precision circles — sized by precision_meters property
     if (showPrecisionCircle) {
         CircleLayer(
             id = "node-precision",
             source = nodesSource,
             filter = !feature.has("cluster"),
-            radius = const(40.dp), // TODO: scale by precision_meters and zoom
-            color = const(NodeMarkerColor.copy(alpha = PRECISION_CIRCLE_FILL_ALPHA)),
+            radius = feature["precision_meters"].convertToNumber(const(0f)).dp,
+            color =
+            feature["background_color"].convertToColor(
+                const(NodeMarkerColor.copy(alpha = PRECISION_CIRCLE_FILL_ALPHA)),
+            ),
+            opacity = const(PRECISION_CIRCLE_FILL_ALPHA),
             strokeWidth = const(1.dp),
-            strokeColor = const(NodeMarkerColor.copy(alpha = PRECISION_CIRCLE_STROKE_ALPHA)),
+            strokeColor =
+            feature["background_color"].convertToColor(
+                const(NodeMarkerColor.copy(alpha = PRECISION_CIRCLE_STROKE_ALPHA)),
+            ),
+            strokeOpacity = const(PRECISION_CIRCLE_STROKE_ALPHA),
         )
     }
 }
 
-/** Waypoint markers rendered as symbol layer with emoji icons. */
+/** Waypoint markers rendered as symbol layer with emoji icons and click handling. */
 @Composable
-private fun WaypointMarkerLayers(waypoints: Map<Int, DataPacket>) {
+private fun WaypointMarkerLayers(waypoints: Map<Int, DataPacket>, onWaypointClick: (Int) -> Unit) {
     val featureCollection = remember(waypoints) { waypointsToFeatureCollection(waypoints) }
 
     val waypointSource = rememberGeoJsonSource(data = GeoJsonData.Features(featureCollection))
@@ -191,6 +246,15 @@ private fun WaypointMarkerLayers(waypoints: Map<Int, DataPacket>) {
         textSize = const(2f.em),
         textAllowOverlap = const(true),
         iconAllowOverlap = const(true),
+        onClick = { features ->
+            val waypointId = features.firstOrNull()?.properties?.get("waypoint_id")?.toString()?.toIntOrNull()
+            if (waypointId != null) {
+                onWaypointClick(waypointId)
+                ClickResult.Consume
+            } else {
+                ClickResult.Pass
+            }
+        },
     )
 
     // Waypoint name labels below emoji

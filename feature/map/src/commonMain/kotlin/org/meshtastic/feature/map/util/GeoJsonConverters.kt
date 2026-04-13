@@ -54,8 +54,8 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
                 put("via_mqtt", node.viaMqtt)
                 put("snr", node.snr.toDouble())
                 put("rssi", node.rssi)
-                put("foreground_color", colors.first)
-                put("background_color", colors.second)
+                put("foreground_color", intToHexColor(colors.first))
+                put("background_color", intToHexColor(colors.second))
                 put("has_precision", (pos.precision_bits ?: 0) in MIN_PRECISION_BITS..MAX_PRECISION_BITS)
                 put("precision_meters", precisionBitsToMeters(pos.precision_bits ?: 0))
             }
@@ -159,6 +159,14 @@ private const val HALF_SHIFT = 10
 private const val HIGH_SURROGATE_BASE = 0xD800
 private const val LOW_SURROGATE_BASE = 0xDC00
 private const val SURROGATE_MASK = 0x3FF
+private const val HEX_COLOR_MASK = 0xFFFFFF
+
+/** Convert an ARGB color integer to a hex color string (e.g. "#FF6750A4") for MapLibre expressions. */
+@Suppress("MagicNumber")
+internal fun intToHexColor(argb: Int): String {
+    val rgb = argb and HEX_COLOR_MASK
+    return "#${rgb.toString(16).padStart(6, '0').uppercase()}"
+}
 
 /** Convert a Unicode code point integer to its emoji string representation. */
 internal fun convertIntToEmoji(codePoint: Int): String = try {
