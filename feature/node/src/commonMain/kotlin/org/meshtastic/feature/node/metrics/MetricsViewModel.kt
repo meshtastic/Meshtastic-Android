@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -31,7 +30,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -106,7 +104,7 @@ open class MetricsViewModel(
                 if (nodeId == null) return@flatMapLatest flowOf(MetricsState.Empty)
                 getNodeDetailsUseCase(nodeId).map { it.metricsState }
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MetricsState.Empty)
+            .stateInWhileSubscribed(initialValue = MetricsState.Empty)
 
     private val environmentState: StateFlow<EnvironmentMetricsState> =
         activeNodeId
@@ -114,7 +112,7 @@ open class MetricsViewModel(
                 if (nodeId == null) return@flatMapLatest flowOf(EnvironmentMetricsState())
                 getNodeDetailsUseCase(nodeId).map { it.environmentState }
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), EnvironmentMetricsState())
+            .stateInWhileSubscribed(initialValue = EnvironmentMetricsState())
 
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
 

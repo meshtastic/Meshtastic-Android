@@ -21,13 +21,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.DataPacket
@@ -35,6 +33,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsState
@@ -81,7 +80,7 @@ class NodeDetailViewModel(
                 if (nodeId == null) return@flatMapLatest flowOf(NodeDetailUiState())
                 getNodeDetailsUseCase(nodeId)
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), NodeDetailUiState())
+            .stateInWhileSubscribed(initialValue = NodeDetailUiState())
 
     fun start(nodeId: Int) {
         if (manualNodeId.value != nodeId) {
