@@ -75,6 +75,14 @@
       ]
     },
     {
+      "description": "Group JetBrains Compose Multiplatform plugin and libraries (separate versioning from AndroidX Compose)",
+      "groupName": "Compose Multiplatform (JetBrains)",
+      "groupSlug": "compose-multiplatform",
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.compose/"
+      ]
+    },
+    {
       "description": "Group Kotlin standard library, coroutines, and serialization",
       "groupName": "Kotlin Ecosystem",
       "groupSlug": "kotlin",
@@ -277,6 +285,7 @@
       "matchPackageNames": [
         "/^org\\.jetbrains\\.kotlin/",
         "/^org\\.jetbrains\\.kotlinx/",
+        "/^org\\.jetbrains\\.compose/",
         "/^com\\.google\\.dagger/",
         "/^androidx\\.hilt/",
         "/^com\\.google\\.protobuf/",
