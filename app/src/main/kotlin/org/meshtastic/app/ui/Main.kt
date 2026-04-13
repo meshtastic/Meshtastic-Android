@@ -33,6 +33,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.navigation.NodesRoute
+import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
@@ -53,7 +54,15 @@ import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 @Composable
 fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
-    val multiBackstack = rememberMultiBackstack(NodesRoute.NodesGraph)
+    // Land on Connections for first-run / no-device-selected; otherwise on Nodes. Read synchronously
+    // from the StateFlow (seeded from persisted prefs) so the initial tab is set in one shot.
+    val initialTab =
+        if (viewModel.currentDeviceAddressFlow.value.isNullOrSelectedNone()) {
+            TopLevelDestination.Connections.route
+        } else {
+            NodesRoute.NodesGraph
+        }
+    val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
 
     AndroidAppVersionCheck(viewModel)
@@ -71,6 +80,9 @@ fun MainScreen() {
                         backStack = backStack,
                         scrollToTopEvents = viewModel.scrollToTopEventFlow,
                         onHandleDeepLink = viewModel::handleDeepLink,
+                        onNavigateToConnections = {
+                            multiBackstack.navigateTopLevel(TopLevelDestination.Connections.route)
+                        },
                     )
                     mapGraph(backStack)
                     channelsGraph(backStack)
@@ -87,6 +99,9 @@ fun MainScreen() {
         }
     }
 }
+
+/** True when no device address is persisted, or the address is the "none" sentinel (`"n"`). */
+private fun String?.isNullOrSelectedNone(): Boolean = isNullOrBlank() || this == "n"
 
 @Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod")

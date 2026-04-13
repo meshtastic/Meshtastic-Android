@@ -275,7 +275,7 @@ class MainActivity : ComponentActivity() {
                 // never sees this event. Forward it explicitly so the serialDevices StateFlow
                 // refreshes and the device shows up in the Connect → Serial tab.
                 usbRepository.refreshState()
-                showSettingsPage()
+                showConnectionsPage()
             }
 
             Intent.ACTION_MAIN -> {}
@@ -314,7 +314,7 @@ class MainActivity : ComponentActivity() {
         return resultPendingIntent!!
     }
 
-    private fun createSettingsIntent(): PendingIntent {
+    private fun createConnectionsIntent(): PendingIntent {
         val deepLink = "$DEEP_LINK_BASE_URI/connections"
         val startActivityIntent =
             Intent(Intent.ACTION_VIEW, deepLink.toUri(), this, MainActivity::class.java).apply {
@@ -329,7 +329,7 @@ class MainActivity : ComponentActivity() {
         return resultPendingIntent!!
     }
 
-    private fun showSettingsPage() {
-        createSettingsIntent().send()
+    private fun showConnectionsPage() {
+        createConnectionsIntent().send()
     }
 }

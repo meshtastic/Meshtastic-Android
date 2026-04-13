@@ -124,6 +124,16 @@ interface UiPrefs {
 
     fun setShowQuickChat(show: Boolean)
 
+    /** Whether BLE scanning should auto-start when the Connections screen is opened. */
+    val bleAutoScan: StateFlow<Boolean>
+
+    fun setBleAutoScan(enabled: Boolean)
+
+    /** Whether NSD network scanning should auto-start when the Connections screen is opened. */
+    val networkAutoScan: StateFlow<Boolean>
+
+    fun setNetworkAutoScan(enabled: Boolean)
+
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)

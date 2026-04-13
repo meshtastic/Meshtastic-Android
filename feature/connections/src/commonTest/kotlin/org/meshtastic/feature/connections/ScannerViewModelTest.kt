@@ -22,14 +22,20 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.datastore.RecentAddressesDataSource
+import org.meshtastic.core.network.repository.DiscoveredService
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeServiceRepository
+import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.test.BeforeTest
@@ -46,22 +52,41 @@ class ScannerViewModelTest {
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
     private val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
-    private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase = mock(MockMode.autofill)
+    private val networkRepository: NetworkRepository = mock(MockMode.autofill)
     private val bleScanner: org.meshtastic.core.ble.BleScanner = mock(MockMode.autofill)
+    private val uiPrefs = org.meshtastic.core.testing.FakeUiPrefs()
 
-    private val discoveredDevicesFlow = MutableStateFlow(DiscoveredDevices())
+    private val resolvedServicesFlow = MutableStateFlow<List<DiscoveredService>>(emptyList())
+    private val baseDevicesFlow = MutableStateFlow(DiscoveredDevices())
+
+    /**
+     * A fake [GetDiscoveredDevicesUseCase] that mirrors the real behavior: it combines the provided [resolvedList] with
+     * base device data so tests can verify NSD gating.
+     */
+    private val getDiscoveredDevicesUseCase =
+        object : GetDiscoveredDevicesUseCase {
+            override fun invoke(
+                showMock: Boolean,
+                resolvedList: Flow<List<DiscoveredService>>,
+            ): Flow<DiscoveredDevices> = combine(baseDevicesFlow, resolvedList) { base, resolved ->
+                val tcpDevices =
+                    resolved.map { DeviceListEntry.Tcp(name = it.name, fullAddress = "t${it.hostAddress}") }
+                base.copy(discoveredTcpDevices = tcpDevices)
+            }
+        }
 
     @BeforeTest
     fun setUp() {
         every { radioInterfaceService.isMockTransport() } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
-        every { radioInterfaceService.supportedDeviceTypes } returns emptyList()
 
-        every { getDiscoveredDevicesUseCase.invoke(any()) } returns discoveredDevicesFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
+        every { networkRepository.resolvedList } returns resolvedServicesFlow
+        every { networkRepository.networkAvailable } returns flowOf(true)
 
         serviceRepository.setConnectionProgress("")
-        discoveredDevicesFlow.value = DiscoveredDevices()
+        baseDevicesFlow.value = DiscoveredDevices()
+        resolvedServicesFlow.value = emptyList()
 
         viewModel =
             ScannerViewModel(
@@ -71,12 +96,14 @@ class ScannerViewModelTest {
                 radioPrefs = radioPrefs,
                 recentAddressesDataSource = recentAddressesDataSource,
                 getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
+                networkRepository = networkRepository,
                 dispatchers =
                 org.meshtastic.core.di.CoroutineDispatchers(
                     io = UnconfinedTestDispatcher(),
                     main = UnconfinedTestDispatcher(),
                     default = UnconfinedTestDispatcher(),
                 ),
+                uiPrefs = uiPrefs,
                 bleScanner = bleScanner,
             )
     }
@@ -124,15 +151,60 @@ class ScannerViewModelTest {
             assertEquals(emptyList(), awaitItem())
 
             val device =
-                org.meshtastic.feature.connections.model.DeviceListEntry.Usb(
+                DeviceListEntry.Usb(
                     usbData = object : org.meshtastic.feature.connections.model.UsbDeviceData {},
                     name = "USB Device",
                     fullAddress = "usb_address",
                     bonded = true,
                 )
-            discoveredDevicesFlow.value = DiscoveredDevices(usbDevices = listOf(device))
+            baseDevicesFlow.value = DiscoveredDevices(usbDevices = listOf(device))
 
             assertEquals(listOf(device), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `isNetworkScanning defaults to false`() {
+        assertEquals(false, viewModel.isNetworkScanning.value)
+    }
+
+    @Test
+    fun `startNetworkScan updates isNetworkScanning`() = runTest {
+        viewModel.isNetworkScanning.test {
+            assertEquals(false, awaitItem())
+            viewModel.startNetworkScan()
+            assertEquals(true, awaitItem())
+            viewModel.stopNetworkScan()
+            assertEquals(false, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `discoveredTcpDevicesForUi is empty when not scanning`() = runTest {
+        resolvedServicesFlow.value =
+            listOf(DiscoveredService(name = "NSD Device", hostAddress = "192.168.1.50", port = 4403))
+
+        viewModel.discoveredTcpDevicesForUi.test {
+            assertEquals(emptyList(), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `discoveredTcpDevicesForUi populates when scanning is active`() = runTest {
+        resolvedServicesFlow.value =
+            listOf(DiscoveredService(name = "NSD Device", hostAddress = "192.168.1.50", port = 4403))
+
+        viewModel.discoveredTcpDevicesForUi.test {
+            assertEquals(emptyList(), awaitItem())
+            viewModel.startNetworkScan()
+            val result = awaitItem()
+            assertEquals(1, result.size)
+            assertEquals("t192.168.1.50", result[0].fullAddress)
+            viewModel.stopNetworkScan()
+            assertEquals(emptyList(), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

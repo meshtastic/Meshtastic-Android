@@ -141,6 +141,20 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = show } }
     }
 
+    override val bleAutoScan: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_BLE_AUTO_SCAN] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setBleAutoScan(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_BLE_AUTO_SCAN] = enabled } }
+    }
+
+    override val networkAutoScan: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_NETWORK_AUTO_SCAN] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setNetworkAutoScan(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_NETWORK_AUTO_SCAN] = enabled } }
+    }
+
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
         cachedFlow(provideNodeLocationFlows, nodeNum) {
             val key = booleanPreferencesKey(provideLocationKey(nodeNum))
@@ -168,5 +182,7 @@ class UiPrefsImpl(
         val KEY_ONLY_DIRECT = booleanPreferencesKey("only-direct")
         val KEY_SHOW_IGNORED = booleanPreferencesKey("show-ignored")
         val KEY_EXCLUDE_MQTT = booleanPreferencesKey("exclude-mqtt")
+        val KEY_BLE_AUTO_SCAN = booleanPreferencesKey("ble-auto-scan")
+        val KEY_NETWORK_AUTO_SCAN = booleanPreferencesKey("network-auto-scan")
     }
 }
