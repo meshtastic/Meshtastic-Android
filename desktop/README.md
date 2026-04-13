@@ -32,7 +32,7 @@ Release builds use ProGuard for tree-shaking (unused code removal), significantl
 - `proguard-rules.pro` — Keep-rules for reflection/JNI-sensitive dependencies (Koin, kotlinx-serialization, Wire protobuf, Room KMP `androidx.room3`, Ktor, Kable BLE, Coil, SQLite JNI, Compose Multiplatform resources) and an anti-merge rule for Compose animation classes.
 
 **Key rules:**
-- **Compose animation anti-merge** (`-keep,allowshrinking,allowobfuscation class androidx.compose.animation.** { *; }`) — Prevents ProGuard's optimizer from merging animation class hierarchies (e.g. `EnterTransition`/`ExitTransition` into `*Impl`), which causes animations to silently snap. Same rule as Android.
+- **Compose animation anti-merge** (`-keep class androidx.compose.animation.** { *; }`) — Prevents ProGuard's optimizer from incorrectly tree-shaking or merging animation class hierarchies (e.g. `EnterTransition`/`ExitTransition` into `*Impl`), which causes animations to silently snap. Same rule as Android.
 - **Room KMP** — Uses `androidx.room3` package path (Room KMP 3.x).
 
 **Troubleshooting ProGuard issues:**

@@ -48,14 +48,8 @@
 # curves, transition specs, Animatable internals) which can cause animations to
 # silently snap in release builds.
 #
-# -keep prevents class merging (EnterTransition/ExitTransition into *Impl,
-#   VectorizedSpringSpec/TweenSpec elimination, etc.).
-# allowshrinking lets R8 remove genuinely unreachable classes (e.g.
-#   SharedTransition APIs, RepeatableSpec — unused by this app). Verified via
-#   dex analysis: 278 classes survive in release vs 139 without this rule;
-#   all actively used classes (AnimatedVisibility, Crossfade, SpringSpec,
-#   TweenSpec, EnterTransition, ExitTransition, etc.) are preserved.
-# allowobfuscation is moot (-dontobfuscate is set above) but explicit for
-#   clarity.
-# The ** wildcard is recursive and covers animation.core.* sub-packages.
--keep,allowshrinking,allowobfuscation class androidx.compose.animation.** { *; }
+# We use a full -keep here without allowshrinking/allowobfuscation. While it
+# might keep some unused transition APIs, R8's aggressive shrinking is known
+# to incorrectly remove internal states or merging empty transitions (like None)
+# causing AnimatedVisibility and others to snap.
+-keep class androidx.compose.animation.** { *; }
