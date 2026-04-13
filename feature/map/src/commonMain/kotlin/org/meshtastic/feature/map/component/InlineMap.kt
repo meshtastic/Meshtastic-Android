@@ -44,9 +44,6 @@ private const val DEFAULT_ZOOM = 15.0
 private const val PRECISION_CIRCLE_FILL_ALPHA = 0.15f
 private const val PRECISION_CIRCLE_STROKE_ALPHA = 0.3f
 
-/** Ground resolution at zoom 15 (equatorial): ~4.773 meters per pixel. */
-private const val METERS_PER_PIXEL_ZOOM15 = 4.773
-
 /**
  * A compact, non-interactive map showing a single node's position. Used in node detail screens. Replaces both the
  * Google Maps and OSMDroid inline map implementations.
@@ -83,10 +80,11 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                 strokeColor = const(Color.White),
             )
 
-            // Precision circle — radius computed from precision_meters at zoom 15
+            // Precision circle — radius computed from precision_meters using latitude-aware metersPerDp
             val precisionMeters = precisionBitsToMeters(position.precision_bits ?: 0)
-            if (precisionMeters > 0) {
-                val radiusDp = (precisionMeters / METERS_PER_PIXEL_ZOOM15).dp
+            val metersPerDp = cameraState.metersPerDpAtTarget
+            if (precisionMeters > 0 && metersPerDp > 0) {
+                val radiusDp = (precisionMeters / metersPerDp).dp
                 CircleLayer(
                     id = "inline-node-precision",
                     source = source,

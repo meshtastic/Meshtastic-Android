@@ -48,12 +48,15 @@ import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
+import org.maplibre.compose.material3.LocationPuckDefaults
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.sources.RasterDemEncoding
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.sources.rememberRasterDemSource
 import org.maplibre.compose.style.BaseStyle
+import org.maplibre.compose.style.StyleState
+import org.maplibre.compose.style.rememberStyleState
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.DataPacket
@@ -108,6 +111,7 @@ fun MaplibreMapContent(
     onMapLongClick: (GeoPosition) -> Unit,
     modifier: Modifier = Modifier,
     gestureOptions: GestureOptions = GestureOptions.Standard,
+    styleState: StyleState = rememberStyleState(),
     onCameraMoved: (CameraPosition) -> Unit = {},
     onWaypointClick: (Int) -> Unit = {},
     onMapLoadFinished: () -> Unit = {},
@@ -118,6 +122,7 @@ fun MaplibreMapContent(
         modifier = modifier,
         baseStyle = baseStyle,
         cameraState = cameraState,
+        styleState = styleState,
         options = MapOptions(gestureOptions = gestureOptions, ornamentOptions = OrnamentOptions.OnlyLogo),
         onMapLongClick = { position, _ ->
             onMapLongClick(position)
@@ -148,7 +153,12 @@ fun MaplibreMapContent(
 
         // --- User location puck ---
         if (locationState != null) {
-            LocationPuck(idPrefix = "user-location", locationState = locationState, cameraState = cameraState)
+            LocationPuck(
+                idPrefix = "user-location",
+                locationState = locationState,
+                cameraState = cameraState,
+                colors = LocationPuckDefaults.colors(),
+            )
         }
     }
 

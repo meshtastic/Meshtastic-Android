@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -40,6 +41,9 @@ import org.maplibre.compose.location.LocationTrackingEffect
 import org.maplibre.compose.location.rememberNullLocationProvider
 import org.maplibre.compose.location.rememberUserLocationState
 import org.maplibre.compose.map.GestureOptions
+import org.maplibre.compose.material3.DisappearingScaleBar
+import org.maplibre.compose.material3.ExpandingAttributionButton
+import org.maplibre.compose.style.rememberStyleState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map
 import org.meshtastic.core.ui.component.MainAppBar
@@ -53,6 +57,7 @@ import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val WAYPOINT_ZOOM = 15.0
+private val MAP_OVERLAY_PADDING = 16.dp
 
 /**
  * Main map screen composable. Uses MapLibre Compose Multiplatform to render an interactive map with mesh node markers,
@@ -81,6 +86,7 @@ fun MapScreen(
     LaunchedEffect(waypointId) { viewModel.setWaypointId(waypointId) }
 
     val cameraState = rememberCameraState(firstPosition = viewModel.initialCameraPosition)
+    val styleState = rememberStyleState()
 
     var filterMenuExpanded by remember { mutableStateOf(false) }
 
@@ -155,6 +161,7 @@ fun MapScreen(
                 },
                 modifier = Modifier.fillMaxSize(),
                 gestureOptions = gestureOptions,
+                styleState = styleState,
                 onCameraMoved = { position -> viewModel.saveCameraPosition(position) },
                 onWaypointClick = { wpId ->
                     editingWaypointId = wpId
@@ -227,6 +234,20 @@ fun MapScreen(
                         }
                     }
                 },
+            )
+
+            // Scale bar — auto-shows on zoom change, hides after 3 seconds
+            DisappearingScaleBar(
+                metersPerDp = cameraState.metersPerDpAtTarget,
+                zoom = cameraState.position.zoom,
+                modifier = Modifier.align(Alignment.BottomStart).padding(MAP_OVERLAY_PADDING),
+            )
+
+            // Attribution button — shows tile provider attributions (legal compliance)
+            ExpandingAttributionButton(
+                cameraState = cameraState,
+                styleState = styleState,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(MAP_OVERLAY_PADDING),
             )
         }
     }
