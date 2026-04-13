@@ -147,6 +147,14 @@
 -keep class org.jetbrains.compose.resources.** { *; }
 -keep class org.meshtastic.core.resources.** { *; }
 
+# ---- Compose Animation (anti-merge) ----------------------------------------
+
+# Prevent ProGuard from merging animation spec class hierarchies (same issue
+# as R8 on Android — EnterTransition/ExitTransition merged into *Impl,
+# VectorizedSpringSpec/TweenSpec eliminated). allowshrinking lets ProGuard
+# remove genuinely unreachable classes.
+-keep,allowshrinking,allowobfuscation class androidx.compose.animation.** { *; }
+
 # ---- AboutLibraries ---------------------------------------------------------
 
 -keep class com.mikepenz.aboutlibraries.** { *; }
