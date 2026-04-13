@@ -50,6 +50,7 @@ import org.meshtastic.core.resources.waypoint_edit
 import org.meshtastic.core.resources.waypoint_lock_to_my_node
 import org.meshtastic.core.resources.waypoint_new
 import org.meshtastic.feature.map.util.convertIntToEmoji
+import kotlin.math.abs
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val MAX_NAME_LENGTH = 29
@@ -175,7 +176,12 @@ fun EditWaypointDialog(
 }
 
 /** Format a coordinate to 6 decimal places without using JVM-only String.format(). */
+@Suppress("MagicNumber")
 private fun Double.formatCoord(): String {
-    val rounded = (this * COORDINATE_PRECISION).toLong() / COORDINATE_PRECISION.toDouble()
-    return rounded.toString()
+    val negative = this < 0
+    val absVal = abs(this)
+    val wholePart = absVal.toLong()
+    val fracPart = ((absVal - wholePart) * COORDINATE_PRECISION + 0.5).toLong()
+    val fracStr = fracPart.toString().padStart(6, '0')
+    return "${if (negative) "-" else ""}$wholePart.$fracStr"
 }
