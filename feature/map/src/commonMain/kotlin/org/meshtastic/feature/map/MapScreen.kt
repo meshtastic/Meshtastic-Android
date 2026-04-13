@@ -23,16 +23,35 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.location.LocationTrackingEffect
+import org.maplibre.compose.location.rememberNullLocationProvider
+import org.maplibre.compose.location.rememberUserLocationState
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.MapFilterDropdown
+import org.meshtastic.feature.map.component.MapStyleSelector
 import org.meshtastic.feature.map.component.MaplibreMapContent
+import org.meshtastic.proto.Waypoint
+import org.maplibre.spatialk.geojson.Position as GeoPosition
+
+/** Meshtastic stores lat/lng as integer microdegrees; multiply by this to get decimal degrees. */
+private const val COORDINATE_SCALE = 1e-7
+private const val WAYPOINT_ZOOM = 15.0
 
 /**
  * Main map screen composable. Uses MapLibre Compose Multiplatform to render an interactive map with mesh node markers,
@@ -41,6 +60,7 @@ import org.meshtastic.feature.map.component.MaplibreMapContent
  * This replaces the previous flavor-specific Google Maps and OSMDroid implementations with a single cross-platform
  * composable.
  */
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MapScreen(
     onClickNodeChip: (Int) -> Unit,
@@ -55,10 +75,54 @@ fun MapScreen(
     val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val baseStyle by viewModel.baseStyle.collectAsStateWithLifecycle()
+    val selectedMapStyle by viewModel.selectedMapStyle.collectAsStateWithLifecycle()
 
     LaunchedEffect(waypointId) { viewModel.setWaypointId(waypointId) }
 
     val cameraState = rememberCameraState(firstPosition = viewModel.initialCameraPosition)
+
+    var filterMenuExpanded by remember { mutableStateOf(false) }
+
+    // Waypoint dialog state
+    var showWaypointDialog by remember { mutableStateOf(false) }
+    var longPressPosition by remember { mutableStateOf<GeoPosition?>(null) }
+    var editingWaypointId by remember { mutableStateOf<Int?>(null) }
+
+    val scope = rememberCoroutineScope()
+
+    // Location tracking state
+    var isLocationTrackingEnabled by remember { mutableStateOf(false) }
+    val locationProvider = rememberLocationProviderOrNull()
+    val locationState = rememberUserLocationState(locationProvider ?: rememberNullLocationProvider())
+    val locationAvailable = locationProvider != null
+
+    // Animate to waypoint when waypointId is provided (deep-link)
+    val selectedWaypointId by viewModel.selectedWaypointId.collectAsStateWithLifecycle()
+    LaunchedEffect(selectedWaypointId, waypoints) {
+        val wpId = selectedWaypointId ?: return@LaunchedEffect
+        val packet = waypoints[wpId] ?: return@LaunchedEffect
+        val wpt = packet.waypoint ?: return@LaunchedEffect
+        val lat = (wpt.latitude_i ?: 0) * COORDINATE_SCALE
+        val lng = (wpt.longitude_i ?: 0) * COORDINATE_SCALE
+        if (lat != 0.0 || lng != 0.0) {
+            cameraState.animateTo(
+                CameraPosition(target = GeoPosition(longitude = lng, latitude = lat), zoom = WAYPOINT_ZOOM),
+            )
+        }
+    }
+
+    // Apply favorites and last-heard filters to the node list
+    val myNum = viewModel.myNodeNum
+    val filteredNodes =
+        remember(nodesWithPosition, filterState, myNum) {
+            nodesWithPosition
+                .filter { node -> !filterState.onlyFavorites || node.isFavorite || node.num == myNum }
+                .filter { node ->
+                    filterState.lastHeardFilter.seconds == 0L ||
+                        (nowSeconds - node.lastHeard) <= filterState.lastHeardFilter.seconds ||
+                        node.num == myNum
+                }
+        }
 
     @Suppress("ViewModelForwarding")
     Scaffold(
@@ -77,7 +141,7 @@ fun MapScreen(
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             MaplibreMapContent(
-                nodes = nodesWithPosition,
+                nodes = filteredNodes,
                 waypoints = waypoints,
                 baseStyle = baseStyle,
                 cameraState = cameraState,
@@ -86,20 +150,95 @@ fun MapScreen(
                 showPrecisionCircle = filterState.showPrecisionCircle,
                 onNodeClick = { nodeNum -> navigateToNodeDetails(nodeNum) },
                 onMapLongClick = { position ->
-                    // TODO: open waypoint creation dialog at position
+                    longPressPosition = position
+                    editingWaypointId = null
+                    showWaypointDialog = true
                 },
                 modifier = Modifier.fillMaxSize(),
                 onCameraMoved = { position -> viewModel.saveCameraPosition(position) },
+                onWaypointClick = { wpId ->
+                    editingWaypointId = wpId
+                    longPressPosition = null
+                    showWaypointDialog = true
+                },
+                locationState = if (isLocationTrackingEnabled && locationAvailable) locationState else null,
             )
 
+            // Auto-pan camera when location tracking is enabled
+            if (locationAvailable) {
+                LocationTrackingEffect(locationState = locationState, enabled = isLocationTrackingEnabled) {
+                    cameraState.updateFromLocation()
+                }
+            }
+
             MapControlsOverlay(
-                onToggleFilterMenu = {},
+                onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
                 modifier = Modifier.align(Alignment.TopEnd).padding(paddingValues),
                 bearing = cameraState.position.bearing.toFloat(),
-                onCompassClick = {},
-                isLocationTrackingEnabled = false,
-                onToggleLocationTracking = {},
+                onCompassClick = { scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0)) } },
+                filterDropdownContent = {
+                    MapFilterDropdown(
+                        expanded = filterMenuExpanded,
+                        onDismissRequest = { filterMenuExpanded = false },
+                        filterState = filterState,
+                        onToggleFavorites = viewModel::toggleOnlyFavorites,
+                        onToggleWaypoints = viewModel::toggleShowWaypointsOnMap,
+                        onTogglePrecisionCircle = viewModel::toggleShowPrecisionCircleOnMap,
+                        onSetLastHeardFilter = viewModel::setLastHeardFilter,
+                    )
+                },
+                mapTypeContent = {
+                    MapStyleSelector(selectedStyle = selectedMapStyle, onSelectStyle = viewModel::selectMapStyle)
+                },
+                isLocationTrackingEnabled = isLocationTrackingEnabled,
+                onToggleLocationTracking = { isLocationTrackingEnabled = !isLocationTrackingEnabled },
             )
         }
+    }
+
+    // Waypoint creation/edit dialog
+    if (showWaypointDialog) {
+        val editingPacket = editingWaypointId?.let { waypoints[it] }
+        val editingWaypoint = editingPacket?.waypoint
+
+        EditWaypointDialog(
+            onDismiss = {
+                showWaypointDialog = false
+                editingWaypointId = null
+                longPressPosition = null
+            },
+            onSend = { name, description, icon, locked, expire ->
+                val myNodeNum = viewModel.myNodeNum ?: 0
+                val wpt =
+                    Waypoint(
+                        id = editingWaypoint?.id ?: viewModel.generatePacketId(),
+                        name = name,
+                        description = description,
+                        icon = icon,
+                        locked_to = if (locked) myNodeNum else 0,
+                        latitude_i =
+                        if (editingWaypoint != null) {
+                            editingWaypoint.latitude_i
+                        } else {
+                            longPressPosition?.let { (it.latitude / COORDINATE_SCALE).toInt() } ?: 0
+                        },
+                        longitude_i =
+                        if (editingWaypoint != null) {
+                            editingWaypoint.longitude_i
+                        } else {
+                            longPressPosition?.let { (it.longitude / COORDINATE_SCALE).toInt() } ?: 0
+                        },
+                        expire = expire,
+                    )
+                viewModel.sendWaypoint(wpt)
+            },
+            onDelete = editingWaypoint?.let { wpt -> { viewModel.deleteWaypoint(wpt.id) } },
+            initialName = editingWaypoint?.name ?: "",
+            initialDescription = editingWaypoint?.description ?: "",
+            initialIcon = editingWaypoint?.icon ?: 0,
+            initialLocked = (editingWaypoint?.locked_to ?: 0) != 0,
+            isEditing = editingWaypoint != null,
+            position = longPressPosition,
+        )
     }
 }
