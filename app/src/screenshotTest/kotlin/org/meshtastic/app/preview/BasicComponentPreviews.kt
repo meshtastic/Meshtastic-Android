@@ -42,10 +42,9 @@ import org.meshtastic.core.ui.theme.AppTheme
 /**
  * Multi-preview annotation for visual regression testing.
  *
- * Currently generates light and dark phone screenshots. Additional variants
- * (large font, foldable, tablet, RTL) are commented out to keep CI fast and
- * can be re-enabled when the screenshot plugin supports parallel rendering
- * or the project moves to larger CI runners.
+ * Currently generates light and dark phone screenshots. Additional variants (large font, foldable, tablet, RTL) are
+ * commented out to keep CI fast and can be re-enabled when the screenshot plugin supports parallel rendering or the
+ * project moves to larger CI runners.
  *
  * Usage: `@MultiPreview @Composable fun ComponentPreview() { ... }`
  *
