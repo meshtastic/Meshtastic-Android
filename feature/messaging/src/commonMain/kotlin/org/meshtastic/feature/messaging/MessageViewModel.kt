@@ -157,7 +157,7 @@ class MessageViewModel(
     }
 
     fun setTitle(title: String) {
-        safeLaunch(tag = "setTitle") { _title.value = title }
+        _title.value = title
     }
 
     fun getMessagesFromPaged(contactKey: String): Flow<PagingData<Message>> {

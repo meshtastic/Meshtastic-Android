@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.resources.UiText
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -108,7 +109,7 @@ fun safeLaunch(
     tag: String? = null,
     block: suspend CoroutineScope.() -> Unit,
 ): Job {
-    val context = dispatcher ?: viewModel.viewModelScope.coroutineContext
+    val context = dispatcher ?: EmptyCoroutineContext
     return viewModel.viewModelScope.launch(context) {
         try {
             block()

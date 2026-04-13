@@ -253,16 +253,45 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
 @Composable
 actual fun isLocationPermissionGranted(): Boolean {
     val context = LocalContext.current
-    return remember(context) {
-        androidx.core.content.ContextCompat.checkSelfPermission(
-            context,
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    val granted =
+        androidx.compose.runtime.mutableStateOf(
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED,
+        )
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            androidx.lifecycle.LifecycleEventObserver { _, event ->
+                if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                    granted.value =
+                        androidx.core.content.ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+    return granted.value
 }
 
 @Composable
 actual fun isGpsDisabled(): Boolean {
     val context = LocalContext.current
-    return remember(context) { context.gpsDisabled() }
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    val disabled = androidx.compose.runtime.mutableStateOf(context.gpsDisabled())
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            androidx.lifecycle.LifecycleEventObserver { _, event ->
+                if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                    disabled.value = context.gpsDisabled()
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    return disabled.value
 }
