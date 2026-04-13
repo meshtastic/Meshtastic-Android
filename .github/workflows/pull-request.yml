@@ -3,10 +3,6 @@ name: Pull Request CI
 on:
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.gitignore'
 
 permissions:
   contents: read
