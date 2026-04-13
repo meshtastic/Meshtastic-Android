@@ -30,17 +30,26 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.import_label
 import org.meshtastic.core.resources.play
+import org.meshtastic.core.resources.ringtone_file_empty
+import org.meshtastic.core.resources.ringtone_import_error
+import org.meshtastic.core.resources.ringtone_imported
 import org.meshtastic.core.ui.icon.FolderOpen
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PlayArrow
 import java.io.File
 
 private const val MAX_RINGTONE_SIZE = 230
+private const val IMPORT_ERROR_PLACEHOLDER = "@@ERROR@@"
 
 @Suppress("TooGenericExceptionCaught")
 @Composable
 actual fun RingtoneTrailingIcon(ringtoneInput: String, onRingtoneImported: (String) -> Unit, enabled: Boolean) {
     val context = LocalContext.current
+    val importedText = stringResource(Res.string.ringtone_imported)
+    val emptyText = stringResource(Res.string.ringtone_file_empty)
+    // Pre-resolve the format pattern for use in the non-composable launcher callback.
+    // Using a sentinel placeholder that will be replaced at call-site.
+    val importErrorPrefix = stringResource(Res.string.ringtone_import_error, IMPORT_ERROR_PLACEHOLDER)
 
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -52,15 +61,16 @@ actual fun RingtoneTrailingIcon(ringtoneInput: String, onRingtoneImported: (Stri
                             val read = reader.read(buffer)
                             if (read > 0) {
                                 onRingtoneImported(String(buffer, 0, read))
-                                Toast.makeText(context, "Imported ringtone", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, importedText, Toast.LENGTH_SHORT).show()
                             } else {
-                                Toast.makeText(context, "File is empty", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, emptyText, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 } catch (e: Exception) {
                     Logger.e(e) { "Error importing ringtone" }
-                    Toast.makeText(context, "Error importing: ${e.message}", Toast.LENGTH_SHORT).show()
+                    val errorMsg = importErrorPrefix.replace(IMPORT_ERROR_PLACEHOLDER, e.message ?: "Unknown error")
+                    Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
                 }
             }
         }

@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.RadioController
@@ -77,7 +76,7 @@ open class ScannerViewModel(
         scannedBleDevices.value = emptyMap()
 
         scanJob =
-            viewModelScope.launch {
+            safeLaunch(tag = "startBleScan") {
                 try {
                     bleScanner
                         .scan(
@@ -90,10 +89,6 @@ open class ScannerViewModel(
                                 scannedBleDevices.update { current -> current + (device.address to device) }
                             }
                         }
-                } catch (e: kotlin.coroutines.cancellation.CancellationException) {
-                    throw e
-                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                    co.touchlab.kermit.Logger.w(e) { "BLE scan failed" }
                 } finally {
                     isBleScanningState.value = false
                 }
