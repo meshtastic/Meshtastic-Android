@@ -101,11 +101,11 @@ jobs:
         run: ./gradlew kmpSmokeCompile -Pci=true --continue --scan
 
   # ── Sharded Unit Tests ──────────────────────────────────────────────
-  # Tests are split into 4 shards that run in parallel:
+  # Tests are split into 3 shards that run in parallel:
   #   shard-core:       core:* KMP module tests (allTests)
   #   shard-feature:    feature:* KMP module tests (allTests)
   #   shard-app:        Pure-Android/JVM tests (app, desktop, core:barcode, etc.)
-  #   shard-screenshot: Compose Preview Screenshot visual regression tests
+  # Screenshot tests run in a separate workflow (screenshot-tests.yml).
   test-shards:
     runs-on: ubuntu-24.04
     permissions:
@@ -180,10 +180,6 @@ jobs:
               :core:barcode:koverXmlReportFdroidDebug
               :core:barcode:koverXmlReportGoogleDebug
               :desktop:koverXmlReport
-          - name: shard-screenshot
-            tasks: >-
-              :app:validateGoogleDebugScreenshotTest
-            kover: ""
 
     steps:
       - name: Checkout code
@@ -198,9 +194,8 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
-      # ── Non-screenshot shards: run tests normally ──
+      # ── Run tests ──
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
-        if: matrix.shard.name != 'shard-screenshot'
         run: |
           kover_tasks=""
           if [[ "${{ inputs.run_coverage }}" == "true" ]]; then
@@ -208,15 +203,8 @@ jobs:
           fi
           ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue --scan
 
-      # ── Screenshot shard: validate → fail with context-aware error ──
-      - name: Validate screenshot tests
-        id: screenshotsverify
-        if: matrix.shard.name == 'shard-screenshot'
-        continue-on-error: true
-        run: ./gradlew :app:validateGoogleDebugScreenshotTest -Pci=true --scan
-
       - name: Upload test results to Codecov
-        if: ${{ !cancelled() && matrix.shard.name != 'shard-screenshot' }}
+        if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -227,7 +215,7 @@ jobs:
           files: "**/build/test-results/**/*.xml"
 
       - name: Upload coverage to Codecov
-        if: ${{ !cancelled() && matrix.shard.name != 'shard-screenshot' }}
+        if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -245,73 +233,6 @@ jobs:
             **/build/reports
             **/build/test-results
           retention-days: 7
-
-      - name: Upload screenshot diff images
-        if: >-
-          always()
-          && matrix.shard.name == 'shard-screenshot'
-          && steps.screenshotsverify.outcome == 'failure'
-        uses: actions/upload-artifact@v7
-        with:
-          name: screenshot-diffs
-          path: app/build/reports/screenshotTest/preview/debug/google/
-          retention-days: 7
-
-      - name: Screenshot test failure summary
-        if: >-
-          matrix.shard.name == 'shard-screenshot'
-          && steps.screenshotsverify.outcome == 'failure'
-        shell: bash
-        run: |
-          DIFF_DIR="app/build/reports/screenshotTest/preview/debug/google"
-          {
-            echo "### Screenshot Test Failures"
-            echo ""
-            echo "One or more screenshot tests failed visual comparison."
-            echo "Download the \`screenshot-diffs\` artifact to inspect diff images."
-            echo ""
-            if [ -d "$DIFF_DIR" ]; then
-              FAILURES=$(find "$DIFF_DIR" -name "*_diff.png" 2>/dev/null | wc -l | tr -d ' ')
-              echo "**${FAILURES} diff image(s) generated.**"
-              echo ""
-              echo "<details>"
-              echo "<summary>Failed screenshot tests</summary>"
-              echo ""
-              find "$DIFF_DIR" -name "*_diff.png" -exec basename {} _diff.png \; | sort | while read -r name; do
-                echo "- \`${name}\`"
-              done
-              echo ""
-              echo "</details>"
-            else
-              echo "_No diff directory found at \`${DIFF_DIR}\`. Check the build logs for details._"
-            fi
-            echo ""
-            echo "#### How to update reference images locally"
-            echo "\`\`\`bash"
-            echo "./gradlew updateGoogleDebugScreenshotTest"
-            echo "\`\`\`"
-            echo "Commit the updated \`.png\` files under \`app/src/screenshotTestGoogleDebug/reference/\`."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Fail screenshot tests (fork PR)
-        if: >-
-          matrix.shard.name == 'shard-screenshot'
-          && steps.screenshotsverify.outcome == 'failure'
-          && github.event_name == 'pull_request'
-          && github.event.pull_request.head.repo.full_name != github.repository
-        run: |
-          echo "::error::Screenshot tests failed. Please run './gradlew updateGoogleDebugScreenshotTest' locally and push the updated images."
-          exit 1
-
-      - name: Fail screenshot tests (same-repo PR or merge queue)
-        if: >-
-          matrix.shard.name == 'shard-screenshot'
-          && steps.screenshotsverify.outcome == 'failure'
-          && (github.event_name != 'pull_request'
-              || github.event.pull_request.head.repo.full_name == github.repository)
-        run: |
-          echo "::error::Screenshot tests failed. Run './gradlew updateGoogleDebugScreenshotTest' and commit the updated images."
-          exit 1
 
   # ── Android Build ────────────────────────────────────────────────────
   android-check:

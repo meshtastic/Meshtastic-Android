@@ -45,18 +45,18 @@ Run these when relevant to map, provider, or flavor-specific behavior:
 
 ## 4) CI Pipeline Architecture
 
-CI is defined in `.github/workflows/reusable-check.yml` and structured as four parallel job groups:
+CI is defined in `.github/workflows/reusable-check.yml` (unit tests, lint, build) and `.github/workflows/screenshot-tests.yml` (visual regression). These run as **independent parallel workflows** on PRs.
 
 1. **`lint-check`** — Runs spotless, detekt, Android lint, and KMP smoke compile in a single Gradle invocation (avoids 3x cold-start overhead). Uses `fetch-depth: 0` (full clone) for spotless ratcheting and version code calculation. Produces `cache_read_only` output and computed `version_code` for downstream jobs.
-2. **`test-shards`** — A 4-shard matrix that runs tests in parallel (depends on `lint-check`):
+2. **`test-shards`** — A 3-shard matrix that runs tests in parallel (depends on `lint-check`):
    - `shard-core`: `allTests` for all `core:*` KMP modules.
    - `shard-feature`: `allTests` for all `feature:*` KMP modules.
    - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`).
-   - `shard-screenshot`: `validateGoogleDebugScreenshotTest` — visual regression tests for CMP UI components. On failure, writes a step summary listing failed tests and links to the `reports-shard-screenshot` artifact.
-   Each shard generates Kover XML coverage (except `shard-screenshot`) and uploads test results + coverage to Codecov with per-shard flags.
+   Each shard generates Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
    Downstream jobs use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
 3. **`android-check`** — Builds APKs for all flavors (depends on `lint-check`).
 4. **`build-desktop`** — Multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) that builds desktop distributions via `createDistributable` (depends on `lint-check`).
+5. **`screenshot-tests.yml`** — Standalone workflow that runs `validateGoogleDebugScreenshotTest` **independently** from the main CI pipeline (no lint-check dependency). Uses `dorny/paths-filter` to skip when no UI files changed. On failure, uploads `screenshot-diffs` artifact and writes `GITHUB_STEP_SUMMARY`.
 
 ### Runner Strategy (Three Tiers)
 - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). Benefits from ARM runners' shorter queue times.
@@ -157,8 +157,11 @@ Screenshot tests cover components from the following modules:
 - Must be applied **after** `alias(libs.plugins.screenshot)` in the consumer's `plugins {}` block.
 
 ### CI Integration
-- Screenshot validation runs in a **dedicated `shard-screenshot` CI shard** (separate from unit tests in `shard-app`) via `:app:validateGoogleDebugScreenshotTest`.
-- The shard runs on `ubuntu-24.04` alongside other test shards with `fail-fast: false`, so a screenshot failure does not cancel unit test shards.
+- Screenshot validation runs in a **standalone workflow** (`screenshot-tests.yml`) that is **completely independent** from the main CI pipeline (`reusable-check.yml`).
+- This means screenshot tests start immediately on push — they do NOT wait for lint-check or any other job to complete first.
+- The workflow uses `dorny/paths-filter` to detect UI-related file changes. When no UI files changed, the expensive Gradle validation is skipped and the status gate (`Screenshot Status`) passes immediately.
+- On `merge_group` events, screenshot validation always runs regardless of path filters.
+- The `screenshot-check` job runs on `ubuntu-24.04` with a **30-minute timeout**.
 - On failure, a `GITHUB_STEP_SUMMARY` annotation lists the names of failed tests and directs reviewers to download the `screenshot-diffs` artifact for diff images.
 - The diff report (HTML with side-by-side expected/actual/diff views) is located at `app/build/reports/screenshotTest/preview/` inside the artifact.
 
@@ -180,8 +183,8 @@ When screenshot tests fail in CI, behavior depends on the PR context:
 - **Updating references**: Run `./gradlew updateGoogleDebugScreenshotTest`, then commit the updated `.png` files under `app/src/screenshotTestGoogleDebug/reference/`.
 
 ### Debugging CI Failures
-1. **Check the job summary**: The `shard-screenshot` job writes a step summary listing which tests failed. Look for the "Screenshot Test Failures" section in the PR checks.
-2. **Download the artifact**: Download the `screenshot-diffs` artifact (just the diff PNGs) or `reports-shard-screenshot` (full reports) from the workflow run's artifacts page (retained for 7 days).
+1. **Check the job summary**: The `screenshot-check` job writes a step summary listing which tests failed. Look for the "Screenshot Test Failures" section in the `Screenshot Tests` workflow checks.
+2. **Download the artifact**: Download the `screenshot-diffs` artifact (just the diff PNGs) from the workflow run's artifacts page (retained for 7 days).
 3. **Inspect diff images**: Each failed test has `_expected.png`, `_actual.png`, and `_diff.png` files.
 4. **Common causes**:
    - Font rendering differences (macOS vs Linux) — usually within threshold; if not, let CI regenerate.
