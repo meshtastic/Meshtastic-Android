@@ -23,6 +23,7 @@ import dev.mokkery.every
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -35,6 +36,7 @@ import org.meshtastic.core.testing.FakeMapPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.feature.map.model.MapStyle
+import org.meshtastic.proto.Waypoint
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -48,6 +50,7 @@ class MapViewModelTest {
     private lateinit var viewModel: MapViewModel
     private lateinit var mapCameraPrefs: FakeMapCameraPrefs
     private lateinit var mapPrefs: FakeMapPrefs
+    private lateinit var radioController: FakeRadioController
     private val packetRepository: PacketRepository = mock()
 
     @BeforeTest
@@ -55,6 +58,7 @@ class MapViewModelTest {
         Dispatchers.setMain(testDispatcher)
         mapCameraPrefs = FakeMapCameraPrefs()
         mapPrefs = FakeMapPrefs()
+        radioController = FakeRadioController()
         every { packetRepository.getWaypoints() } returns MutableStateFlow(emptyList())
         viewModel = createViewModel()
     }
@@ -64,12 +68,15 @@ class MapViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()): MapViewModel = MapViewModel(
+    private fun createViewModel(
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        nodeRepository: FakeNodeRepository = FakeNodeRepository(),
+    ): MapViewModel = MapViewModel(
         mapPrefs = mapPrefs,
         mapCameraPrefs = mapCameraPrefs,
-        nodeRepository = FakeNodeRepository(),
+        nodeRepository = nodeRepository,
         packetRepository = packetRepository,
-        radioController = FakeRadioController(),
+        radioController = radioController,
         savedStateHandle = savedStateHandle,
     )
 
@@ -166,13 +173,6 @@ class MapViewModelTest {
     }
 
     @Test
-    fun compassBearingReflectsPrefs() {
-        mapCameraPrefs.setCameraBearing(180f)
-        val vm = createViewModel()
-        assertEquals(180f, vm.compassBearing)
-    }
-
-    @Test
     fun blankStyleUriFallsBackToOpenStreetMap() = runTest(testDispatcher) {
         // selectedStyleUri defaults to "" in FakeMapCameraPrefs
         viewModel.baseStyle.test {
@@ -180,5 +180,105 @@ class MapViewModelTest {
             assertEquals(BaseStyle.Uri(MapStyle.OpenStreetMap.styleUri), style)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    // ---- createAndSendWaypoint tests ----
+
+    @Test
+    fun createAndSendWaypoint_newWaypoint_convertsPositionToIntCoordinates() = runTest(testDispatcher) {
+        val position = org.maplibre.spatialk.geojson.Position(longitude = -74.0, latitude = 40.0)
+
+        viewModel.createAndSendWaypoint(
+            name = "Test WP",
+            description = "A waypoint",
+            icon = 0x1F4CD,
+            locked = false,
+            expire = 0,
+            existingWaypoint = null,
+            position = position,
+        )
+
+        // sendWaypoint dispatches to ioDispatcher; give it time to execute
+        delay(100)
+
+        // FakeRadioController.getPacketId() returns 1, and sendMessage appends to sentPackets
+        assertEquals(1, radioController.sentPackets.size)
+        val sent = radioController.sentPackets.first()
+        val wpt = sent.waypoint!!
+        assertEquals("Test WP", wpt.name)
+        assertEquals("A waypoint", wpt.description)
+        assertEquals(0x1F4CD, wpt.icon)
+        assertEquals(0, wpt.locked_to)
+        // 40.0 / 1e-7 = 400000000
+        assertEquals(400000000, wpt.latitude_i)
+        // -74.0 / 1e-7 = -740000000
+        assertEquals(-740000000, wpt.longitude_i)
+    }
+
+    @Test
+    fun createAndSendWaypoint_editExisting_retainsOriginalCoordinates() = runTest(testDispatcher) {
+        val existing = Waypoint(id = 42, name = "Old Name", latitude_i = 515000000, longitude_i = -1000000)
+
+        viewModel.createAndSendWaypoint(
+            name = "New Name",
+            description = "Updated",
+            icon = 0x1F3E0,
+            locked = false,
+            expire = 0,
+            existingWaypoint = existing,
+            position = null,
+        )
+
+        delay(100)
+
+        assertEquals(1, radioController.sentPackets.size)
+        val wpt = radioController.sentPackets.first().waypoint!!
+        assertEquals(42, wpt.id) // Retains existing ID
+        assertEquals("New Name", wpt.name)
+        assertEquals(515000000, wpt.latitude_i) // Retains existing coords
+        assertEquals(-1000000, wpt.longitude_i)
+    }
+
+    @Test
+    fun createAndSendWaypoint_locked_setsLockedToMyNodeNum() = runTest(testDispatcher) {
+        val nodeRepository = FakeNodeRepository()
+        nodeRepository.setMyNodeInfo(org.meshtastic.core.testing.TestDataFactory.createMyNodeInfo(myNodeNum = 99))
+        val vm = createViewModel(nodeRepository = nodeRepository)
+        val position = org.maplibre.spatialk.geojson.Position(longitude = 0.1, latitude = 0.1)
+
+        vm.createAndSendWaypoint(
+            name = "Locked WP",
+            description = "",
+            icon = 0,
+            locked = true,
+            expire = 0,
+            existingWaypoint = null,
+            position = position,
+        )
+
+        delay(100)
+
+        assertEquals(1, radioController.sentPackets.size)
+        assertEquals(99, radioController.sentPackets.first().waypoint!!.locked_to)
+    }
+
+    @Test
+    fun createAndSendWaypoint_noPositionNoExisting_usesZeroCoordinates() = runTest(testDispatcher) {
+        viewModel.createAndSendWaypoint(
+            name = "Nowhere",
+            description = "",
+            icon = 0,
+            locked = false,
+            expire = 0,
+            existingWaypoint = null,
+            position = null,
+        )
+
+        delay(100)
+
+        assertEquals(1, radioController.sentPackets.size)
+        val wpt = radioController.sentPackets.first().waypoint!!
+        assertEquals(0, wpt.latitude_i)
+        assertEquals(0, wpt.longitude_i)
     }
 }

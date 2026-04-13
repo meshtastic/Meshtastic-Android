@@ -29,13 +29,14 @@ import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.spatialk.geojson.BoundingBox
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.feature.map.model.MapStyle
+import org.meshtastic.feature.map.util.COORDINATE_SCALE
 import org.meshtastic.proto.Position
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val DEFAULT_TRACEROUTE_ZOOM = 10.0
-private const val COORDINATE_SCALE = 1e-7
 private const val BOUNDS_PADDING_DP = 64
 
 /**
@@ -43,6 +44,9 @@ private const val BOUNDS_PADDING_DP = 64
  *
  * This composable is designed to be embedded inside a parent scaffold (e.g. TracerouteMapScreen). It does NOT include
  * its own Scaffold or AppBar.
+ *
+ * @param nodes Node lookup map for resolving short names on hop markers. When empty, hop markers fall back to hex node
+ *   numbers. Callers should pass `nodeRepository.nodeDBbyNum.value` (or equivalent) for readable labels.
  *
  * Replaces both the Google Maps and OSMDroid flavor-specific TracerouteMap implementations.
  */
@@ -52,6 +56,7 @@ fun TracerouteMap(
     tracerouteNodePositions: Map<Int, Position>,
     onMappableCountChanged: (shown: Int, total: Int) -> Unit,
     modifier: Modifier = Modifier,
+    nodes: Map<Int, Node> = emptyMap(),
 ) {
     val geoPositions =
         remember(tracerouteNodePositions) {
@@ -99,7 +104,7 @@ fun TracerouteMap(
         TracerouteLayers(
             overlay = tracerouteOverlay,
             nodePositions = tracerouteNodePositions,
-            nodes = emptyMap(), // Node lookups for short names are best-effort
+            nodes = nodes,
             onMappableCountChanged = onMappableCountChanged,
         )
     }

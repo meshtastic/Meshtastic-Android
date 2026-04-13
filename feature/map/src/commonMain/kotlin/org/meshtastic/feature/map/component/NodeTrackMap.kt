@@ -30,11 +30,11 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.OrnamentOptions
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.feature.map.model.MapStyle
+import org.meshtastic.feature.map.util.COORDINATE_SCALE
 import org.meshtastic.proto.Position
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val DEFAULT_TRACK_ZOOM = 13.0
-private const val COORDINATE_SCALE = 1e-7
 private const val BOUNDS_PADDING_DP = 48
 
 /**

@@ -31,6 +31,8 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.MapStyle
+import org.meshtastic.feature.map.util.COORDINATE_SCALE
+import org.meshtastic.proto.Waypoint
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 /**
@@ -94,7 +96,34 @@ class MapViewModel(
         mapCameraPrefs.setSelectedStyleUri(style.styleUri)
     }
 
-    /** Bearing for the compass in degrees. */
-    val compassBearing: Float
-        get() = mapCameraPrefs.cameraBearing.value
+    /**
+     * Create a [Waypoint] proto from user-provided fields, handling coordinate conversion and ID generation.
+     *
+     * @param existingWaypoint If non-null, the waypoint being edited (retains its id and coordinates).
+     * @param position If non-null, the long-press position for a new waypoint.
+     */
+    fun createAndSendWaypoint(
+        name: String,
+        description: String,
+        icon: Int,
+        locked: Boolean,
+        expire: Int,
+        existingWaypoint: Waypoint?,
+        position: GeoPosition?,
+    ) {
+        val wpt =
+            Waypoint(
+                id = existingWaypoint?.id ?: generatePacketId(),
+                name = name,
+                description = description,
+                icon = icon,
+                locked_to = if (locked) (myNodeNum ?: 0) else 0,
+                latitude_i =
+                existingWaypoint?.latitude_i ?: position?.let { (it.latitude / COORDINATE_SCALE).toInt() } ?: 0,
+                longitude_i =
+                existingWaypoint?.longitude_i ?: position?.let { (it.longitude / COORDINATE_SCALE).toInt() } ?: 0,
+                expire = expire,
+            )
+        sendWaypoint(wpt)
+    }
 }

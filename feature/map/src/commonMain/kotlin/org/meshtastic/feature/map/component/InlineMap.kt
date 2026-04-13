@@ -37,11 +37,11 @@ import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.util.COORDINATE_SCALE
 import org.meshtastic.feature.map.util.precisionBitsToMeters
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val DEFAULT_ZOOM = 15.0
-private const val COORDINATE_SCALE = 1e-7
 private const val PRECISION_CIRCLE_FILL_ALPHA = 0.15f
 private const val PRECISION_CIRCLE_STROKE_ALPHA = 0.3f
 
