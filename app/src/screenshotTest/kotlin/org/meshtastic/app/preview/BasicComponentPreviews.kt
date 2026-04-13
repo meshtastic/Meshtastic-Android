@@ -40,15 +40,67 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
 /**
- * Multi-preview annotation for testing components in light and dark themes.
+ * Multi-preview annotation for comprehensive visual regression testing.
+ *
+ * Generates screenshots across the following configuration axes:
+ * - **Theme**: Light and dark modes
+ * - **Font scale**: Default (1.0) and large (2.0)
+ * - **Device form factor**: Phone (default), foldable (673dp wide), and tablet (1280dp wide)
  *
  * Usage: `@MultiPreview @Composable fun ComponentPreview() { ... }`
  *
  * This annotation is Android-only (uses [Configuration.UI_MODE_NIGHT_YES]) and must live in an Android source set, not
  * `commonMain`.
  */
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Light - Phone", showBackground = true)
+@Preview(name = "Dark - Phone", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Light - Phone - Large Font", showBackground = true, fontScale = 2f)
+@Preview(
+    name = "Dark - Phone - Large Font",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2f,
+)
+@Preview(name = "Light - Foldable", showBackground = true, device = "spec:width=673dp,height=841dp,dpi=480")
+@Preview(
+    name = "Dark - Foldable",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = "spec:width=673dp,height=841dp,dpi=480",
+)
+@Preview(
+    name = "Light - Foldable - Large Font",
+    showBackground = true,
+    fontScale = 2f,
+    device = "spec:width=673dp,height=841dp,dpi=480",
+)
+@Preview(
+    name = "Dark - Foldable - Large Font",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2f,
+    device = "spec:width=673dp,height=841dp,dpi=480",
+)
+@Preview(name = "Light - Tablet", showBackground = true, device = "spec:width=1280dp,height=800dp,dpi=480")
+@Preview(
+    name = "Dark - Tablet",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = "spec:width=1280dp,height=800dp,dpi=480",
+)
+@Preview(
+    name = "Light - Tablet - Large Font",
+    showBackground = true,
+    fontScale = 2f,
+    device = "spec:width=1280dp,height=800dp,dpi=480",
+)
+@Preview(
+    name = "Dark - Tablet - Large Font",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    fontScale = 2f,
+    device = "spec:width=1280dp,height=800dp,dpi=480",
+)
 annotation class MultiPreview
 
 @MultiPreview
