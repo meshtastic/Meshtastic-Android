@@ -23,6 +23,7 @@ plugins {
 
 android {
     namespace = "org.meshtastic.feature.widget"
+    resourcePrefix = "widget_"
 
     defaultConfig { minSdk = 26 }
 }

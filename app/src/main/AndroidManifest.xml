@@ -288,7 +288,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/local_stats_widget_info" />
+                android:resource="@xml/widget_local_stats_info" />
         </receiver>
 
         <!-- allow for plugin discovery -->

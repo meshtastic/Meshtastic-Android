@@ -132,11 +132,11 @@ class LocalStatsWidget :
                 Scaffold(
                     titleBar = {
                         TitleBar(
-                            startIcon = ImageProvider(R.drawable.app_icon),
+                            startIcon = ImageProvider(R.drawable.widget_app_icon),
                             title = stringResource(Res.string.meshtastic_app_name),
                             actions = {
                                 CircleIconButton(
-                                    imageProvider = ImageProvider(R.drawable.ic_refresh),
+                                    imageProvider = ImageProvider(R.drawable.widget_ic_refresh),
                                     contentDescription = stringResource(Res.string.refresh),
                                     onClick = actionRunCallback<RefreshLocalStatsAction>(),
                                     backgroundColor = null,
@@ -297,7 +297,7 @@ class LocalStatsWidget :
                 CircularProgressIndicator(modifier = GlanceModifier.size(24.dp))
             } else {
                 Image(
-                    provider = ImageProvider(R.drawable.app_icon),
+                    provider = ImageProvider(R.drawable.widget_app_icon),
                     contentDescription = null,
                     modifier = GlanceModifier.size(32.dp),
                 )

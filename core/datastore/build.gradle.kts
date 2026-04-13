@@ -24,7 +24,11 @@ plugins {
 kotlin {
     jvm()
 
-    android { namespace = "org.meshtastic.core.datastore" }
+    android {
+        namespace = "org.meshtastic.core.datastore"
+        androidResources.enable = false
+        withHostTest {}
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -35,6 +39,12 @@ kotlin {
             api(libs.androidx.datastore.preferences)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.okio)
         }
     }
 }
