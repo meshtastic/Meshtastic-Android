@@ -215,26 +215,6 @@ jobs:
         continue-on-error: true
         run: ./gradlew :app:validateGoogleDebugScreenshotTest -Pci=true --scan
 
-      - name: Fail screenshot tests (fork PR)
-        if: >-
-          matrix.shard.name == 'shard-screenshot'
-          && steps.screenshotsverify.outcome == 'failure'
-          && github.event_name == 'pull_request'
-          && github.event.pull_request.head.repo.full_name != github.repository
-        run: |
-          echo "::error::Screenshot tests failed. Please run './gradlew updateGoogleDebugScreenshotTest' locally and push the updated images."
-          exit 1
-
-      - name: Fail screenshot tests (same-repo PR or merge queue)
-        if: >-
-          matrix.shard.name == 'shard-screenshot'
-          && steps.screenshotsverify.outcome == 'failure'
-          && (github.event_name != 'pull_request'
-              || github.event.pull_request.head.repo.full_name == github.repository)
-        run: |
-          echo "::error::Screenshot tests failed. Run './gradlew updateGoogleDebugScreenshotTest' and commit the updated images."
-          exit 1
-
       - name: Upload test results to Codecov
         if: ${{ !cancelled() && matrix.shard.name != 'shard-screenshot' }}
         uses: codecov/codecov-action@v6
@@ -312,6 +292,26 @@ jobs:
             echo "\`\`\`"
             echo "Commit the updated \`.png\` files under \`app/src/screenshotTestGoogleDebug/reference/\`."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail screenshot tests (fork PR)
+        if: >-
+          matrix.shard.name == 'shard-screenshot'
+          && steps.screenshotsverify.outcome == 'failure'
+          && github.event_name == 'pull_request'
+          && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "::error::Screenshot tests failed. Please run './gradlew updateGoogleDebugScreenshotTest' locally and push the updated images."
+          exit 1
+
+      - name: Fail screenshot tests (same-repo PR or merge queue)
+        if: >-
+          matrix.shard.name == 'shard-screenshot'
+          && steps.screenshotsverify.outcome == 'failure'
+          && (github.event_name != 'pull_request'
+              || github.event.pull_request.head.repo.full_name == github.repository)
+        run: |
+          echo "::error::Screenshot tests failed. Run './gradlew updateGoogleDebugScreenshotTest' and commit the updated images."
+          exit 1
 
   # ── Android Build ────────────────────────────────────────────────────
   android-check:
