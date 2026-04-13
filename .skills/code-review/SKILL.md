@@ -55,3 +55,9 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 ### 8. ProGuard / R8 Rules
 - [ ] **New Dependencies:** If a new reflection-heavy dependency is added (DI, serialization, JNI, ServiceLoader), verify keep rules exist in **both** `app/proguard-rules.pro` (R8) and `desktop/proguard-rules.pro` (ProGuard). The two files must stay aligned.
 - [ ] **Release Smoke-Test:** For dependency or ProGuard rule changes, verify `assembleRelease` and `./gradlew :desktop:runRelease` succeed.
+
+## Review Output Guidelines
+1. **Be Specific & Constructive:** Provide exact file references and code snippets illustrating the required project pattern.
+2. **Reference the Docs:** Cite `AGENTS.md` and project architecture playbooks to justify change requests (e.g., "Per AGENTS.md, `java.io.*` cannot be used in `commonMain`; please migrate to Okio").
+3. **Enforce Build Health:** Remind authors to run `./gradlew test allTests` locally to verify changes, especially since KMP `test` tasks are ambiguous.
+4. **Praise Good Patterns:** Acknowledge correct usage of complex architecture requirements, like proper Navigation 3 scene transitions or elegant `commonMain` helper extractions.
