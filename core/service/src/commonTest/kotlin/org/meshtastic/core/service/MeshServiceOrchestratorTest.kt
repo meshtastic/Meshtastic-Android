@@ -35,6 +35,7 @@ import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -67,6 +68,7 @@ class MeshServiceOrchestratorTest {
     private val takPrefs: TakPrefs = mock(MockMode.autofill)
     private val cotHandler: CoTHandler = mock(MockMode.autofill)
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
+    private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = CoroutineScope(testDispatcher)
@@ -111,6 +113,7 @@ class MeshServiceOrchestratorTest {
             takMeshIntegration = takMeshIntegration,
             takPrefs = takPrefs,
             databaseManager = databaseManager,
+            connectionManager = connectionManager,
             scope = testScope,
         )
     }

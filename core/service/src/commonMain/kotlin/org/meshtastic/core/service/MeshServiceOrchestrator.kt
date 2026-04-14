@@ -26,6 +26,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -57,6 +58,7 @@ class MeshServiceOrchestrator(
     private val takMeshIntegration: TAKMeshIntegration,
     private val takPrefs: TakPrefs,
     private val databaseManager: DatabaseManager,
+    private val connectionManager: MeshConnectionManager,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) {
     private var serviceJob: Job? = null
@@ -87,6 +89,7 @@ class MeshServiceOrchestrator(
         serviceJob = job
 
         serviceNotifications.initChannels()
+        connectionManager.updateStatusNotification()
 
         // Observe TAK server pref to start/stop
         takJob =

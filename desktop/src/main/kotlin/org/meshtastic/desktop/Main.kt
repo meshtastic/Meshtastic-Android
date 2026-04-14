@@ -60,9 +60,7 @@ import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.database.desktopDataDir
@@ -107,12 +105,13 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 
 @OptIn(ExperimentalCoilApi::class)
 fun main(args: Array<String>) = application(exitProcessOnExit = false) {
-    Logger.i { "Meshtastic Desktop — Starting" }
-
-    remember { startKoin { modules(desktopPlatformModule(), desktopModule()) } }
-    DisposableEffect(Unit) { onDispose { stopKoin() } }
-
-    val uiViewModel = koinViewModel<UIViewModel>()
+    val koinApp = remember {
+        Logger.i { "Meshtastic Desktop — Starting" }
+        startKoin { modules(desktopPlatformModule(), desktopModule()) }
+    }
+    val systemLocale = remember { Locale.getDefault() }
+    val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+    val httpClient = remember { koinApp.koin.get<HttpClient>() }
 
     DeepLinkHandler(args, uiViewModel)
     MeshServiceLifecycle()
