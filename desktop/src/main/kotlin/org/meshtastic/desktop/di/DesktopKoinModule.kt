@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("ktlint:standard:no-unused-imports") // Koin KSP-generated extension functions require aliased imports
+
 package org.meshtastic.desktop.di
 
 // Generated Koin module extensions from core KMP modules
@@ -34,6 +36,7 @@ import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.service.ApiService
@@ -91,9 +94,6 @@ import org.meshtastic.feature.messaging.di.module as featureMessagingModule
 import org.meshtastic.feature.node.di.module as featureNodeModule
 import org.meshtastic.feature.settings.di.module as featureSettingsModule
 import org.meshtastic.feature.wifiprovision.di.module as featureWifiProvisionModule
-
-private const val HTTP_TIMEOUT_MS = 30_000L
-private const val MAX_RETRIES = 3
 
 /**
  * Koin module for the Desktop target.
@@ -184,12 +184,12 @@ private fun desktopPlatformStubsModule() = module {
         HttpClient(Java) {
             install(ContentNegotiation) { json(get<Json>()) }
             install(HttpTimeout) {
-                requestTimeoutMillis = HTTP_TIMEOUT_MS
-                connectTimeoutMillis = HTTP_TIMEOUT_MS
-                socketTimeoutMillis = HTTP_TIMEOUT_MS
+                requestTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
             }
             install(HttpRequestRetry) {
-                retryOnServerErrors(maxRetries = MAX_RETRIES)
+                retryOnServerErrors(maxRetries = HttpClientDefaults.MAX_RETRIES)
                 exponentialDelay()
             }
             if (DesktopBuildConfig.IS_DEBUG) {

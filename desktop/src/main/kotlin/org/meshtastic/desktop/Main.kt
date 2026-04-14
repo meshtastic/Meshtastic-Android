@@ -33,6 +33,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -93,8 +94,14 @@ private const val DISK_CACHE_MAX_BYTES = 32L * 1024L * 1024L // 32 MiB
  * raster images — not raw SVGs. Since the desktop module is a JVM-only host shell, classpath resource access is safe.
  */
 @Composable
-private fun svgPainterResource(path: String, density: Density): Painter = remember(path) {
-    val bytes = Thread.currentThread().contextClassLoader!!.getResourceAsStream(path)!!.readAllBytes()
+private fun svgPainterResource(path: String, density: Density): Painter = remember(path, density) {
+    val classLoader =
+        requireNotNull(Thread.currentThread().contextClassLoader) {
+            "Missing context class loader while loading resource: $path"
+        }
+    val bytes =
+        requireNotNull(classLoader.getResourceAsStream(path)) { "Missing classpath resource: $path" }
+            .use { it.readAllBytes() }
     bytes.decodeToSvgPainter(density)
 }
 
@@ -185,10 +192,11 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
     var isAppVisible by remember { mutableStateOf(true) }
     var isWindowReady by remember { mutableStateOf(false) }
     val trayState = rememberTrayState()
-    val appIcon = svgPainterResource("tray_icon_black.svg", Density(1f))
+    val density = LocalDensity.current
+    val appIcon = svgPainterResource("tray_icon_black.svg", density)
 
     val trayIcon =
-        svgPainterResource(if (isSystemInDarkTheme()) "tray_icon_white.svg" else "tray_icon_black.svg", Density(1f))
+        svgPainterResource(if (isSystemInDarkTheme()) "tray_icon_white.svg" else "tray_icon_black.svg", density)
 
     val notificationManager = koinInject<DesktopNotificationManager>()
     val desktopPrefs = koinInject<DesktopPreferencesDataSource>()

@@ -42,12 +42,11 @@ import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 
 private const val DISK_CACHE_PERCENT = 0.02
 private const val MEMORY_CACHE_PERCENT = 0.25
-private const val HTTP_TIMEOUT_MS = 30_000L
-private const val MAX_RETRIES = 3
 
 @Module
 class NetworkModule {
@@ -89,12 +88,12 @@ class NetworkModule {
         HttpClient(engineFactory = Android) {
             install(plugin = ContentNegotiation) { json(json) }
             install(plugin = HttpTimeout) {
-                requestTimeoutMillis = HTTP_TIMEOUT_MS
-                connectTimeoutMillis = HTTP_TIMEOUT_MS
-                socketTimeoutMillis = HTTP_TIMEOUT_MS
+                requestTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
             }
             install(plugin = HttpRequestRetry) {
-                retryOnServerErrors(maxRetries = MAX_RETRIES)
+                retryOnServerErrors(maxRetries = HttpClientDefaults.MAX_RETRIES)
                 exponentialDelay()
             }
             if (buildConfigProvider.isDebug) {

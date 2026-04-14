@@ -31,6 +31,7 @@ import com.google.maps.android.compose.MapType
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -646,7 +647,12 @@ class MapViewModel(
         return withContext(dispatchers.io) {
             try {
                 if (layerItem.isNetwork && (uriToLoad.scheme == "http" || uriToLoad.scheme == "https")) {
-                    httpClient.get(uriToLoad.toString()).bodyAsChannel().toInputStream()
+                    val response = httpClient.get(uriToLoad.toString())
+                    if (!response.status.isSuccess()) {
+                        Logger.withTag("MapViewModel").e { "HTTP ${response.status} fetching layer: $uriToLoad" }
+                        return@withContext null
+                    }
+                    response.bodyAsChannel().toInputStream()
                 } else {
                     application.contentResolver.openInputStream(uriToLoad)
                 }
