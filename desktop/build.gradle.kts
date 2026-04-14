@@ -118,8 +118,8 @@ compose.desktop {
         mainClass = "org.meshtastic.desktop.MainKt"
         jvmArgs(
             "-Xmx2G",
-            "-Dapple.awt.application.name=Meshtastic",
-            "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic",
+            "-Dapple.awt.application.name=Meshtastic Desktop",
+            "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
             "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
         )
 
@@ -131,7 +131,7 @@ compose.desktop {
         }
 
         nativeDistributions {
-            packageName = "Meshtastic"
+            packageName = "Meshtastic Desktop"
 
             // Ensure critical JVM modules are included in the custom JRE bundled with the app.
             // jdeps might miss some of these if they are loaded via reflection or JNI.
@@ -148,8 +148,8 @@ compose.desktop {
             // Increase max heap size to prevent OOM issues on complex maps/data
             jvmArgs(
                 "-Xmx2G",
-                "-Dapple.awt.application.name=Meshtastic",
-                "-Dcom.apple.mrj.application.apple.name=Meshtastic",
+                "-Dapple.awt.application.name=Meshtastic Desktop",
+                "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
                 "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
             )
 
@@ -158,6 +158,7 @@ compose.desktop {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
                 minimumSystemVersion = "12.0"
                 bundleID = "org.meshtastic.desktop"
+                appCategory = "public.app-category.utilities"
                 entitlementsFile.set(project.file("entitlements.plist"))
                 infoPlist {
                     extraKeysRawXml =
@@ -182,22 +183,46 @@ compose.desktop {
                         """
                             .trimIndent()
                 }
-                // TODO: To prepare for real distribution on macOS, you'll need to sign and notarize.
-                // You can inject these from CI environment variables.
-                // sign = true
-                // notarize = true
-                // appleID = System.getenv("APPLE_ID")
-                // appStorePassword = System.getenv("APPLE_APP_SPECIFIC_PASSWORD")
+                // macOS code signing and notarization.
+                // Required for Gatekeeper acceptance on end-user machines (without this,
+                // macOS 12+ shows "app cannot be opened because it is from an unidentified developer").
+                //
+                // Required CI secrets:
+                //   APPLE_SIGNING_IDENTITY      – e.g. "Developer ID Application: Meshtastic LLC (TEAMID)"
+                //   APPLE_ID                    – Apple ID email used for notarization
+                //   APPLE_APP_SPECIFIC_PASSWORD – App-specific password from appleid.apple.com
+                //   APPLE_TEAM_ID               – 10-character Apple Developer Team ID
+                //
+                // To enable, set SIGN_MACOS=true in the CI environment and uncomment the block below.
+                val signMacOs = System.getenv("SIGN_MACOS")?.toBoolean() ?: false
+                if (signMacOs) {
+                    signing {
+                        sign.set(true)
+                        identity.set(System.getenv("APPLE_SIGNING_IDENTITY"))
+                    }
+                    notarization {
+                        appleID.set(System.getenv("APPLE_ID"))
+                        password.set(System.getenv("APPLE_APP_SPECIFIC_PASSWORD"))
+                        teamID.set(System.getenv("APPLE_TEAM_ID"))
+                    }
+                }
             }
             windows {
                 iconFile.set(project.file("src/main/resources/icon.ico"))
                 menuGroup = "Meshtastic"
-                // TODO: Must generate and set a consistent UUID for Windows upgrades.
-                // upgradeUuid = "YOUR-UPGRADE-UUID-HERE"
+                shortcut = true
+                menu = true
+                dirChooser = true
+                // Stable UUID ensures MSI upgrades replace the previous installation
+                // rather than installing side-by-side. NEVER change this value.
+                upgradeUuid = "4974EA87-98AA-470E-B590-0BD5CF9FAE8E"
             }
             linux {
                 iconFile.set(project.file("src/main/resources/icon.png"))
                 menuGroup = "Network"
+                debMaintainer = "developers@meshtastic.org"
+                appCategory = "Network"
+                rpmLicenseType = "GPLv3+"
             }
 
             // Define target formats based on the current host OS to avoid configuration errors
