@@ -469,6 +469,9 @@
     <string name="notifications_on_alert_bell_receipt">Известия при получаване на сигнал/позвъняване</string>
     <string name="use_pwm_buzzer">Използване на PWM зумер</string>
     <string name="ringtone">Тон на звънене</string>
+    <string name="ringtone_imported">Импортирана мелодия</string>
+    <string name="ringtone_file_empty">Файлът е празен</string>
+    <string name="ringtone_import_error">Грешка при импортиране: %1$s</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Опции</string>
     <string name="advanced">Разширени</string>
