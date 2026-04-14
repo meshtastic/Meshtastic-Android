@@ -17,7 +17,6 @@
 package org.meshtastic.core.common.util
 
 import java.net.InetAddress
-import java.text.DateFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -74,7 +73,7 @@ actual object DateFormatter {
         shortDateFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 
     actual fun formatDateTimeShort(timestampMillis: Long): String =
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(timestampMillis)
+        shortDateTimeFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 }
 
 @Suppress("MagicNumber")
