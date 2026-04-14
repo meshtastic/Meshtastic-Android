@@ -17,16 +17,14 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room3.Dao
-import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import androidx.room3.Upsert
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 
 @Dao
 interface FirmwareReleaseDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(firmwareReleaseEntity: FirmwareReleaseEntity)
+    @Upsert suspend fun insert(firmwareReleaseEntity: FirmwareReleaseEntity)
 
     @Query("DELETE FROM firmware_release")
     suspend fun deleteAll()

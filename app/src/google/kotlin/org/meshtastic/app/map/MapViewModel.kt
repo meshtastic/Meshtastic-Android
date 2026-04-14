@@ -28,7 +28,10 @@ import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapType
-import kotlinx.coroutines.Dispatchers
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -45,6 +48,7 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
@@ -77,6 +81,8 @@ data class MapCameraPosition(
 @KoinViewModel
 class MapViewModel(
     private val application: Application,
+    private val dispatchers: CoroutineDispatchers,
+    private val httpClient: HttpClient,
     mapPrefs: MapPrefs,
     private val googleMapsPrefs: GoogleMapsPrefs,
     nodeRepository: NodeRepository,
@@ -404,7 +410,7 @@ class MapViewModel(
     }
 
     private fun loadPersistedLayers() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatchers.io) {
             try {
                 val layersDir = File(application.filesDir, "map_layers")
                 if (layersDir.exists() && layersDir.isDirectory) {
@@ -412,32 +418,33 @@ class MapViewModel(
 
                     if (persistedLayerFiles != null) {
                         val hiddenLayerUrls = googleMapsPrefs.hiddenLayerUrls.value
-                        val loadedItems = persistedLayerFiles.mapNotNull { file ->
-                            if (file.isFile) {
-                                val layerType =
-                                    when (file.extension.lowercase()) {
-                                        "kml",
-                                        "kmz",
-                                        -> LayerType.KML
-                                        "geojson",
-                                        "json",
-                                        -> LayerType.GEOJSON
-                                        else -> null
-                                    }
+                        val loadedItems =
+                            persistedLayerFiles.mapNotNull { file ->
+                                if (file.isFile) {
+                                    val layerType =
+                                        when (file.extension.lowercase()) {
+                                            "kml",
+                                            "kmz",
+                                            -> LayerType.KML
+                                            "geojson",
+                                            "json",
+                                            -> LayerType.GEOJSON
+                                            else -> null
+                                        }
 
-                                layerType?.let {
-                                    val uri = Uri.fromFile(file)
-                                    MapLayerItem(
-                                        name = file.nameWithoutExtension,
-                                        uri = uri,
-                                        isVisible = !hiddenLayerUrls.contains(uri.toString()),
-                                        layerType = it,
-                                    )
+                                    layerType?.let {
+                                        val uri = Uri.fromFile(file)
+                                        MapLayerItem(
+                                            name = file.nameWithoutExtension,
+                                            uri = uri,
+                                            isVisible = !hiddenLayerUrls.contains(uri.toString()),
+                                            layerType = it,
+                                        )
+                                    }
+                                } else {
+                                    null
                                 }
-                            } else {
-                                null
                             }
-                        }
 
                         val networkItems =
                             googleMapsPrefs.networkMapLayers.value.mapNotNull { networkString ->
@@ -550,7 +557,7 @@ class MapViewModel(
         }
     }
 
-    private suspend fun copyFileToInternalStorage(uri: Uri, fileName: String): Uri? = withContext(Dispatchers.IO) {
+    private suspend fun copyFileToInternalStorage(uri: Uri, fileName: String): Uri? = withContext(dispatchers.io) {
         try {
             val inputStream = application.contentResolver.openInputStream(uri)
             val directory = File(application.filesDir, "map_layers")
@@ -621,7 +628,7 @@ class MapViewModel(
     }
 
     private suspend fun deleteFileToInternalStorage(uri: Uri) {
-        withContext(Dispatchers.IO) {
+        withContext(dispatchers.io) {
             try {
                 val file = uri.toFile()
                 if (file.exists()) {
@@ -636,11 +643,10 @@ class MapViewModel(
     @Suppress("Recycle")
     suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
         val uriToLoad = layerItem.uri ?: return null
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatchers.io) {
             try {
                 if (layerItem.isNetwork && (uriToLoad.scheme == "http" || uriToLoad.scheme == "https")) {
-                    val url = java.net.URL(uriToLoad.toString())
-                    java.io.BufferedInputStream(url.openStream())
+                    httpClient.get(uriToLoad.toString()).bodyAsChannel().toInputStream()
                 } else {
                     application.contentResolver.openInputStream(uriToLoad)
                 }

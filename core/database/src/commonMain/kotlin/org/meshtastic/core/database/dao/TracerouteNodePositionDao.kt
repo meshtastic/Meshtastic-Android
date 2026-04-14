@@ -17,9 +17,8 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room3.Dao
-import androidx.room3.Insert
-import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
+import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
 
@@ -32,6 +31,5 @@ interface TracerouteNodePositionDao {
     @Query("DELETE FROM traceroute_node_position WHERE log_uuid = :logUuid")
     suspend fun deleteByLogUuid(logUuid: String)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(entities: List<TracerouteNodePositionEntity>)
+    @Upsert suspend fun insertAll(entities: List<TracerouteNodePositionEntity>)
 }

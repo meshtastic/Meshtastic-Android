@@ -19,6 +19,8 @@ package org.meshtastic.desktop.di
 // Generated Koin module extensions from core KMP modules
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.java.Java
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -89,6 +91,9 @@ import org.meshtastic.feature.messaging.di.module as featureMessagingModule
 import org.meshtastic.feature.node.di.module as featureNodeModule
 import org.meshtastic.feature.settings.di.module as featureSettingsModule
 import org.meshtastic.feature.wifiprovision.di.module as featureWifiProvisionModule
+
+private const val HTTP_TIMEOUT_MS = 30_000L
+private const val MAX_RETRIES = 3
 
 /**
  * Koin module for the Desktop target.
@@ -178,6 +183,15 @@ private fun desktopPlatformStubsModule() = module {
     single<HttpClient> {
         HttpClient(Java) {
             install(ContentNegotiation) { json(get<Json>()) }
+            install(HttpTimeout) {
+                requestTimeoutMillis = HTTP_TIMEOUT_MS
+                connectTimeoutMillis = HTTP_TIMEOUT_MS
+                socketTimeoutMillis = HTTP_TIMEOUT_MS
+            }
+            install(HttpRequestRetry) {
+                retryOnServerErrors(maxRetries = MAX_RETRIES)
+                exponentialDelay()
+            }
             if (DesktopBuildConfig.IS_DEBUG) {
                 install(Logging) {
                     logger = KermitHttpLogger

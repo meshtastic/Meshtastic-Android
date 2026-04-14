@@ -42,7 +42,6 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.jetbrains.navigation3.ui)
-            implementation(libs.jetbrains.navigationevent.compose)
             implementation(libs.androidx.paging.common)
             implementation(libs.androidx.paging.compose)
 

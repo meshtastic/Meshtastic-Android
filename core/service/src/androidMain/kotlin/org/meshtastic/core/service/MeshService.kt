@@ -25,11 +25,11 @@ import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import org.koin.android.ext.android.inject
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.util.toRemoteExceptions
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.MeshUser
@@ -84,8 +84,10 @@ class MeshService : Service() {
 
     private val router: MeshRouter by inject()
 
+    private val dispatchers: CoroutineDispatchers by inject()
+
     private val serviceJob = Job()
-    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+    private val serviceScope by lazy { CoroutineScope(dispatchers.io + serviceJob) }
 
     private var isServiceInitialized = false
 

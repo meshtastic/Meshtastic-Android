@@ -21,11 +21,11 @@ import android.content.Context
 import android.content.Intent
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.ServiceRepository
 
@@ -41,7 +41,9 @@ class ReactionReceiver :
 
     private val serviceRepository: ServiceRepository by inject()
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val dispatchers: CoroutineDispatchers by inject()
+
+    private val scope by lazy { CoroutineScope(SupervisorJob() + dispatchers.io) }
 
     @Suppress("TooGenericExceptionCaught", "ReturnCount")
     override fun onReceive(context: Context, intent: Intent) {
