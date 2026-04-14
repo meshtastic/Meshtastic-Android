@@ -24,8 +24,6 @@ import kotlinx.cinterop.ptr
 import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
-import platform.CoreCrypto.CC_SHA256
-import platform.CoreCrypto.CC_SHA256_DIGEST_LENGTH
 import platform.zlib.Z_BUF_ERROR
 import platform.zlib.Z_OK
 import platform.zlib.compress
@@ -103,22 +101,5 @@ internal actual object ZlibCodec {
             if (success != null) return success
         }
         return null
-    }
-}
-
-internal actual object CryptoCodec {
-    @OptIn(ExperimentalForeignApi::class)
-    actual fun sha256Prefix8(data: ByteArray): ByteArray {
-        val digest = ByteArray(CC_SHA256_DIGEST_LENGTH)
-        if (data.isNotEmpty()) {
-            data.usePinned { dataPin ->
-                digest.usePinned { digestPin ->
-                    CC_SHA256(dataPin.addressOf(0), data.size.toUInt(), digestPin.addressOf(0).reinterpret())
-                }
-            }
-        } else {
-            digest.usePinned { digestPin -> CC_SHA256(null, 0u, digestPin.addressOf(0).reinterpret()) }
-        }
-        return digest.copyOf(8)
     }
 }

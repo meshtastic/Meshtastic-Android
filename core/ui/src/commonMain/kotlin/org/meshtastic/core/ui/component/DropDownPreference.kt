@@ -62,12 +62,13 @@ fun <T : Enum<T>> DropDownPreference(
             enumEntriesOf(selectedItem).filter { it.name != "UNRECOGNIZED" && !it.isDeprecatedEnumEntry() }
         }
 
-    val items = enumConstants.map {
-        val label = itemLabel?.invoke(it) ?: it.name
-        val icon = itemIcon?.invoke(it)
-        val color = itemColor?.invoke(it)
-        DropDownItem(it, label, icon, color)
-    }
+    val items =
+        enumConstants.map {
+            val label = itemLabel?.invoke(it) ?: it.name
+            val icon = itemIcon?.invoke(it)
+            val color = itemColor?.invoke(it)
+            DropDownItem(it, label, icon, color)
+        }
 
     DropDownPreference(
         title = title,

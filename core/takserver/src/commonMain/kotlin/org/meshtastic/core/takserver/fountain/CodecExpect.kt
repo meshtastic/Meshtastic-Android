@@ -16,12 +16,16 @@
  */
 package org.meshtastic.core.takserver.fountain
 
+import okio.ByteString.Companion.toByteString
+
 internal expect object ZlibCodec {
     fun compress(data: ByteArray): ByteArray?
 
     fun decompress(data: ByteArray): ByteArray?
 }
 
-internal expect object CryptoCodec {
-    fun sha256Prefix8(data: ByteArray): ByteArray
+internal object CryptoCodec {
+    private const val PREFIX_SIZE = 8
+
+    fun sha256Prefix8(data: ByteArray): ByteArray = data.toByteString().sha256().toByteArray().copyOf(PREFIX_SIZE)
 }
