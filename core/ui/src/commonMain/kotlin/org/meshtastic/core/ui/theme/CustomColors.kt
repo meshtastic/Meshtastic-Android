@@ -60,6 +60,10 @@ object GraphColors {
     val Lime = Color(0xFFCDDC39)
     val Indigo = Color(0xFF3F51B5)
     val DeepOrange = Color(0xFFFF5722)
+    val Magenta = Color(0xFFE040FB)
+    val SkyBlue = Color(0xFF03A9F4)
+    val Chartreuse = Color(0xFF76FF03)
+    val Coral = Color(0xFFFF6E40)
 }
 
 object StatusColors {

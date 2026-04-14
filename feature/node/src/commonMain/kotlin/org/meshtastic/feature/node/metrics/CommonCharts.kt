@@ -127,6 +127,8 @@ data class LegendData(
     val color: Color,
     val isLine: Boolean = false,
     val metricKey: Any? = null,
+    /** When non-null, overrides the resolved [nameRes] string in the legend label. */
+    val labelOverride: String? = null,
 )
 
 data class InfoDialogData(val titleRes: StringResource, val definitionRes: StringResource, val color: Color)
@@ -153,11 +155,12 @@ fun Legend(
     ) {
         legendData.forEachIndexed { index, data ->
             val isVisible = index !in hiddenSet
+            val label = data.labelOverride ?: stringResource(data.nameRes)
             if (onToggle != null) {
                 FilterChip(
                     selected = isVisible,
                     onClick = { onToggle(index) },
-                    label = { Text(text = stringResource(data.nameRes), style = MaterialTheme.typography.labelSmall) },
+                    label = { Text(text = label, style = MaterialTheme.typography.labelSmall) },
                     leadingIcon = { LegendIndicator(color = data.color, isLine = data.isLine) },
                     modifier = Modifier.padding(horizontal = 2.dp),
                 )
@@ -166,7 +169,7 @@ fun Legend(
                     LegendIndicator(color = data.color, isLine = data.isLine)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = stringResource(data.nameRes),
+                        text = label,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelSmall.fontSize,
                     )

@@ -148,6 +148,8 @@ open class MetricsViewModel(
                             temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
                             soil_temperature =
                             em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
+                            one_wire_temperature =
+                            em.one_wire_temperature.map { UnitConversions.celsiusToFahrenheit(it) },
                         ),
                     )
                 }
@@ -386,16 +388,22 @@ open class MetricsViewModel(
             header =
             "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\"," +
                 "\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\"," +
-                "\"soilMoisture\"\n",
+                "\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\"," +
+                "\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\"\n",
             rows = data,
             epochSeconds = { it.time.toLong() },
         ) { t ->
             val em = t.environment_metrics
+            val owt = em?.one_wire_temperature ?: emptyList()
             "\"${em?.temperature ?: ""}\",\"${em?.relative_humidity ?: ""}\"," +
                 "\"${em?.barometric_pressure ?: ""}\",\"${em?.gas_resistance ?: ""}\"," +
                 "\"${em?.iaq ?: ""}\",\"${em?.wind_speed ?: ""}\"," +
                 "\"${em?.wind_direction ?: ""}\",\"${em?.soil_temperature ?: ""}\"," +
-                "\"${em?.soil_moisture ?: ""}\""
+                "\"${em?.soil_moisture ?: ""}\"," +
+                "\"${owt.getOrNull(0) ?: ""}\",\"${owt.getOrNull(1) ?: ""}\"," +
+                "\"${owt.getOrNull(2) ?: ""}\",\"${owt.getOrNull(3) ?: ""}\"," +
+                "\"${owt.getOrNull(4) ?: ""}\",\"${owt.getOrNull(5) ?: ""}\"," +
+                "\"${owt.getOrNull(6) ?: ""}\",\"${owt.getOrNull(7) ?: ""}\""
         }
     }
 

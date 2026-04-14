@@ -42,6 +42,7 @@ import org.meshtastic.core.resources.baro_pressure
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.one_wire_temperature
 import org.meshtastic.core.resources.radiation
 import org.meshtastic.core.resources.soil_moisture
 import org.meshtastic.core.resources.soil_temperature
@@ -112,6 +113,27 @@ private val LEGEND_DATA_3 =
         ),
     )
 
+private val LEGEND_DATA_4 =
+    listOf(
+        Environment.ONE_WIRE_TEMP_1,
+        Environment.ONE_WIRE_TEMP_2,
+        Environment.ONE_WIRE_TEMP_3,
+        Environment.ONE_WIRE_TEMP_4,
+        Environment.ONE_WIRE_TEMP_5,
+        Environment.ONE_WIRE_TEMP_6,
+        Environment.ONE_WIRE_TEMP_7,
+        Environment.ONE_WIRE_TEMP_8,
+    )
+        .mapIndexed { index, entry ->
+            LegendData(
+                nameRes = Res.string.one_wire_temperature,
+                labelOverride = "1-Wire Temp ${index + 1}",
+                color = entry.color,
+                isLine = true,
+                metricKey = entry,
+            )
+        }
+
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun EnvironmentMetricsChart(
@@ -132,7 +154,7 @@ fun EnvironmentMetricsChart(
         val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
         val allLegendData =
-            (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3).filter {
+            (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3 + LEGEND_DATA_4).filter {
                 graphData.shouldPlot[(it.metricKey as? Environment)?.ordinal ?: 0]
             }
 
@@ -143,7 +165,7 @@ fun EnvironmentMetricsChart(
                 hiddenIndices.mapNotNull { allLegendData.getOrNull(it)?.metricKey as? Environment }.toSet()
             }
 
-        val colorToLabel = allLegendData.associate { it.color to stringResource(it.nameRes) }
+        val colorToLabel = allLegendData.associate { it.color to (it.labelOverride ?: stringResource(it.nameRes)) }
 
         val showPressure =
             shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && Environment.BAROMETRIC_PRESSURE !in hiddenMetrics
