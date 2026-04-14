@@ -53,6 +53,14 @@ on:
         required: false
       INTERNAL_BUILDS_HOST_PAT:
         required: false
+      CONVEYOR_SIGNING_KEY:
+        required: false
+      APPLE_TEAM_ID:
+        required: false
+      APPLE_ID:
+        required: false
+      APPLE_APP_SPECIFIC_PASSWORD:
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.tag_name }}
@@ -252,13 +260,9 @@ jobs:
 
   release-desktop:
     if: ${{ inputs.build_desktop }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-24.04
     needs: [prepare-build-info]
     environment: Release
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -277,34 +281,48 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'false'
 
-      - name: Install dependencies for AppImage
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libfuse2
-
-      - name: Package Native Distributions
+      - name: Build Desktop JAR
         env:
           ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          APPIMAGE_EXTRACT_AND_RUN: 1
-        run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS -PaboutLibraries.release=true --no-daemon
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: ./gradlew :desktop:jar :desktop:writeConveyorConfig -PaboutLibraries.release=true --no-daemon
 
-      - name: List Desktop Binaries
-        if: runner.os == 'Linux'
-        run: ls -R desktop/build/compose/binaries/main-release
+      - name: Package with Conveyor
+        uses: hydraulic-software/conveyor/actions/build@v22.0
+        with:
+          command: make copied-site
+          signing_key: ${{ secrets.CONVEYOR_SIGNING_KEY }}
+          agree_to_license: 1
+          extra_flags: -f desktop/ci.conveyor.conf -o desktop/build/conveyor-output
+        env:
+          APPLE_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_NOTARIZATION_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
       - name: Upload Desktop Artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: desktop-${{ runner.os }}-${{ runner.arch }}
+          name: desktop-all-platforms
           path: |
-            desktop/build/compose/binaries/main-release/*/*.dmg
-            desktop/build/compose/binaries/main-release/*/*.msi
-            desktop/build/compose/binaries/main-release/*/*.exe
-            desktop/build/compose/binaries/main-release/*/*.deb
-            desktop/build/compose/binaries/main-release/*/*.rpm
-            desktop/build/compose/binaries/main-release/*/*.AppImage
+            desktop/build/conveyor-output/*.zip
+            desktop/build/conveyor-output/*.tar.gz
+            desktop/build/conveyor-output/*.msix
+            desktop/build/conveyor-output/*.exe
+            desktop/build/conveyor-output/*.deb
+            desktop/build/conveyor-output/debian/*.deb
+            desktop/build/conveyor-output/download.html
           retention-days: 1
           if-no-files-found: ignore
+
+      - name: Attest Desktop provenance
+        if: success()
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            desktop/build/conveyor-output/*.zip
+            desktop/build/conveyor-output/*.tar.gz
+            desktop/build/conveyor-output/*.msix
 
   github-release:
     if: ${{ !cancelled() && !failure() }}

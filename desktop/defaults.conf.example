@@ -1,0 +1,11 @@
+// Local Conveyor defaults — copy to defaults.conf and fill in your values.
+// This file is checked in as a template; defaults.conf is gitignored.
+conveyor.billing-email = "you@example.com"
+
+// Uncomment for real code signing:
+// app.signing-key = "<your-root-key>"
+// app.mac.notarization {
+//     team-id = "YOUR_TEAM_ID"
+//     apple-id = "you@example.com"
+//     app-specific-password = ${env.APPLE_ASP}
+// }

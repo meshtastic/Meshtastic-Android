@@ -32,6 +32,7 @@ plugins {
     alias(libs.plugins.meshtastic.koin)
     id("meshtastic.kover")
     alias(libs.plugins.aboutlibraries)
+    id("dev.hydraulic.conveyor") version "2.0"
 }
 
 // ── Version resolution (mirrors app/build.gradle.kts) ────────────────────────
@@ -51,6 +52,11 @@ val resolvedVersionName: String =
 val resolvedIsDebug: Boolean = project.findProperty("desktop.release")?.toString()?.toBoolean()?.not() ?: true
 val resolvedMinFwVersion: String = configProperties.getProperty("MIN_FW_VERSION") ?: ""
 val resolvedAbsMinFwVersion: String = configProperties.getProperty("ABS_MIN_FW_VERSION") ?: ""
+
+// Set project version for the Conveyor Gradle plugin (requires strict semver X.Y.Z)
+val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(resolvedVersionName)?.value ?: "1.0.0"
+version = sanitizedVersion
+group = "org.meshtastic"
 
 // ── Generate DesktopBuildConfig ──────────────────────────────────────────────
 // Mirrors AGP's BuildConfig for Android so the desktop runtime has access to the
@@ -209,9 +215,7 @@ compose.desktop {
                 else -> targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
             }
 
-            // Reuse the resolved version from the top of this script (mirrors app/build.gradle.kts).
-            // Native installers require strict numeric semantic versions (X.Y.Z) without suffixes.
-            val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(resolvedVersionName)?.value ?: "1.0.0"
+            // Reuse the project-level version for native installers.
             packageVersion = sanitizedVersion
 
             description = "Meshtastic Desktop Application"

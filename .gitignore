@@ -55,3 +55,8 @@ wireless-install.sh
 firebase-debug.log
 .agent_plans/
 .agent_refs/
+
+# Conveyor packaging (desktop)
+desktop/defaults.conf
+desktop/generated.conveyor.conf
+desktop/build/conveyor-output/
