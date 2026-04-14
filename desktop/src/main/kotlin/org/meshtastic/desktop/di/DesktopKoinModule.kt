@@ -14,18 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("ktlint:standard:no-unused-imports") // Koin KSP-generated extension functions require aliased imports
+@file:Suppress(
+    "ktlint:standard:no-unused-imports",
+) // Koin K2 compiler plugin generates aliased module extensions referenced in desktopModule()
 
 package org.meshtastic.desktop.di
 
 // Generated Koin module extensions from core KMP modules
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.java.Java
+import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.url
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
@@ -183,6 +187,7 @@ private fun desktopPlatformStubsModule() = module {
     single<HttpClient> {
         HttpClient(Java) {
             install(ContentNegotiation) { json(get<Json>()) }
+            install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
             install(HttpTimeout) {
                 requestTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
                 connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
@@ -195,7 +200,7 @@ private fun desktopPlatformStubsModule() = module {
             if (DesktopBuildConfig.IS_DEBUG) {
                 install(Logging) {
                     logger = KermitHttpLogger
-                    level = LogLevel.HEADERS
+                    level = LogLevel.BODY
                 }
             }
         }

@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
@@ -98,7 +99,7 @@ class DeviceHardwareRepositoryImpl(
         }
 
         // 2. Fetch from remote API
-        runCatching {
+        safeCatching {
             Logger.d { "DeviceHardwareRepository: fetching device hardware from remote API" }
             val remoteHardware = remoteDataSource.getAllDeviceHardware()
             Logger.d {
@@ -157,7 +158,7 @@ class DeviceHardwareRepositoryImpl(
         hwModel: Int,
         target: String?,
         quirks: List<BootloaderOtaQuirk>,
-    ): Result<DeviceHardware?> = runCatching {
+    ): Result<DeviceHardware?> = safeCatching {
         Logger.d { "DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=$hwModel" }
         val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
         Logger.d {

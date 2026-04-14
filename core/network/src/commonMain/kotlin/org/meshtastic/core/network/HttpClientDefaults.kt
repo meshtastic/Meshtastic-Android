@@ -28,4 +28,7 @@ object HttpClientDefaults {
 
     /** Maximum number of automatic retries on server errors (5xx). */
     const val MAX_RETRIES = 3
+
+    /** Base URL for the Meshtastic public API. Installed via the `DefaultRequest` plugin. */
+    const val API_BASE_URL = "https://api.meshtastic.org/"
 }

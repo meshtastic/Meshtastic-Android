@@ -54,16 +54,18 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
 
                     // Logging
                     implementation(libs.library("kermit"))
+
+                    // @Preview available in commonMain since CMP 1.11 (androidx.compose.ui.tooling.preview.Preview)
+                    // org.jetbrains.compose.ui.tooling.preview.Preview is deprecated in 1.11
+                    implementation(libs.library("compose-multiplatform-ui-tooling-preview"))
                 }
 
                 sourceSets.getByName("androidMain").dependencies {
                     // Common Android Compose dependencies
                     implementation(libs.library("accompanist-permissions"))
                     implementation(libs.library("androidx-activity-compose"))
-                    implementation(libs.library("compose-multiplatform-material3"))
 
                     implementation(libs.library("compose-multiplatform-ui"))
-                    implementation(libs.library("compose-multiplatform-ui-tooling-preview"))
                 }
 
                 sourceSets.getByName("commonTest").dependencies { implementation(project(":core:testing")) }

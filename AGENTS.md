@@ -25,11 +25,16 @@ You are an expert Android and Kotlin Multiplatform (KMP) engineer working on Mes
 - **Workspace Bootstrap (MUST run first):** Before executing any Gradle task in a new workspace, agents MUST automatically:
   1. **Find the Android SDK** — `ANDROID_HOME` is often unset in agent worktrees. Probe `~/Library/Android/sdk`, `~/Android/Sdk`, and `/opt/android-sdk`. Export the first one found. If none exist, ask the user.
   2. **Init the proto submodule** — Run `git submodule update --init`. The `core/proto/src/main/proto` submodule contains Protobuf definitions required for builds.
+  3. **Init secrets** — If `local.properties` does not exist, copy `secrets.defaults.properties` to `local.properties`. Without this the `google` flavor build fails.
 - **Think First:** Reason through the problem before writing code. For complex KMP tasks involving multiple modules or source sets, outline your approach step-by-step before executing.
 - **Plan Before Execution:** Use the git-ignored `.agent_plans/` directory to write markdown implementation plans (`plan.md`) and Mermaid diagrams (`.mmd`) for complex refactors before modifying code.
 - **Atomic Execution:** Follow your plan step-by-step. Do not jump ahead. Use TDD where feasible (write `commonTest` fakes first).
 - **Baseline Verification:** Always instruct the user (or use your CLI tools) to run the baseline check before finishing:
-  `./gradlew clean spotlessCheck spotlessApply detekt assembleDebug test allTests`
+  ```
+  ./gradlew spotlessCheck spotlessApply detekt assembleDebug test allTests
+  ```
+  > **Why both `test` and `allTests`?** In KMP modules, `test` is ambiguous and Gradle silently skips them. `allTests` is the KMP lifecycle task that covers KMP modules. Conversely, `allTests` does NOT cover pure-Android modules (`:app`, `:core:api`), so both tasks are required.
+  > For KMP cross-platform compilation, also run `./gradlew kmpSmokeCompile` (compiles all KMP modules for JVM + iOS Simulator — used by CI's `lint-check` job).
 </process>
 
 <agent_tools>
@@ -57,9 +62,10 @@ Do NOT duplicate content into agent-specific files. When you modify architecture
 
 <rules>
 - **No Lazy Coding:** DO NOT use placeholders like `// ... existing code ...`. Always provide complete, valid code blocks for the sections you modify to ensure correct diff application.
-- **No Framework Bleed:** NEVER import `java.*` or `android.*` in `commonMain`.
-- **Koin Annotations:** Use `@Single`, `@Factory`, and `@KoinViewModel` inside `commonMain` instead of manual constructor trees. Do not enable A1 module compile safety.
-- **CMP Over Android:** Use `compose-multiplatform` constraints (e.g., no float formatting in `stringResource`).
+- **No Framework Bleed:** NEVER import `java.*` or `android.*` in `commonMain`. Use KMP equivalents: `Okio` for `java.io.*`, `kotlinx.coroutines.sync.Mutex` for `java.util.concurrent.locks.*`, `atomicfu` or Mutex-guarded `mutableMapOf()` for `ConcurrentHashMap`. Use `org.meshtastic.core.common.util.ioDispatcher` instead of `Dispatchers.IO` directly.
+- **Koin Annotations:** Use `@Single`, `@Factory`, and `@KoinViewModel` inside `commonMain` instead of manual constructor trees. Do not enable A1 module compile safety — A3 full-graph validation (`VerifyModule`) is the correct approach because interfaces and implementations live in separate modules. Always register new feature modules in **both** `AppKoinModule.kt` and `DesktopKoinModule.kt`; they are not auto-activated.
+- **CMP Over Android:** Use `compose-multiplatform` constraints. `stringResource` only supports `%N$s` and `%N$d` — pre-format floats with `NumberFormatter.format()` from `core:common` and pass as `%N$s`. In ViewModels/coroutines use `getStringSuspend(Res.string.key)`; never blocking `getString()`. Always use `MeshtasticNavDisplay` (not raw `NavDisplay`) as the navigation host, and `NavigationBackHandler` (not Android's `BackHandler`) for back gestures in shared code.
+- **ProGuard:** When adding a reflection-heavy dependency, add keep rules to **both** `app/proguard-rules.pro` and `desktop/proguard-rules.pro` and verify release builds.
 - **Always Check Docs:** If unsure about an abstraction, search `core:ui/commonMain` or `core:navigation/commonMain` before assuming it doesn't exist.
 - **Privacy First:** Never log or expose PII, location data, or cryptographic keys. Meshtastic is used for sensitive off-grid communication — treat all user data with extreme caution.
 - **Dependency Discipline:** Never add a library without first checking `libs.versions.toml` and justifying its inclusion against the project's size and complexity goals. Prefer removing dependencies over adding them.

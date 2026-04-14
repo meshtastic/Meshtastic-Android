@@ -124,7 +124,7 @@ fun ChannelScreen(
     val modemPresetName by
         remember(channels) { mutableStateOf(Channel(loraConfig = channels.lora_config ?: Config.LoRaConfig()).name) }
 
-    var showResetDialog by remember { mutableStateOf(false) }
+    var showResetDialog by rememberSaveable { mutableStateOf(false) }
 
     var shouldAddChannelsState by remember { mutableStateOf(true) }
 
@@ -211,7 +211,7 @@ fun ChannelScreen(
 
     requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { viewModel.clearRequestChannelUrl() }) }
 
-    var showShareDialog by remember { mutableStateOf(false) }
+    var showShareDialog by rememberSaveable { mutableStateOf(false) }
 
     if (showShareDialog) {
         ChannelShareDialog(

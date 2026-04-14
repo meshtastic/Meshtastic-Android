@@ -15,6 +15,13 @@ This skill covers dependency injection (Koin Annotations 4.2.x) and JetBrains Na
 - **A1 Module Compile Safety:** Do **not** enable A1 `compileSafety`. We rely on Koin's A3 full-graph validation (`startKoin` / `VerifyModule`) because of our decoupled Clean Architecture design (interfaces in one module, implemented in another).
 - **Default Parameters:** Do **not** expect Koin to inject default parameters automatically. The K2 plugin's `skipDefaultValues = true` behavior skips parameters with default Kotlin values.
 
+### Koin Startup Pattern (K2 Compiler Plugin)
+The project uses the **K2 Compiler Plugin** (`koin-compiler-plugin`, not KSP). The correct canonical startup for this path is:
+```kotlin
+startKoin { modules(AppKoinModule().module()) }
+```
+Do **not** use `@KoinApplication` — that annotation is part of the **KSP annotations path** (`koin-ksp-compiler`) and generates a `startKoin()` extension via KSP. It is incompatible with the K2 plugin approach. The two paths are mutually exclusive; the project has deliberately chosen K2 for compile-time wiring without KSP overhead.
+
 ## Navigation 3
 
 ### Guidelines

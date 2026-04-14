@@ -51,6 +51,7 @@ import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.disk.DiskCache
 import coil3.memory.MemoryCache
+import coil3.network.DeDupeConcurrentRequestStrategy
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
@@ -296,7 +297,12 @@ private fun CoilImageLoaderSetup() {
         val cacheDir = desktopDataDir() + "/image_cache_v3"
         ImageLoader.Builder(context)
             .components {
-                add(KtorNetworkFetcherFactory(httpClient = httpClient))
+                add(
+                    KtorNetworkFetcherFactory(
+                        httpClient = httpClient,
+                        concurrentRequestStrategy = DeDupeConcurrentRequestStrategy(),
+                    ),
+                )
                 // Render SVGs to a bitmap on Desktop to avoid Skiko vector rendering artifacts
                 // that show up as solid/black hardware images.
                 add(SvgDecoder.Factory(renderToBitmap = true))

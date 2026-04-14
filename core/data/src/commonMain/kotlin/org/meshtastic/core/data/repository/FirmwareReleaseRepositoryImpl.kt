@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
 import org.meshtastic.core.data.datasource.FirmwareReleaseLocalDataSource
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -97,7 +98,7 @@ open class FirmwareReleaseRepositoryImpl(
      */
     private suspend fun updateCacheFromSources() {
         val remoteFetchSuccess =
-            runCatching {
+            safeCatching {
                 Logger.d { "Fetching fresh firmware releases from remote API." }
                 val networkReleases = remoteDataSource.getFirmwareReleases()
 
@@ -110,7 +111,7 @@ open class FirmwareReleaseRepositoryImpl(
         // If remote fetch failed, try the JSON fallback as a last resort.
         if (!remoteFetchSuccess) {
             Logger.w { "Remote fetch failed, attempting to cache from bundled JSON." }
-            runCatching {
+            safeCatching {
                 val jsonReleases = jsonDataSource.loadFirmwareReleaseFromJsonAsset()
                 localDataSource.insertFirmwareReleases(jsonReleases.releases.stable, FirmwareReleaseType.STABLE)
                 localDataSource.insertFirmwareReleases(jsonReleases.releases.alpha, FirmwareReleaseType.ALPHA)

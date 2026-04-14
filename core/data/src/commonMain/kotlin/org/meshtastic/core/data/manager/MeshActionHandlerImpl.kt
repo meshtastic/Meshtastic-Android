@@ -26,6 +26,7 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MessageStatus
@@ -93,7 +94,7 @@ class MeshActionHandlerImpl(
                 is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
                 is ServiceAction.SendContact -> {
                     val accepted =
-                        runCatching {
+                        safeCatching {
                             commandSender.sendAdminAwait(myNodeNum) { AdminMessage(add_contact = action.contact) }
                         }
                             .getOrDefault(false)

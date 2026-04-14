@@ -35,14 +35,14 @@ interface ApiService {
 /**
  * Ktor-based [ApiService] implementation.
  *
+ * Uses relative paths — the base URL is set via the `DefaultRequest` plugin in the platform Koin modules.
+ *
  * Registered with `binds = []` to prevent Koin from auto-binding to [ApiService]; host modules (`app`, `desktop`)
  * provide their own explicit `ApiService` binding to allow platform-specific `HttpClient` engines.
  */
 @Single(binds = [])
 class ApiServiceImpl(private val client: HttpClient) : ApiService {
-    override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> =
-        client.get("https://api.meshtastic.org/resource/deviceHardware").body()
+    override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = client.get("resource/deviceHardware").body()
 
-    override suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
-        client.get("https://api.meshtastic.org/github/firmware/list").body()
+    override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = client.get("github/firmware/list").body()
 }

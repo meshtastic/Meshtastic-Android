@@ -104,7 +104,11 @@ fun desktopPlatformModule() = module {
     }
 
     // -- Process Lifecycle (stays RESUMED forever on desktop) --
-    single(named("ProcessLifecycle")) { DesktopProcessLifecycleOwner().lifecycle }
+    // Store the owner in a val so it stays strongly reachable for the process lifetime.
+    // LifecycleRegistry may hold only a weak reference to its owner; without this the owner
+    // could be GC'd before the process exits, silently breaking lifecycle-aware components.
+    val processLifecycleOwner = DesktopProcessLifecycleOwner()
+    single(named("ProcessLifecycle")) { processLifecycleOwner.lifecycle }
 }
 
 /** Named [DataStore]<[Preferences]> instances for all preference domains. */

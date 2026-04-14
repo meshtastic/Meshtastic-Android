@@ -123,9 +123,12 @@ class FirmwareUpdateViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        // viewModelScope is already cancelled when onCleared() runs, so use a standalone scope
-        // for fire-and-forget cleanup of temporary firmware files.
-        kotlinx.coroutines.CoroutineScope(NonCancellable).launch {
+        // viewModelScope is already cancelled when onCleared() runs, so launch cleanup in a
+        // standalone scope. SupervisorJob prevents the coroutine from propagating failures to a
+        // shared parent, and NonCancellable on the launch keeps cleanup running even if the scope
+        // is cancelled concurrently.
+        @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+        kotlinx.coroutines.GlobalScope.launch(NonCancellable) {
             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
         }
     }

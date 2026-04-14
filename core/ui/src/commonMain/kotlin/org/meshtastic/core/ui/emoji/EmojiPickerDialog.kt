@@ -59,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -117,8 +118,8 @@ fun EmojiPickerDialog(
     onConfirm: (String) -> Unit,
 ) {
     val viewModel: EmojiPickerViewModel = koinViewModel()
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedCategoryIndex by remember { mutableStateOf(0) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var selectedCategoryIndex by rememberSaveable { mutableStateOf(0) }
 
     val recentEmojis by
         remember(viewModel.customEmojiFrequency) { derivedStateOf { parseRecents(viewModel.customEmojiFrequency) } }
@@ -427,7 +428,7 @@ private fun SectionHeader(title: String) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun EmojiCellWithSkinTone(emoji: Emoji, isSelected: Boolean, onSelect: (String) -> Unit) {
-    var showSkinTonePopup by remember { mutableStateOf(false) }
+    var showSkinTonePopup by rememberSaveable { mutableStateOf(false) }
 
     Box {
         Box(

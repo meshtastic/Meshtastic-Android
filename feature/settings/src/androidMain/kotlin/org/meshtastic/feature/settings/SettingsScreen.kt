@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -88,7 +89,7 @@ fun SettingsScreen(
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
-    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
+    var showEditDeviceProfileDialog by rememberSaveable { mutableStateOf(false) }
 
     val importConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -142,12 +143,12 @@ fun SettingsScreen(
         )
     }
 
-    var showLanguagePickerDialog by remember { mutableStateOf(false) }
+    var showLanguagePickerDialog by rememberSaveable { mutableStateOf(false) }
     if (showLanguagePickerDialog) {
         LanguagePickerDialog { showLanguagePickerDialog = false }
     }
 
-    var showThemePickerDialog by remember { mutableStateOf(false) }
+    var showThemePickerDialog by rememberSaveable { mutableStateOf(false) }
     if (showThemePickerDialog) {
         ThemePickerDialog(
             onClickTheme = { settingsViewModel.setTheme(it) },

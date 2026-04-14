@@ -39,6 +39,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import org.jetbrains.compose.resources.stringResource
@@ -75,8 +77,11 @@ fun CurrentlyConnectedInfo(
             while (bleDevice.device.isConnected) {
                 try {
                     rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
+                } catch (_: TimeoutCancellationException) {
+                    Logger.d { "RSSI read timed out" }
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
-                    // RSSI reading failures (or timeouts) are common; log as debug to avoid Crashlytics noise
                     Logger.d(e) { "Failed to read RSSI ${e.message}" }
                 }
                 delay(RSSI_DELAY.seconds)

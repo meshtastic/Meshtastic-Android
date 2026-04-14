@@ -36,6 +36,7 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT_HIDDEN
@@ -88,7 +89,7 @@ class NymeaWifiService(
      * @return The discovered device's advertised name on success.
      * @throws IllegalStateException if no device is found within [SCAN_TIMEOUT].
      */
-    suspend fun connect(address: String? = null): Result<String> = runCatching {
+    suspend fun connect(address: String? = null): Result<String> = safeCatching {
         Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=$address)…" }
 
         val device =
@@ -138,7 +139,7 @@ class NymeaWifiService(
      *
      * Sends: CMD_SCAN (4), waits for ack, then CMD_GET_NETWORKS (0).
      */
-    suspend fun scanNetworks(): Result<List<WifiNetwork>> = runCatching {
+    suspend fun scanNetworks(): Result<List<WifiNetwork>> = safeCatching {
         // Trigger scan
         sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_SCAN)))
         val scanAck = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
@@ -180,7 +181,7 @@ class NymeaWifiService(
                 NymeaConnectCommand(command = cmd, params = NymeaConnectParams(ssid = ssid, password = password)),
             )
 
-        return runCatching {
+        return safeCatching {
             sendCommand(json)
             val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
             if (response.responseCode == RESPONSE_SUCCESS) {
