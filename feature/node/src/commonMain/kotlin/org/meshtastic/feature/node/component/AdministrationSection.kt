@@ -22,20 +22,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.firmware
 import org.meshtastic.core.resources.firmware_edition
+import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.installed_firmware_version
 import org.meshtastic.core.resources.latest_alpha_firmware
 import org.meshtastic.core.resources.latest_stable_firmware
 import org.meshtastic.core.resources.remote_admin
+import org.meshtastic.core.resources.remote_shell
 import org.meshtastic.core.resources.request_metadata
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.ForkLeft
@@ -78,6 +82,17 @@ fun AdministrationSection(
                 enabled = metricsState.isLocal || node.metadata != null,
             ) {
                 onAction(NodeDetailAction.Navigate(SettingsRoute.Settings(node.num)))
+            }
+
+            if (node.capabilities.supportsRemoteShell) {
+                SectionDivider()
+
+                ListItem(
+                    text = stringResource(Res.string.remote_shell),
+                    leadingIcon = vectorResource(Res.drawable.ic_terminal),
+                ) {
+                    onAction(NodeDetailAction.Navigate(NodeDetailRoute.RemoteShell(node.num)))
+                }
             }
         }
     }
