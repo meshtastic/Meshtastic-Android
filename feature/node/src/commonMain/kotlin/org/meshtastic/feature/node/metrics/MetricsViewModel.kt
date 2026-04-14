@@ -383,27 +383,25 @@ open class MetricsViewModel(
     }
 
     fun saveEnvironmentMetricsCSV(uri: MeshtasticUri, data: List<Telemetry>) {
+        val oneWireHeaders = (1..ONE_WIRE_SENSOR_COUNT).joinToString(",") { "\"oneWireTemp$it\"" }
         exportCsv(
             uri = uri,
             header =
             "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\"," +
                 "\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\"," +
-                "\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\"," +
-                "\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\"\n",
+                "\"soilMoisture\",$oneWireHeaders\n",
             rows = data,
             epochSeconds = { it.time.toLong() },
         ) { t ->
             val em = t.environment_metrics
             val owt = em?.one_wire_temperature ?: emptyList()
+            val oneWireValues =
+                (0 until ONE_WIRE_SENSOR_COUNT).joinToString(",") { i -> "\"${owt.getOrNull(i) ?: ""}\"" }
             "\"${em?.temperature ?: ""}\",\"${em?.relative_humidity ?: ""}\"," +
                 "\"${em?.barometric_pressure ?: ""}\",\"${em?.gas_resistance ?: ""}\"," +
                 "\"${em?.iaq ?: ""}\",\"${em?.wind_speed ?: ""}\"," +
                 "\"${em?.wind_direction ?: ""}\",\"${em?.soil_temperature ?: ""}\"," +
-                "\"${em?.soil_moisture ?: ""}\"," +
-                "\"${owt.getOrNull(0) ?: ""}\",\"${owt.getOrNull(1) ?: ""}\"," +
-                "\"${owt.getOrNull(2) ?: ""}\",\"${owt.getOrNull(3) ?: ""}\"," +
-                "\"${owt.getOrNull(4) ?: ""}\",\"${owt.getOrNull(5) ?: ""}\"," +
-                "\"${owt.getOrNull(6) ?: ""}\",\"${owt.getOrNull(7) ?: ""}\""
+                "\"${em?.soil_moisture ?: ""}\",$oneWireValues"
         }
     }
 
@@ -465,4 +463,8 @@ open class MetricsViewModel(
     }
 
     protected fun decodeBase64(base64: String): ByteArray = base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
+
+    companion object {
+        private const val ONE_WIRE_SENSOR_COUNT = 8
+    }
 }
