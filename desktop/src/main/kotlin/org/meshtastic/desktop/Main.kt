@@ -58,8 +58,10 @@ import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
-import org.koin.core.KoinApplication
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.database.desktopDataDir
@@ -100,12 +102,14 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     Logger.i { "Meshtastic Desktop — Starting" }
 
-    val koinApp = remember { startKoin { modules(desktopPlatformModule(), desktopModule()) } }
-    val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+    remember { startKoin { modules(desktopPlatformModule(), desktopModule()) } }
+    DisposableEffect(Unit) { onDispose { stopKoin() } }
+
+    val uiViewModel = koinViewModel<UIViewModel>()
 
     DeepLinkHandler(args, uiViewModel)
-    MeshServiceLifecycle(koinApp)
-    ThemeAndLocaleProvider(koinApp, uiViewModel)
+    MeshServiceLifecycle()
+    ThemeAndLocaleProvider(uiViewModel)
 }
 
 // ----- Deep link handling -----
@@ -141,8 +145,8 @@ private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: U
 
 /** Starts [MeshServiceOrchestrator] on composition and stops it on disposal. */
 @Composable
-private fun MeshServiceLifecycle(koinApp: KoinApplication) {
-    val meshServiceController = remember { koinApp.koin.get<MeshServiceOrchestrator>() }
+private fun MeshServiceLifecycle() {
+    val meshServiceController = koinInject<MeshServiceOrchestrator>()
     DisposableEffect(Unit) {
         meshServiceController.start()
         onDispose { meshServiceController.stop() }
@@ -154,9 +158,9 @@ private fun MeshServiceLifecycle(koinApp: KoinApplication) {
 /** Resolves the user's theme/locale preferences and renders the full application UI. */
 @Composable
 @OptIn(ExperimentalCoilApi::class)
-private fun ApplicationScope.ThemeAndLocaleProvider(koinApp: KoinApplication, uiViewModel: UIViewModel) {
+private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
     val systemLocale = remember { Locale.getDefault() }
-    val uiPrefs = remember { koinApp.koin.get<UiPrefs>() }
+    val uiPrefs = koinInject<UiPrefs>()
     val themePref by uiPrefs.theme.collectAsState(initial = -1)
     val localePref by uiPrefs.locale.collectAsState(initial = "")
 
@@ -169,7 +173,7 @@ private fun ApplicationScope.ThemeAndLocaleProvider(koinApp: KoinApplication, ui
             else -> isSystemInDarkTheme()
         }
 
-    MeshtasticDesktopApp(koinApp, uiViewModel, isDarkTheme)
+    MeshtasticDesktopApp(uiViewModel, isDarkTheme)
 }
 
 // ----- Application chrome (tray, window, navigation) -----
@@ -177,11 +181,7 @@ private fun ApplicationScope.ThemeAndLocaleProvider(koinApp: KoinApplication, ui
 /** Composes the system tray, window, and Coil image loader. */
 @Composable
 @OptIn(ExperimentalCoilApi::class)
-private fun ApplicationScope.MeshtasticDesktopApp(
-    koinApp: KoinApplication,
-    uiViewModel: UIViewModel,
-    isDarkTheme: Boolean,
-) {
+private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDarkTheme: Boolean) {
     var isAppVisible by remember { mutableStateOf(true) }
     var isWindowReady by remember { mutableStateOf(false) }
     val trayState = rememberTrayState()
@@ -190,8 +190,8 @@ private fun ApplicationScope.MeshtasticDesktopApp(
     val trayIcon =
         svgPainterResource(if (isSystemInDarkTheme()) "tray_icon_white.svg" else "tray_icon_black.svg", Density(1f))
 
-    val notificationManager = remember { koinApp.koin.get<DesktopNotificationManager>() }
-    val desktopPrefs = remember { koinApp.koin.get<DesktopPreferencesDataSource>() }
+    val notificationManager = koinInject<DesktopNotificationManager>()
+    val desktopPrefs = koinInject<DesktopPreferencesDataSource>()
     val windowState = rememberWindowState()
 
     LaunchedEffect(Unit) {
@@ -212,7 +212,7 @@ private fun ApplicationScope.MeshtasticDesktopApp(
     )
 
     if (isWindowReady && isAppVisible) {
-        MeshtasticWindow(koinApp, uiViewModel, isDarkTheme, appIcon, windowState) { isAppVisible = false }
+        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState) { isAppVisible = false }
     }
 }
 
@@ -258,7 +258,6 @@ private fun WindowBoundsManager(
 @Composable
 @OptIn(ExperimentalCoilApi::class)
 private fun ApplicationScope.MeshtasticWindow(
-    koinApp: KoinApplication,
     uiViewModel: UIViewModel,
     isDarkTheme: Boolean,
     appIcon: Painter,
@@ -274,7 +273,7 @@ private fun ApplicationScope.MeshtasticWindow(
         state = windowState,
         onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
     ) {
-        CoilImageLoaderSetup(koinApp)
+        CoilImageLoaderSetup()
         AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
     }
 }
@@ -282,9 +281,9 @@ private fun ApplicationScope.MeshtasticWindow(
 /** Configures the Coil singleton [ImageLoader] with Ktor networking, SVG decoding, and caching. */
 @Composable
 @OptIn(ExperimentalCoilApi::class)
-private fun CoilImageLoaderSetup(koinApp: KoinApplication) {
-    val httpClient = remember { koinApp.koin.get<HttpClient>() }
-    val buildConfigProvider = remember { koinApp.koin.get<BuildConfigProvider>() }
+private fun CoilImageLoaderSetup() {
+    val httpClient = koinInject<HttpClient>()
+    val buildConfigProvider = koinInject<BuildConfigProvider>()
 
     setSingletonImageLoaderFactory { context ->
         val cacheDir = desktopDataDir() + "/image_cache_v3"
