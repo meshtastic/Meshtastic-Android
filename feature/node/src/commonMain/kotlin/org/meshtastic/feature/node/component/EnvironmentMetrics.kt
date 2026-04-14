@@ -40,6 +40,7 @@ import org.meshtastic.core.resources.ic_radioactive
 import org.meshtastic.core.resources.ic_soil_moisture
 import org.meshtastic.core.resources.ic_soil_temperature
 import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.one_wire_temperature
 import org.meshtastic.core.resources.pressure
 import org.meshtastic.core.resources.radiation
 import org.meshtastic.core.resources.soil_moisture
@@ -222,6 +223,18 @@ internal fun EnvironmentMetrics(
                     ),
                 )
             }
+            // 1-Wire temperature sensors (up to 8 channels)
+            one_wire_temperature
+                .filterNot { it.isNaN() }
+                .forEachIndexed { idx, temp ->
+                    add(
+                        DrawableMetricInfo(
+                            label = Res.string.one_wire_temperature,
+                            value = "${idx + 1}: ${temp.toTempString(isFahrenheit)}",
+                            icon = Res.drawable.ic_soil_temperature,
+                        ),
+                    )
+                }
         }
     }
     FlowRow(

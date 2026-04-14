@@ -148,6 +148,8 @@ open class MetricsViewModel(
                             temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
                             soil_temperature =
                             em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
+                            one_wire_temperature =
+                            em.one_wire_temperature.map { UnitConversions.celsiusToFahrenheit(it) },
                         ),
                     )
                 }
@@ -381,21 +383,25 @@ open class MetricsViewModel(
     }
 
     fun saveEnvironmentMetricsCSV(uri: MeshtasticUri, data: List<Telemetry>) {
+        val oneWireHeaders = (1..ONE_WIRE_SENSOR_COUNT).joinToString(",") { "\"oneWireTemp$it\"" }
         exportCsv(
             uri = uri,
             header =
             "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\"," +
                 "\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\"," +
-                "\"soilMoisture\"\n",
+                "\"soilMoisture\",$oneWireHeaders\n",
             rows = data,
             epochSeconds = { it.time.toLong() },
         ) { t ->
             val em = t.environment_metrics
+            val owt = em?.one_wire_temperature ?: emptyList()
+            val oneWireValues =
+                (0 until ONE_WIRE_SENSOR_COUNT).joinToString(",") { i -> "\"${owt.getOrNull(i) ?: ""}\"" }
             "\"${em?.temperature ?: ""}\",\"${em?.relative_humidity ?: ""}\"," +
                 "\"${em?.barometric_pressure ?: ""}\",\"${em?.gas_resistance ?: ""}\"," +
                 "\"${em?.iaq ?: ""}\",\"${em?.wind_speed ?: ""}\"," +
                 "\"${em?.wind_direction ?: ""}\",\"${em?.soil_temperature ?: ""}\"," +
-                "\"${em?.soil_moisture ?: ""}\""
+                "\"${em?.soil_moisture ?: ""}\",$oneWireValues"
         }
     }
 
@@ -457,4 +463,8 @@ open class MetricsViewModel(
     }
 
     protected fun decodeBase64(base64: String): ByteArray = base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
+
+    companion object {
+        private const val ONE_WIRE_SENSOR_COUNT = 8
+    }
 }
