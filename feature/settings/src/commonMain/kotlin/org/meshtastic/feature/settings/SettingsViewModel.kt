@@ -28,7 +28,7 @@ import okio.BufferedSink
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -181,7 +181,7 @@ class SettingsViewModel(
      * @param uri The destination URI for the CSV file.
      * @param filterPortnum If provided, only packets with this port number will be exported.
      */
-    fun saveDataCsv(uri: MeshtasticUri, filterPortnum: Int? = null) {
+    fun saveDataCsv(uri: CommonUri, filterPortnum: Int? = null) {
         safeLaunch(tag = "saveDataCsv") {
             fileService.write(uri) { writer -> performDataExport(writer, filterPortnum) }
         }

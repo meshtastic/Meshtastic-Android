@@ -45,6 +45,7 @@ import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
+import com.eygraber.uri.toKmpUri
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -57,7 +58,6 @@ import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
-import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
@@ -276,7 +276,7 @@ class MainActivity : ComponentActivity() {
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
 
-        model.handleDeepLink(uri.toMeshtasticUri()) { lifecycleScope.launch { showToast(Res.string.channel_invalid) } }
+        model.handleDeepLink(uri.toKmpUri()) { lifecycleScope.launch { showToast(Res.string.channel_invalid) } }
     }
 
     private fun createShareIntent(message: String): PendingIntent {

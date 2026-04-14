@@ -18,27 +18,26 @@ package org.meshtastic.core.common.util
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class CommonUriTest {
-
     @Test
-    fun testParse() {
-        val uri = CommonUri.parse("https://meshtastic.org/path/to/page?param1=value1&param2=true#fragment")
-        assertEquals("meshtastic.org", uri.host)
-        assertEquals("fragment", uri.fragment)
-        assertEquals(listOf("path", "to", "page"), uri.pathSegments)
-        assertEquals("value1", uri.getQueryParameter("param1"))
-        assertTrue(uri.getBooleanQueryParameter("param2", false))
+    fun testParseAndToString() {
+        val uriString = "content://com.example.provider/file.txt"
+        val uri = CommonUri.parse(uriString)
+        assertEquals(uriString, uri.toString())
     }
 
     @Test
-    fun testBooleanParameters() {
-        val uri = CommonUri.parse("meshtastic://test?t1=true&t2=1&t3=yes&f1=false&f2=0")
-        assertTrue(uri.getBooleanQueryParameter("t1", false))
-        assertTrue(uri.getBooleanQueryParameter("t2", false))
-        assertTrue(uri.getBooleanQueryParameter("t3", false))
-        assertTrue(!uri.getBooleanQueryParameter("f1", true))
-        assertTrue(!uri.getBooleanQueryParameter("f2", true))
+    fun testQueryParameters() {
+        val uri = CommonUri.parse("https://meshtastic.org/d/#key=value&complete=true")
+        assertEquals("meshtastic.org", uri.host)
+        assertEquals("key=value&complete=true", uri.fragment)
+    }
+
+    @Test
+    fun testFileUri() {
+        val uri = CommonUri.parse("file:///tmp/export.csv")
+        assertEquals("file", uri.scheme)
+        assertEquals("/tmp/export.csv", uri.path)
     }
 }

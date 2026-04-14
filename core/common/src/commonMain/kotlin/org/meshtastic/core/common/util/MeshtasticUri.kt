@@ -16,14 +16,6 @@
  */
 package org.meshtastic.core.common.util
 
-/**
- * A multiplatform representation of a URI, primarily used to safely pass Android Uri references through commonMain
- * modules without coupling them to the android.net.Uri class.
- */
-data class MeshtasticUri(val uriString: String) {
-    override fun toString(): String = uriString
-
-    companion object {
-        fun parse(uriString: String): MeshtasticUri = MeshtasticUri(uriString)
-    }
-}
+/** Legacy typealias retained for migration compatibility. Prefer using [CommonUri] directly for all URI handling. */
+@Deprecated("Use CommonUri directly", ReplaceWith("CommonUri"))
+typealias MeshtasticUri = CommonUri

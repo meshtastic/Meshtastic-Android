@@ -63,7 +63,7 @@ import org.jetbrains.compose.resources.decodeToSvgPainter
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
@@ -131,7 +131,7 @@ private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: U
                 arg.startsWith("http://meshtastic.org") ||
                 arg.startsWith("https://meshtastic.org")
             ) {
-                uiViewModel.handleDeepLink(MeshtasticUri(arg)) {
+                uiViewModel.handleDeepLink(CommonUri.parse(arg)) {
                     Logger.e { "Invalid Meshtastic URI passed via args: $arg" }
                 }
             }
@@ -142,7 +142,7 @@ private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: U
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_URI)) {
             Desktop.getDesktop().setOpenURIHandler { event ->
                 val uriStr = event.uri.toString()
-                uiViewModel.handleDeepLink(MeshtasticUri(uriStr)) { Logger.e { "Invalid URI from OS: $uriStr" } }
+                uiViewModel.handleDeepLink(CommonUri.parse(uriStr)) { Logger.e { "Invalid URI from OS: $uriStr" } }
             }
         }
     }

@@ -37,7 +37,7 @@ import okio.ByteString.Companion.decodeBase64
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -333,7 +333,7 @@ open class MetricsViewModel(
      * epoch-seconds timestamp extracted by [epochSeconds].
      */
     private fun <T> exportCsv(
-        uri: MeshtasticUri,
+        uri: CommonUri,
         header: String,
         rows: List<T>,
         epochSeconds: (T) -> Long,
@@ -351,7 +351,7 @@ open class MetricsViewModel(
         }
     }
 
-    fun savePositionCSV(uri: MeshtasticUri, data: List<org.meshtastic.proto.Position>) {
+    fun savePositionCSV(uri: CommonUri, data: List<org.meshtastic.proto.Position>) {
         exportCsv(
             uri = uri,
             header = "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n",
@@ -365,7 +365,7 @@ open class MetricsViewModel(
         }
     }
 
-    fun saveDeviceMetricsCSV(uri: MeshtasticUri, data: List<Telemetry>) {
+    fun saveDeviceMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
         exportCsv(
             uri = uri,
             header =
@@ -381,7 +381,7 @@ open class MetricsViewModel(
         }
     }
 
-    fun saveEnvironmentMetricsCSV(uri: MeshtasticUri, data: List<Telemetry>) {
+    fun saveEnvironmentMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
         val oneWireHeaders = (1..ONE_WIRE_SENSOR_COUNT).joinToString(",") { "\"oneWireTemp$it\"" }
         exportCsv(
             uri = uri,
@@ -404,7 +404,7 @@ open class MetricsViewModel(
         }
     }
 
-    fun saveSignalMetricsCSV(uri: MeshtasticUri, data: List<MeshPacket>) {
+    fun saveSignalMetricsCSV(uri: CommonUri, data: List<MeshPacket>) {
         exportCsv(
             uri = uri,
             header = "\"date\",\"time\",\"rssi\",\"snr\"\n",
@@ -415,7 +415,7 @@ open class MetricsViewModel(
         }
     }
 
-    fun savePowerMetricsCSV(uri: MeshtasticUri, data: List<Telemetry>) {
+    fun savePowerMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
         exportCsv(
             uri = uri,
             header =

@@ -24,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.MeshtasticUri
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
@@ -61,7 +60,7 @@ actual fun rememberOpenUrl(): (url: String) -> Unit = { url ->
 /** JVM — Opens a native file dialog to save a file. */
 @Composable
 actual fun rememberSaveFileLauncher(
-    onUriReceived: (MeshtasticUri) -> Unit,
+    onUriReceived: (CommonUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit = { defaultFilename, _ ->
     val dialog = FileDialog(null as Frame?, "Save File", FileDialog.SAVE)
     dialog.file = defaultFilename
@@ -70,7 +69,7 @@ actual fun rememberSaveFileLauncher(
     val dir = dialog.directory
     if (file != null && dir != null) {
         val path = File(dir, file)
-        onUriReceived(MeshtasticUri(path.toURI().toString()))
+        onUriReceived(CommonUri.parse(path.toURI().toString()))
     }
 }
 

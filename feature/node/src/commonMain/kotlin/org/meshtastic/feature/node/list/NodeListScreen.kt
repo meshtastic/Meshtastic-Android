@@ -72,7 +72,7 @@ fun NodeListScreen(
     onNavigateToChannels: () -> Unit = {},
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
-    onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
+    onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
     val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
@@ -124,7 +124,7 @@ fun NodeListScreen(
                     alignment = androidx.compose.ui.Alignment.BottomEnd,
                 ),
                 onImport = { uriString ->
-                    onHandleDeepLink(org.meshtastic.core.common.util.MeshtasticUri(uriString)) {
+                    onHandleDeepLink(org.meshtastic.core.common.util.CommonUri.parse(uriString)) {
                         scope.launch { showToast(Res.string.channel_invalid) }
                     }
                 },

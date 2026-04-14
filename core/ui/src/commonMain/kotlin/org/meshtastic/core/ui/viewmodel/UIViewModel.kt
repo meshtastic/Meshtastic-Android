@@ -36,7 +36,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
@@ -99,18 +98,16 @@ class UIViewModel(
      * 2. **Data Import:** If navigation fails, falls back to legacy contact/channel parsing via
      *    [dispatchMeshtasticUri]. This triggers import dialogs for shared nodes or channel configurations.
      */
-    fun handleDeepLink(uri: MeshtasticUri, onInvalid: () -> Unit = {}) {
-        val commonUri = CommonUri.parse(uri.uriString)
-
+    fun handleDeepLink(uri: CommonUri, onInvalid: () -> Unit = {}) {
         // Try navigation routing first
-        val navKeys = DeepLinkRouter.route(commonUri)
+        val navKeys = DeepLinkRouter.route(uri)
         if (navKeys != null) {
             _navigationDeepLink.tryEmit(navKeys)
             return
         }
 
         // Fallback to channel/contact importing
-        commonUri.dispatchMeshtasticUri(
+        uri.dispatchMeshtasticUri(
             onContact = { setSharedContactRequested(it) },
             onChannel = { setRequestChannelSet(it) },
             onInvalid = onInvalid,

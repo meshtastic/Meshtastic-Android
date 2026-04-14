@@ -35,11 +35,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.eygraber.uri.toKmpUri
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
-import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
@@ -96,7 +96,7 @@ fun SettingsScreen(
             if (it.resultCode == Activity.RESULT_OK) {
                 showEditDeviceProfileDialog = true
                 it.data?.data?.let { uri ->
-                    viewModel.importProfile(uri.toMeshtasticUri()) { profile -> deviceProfile = profile }
+                    viewModel.importProfile(uri.toKmpUri()) { profile -> deviceProfile = profile }
                 }
             }
         }
@@ -104,7 +104,7 @@ fun SettingsScreen(
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toMeshtasticUri(), deviceProfile!!) }
+                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toKmpUri(), deviceProfile!!) }
             }
         }
 
@@ -240,7 +240,7 @@ fun SettingsScreen(
                     cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
                     onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                     nodeShortName = ourNode?.user?.short_name ?: "",
-                    onExportData = { settingsViewModel.saveDataCsv(it.toMeshtasticUri()) },
+                    onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
                 )
 
                 AppInfoSection(

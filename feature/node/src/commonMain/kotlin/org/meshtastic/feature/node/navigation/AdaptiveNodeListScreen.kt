@@ -31,7 +31,7 @@ import org.meshtastic.feature.node.list.NodeListViewModel
 fun AdaptiveNodeListScreen(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
-    onHandleDeepLink: (org.meshtastic.core.common.util.MeshtasticUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
+    onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
 ) {
     val nodeListViewModel: NodeListViewModel = koinViewModel()
 

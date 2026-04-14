@@ -43,7 +43,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.MeshtasticUri
 import java.net.URLEncoder
 
 @Composable
@@ -108,16 +107,14 @@ actual fun rememberOpenUrl(): (url: String) -> Unit {
 @Composable
 @Suppress("Wrapping")
 actual fun rememberSaveFileLauncher(
-    onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit,
+    onUriReceived: (org.meshtastic.core.common.util.CommonUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit {
     val launcher =
         androidx.activity.compose.rememberLauncherForActivityResult(
             androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
         ) { result ->
             if (result.resultCode == android.app.Activity.RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    onUriReceived(uri.toString().let { org.meshtastic.core.common.util.MeshtasticUri(it) })
-                }
+                result.data?.data?.let { uri -> onUriReceived(uri.toKmpUri()) }
             }
         }
 

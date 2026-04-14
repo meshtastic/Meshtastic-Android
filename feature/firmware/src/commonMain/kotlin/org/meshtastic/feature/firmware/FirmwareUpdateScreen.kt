@@ -163,9 +163,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
         uri?.let { viewModel.startUpdateFromFile(it) }
     }
 
-    val saveFileLauncher = rememberSaveFileLauncher { meshtasticUri ->
-        viewModel.saveDfuFile(CommonUri.parse(meshtasticUri.uriString))
-    }
+    val saveFileLauncher = rememberSaveFileLauncher { uri -> viewModel.saveDfuFile(uri) }
 
     val actions =
         remember(viewModel, onNavigateUp) {
