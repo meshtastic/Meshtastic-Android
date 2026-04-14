@@ -14,15 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.desktop.di
-
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
+package org.meshtastic.core.network
 
 /**
- * Koin module that component-scans the `org.meshtastic.desktop` package for annotated bindings (`@Single`, `@Factory`,
- * `@KoinViewModel`).
+ * Shared HTTP client configuration constants used by both Android and Desktop Ktor `HttpClient` setups.
+ *
+ * These values are consumed by the platform-specific Koin modules (`NetworkModule` on Android, `DesktopKoinModule` on
+ * Desktop) when installing [io.ktor.client.plugins.HttpTimeout] and [io.ktor.client.plugins.HttpRequestRetry].
  */
-@Module
-@ComponentScan("org.meshtastic.desktop")
-class DesktopDiModule
+object HttpClientDefaults {
+    /** Timeout in milliseconds for connect, request, and socket operations. */
+    const val TIMEOUT_MS = 30_000L
+
+    /** Maximum number of automatic retries on server errors (5xx). */
+    const val MAX_RETRIES = 3
+}

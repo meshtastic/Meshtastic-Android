@@ -27,7 +27,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import okio.FileSystem
 import okio.Path.Companion.toPath
@@ -35,10 +34,12 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.datastore.di.DATASTORE_SCOPE
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
@@ -49,10 +50,10 @@ import org.meshtastic.proto.LocalStats
 private fun createPreferencesDataStore(name: String, scope: CoroutineScope): DataStore<Preferences> {
     val dir = desktopDataDir() + "/datastore"
     FileSystem.SYSTEM.createDirectories(dir.toPath())
-    return PreferenceDataStoreFactory.create(
+    return PreferenceDataStoreFactory.createWithPath(
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
         scope = scope,
-        produceFile = { (dir + "/$name.preferences_pb").toPath().toNioPath().toFile() },
+        produceFile = { "$dir/$name.preferences_pb".toPath() },
     )
 }
 
@@ -80,16 +81,15 @@ private class DesktopProcessLifecycleOwner : LifecycleOwner {
  * - [Lifecycle] (`ProcessLifecycle`)
  * - [BuildConfigProvider]
  */
-@Suppress("InjectDispatcher")
 fun desktopPlatformModule() = module {
     // Application-lifetime scope shared by all DataStore instances. Per the DataStore docs:
     // "The Job within this context dictates the lifecycle of the DataStore's internal operations.
     // Ensure it is an application-scoped context that is not canceled by UI lifecycle events."
     // DataStore has no close() API — the in-memory cache is released only when this Job is cancelled
     // (at process exit). Using SupervisorJob so a single store's failure doesn't cascade.
-    val dataStoreScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    single<CoroutineScope>(named(DATASTORE_SCOPE)) { CoroutineScope(get<CoroutineDispatchers>().io + SupervisorJob()) }
 
-    includes(desktopPreferencesDataStoreModule(dataStoreScope), desktopProtoDataStoreModule(dataStoreScope))
+    includes(desktopPreferencesDataStoreModule(), desktopProtoDataStoreModule())
 
     // -- Build config (values generated at build time by generateDesktopBuildConfig) --
     single<BuildConfigProvider> {
@@ -108,30 +108,50 @@ fun desktopPlatformModule() = module {
 }
 
 /** Named [DataStore]<[Preferences]> instances for all preference domains. */
-private fun desktopPreferencesDataStoreModule(scope: CoroutineScope) = module {
-    single<DataStore<Preferences>>(named("AnalyticsDataStore")) { createPreferencesDataStore("analytics", scope) }
+private fun desktopPreferencesDataStoreModule() = module {
+    single<DataStore<Preferences>>(named("AnalyticsDataStore")) {
+        createPreferencesDataStore("analytics", get(named(DATASTORE_SCOPE)))
+    }
     single<DataStore<Preferences>>(named("HomoglyphEncodingDataStore")) {
-        createPreferencesDataStore("homoglyph_encoding", scope)
+        createPreferencesDataStore("homoglyph_encoding", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("AppDataStore")) { createPreferencesDataStore("app", scope) }
-    single<DataStore<Preferences>>(named("CustomEmojiDataStore")) { createPreferencesDataStore("custom_emoji", scope) }
-    single<DataStore<Preferences>>(named("MapDataStore")) { createPreferencesDataStore("map", scope) }
-    single<DataStore<Preferences>>(named("MapConsentDataStore")) { createPreferencesDataStore("map_consent", scope) }
+    single<DataStore<Preferences>>(named("AppDataStore")) {
+        createPreferencesDataStore("app", get(named(DATASTORE_SCOPE)))
+    }
+    single<DataStore<Preferences>>(named("CustomEmojiDataStore")) {
+        createPreferencesDataStore("custom_emoji", get(named(DATASTORE_SCOPE)))
+    }
+    single<DataStore<Preferences>>(named("MapDataStore")) {
+        createPreferencesDataStore("map", get(named(DATASTORE_SCOPE)))
+    }
+    single<DataStore<Preferences>>(named("MapConsentDataStore")) {
+        createPreferencesDataStore("map_consent", get(named(DATASTORE_SCOPE)))
+    }
     single<DataStore<Preferences>>(named("MapTileProviderDataStore")) {
-        createPreferencesDataStore("map_tile_provider", scope)
+        createPreferencesDataStore("map_tile_provider", get(named(DATASTORE_SCOPE)))
     }
-    single<DataStore<Preferences>>(named("MeshDataStore")) { createPreferencesDataStore("mesh", scope) }
-    single<DataStore<Preferences>>(named("RadioDataStore")) { createPreferencesDataStore("radio", scope) }
-    single<DataStore<Preferences>>(named("UiDataStore")) { createPreferencesDataStore("ui", scope) }
-    single<DataStore<Preferences>>(named("MeshLogDataStore")) { createPreferencesDataStore("meshlog", scope) }
-    single<DataStore<Preferences>>(named("FilterDataStore")) { createPreferencesDataStore("filter", scope) }
+    single<DataStore<Preferences>>(named("MeshDataStore")) {
+        createPreferencesDataStore("mesh", get(named(DATASTORE_SCOPE)))
+    }
+    single<DataStore<Preferences>>(named("RadioDataStore")) {
+        createPreferencesDataStore("radio", get(named(DATASTORE_SCOPE)))
+    }
+    single<DataStore<Preferences>>(named("UiDataStore")) {
+        createPreferencesDataStore("ui", get(named(DATASTORE_SCOPE)))
+    }
+    single<DataStore<Preferences>>(named("MeshLogDataStore")) {
+        createPreferencesDataStore("meshlog", get(named(DATASTORE_SCOPE)))
+    }
+    single<DataStore<Preferences>>(named("FilterDataStore")) {
+        createPreferencesDataStore("filter", get(named(DATASTORE_SCOPE)))
+    }
     single<DataStore<Preferences>>(named("CorePreferencesDataStore")) {
-        createPreferencesDataStore("core_preferences", scope)
+        createPreferencesDataStore("core_preferences", get(named(DATASTORE_SCOPE)))
     }
 }
 
 /** Proto [DataStore] instances (OkioStorage-backed). */
-private fun desktopProtoDataStoreModule(scope: CoroutineScope) = module {
+private fun desktopProtoDataStoreModule() = module {
     val protoDir = desktopDataDir() + "/datastore"
 
     single<DataStore<LocalConfig>>(named("CoreLocalConfigDataStore")) {
@@ -143,7 +163,7 @@ private fun desktopProtoDataStoreModule(scope: CoroutineScope) = module {
                 producePath = { "$protoDir/local_config.pb".toPath() },
             ),
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig() }),
-            scope = scope,
+            scope = get(named(DATASTORE_SCOPE)),
         )
     }
 
@@ -156,7 +176,7 @@ private fun desktopProtoDataStoreModule(scope: CoroutineScope) = module {
                 producePath = { "$protoDir/module_config.pb".toPath() },
             ),
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig() }),
-            scope = scope,
+            scope = get(named(DATASTORE_SCOPE)),
         )
     }
 
@@ -169,7 +189,7 @@ private fun desktopProtoDataStoreModule(scope: CoroutineScope) = module {
                 producePath = { "$protoDir/channel_set.pb".toPath() },
             ),
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet() }),
-            scope = scope,
+            scope = get(named(DATASTORE_SCOPE)),
         )
     }
 
@@ -182,7 +202,7 @@ private fun desktopProtoDataStoreModule(scope: CoroutineScope) = module {
                 producePath = { "$protoDir/local_stats.pb".toPath() },
             ),
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalStats() }),
-            scope = scope,
+            scope = get(named(DATASTORE_SCOPE)),
         )
     }
 }

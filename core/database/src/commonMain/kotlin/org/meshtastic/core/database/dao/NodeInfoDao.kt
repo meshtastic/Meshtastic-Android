@@ -17,9 +17,7 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room3.Dao
-import androidx.room3.Insert
 import androidx.room3.MapColumn
-import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
 import androidx.room3.Upsert
@@ -168,8 +166,7 @@ interface NodeInfoDao {
     @Query("SELECT * FROM my_node")
     fun getMyNodeInfo(): Flow<MyNodeEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun setMyNodeInfo(myInfo: MyNodeEntity)
+    @Upsert suspend fun setMyNodeInfo(myInfo: MyNodeEntity)
 
     @Query("DELETE FROM my_node")
     suspend fun clearMyNodeInfo()
@@ -295,8 +292,7 @@ interface NodeInfoDao {
         doUpsert(verifiedNode)
     }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun putAll(nodes: List<NodeEntity>)
+    @Upsert suspend fun putAll(nodes: List<NodeEntity>)
 
     @Query("UPDATE nodes SET notes = :notes WHERE num = :num")
     suspend fun setNodeNotes(num: Int, notes: String)

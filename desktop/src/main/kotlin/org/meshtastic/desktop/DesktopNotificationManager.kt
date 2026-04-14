@@ -16,6 +16,7 @@
  */
 package org.meshtastic.desktop
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,15 +26,22 @@ import org.meshtastic.core.repository.NotificationPrefs
 import androidx.compose.ui.window.Notification as ComposeNotification
 
 /**
- * Desktop notification manager. Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to avoid
- * double-registration with the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
+ * Desktop notification manager that bridges domain [Notification] objects to Compose Desktop tray notifications.
+ *
+ * Notifications are emitted via [notifications] and collected by the tray composable in [Main.kt]. Respects user
+ * preferences for message, node-event, and low-battery categories.
+ *
+ * Registered manually in `desktopPlatformStubsModule` -- do **not** add `@Single` to avoid double-registration with the
+ * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
  */
 class DesktopNotificationManager(private val prefs: NotificationPrefs) : NotificationManager {
     init {
-        co.touchlab.kermit.Logger.i { "DesktopNotificationManager initialized" }
+        Logger.i { "DesktopNotificationManager initialized" }
     }
 
     private val _notifications = MutableSharedFlow<ComposeNotification>(extraBufferCapacity = 10)
+
+    /** Flow of Compose [ComposeNotification] objects to be forwarded to [TrayState.sendNotification]. */
     val notifications: SharedFlow<ComposeNotification> = _notifications.asSharedFlow()
 
     override fun dispatch(notification: Notification) {
@@ -46,9 +54,7 @@ class DesktopNotificationManager(private val prefs: NotificationPrefs) : Notific
                 Notification.Category.Service -> true
             }
 
-        co.touchlab.kermit.Logger.d {
-            "DesktopNotificationManager dispatch: category=${notification.category}, enabled=$enabled"
-        }
+        Logger.d { "DesktopNotificationManager dispatch: category=${notification.category}, enabled=$enabled" }
 
         if (!enabled) return
 
@@ -61,14 +67,14 @@ class DesktopNotificationManager(private val prefs: NotificationPrefs) : Notific
             }
 
         val success = _notifications.tryEmit(ComposeNotification(notification.title, notification.message, composeType))
-        co.touchlab.kermit.Logger.d { "DesktopNotificationManager emit: success=$success, title=${notification.title}" }
+        Logger.d { "DesktopNotificationManager emit: success=$success, title=${notification.title}" }
     }
 
     override fun cancel(id: Int) {
-        // Desktop Tray notifications cannot be cancelled once sent via TrayState
+        // Desktop tray notifications cannot be cancelled once sent via TrayState.
     }
 
     override fun cancelAll() {
-        // Desktop Tray notifications cannot be cleared once sent via TrayState
+        // Desktop tray notifications cannot be cleared once sent via TrayState.
     }
 }

@@ -31,6 +31,8 @@ import coil3.util.DebugLogger
 import coil3.util.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -40,6 +42,7 @@ import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 
 private const val DISK_CACHE_PERCENT = 0.02
@@ -84,6 +87,15 @@ class NetworkModule {
     fun provideHttpClient(json: Json, buildConfigProvider: BuildConfigProvider): HttpClient =
         HttpClient(engineFactory = Android) {
             install(plugin = ContentNegotiation) { json(json) }
+            install(plugin = HttpTimeout) {
+                requestTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+            }
+            install(plugin = HttpRequestRetry) {
+                retryOnServerErrors(maxRetries = HttpClientDefaults.MAX_RETRIES)
+                exponentialDelay()
+            }
             if (buildConfigProvider.isDebug) {
                 install(plugin = Logging) {
                     logger = KermitHttpLogger

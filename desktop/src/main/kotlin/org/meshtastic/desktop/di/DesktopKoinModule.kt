@@ -14,11 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("ktlint:standard:no-unused-imports") // Koin KSP-generated extension functions require aliased imports
+
 package org.meshtastic.desktop.di
 
 // Generated Koin module extensions from core KMP modules
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.java.Java
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -32,6 +36,7 @@ import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.service.ApiService
@@ -163,7 +168,7 @@ private fun desktopPlatformStubsModule() = module {
     single<ServiceBroadcasts> { NoopServiceBroadcasts() }
     single<AppWidgetUpdater> { NoopAppWidgetUpdater() }
     single<MeshWorkerManager> { NoopMeshWorkerManager() }
-    single<MessageQueue> { DesktopMessageQueue(packetRepository = get(), radioController = get()) }
+    single<MessageQueue> { DesktopMessageQueue(packetRepository = get(), radioController = get(), dispatchers = get()) }
     single<MeshLocationManager> { NoopMeshLocationManager() }
     single<LocationRepository> { NoopLocationRepository() }
     single<MQTTRepository> { NoopMQTTRepository() }
@@ -178,6 +183,15 @@ private fun desktopPlatformStubsModule() = module {
     single<HttpClient> {
         HttpClient(Java) {
             install(ContentNegotiation) { json(get<Json>()) }
+            install(HttpTimeout) {
+                requestTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+                socketTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
+            }
+            install(HttpRequestRetry) {
+                retryOnServerErrors(maxRetries = HttpClientDefaults.MAX_RETRIES)
+                exponentialDelay()
+            }
             if (DesktopBuildConfig.IS_DEBUG) {
                 install(Logging) {
                     logger = KermitHttpLogger

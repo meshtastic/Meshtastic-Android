@@ -266,7 +266,6 @@ dependencies {
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.koin.android)
-    implementation(libs.koin.androidx.compose)
     implementation(libs.koin.compose.viewmodel)
     implementation(libs.koin.androidx.workmanager)
     implementation(libs.koin.annotations)

@@ -48,8 +48,8 @@ import coil3.compose.setSingletonImageLoaderFactory
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
-import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
