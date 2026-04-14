@@ -85,7 +85,7 @@ private const val CURSOR_BLINK_MS = 530L
  * @param viewModel [RemoteShellViewModel] for this destination node.
  * @param onNavigateUp Callback invoked when the user presses the navigation-up button.
  */
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val outputLines by viewModel.outputLines.collectAsStateWithLifecycle()

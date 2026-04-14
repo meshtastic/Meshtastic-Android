@@ -53,6 +53,9 @@ private val CRT_AGSL =
     """
         .trimIndent()
 
+/** Multiplier applied to strength for a visible CRT curvature effect with the barrel-distortion shader. */
+private const val CRT_STRENGTH_SCALE = 4f
+
 @Composable
 actual fun Modifier.crtCurvature(strength: Float): Modifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
     val shader = remember { RuntimeShader(CRT_AGSL) }
@@ -61,7 +64,7 @@ actual fun Modifier.crtCurvature(strength: Float): Modifier = if (Build.VERSION.
         val h = size.height
         if (w > 0f && h > 0f) {
             shader.setFloatUniform("resolution", w, h)
-            shader.setFloatUniform("strength", strength * 4f) // scale for visible effect
+            shader.setFloatUniform("strength", strength * CRT_STRENGTH_SCALE)
             renderEffect = RenderEffect.createRuntimeShaderEffect(shader, "image").asComposeRenderEffect()
         }
     }

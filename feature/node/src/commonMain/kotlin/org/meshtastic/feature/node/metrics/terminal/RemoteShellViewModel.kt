@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.Buffer
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -40,6 +42,7 @@ import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.RemoteShell
+import kotlin.concurrent.Volatile
 
 // ---------------------------------------------------------------------------
 // Protocol constants (matched to dmshell_client.py / DMShell.cpp)
@@ -84,6 +87,9 @@ private const val MISSING_SEQ_RETRY_MS = 1_000L
 /** Size in bytes of an encoded replay-request payload (big-endian uint32). */
 private const val REPLAY_REQUEST_BYTES = 4
 
+/** Maximum configurable flush window in milliseconds. */
+private const val MAX_FLUSH_WINDOW_MS = 5_000L
+
 /** Size in bytes of a heartbeat-status payload (two big-endian uint32s). */
 private const val HEARTBEAT_STATUS_BYTES = 8
 
@@ -93,8 +99,11 @@ private const val HEARTBEAT_STATUS_BYTES = 8
 
 private fun encodeUint32BE(value: Int): ByteArray = Buffer().apply { writeInt(value) }.readByteArray()
 
+/** Size in bytes of an encoded uint32 (big-endian). */
+private const val UINT32_BYTES = 4
+
 private fun decodeUint32BE(bytes: ByteArray, offset: Int = 0): Int =
-    Buffer().apply { write(bytes, offset, 4) }.readInt()
+    Buffer().apply { write(bytes, offset, UINT32_BYTES) }.readInt()
 
 private fun encodeHeartbeatStatus(lastTxSeq: Int, lastRxSeq: Int): ByteArray = Buffer()
     .apply {
@@ -195,24 +204,25 @@ class RemoteShellViewModel(
 
     /** Ring buffer of the last [TX_HISTORY_MAX] sent frames for replay. */
     private val txHistory = ArrayDeque<SentFrame>()
+    private val txMutex = Mutex()
 
-    private fun allocSeq(): Int = synchronized(txHistory) { nextTxSeq++ }
+    private suspend fun allocSeq(): Int = txMutex.withLock { nextTxSeq++ }
 
-    private fun rememberSent(frame: SentFrame) {
+    private suspend fun rememberSent(frame: SentFrame) {
         if (frame.seq == 0 || frame.op == RemoteShell.OpCode.ACK) return
-        synchronized(txHistory) {
+        txMutex.withLock {
             txHistory.addLast(frame)
             if (txHistory.size > TX_HISTORY_MAX) txHistory.removeFirst()
         }
     }
 
-    private fun pruneSentFrames(ackSeq: Int) {
+    private suspend fun pruneSentFrames(ackSeq: Int) {
         if (ackSeq <= 0) return
-        synchronized(txHistory) { txHistory.removeAll { it.seq <= ackSeq } }
+        txMutex.withLock { txHistory.removeAll { it.seq <= ackSeq } }
     }
 
-    private fun replayFrom(startSeq: Int) {
-        val frame = synchronized(txHistory) { txHistory.firstOrNull { it.seq == startSeq } }
+    private suspend fun replayFrom(startSeq: Int) {
+        val frame = txMutex.withLock { txHistory.firstOrNull { it.seq == startSeq } }
         if (frame == null) {
             Logger.w { "RemoteShell replay unavailable for seq=$startSeq" }
             return
@@ -232,15 +242,15 @@ class RemoteShellViewModel(
         )
     }
 
-    private fun currentAckSeq(): Int = synchronized(rxLock) { lastRxSeq }
+    private suspend fun currentAckSeq(): Int = rxMutex.withLock { lastRxSeq }
 
-    private fun highestSentSeq(): Int = synchronized(txHistory) { nextTxSeq - 1 }
+    private suspend fun highestSentSeq(): Int = txMutex.withLock { nextTxSeq - 1 }
 
     // endregion
 
     // region --- Inbound sequence tracking ---
 
-    private val rxLock = Any()
+    private val rxMutex = Mutex()
 
     /** Highest in-order rx seq we have delivered to the output buffer. */
     @Volatile private var lastRxSeq: Int = 0
@@ -265,9 +275,9 @@ class RemoteShellViewModel(
         DUPLICATE,
     }
 
-    private fun noteReceivedSeq(seq: Int): RxAction = synchronized(rxLock) {
-        if (seq == 0) return RxAction.PROCESS
-        return when {
+    private suspend fun noteReceivedSeq(seq: Int): RxAction = rxMutex.withLock {
+        if (seq == 0) return@withLock RxAction.PROCESS
+        when {
             seq < nextExpectedRxSeq -> RxAction.DUPLICATE
             seq > nextExpectedRxSeq -> {
                 if (seq > highestSeenRxSeq) highestSeenRxSeq = seq
@@ -285,17 +295,17 @@ class RemoteShellViewModel(
         }
     }
 
-    private fun requestMissingSeqOnce(): Int? = synchronized(rxLock) {
-        if (highestSeenRxSeq < nextExpectedRxSeq) return null
+    private suspend fun requestMissingSeqOnce(): Int? = rxMutex.withLock {
+        if (highestSeenRxSeq < nextExpectedRxSeq) return@withLock null
         val now = nowMillis
         if (
             lastRequestedMissingSeq == nextExpectedRxSeq && (now - lastMissingRequestTimeMs) < MISSING_SEQ_RETRY_MS
         ) {
-            return null
+            return@withLock null
         }
         lastRequestedMissingSeq = nextExpectedRxSeq
         lastMissingRequestTimeMs = now
-        return nextExpectedRxSeq
+        nextExpectedRxSeq
     }
 
     // endregion
@@ -320,7 +330,7 @@ class RemoteShellViewModel(
     val flushWindowMs: StateFlow<Long> = _flushWindowMs.asStateFlow()
 
     fun setFlushWindowMs(ms: Long) {
-        _flushWindowMs.value = ms.coerceIn(0L, 5_000L)
+        _flushWindowMs.value = ms.coerceIn(0L, MAX_FLUSH_WINDOW_MS)
     }
 
     // endregion
@@ -360,8 +370,7 @@ class RemoteShellViewModel(
     private fun isHeartbeatDue(): Boolean {
         val now = nowMillis
         if ((now - lastActivityMs) < HEARTBEAT_IDLE_DELAY_MS) return false
-        if (lastHeartbeatSentMs <= lastActivityMs) return true
-        return (now - lastHeartbeatSentMs) >= HEARTBEAT_REPEAT_MS
+        return lastHeartbeatSentMs <= lastActivityMs || (now - lastHeartbeatSentMs) >= HEARTBEAT_REPEAT_MS
     }
 
     // endregion
@@ -377,57 +386,62 @@ class RemoteShellViewModel(
 
     fun openSession() {
         if (_sessionState.value !in OPENABLE_STATES) return
-
-        val newSessionId = commandSender.generatePacketId()
-        sessionId.update { newSessionId }
-        synchronized(rxLock) {
-            lastRxSeq = 0
-            nextExpectedRxSeq = 1
-            highestSeenRxSeq = 0
-            pendingRxFrames.clear()
-        }
-        synchronized(txHistory) { nextTxSeq = 1 }
         _sessionState.update { SessionState.OPENING }
-        sendFrame(
-            RemoteShell(
-                op = RemoteShell.OpCode.OPEN,
-                session_id = newSessionId,
-                seq = allocSeq(),
-                cols = _cols.value,
-                rows = _rows.value,
-            ),
-        )
-        Logger.d { "RemoteShell OPEN → destNum=$destNum sessionId=$newSessionId" }
-        startHeartbeatLoop()
+        viewModelScope.launch {
+            val newSessionId = commandSender.generatePacketId()
+            sessionId.update { newSessionId }
+            rxMutex.withLock {
+                lastRxSeq = 0
+                nextExpectedRxSeq = 1
+                highestSeenRxSeq = 0
+                pendingRxFrames.clear()
+            }
+            txMutex.withLock { nextTxSeq = 1 }
+            sendFrame(
+                RemoteShell(
+                    op = RemoteShell.OpCode.OPEN,
+                    session_id = newSessionId,
+                    seq = allocSeq(),
+                    cols = _cols.value,
+                    rows = _rows.value,
+                ),
+            )
+            Logger.d { "RemoteShell OPEN → destNum=$destNum sessionId=$newSessionId" }
+            startHeartbeatLoop()
+        }
     }
 
     fun closeSession() {
         if (_sessionState.value != SessionState.OPEN) return
         _sessionState.update { SessionState.CLOSING }
-        sendFrame(
-            RemoteShell(
-                op = RemoteShell.OpCode.CLOSE,
-                session_id = sessionId.value,
-                seq = allocSeq(),
-                ack_seq = currentAckSeq(),
-            ),
-        )
+        viewModelScope.launch {
+            sendFrame(
+                RemoteShell(
+                    op = RemoteShell.OpCode.CLOSE,
+                    session_id = sessionId.value,
+                    seq = allocSeq(),
+                    ack_seq = currentAckSeq(),
+                ),
+            )
+        }
     }
 
     fun resize(cols: Int, rows: Int) {
         _cols.value = cols
         _rows.value = rows
         if (_sessionState.value == SessionState.OPEN) {
-            sendFrame(
-                RemoteShell(
-                    op = RemoteShell.OpCode.RESIZE,
-                    session_id = sessionId.value,
-                    seq = allocSeq(),
-                    ack_seq = currentAckSeq(),
-                    cols = cols,
-                    rows = rows,
-                ),
-            )
+            viewModelScope.launch {
+                sendFrame(
+                    RemoteShell(
+                        op = RemoteShell.OpCode.RESIZE,
+                        session_id = sessionId.value,
+                        seq = allocSeq(),
+                        ack_seq = currentAckSeq(),
+                        cols = cols,
+                        rows = rows,
+                    ),
+                )
+            }
         }
     }
 
@@ -493,19 +507,21 @@ class RemoteShellViewModel(
         // remote PTY will echo them back as OUTPUT frames once the INPUT is delivered.
 
         val payload = text.encodeToByteArray().toByteString()
-        var offset = 0
-        while (offset < payload.size) {
-            val end = (offset + MAX_INPUT_CHUNK_BYTES).coerceAtMost(payload.size)
-            sendFrame(
-                RemoteShell(
-                    op = RemoteShell.OpCode.INPUT,
-                    session_id = sessionId.value,
-                    seq = allocSeq(),
-                    ack_seq = currentAckSeq(),
-                    payload = payload.substring(offset, end),
-                ),
-            )
-            offset = end
+        viewModelScope.launch {
+            var offset = 0
+            while (offset < payload.size) {
+                val end = (offset + MAX_INPUT_CHUNK_BYTES).coerceAtMost(payload.size)
+                sendFrame(
+                    RemoteShell(
+                        op = RemoteShell.OpCode.INPUT,
+                        session_id = sessionId.value,
+                        seq = allocSeq(),
+                        ack_seq = currentAckSeq(),
+                        payload = payload.substring(offset, end),
+                    ),
+                )
+                offset = end
+            }
         }
     }
 
@@ -515,6 +531,7 @@ class RemoteShellViewModel(
 
     private var heartbeatJob: Job? = null
 
+    @Suppress("LoopWithTooManyJumpStatements")
     private fun startHeartbeatLoop() {
         heartbeatJob?.cancel()
         heartbeatJob =
@@ -555,12 +572,12 @@ class RemoteShellViewModel(
     }
 
     @Suppress("CyclomaticComplexMethod")
-    private fun processFrame(frame: RemoteShell) {
+    private suspend fun processFrame(frame: RemoteShell) {
         pruneSentFrames(frame.ack_seq)
 
         if (frame.op == RemoteShell.OpCode.ACK) {
-            val payload = frame.payload?.toByteArray()
-            if (payload != null && payload.size >= REPLAY_REQUEST_BYTES) {
+            val payload = frame.payload.toByteArray()
+            if (payload.size >= REPLAY_REQUEST_BYTES) {
                 replayFrom(decodeUint32BE(payload))
             }
             return
@@ -571,7 +588,7 @@ class RemoteShellViewModel(
                 requestMissingSeqOnce()?.let { sendAck(replayFrom = it) }
             }
             RxAction.GAP -> {
-                synchronized(rxLock) { pendingRxFrames[frame.seq] = frame }
+                rxMutex.withLock { pendingRxFrames[frame.seq] = frame }
                 requestMissingSeqOnce()?.let { sendAck(replayFrom = it) }
             }
             RxAction.PROCESS -> {
@@ -582,50 +599,56 @@ class RemoteShellViewModel(
         }
     }
 
-    private fun drainPendingRxFrames() {
+    @Suppress("LoopWithTooManyJumpStatements")
+    private suspend fun drainPendingRxFrames() {
         while (true) {
-            val next = synchronized(rxLock) { pendingRxFrames.remove(nextExpectedRxSeq) } ?: break
+            val next = rxMutex.withLock { pendingRxFrames.remove(nextExpectedRxSeq) } ?: break
             if (noteReceivedSeq(next.seq) == RxAction.PROCESS) {
                 handleInOrderFrame(next)
             } else {
-                synchronized(rxLock) { pendingRxFrames[next.seq] = next }
+                rxMutex.withLock { pendingRxFrames[next.seq] = next }
                 break
             }
         }
     }
 
-    private fun handleInOrderFrame(frame: RemoteShell) {
+    @Suppress("CyclomaticComplexMethod", "ReturnCount")
+    private suspend fun handleInOrderFrame(frame: RemoteShell) {
         when (frame.op) {
             RemoteShell.OpCode.OPEN_OK -> {
                 _sessionState.update { SessionState.OPEN }
-                val payload = frame.payload?.toByteArray()
-                if (payload != null && payload.size >= 4) {
+                val payload = frame.payload.toByteArray()
+                if (payload.size >= UINT32_BYTES) {
                     _remotePid.update { decodeUint32BE(payload) }
                 }
                 Logger.i { "RemoteShell OPEN_OK session=${frame.session_id} pid=${_remotePid.value}" }
             }
             RemoteShell.OpCode.OUTPUT -> {
-                val text = frame.payload?.utf8() ?: return
+                val text =
+                    frame.payload.utf8().ifEmpty {
+                        return
+                    }
                 text.lines().forEach { appendOutput(it) }
             }
             RemoteShell.OpCode.ERROR -> {
-                appendOutput("[error] ${frame.payload?.utf8() ?: "unknown error"}")
+                appendOutput("[error] ${frame.payload.utf8().ifEmpty { "unknown error" }}")
                 _sessionState.update { SessionState.ERROR }
             }
             RemoteShell.OpCode.CLOSED -> {
-                val msg = frame.payload?.utf8() ?: ""
+                val msg = frame.payload.utf8()
                 appendOutput(if (msg.isNotEmpty()) "[session closed: $msg]" else "[session closed]")
                 _sessionState.update { SessionState.CLOSED }
             }
             RemoteShell.OpCode.PONG -> {
-                val payload = frame.payload?.toByteArray() ?: return
+                val payload = frame.payload.toByteArray()
+                if (payload.isEmpty()) return
                 val (peerLastTxSeq, peerLastRxSeq) = decodeHeartbeatStatus(payload) ?: return
                 val ourHighestTx = highestSentSeq()
                 if (peerLastRxSeq < ourHighestTx) {
                     replayFrom(peerLastRxSeq + 1)
                 }
                 if (peerLastTxSeq > currentAckSeq()) {
-                    synchronized(rxLock) { if (peerLastTxSeq > highestSeenRxSeq) highestSeenRxSeq = peerLastTxSeq }
+                    rxMutex.withLock { if (peerLastTxSeq > highestSeenRxSeq) highestSeenRxSeq = peerLastTxSeq }
                     requestMissingSeqOnce()?.let { sendAck(replayFrom = it) }
                 }
             }
@@ -637,7 +660,7 @@ class RemoteShellViewModel(
 
     // region --- Frame dispatch ---
 
-    private fun sendAck(replayFrom: Int? = null) {
+    private suspend fun sendAck(replayFrom: Int? = null) {
         val payload = replayFrom?.let { encodeUint32BE(it).toByteString() } ?: ByteString.EMPTY
         sendFrame(
             RemoteShell(
@@ -651,7 +674,7 @@ class RemoteShellViewModel(
         )
     }
 
-    private fun sendFrame(frame: RemoteShell, remember: Boolean = true, isHeartbeat: Boolean = false) {
+    private suspend fun sendFrame(frame: RemoteShell, remember: Boolean = true, isHeartbeat: Boolean = false) {
         if (remember) {
             rememberSent(
                 SentFrame(
@@ -659,7 +682,7 @@ class RemoteShellViewModel(
                     sessionId = frame.session_id,
                     seq = frame.seq,
                     ackSeq = frame.ack_seq,
-                    payload = frame.payload ?: ByteString.EMPTY,
+                    payload = frame.payload,
                     cols = frame.cols,
                     rows = frame.rows,
                 ),
@@ -670,8 +693,8 @@ class RemoteShellViewModel(
             val myNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
             val packet =
                 DataPacket(
-                    to = "!%08x".format(destNum),
-                    from = "!%08x".format(myNum),
+                    to = DataPacket.nodeNumToDefaultId(destNum),
+                    from = DataPacket.nodeNumToDefaultId(myNum),
                     bytes = RemoteShell.ADAPTER.encode(frame).toByteString(),
                     dataType = PortNum.REMOTE_SHELL_APP.value,
                     // PKC_CHANNEL_INDEX (8) triggers Curve25519 encryption in CommandSenderImpl.

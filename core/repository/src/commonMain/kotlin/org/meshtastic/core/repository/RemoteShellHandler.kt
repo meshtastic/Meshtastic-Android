@@ -23,13 +23,10 @@ import org.meshtastic.proto.RemoteShell
 /**
  * A decoded [RemoteShell] frame together with the node number that sent it.
  *
- * Propagating [from] allows downstream consumers (e.g. the ViewModel) to verify that a frame
- * actually originated from the expected peer rather than relying solely on [RemoteShell.session_id].
+ * Propagating [from] allows downstream consumers (e.g. the ViewModel) to verify that a frame actually originated from
+ * the expected peer rather than relying solely on [RemoteShell.session_id].
  */
-data class ReceivedShellFrame(
-    val from: Int,
-    val frame: RemoteShell,
-)
+data class ReceivedShellFrame(val from: Int, val frame: RemoteShell)
 
 /**
  * Interface for handling RemoteShell packets (REMOTE_SHELL_APP portnum = 13).
