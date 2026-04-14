@@ -62,6 +62,13 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_THEME] = value } }
     }
 
+    override val contrastLevel: StateFlow<Int> =
+        dataStore.data.map { it[KEY_CONTRAST_LEVEL] ?: 0 }.stateIn(scope, SharingStarted.Lazily, 0)
+
+    override fun setContrastLevel(value: Int) {
+        scope.launch { dataStore.edit { it[KEY_CONTRAST_LEVEL] = value } }
+    }
+
     override val locale: StateFlow<String> =
         dataStore.data.map { it[KEY_LOCALE] ?: "" }.stateIn(scope, SharingStarted.Eagerly, "")
 
@@ -152,6 +159,7 @@ class UiPrefsImpl(
 
         val KEY_APP_INTRO_COMPLETED = booleanPreferencesKey("app_intro_completed")
         val KEY_THEME = intPreferencesKey("theme")
+        val KEY_CONTRAST_LEVEL = intPreferencesKey("contrast-level")
         val KEY_LOCALE = stringPreferencesKey("locale")
         val KEY_NODE_SORT = intPreferencesKey("node-sort-option")
         val KEY_INCLUDE_UNKNOWN = booleanPreferencesKey("include-unknown")

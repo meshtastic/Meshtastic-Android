@@ -46,6 +46,7 @@ import org.meshtastic.core.resources.acknowledgements
 import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.bottom_nav_settings
+import org.meshtastic.core.resources.contrast
 import org.meshtastic.core.resources.device_db_cache_limit
 import org.meshtastic.core.resources.device_db_cache_limit_summary
 import org.meshtastic.core.resources.info
@@ -67,6 +68,7 @@ import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.rememberShowToastResource
+import org.meshtastic.feature.settings.component.ContrastPickerDialog
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.HomoglyphSetting
 import org.meshtastic.feature.settings.component.NotificationSection
@@ -101,10 +103,18 @@ fun DesktopSettingsScreen(
 
     var showThemePickerDialog by remember { mutableStateOf(false) }
     var showLanguagePickerDialog by remember { mutableStateOf(false) }
+    var showContrastPickerDialog by remember { mutableStateOf(false) }
     if (showThemePickerDialog) {
         ThemePickerDialog(
             onClickTheme = { settingsViewModel.setTheme(it) },
             onDismiss = { showThemePickerDialog = false },
+        )
+    }
+
+    if (showContrastPickerDialog) {
+        ContrastPickerDialog(
+            onClickContrast = { settingsViewModel.setContrastLevel(it) },
+            onDismiss = { showContrastPickerDialog = false },
         )
     }
 
@@ -170,6 +180,14 @@ fun DesktopSettingsScreen(
                         trailingIcon = null,
                     ) {
                         showThemePickerDialog = true
+                    }
+
+                    ListItem(
+                        text = stringResource(Res.string.contrast),
+                        leadingIcon = MeshtasticIcons.FormatPaint,
+                        trailingIcon = null,
+                    ) {
+                        showContrastPickerDialog = true
                     }
 
                     ListItem(

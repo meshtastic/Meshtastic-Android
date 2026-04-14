@@ -33,6 +33,7 @@ import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
+import org.meshtastic.core.domain.usecase.settings.SetContrastLevelUseCase
 import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
 import org.meshtastic.core.domain.usecase.settings.SetLocaleUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
@@ -65,6 +66,7 @@ class SettingsViewModel(
     private val meshLogPrefs: MeshLogPrefs,
     private val notificationPrefs: NotificationPrefs,
     private val setThemeUseCase: SetThemeUseCase,
+    private val setContrastLevelUseCase: SetContrastLevelUseCase,
     private val setLocaleUseCase: SetLocaleUseCase,
     private val setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase,
     private val setProvideLocationUseCase: SetProvideLocationUseCase,
@@ -160,6 +162,10 @@ class SettingsViewModel(
 
     fun setTheme(theme: Int) {
         setThemeUseCase(theme)
+    }
+
+    fun setContrastLevel(level: Int) {
+        setContrastLevelUseCase(level)
     }
 
     /** Set the application locale. Empty string means system default. */
