@@ -73,6 +73,11 @@ Agents **MUST** perform these steps automatically at the start of every session 
    git submodule update --init
    ```
 
+3. **Init secrets:** If `local.properties` does not exist, copy `secrets.defaults.properties` to `local.properties`. Without this the `google` flavor build fails:
+   ```bash
+   [ -f local.properties ] || cp secrets.defaults.properties local.properties
+   ```
+
 ## Troubleshooting
 - **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.
 - **Configuration Cache:** Add `--no-configuration-cache` if cache-related issues persist.

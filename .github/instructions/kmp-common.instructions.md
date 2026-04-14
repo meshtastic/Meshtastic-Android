@@ -15,3 +15,5 @@ applyTo: "**/commonMain/**/*.kt"
 - Strings: use `stringResource(Res.string.key)` from `core:resources`. No hardcoded strings.
 - CMP `stringResource` only supports `%N$s` and `%N$d` — pre-format floats with `NumberFormatter.format()`.
 - Check `gradle/libs.versions.toml` before adding dependencies.
+- Use `safeCatching {}` from `core:common` instead of `runCatching {}` in coroutine/suspend contexts. Keep `runCatching` only in cleanup/teardown code.
+- Use `kotlinx.coroutines.CancellationException`, not `kotlin.coroutines.cancellation.CancellationException`.
