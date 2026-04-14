@@ -1511,5 +1511,6 @@
     <string name="you">You</string>
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
+    <string name="zoom_to_fit_all">Zoom to Fit All Nodes</string>
 </resources>
 

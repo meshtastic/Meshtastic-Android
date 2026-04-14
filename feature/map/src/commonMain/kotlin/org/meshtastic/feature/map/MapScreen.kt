@@ -53,6 +53,7 @@ import org.meshtastic.feature.map.component.MapFilterDropdown
 import org.meshtastic.feature.map.component.MapStyleSelector
 import org.meshtastic.feature.map.component.MaplibreMapContent
 import org.meshtastic.feature.map.model.MapStyle
+import org.meshtastic.feature.map.util.computeBoundingBox
 import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
@@ -205,6 +206,16 @@ fun MapScreen(
                         onToggleWaypoints = viewModel::toggleShowWaypointsOnMap,
                         onTogglePrecisionCircle = viewModel::toggleShowPrecisionCircleOnMap,
                         onSetLastHeardFilter = viewModel::setLastHeardFilter,
+                        onZoomToFitAll = {
+                            val positions =
+                                filteredNodes.mapNotNull { node ->
+                                    node.validPosition?.let { pos ->
+                                        toGeoPositionOrNull(pos.latitude_i, pos.longitude_i)
+                                    }
+                                }
+                            val bbox = computeBoundingBox(positions) ?: return@MapFilterDropdown
+                            scope.launch { cameraState.animateTo(bbox) }
+                        },
                     )
                 },
                 mapTypeContent = {

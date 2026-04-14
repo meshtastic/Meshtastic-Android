@@ -18,8 +18,10 @@ package org.meshtastic.feature.map.util
 
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.Point
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
@@ -90,6 +92,51 @@ class GeoJsonConvertersTest {
         val result = nodesToFeatureCollection(listOf(node), myNodeNum = 42)
         val props = result.features.first().properties
         assertEquals("false", props["is_my_node"].toString())
+    }
+
+    @Test
+    fun nodesToFeatureCollection_isOnline_offlineByDefault() {
+        // lastHeard defaults to 0 (epoch 1970), always older than the 2-hour online threshold
+        val node = Node(num = 1, position = Position(latitude_i = 400000000, longitude_i = -740000000))
+        val result = nodesToFeatureCollection(listOf(node))
+        val props = result.features.first().properties
+        assertEquals("false", props["is_online"].toString())
+    }
+
+    @Test
+    fun nodesToFeatureCollection_isOnline_trueWhenRecentlyHeard() {
+        val recentTimestamp = nowSeconds.toInt()
+        val node =
+            Node(
+                num = 1,
+                position = Position(latitude_i = 400000000, longitude_i = -740000000),
+                lastHeard = recentTimestamp,
+            )
+        val result = nodesToFeatureCollection(listOf(node))
+        val props = result.features.first().properties
+        assertEquals("true", props["is_online"].toString())
+    }
+
+    @Test
+    fun nodesToFeatureCollection_batteryLevel_withKnownBattery() {
+        val node =
+            Node(
+                num = 1,
+                position = Position(latitude_i = 400000000, longitude_i = -740000000),
+                deviceMetrics = DeviceMetrics(battery_level = 75),
+            )
+        val result = nodesToFeatureCollection(listOf(node))
+        val props = result.features.first().properties
+        assertEquals(75, props["battery_level"]?.toString()?.toIntOrNull())
+    }
+
+    @Test
+    fun nodesToFeatureCollection_batteryLevel_nullDefaultsToNegativeOne() {
+        // Default DeviceMetrics has null battery_level — should map to -1 sentinel
+        val node = Node(num = 1, position = Position(latitude_i = 400000000, longitude_i = -740000000))
+        val result = nodesToFeatureCollection(listOf(node))
+        val props = result.features.first().properties
+        assertEquals(-1, props["battery_level"]?.toString()?.toIntOrNull())
     }
 
     @Test
