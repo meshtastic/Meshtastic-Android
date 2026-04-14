@@ -34,6 +34,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.datastore.di.DATASTORE_SCOPE
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
@@ -86,7 +87,7 @@ fun desktopPlatformModule() = module {
     // Ensure it is an application-scoped context that is not canceled by UI lifecycle events."
     // DataStore has no close() API — the in-memory cache is released only when this Job is cancelled
     // (at process exit). Using SupervisorJob so a single store's failure doesn't cascade.
-    single<CoroutineScope>(named("DataStoreScope")) { CoroutineScope(get<CoroutineDispatchers>().io + SupervisorJob()) }
+    single<CoroutineScope>(named(DATASTORE_SCOPE)) { CoroutineScope(get<CoroutineDispatchers>().io + SupervisorJob()) }
 
     includes(desktopPreferencesDataStoreModule(), desktopProtoDataStoreModule())
 
@@ -109,43 +110,43 @@ fun desktopPlatformModule() = module {
 /** Named [DataStore]<[Preferences]> instances for all preference domains. */
 private fun desktopPreferencesDataStoreModule() = module {
     single<DataStore<Preferences>>(named("AnalyticsDataStore")) {
-        createPreferencesDataStore("analytics", get(named("DataStoreScope")))
+        createPreferencesDataStore("analytics", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("HomoglyphEncodingDataStore")) {
-        createPreferencesDataStore("homoglyph_encoding", get(named("DataStoreScope")))
+        createPreferencesDataStore("homoglyph_encoding", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("AppDataStore")) {
-        createPreferencesDataStore("app", get(named("DataStoreScope")))
+        createPreferencesDataStore("app", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("CustomEmojiDataStore")) {
-        createPreferencesDataStore("custom_emoji", get(named("DataStoreScope")))
+        createPreferencesDataStore("custom_emoji", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("MapDataStore")) {
-        createPreferencesDataStore("map", get(named("DataStoreScope")))
+        createPreferencesDataStore("map", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("MapConsentDataStore")) {
-        createPreferencesDataStore("map_consent", get(named("DataStoreScope")))
+        createPreferencesDataStore("map_consent", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("MapTileProviderDataStore")) {
-        createPreferencesDataStore("map_tile_provider", get(named("DataStoreScope")))
+        createPreferencesDataStore("map_tile_provider", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("MeshDataStore")) {
-        createPreferencesDataStore("mesh", get(named("DataStoreScope")))
+        createPreferencesDataStore("mesh", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("RadioDataStore")) {
-        createPreferencesDataStore("radio", get(named("DataStoreScope")))
+        createPreferencesDataStore("radio", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("UiDataStore")) {
-        createPreferencesDataStore("ui", get(named("DataStoreScope")))
+        createPreferencesDataStore("ui", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("MeshLogDataStore")) {
-        createPreferencesDataStore("meshlog", get(named("DataStoreScope")))
+        createPreferencesDataStore("meshlog", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("FilterDataStore")) {
-        createPreferencesDataStore("filter", get(named("DataStoreScope")))
+        createPreferencesDataStore("filter", get(named(DATASTORE_SCOPE)))
     }
     single<DataStore<Preferences>>(named("CorePreferencesDataStore")) {
-        createPreferencesDataStore("core_preferences", get(named("DataStoreScope")))
+        createPreferencesDataStore("core_preferences", get(named(DATASTORE_SCOPE)))
     }
 }
 
@@ -162,7 +163,7 @@ private fun desktopProtoDataStoreModule() = module {
                 producePath = { "$protoDir/local_config.pb".toPath() },
             ),
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig() }),
-            scope = get(named("DataStoreScope")),
+            scope = get(named(DATASTORE_SCOPE)),
         )
     }
 
@@ -175,7 +176,7 @@ private fun desktopProtoDataStoreModule() = module {
                 producePath = { "$protoDir/module_config.pb".toPath() },
             ),
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig() }),
-            scope = get(named("DataStoreScope")),
+            scope = get(named(DATASTORE_SCOPE)),
         )
     }
 
@@ -188,7 +189,7 @@ private fun desktopProtoDataStoreModule() = module {
                 producePath = { "$protoDir/channel_set.pb".toPath() },
             ),
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet() }),
-            scope = get(named("DataStoreScope")),
+            scope = get(named(DATASTORE_SCOPE)),
         )
     }
 
@@ -201,7 +202,7 @@ private fun desktopProtoDataStoreModule() = module {
                 producePath = { "$protoDir/local_stats.pb".toPath() },
             ),
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalStats() }),
-            scope = get(named("DataStoreScope")),
+            scope = get(named(DATASTORE_SCOPE)),
         )
     }
 }
