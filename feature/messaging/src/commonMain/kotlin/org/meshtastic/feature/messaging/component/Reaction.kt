@@ -123,7 +123,6 @@ internal fun ReactionItem(
                     text = emojiCount.toString(),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -248,7 +247,13 @@ internal fun ReactionDialog(
                 text = "$emoji${reactions.size}",
                 modifier =
                 Modifier.clip(CircleShape)
-                    .background(if (selectedEmoji == emoji) Color.Gray else Color.Transparent)
+                    .background(
+                        if (selectedEmoji == emoji) {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        } else {
+                            Color.Transparent
+                        },
+                    )
                     .then(if (isSending) Modifier.graphicsLayer(alpha = 0.5f) else Modifier)
                     .padding(8.dp)
                     .clickable { selectedEmoji = if (selectedEmoji == emoji) null else emoji },
