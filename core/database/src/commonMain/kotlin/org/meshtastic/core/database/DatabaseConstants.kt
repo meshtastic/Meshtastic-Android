@@ -17,6 +17,7 @@
 package org.meshtastic.core.database
 
 import okio.ByteString.Companion.encodeUtf8
+import org.meshtastic.core.common.util.normalizeAddress
 
 object DatabaseConstants {
     const val DB_PREFIX: String = "meshtastic_database"
@@ -38,17 +39,6 @@ object DatabaseConstants {
     // Address anonymization sizing
     const val ADDRESS_ANON_SHORT_LEN: Int = 4
     const val ADDRESS_ANON_EDGE_LEN: Int = 2
-}
-
-fun normalizeAddress(addr: String?): String {
-    val u = addr?.trim()?.uppercase()
-    val normalized =
-        when {
-            u.isNullOrBlank() -> "DEFAULT"
-            u == "N" || u == "NULL" -> "DEFAULT"
-            else -> u.replace(":", "")
-        }
-    return normalized
 }
 
 fun shortSha1(s: String): String = s.encodeUtf8().sha1().hex().take(DatabaseConstants.DB_NAME_HASH_LEN)

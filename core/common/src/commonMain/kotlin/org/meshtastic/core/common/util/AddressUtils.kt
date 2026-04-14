@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.core.common.util
 
-package org.meshtastic.core.common
-
-/** Utility function to make it easy to declare byte arrays */
-fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
-
-fun xorHash(b: ByteArray) = b.fold(0) { acc, x -> acc xor (x.toInt() and BYTE_MASK) }
-
-private const val BYTE_MASK = 0xff
+/**
+ * Normalizes a BLE/device address to a canonical uppercase form with colons removed. Returns `"DEFAULT"` for null,
+ * blank, or sentinel values (`"N"`, `"NULL"`).
+ */
+fun normalizeAddress(addr: String?): String {
+    val u = addr?.trim()?.uppercase()
+    return when {
+        u.isNullOrBlank() -> "DEFAULT"
+        u == "N" || u == "NULL" -> "DEFAULT"
+        else -> u.replace(":", "")
+    }
+}
