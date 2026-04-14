@@ -242,6 +242,19 @@ class TracerouteChartTest {
     }
 
     @Test
+    fun timeSeconds_truncatesSubSecondPrecision() {
+        // received_date with sub-second remainder (e.g. 1000 seconds + 456 ms)
+        val requestTime = 1000L * MS_PER_SEC + 456L
+        val requests = listOf(makeRequest(id = 1, receivedDateMillis = requestTime))
+        val results = emptyList<MeshLog>()
+
+        val point = resolveTraceroutePoints(requests, results).first()
+
+        // Must truncate to whole seconds to avoid Vico "x-values are too precise" crash
+        assertEquals(1000.0, point.timeSeconds)
+    }
+
+    @Test
     fun returnHops_computedWhenRouteBackAvailable() {
         val requests = listOf(makeRequest(id = 1, receivedDateMillis = 1000L * MS_PER_SEC))
         // 1 intermediate hop on return path, with hop_start and snr_back set
