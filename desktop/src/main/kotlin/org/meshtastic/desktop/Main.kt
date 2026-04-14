@@ -36,9 +36,11 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.rememberWindowState
@@ -55,10 +57,13 @@ import coil3.util.DebugLogger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
+import org.jetbrains.compose.resources.decodeToSvgPainter
+import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.database.desktopDataDir
+import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
@@ -81,26 +86,33 @@ private const val DISK_CACHE_MAX_BYTES = 32L * 1024L * 1024L // 32 MiB
 /**
  * Loads an SVG from JVM classpath resources and returns a [Painter].
  *
- * The Compose Desktop `useResource`/`loadSvgPainter` APIs are deprecated in favour of the CMP resource library, but CMP
- * resources only support XML vector drawables and raster images — not raw SVGs. Since the desktop module is a JVM-only
- * host shell (not a KMP library with `composeResources/`), we suppress the deprecation here.
+ * Uses the CMP 1.11 `decodeToSvgPainter` extension which replaces the deprecated `useResource`/`loadSvgPainter` pair.
+ * The SVG bytes are read from the classpath because CMP `composeResources/` only supports XML vector drawables and
+ * raster images — not raw SVGs. Since the desktop module is a JVM-only host shell, classpath resource access is safe.
  */
-@Suppress("DEPRECATION")
 @Composable
-private fun svgPainterResource(path: String, density: Density): Painter =
-    remember(path) { androidx.compose.ui.res.useResource(path) { androidx.compose.ui.res.loadSvgPainter(it, density) } }
+private fun svgPainterResource(path: String, density: Density): Painter = remember(path) {
+    val bytes = Thread.currentThread().contextClassLoader!!.getResourceAsStream(path)!!.readAllBytes()
+    bytes.decodeToSvgPainter(density)
+}
 
-@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalCoilApi::class)
 fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     Logger.i { "Meshtastic Desktop — Starting" }
 
     val koinApp = remember { startKoin { modules(desktopPlatformModule(), desktopModule()) } }
-    val systemLocale = remember { Locale.getDefault() }
     val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
-    val httpClient = remember { koinApp.koin.get<HttpClient>() }
-    val buildConfigProvider = remember { koinApp.koin.get<BuildConfigProvider>() }
 
+    DeepLinkHandler(args, uiViewModel)
+    MeshServiceLifecycle(koinApp)
+    ThemeAndLocaleProvider(koinApp, uiViewModel)
+}
+
+// ----- Deep link handling -----
+
+/** Processes deep-link URIs from CLI arguments and OS-level URI handlers. */
+@Composable
+private fun ApplicationScope.DeepLinkHandler(args: Array<String>, uiViewModel: UIViewModel) {
     LaunchedEffect(args) {
         args.forEach { arg ->
             if (
@@ -123,13 +135,27 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
             }
         }
     }
+}
 
+// ----- Mesh service lifecycle -----
+
+/** Starts [MeshServiceOrchestrator] on composition and stops it on disposal. */
+@Composable
+private fun MeshServiceLifecycle(koinApp: KoinApplication) {
     val meshServiceController = remember { koinApp.koin.get<MeshServiceOrchestrator>() }
     DisposableEffect(Unit) {
         meshServiceController.start()
         onDispose { meshServiceController.stop() }
     }
+}
 
+// ----- Theme, locale, and application shell -----
+
+/** Resolves the user's theme/locale preferences and renders the full application UI. */
+@Composable
+@OptIn(ExperimentalCoilApi::class)
+private fun ApplicationScope.ThemeAndLocaleProvider(koinApp: KoinApplication, uiViewModel: UIViewModel) {
+    val systemLocale = remember { Locale.getDefault() }
     val uiPrefs = remember { koinApp.koin.get<UiPrefs>() }
     val themePref by uiPrefs.theme.collectAsState(initial = -1)
     val localePref by uiPrefs.locale.collectAsState(initial = "")
@@ -143,6 +169,19 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
             else -> isSystemInDarkTheme()
         }
 
+    MeshtasticDesktopApp(koinApp, uiViewModel, isDarkTheme)
+}
+
+// ----- Application chrome (tray, window, navigation) -----
+
+/** Composes the system tray, window, and Coil image loader. */
+@Composable
+@OptIn(ExperimentalCoilApi::class)
+private fun ApplicationScope.MeshtasticDesktopApp(
+    koinApp: KoinApplication,
+    uiViewModel: UIViewModel,
+    isDarkTheme: Boolean,
+) {
     var isAppVisible by remember { mutableStateOf(true) }
     var isWindowReady by remember { mutableStateOf(false) }
     val trayState = rememberTrayState()
@@ -159,6 +198,33 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
         notificationManager.notifications.collect { notification -> trayState.sendNotification(notification) }
     }
 
+    WindowBoundsManager(desktopPrefs, windowState) { isWindowReady = true }
+
+    Tray(
+        state = trayState,
+        icon = trayIcon,
+        tooltip = "Meshtastic Desktop",
+        onAction = { isAppVisible = true },
+        menu = {
+            Item("Show Meshtastic", onClick = { isAppVisible = true })
+            Item("Quit", onClick = ::exitApplication)
+        },
+    )
+
+    if (isWindowReady && isAppVisible) {
+        MeshtasticWindow(koinApp, uiViewModel, isDarkTheme, appIcon, windowState) { isAppVisible = false }
+    }
+}
+
+// ----- Window bounds persistence -----
+
+/** Restores window geometry from preferences and persists changes via [snapshotFlow]. */
+@Composable
+private fun WindowBoundsManager(
+    desktopPrefs: DesktopPreferencesDataSource,
+    windowState: WindowState,
+    onReady: () -> Unit,
+) {
     LaunchedEffect(Unit) {
         val initialWidth = desktopPrefs.windowWidth.first()
         val initialHeight = desktopPrefs.windowHeight.first()
@@ -173,7 +239,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                 WindowPosition(Alignment.Center)
             }
 
-        isWindowReady = true
+        onReady()
 
         snapshotFlow {
             val x = if (windowState.position.isSpecified) windowState.position.x.value else Float.NaN
@@ -184,87 +250,100 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                 desktopPrefs.setWindowBounds(width = bounds[0], height = bounds[1], x = bounds[2], y = bounds[3])
             }
     }
+}
 
-    Tray(
-        state = trayState,
-        icon = trayIcon,
-        tooltip = "Meshtastic Desktop",
-        onAction = { isAppVisible = true },
-        menu = {
-            Item("Show Meshtastic", onClick = { isAppVisible = true })
-            Item("Quit", onClick = ::exitApplication)
-        },
-    )
+// ----- Main window with keyboard shortcuts and Coil -----
 
-    if (isWindowReady && isAppVisible) {
-        val multiBackstack = rememberMultiBackstack(TopLevelDestination.Connections.route)
-        val backStack = multiBackstack.activeBackStack
+/** Renders the main application window with keyboard shortcuts, Coil image loading, and the Compose UI tree. */
+@Composable
+@OptIn(ExperimentalCoilApi::class)
+private fun ApplicationScope.MeshtasticWindow(
+    koinApp: KoinApplication,
+    uiViewModel: UIViewModel,
+    isDarkTheme: Boolean,
+    appIcon: Painter,
+    windowState: WindowState,
+    onCloseRequest: () -> Unit,
+) {
+    val multiBackstack = rememberMultiBackstack(TopLevelDestination.Connections.route)
 
-        Window(
-            onCloseRequest = { isAppVisible = false },
-            title = "Meshtastic Desktop",
-            icon = appIcon,
-            state = windowState,
-            onPreviewKeyEvent = { event ->
-                if (event.type != KeyEventType.KeyDown || !event.isMetaPressed) return@Window false
-                when {
-                    event.key == Key.Q -> {
-                        exitApplication()
-                        true
-                    }
-                    event.key == Key.Comma -> {
-                        if (
-                            TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())
-                        ) {
-                            multiBackstack.navigateTopLevel(TopLevelDestination.Settings.route)
-                        }
-                        true
-                    }
-                    event.key == Key.One -> {
-                        multiBackstack.navigateTopLevel(TopLevelDestination.Conversations.route)
-                        true
-                    }
-                    event.key == Key.Two -> {
-                        multiBackstack.navigateTopLevel(TopLevelDestination.Nodes.route)
-                        true
-                    }
-                    event.key == Key.Three -> {
-                        multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
-                        true
-                    }
-                    event.key == Key.Four -> {
-                        multiBackstack.navigateTopLevel(TopLevelDestination.Connections.route)
-                        true
-                    }
-                    event.key == Key.Slash -> {
-                        backStack.add(SettingsRoute.About)
-                        true
-                    }
-                    else -> false
-                }
-            },
-        ) {
-            setSingletonImageLoaderFactory { context ->
-                val cacheDir = desktopDataDir() + "/image_cache_v3"
-                ImageLoader.Builder(context)
-                    .components {
-                        add(KtorNetworkFetcherFactory(httpClient = httpClient))
-                        // Render SVGs to a bitmap on Desktop to avoid Skiko vector rendering artifacts
-                        // that show up as solid/black hardware images.
-                        add(SvgDecoder.Factory(renderToBitmap = true))
-                    }
-                    .memoryCache { MemoryCache.Builder().maxSizeBytes(MEMORY_CACHE_MAX_BYTES).build() }
-                    .diskCache {
-                        DiskCache.Builder().directory(cacheDir.toPath()).maxSizeBytes(DISK_CACHE_MAX_BYTES).build()
-                    }
-                    .logger(
-                        if (buildConfigProvider.isDebug) DebugLogger(minLevel = CoilLogger.Level.Verbose) else null,
-                    )
-                    .crossfade(true)
-                    .build()
+    Window(
+        onCloseRequest = onCloseRequest,
+        title = "Meshtastic Desktop",
+        icon = appIcon,
+        state = windowState,
+        onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
+    ) {
+        CoilImageLoaderSetup(koinApp)
+        AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
+    }
+}
+
+/** Configures the Coil singleton [ImageLoader] with Ktor networking, SVG decoding, and caching. */
+@Composable
+@OptIn(ExperimentalCoilApi::class)
+private fun CoilImageLoaderSetup(koinApp: KoinApplication) {
+    val httpClient = remember { koinApp.koin.get<HttpClient>() }
+    val buildConfigProvider = remember { koinApp.koin.get<BuildConfigProvider>() }
+
+    setSingletonImageLoaderFactory { context ->
+        val cacheDir = desktopDataDir() + "/image_cache_v3"
+        ImageLoader.Builder(context)
+            .components {
+                add(KtorNetworkFetcherFactory(httpClient = httpClient))
+                // Render SVGs to a bitmap on Desktop to avoid Skiko vector rendering artifacts
+                // that show up as solid/black hardware images.
+                add(SvgDecoder.Factory(renderToBitmap = true))
             }
+            .memoryCache { MemoryCache.Builder().maxSizeBytes(MEMORY_CACHE_MAX_BYTES).build() }
+            .diskCache { DiskCache.Builder().directory(cacheDir.toPath()).maxSizeBytes(DISK_CACHE_MAX_BYTES).build() }
+            .logger(if (buildConfigProvider.isDebug) DebugLogger(minLevel = CoilLogger.Level.Verbose) else null)
+            .crossfade(true)
+            .build()
+    }
+}
 
-            AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
+// ----- Keyboard shortcuts -----
+
+/** Handles Cmd-key shortcuts. Returns `true` if the event was consumed. */
+private fun handleKeyboardShortcut(
+    event: androidx.compose.ui.input.key.KeyEvent,
+    multiBackstack: MultiBackstack,
+    exitApplication: () -> Unit,
+): Boolean {
+    if (event.type != KeyEventType.KeyDown || !event.isMetaPressed) return false
+    val backStack = multiBackstack.activeBackStack
+    return when (event.key) {
+        Key.Q -> {
+            exitApplication()
+            true
         }
+        Key.Comma -> {
+            if (TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())) {
+                multiBackstack.navigateTopLevel(TopLevelDestination.Settings.route)
+            }
+            true
+        }
+        Key.One -> {
+            multiBackstack.navigateTopLevel(TopLevelDestination.Conversations.route)
+            true
+        }
+        Key.Two -> {
+            multiBackstack.navigateTopLevel(TopLevelDestination.Nodes.route)
+            true
+        }
+        Key.Three -> {
+            multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
+            true
+        }
+        Key.Four -> {
+            multiBackstack.navigateTopLevel(TopLevelDestination.Connections.route)
+            true
+        }
+        Key.Slash -> {
+            backStack.add(SettingsRoute.About)
+            true
+        }
+        else -> false
     }
 }
