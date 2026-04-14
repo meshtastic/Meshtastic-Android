@@ -112,7 +112,7 @@ internal fun resolveTraceroutePoints(requests: List<MeshLog>, results: List<Mesh
         val requestPacketId = request.fromRadio.packet?.id
         val result = results.find { it.fromRadio.packet?.decoded?.request_id == requestPacketId }
         val route = result?.fromRadio?.packet?.fullRouteDiscovery
-        val timeSeconds = request.received_date.toDouble() / MS_PER_SEC
+        val timeSeconds = (request.received_date / MS_PER_SEC).toDouble()
 
         val forwardHops = route?.let { maxOf(0, it.route.size - 2) }
         val returnHops = route?.let { if (it.route_back.isNotEmpty()) maxOf(0, it.route_back.size - 2) else null }
