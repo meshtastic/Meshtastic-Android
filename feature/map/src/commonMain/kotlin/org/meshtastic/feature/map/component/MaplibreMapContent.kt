@@ -28,15 +28,20 @@ import kotlinx.coroutines.launch
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.expressions.dsl.asString
+import org.maplibre.compose.expressions.dsl.condition
 import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.convertToBoolean
 import org.maplibre.compose.expressions.dsl.convertToColor
 import org.maplibre.compose.expressions.dsl.convertToNumber
 import org.maplibre.compose.expressions.dsl.dp
 import org.maplibre.compose.expressions.dsl.exponential
 import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.format
 import org.maplibre.compose.expressions.dsl.interpolate
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.expressions.dsl.offset
+import org.maplibre.compose.expressions.dsl.span
+import org.maplibre.compose.expressions.dsl.switch
 import org.maplibre.compose.expressions.dsl.times
 import org.maplibre.compose.expressions.dsl.zoom
 import org.maplibre.compose.layers.CircleLayer
@@ -69,6 +74,8 @@ import org.meshtastic.feature.map.util.waypointsToFeatureCollection
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private val NodeMarkerColor = Color(0xFF6750A4)
+private val OnlineStrokeColor = Color(0xFF4CAF50) // Green — node heard within online threshold
+private val OfflineStrokeColor = Color(0xFF9E9E9E) // Gray — node not heard recently
 private const val CLUSTER_RADIUS = 50
 private const val CLUSTER_MIN_POINTS = 10
 private const val PRECISION_CIRCLE_FILL_ALPHA = 0.1f
@@ -227,7 +234,7 @@ private fun NodeMarkerLayers(
         textSize = const(1.2f.em),
     )
 
-    // Individual node markers with per-node background color
+    // Individual node markers with per-node background color and online-status stroke
     CircleLayer(
         id = "node-markers",
         source = nodesSource,
@@ -235,7 +242,11 @@ private fun NodeMarkerLayers(
         radius = const(NODE_MARKER_RADIUS),
         color = feature["background_color"].convertToColor(const(NodeMarkerColor)),
         strokeWidth = const(MARKER_STROKE_WIDTH),
-        strokeColor = const(Color.White),
+        strokeColor =
+        switch(
+            condition(feature["is_online"].convertToBoolean(), const(OnlineStrokeColor)),
+            fallback = const(OfflineStrokeColor),
+        ),
         onClick = { features ->
             val nodeNum = features.firstOrNull()?.properties?.get("node_num")?.toString()?.toIntOrNull()
             if (nodeNum != null) {
@@ -247,12 +258,23 @@ private fun NodeMarkerLayers(
         },
     )
 
-    // Short name labels below node markers
+    // Short name labels with online status dot below node markers
     SymbolLayer(
         id = "node-labels",
         source = nodesSource,
         filter = !feature.has("cluster"),
-        textField = feature["short_name"].asString(),
+        textField =
+        format(
+            span(feature["short_name"].asString()),
+            span(
+                const(" \u25CF"), // U+25CF Black Circle
+                textColor =
+                switch(
+                    condition(feature["is_online"].convertToBoolean(), const(OnlineStrokeColor)),
+                    fallback = const(OfflineStrokeColor),
+                ),
+            ),
+        ),
         textSize = const(0.9f.em),
         textOffset = offset(0f.em, LABEL_OFFSET_EM.em),
         textColor = const(Color.DarkGray),

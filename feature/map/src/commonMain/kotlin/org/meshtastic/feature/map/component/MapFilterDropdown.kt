@@ -39,10 +39,12 @@ import org.meshtastic.core.resources.last_heard_filter_label
 import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.resources.zoom_to_fit_all
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.Lens
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
+import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
 import kotlin.math.roundToInt
@@ -62,6 +64,7 @@ internal fun MapFilterDropdown(
     onToggleWaypoints: () -> Unit,
     onTogglePrecisionCircle: () -> Unit,
     onSetLastHeardFilter: (LastHeardFilter) -> Unit,
+    onZoomToFitAll: () -> Unit,
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         DropdownMenuItem(
@@ -101,6 +104,20 @@ internal fun MapFilterDropdown(
         )
         HorizontalDivider()
         LastHeardSlider(filterState.lastHeardFilter, onSetLastHeardFilter)
+        HorizontalDivider()
+        DropdownMenuItem(
+            text = { Text(stringResource(Res.string.zoom_to_fit_all)) },
+            onClick = {
+                onZoomToFitAll()
+                onDismissRequest()
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = MeshtasticIcons.SelectAll,
+                    contentDescription = stringResource(Res.string.zoom_to_fit_all),
+                )
+            },
+        )
     }
 }
 

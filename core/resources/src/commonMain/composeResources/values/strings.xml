@@ -836,6 +836,7 @@
     <string name="only_favorites">Only Favorites</string>
     <string name="show_waypoints">Show Waypoints</string>
     <string name="show_precision_circle">Show Precision Circles</string>
+    <string name="zoom_to_fit_all">Zoom to Fit All Nodes</string>
     <string name="client_notification">Client Notification</string>
     <string name="key_verification_title">Key Verification</string>
     <string name="key_verification_request_title">Key Verification Request</string>
