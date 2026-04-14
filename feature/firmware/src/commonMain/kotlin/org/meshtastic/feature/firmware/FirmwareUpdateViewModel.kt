@@ -36,6 +36,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -150,7 +151,7 @@ class FirmwareUpdateViewModel(
         updateJob =
             viewModelScope.launch {
                 _state.value = FirmwareUpdateState.Checking
-                runCatching {
+                safeCatching {
                     val ourNode = nodeRepository.myNodeInfo.value
                     val address = radioPrefs.devAddr.value?.drop(1)
                     if (address == null || ourNode == null) {
@@ -203,7 +204,6 @@ class FirmwareUpdateViewModel(
                     }
                 }
                     .onFailure { e ->
-                        if (e is CancellationException) throw e
                         Logger.e(e) { "Error checking for updates" }
                         val unknownError = UiText.Resource(Res.string.firmware_update_unknown_error)
                         _state.value =
