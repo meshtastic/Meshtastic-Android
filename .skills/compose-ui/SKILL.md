@@ -20,6 +20,25 @@ Guidelines for building shared UI, adaptive layouts, and handling strings/resour
     stringResource(Res.string.battery_percent, formatted)   // uses %1$s
     ```
   - **Percent Literals:** Use bare `%` (not `%%`) for literal percent signs in CMP-consumed strings.
+
+### String Formatting Decision Tree
+Choose the right tool for the job:
+
+| Scenario | Tool | Example |
+|----------|------|---------|
+| **Metric display** (temp, voltage, %, signal) | `MetricFormatter.*` | `MetricFormatter.temperature(25.0f, isFahrenheit)` → `"77.0°F"` |
+| **Simple number + unit** | `NumberFormatter` + interpolation | `"${NumberFormatter.format(val, 1)} dB"` |
+| **Localized template from strings.xml** | `stringResource(Res.string.key, preFormattedArgs)` | `stringResource(Res.string.battery, formatted)` |
+| **Non-composable template** (notifications, plain functions) | `formatString(template, args)` | `formatString(template, label, value)` |
+| **Hex formatting** | `formatString` | `formatString("!%08x", nodeNum)` |
+| **Date/time** | `DateFormatter` | `DateFormatter.format(instant)` |
+
+**Rules:**
+1. **NEVER use `%.Nf` in strings.xml** — CMP cannot substitute them. Use `%N$s` and pre-format floats.
+2. **Prefer `MetricFormatter`** over scattered `formatString("%.1f°C", temp)` calls.
+3. **`formatString` (expect/actual)** is still needed for: hex formats, multi-arg templates fetched at runtime, and chart axis formatters. It works on both JVM and iOS.
+4. **`NumberFormatter`** always uses `.` as decimal separator — intentional for mesh networking precision.
+
 - **Workflow to Add a String:**
   1. Add to `core/resources/src/commonMain/composeResources/values/strings.xml`.
   2. Use the generated `org.meshtastic.core.resources.<key>` symbol.

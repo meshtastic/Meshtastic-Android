@@ -19,10 +19,9 @@ package org.meshtastic.core.model
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.GPSFormat
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.bearing
-import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.latLongToMeter
-import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.proto.Config
@@ -143,34 +142,26 @@ data class Node(
     private fun EnvironmentMetrics.getDisplayStrings(isFahrenheit: Boolean): List<String> {
         val temp =
             if ((temperature ?: 0f) != 0f) {
-                if (isFahrenheit) {
-                    formatString("%.1f°F", celsiusToFahrenheit(temperature ?: 0f))
-                } else {
-                    formatString("%.1f°C", temperature)
-                }
+                MetricFormatter.temperature(temperature ?: 0f, isFahrenheit)
             } else {
                 null
             }
-        val humidity = if ((relative_humidity ?: 0f) != 0f) formatString("%.0f%%", relative_humidity) else null
+        val humidity = if ((relative_humidity ?: 0f) != 0f) MetricFormatter.humidity(relative_humidity ?: 0f) else null
         val soilTemperatureStr =
             if ((soil_temperature ?: 0f) != 0f) {
-                if (isFahrenheit) {
-                    formatString("%.1f°F", celsiusToFahrenheit(soil_temperature ?: 0f))
-                } else {
-                    formatString("%.1f°C", soil_temperature)
-                }
+                MetricFormatter.temperature(soil_temperature ?: 0f, isFahrenheit)
             } else {
                 null
             }
         val soilMoistureRange = 0..100
         val soilMoisture =
             if ((soil_moisture ?: Int.MIN_VALUE) in soilMoistureRange && (soil_temperature ?: 0f) != 0f) {
-                formatString("%d%%", soil_moisture)
+                MetricFormatter.percent(soil_moisture ?: 0)
             } else {
                 null
             }
-        val voltage = if ((this.voltage ?: 0f) != 0f) formatString("%.2fV", this.voltage) else null
-        val current = if ((current ?: 0f) != 0f) formatString("%.1fmA", current) else null
+        val voltage = if ((this.voltage ?: 0f) != 0f) MetricFormatter.voltage(this.voltage ?: 0f) else null
+        val current = if ((current ?: 0f) != 0f) MetricFormatter.current(current ?: 0f) else null
         val iaq = if ((iaq ?: 0) != 0) "IAQ: $iaq" else null
 
         return listOfNotNull(
@@ -199,9 +190,12 @@ data class Node(
         fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
 
-            val candidateRelayNodes = nodes.filter {
-                it.num != ourNodeNum && it.lastHeard != 0 && (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
-            }
+            val candidateRelayNodes =
+                nodes.filter {
+                    it.num != ourNodeNum &&
+                        it.lastHeard != 0 &&
+                        (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
+                }
 
             val closestRelayNode =
                 if (candidateRelayNodes.size == 1) {

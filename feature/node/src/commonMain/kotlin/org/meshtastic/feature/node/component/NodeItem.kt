@@ -46,11 +46,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
-import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
@@ -257,14 +256,14 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     icon = MeshtasticIcons.ChannelUtilization,
                     contentDescription = stringResource(Res.string.channel_utilization),
                     label = stringResource(Res.string.channel_utilization),
-                    text = formatString("%.1f%%", thatNode.deviceMetrics.channel_utilization),
+                    text = MetricFormatter.percent(thatNode.deviceMetrics.channel_utilization ?: 0f),
                     contentColor = contentColor,
                 )
                 IconInfo(
                     icon = MeshtasticIcons.AirUtilization,
                     contentDescription = stringResource(Res.string.air_utilization),
                     label = stringResource(Res.string.air_utilization),
-                    text = formatString("%.1f%%", thatNode.deviceMetrics.air_util_tx),
+                    text = MetricFormatter.percent(thatNode.deviceMetrics.air_util_tx ?: 0f),
                     contentColor = contentColor,
                 )
             }
@@ -317,31 +316,24 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     }
 
     if ((env.temperature ?: 0f) != 0f) {
-        val temp =
-            if (tempInFahrenheit) {
-                formatString("%.1f°F", celsiusToFahrenheit(env.temperature ?: 0f))
-            } else {
-                formatString("%.1f°C", env.temperature ?: 0f)
-            }
+        val temp = MetricFormatter.temperature(env.temperature ?: 0f, tempInFahrenheit)
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
     if ((env.relative_humidity ?: 0f) != 0f) {
         items.add {
-            HumidityInfo(humidity = formatString("%.0f%%", env.relative_humidity ?: 0f), contentColor = contentColor)
+            HumidityInfo(humidity = MetricFormatter.humidity(env.relative_humidity ?: 0f), contentColor = contentColor)
         }
     }
     if ((env.barometric_pressure ?: 0f) != 0f) {
         items.add {
-            PressureInfo(pressure = formatString("%.1fhPa", env.barometric_pressure ?: 0f), contentColor = contentColor)
+            PressureInfo(
+                pressure = MetricFormatter.pressure(env.barometric_pressure ?: 0f),
+                contentColor = contentColor,
+            )
         }
     }
     if ((env.soil_temperature ?: 0f) != 0f) {
-        val temp =
-            if (tempInFahrenheit) {
-                formatString("%.1f°F", celsiusToFahrenheit(env.soil_temperature ?: 0f))
-            } else {
-                formatString("%.1f°C", env.soil_temperature ?: 0f)
-            }
+        val temp = MetricFormatter.temperature(env.soil_temperature ?: 0f, tempInFahrenheit)
         items.add { SoilTemperatureInfo(temp = temp, contentColor = contentColor) }
     }
     if ((env.soil_moisture ?: 0) != 0 && (env.soil_temperature ?: 0f) != 0f) {
@@ -350,7 +342,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.voltage ?: 0f) != 0f) {
         items.add {
             PowerInfo(
-                value = formatString("%.2fV", env.voltage ?: 0f),
+                value = MetricFormatter.voltage(env.voltage ?: 0f),
                 label = stringResource(Res.string.voltage),
                 contentColor = contentColor,
             )
@@ -359,7 +351,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.current ?: 0f) != 0f) {
         items.add {
             PowerInfo(
-                value = formatString("%.1fmA", env.current ?: 0f),
+                value = MetricFormatter.current(env.current ?: 0f),
                 label = stringResource(Res.string.current),
                 contentColor = contentColor,
             )
