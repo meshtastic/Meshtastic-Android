@@ -192,7 +192,13 @@ fun MessageItem(
 
     val containerColor =
         when (contrastLevel) {
-            ContrastLevel.HIGH -> MaterialTheme.colorScheme.surfaceContainerHigh
+            ContrastLevel.HIGH ->
+                when {
+                    message.filtered -> MaterialTheme.colorScheme.surfaceContainerLow
+                    inSelectionMode && selected -> MaterialTheme.colorScheme.surfaceContainerHighest
+                    inSelectionMode && !selected -> MaterialTheme.colorScheme.surfaceContainerLow
+                    else -> MaterialTheme.colorScheme.surfaceContainerHigh
+                }
             ContrastLevel.MEDIUM -> nodeColor.copy(alpha = (alpha + 0.2f).coerceAtMost(1f))
             ContrastLevel.STANDARD -> nodeColor.copy(alpha = alpha)
         }
