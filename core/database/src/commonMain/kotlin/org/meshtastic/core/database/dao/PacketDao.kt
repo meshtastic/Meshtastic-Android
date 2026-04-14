@@ -18,7 +18,9 @@ package org.meshtastic.core.database.dao
 
 import androidx.paging.PagingSource
 import androidx.room3.Dao
+import androidx.room3.Insert
 import androidx.room3.MapColumn
+import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
 import androidx.room3.Update
@@ -366,24 +368,24 @@ interface PacketDao {
 
     @Upsert suspend fun upsertContactSettings(contacts: List<ContactSettings>)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertContactSettingsIgnore(contacts: List<ContactSettings>)
+
+    @Query("UPDATE contact_settings SET muteUntil = :muteUntil WHERE contact_key IN (:contactKeys)")
+    suspend fun updateMuteUntil(contactKeys: List<String>, muteUntil: Long)
+
     @Transaction
     suspend fun setMuteUntil(contacts: List<String>, until: Long) {
-        val contactList =
-            contacts.map { contact ->
-                // Always mute
-                val absoluteMuteUntil =
-                    if (until == Long.MAX_VALUE) {
-                        Long.MAX_VALUE
-                    } else if (until == 0L) { // unmute
-                        0L
-                    } else {
-                        nowMillis + until
-                    }
-
-                getContactSettings(contact)?.copy(muteUntil = absoluteMuteUntil)
-                    ?: ContactSettings(contact_key = contact, muteUntil = absoluteMuteUntil)
+        val absoluteMuteUntil =
+            when {
+                until == Long.MAX_VALUE -> Long.MAX_VALUE
+                until == 0L -> 0L
+                else -> nowMillis + until
             }
-        upsertContactSettings(contactList)
+        // Ensure rows exist for all contacts (IGNORE avoids overwriting existing data)
+        insertContactSettingsIgnore(contacts.map { ContactSettings(contact_key = it) })
+        // Atomic column-level update — no read-then-write race
+        updateMuteUntil(contacts, absoluteMuteUntil)
     }
 
     @Upsert suspend fun insert(reaction: ReactionEntity)

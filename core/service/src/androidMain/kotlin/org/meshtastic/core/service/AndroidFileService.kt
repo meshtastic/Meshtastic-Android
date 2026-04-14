@@ -18,7 +18,6 @@ package org.meshtastic.core.service
 
 import android.app.Application
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.BufferedSink
 import okio.BufferedSource
@@ -28,13 +27,15 @@ import okio.source
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.common.util.toAndroidUri
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FileService
 import java.io.FileOutputStream
 
 @Single
-class AndroidFileService(private val context: Application) : FileService {
+class AndroidFileService(private val context: Application, private val dispatchers: CoroutineDispatchers) :
+    FileService {
     override suspend fun write(uri: MeshtasticUri, block: suspend (BufferedSink) -> Unit): Boolean =
-        withContext(Dispatchers.IO) {
+        withContext(dispatchers.io) {
             try {
                 val pfd = context.contentResolver.openFileDescriptor(uri.toAndroidUri(), "wt")
                 if (pfd == null) {
@@ -52,7 +53,7 @@ class AndroidFileService(private val context: Application) : FileService {
         }
 
     override suspend fun read(uri: MeshtasticUri, block: suspend (BufferedSource) -> Unit): Boolean =
-        withContext(Dispatchers.IO) {
+        withContext(dispatchers.io) {
             try {
                 val success =
                     context.contentResolver.openInputStream(uri.toAndroidUri())?.use { inputStream ->

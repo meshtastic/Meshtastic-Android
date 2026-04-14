@@ -17,12 +17,12 @@
 package org.meshtastic.core.network.repository
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import org.koin.core.annotation.Single
+import org.meshtastic.core.di.CoroutineDispatchers
 import java.io.IOException
 import java.net.InetAddress
 import java.net.NetworkInterface
@@ -31,7 +31,7 @@ import javax.jmdns.ServiceEvent
 import javax.jmdns.ServiceListener
 
 @Single
-class JvmServiceDiscovery : ServiceDiscovery {
+class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : ServiceDiscovery {
     @Suppress("TooGenericExceptionCaught")
     override val resolvedServices: Flow<List<DiscoveredService>> =
         callbackFlow {
@@ -98,7 +98,7 @@ class JvmServiceDiscovery : ServiceDiscovery {
                 }
             }
         }
-            .flowOn(Dispatchers.IO)
+            .flowOn(dispatchers.io)
 
     companion object {
         /**
