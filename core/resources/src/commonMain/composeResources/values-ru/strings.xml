@@ -590,6 +590,9 @@
     <string name="output_duration_milliseconds">Продолжительность вывода (миллисекунды)</string>
     <string name="nag_timeout_seconds">Таймаут Nag (в секундах)</string>
     <string name="ringtone">Рингтон</string>
+    <string name="ringtone_imported">Импортировать рингтон</string>
+    <string name="ringtone_file_empty">Файл пуст</string>
+    <string name="ringtone_import_error">Ошибка импорта: %1$s</string>
     <string name="play">Воспроизвести</string>
     <string name="use_i2s_as_buzzer">Использовать I2S как буззер</string>
     <string name="lora_config">LoRa</string>
