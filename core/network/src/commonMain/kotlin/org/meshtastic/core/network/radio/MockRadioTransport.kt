@@ -326,8 +326,8 @@ class MockRadioTransport(
                 user =
                 User(
                     id = DataPacket.nodeNumToDefaultId(numIn),
-                    long_name = "Sim " + numIn.toString(16),
-                    short_name = getInitials("Sim " + numIn.toString(16)),
+                    long_name = "Sim ${numIn.toString(16)}",
+                    short_name = getInitials("Sim ${numIn.toString(16)}"),
                     hw_model = HardwareModel.ANDROID_SIM,
                 ),
                 position =

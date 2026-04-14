@@ -45,7 +45,7 @@ internal fun calculateMacPlusOne(macAddress: String): String {
     if (parts.size != MAC_PARTS_COUNT) return macAddress
     val lastByte = parts[MAC_PARTS_COUNT - 1].toIntOrNull(HEX_RADIX) ?: return macAddress
     val incremented = ((lastByte + 1) and BYTE_MASK).toString(HEX_RADIX).uppercase().padStart(2, '0')
-    return parts.take(MAC_PARTS_COUNT - 1).joinToString(":") + ":" + incremented
+    return "${parts.take(MAC_PARTS_COUNT - 1).joinToString(":")}:$incremented"
 }
 
 /**

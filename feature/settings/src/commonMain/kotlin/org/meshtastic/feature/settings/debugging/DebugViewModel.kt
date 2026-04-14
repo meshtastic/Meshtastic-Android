@@ -61,15 +61,6 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
 
-data class SearchMatch(val logIndex: Int, val start: Int, val end: Int, val field: String)
-
-data class SearchState(
-    val searchText: String = "",
-    val currentMatchIndex: Int = -1,
-    val allMatches: List<SearchMatch> = emptyList(),
-    val hasMatches: Boolean = false,
-)
-
 enum class FilterMode {
     AND,
     OR,
@@ -387,17 +378,15 @@ class DebugViewModel(
         val nodeIdStr = nodeId.toUInt().toString()
         // Only match if whitespace before and after
         val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""")
-        regex.find(this)?.let { _ ->
-            regex.findAll(this).toList().asReversed().forEach {
-                val idx = it.range.last + 1
-                insert(idx, " (${nodeId.toHex(8)})")
-            }
-            return true
+        if (!regex.containsMatchIn(this)) return false
+        regex.findAll(this).toList().asReversed().forEach {
+            val idx = it.range.last + 1
+            insert(idx, " (${nodeId.toHex(8)})")
         }
-        return false
+        return true
     }
 
-    private fun Int.toHex(length: Int): String = "!" + this.toUInt().toString(16).padStart(length, '0')
+    private fun Int.toHex(length: Int): String = "!${this.toUInt().toString(16).padStart(length, '0')}"
 
     fun requestDeleteAllLogs() {
         alertManager.showAlert(

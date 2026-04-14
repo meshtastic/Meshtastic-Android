@@ -48,9 +48,7 @@ suspend fun <T> retryBleOperation(
                 Logger.w(e) { "[$tag] BLE operation failed after $count attempts, giving up" }
                 throw e
             }
-            Logger.w(e) {
-                "[$tag] BLE operation failed (attempt $currentAttempt/$count), " + "retrying in ${delayMs}ms..."
-            }
+            Logger.w(e) { "[$tag] BLE operation failed (attempt $currentAttempt/$count), retrying in ${delayMs}ms..." }
             delay(delayMs)
         }
     }

@@ -96,7 +96,7 @@ class MeshMessageProcessorImpl(
                 }
                     .onFailure { _ ->
                         Logger.e(primaryException) {
-                            "Failed to parse radio packet (len=${bytes.size}). " + "Not a valid FromRadio or LogRecord."
+                            "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
                         }
                     }
             }

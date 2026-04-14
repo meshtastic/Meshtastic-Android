@@ -113,9 +113,9 @@ private fun ChannelConfigScreen(
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
-    val modemPresetName by remember(loraConfig) { mutableStateOf(Channel(loraConfig = loraConfig).name) }
-    val primaryChannel by remember(loraConfig) { mutableStateOf(Channel(primarySettings, loraConfig)) }
-    val capabilities by remember(firmwareVersion) { mutableStateOf(Capabilities(firmwareVersion)) }
+    val modemPresetName = remember(loraConfig) { Channel(loraConfig = loraConfig).name }
+    val primaryChannel = remember(loraConfig) { Channel(primarySettings, loraConfig) }
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
 
     val focusManager = LocalFocusManager.current
     val settingsListInput =
@@ -141,7 +141,7 @@ private fun ChannelConfigScreen(
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
         EditChannelDialog(
-            channelSettings = with(settingsListInput) { if (size > index) get(index) else ChannelSettings() },
+            channelSettings = settingsListInput.getOrNull(index) ?: ChannelSettings(),
             modemPresetName = modemPresetName,
             onAddClick = {
                 if (settingsListInput.size > index) {

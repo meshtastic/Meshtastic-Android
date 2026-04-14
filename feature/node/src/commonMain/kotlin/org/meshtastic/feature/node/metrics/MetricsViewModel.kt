@@ -354,8 +354,7 @@ open class MetricsViewModel(
     fun savePositionCSV(uri: MeshtasticUri, data: List<org.meshtastic.proto.Position>) {
         exportCsv(
             uri = uri,
-            header =
-            "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\"," + "\"satsInView\",\"speed\",\"heading\"\n",
+            header = "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n",
             rows = data,
             epochSeconds = { it.time.toLong() },
         ) { pos ->

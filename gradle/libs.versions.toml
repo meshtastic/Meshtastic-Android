@@ -104,7 +104,6 @@ androidx-glance-material3 = { module = "androidx.glance:glance-material3", versi
 # lifecycle-runtime-ktx dropped: KTX extensions merged into lifecycle-runtime since 2.8.0;
 # use jetbrains-lifecycle-runtime (JB KMP fork) instead.
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
-androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
 # JetBrains KMP lifecycle (use in commonMain and androidMain)
 jetbrains-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
