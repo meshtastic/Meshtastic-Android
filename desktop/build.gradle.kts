@@ -158,9 +158,14 @@ compose.desktop {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
                 minimumSystemVersion = "12.0"
                 bundleID = "org.meshtastic.desktop"
+                entitlementsFile.set(project.file("entitlements.plist"))
                 infoPlist {
                     extraKeysRawXml =
                         """
+                        <key>NSBluetoothAlwaysUsageDescription</key>
+                        <string>Meshtastic uses Bluetooth to communicate with your Meshtastic radio device.</string>
+                        <key>NSLocalNetworkUsageDescription</key>
+                        <string>Meshtastic uses your local network to discover Meshtastic devices connected via WiFi.</string>
                         <key>NSUserNotificationAlertStyle</key>
                         <string>alert</string>
                         <key>CFBundleURLTypes</key>
