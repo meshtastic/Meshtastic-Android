@@ -163,7 +163,7 @@ private fun desktopPlatformStubsModule() = module {
     single<ServiceBroadcasts> { NoopServiceBroadcasts() }
     single<AppWidgetUpdater> { NoopAppWidgetUpdater() }
     single<MeshWorkerManager> { NoopMeshWorkerManager() }
-    single<MessageQueue> { DesktopMessageQueue(packetRepository = get(), radioController = get()) }
+    single<MessageQueue> { DesktopMessageQueue(packetRepository = get(), radioController = get(), dispatchers = get()) }
     single<MeshLocationManager> { NoopMeshLocationManager() }
     single<LocationRepository> { NoopLocationRepository() }
     single<MQTTRepository> { NoopMQTTRepository() }

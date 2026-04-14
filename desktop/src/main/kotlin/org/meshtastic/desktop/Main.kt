@@ -18,7 +18,6 @@ package org.meshtastic.desktop
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,17 +26,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Tray
@@ -55,11 +51,12 @@ import coil3.memory.MemoryCache
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
+import coil3.util.DebugLogger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
-import org.jetbrains.skia.Image
 import org.koin.core.context.startKoin
+import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.database.desktopDataDir
 import org.meshtastic.core.navigation.SettingsRoute
@@ -75,22 +72,23 @@ import org.meshtastic.desktop.di.desktopPlatformModule
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import java.awt.Desktop
 import java.util.Locale
+import coil3.util.Logger as CoilLogger
 
 /** Meshtastic Desktop — the first non-Android target for the shared KMP module graph. */
-private val LocalAppLocale = staticCompositionLocalOf { "" }
-
 private const val MEMORY_CACHE_MAX_BYTES = 64L * 1024L * 1024L // 64 MiB
 private const val DISK_CACHE_MAX_BYTES = 32L * 1024L * 1024L // 32 MiB
 
+/**
+ * Loads an SVG from JVM classpath resources and returns a [Painter].
+ *
+ * The Compose Desktop `useResource`/`loadSvgPainter` APIs are deprecated in favour of the CMP resource library, but CMP
+ * resources only support XML vector drawables and raster images — not raw SVGs. Since the desktop module is a JVM-only
+ * host shell (not a KMP library with `composeResources/`), we suppress the deprecation here.
+ */
+@Suppress("DEPRECATION")
 @Composable
-private fun classpathPainterResource(path: String): Painter {
-    val bitmap: ImageBitmap =
-        remember(path) {
-            val bytes = Thread.currentThread().contextClassLoader!!.getResourceAsStream(path)!!.readAllBytes()
-            Image.makeFromEncoded(bytes).toComposeImageBitmap()
-        }
-    return remember(bitmap) { BitmapPainter(bitmap) }
-}
+private fun svgPainterResource(path: String, density: Density): Painter =
+    remember(path) { androidx.compose.ui.res.useResource(path) { androidx.compose.ui.res.loadSvgPainter(it, density) } }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalCoilApi::class)
@@ -101,6 +99,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     val systemLocale = remember { Locale.getDefault() }
     val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
     val httpClient = remember { koinApp.koin.get<HttpClient>() }
+    val buildConfigProvider = remember { koinApp.koin.get<BuildConfigProvider>() }
 
     LaunchedEffect(args) {
         args.forEach { arg ->
@@ -147,13 +146,10 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     var isAppVisible by remember { mutableStateOf(true) }
     var isWindowReady by remember { mutableStateOf(false) }
     val trayState = rememberTrayState()
-    val appIcon = classpathPainterResource("icon.png")
+    val appIcon = svgPainterResource("tray_icon_black.svg", Density(1f))
 
-    @Suppress("DEPRECATION")
     val trayIcon =
-        androidx.compose.ui.res.painterResource(
-            if (isSystemInDarkTheme()) "tray_icon_white.svg" else "tray_icon_black.svg",
-        )
+        svgPainterResource(if (isSystemInDarkTheme()) "tray_icon_white.svg" else "tray_icon_black.svg", Density(1f))
 
     val notificationManager = remember { koinApp.koin.get<DesktopNotificationManager>() }
     val desktopPrefs = remember { koinApp.koin.get<DesktopPreferencesDataSource>() }
@@ -261,13 +257,14 @@ fun main(args: Array<String>) = application(exitProcessOnExit = false) {
                     .diskCache {
                         DiskCache.Builder().directory(cacheDir.toPath()).maxSizeBytes(DISK_CACHE_MAX_BYTES).build()
                     }
+                    .logger(
+                        if (buildConfigProvider.isDebug) DebugLogger(minLevel = CoilLogger.Level.Verbose) else null,
+                    )
                     .crossfade(true)
                     .build()
             }
 
-            CompositionLocalProvider(LocalAppLocale provides localePref) {
-                AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
-            }
+            AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
         }
     }
 }

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.desktop.notification
 
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.Notification
@@ -29,8 +30,15 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
 /**
- * Desktop notifications implementation. Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to
- * avoid double-registration with the @ComponentScan("org.meshtastic.desktop") in DesktopDiModule.
+ * Desktop implementation of [MeshServiceNotifications].
+ *
+ * Converts mesh-layer notification events into domain [Notification] objects and dispatches them through
+ * [NotificationManager], which ultimately surfaces them as Compose Desktop tray notifications.
+ *
+ * Android-only concepts (notification channels, foreground-service state updates) are intentionally no-ops.
+ *
+ * Registered manually in `desktopPlatformStubsModule` -- do **not** add `@Single` to avoid double-registration with the
+ * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
  */
 @Suppress("TooManyFunctions")
 class DesktopMeshServiceNotifications(private val notificationManager: NotificationManager) : MeshServiceNotifications {
@@ -39,14 +47,11 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
     }
 
     override fun initChannels() {
-        // no-op for desktop
+        // No-op: desktop has no Android notification channels.
     }
 
-    override fun updateServiceStateNotification(
-        state: org.meshtastic.core.model.ConnectionState,
-        telemetry: Telemetry?,
-    ) {
-        // We don't have a foreground service on desktop
+    override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {
+        // No-op: desktop has no foreground service notification.
     }
 
     override suspend fun updateMessageNotification(
@@ -106,16 +111,10 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
         )
     }
 
-    @Suppress("ktlint:standard:max-line-length")
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
-        notificationManager.dispatch(
-            Notification(
-                title = name,
-                message = alert,
-                category = Notification.Category.Alert,
-                contactKey = contactKey,
-            ),
-        )
+        val notification =
+            Notification(title = name, message = alert, category = Notification.Category.Alert, contactKey = contactKey)
+        notificationManager.dispatch(notification)
     }
 
     override fun showNewNodeSeenNotification(node: Node) {

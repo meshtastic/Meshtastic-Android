@@ -19,6 +19,10 @@ package org.meshtastic.desktop.di
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 
+/**
+ * Koin module that component-scans the `org.meshtastic.desktop` package for annotated bindings (`@Single`, `@Factory`,
+ * `@KoinViewModel`).
+ */
 @Module
 @ComponentScan("org.meshtastic.desktop")
 class DesktopDiModule

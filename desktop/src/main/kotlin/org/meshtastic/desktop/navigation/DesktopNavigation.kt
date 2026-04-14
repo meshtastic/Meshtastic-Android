@@ -19,6 +19,7 @@ package org.meshtastic.desktop.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
@@ -29,42 +30,22 @@ import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 
 /**
- * Registers entry providers for all top-level desktop destinations.
+ * Registers [NavKey] entry providers for every desktop destination.
  *
- * Nodes uses real composables from `feature:node` via [nodesGraph]. Conversations uses real composables from
- * `feature:messaging` via [desktopMessagingGraph]. Settings uses real composables from `feature:settings` via
- * [settingsGraph]. Connections uses the shared [ConnectionsScreen]. Other features use placeholder screens until their
- * shared composables are wired.
+ * Each call delegates to the shared navigation graph extension exported by the corresponding feature module, keeping
+ * the desktop shell free of screen-level composable knowledge.
  */
-fun EntryProviderScope<NavKey>.desktopNavGraph(
-    backStack: NavBackStack<NavKey>,
-    uiViewModel: org.meshtastic.core.ui.viewmodel.UIViewModel,
-) {
-    // Nodes — real composables from feature:node
+fun EntryProviderScope<NavKey>.desktopNavGraph(backStack: NavBackStack<NavKey>, uiViewModel: UIViewModel) {
     nodesGraph(
         backStack = backStack,
         scrollToTopEvents = uiViewModel.scrollToTopEventFlow,
         onHandleDeepLink = uiViewModel::handleDeepLink,
     )
-
-    // Conversations — real composables from feature:messaging
     contactsGraph(backStack, uiViewModel.scrollToTopEventFlow)
-
-    // Map — placeholder for now, will be replaced with feature:map real implementation
     mapGraph(backStack)
-
-    // Firmware — in-flow destination (for example from Settings), not a top-level rail tab
     firmwareGraph(backStack)
-
-    // Settings — real composables from feature:settings
     settingsGraph(backStack)
-
-    // Channels
     channelsGraph(backStack)
-
-    // Connections — shared screen
     connectionsGraph(backStack)
-
-    // WiFi Provisioning — nymea-networkmanager BLE protocol
     wifiProvisionGraph(backStack)
 }

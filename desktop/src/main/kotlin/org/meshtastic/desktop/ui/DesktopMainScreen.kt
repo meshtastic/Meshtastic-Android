@@ -31,7 +31,10 @@ import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
 
-/** Desktop main screen — uses shared navigation components. */
+/**
+ * Desktop main screen — assembles the shared [MeshtasticAppShell], [MeshtasticNavigationSuite], and
+ * [MeshtasticNavDisplay] with the desktop-specific [desktopNavGraph] entry provider.
+ */
 @Composable
 fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) {
     val backStack = multiBackstack.activeBackStack

@@ -21,7 +21,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,16 +29,21 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.di.CoroutineDispatchers
 
-const val KEY_WINDOW_WIDTH = "window_width"
-const val KEY_WINDOW_HEIGHT = "window_height"
-const val KEY_WINDOW_X = "window_x"
-const val KEY_WINDOW_Y = "window_y"
-
+/**
+ * Persists and restores desktop window geometry (position and size) across application restarts.
+ *
+ * Backed by the `CorePreferencesDataStore` [DataStore] instance. Window bounds are written atomically via
+ * [setWindowBounds] and exposed as [StateFlow] properties for composable consumption.
+ */
 @Single
-class DesktopPreferencesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
+class DesktopPreferencesDataSource(
+    @Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>,
+    dispatchers: CoroutineDispatchers,
+) {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + dispatchers.io)
 
     val windowWidth: StateFlow<Float> = dataStore.prefStateFlow(key = WINDOW_WIDTH, default = 1024f)
     val windowHeight: StateFlow<Float> = dataStore.prefStateFlow(key = WINDOW_HEIGHT, default = 768f)
@@ -64,9 +68,9 @@ class DesktopPreferencesDataSource(@Named("CorePreferencesDataStore") private va
     ): StateFlow<T> = data.map { it[key] ?: default }.stateIn(scope = scope, started = started, initialValue = default)
 
     companion object {
-        val WINDOW_WIDTH = floatPreferencesKey(KEY_WINDOW_WIDTH)
-        val WINDOW_HEIGHT = floatPreferencesKey(KEY_WINDOW_HEIGHT)
-        val WINDOW_X = floatPreferencesKey(KEY_WINDOW_X)
-        val WINDOW_Y = floatPreferencesKey(KEY_WINDOW_Y)
+        val WINDOW_WIDTH = floatPreferencesKey("window_width")
+        val WINDOW_HEIGHT = floatPreferencesKey("window_height")
+        val WINDOW_X = floatPreferencesKey("window_x")
+        val WINDOW_Y = floatPreferencesKey("window_y")
     }
 }
