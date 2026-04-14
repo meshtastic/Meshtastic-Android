@@ -308,6 +308,7 @@
     <string name="delivery_confirmed">Доставка подтверждена</string>
     <string name="delivery_confirmed_reboot_warning">Ваше устройство может отключиться и перезагрузиться во время применения настроек.</string>
     <string name="error">Ошибка</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
     <string name="ignore">Игнорировать</string>
     <string name="remove_ignored">Удалить из игнорируемых</string>
     <string name="ignore_add">Добавить '%1$s' в список игнорируемых?</string>

@@ -276,6 +276,7 @@
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
     <string name="delivery_confirmed">Réception confirmée par le destinataire</string>
     <string name="error">Erreur</string>
+    <string name="unknown_error">Une erreur inconnue s'est produite</string>
     <string name="ignore">Ignorer</string>
     <string name="remove_ignored">Supprimer des ignorés</string>
     <string name="ignore_add">Ajouter '%1$s' à la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>

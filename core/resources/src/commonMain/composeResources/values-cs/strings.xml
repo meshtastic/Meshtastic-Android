@@ -263,6 +263,7 @@
     <string name="delivery_confirmed">Doručeno</string>
     <string name="delivery_confirmed_reboot_warning">Vaše zařízení se může odpojit a restartovat při aplikaci nastavení.</string>
     <string name="error">Chyba</string>
+    <string name="unknown_error">Neznámá chyba</string>
     <string name="ignore">Ignorovat</string>
     <string name="remove_ignored">Odstranit z ignorovaných</string>
     <string name="ignore_add">Přidat '%1$s' do seznamu ignorovaných?</string>

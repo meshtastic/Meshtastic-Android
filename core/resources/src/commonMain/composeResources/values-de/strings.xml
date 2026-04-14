@@ -302,6 +302,7 @@
     <string name="delivery_confirmed">Zustellung bestätigt</string>
     <string name="delivery_confirmed_reboot_warning">Ihr Gerät kann die Verbindung trennen und neu starten, während die Einstellungen angewendet werden.</string>
     <string name="error">Fehler</string>
+    <string name="unknown_error">Unbekannter Fehler</string>
     <string name="ignore">Ignorieren</string>
     <string name="remove_ignored">Aus Ignorierliste entfernen</string>
     <string name="ignore_add">'%1$s' zur Ignorieren-Liste hinzufügen?</string>

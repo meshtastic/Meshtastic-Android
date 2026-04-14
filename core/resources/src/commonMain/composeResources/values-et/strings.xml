@@ -302,6 +302,7 @@
     <string name="delivery_confirmed">Kohale toimetatud</string>
     <string name="delivery_confirmed_reboot_warning">Seadete rakendamise ajal võib seadme ühendus katkeda ja taaskäivituda.</string>
     <string name="error">Viga</string>
+    <string name="unknown_error">Tundmatu viga</string>
     <string name="ignore">Eira</string>
     <string name="remove_ignored">Eemalda ignoreeritute hulgast</string>
     <string name="ignore_add">Lisa '%1$s' eiramis loendisse?</string>

@@ -289,6 +289,7 @@
     <string name="delivery_confirmed">已送达</string>
     <string name="delivery_confirmed_reboot_warning">在应用设置时，您的设备可能会断开连接并重启。</string>
     <string name="error">错误</string>
+    <string name="unknown_error">未知错误</string>
     <string name="ignore">忽略</string>
     <string name="remove_ignored">从忽略中删除</string>
     <string name="ignore_add">添加 '%1$s' 到忽略列表？</string>
