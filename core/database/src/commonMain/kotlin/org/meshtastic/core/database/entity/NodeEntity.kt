@@ -118,6 +118,7 @@ data class MetadataEntity(
         Index(value = ["hops_away"]),
         Index(value = ["is_favorite"]),
         Index(value = ["last_heard", "is_favorite"]),
+        Index(value = ["public_key"]),
     ],
 )
 data class NodeEntity(
