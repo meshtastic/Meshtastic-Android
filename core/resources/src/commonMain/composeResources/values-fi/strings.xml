@@ -302,6 +302,7 @@
     <string name="delivery_confirmed">Toimitus vahvistettu</string>
     <string name="delivery_confirmed_reboot_warning">Laitteesi saattaa katkaista yhteyden ja käynnistyä uudelleen, kun asetuksia otetaan käyttöön.</string>
     <string name="error">Virhe</string>
+    <string name="unknown_error">Tuntematon virhe</string>
     <string name="ignore">Jätä huomiotta</string>
     <string name="remove_ignored">Poista huomioimattomista</string>
     <string name="ignore_add">Lisää '%1$s' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
@@ -581,6 +582,9 @@
     <string name="output_duration_milliseconds">Ulostulon kesto (millisekuntia)</string>
     <string name="nag_timeout_seconds">Hälytysaikakatkaisu (sekuntia)</string>
     <string name="ringtone">Soittoääni</string>
+    <string name="ringtone_imported">Tuotu soittoääni</string>
+    <string name="ringtone_file_empty">Tiedosto on tyhjä</string>
+    <string name="ringtone_import_error">Virhe tuotaessa: %1$s</string>
     <string name="play">Aloita</string>
     <string name="use_i2s_as_buzzer">Käytä I2S protokollaa äänimerkille</string>
     <string name="lora_config">LoRa</string>

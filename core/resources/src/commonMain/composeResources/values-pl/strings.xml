@@ -268,6 +268,7 @@
     <string name="nodedb_reset">Zresetuj NodeDB</string>
     <string name="delivery_confirmed">Dostarczono</string>
     <string name="error">Błąd</string>
+    <string name="unknown_error">Nieznany błąd</string>
     <string name="ignore">Zignoruj</string>
     <string name="remove_ignored">Usuń z listy ignorowanych</string>
     <string name="ignore_add">Dodać '%1$s' do listy ignorowanych?</string>

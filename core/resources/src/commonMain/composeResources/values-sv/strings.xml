@@ -272,6 +272,7 @@
     <string name="nodedb_reset">Nollställ NodeDB</string>
     <string name="delivery_confirmed">Sändning bekräftad</string>
     <string name="error">Fel</string>
+    <string name="unknown_error">Okänt fel</string>
     <string name="ignore">Ignorera</string>
     <string name="remove_ignored">Ta bort från ignorerade</string>
     <string name="ignore_add">Lägg till '%1$s' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>

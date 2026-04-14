@@ -222,6 +222,7 @@
     <string name="nodedb_reset">Очищення бази вузлів</string>
     <string name="delivery_confirmed">Доставку підтверджено</string>
     <string name="error">Помилка</string>
+    <string name="unknown_error">Невідома помилка</string>
     <string name="ignore">Ігнорувати</string>
     <string name="remove_ignored">Вилучити з ігнорованих</string>
     <string name="ignore_add">Додати '%1$s' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>

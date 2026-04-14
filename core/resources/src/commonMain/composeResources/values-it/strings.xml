@@ -284,6 +284,7 @@
     <string name="delivery_confirmed">Consegna confermata</string>
     <string name="delivery_confirmed_reboot_warning">Il dispositivo potrebbe disconnettersi e riavviarsi durante l'applicazione delle impostazioni.</string>
     <string name="error">Errore</string>
+    <string name="unknown_error">Errore sconosciuto</string>
     <string name="ignore">Ignora</string>
     <string name="remove_ignored">Rimuovi da ignorati</string>
     <string name="ignore_add">Aggiungere '%1$s' alla lista degli ignorati?</string>

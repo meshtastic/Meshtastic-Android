@@ -250,6 +250,7 @@
     <string name="delivery_confirmed">Съобщението е доставено</string>
     <string name="delivery_confirmed_reboot_warning">Устройството ви може да прекъсне връзката и да се рестартира, докато се прилагат настройките.</string>
     <string name="error">Грешка</string>
+    <string name="unknown_error">Неизвестна грешка</string>
     <string name="ignore">Игнорирай</string>
     <string name="remove_ignored">Премахване от игнорирани</string>
     <string name="ignore_add">Добави '%1$s' към списъка с игнорирани?</string>
