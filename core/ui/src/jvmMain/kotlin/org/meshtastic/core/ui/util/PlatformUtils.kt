@@ -83,7 +83,7 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
     val dir = dialog.directory
     if (file != null && dir != null) {
         val path = File(dir, file)
-        onUriReceived(CommonUri(path.toURI()))
+        onUriReceived(CommonUri.parse(path.toURI().toString()))
     }
 }
 

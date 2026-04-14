@@ -68,6 +68,7 @@ firebase-crashlytics-gradle = "3.0.7"
 google-services-gradle = "4.4.4"
 markdownRenderer = "0.40.2"
 okio = "3.17.0"
+uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
 spotless = "8.4.0"
 wire = "6.2.0"
@@ -227,6 +228,7 @@ kmqtt-common = { module = "io.github.davidepianca98:kmqtt-common", version.ref =
 
 jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }

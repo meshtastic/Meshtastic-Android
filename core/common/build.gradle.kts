@@ -37,6 +37,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)
             api(libs.okio)
+            api(libs.uri.kmp)
             implementation(libs.kermit)
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
