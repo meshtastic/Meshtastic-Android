@@ -17,7 +17,6 @@
 package org.meshtastic.feature.settings
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +24,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import okio.BufferedSink
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
@@ -51,6 +49,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 
@@ -146,12 +145,12 @@ class SettingsViewModel(
     val meshLogLoggingEnabled: StateFlow<Boolean> = _meshLogLoggingEnabled.asStateFlow()
 
     fun setMeshLogRetentionDays(days: Int) {
-        viewModelScope.launch { setMeshLogSettingsUseCase.setRetentionDays(days) }
+        safeLaunch(tag = "setMeshLogRetentionDays") { setMeshLogSettingsUseCase.setRetentionDays(days) }
         _meshLogRetentionDays.value = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
     }
 
     fun setMeshLogLoggingEnabled(enabled: Boolean) {
-        viewModelScope.launch { setMeshLogSettingsUseCase.setLoggingEnabled(enabled) }
+        safeLaunch(tag = "setMeshLogLoggingEnabled") { setMeshLogSettingsUseCase.setLoggingEnabled(enabled) }
         _meshLogLoggingEnabled.value = enabled
     }
 
@@ -183,7 +182,9 @@ class SettingsViewModel(
      * @param filterPortnum If provided, only packets with this port number will be exported.
      */
     fun saveDataCsv(uri: MeshtasticUri, filterPortnum: Int? = null) {
-        viewModelScope.launch { fileService.write(uri) { writer -> performDataExport(writer, filterPortnum) } }
+        safeLaunch(tag = "saveDataCsv") {
+            fileService.write(uri) { writer -> performDataExport(writer, filterPortnum) }
+        }
     }
 
     private suspend fun performDataExport(writer: BufferedSink, filterPortnum: Int?) {

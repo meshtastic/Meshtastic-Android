@@ -18,7 +18,6 @@ package org.meshtastic.feature.node.compass
 
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.formatString
@@ -37,6 +35,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.ui.component.precisionBitsToMeters
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
 import kotlin.math.abs
@@ -92,13 +91,17 @@ class CompassViewModel(
 
         updatesJob?.cancel()
 
-        updatesJob = viewModelScope.launch {
-            combine(headingProvider.headingUpdates(), phoneLocationProvider.locationUpdates()) { heading, location ->
-                buildState(heading, location)
+        updatesJob =
+            safeLaunch(tag = "compassUpdates") {
+                combine(headingProvider.headingUpdates(), phoneLocationProvider.locationUpdates()) {
+                        heading,
+                        location,
+                    ->
+                    buildState(heading, location)
+                }
+                    .flowOn(dispatchers.default)
+                    .collect { _uiState.value = it }
             }
-                .flowOn(dispatchers.default)
-                .collect { _uiState.value = it }
-        }
     }
 
     fun stop() {

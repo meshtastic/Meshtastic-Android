@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ContactSettings
@@ -49,6 +48,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
 
@@ -157,7 +157,7 @@ class MessageViewModel(
     }
 
     fun setTitle(title: String) {
-        viewModelScope.launch { _title.value = title }
+        _title.value = title
     }
 
     fun getMessagesFromPaged(contactKey: String): Flow<PagingData<Message>> {
@@ -190,7 +190,9 @@ class MessageViewModel(
     }
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        viewModelScope.launch(ioDispatcher) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
+        safeLaunch(context = ioDispatcher, tag = "setContactFilteringDisabled") {
+            packetRepository.setContactFilteringDisabled(contactKey, disabled)
+        }
     }
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
@@ -211,21 +213,21 @@ class MessageViewModel(
      * @param replyId The ID of the message this is a reply to, if any.
      */
     fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
-        viewModelScope.launch { sendMessageUseCase.invoke(str, contactKey, replyId) }
+        safeLaunch(tag = "sendMessage") { sendMessageUseCase.invoke(str, contactKey, replyId) }
     }
 
-    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = safeLaunch(tag = "sendReaction") {
         serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
     }
 
     fun deleteMessages(uuidList: List<Long>) =
-        viewModelScope.launch(ioDispatcher) { packetRepository.deleteMessages(uuidList) }
+        safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
 
     fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
-        viewModelScope.launch(ioDispatcher) {
+        safeLaunch(context = ioDispatcher, tag = "clearUnreadCount") {
             val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
             if (lastReadTimestamp <= existingTimestamp) {
-                return@launch
+                return@safeLaunch
             }
             packetRepository.clearUnreadCount(contact, lastReadTimestamp)
             packetRepository.updateLastReadMessage(contact, messageUuid, lastReadTimestamp)

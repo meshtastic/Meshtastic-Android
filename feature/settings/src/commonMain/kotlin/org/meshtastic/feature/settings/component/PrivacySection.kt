@@ -16,15 +16,9 @@
  */
 package org.meshtastic.feature.settings.component
 
-import android.Manifest
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.analytics_okay
 import org.meshtastic.core.resources.app_settings
@@ -34,11 +28,12 @@ import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.core.ui.util.isGpsDisabled
+import org.meshtastic.core.ui.util.isLocationPermissionGranted
+import org.meshtastic.core.ui.util.rememberRequestLocationPermission
+import org.meshtastic.core.ui.util.rememberShowToastResource
 
 /** Section managing privacy settings like analytics and location sharing. */
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PrivacySection(
     analyticsAvailable: Boolean,
@@ -51,21 +46,22 @@ fun PrivacySection(
     startProvideLocation: () -> Unit,
     stopProvideLocation: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val locationPermissionsState =
-        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
-    val isGpsDisabled = context.gpsDisabled()
+    val showToast = rememberShowToastResource()
+    val isLocationGranted = isLocationPermissionGranted()
+    val isGpsOff = isGpsDisabled()
+    val requestLocationPermission =
+        rememberRequestLocationPermission(onGranted = { startProvideLocation() }, onDenied = {})
 
-    LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
+    LaunchedEffect(provideLocation, isLocationGranted, isGpsOff) {
         if (provideLocation) {
-            if (locationPermissionsState.allPermissionsGranted) {
-                if (!isGpsDisabled) {
+            if (isLocationGranted) {
+                if (!isGpsOff) {
                     startProvideLocation()
                 } else {
-                    context.showToast(Res.string.location_disabled)
+                    showToast(Res.string.location_disabled)
                 }
             } else {
-                locationPermissionsState.launchMultiplePermissionRequest()
+                requestLocationPermission()
             }
         } else {
             stopProvideLocation()
@@ -85,29 +81,11 @@ fun PrivacySection(
         SwitchListItem(
             text = stringResource(Res.string.provide_location_to_mesh),
             leadingIcon = MeshtasticIcons.LocationOn,
-            enabled = !isGpsDisabled,
+            enabled = !isGpsOff,
             checked = provideLocation,
             onClick = { onToggleLocation(!provideLocation) },
         )
 
         HomoglyphSetting(homoglyphEncodingEnabled = homoglyphEnabled, onToggle = onToggleHomoglyph)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PrivacySectionPreview() {
-    AppTheme {
-        PrivacySection(
-            analyticsAvailable = true,
-            analyticsEnabled = true,
-            onToggleAnalytics = {},
-            provideLocation = true,
-            onToggleLocation = {},
-            homoglyphEnabled = false,
-            onToggleHomoglyph = {},
-            startProvideLocation = {},
-            stopProvideLocation = {},
-        )
     }
 }

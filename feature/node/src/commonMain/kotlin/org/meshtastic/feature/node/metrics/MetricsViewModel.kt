@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.ByteString.Companion.decodeBase64
@@ -60,6 +59,7 @@ import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.toMessageRes
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
@@ -181,7 +181,8 @@ open class MetricsViewModel(
 
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
-    fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
+    fun deleteLog(uuid: String) =
+        safeLaunch(context = dispatchers.io, tag = "deleteLog") { meshLogRepository.deleteLog(uuid) }
 
     fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
         val cached = tracerouteOverlayCache.value[requestId]
@@ -216,7 +217,7 @@ open class MetricsViewModel(
     private fun List<Node>.numSet(): Set<Int> = map { it.num }.toSet()
 
     init {
-        viewModelScope.launch {
+        safeLaunch(tag = "tracerouteCollector") {
             serviceRepository.tracerouteResponse.filterNotNull().collect { response ->
                 val overlay =
                     TracerouteOverlay(
@@ -232,7 +233,7 @@ open class MetricsViewModel(
         Logger.d { "MetricsViewModel created" }
     }
 
-    fun clearPosition() = viewModelScope.launch(dispatchers.io) {
+    fun clearPosition() = safeLaunch(context = dispatchers.io, tag = "clearPosition") {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
             meshLogRepository.deleteLogs(it, PortNum.POSITION_APP.value)
         }
@@ -276,7 +277,7 @@ open class MetricsViewModel(
         overlay: TracerouteOverlay?,
         onViewOnMap: (Int, String) -> Unit,
     ) {
-        viewModelScope.launch {
+        safeLaunch(tag = "showTracerouteDetail") {
             val snapshotPositions = tracerouteSnapshotRepository.getSnapshotPositions(responseLogUuid).first()
             alertManager.showAlert(
                 titleRes = Res.string.traceroute,
@@ -299,7 +300,7 @@ open class MetricsViewModel(
                     if (errorRes != null) {
                         // Post the error alert after the current alert is dismissed to avoid
                         // the wrapping dismissAlert() in AlertManager immediately clearing it.
-                        viewModelScope.launch {
+                        safeLaunch(tag = "tracerouteError") {
                             alertManager.showAlert(titleRes = Res.string.traceroute, messageRes = errorRes)
                         }
                     } else {
@@ -336,7 +337,7 @@ open class MetricsViewModel(
         epochSeconds: (T) -> Long,
         rowMapper: (T) -> String,
     ) {
-        viewModelScope.launch(dispatchers.io) {
+        safeLaunch(context = dispatchers.io, tag = "exportCsv") {
             fileService.write(uri) { sink ->
                 sink.writeUtf8(header)
                 rows.forEach { item ->

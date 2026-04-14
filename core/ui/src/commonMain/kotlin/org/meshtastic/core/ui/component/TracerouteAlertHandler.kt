@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.okay
@@ -89,7 +90,14 @@ fun TracerouteAlertHandler(
                         uiViewModel.clearTracerouteResponse()
                         // Post the error alert after the current alert is dismissed to avoid
                         // the wrapping dismissAlert() in AlertManager immediately clearing it.
-                        scope.launch { uiViewModel.showAlert(titleRes = Res.string.traceroute, messageRes = errorRes) }
+                        @Suppress("TooGenericExceptionCaught")
+                        scope.launch {
+                            try {
+                                uiViewModel.showAlert(titleRes = Res.string.traceroute, messageRes = errorRes)
+                            } catch (e: Exception) {
+                                Logger.e(e) { "[TracerouteAlertHandler] Failed to show error alert" }
+                            }
+                        }
                     }
                 },
                 dismissTextRes = Res.string.okay,

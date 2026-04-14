@@ -18,7 +18,6 @@ package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.DateFormatter
@@ -47,6 +45,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_clear_logs_confirm
 import org.meshtastic.core.ui.util.AlertManager
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
@@ -265,16 +264,18 @@ class DebugViewModel(
         val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
         meshLogPrefs.setRetentionDays(clamped)
         _retentionDays.value = clamped
-        viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(clamped) }
+        safeLaunch(tag = "setRetentionDays") { meshLogRepository.deleteLogsOlderThan(clamped) }
     }
 
     fun setLoggingEnabled(enabled: Boolean) {
         meshLogPrefs.setLoggingEnabled(enabled)
         _loggingEnabled.value = enabled
         if (!enabled) {
-            viewModelScope.launch { meshLogRepository.deleteAll() }
+            safeLaunch(tag = "disableLogging") { meshLogRepository.deleteAll() }
         } else {
-            viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value) }
+            safeLaunch(tag = "enableLogging") {
+                meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value)
+            }
         }
     }
 
@@ -286,7 +287,7 @@ class DebugViewModel(
 
     init {
         Logger.d { "DebugViewModel created" }
-        viewModelScope.launch {
+        safeLaunch(tag = "searchMatchUpdater") {
             combine(searchManager.searchText, filterManager.filteredLogs) { searchText, logs ->
                 searchManager.findSearchMatches(searchText, logs)
             }
@@ -406,7 +407,7 @@ class DebugViewModel(
         )
     }
 
-    fun deleteAllLogs() = viewModelScope.launch(ioDispatcher) { meshLogRepository.deleteAll() }
+    fun deleteAllLogs() = safeLaunch(context = ioDispatcher, tag = "deleteAllLogs") { meshLogRepository.deleteAll() }
 
     @Immutable
     data class UiMeshLog(

@@ -27,15 +27,20 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.MeshtasticUri
 import java.net.URLEncoder
@@ -215,4 +220,68 @@ actual fun rememberOpenLocationSettings(): () -> Unit {
         ) { _ ->
         }
     return remember(launcher) { { launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)) } }
+}
+
+@Composable
+actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // On pre-Android 12, BLE scanning is gated by location permission, not Bluetooth.
+        return remember { { onGranted() } }
+    }
+    val currentOnGranted = rememberUpdatedState(onGranted)
+    val currentOnDenied = rememberUpdatedState(onDenied)
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.values.all { it }) currentOnGranted.value() else currentOnDenied.value()
+        }
+    return remember(launcher) {
+        {
+            launcher.launch(
+                arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT),
+            )
+        }
+    }
+}
+
+@Composable
+actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+        // Pre-Android 13, no runtime notification permission required.
+        return remember { { onGranted() } }
+    }
+    val currentOnGranted = rememberUpdatedState(onGranted)
+    val currentOnDenied = rememberUpdatedState(onDenied)
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) currentOnGranted.value() else currentOnDenied.value()
+        }
+    return remember(launcher) { { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) } }
+}
+
+@Composable
+actual fun isLocationPermissionGranted(): Boolean {
+    val context = LocalContext.current
+    return rememberOnResumeState {
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+}
+
+@Composable
+actual fun isGpsDisabled(): Boolean {
+    val context = LocalContext.current
+    return rememberOnResumeState { context.gpsDisabled() }
+}
+
+/**
+ * Remembers a boolean state that is re-evaluated on each [Lifecycle.Event.ON_RESUME], ensuring the value stays fresh
+ * when the user returns from a permission dialog or system settings screen.
+ */
+@Composable
+private fun rememberOnResumeState(check: () -> Boolean): Boolean {
+    val state = remember { mutableStateOf(check()) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { state.value = check() }
+    return state.value
 }

@@ -17,14 +17,12 @@
 package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
@@ -41,6 +39,7 @@ import org.meshtastic.core.resources.eight_hours
 import org.meshtastic.core.resources.one_day
 import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.two_days
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
@@ -147,7 +146,8 @@ open class BaseMapViewModel(
 
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
-    fun deleteWaypoint(id: Int) = viewModelScope.launch(ioDispatcher) { packetRepository.deleteWaypoint(id) }
+    fun deleteWaypoint(id: Int) =
+        safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
 
     fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
@@ -159,7 +159,7 @@ open class BaseMapViewModel(
     }
 
     private fun sendDataPacket(p: DataPacket) {
-        viewModelScope.launch(ioDispatcher) { radioController.sendMessage(p) }
+        safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
     }
 
     fun generatePacketId(): Int = radioController.getPacketId()

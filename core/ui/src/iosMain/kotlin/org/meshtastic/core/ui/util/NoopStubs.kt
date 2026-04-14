@@ -57,4 +57,13 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}
 
+@Composable actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
+
+@Composable
+actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
+
+@Composable actual fun isLocationPermissionGranted(): Boolean = true
+
+@Composable actual fun isGpsDisabled(): Boolean = false
+
 @Composable actual fun SetScreenBrightness(brightness: Float) {}
