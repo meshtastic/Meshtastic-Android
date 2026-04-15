@@ -108,7 +108,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
             dao.upsertContactSettings(listOf(updated))
         }
 
-    override suspend fun getQueuedPackets(): List<DataPacket>? =
+    override suspend fun getQueuedPackets(): List<DataPacket> =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getQueuedPackets() }
 
     suspend fun insertRoomPacket(packet: RoomPacket) =

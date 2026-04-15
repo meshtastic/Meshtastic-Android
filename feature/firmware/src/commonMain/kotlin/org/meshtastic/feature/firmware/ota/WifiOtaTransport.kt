@@ -32,6 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.safeCatching
 
 /**
  * WiFi/TCP transport implementation for ESP32 Unified OTA protocol.
@@ -54,7 +55,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
 
     /** Connect to the device via TCP using Ktor raw sockets. */
     override suspend fun connect(): Result<Unit> = withContext(ioDispatcher) {
-        runCatching {
+        safeCatching {
             Logger.i { "WiFi OTA: Connecting to $deviceIpAddress:$port" }
 
             val selector = SelectorManager(ioDispatcher)
@@ -82,7 +83,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         sizeBytes: Long,
         sha256Hash: String,
         onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = safeCatching {
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
         sendCommand(command)
 
@@ -116,7 +117,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         chunkSize: Int,
         onProgress: suspend (Float) -> Unit,
     ): Result<Unit> = withContext(ioDispatcher) {
-        runCatching {
+        safeCatching {
             if (!isConnected) {
                 throw OtaProtocolException.TransferFailed("Not connected")
             }

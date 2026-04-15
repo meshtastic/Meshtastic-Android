@@ -241,6 +241,7 @@ open class DatabaseManager(
 
         victims.forEach { name ->
             runCatching {
+                // runCatching intentional: best-effort cleanup must not abort on cancellation
                 closeCachedDatabase(name)
                 deleteDatabase(name)
                 datastore.edit { it.remove(lastUsedKey(name)) }
@@ -266,6 +267,7 @@ open class DatabaseManager(
 
         if (fs.exists(legacyPath)) {
             runCatching {
+                // runCatching intentional: best-effort cleanup must not abort on cancellation
                 closeCachedDatabase(legacy)
                 deleteDatabase(legacy)
             }

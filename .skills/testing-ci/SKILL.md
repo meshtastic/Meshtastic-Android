@@ -5,16 +5,13 @@ Guidelines and commands for verifying code changes locally and understanding the
 
 ## 1) Baseline local verification order
 
-Run in this order for routine changes to ensure code formatting, analysis, and basic compilation:
+Run in a single invocation for routine changes to ensure code formatting, analysis, and basic compilation:
 
 ```bash
-./gradlew clean
-./gradlew spotlessCheck
-./gradlew spotlessApply
-./gradlew detekt
-./gradlew assembleDebug
-./gradlew test allTests
+./gradlew spotlessCheck spotlessApply detekt assembleDebug test allTests
 ```
+
+> **Why no `clean`?** Incremental builds are safe and significantly faster. Only use `clean` when debugging stale cache issues.
 
 > **Why `test allTests` and not just `test`:**
 > In KMP modules, the `test` task name is **ambiguous**. Gradle matches both `testAndroid` and

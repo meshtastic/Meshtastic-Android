@@ -30,15 +30,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.eygraber.uri.toKmpUri
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
-import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
@@ -89,14 +90,14 @@ fun SettingsScreen(
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
-    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
+    var showEditDeviceProfileDialog by rememberSaveable { mutableStateOf(false) }
 
     val importConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
                 showEditDeviceProfileDialog = true
                 it.data?.data?.let { uri ->
-                    viewModel.importProfile(uri.toMeshtasticUri()) { profile -> deviceProfile = profile }
+                    viewModel.importProfile(uri.toKmpUri()) { profile -> deviceProfile = profile }
                 }
             }
         }
@@ -104,7 +105,7 @@ fun SettingsScreen(
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toMeshtasticUri(), deviceProfile!!) }
+                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toKmpUri(), deviceProfile!!) }
             }
         }
 
@@ -143,12 +144,12 @@ fun SettingsScreen(
         )
     }
 
-    var showLanguagePickerDialog by remember { mutableStateOf(false) }
+    var showLanguagePickerDialog by rememberSaveable { mutableStateOf(false) }
     if (showLanguagePickerDialog) {
         LanguagePickerDialog { showLanguagePickerDialog = false }
     }
 
-    var showThemePickerDialog by remember { mutableStateOf(false) }
+    var showThemePickerDialog by rememberSaveable { mutableStateOf(false) }
     if (showThemePickerDialog) {
         ThemePickerDialog(
             onClickTheme = { settingsViewModel.setTheme(it) },
@@ -249,7 +250,7 @@ fun SettingsScreen(
                     cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
                     onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                     nodeShortName = ourNode?.user?.short_name ?: "",
-                    onExportData = { settingsViewModel.saveDataCsv(it.toMeshtasticUri()) },
+                    onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
                 )
 
                 AppInfoSection(

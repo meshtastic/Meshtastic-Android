@@ -46,6 +46,7 @@ import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.DEFAULT_BLE_WRITE_VALUE_LENGTH
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
 import kotlin.time.Duration
@@ -91,7 +92,7 @@ class SecureDfuTransport(
      *
      * The caller must have already released the mesh-service BLE connection before calling this.
      */
-    suspend fun triggerButtonlessDfu(): Result<Unit> = runCatching {
+    suspend fun triggerButtonlessDfu(): Result<Unit> = safeCatching {
         Logger.i { "DFU: Scanning for device $address to trigger buttonless DFU..." }
 
         val device =
@@ -152,7 +153,7 @@ class SecureDfuTransport(
      * Scans for the device in DFU mode (address or address+1) and establishes the GATT connection, enabling
      * notifications on the Control Point.
      */
-    suspend fun connectToDfuMode(): Result<Unit> = runCatching {
+    suspend fun connectToDfuMode(): Result<Unit> = safeCatching {
         val dfuAddress = calculateMacPlusOne(address)
         val targetAddresses = setOf(address, dfuAddress)
         Logger.i { "DFU: Scanning for DFU mode device at $targetAddresses..." }
@@ -210,7 +211,7 @@ class SecureDfuTransport(
      * PRN is explicitly disabled (set to 0) for the init packet per the Nordic DFU library convention — the init packet
      * is small (<512 bytes, fits in a single object) and does not benefit from flow control.
      */
-    suspend fun transferInitPacket(initPacket: ByteArray): Result<Unit> = runCatching {
+    suspend fun transferInitPacket(initPacket: ByteArray): Result<Unit> = safeCatching {
         Logger.i { "DFU: Transferring init packet (${initPacket.size} bytes)..." }
         setPrn(0)
         transferObjectWithRetry(DfuObjectType.COMMAND, initPacket, onProgress = null)
@@ -231,12 +232,13 @@ class SecureDfuTransport(
      * @param firmware Raw bytes of the `.bin` file.
      * @param onProgress Callback receiving progress in [0.0, 1.0].
      */
-    suspend fun transferFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit): Result<Unit> = runCatching {
-        Logger.i { "DFU: Transferring firmware (${firmware.size} bytes)..." }
-        setPrn(PRN_INTERVAL)
-        transferObjectWithRetry(DfuObjectType.DATA, firmware, onProgress)
-        Logger.i { "DFU: Firmware transferred and executed." }
-    }
+    suspend fun transferFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit): Result<Unit> =
+        safeCatching {
+            Logger.i { "DFU: Transferring firmware (${firmware.size} bytes)..." }
+            setPrn(PRN_INTERVAL)
+            transferObjectWithRetry(DfuObjectType.DATA, firmware, onProgress)
+            Logger.i { "DFU: Firmware transferred and executed." }
+        }
 
     // ---------------------------------------------------------------------------
     // Abort & teardown

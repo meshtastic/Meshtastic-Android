@@ -68,6 +68,7 @@ firebase-crashlytics-gradle = "3.0.7"
 google-services-gradle = "4.4.4"
 markdownRenderer = "0.40.2"
 okio = "3.17.0"
+uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
 spotless = "8.4.0"
 wire = "6.2.0"
@@ -104,7 +105,6 @@ androidx-glance-material3 = { module = "androidx.glance:glance-material3", versi
 # lifecycle-runtime-ktx dropped: KTX extensions merged into lifecycle-runtime since 2.8.0;
 # use jetbrains-lifecycle-runtime (JB KMP fork) instead.
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
-androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
 # JetBrains KMP lifecycle (use in commonMain and androidMain)
 jetbrains-lifecycle-runtime = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
@@ -228,6 +228,7 @@ kmqtt-common = { module = "io.github.davidepianca98:kmqtt-common", version.ref =
 
 jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }

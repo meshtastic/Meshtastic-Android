@@ -56,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.fullRouteDiscovery
@@ -113,7 +114,7 @@ fun TracerouteLogScreen(
 
     val headerTowardsStr = stringResource(Res.string.traceroute_route_towards_dest)
     val headerBackStr = stringResource(Res.string.traceroute_route_back_to_us)
-    val durationTemplate = stringResource(Res.string.traceroute_duration, "%SECS%")
+    val durationFormatStr = stringResource(Res.string.traceroute_duration)
 
     val threshold = timeFrame.timeThreshold()
     val filteredRequests =
@@ -176,7 +177,7 @@ fun TracerouteLogScreen(
                                 getUsername = ::getUsername,
                                 headerTowards = headerTowardsStr,
                                 headerBack = headerBackStr,
-                                durationTemplate = durationTemplate,
+                                durationTemplate = durationFormatStr,
                                 statusGreen = statusGreen,
                                 statusYellow = statusYellow,
                                 statusOrange = statusOrange,
@@ -335,7 +336,7 @@ private fun showTracerouteDetail(
                     statusYellow = statusYellow,
                     statusOrange = statusOrange,
                 )
-            val durationText = durationTemplate.replace("%SECS%", formatString("%.1f", seconds))
+            val durationText = formatString(durationTemplate, NumberFormatter.format(seconds, 1))
             buildAnnotatedString {
                 append(annotatedBase)
                 append("\n\n$durationText")

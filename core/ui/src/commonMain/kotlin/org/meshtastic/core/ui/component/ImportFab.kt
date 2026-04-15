@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,10 +91,10 @@ fun MeshtasticImportFAB(
 ) {
     sharedContact?.let { importDialog(it, onDismissSharedContact) }
 
-    var expanded by remember { mutableStateOf(false) }
-    var showUrlDialog by remember { mutableStateOf(false) }
-    var isNfcScanning by remember { mutableStateOf(false) }
-    var showNfcDisabledDialog by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    var showUrlDialog by rememberSaveable { mutableStateOf(false) }
+    var isNfcScanning by rememberSaveable { mutableStateOf(false) }
+    var showNfcDisabledDialog by rememberSaveable { mutableStateOf(false) }
     val openNfcSettings = rememberOpenNfcSettings()
 
     val barcodeScanner = LocalBarcodeScannerProvider.current { contents -> contents?.let { onImport(it) } }

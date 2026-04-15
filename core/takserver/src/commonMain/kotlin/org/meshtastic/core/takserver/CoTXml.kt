@@ -20,47 +20,41 @@ package org.meshtastic.core.takserver
 
 import kotlin.time.Instant
 
-fun CoTMessage.toXml(): String {
-    val sb = StringBuilder()
-    sb.append(
+fun CoTMessage.toXml(): String = buildString {
+    append(
         "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><event version='2.0' uid='${uid.xmlEscaped()}' type='$type' time='${time.toXmlString()}' start='${start.toXmlString()}' stale='${stale.toXmlString()}' how='$how'><point lat='$latitude' lon='$longitude' hae='$hae' ce='$ce' le='$le'/><detail>",
     )
 
     contact?.let {
-        sb.append(
+        append(
             "<contact endpoint='${it.endpoint ?: DEFAULT_TAK_ENDPOINT}' callsign='${it.callsign.xmlEscaped()}'/><uid Droid='${it.callsign.xmlEscaped()}'/>",
         )
     }
 
-    group?.let { sb.append("<__group role='${it.role.xmlEscaped()}' name='${it.name.xmlEscaped()}'/>") }
+    group?.let { append("<__group role='${it.role.xmlEscaped()}' name='${it.name.xmlEscaped()}'/>") }
 
-    status?.let { sb.append("<status battery='${it.battery}'/>") }
+    status?.let { append("<status battery='${it.battery}'/>") }
 
-    track?.let { sb.append("<track course='${it.course}' speed='${it.speed}'/>") }
+    track?.let { append("<track course='${it.course}' speed='${it.speed}'/>") }
 
     if (chat != null) {
         val senderUid = uid.geoChatSenderUid()
         val messageId = uid.geoChatMessageId()
-        sb.append(
+        append(
             "<__chat parent='RootContactGroup' groupOwner='false' messageId='$messageId' chatroom='${chat.chatroom.xmlEscaped()}' id='${chat.chatroom.xmlEscaped()}' senderCallsign='${chat.senderCallsign?.xmlEscaped() ?: ""}'><chatgrp uid0='${senderUid.xmlEscaped()}' uid1='${chat.chatroom.xmlEscaped()}' id='${chat.chatroom.xmlEscaped()}'/></__chat>",
         )
-        sb.append("<link uid='${senderUid.xmlEscaped()}' type='a-f-G-U-C' relation='p-p'/>")
-        sb.append("<__serverdestination destinations='0.0.0.0:4242:tcp:${senderUid.xmlEscaped()}'/>")
-        sb.append(
+        append("<link uid='${senderUid.xmlEscaped()}' type='a-f-G-U-C' relation='p-p'/>")
+        append("<__serverdestination destinations='0.0.0.0:4242:tcp:${senderUid.xmlEscaped()}'/>")
+        append(
             "<remarks source='BAO.F.ATAK.${senderUid.xmlEscaped()}' to='${chat.chatroom.xmlEscaped()}' time='${time.toXmlString()}'>${chat.message.xmlEscaped()}</remarks>",
         )
     } else if (!remarks.isNullOrEmpty()) {
-        sb.append("<remarks>${remarks.xmlEscaped()}</remarks>")
+        append("<remarks>${remarks.xmlEscaped()}</remarks>")
     }
 
-    rawDetailXml?.let {
-        if (it.isNotEmpty()) {
-            sb.append(it)
-        }
-    }
+    rawDetailXml?.takeIf { it.isNotEmpty() }?.let { append(it) }
 
-    sb.append("</detail></event>")
-    return sb.toString()
+    append("</detail></event>")
 }
 
 private fun Instant.toXmlString(): String = this.toString()

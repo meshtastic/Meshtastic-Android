@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.navigation.ChannelsRoute
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.NodesRoute
@@ -35,7 +35,7 @@ fun AdaptiveContactsScreen(
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     sharedContactRequested: SharedContact?,
     requestChannelSet: ChannelSet?,
-    onHandleDeepLink: (MeshtasticUri, onInvalid: () -> Unit) -> Unit,
+    onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
     onClearSharedContactRequested: () -> Unit,
     onClearRequestChannelUrl: () -> Unit,
 ) {

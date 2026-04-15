@@ -38,6 +38,7 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
+import org.meshtastic.core.common.util.safeCatching
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -78,7 +79,7 @@ class BleOtaTransport(
     }
 
     @Suppress("MagicNumber")
-    override suspend fun connect(): Result<Unit> = runCatching {
+    override suspend fun connect(): Result<Unit> = safeCatching {
         Logger.i { "BLE OTA: Waiting $REBOOT_DELAY for device to reboot into OTA mode..." }
         delay(REBOOT_DELAY)
 
@@ -152,7 +153,7 @@ class BleOtaTransport(
         sizeBytes: Long,
         sha256Hash: String,
         onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = safeCatching {
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
         val packetsSent = sendCommand(command)
 
@@ -189,7 +190,7 @@ class BleOtaTransport(
         data: ByteArray,
         chunkSize: Int,
         onProgress: suspend (Float) -> Unit,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = safeCatching {
         val totalBytes = data.size
         var sentBytes = 0
 
@@ -215,7 +216,7 @@ class BleOtaTransport(
                         if (nextSentBytes >= totalBytes && isLastPacketOfChunk) {
                             sentBytes = nextSentBytes
                             onProgress(1.0f)
-                            return@runCatching Unit
+                            return@safeCatching Unit
                         }
                     }
                     is OtaResponse.Error -> {

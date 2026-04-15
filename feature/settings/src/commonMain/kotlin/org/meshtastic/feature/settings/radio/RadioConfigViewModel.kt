@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.update
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -384,7 +384,7 @@ open class RadioConfigViewModel(
         safeLaunch(tag = "removeFixedPosition") { radioConfigUseCase.removeFixedPosition(destNum) }
     }
 
-    fun importProfile(uri: MeshtasticUri, onResult: (DeviceProfile) -> Unit) {
+    fun importProfile(uri: CommonUri, onResult: (DeviceProfile) -> Unit) {
         safeLaunch(tag = "importProfile") {
             var profile: DeviceProfile? = null
             fileService.read(uri) { source ->
@@ -394,7 +394,7 @@ open class RadioConfigViewModel(
         }
     }
 
-    fun exportProfile(uri: MeshtasticUri, profile: DeviceProfile) {
+    fun exportProfile(uri: CommonUri, profile: DeviceProfile) {
         safeLaunch(tag = "exportProfile") {
             fileService.write(uri) { sink ->
                 exportProfileUseCase(sink, profile).onSuccess { /* Success */ }.onFailure { throw it }
@@ -402,7 +402,7 @@ open class RadioConfigViewModel(
         }
     }
 
-    fun exportSecurityConfig(uri: MeshtasticUri, securityConfig: Config.SecurityConfig) {
+    fun exportSecurityConfig(uri: CommonUri, securityConfig: Config.SecurityConfig) {
         safeLaunch(tag = "exportSecurityConfig") {
             fileService.write(uri) { sink ->
                 exportSecurityConfigUseCase(sink, securityConfig).onSuccess { /* Success */ }.onFailure { throw it }

@@ -22,7 +22,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLinkStyles
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.MeshtasticUri
 
 actual fun createClipEntry(text: String, label: String): ClipEntry =
     throw UnsupportedOperationException("ClipEntry instantiation not supported on iOS stub")
@@ -41,7 +40,7 @@ actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): A
 
 @Composable
 actual fun rememberSaveFileLauncher(
-    onUriReceived: (MeshtasticUri) -> Unit,
+    onUriReceived: (CommonUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit = { _, _ -> }
 
 @Composable

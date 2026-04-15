@@ -1,6 +1,6 @@
 # KMP Migration Status
 
-> Last updated: 2026-04-13
+> Last updated: 2026-04-15
 
 Single source of truth for Kotlin Multiplatform migration progress. For the forward-looking roadmap, see [`roadmap.md`](./roadmap.md). For completed decision records, see [`decisions/`](./decisions/).
 
@@ -79,7 +79,7 @@ Working Compose Desktop application with:
 | Multi-target readiness | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | **9/10** | 26 modules validated (including feature:wifi-provision); native release installers automated |
 | DI portability | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
-| Test maturity | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 9 features. Gaps: `core:service`, `core:network` (TcpTransport), `core:ble` state machine, `core:ui` utils, desktop navigation graphs |
+| Test maturity | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 9 features. SfppHasher, AddressUtils, formatString hex, and MetricFormatter edge cases newly covered. Gaps: `core:service`, `core:network` (TcpTransport), `core:ble` state machine, `core:ui` utils |
 
 ## Completion Estimates
 
@@ -109,12 +109,14 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | Firmware KMP migration (pure Secure DFU) | ✅ Done | Native Nordic Secure DFU protocol reimplemented in pure KMP using Kable; desktop is first-class target |
 | Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-beta02`; supports Large (1200dp) and Extra-large (1600dp) breakpoints |
 | JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
-| Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
+| Expect/actual consolidation | ✅ Done | 10+ pairs eliminated (including `formatString`, `CommonUri`, `SfppHasher`); ~20 genuinely platform-specific retained (Parcelable, DateFormatter, Database, Location, Composable UI primitives) |
 | Transport deduplication | ✅ Done | `StreamFrameCodec`, `TcpTransport`, and `SerialTransport` shared in `core:network` |
 | **Transport Lifecycle Unification** | ✅ Done | `SharedRadioInterfaceService` orchestrates auto-reconnect, connection state, and heartbeat uniformly across Android and Desktop. |
 | **Database Parity** | ✅ Done | `DatabaseManager` is pure KMP, giving iOS and Desktop support for multiple connected nodes with LRU caching. On JVM/Desktop, inactive databases are explicitly closed on switch (Room KMP's `setAutoCloseTimeout` is Android-only), and `desktopDataDir()` in `core:database/jvmMain` is the single source for data directory resolution. |
 | Emoji picker unification | ✅ Done | Single commonMain implementation replacing 3 platform variants |
 | Cross-platform deduplication pass | ✅ Done | Extracted shared `AlertHost`, `SharedDialogs`, `PlaceholderScreen`, `ThemePickerDialog`, `MeshtasticNavDisplay`, `formatLogsTo()`, `handleNodeAction()`, `findNodeByNameSuffix()`, `MeshtasticAppShell`, `BleRadioTransport`, and `BaseRadioTransportFactory` to `commonMain`; eliminated ~1,200 lines of duplicated Compose UI code across Android/desktop |
+| URI unification | ✅ Done | `CommonUri` is a `typealias` to `com.eygraber.uri.Uri` (uri-kmp); `MeshtasticUri` wrapper deleted; bridge with `toAndroidUri()`/`toKmpUri()` |
+| Utility commonization | ✅ Done | `formatString` → pure Kotlin parser in `commonMain`; `SfppHasher` and `CryptoCodec` → `Okio ByteString.sha256()`; `MetricFormatter` centralizes display strings (temperature, voltage, current, %, humidity, pressure, SNR, RSSI) |
 
 ## Navigation Parity Note
 

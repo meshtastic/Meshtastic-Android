@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.repository.MeshPrefs
@@ -94,15 +95,6 @@ class MeshPrefsImpl(
     private fun provideLocationKey(nodeNum: Int?) = "provide-location-$nodeNum"
 
     private fun storeForwardKey(address: String?): String = "store-forward-last-request-${normalizeAddress(address)}"
-
-    private fun normalizeAddress(address: String?): String {
-        val raw = address?.trim()?.takeIf { it.isNotEmpty() }
-        return when {
-            raw == null -> "DEFAULT"
-            raw.equals(NO_DEVICE_SELECTED, ignoreCase = true) -> "DEFAULT"
-            else -> raw.uppercase().replace(":", "")
-        }
-    }
 
     companion object {
         val KEY_DEVICE_ADDRESS_PREF = stringPreferencesKey("device_address")

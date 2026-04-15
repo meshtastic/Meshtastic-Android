@@ -21,7 +21,6 @@ package org.meshtastic.core.ui.util
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.MeshtasticUri
 
 /** Returns a function to open the platform's NFC settings. */
 @Composable expect fun rememberOpenNfcSettings(): () -> Unit
@@ -41,7 +40,7 @@ import org.meshtastic.core.common.util.MeshtasticUri
 /** Returns a launcher function to prompt the user to save a file. The callback receives the saved file URI. */
 @Composable
 expect fun rememberSaveFileLauncher(
-    onUriReceived: (MeshtasticUri) -> Unit,
+    onUriReceived: (CommonUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit
 
 /** Returns a launcher function to prompt the user to open/pick a file. The callback receives the selected file URI. */

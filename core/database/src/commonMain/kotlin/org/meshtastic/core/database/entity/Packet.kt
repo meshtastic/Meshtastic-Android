@@ -74,6 +74,9 @@ data class PacketEntity(
         Index(value = ["contact_key"]),
         Index(value = ["contact_key", "port_num", "received_time"]),
         Index(value = ["packet_id"]),
+        Index(value = ["received_time"]),
+        Index(value = ["filtered"]),
+        Index(value = ["read"]),
     ],
 )
 data class Packet(
@@ -98,9 +101,12 @@ data class Packet(
         fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
 
-            val candidateRelayNodes = nodes.filter {
-                it.num != ourNodeNum && it.lastHeard != 0 && (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
-            }
+            val candidateRelayNodes =
+                nodes.filter {
+                    it.num != ourNodeNum &&
+                        it.lastHeard != 0 &&
+                        (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
+                }
 
             val closestRelayNode =
                 if (candidateRelayNodes.size == 1) {

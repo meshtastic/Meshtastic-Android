@@ -71,7 +71,7 @@ interface PacketRepository {
     suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long)
 
     /** Returns all packets currently queued for transmission. */
-    suspend fun getQueuedPackets(): List<DataPacket>?
+    suspend fun getQueuedPackets(): List<DataPacket>
 
     /**
      * Persists a packet in the database.

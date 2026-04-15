@@ -17,9 +17,6 @@
 package org.meshtastic.core.common.util
 
 import java.net.InetAddress
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
-import java.text.DateFormat
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -76,7 +73,7 @@ actual object DateFormatter {
         shortDateFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 
     actual fun formatDateTimeShort(timestampMillis: Long): String =
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(timestampMillis)
+        shortDateTimeFormatter.format(java.time.Instant.ofEpochMilli(timestampMillis).atZone(zoneId))
 }
 
 @Suppress("MagicNumber")
@@ -100,21 +97,6 @@ actual fun String?.isValidAddress(): Boolean {
         else -> DOMAIN_PATTERN.matches(value)
     }
 }
-
-internal fun parseQueryParameters(rawQuery: String?): Map<String, List<String>> = rawQuery
-    ?.split('&')
-    ?.filter { it.isNotBlank() }
-    ?.groupBy(
-        keySelector = { segment ->
-            val key = segment.substringBefore('=', missingDelimiterValue = segment)
-            URLDecoder.decode(key, StandardCharsets.UTF_8.name())
-        },
-        valueTransform = { segment ->
-            val value = segment.substringAfter('=', missingDelimiterValue = "")
-            URLDecoder.decode(value, StandardCharsets.UTF_8.name())
-        },
-    )
-    .orEmpty()
 
 private val IPV4_PATTERN = Regex("^(?:\\d{1,3}\\.){3}\\d{1,3}${'$'}")
 private val DOMAIN_PATTERN = Regex("^(?=.{1,253}${'$'})(?:(?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,63}${'$'}")

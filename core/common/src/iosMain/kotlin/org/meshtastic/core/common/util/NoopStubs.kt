@@ -22,20 +22,6 @@ actual object BuildUtils {
     actual val sdkInt: Int = 0
 }
 
-actual class CommonUri(actual val host: String?, actual val fragment: String?, actual val pathSegments: List<String>) {
-    actual fun getQueryParameter(key: String): String? = null
-
-    actual fun getBooleanQueryParameter(key: String, defaultValue: Boolean): Boolean = defaultValue
-
-    actual override fun toString(): String = ""
-
-    actual companion object {
-        actual fun parse(uriString: String): CommonUri = CommonUri(null, null, emptyList())
-    }
-}
-
-actual fun CommonUri.toPlatformUri(): Any = Any()
-
 actual object DateFormatter {
     actual fun formatRelativeTime(timestampMillis: Long): String = ""
 

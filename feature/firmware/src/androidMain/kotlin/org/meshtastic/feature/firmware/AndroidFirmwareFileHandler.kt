@@ -18,6 +18,7 @@ package org.meshtastic.feature.firmware
 
 import android.content.Context
 import co.touchlab.kermit.Logger
+import com.eygraber.uri.toAndroidUri
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.head
@@ -32,7 +33,6 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
-import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileOutputStream
@@ -188,7 +188,7 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         if (!tempDir.exists()) tempDir.mkdirs()
 
         try {
-            val platformUri = uri.toPlatformUri() as android.net.Uri
+            val platformUri = uri.toAndroidUri()
             val inputStream = context.contentResolver.openInputStream(platformUri) ?: return@withContext null
             ZipInputStream(inputStream).use { zipInput ->
                 var entry = zipInput.nextEntry
@@ -225,9 +225,9 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
 
     override suspend fun getFileSize(file: FirmwareArtifact): Long = withContext(ioDispatcher) {
         file.toLocalFileOrNull()?.takeIf { it.exists() }?.length()
-            ?: context.contentResolver
-                .openAssetFileDescriptor(file.uri.toPlatformUri() as android.net.Uri, "r")
-                ?.use { descriptor -> descriptor.length.takeIf { it >= 0L } }
+            ?: context.contentResolver.openAssetFileDescriptor(file.uri.toAndroidUri(), "r")?.use { descriptor ->
+                descriptor.length.takeIf { it >= 0L }
+            }
             ?: 0L
     }
 
@@ -242,16 +242,13 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         if (localFile != null && localFile.exists()) {
             localFile.readBytes()
         } else {
-            context.contentResolver.openInputStream(artifact.uri.toPlatformUri() as android.net.Uri)?.use {
-                it.readBytes()
-            } ?: throw IOException("Cannot open artifact: ${artifact.uri}")
+            context.contentResolver.openInputStream(artifact.uri.toAndroidUri())?.use { it.readBytes() }
+                ?: throw IOException("Cannot open artifact: ${artifact.uri}")
         }
     }
 
     override suspend fun importFromUri(uri: CommonUri): FirmwareArtifact? = withContext(ioDispatcher) {
-        val inputStream =
-            context.contentResolver.openInputStream(uri.toPlatformUri() as android.net.Uri)
-                ?: return@withContext null
+        val inputStream = context.contentResolver.openInputStream(uri.toAndroidUri()) ?: return@withContext null
         val tempFile = File(context.cacheDir, "firmware_update/ota_firmware.bin")
         tempFile.parentFile?.mkdirs()
         inputStream.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
@@ -282,10 +279,10 @@ class AndroidFirmwareFileHandler(private val context: Context, private val clien
         withContext(ioDispatcher) {
             val inputStream =
                 source.toLocalFileOrNull()?.inputStream()
-                    ?: context.contentResolver.openInputStream(source.uri.toPlatformUri() as android.net.Uri)
+                    ?: context.contentResolver.openInputStream(source.uri.toAndroidUri())
                     ?: throw IOException("Cannot open source URI")
             val outputStream =
-                context.contentResolver.openOutputStream(destinationUri.toPlatformUri() as android.net.Uri)
+                context.contentResolver.openOutputStream(destinationUri.toAndroidUri())
                     ?: throw IOException("Cannot open content URI for writing")
 
             inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }

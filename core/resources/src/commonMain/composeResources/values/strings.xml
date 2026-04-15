@@ -384,9 +384,9 @@
     <string name="battery">Battery</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
-    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
-    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
-    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Temp</string>
     <string name="humidity">Hum</string>

@@ -20,7 +20,6 @@ package org.meshtastic.core.ui.util
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -36,13 +35,14 @@ import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import co.touchlab.kermit.Logger
+import com.eygraber.uri.toAndroidUri
+import com.eygraber.uri.toKmpUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.MeshtasticUri
 import java.net.URLEncoder
 
 @Composable
@@ -107,16 +107,14 @@ actual fun rememberOpenUrl(): (url: String) -> Unit {
 @Composable
 @Suppress("Wrapping")
 actual fun rememberSaveFileLauncher(
-    onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit,
+    onUriReceived: (org.meshtastic.core.common.util.CommonUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit {
     val launcher =
         androidx.activity.compose.rememberLauncherForActivityResult(
             androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
         ) { result ->
             if (result.resultCode == android.app.Activity.RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    onUriReceived(uri.toString().let { org.meshtastic.core.common.util.MeshtasticUri(it) })
-                }
+                result.data?.data?.let { uri -> onUriReceived(uri.toKmpUri()) }
             }
         }
 
@@ -137,7 +135,7 @@ actual fun rememberSaveFileLauncher(
 actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit {
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            onUriReceived(uri?.let { CommonUri(it) })
+            onUriReceived(uri?.let { it.toKmpUri() })
         }
     return remember(launcher) { { mimeType -> launcher.launch(mimeType) } }
 }
@@ -151,7 +149,7 @@ actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) ->
             withContext(Dispatchers.IO) {
                 @Suppress("TooGenericExceptionCaught")
                 try {
-                    val androidUri = Uri.parse(uri.toString())
+                    val androidUri = uri.toAndroidUri()
                     context.contentResolver.openInputStream(androidUri)?.use { stream ->
                         stream.bufferedReader().use { reader ->
                             val buffer = CharArray(maxChars)

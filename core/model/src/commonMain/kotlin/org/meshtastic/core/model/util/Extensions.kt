@@ -32,7 +32,7 @@ val Any?.anonymize: String
     get() = this.anonymize()
 
 /** A version of anonymize that allows passing in a custom minimum length */
-fun Any?.anonymize(maxLen: Int = 3) = if (this != null) ("..." + this.toString().takeLast(maxLen)) else "null"
+fun Any?.anonymize(maxLen: Int = 3) = if (this != null) "...${this.toString().takeLast(maxLen)}" else "null"
 
 // A toString that makes sure all newlines are removed (for nice logging).
 fun Any.toOneLineString() = this.toString().replace('\n', ' ')

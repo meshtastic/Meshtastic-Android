@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,14 @@
 package org.meshtastic.core.common.util
 
 /**
- * A multiplatform representation of a URI, primarily used to safely pass Android Uri references through commonMain
- * modules without coupling them to the android.net.Uri class.
+ * Normalizes a BLE/device address to a canonical uppercase form with colons removed. Returns `"DEFAULT"` for null,
+ * blank, or sentinel values (`"N"`, `"NULL"`).
  */
-data class MeshtasticUri(val uriString: String) {
-    override fun toString(): String = uriString
-
-    companion object {
-        fun parse(uriString: String): MeshtasticUri = MeshtasticUri(uriString)
+fun normalizeAddress(addr: String?): String {
+    val u = addr?.trim()?.uppercase()
+    return when {
+        u.isNullOrBlank() -> "DEFAULT"
+        u == "N" || u == "NULL" -> "DEFAULT"
+        else -> u.replace(":", "")
     }
 }

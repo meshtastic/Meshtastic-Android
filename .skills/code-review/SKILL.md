@@ -13,14 +13,15 @@ When reviewing code, meticulously verify the following categories. Flag any devi
   - `java.util.concurrent.locks.*` -> `kotlinx.coroutines.sync.Mutex`
   - `java.util.concurrent.ConcurrentHashMap` -> `atomicfu` or Mutex-guarded `mutableMapOf()`
   - `java.io.*` -> `Okio` (`BufferedSource`/`BufferedSink`)
-  - `java.util.Locale` -> Kotlin `uppercase()`/`lowercase()` or `expect`/`actual`
+  - `java.util.Locale` -> Kotlin `uppercase()`/`lowercase()` (purged from `commonMain`)
+- [ ] **Coroutine Safety:** Use `safeCatching {}` from `core:common` instead of `runCatching {}` in coroutine/suspend contexts. `runCatching` silently swallows `CancellationException`, breaking structured concurrency. Keep `runCatching` only in cleanup/teardown code (abort, close, eviction). Use `kotlinx.coroutines.CancellationException` (not `kotlin.coroutines.cancellation.CancellationException`).
 - [ ] **Shared Helpers:** If `androidMain` and `jvmMain` contain identical pure-Kotlin logic, mandate extracting it to a shared function in `commonMain`.
 - [ ] **File Naming Conflicts:** For `expect`/`actual` declarations, ensure files sharing the same package namespace have distinct names (e.g., keep `expect` in `LogExporter.kt` and shared helpers in `LogFormatter.kt`) to avoid duplicate class errors on the JVM target.
 - [ ] **Interface & DI Over `expect`/`actual`:** Check that `expect`/`actual` is reserved for small platform primitives. Interfaces + DI should be preferred for larger capabilities.
 
 ### 2. UI & Compose Multiplatform (CMP)
 - [ ] **Compose Multiplatform Resources:** Ensure NO hardcoded strings. Must use `core:resources` (e.g., `stringResource(Res.string.key)` or asynchronous `getStringSuspend(Res.string.key)` for ViewModels/Coroutines). NEVER use blocking `getString()` in a coroutine.
-- [ ] **String Formatting:** CMP only supports `%N$s` and `%N$d`. Flag any float formats (`%N$.1f`) in Compose string resources; they must be pre-formatted using `NumberFormatter.format()` from `core:common`.
+- [ ] **String Formatting:** CMP only supports `%N$s` and `%N$d`. Flag any float formats (`%N$.1f`) in Compose string resources; they must be pre-formatted using `NumberFormatter.format()` from `core:common`. Use `MetricFormatter` for metric-specific displays (temperature, voltage, current, percent, humidity, pressure, SNR, RSSI).
 - [ ] **Centralized Dialogs & Alerts:** Flag inline alert-rendering logic. Mandate the use of `AlertHost(alertManager)` or `SharedDialogs` from `core:ui/commonMain`.
 - [ ] **Placeholders:** Require `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktop/JVM features. No inline placeholders in feature modules.
 - [ ] **Adaptive Layouts:** Verify use of `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support desktop/tablet breakpoints (≥ 1200dp).
@@ -36,8 +37,10 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 
 ### 5. Networking, DB & I/O
 - [ ] **Ktor Strictly:** Check that Ktor is used for all HTTP networking. Flag and reject any usage of OkHttp.
+- [ ] **HTTP Configuration:** Verify timeouts and base URLs use `HttpClientDefaults` from `core:network`. Never hardcode timeouts in feature modules. `DefaultRequest` sets the base URL; feature API services use relative paths.
 - [ ] **Image Loading (Coil):** Coil must use `coil-network-ktor3` in host modules. Feature modules should ONLY depend on `libs.coil` (coil-compose) and never configure fetchers.
 - [ ] **Room KMP:** Ensure `factory = { MeshtasticDatabaseConstructor.initialize() }` is used in `Room.databaseBuilder`. DAOs and Entities must reside in `commonMain`.
+- [ ] **Room Patterns:** Verify use of `@Upsert` for insert-or-update logic. Check for `LIMIT 1` on single-row queries. Flag N+1 query patterns (loops calling single-row queries) — batch with chunked `WHERE IN` instead.
 - [ ] **Bluetooth (BLE):** All Bluetooth communication must be routed through `core:ble` using Kable abstractions.
 
 ### 6. Dependency Catalog Aliases
@@ -47,7 +50,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 - [ ] **Compose Multiplatform:** Ensure `compose-multiplatform-*` aliases are used instead of plain `androidx.compose` in all KMP modules.
 
 ### 7. Testing
-- [ ] **Test Placement:** New Compose UI tests must go in `commonTest` using `runComposeUiTest {}` + `kotlin.test.Test`. Do not add `androidTest` (instrumented) tests.
+- [ ] **Test Placement:** New Compose UI tests must go in `commonTest` using `runComposeUiTest {}` from `androidx.compose.ui.test.v2` (not the deprecated v1 `androidx.compose.ui.test` package) + `kotlin.test.Test`. Do not add `androidTest` (instrumented) tests.
 - [ ] **Shared Test Utilities:** Test fakes, doubles, and utilities should be placed in `core:testing`.
 - [ ] **Libraries:** Verify usage of `Turbine` for Flow testing, `Kotest` for property-based testing, and `Mokkery` for mocking.
 - [ ] **Robolectric Configuration:** Check that Compose UI tests running via Robolectric on JVM are pinned to `@Config(sdk = [34])` to prevent Java 21 / SDK 35 compatibility issues.

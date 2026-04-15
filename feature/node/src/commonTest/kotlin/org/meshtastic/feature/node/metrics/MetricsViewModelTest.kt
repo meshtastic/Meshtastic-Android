@@ -35,7 +35,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import okio.Buffer
 import okio.BufferedSink
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
@@ -210,7 +210,7 @@ class MetricsViewModelTest {
             awaitItem() // Empty
             awaitItem() // with position
 
-            val uri = MeshtasticUri("content://test")
+            val uri = CommonUri.parse("content://test")
             vm.savePositionCSV(uri, listOf(testPosition))
             runCurrent()
 

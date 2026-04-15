@@ -44,6 +44,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +62,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
@@ -117,7 +118,7 @@ fun ContactsScreen(
     onNavigateToShare: () -> Unit,
     sharedContactRequested: SharedContact?,
     requestChannelSet: ChannelSet?,
-    onHandleDeepLink: (MeshtasticUri, onInvalid: () -> Unit) -> Unit,
+    onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
     onClearSharedContactRequested: () -> Unit,
     onClearRequestChannelUrl: () -> Unit,
     viewModel: ContactsViewModel,
@@ -131,8 +132,8 @@ fun ContactsScreen(
     val scope = rememberCoroutineScope()
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    var showMuteDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showMuteDialog by rememberSaveable { mutableStateOf(false) }
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
     // State for managing selected contacts
     val selectedContactKeys = remember { mutableStateListOf<String>() }
@@ -255,7 +256,7 @@ fun ContactsScreen(
                 MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
                     onImport = { uriString ->
-                        onHandleDeepLink(MeshtasticUri(uriString)) {
+                        onHandleDeepLink(CommonUri.parse(uriString)) {
                             scope.launch { showToast(Res.string.channel_invalid) }
                         }
                     },

@@ -36,6 +36,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -123,9 +124,12 @@ class FirmwareUpdateViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        // viewModelScope is already cancelled when onCleared() runs, so use a standalone scope
-        // for fire-and-forget cleanup of temporary firmware files.
-        kotlinx.coroutines.CoroutineScope(NonCancellable).launch {
+        // viewModelScope is already cancelled when onCleared() runs, so launch cleanup in a
+        // standalone scope. SupervisorJob prevents the coroutine from propagating failures to a
+        // shared parent, and NonCancellable on the launch keeps cleanup running even if the scope
+        // is cancelled concurrently.
+        @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+        kotlinx.coroutines.GlobalScope.launch(NonCancellable) {
             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
         }
     }
@@ -147,7 +151,7 @@ class FirmwareUpdateViewModel(
         updateJob =
             viewModelScope.launch {
                 _state.value = FirmwareUpdateState.Checking
-                runCatching {
+                safeCatching {
                     val ourNode = nodeRepository.myNodeInfo.value
                     val address = radioPrefs.devAddr.value?.drop(1)
                     if (address == null || ourNode == null) {
@@ -200,7 +204,6 @@ class FirmwareUpdateViewModel(
                     }
                 }
                     .onFailure { e ->
-                        if (e is CancellationException) throw e
                         Logger.e(e) { "Error checking for updates" }
                         val unknownError = UiText.Resource(Res.string.firmware_update_unknown_error)
                         _state.value =
@@ -390,7 +393,7 @@ private suspend fun cleanupTemporaryFiles(
     fileHandler: FirmwareFileHandler,
     tempFirmwareFile: FirmwareArtifact?,
 ): FirmwareArtifact? {
-    runCatching {
+    safeCatching {
         tempFirmwareFile?.takeIf { it.isTemporary }?.let { fileHandler.deleteFile(it) }
         fileHandler.cleanupAllTemporaryFiles()
     }

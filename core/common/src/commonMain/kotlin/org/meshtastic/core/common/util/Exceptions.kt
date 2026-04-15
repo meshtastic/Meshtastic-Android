@@ -17,6 +17,7 @@
 package org.meshtastic.core.common.util
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 
 object Exceptions {
     /** Set by the application to provide a custom crash reporting implementation. */
@@ -47,10 +48,12 @@ fun ignoreException(silent: Boolean = false, inner: () -> Unit) {
     }
 }
 
-/** Suspend-compatible variant of [ignoreException]. */
+/** Suspend-compatible variant of [ignoreException]. Re-throws [CancellationException]. */
 suspend fun ignoreExceptionSuspend(silent: Boolean = false, inner: suspend () -> Unit) {
     try {
         inner()
+    } catch (e: CancellationException) {
+        throw e
     } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
         if (!silent) {
             Logger.w(ex) { "Ignoring exception" }
@@ -68,4 +71,27 @@ fun exceptionReporter(inner: () -> Unit) {
     } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
         Exceptions.report(ex, "exceptionReporter", "Uncaught Exception")
     }
+}
+
+/**
+ * Like [kotlin.runCatching], but re-throws [CancellationException] to preserve structured concurrency. Use this instead
+ * of [runCatching] in coroutine contexts.
+ */
+@Suppress("TooGenericExceptionCaught")
+inline fun <T> safeCatching(block: () -> T): Result<T> = try {
+    Result.success(block())
+} catch (e: CancellationException) {
+    throw e
+} catch (e: Exception) {
+    Result.failure(e)
+}
+
+/** Like [kotlin.runCatching] receiver variant, but re-throws [CancellationException]. */
+@Suppress("TooGenericExceptionCaught")
+inline fun <T, R> T.safeCatching(block: T.() -> R): Result<R> = try {
+    Result.success(block())
+} catch (e: CancellationException) {
+    throw e
+} catch (e: Exception) {
+    Result.failure(e)
 }

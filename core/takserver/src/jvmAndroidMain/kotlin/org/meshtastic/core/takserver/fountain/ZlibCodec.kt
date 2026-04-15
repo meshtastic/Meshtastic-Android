@@ -17,7 +17,6 @@
 package org.meshtastic.core.takserver.fountain
 
 import java.io.ByteArrayOutputStream
-import java.security.MessageDigest
 import java.util.zip.Deflater
 import java.util.zip.Inflater
 
@@ -64,12 +63,5 @@ internal actual object ZlibCodec {
         } finally {
             inflater.end()
         }
-    }
-}
-
-internal actual object CryptoCodec {
-    actual fun sha256Prefix8(data: ByteArray): ByteArray {
-        val digest = MessageDigest.getInstance("SHA-256")
-        return digest.digest(data).copyOf(8)
     }
 }

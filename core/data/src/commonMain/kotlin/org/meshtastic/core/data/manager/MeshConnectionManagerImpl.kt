@@ -289,7 +289,7 @@ class MeshConnectionManagerImpl(
 
     override fun onRadioConfigLoaded() {
         scope.handledLaunch {
-            val queuedPackets = packetRepository.getQueuedPackets() ?: emptyList()
+            val queuedPackets = packetRepository.getQueuedPackets()
             queuedPackets.forEach { packet ->
                 try {
                     workerManager.enqueueSendMessage(packet.id)

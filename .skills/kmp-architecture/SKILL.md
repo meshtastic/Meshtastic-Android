@@ -16,12 +16,14 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 - **Shared Helpers:** Do not duplicate pure Kotlin logic between `androidMain` and `jvmMain`. Extract to a `commonMain` helper.
 
 ## 3. Core Libraries & Constraints
-- **Concurrency:** `kotlinx.coroutines`. Use `org.meshtastic.core.common.util.ioDispatcher` over `Dispatchers.IO` directly.
+- **Concurrency:** `kotlinx.coroutines`. Use `org.meshtastic.core.common.util.ioDispatcher` over `Dispatchers.IO` directly. Inject `CoroutineDispatchers` from `core:di` into classes that need dispatchers — never reference `Dispatchers.IO`/`Main`/`Default` directly in business logic.
+- **Error Handling:** Use `safeCatching {}` from `core:common` instead of `runCatching {}` in coroutine/suspend contexts. `runCatching` swallows `CancellationException`, breaking structured concurrency. Keep `runCatching` only in cleanup/teardown code (abort, close, eviction loops).
 - **Standard Library Replacements:**
   - `ConcurrentHashMap` -> `atomicfu` or Mutex-guarded `mutableMapOf()`.
   - `java.util.concurrent.locks.*` -> `kotlinx.coroutines.sync.Mutex`.
   - `java.io.*` -> `Okio` (`BufferedSource`/`BufferedSink`).
 - **Networking:** Pure **Ktor**. No OkHttp. Ktor `Logging` plugin for debugging.
+- **HTTP Configuration:** Use `HttpClientDefaults` from `core:network` for shared base URL (`API_BASE_URL`), timeouts, and retry constants. Both Android (`NetworkModule`) and Desktop (`DesktopKoinModule`) HttpClient instances must use these. Feature API services use relative paths; `DefaultRequest` sets the base URL.
 - **BLE:** Route through `core:ble` using **Kable**.
 - **Room KMP:** Use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder`.
 
@@ -38,6 +40,10 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 ## 6. I/O & Serialization
 - **Okio standard:** This project standardizes on Okio (`BufferedSource`/`BufferedSink`). JetBrains recommends `kotlinx-io` (built on Okio), but this project has not migrated. Do not introduce `kotlinx-io` without an explicit decision.
 - **Room KMP:** Always use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder` and `inMemoryDatabaseBuilder`. DAOs and Entities reside in `commonMain`.
+- **Room Patterns:**
+  - Use `@Upsert` for insert-or-update operations instead of manual `INSERT OR IGNORE` + `UPDATE` logic.
+  - Use `LIMIT 1` on `@Query` methods that expect a single row.
+  - Prevent N+1 queries: batch operations with `@Upsert fun putAll(items: List<T>)` or chunked `WHERE IN` queries (chunk size ≤ 999 to respect SQLite bind parameter limit).
 
 ## 7. Build-Logic Conventions
 - In `build-logic/convention`, prefer lazy Gradle configuration (`configureEach`, `withPlugin`, provider APIs). Avoid `afterEvaluate` in convention plugins unless there is no viable lazy alternative.

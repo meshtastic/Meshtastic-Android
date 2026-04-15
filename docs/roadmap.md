@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: 2026-04-10
+> Last updated: 2026-04-15
 
 Forward-looking priorities for the Meshtastic KMP multi-target effort. For current state, see [`kmp-status.md`](./kmp-status.md).
 
@@ -18,6 +18,8 @@ These items address structural gaps identified in the March 2026 architecture re
 | Auto-wire Desktop ViewModels via K2 Compiler (eliminate manual wiring) | Medium | Low | ✅ |
 | **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low | ✅ |
 | **iOS CI gate (compile-only validation)** | High | Medium | ✅ |
+| **Commonize utilities** (`formatString`, `SfppHasher`, `CryptoCodec`, `CommonUri`) | High | Medium | ✅ |
+| **Centralize metric formatting** (`MetricFormatter`) | Medium | Low | ✅ |
 
 ## Active Work
 

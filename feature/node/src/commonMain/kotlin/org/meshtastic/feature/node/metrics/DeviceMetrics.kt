@@ -55,6 +55,8 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
@@ -230,12 +232,13 @@ private fun DeviceMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                    val formatted = NumberFormatter.format(value, 1)
                     when (color) {
-                        batteryColor -> formatString(percentValueTemplate, batteryLabel, value)
-                        voltageColor -> formatString(voltageValueTemplate, voltageLabel, value)
-                        chUtilColor -> formatString(percentValueTemplate, channelUtilizationLabel, value)
-                        airUtilColor -> formatString(percentValueTemplate, airUtilizationLabel, value)
-                        else -> formatString(numericValueTemplate, value)
+                        batteryColor -> formatString(percentValueTemplate, batteryLabel, formatted)
+                        voltageColor -> formatString(voltageValueTemplate, voltageLabel, formatted)
+                        chUtilColor -> formatString(percentValueTemplate, channelUtilizationLabel, formatted)
+                        airUtilColor -> formatString(percentValueTemplate, airUtilizationLabel, formatted)
+                        else -> formatString(numericValueTemplate, formatted)
                     }
                 },
             )
@@ -337,7 +340,7 @@ private fun DeviceMetricsChart(
                 if (leftLayer != null) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = batteryColor),
-                        valueFormatter = { _, value, _ -> formatString("%.0f%%", value) },
+                        valueFormatter = { _, value, _ -> MetricFormatter.percent(value.toFloat(), 0) },
                     )
                 } else {
                     null
@@ -346,7 +349,7 @@ private fun DeviceMetricsChart(
                 if (rightLayer != null) {
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                        valueFormatter = { _, value, _ -> formatString("%.1f V", value) },
+                        valueFormatter = { _, value, _ -> "${NumberFormatter.format(value.toFloat(), 1)} V" },
                     )
                 } else {
                     null
@@ -441,7 +444,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                             formatString(
                                 percentValueTemplate,
                                 channelUtilizationLabel,
-                                deviceMetrics.channel_utilization ?: 0f,
+                                NumberFormatter.format(deviceMetrics.channel_utilization ?: 0f, 1),
                             ),
                         )
                         Spacer(Modifier.width(12.dp))
@@ -453,7 +456,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                             formatString(
                                 percentValueTemplate,
                                 airUtilizationLabel,
-                                deviceMetrics.air_util_tx ?: 0f,
+                                NumberFormatter.format(deviceMetrics.air_util_tx ?: 0f, 1),
                             ),
                         )
                     }

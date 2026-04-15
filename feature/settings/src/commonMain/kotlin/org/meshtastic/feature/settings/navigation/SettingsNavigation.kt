@@ -18,7 +18,6 @@ package org.meshtastic.feature.settings.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -80,7 +79,7 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewMod
                     .lastOrNull { it is SettingsRoute.SettingsGraph }
                     ?.let { (it as SettingsRoute.SettingsGraph).destNum }
         }
-    SideEffect { viewModel.initDestNum(destNum) }
+    LaunchedEffect(destNum) { viewModel.initDestNum(destNum) }
     return viewModel
 }
 

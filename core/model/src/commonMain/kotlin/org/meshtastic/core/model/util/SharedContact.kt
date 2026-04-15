@@ -107,7 +107,7 @@ fun compareUsers(oldUser: User, newUser: User): String {
     return if (changes.isEmpty()) {
         "No changes detected."
     } else {
-        "Changes:\n" + changes.joinToString("\n")
+        "Changes:\n${changes.joinToString("\n")}"
     }
 }
 

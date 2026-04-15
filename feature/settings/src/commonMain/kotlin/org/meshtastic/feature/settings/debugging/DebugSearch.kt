@@ -35,7 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -158,7 +158,7 @@ fun DebugSearchState(
     onExportLogs: (() -> Unit)? = null,
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    var customFilterText by remember { mutableStateOf("") }
+    var customFilterText by rememberSaveable { mutableStateOf("") }
 
     Column(modifier = modifier.background(color = colorScheme.background.copy(alpha = 1.0f)).padding(8.dp)) {
         Row(

@@ -41,7 +41,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bad
 import org.meshtastic.core.resources.fair
@@ -154,7 +154,7 @@ fun Snr(snr: Float, modifier: Modifier = Modifier) {
 
     Text(
         modifier = modifier,
-        text = formatString("%s %.2fdB", stringResource(Res.string.snr), snr),
+        text = "${stringResource(Res.string.snr)} ${MetricFormatter.snr(snr, decimalPlaces = 2)}",
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )
@@ -172,7 +172,7 @@ fun Rssi(rssi: Int, modifier: Modifier = Modifier) {
         }
     Text(
         modifier = modifier,
-        text = formatString("%s %ddBm", stringResource(Res.string.rssi), rssi),
+        text = "${stringResource(Res.string.rssi)} ${MetricFormatter.rssi(rssi)}",
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )

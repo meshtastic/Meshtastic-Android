@@ -14,4 +14,7 @@ applyTo: "**/commonMain/**/*.kt"
 - Never use plain `androidx.compose` dependencies in `commonMain`.
 - Strings: use `stringResource(Res.string.key)` from `core:resources`. No hardcoded strings.
 - CMP `stringResource` only supports `%N$s` and `%N$d` — pre-format floats with `NumberFormatter.format()`.
+- Use `MetricFormatter` from `core:common` for display strings (temperature, voltage, percent, signal). Avoid scattered `formatString("%.1f°C", val)` calls.
 - Check `gradle/libs.versions.toml` before adding dependencies.
+- Use `safeCatching {}` from `core:common` instead of `runCatching {}` in coroutine/suspend contexts. Keep `runCatching` only in cleanup/teardown code.
+- Use `kotlinx.coroutines.CancellationException`, not `kotlin.coroutines.cancellation.CancellationException`.

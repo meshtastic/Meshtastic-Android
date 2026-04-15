@@ -30,9 +30,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.eygraber.uri.toKmpUri
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.export_keys
 import org.meshtastic.core.resources.export_keys_confirmation
@@ -54,7 +54,7 @@ actual fun ExportSecurityConfigButton(
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri.toMeshtasticUri(), securityConfig) }
+                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri.toKmpUri(), securityConfig) }
             }
         }
 
