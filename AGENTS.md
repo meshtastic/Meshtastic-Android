@@ -66,3 +66,9 @@ Do NOT duplicate content into agent-specific files. When you modify architecture
 - **Zero Lint Tolerance:** A task is incomplete if `detekt` fails or `spotlessCheck` does not pass for touched modules.
 - **Read Before Refactoring:** When a pattern contradicts best practices, analyze whether it is legacy debt or a deliberate architectural choice before proposing a change.
 </rules>
+
+<git_and_prs>
+- **Commit Hygiene:** Squash fixup/polish/review-feedback commits before opening a PR. Each commit should represent a logical, self-contained unit of work — not a back-and-forth conversation.
+- **PR Descriptions:** Keep PR descriptions concise and scannable. State *what changed* and *why*, not a per-commit play-by-play. Use a short summary paragraph followed by a bullet list of changes. Avoid tables, headers-per-commit, or verbose breakdowns. Reference the `meshtastic/firmware` repo PRs for tone and style.
+- **PR Titles:** Use conventional commit format: `feat(scope):`, `fix(scope):`, `refactor(scope):`, `chore(scope):`. Keep titles under ~72 characters.
+</git_and_prs>
