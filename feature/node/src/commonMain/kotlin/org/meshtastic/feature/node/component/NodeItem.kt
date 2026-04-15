@@ -48,6 +48,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
@@ -106,6 +107,7 @@ fun NodeItem(
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
     connectionState: ConnectionState,
+    deviceType: DeviceType? = null,
     isActive: Boolean = false,
 ) {
     val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
@@ -166,6 +168,7 @@ fun NodeItem(
                 isMuted = isMuted,
                 isUnmessageable = unmessageable,
                 connectionState = connectionState,
+                deviceType = deviceType,
                 contentColor = contentColor,
             )
 
@@ -400,6 +403,7 @@ private fun NodeItemHeader(
     isMuted: Boolean,
     isUnmessageable: Boolean,
     connectionState: ConnectionState,
+    deviceType: DeviceType?,
     contentColor: Color,
 ) {
     Row(
@@ -445,6 +449,7 @@ private fun NodeItemHeader(
             isMuted = isMuted,
             isUnmessageable = isUnmessageable,
             connectionState = connectionState,
+            deviceType = deviceType,
             contentColor = contentColor,
         )
     }

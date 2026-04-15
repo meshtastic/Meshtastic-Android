@@ -97,6 +97,7 @@ fun NodeListScreen(
     }
 
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val deviceType by viewModel.deviceType.collectAsStateWithLifecycle()
 
     val isScrollInProgress by remember {
         derivedStateOf { listState.isScrollInProgress && (listState.canScrollForward || listState.canScrollBackward) }
@@ -187,6 +188,7 @@ fun NodeListScreen(
                             onClick = { navigateToNodeDetails(node.num) },
                             onLongClick = longClick,
                             connectionState = connectionState,
+                            deviceType = deviceType,
                             isActive = isActive,
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }

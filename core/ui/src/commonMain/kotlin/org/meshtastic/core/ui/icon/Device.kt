@@ -25,6 +25,7 @@ import org.meshtastic.core.resources.ic_fingerprint
 import org.meshtastic.core.resources.ic_fork_left
 import org.meshtastic.core.resources.ic_home
 import org.meshtastic.core.resources.ic_icecream
+import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.ic_military_tech
 import org.meshtastic.core.resources.ic_mountain_flag
 import org.meshtastic.core.resources.ic_my_location
@@ -75,4 +76,4 @@ val MeshtasticIcons.DeviceNumbers: ImageVector
 val MeshtasticIcons.Android: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_android)
 val MeshtasticIcons.HardwareModel: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_router)
+    @Composable get() = vectorResource(Res.drawable.ic_memory)
