@@ -147,12 +147,6 @@
 -keep class org.jetbrains.compose.resources.** { *; }
 -keep class org.meshtastic.core.resources.** { *; }
 
-# ---- Compose Animation (anti-merge) ----------------------------------------
-
-# Prevent ProGuard from merging animation spec class hierarchies (same issue
-# as R8 on Android). We use a full keep to prevent incorrect tree-shaking
-# of internal transitions.
--keep class androidx.compose.animation.** { *; }
 
 # ---- AboutLibraries ---------------------------------------------------------
 
