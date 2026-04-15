@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
@@ -97,7 +98,7 @@ class MeshConfigFlowManagerImplTest {
                 serviceBroadcasts = serviceBroadcasts,
                 analytics = analytics,
                 commandSender = commandSender,
-                packetHandler = packetHandler,
+                heartbeatSender = DataLayerHeartbeatSender(packetHandler),
                 scope = testScope,
             )
     }
@@ -170,6 +171,49 @@ class MeshConfigFlowManagerImplTest {
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
         advanceUntilIdle()
 
+        verify { connectionManager.onRadioConfigLoaded() }
+        verify { connectionManager.startNodeInfoOnly() }
+    }
+
+    @Test
+    fun `Stage 1 complete sends heartbeat with non-zero nonce between stages`() = testScope.runTest {
+        val sentPackets = mutableListOf<org.meshtastic.proto.ToRadio>()
+        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } calls
+            { call ->
+                sentPackets.add(call.arg(0))
+            }
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+
+        sentPackets.clear() // Clear any packets from prior phases
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceUntilIdle()
+
+        val heartbeats = sentPackets.filter { it.heartbeat != null }
+        assertEquals(1, heartbeats.size, "Expected exactly one inter-stage heartbeat")
+        assertEquals(
+            true,
+            heartbeats[0].heartbeat!!.nonce != 0,
+            "Inter-stage heartbeat should have a non-zero nonce",
+        )
+    }
+
+    @Test
+    fun `Stage 1 complete with old firmware logs warning but continues handshake`() = testScope.runTest {
+        val oldMetadata =
+            DeviceMetadata(firmware_version = "2.3.0", hw_model = HardwareModel.HELTEC_V3, hasWifi = false)
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(oldMetadata)
+        advanceUntilIdle()
+
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceUntilIdle()
+
+        // Handshake should still progress despite old firmware
         verify { connectionManager.onRadioConfigLoaded() }
         verify { connectionManager.startNodeInfoOnly() }
     }

@@ -129,6 +129,7 @@ class MeshConnectionManagerImplTest {
         packetRepository,
         workerManager,
         appWidgetUpdater,
+        DataLayerHeartbeatSender(packetHandler),
         scope,
     )
 
@@ -146,6 +147,59 @@ class MeshConnectionManagerImplTest {
             "State should be Connecting after radio Connected",
         )
         verify { serviceBroadcasts.broadcastConnection() }
+    }
+
+    @Test
+    fun `Connected state sends pre-handshake heartbeat before config request`() = runTest(testDispatcher) {
+        val sentPackets = mutableListOf<org.meshtastic.proto.ToRadio>()
+        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } calls
+            { call ->
+                sentPackets.add(call.arg(0))
+            }
+
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        // Advance past PRE_HANDSHAKE_SETTLE_MS (100ms) but NOT the 30s stall guard timeout
+        advanceTimeBy(200)
+
+        // First ToRadio should be a heartbeat, second should be want_config_id
+        assertEquals(2, sentPackets.size, "Expected heartbeat + want_config_id, got ${sentPackets.size} packets")
+        val heartbeat = sentPackets[0]
+        val wantConfig = sentPackets[1]
+
+        assertEquals(true, heartbeat.heartbeat != null, "First packet should be a heartbeat")
+        assertEquals(true, heartbeat.heartbeat!!.nonce != 0, "Heartbeat should have a non-zero nonce")
+        assertEquals(
+            org.meshtastic.core.repository.HandshakeConstants.CONFIG_NONCE,
+            wantConfig.want_config_id,
+            "Second packet should be want_config_id with CONFIG_NONCE",
+        )
+    }
+
+    @Test
+    fun `Disconnect during pre-handshake settle cancels config start`() = runTest(testDispatcher) {
+        val sentPackets = mutableListOf<org.meshtastic.proto.ToRadio>()
+        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } calls
+            { call ->
+                sentPackets.add(call.arg(0))
+            }
+        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
+
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        // Advance only 50ms — within the 100ms settle window
+        advanceTimeBy(50)
+
+        // Should have sent only the heartbeat so far, not want_config_id
+        assertEquals(1, sentPackets.size, "Only heartbeat should be sent before settle completes")
+
+        // Disconnect before the settle delay completes — should cancel the pending config start
+        radioConnectionState.value = ConnectionState.Disconnected
+        advanceTimeBy(200)
+
+        // The want_config_id should NOT have been sent because the job was cancelled
+        val configPackets = sentPackets.filter { it.want_config_id != null }
+        assertEquals(0, configPackets.size, "want_config_id should not be sent after disconnect")
     }
 
     @Test

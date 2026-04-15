@@ -84,6 +84,7 @@ class MeshConnectionManagerImpl(
     private val packetRepository: PacketRepository,
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
+    private val heartbeatSender: DataLayerHeartbeatSender,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConnectionManager {
     /**
@@ -92,6 +93,7 @@ class MeshConnectionManagerImpl(
      */
     private val connectionMutex = Mutex()
 
+    private var preHandshakeJob: Job? = null
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
     private var handshakeTimeout: Job? = null
@@ -172,6 +174,8 @@ class MeshConnectionManagerImpl(
 
         sleepTimeout?.cancel()
         sleepTimeout = null
+        preHandshakeJob?.cancel()
+        preHandshakeJob = null
         handshakeTimeout?.cancel()
         handshakeTimeout = null
 
@@ -192,9 +196,19 @@ class MeshConnectionManagerImpl(
             serviceRepository.setConnectionState(ConnectionState.Connecting)
         }
         serviceBroadcasts.broadcastConnection()
-        Logger.i { "Starting mesh handshake (Stage 1)" }
         connectTimeMsec = nowMillis
-        startConfigOnly()
+
+        // Send a wake-up heartbeat before the config request. The firmware may be in a
+        // power-saving state where the NimBLE callback context needs warming up. The 100ms
+        // delay ensures the heartbeat BLE write is enqueued before the want_config_id
+        // (sendToRadio is fire-and-forget through async coroutine launches).
+        preHandshakeJob =
+            scope.handledLaunch {
+                heartbeatSender.sendHeartbeat("pre-handshake")
+                delay(PRE_HANDSHAKE_SETTLE_MS)
+                Logger.i { "Starting mesh handshake (Stage 1)" }
+                startConfigOnly()
+            }
     }
 
     private fun startHandshakeStallGuard(stage: Int, action: () -> Unit) {
@@ -380,6 +394,15 @@ class MeshConnectionManagerImpl(
         // disconnected, regardless of the device's ls_secs configuration. Without this
         // cap, routers (ls_secs=3600) leave the UI in DeviceSleep for over an hour.
         private const val MAX_SLEEP_TIMEOUT_SECONDS = 300
+
+        /**
+         * Delay between the pre-handshake heartbeat and the want_config_id send.
+         *
+         * Ensures the heartbeat BLE write completes and the firmware's NimBLE callback context is warmed up before the
+         * config request arrives. 100ms is well above observed ESP32 task scheduling latency (~10–50ms) while adding
+         * negligible connection latency.
+         */
+        private const val PRE_HANDSHAKE_SETTLE_MS = 100L
 
         private val HANDSHAKE_TIMEOUT = 30.seconds
 
