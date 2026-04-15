@@ -279,7 +279,6 @@ dependencies {
     googleImplementation(libs.maps.compose)
     googleImplementation(libs.maps.compose.utils)
     googleImplementation(libs.maps.compose.widgets)
-    googleImplementation(libs.dd.sdk.android.compose)
     googleImplementation(libs.dd.sdk.android.logs)
     googleImplementation(libs.dd.sdk.android.rum)
     googleImplementation(libs.dd.sdk.android.session.replay)

@@ -26,7 +26,6 @@ import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Severity
 import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
-import com.datadog.android.compose.enableComposeActionTracking
 import com.datadog.android.core.configuration.Configuration
 import com.datadog.android.log.Logger
 import com.datadog.android.log.Logs
@@ -160,7 +159,6 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
                 .trackFrustrations(false) // Disable click-tracking based frustration detection
                 .trackLongTasks()
                 .trackNonFatalAnrs(true)
-                .enableComposeActionTracking() // Required: activates runtime consumption of Compose semantics tags
                 .setSessionSampleRate(sampleRate)
                 .build()
         Rum.enable(rumConfiguration)

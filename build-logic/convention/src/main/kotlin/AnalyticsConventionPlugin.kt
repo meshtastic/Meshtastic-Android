@@ -18,7 +18,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.datadog.gradle.plugin.DdExtension
 import com.datadog.gradle.plugin.InjectBuildIdToAssetsTask
-import com.datadog.gradle.plugin.InstrumentationMode
+
 import com.datadog.gradle.plugin.SdkCheckLevel
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -110,7 +110,7 @@ class AnalyticsConventionPlugin : Plugin<Project> {
                             variants {
                                 register(variant.name) {
                                     site = "US5"
-                                    composeInstrumentation = InstrumentationMode.AUTO
+
                                 }
                             }
                             checkProjectDependencies = SdkCheckLevel.NONE
