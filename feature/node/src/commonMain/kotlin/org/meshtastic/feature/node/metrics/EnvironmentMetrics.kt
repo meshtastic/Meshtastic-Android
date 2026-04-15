@@ -54,6 +54,7 @@ import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.iaq_definition
 import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.one_wire_temperature
 import org.meshtastic.core.resources.radiation
 import org.meshtastic.core.resources.rainfall_1h
 import org.meshtastic.core.resources.rainfall_24h
@@ -444,6 +445,39 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
 }
 
 @Composable
+private fun OneWireTemperatureDisplay(
+    envMetrics: org.meshtastic.proto.EnvironmentMetrics,
+    environmentDisplayFahrenheit: Boolean,
+) {
+    val sensors = envMetrics.one_wire_temperature.filterNot { it.isNaN() }
+    if (sensors.isEmpty()) return
+    val oneWireEntries =
+        listOf(
+            Environment.ONE_WIRE_TEMP_1,
+            Environment.ONE_WIRE_TEMP_2,
+            Environment.ONE_WIRE_TEMP_3,
+            Environment.ONE_WIRE_TEMP_4,
+            Environment.ONE_WIRE_TEMP_5,
+            Environment.ONE_WIRE_TEMP_6,
+            Environment.ONE_WIRE_TEMP_7,
+            Environment.ONE_WIRE_TEMP_8,
+        )
+    val textFormat = if (environmentDisplayFahrenheit) "%s %d: %.1f°F" else "%s %d: %.1f°C"
+    sensors.forEachIndexed { idx, temp ->
+        val color = oneWireEntries.getOrNull(idx)?.color ?: Environment.ONE_WIRE_TEMP_1.color
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            MetricIndicator(color)
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = formatString(textFormat, stringResource(Res.string.one_wire_temperature), idx + 1, temp),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            )
+        }
+    }
+}
+
+@Composable
 private fun EnvironmentMetricsCard(
     telemetry: Telemetry,
     environmentDisplayFahrenheit: Boolean,
@@ -484,6 +518,7 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
         RadiationDisplay(envMetrics)
         WindDisplay(envMetrics)
         RainfallDisplay(envMetrics)
+        OneWireTemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
     }
 }
 
