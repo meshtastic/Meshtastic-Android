@@ -253,10 +253,15 @@
     <string name="reset_to_defaults">Palauta oletusasetukset</string>
     <string name="apply">Hyväksy</string>
     <string name="theme">Teema</string>
+    <string name="contrast">Kontrasti</string>
     <string name="theme_light">Vaalea</string>
     <string name="theme_dark">Tumma</string>
     <string name="theme_system">Järjestelmän oletus</string>
     <string name="choose_theme">Valitse teema</string>
+    <string name="choose_contrast">Kontrastin taso</string>
+    <string name="contrast_standard">Normaali</string>
+    <string name="contrast_medium">Keskitaso</string>
+    <string name="contrast_high">Korkea</string>
     <string name="provide_location_to_mesh">Jaa puhelimen sijaintitietoa mesh-verkkoon</string>
     <string name="use_homoglyph_characters_encoding">Kyrillisten merkkien tiivis koodaus</string>
     <plurals name="delete_messages">
@@ -354,6 +359,8 @@
     <string name="battery">Akku</string>
     <string name="channel_utilization">Kanavan käyttöaste</string>
     <string name="air_utilization">Lähetysajan käyttöaste</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Lämpötila</string>
