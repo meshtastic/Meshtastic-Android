@@ -13,6 +13,10 @@
 # Open-source — no need to obfuscate
 -dontobfuscate
 
+# Dump the full merged R8 configuration (app rules + all library consumer rules)
+# for auditing. Inspect this file after a release build to see what libraries inject.
+-printconfiguration build/outputs/mapping/r8-merged-config.txt
+
 # ---- Networking (transitive references from Ktor) ---------------------------
 
 -dontwarn org.conscrypt.**
@@ -43,13 +47,3 @@
 # R8 exception-class merging.
 -keep class org.jetbrains.compose.resources.** { *; }
 -keep class org.meshtastic.core.resources.** { *; }
-
-# Compose Animation: prevent R8 from merging animation spec classes (easing
-# curves, transition specs, Animatable internals) which can cause animations to
-# silently snap in release builds.
-#
-# We use a full -keep here without allowshrinking/allowobfuscation. While it
-# might keep some unused transition APIs, R8's aggressive shrinking is known
-# to incorrectly remove internal states or merging empty transitions (like None)
-# causing AnimatedVisibility and others to snap.
--keep class androidx.compose.animation.** { *; }
