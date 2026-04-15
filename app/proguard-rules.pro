@@ -13,6 +13,10 @@
 # Open-source — no need to obfuscate
 -dontobfuscate
 
+# Dump the full merged R8 configuration (app rules + all library consumer rules)
+# for auditing. Inspect this file after a release build to see what libraries inject.
+-printconfiguration build/outputs/mapping/r8-merged-config.txt
+
 # ---- Networking (transitive references from Ktor) ---------------------------
 
 -dontwarn org.conscrypt.**
