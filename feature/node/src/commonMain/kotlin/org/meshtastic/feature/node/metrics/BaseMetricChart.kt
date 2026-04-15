@@ -35,6 +35,7 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -79,6 +80,9 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Save
 
+/** Minimum x-step (in seconds) to prevent the default GCD from producing a value of 1 with irregular timestamps. */
+private const val MIN_X_STEP_SECONDS = 60.0
+
 /**
  * A generic chart host for Meshtastic metric charts. Handles common boilerplate for markers, scrolling, and point
  * selection synchronization.
@@ -100,43 +104,50 @@ fun GenericMetricChart(
     onPointSelected: ((Double) -> Unit)? = null,
     vicoScrollState: VicoScrollState = rememberVicoScrollState(),
 ) {
-    // Hoist zoom state above rememberCartesianChart so that the variable slot count
-    // from the vararg layers spread does not shift this remember call during recomposition
-    // (toggling legend chips changes the layer count, which corrupts the slot table).
-    val zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content)
+    // Key on layer count so Compose rebuilds the entire subtree when legend chip toggles
+    // add/remove layers. rememberCartesianChart uses vararg internally, so changing the
+    // argument count without a key corrupts the slot table.
+    key(layers.size) {
+        val zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content)
 
-    val markerVisibilityListener =
-        remember(onPointSelected) {
-            object : CartesianMarkerVisibilityListener {
-                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected?.invoke(it.x) }
-                }
+        val markerVisibilityListener =
+            remember(onPointSelected) {
+                object : CartesianMarkerVisibilityListener {
+                    override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                        targets.firstOrNull()?.let { onPointSelected?.invoke(it.x) }
+                    }
 
-                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected?.invoke(it.x) }
+                    override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                        targets.firstOrNull()?.let { onPointSelected?.invoke(it.x) }
+                    }
                 }
             }
-        }
 
-    CartesianChartHost(
-        chart =
-        @Suppress("SpreadOperator")
-        rememberCartesianChart(
-            *layers.toTypedArray(),
-            startAxis = startAxis,
-            endAxis = endAxis,
-            bottomAxis = bottomAxis,
-            marker = marker,
-            markerVisibilityListener = markerVisibilityListener,
-            persistentMarkers = { _ -> if (selectedX != null && marker != null) marker at selectedX else null },
-            fadingEdges = rememberFadingEdges(),
-            decorations = decorations,
-        ),
-        modelProducer = modelProducer,
-        modifier = modifier,
-        scrollState = vicoScrollState,
-        zoomState = zoomState,
-    )
+        CartesianChartHost(
+            chart =
+            @Suppress("SpreadOperator")
+            rememberCartesianChart(
+                *layers.toTypedArray(),
+                startAxis = startAxis,
+                endAxis = endAxis,
+                bottomAxis = bottomAxis,
+                marker = marker,
+                markerVisibilityListener = markerVisibilityListener,
+                persistentMarkers = { _ -> if (selectedX != null && marker != null) marker at selectedX else null },
+                fadingEdges = rememberFadingEdges(),
+                decorations = decorations,
+                // Telemetry timestamps arrive at irregular intervals. Without an explicit
+                // x-step, Vico computes the GCD of consecutive x-value differences which can
+                // be as small as 1 second, making the chart logically enormous. A 60-second
+                // floor keeps the internal slot count reasonable for any practical interval.
+                getXStep = { model -> maxOf(model.getXDeltaGcd(), MIN_X_STEP_SECONDS) },
+            ),
+            modelProducer = modelProducer,
+            modifier = modifier,
+            scrollState = vicoScrollState,
+            zoomState = zoomState,
+        )
+    }
 }
 
 /**

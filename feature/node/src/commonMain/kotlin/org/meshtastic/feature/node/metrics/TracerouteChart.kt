@@ -189,17 +189,26 @@ internal fun TracerouteMetricsChart(
         val forwardLayer =
             rememberConditionalLayer(
                 hasData = forwardData.isNotEmpty(),
-                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createStyledLine(forwardColor)),
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    ChartStyling.createStyledLine(
+                        forwardColor,
+                        interpolator = LineCartesianLayer.Interpolator.Sharp,
+                    ),
+                ),
                 verticalAxisPosition = Axis.Position.Vertical.Start,
-                rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
+                rangeProvider = CartesianLayerRangeProvider.auto(),
             )
 
         val returnLayer =
             rememberConditionalLayer(
                 hasData = returnData.isNotEmpty(),
-                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createDashedLine(returnColor)),
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    ChartStyling.createDashedLine(returnColor, interpolator = LineCartesianLayer.Interpolator.Sharp),
+                ),
                 verticalAxisPosition = Axis.Position.Vertical.Start,
-                rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0),
+                rangeProvider = CartesianLayerRangeProvider.auto(),
             )
 
         val rttLayer =

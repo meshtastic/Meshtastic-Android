@@ -158,11 +158,11 @@ fun EnvironmentMetricsChart(
                 graphData.shouldPlot[(it.metricKey as? Environment)?.ordinal ?: 0]
             }
 
-        // Legend toggle state: tracks indices into allLegendData that are hidden
-        var hiddenIndices by remember { mutableStateOf(emptySet<Int>()) }
-        val hiddenMetrics =
-            remember(hiddenIndices, allLegendData) {
-                hiddenIndices.mapNotNull { allLegendData.getOrNull(it)?.metricKey as? Environment }.toSet()
+        // Track hidden metrics by key (not index) so toggling survives changes in allLegendData ordering.
+        var hiddenMetrics by remember { mutableStateOf(emptySet<Environment>()) }
+        val hiddenIndices =
+            remember(hiddenMetrics, allLegendData) {
+                allLegendData.indices.filter { (allLegendData[it].metricKey as? Environment) in hiddenMetrics }.toSet()
             }
 
         val colorToLabel = allLegendData.associate { it.color to (it.labelOverride ?: stringResource(it.nameRes)) }
@@ -233,6 +233,7 @@ fun EnvironmentMetricsChart(
                 },
             )
 
+        val pressureRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 700.0, maxY = 1200.0) }
         val layers = mutableListOf<LineCartesianLayer>()
         if (showPressure && pressureData.isNotEmpty()) {
             layers.add(
@@ -244,7 +245,7 @@ fun EnvironmentMetricsChart(
                     verticalAxisPosition = Axis.Position.Vertical.Start,
                     // Fixed range per Oscar's UX guidance: barometric pressure should NOT autoscale,
                     // otherwise trends (storms) are invisible. 700-1200 hPa covers sea-level to altitude.
-                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 700.0, maxY = 1200.0),
+                    rangeProvider = pressureRangeProvider,
                 ),
             )
         }
@@ -254,7 +255,7 @@ fun EnvironmentMetricsChart(
                 when (metric) {
                     Environment.RADIATION,
                     Environment.WIND_SPEED,
-                    -> CartesianLayerRangeProvider.fixed(minY = 0.0)
+                    -> CartesianLayerRangeProvider.auto()
                     else -> null
                 }
             val lineStyle =
@@ -310,7 +311,8 @@ fun EnvironmentMetricsChart(
             modifier = Modifier.padding(top = 0.dp),
             hiddenSet = hiddenIndices,
             onToggle = { index ->
-                hiddenIndices = if (index in hiddenIndices) hiddenIndices - index else hiddenIndices + index
+                val metric = allLegendData.getOrNull(index)?.metricKey as? Environment ?: return@Legend
+                hiddenMetrics = if (metric in hiddenMetrics) hiddenMetrics - metric else hiddenMetrics + metric
             },
         )
     }
