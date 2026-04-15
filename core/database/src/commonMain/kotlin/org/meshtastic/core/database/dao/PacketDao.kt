@@ -309,6 +309,16 @@ interface PacketDao {
     )
     suspend fun getPacketByPacketId(packetId: Int): PacketEntity?
 
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM packet
+        WHERE packet_id IN (:packetIds)
+        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        """,
+    )
+    suspend fun getPacketsByPacketIds(packetIds: List<Int>): List<PacketEntity>
+
     @Query(
         """
         SELECT * FROM packet 
