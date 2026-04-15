@@ -283,7 +283,6 @@ fun MessageItem(
                 modifier = Modifier.fillMaxWidth(),
                 message = message,
                 ourNode = ourNode,
-                hasSamePrev = hasSamePrev,
                 onNavigateToOriginalMessage = onNavigateToOriginalMessage,
             )
 
@@ -385,7 +384,6 @@ private enum class ActiveSheet {
 private fun OriginalMessageSnippet(
     message: Message,
     ourNode: Node,
-    hasSamePrev: Boolean,
     onNavigateToOriginalMessage: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
