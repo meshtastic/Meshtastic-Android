@@ -33,7 +33,6 @@ import org.meshtastic.app.map.MapViewModel
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.feature.node.metrics.MetricsViewModel
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class KoinVerificationTest {
 
