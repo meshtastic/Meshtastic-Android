@@ -43,7 +43,7 @@ compose-multiplatform-material3 = "1.11.0-alpha06"
 # AndroidX Compose test/tracing artifacts share a version track with CMP but are resolved
 # independently by Maven. Pinning them to their own ref prevents Renovate from bumping the
 # CMP plugin version when a new AndroidX Compose pre-release appears.
-androidx-compose = "1.11.0-beta02"
+androidx-compose = "1.11.0-rc01"
 androidx-compose-material = "1.7.8"
 jetbrains-adaptive = "1.3.0-alpha06"
 
