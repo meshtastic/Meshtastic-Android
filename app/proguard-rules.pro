@@ -39,6 +39,22 @@
 # replacing Koin's InstanceCreationException in stack traces, making crashes undiagnosable).
 -keep class org.koin.core.error.** { *; }
 
+# ---- Compose Runtime & Animation --------------------------------------------
+
+# R8's optimization passes (bundled with AGP 9.x) can inline and dead-code-
+# eliminate parts of the Compose frame-clock / recomposer / animation state
+# machines, causing every animation to silently freeze on its first frame in
+# release builds — indeterminate progress spinners, crossfade transitions,
+# animateFloatAsState, AnimatedVisibility, etc.
+#
+# The frame clock lives in compose.runtime, the draw loop in compose.ui,
+# and the animation drivers in compose.animation.core.  Keep all three so
+# R8 does not break the chain.
+-keep class androidx.compose.runtime.** { *; }
+-keep class androidx.compose.ui.** { *; }
+-keep class androidx.compose.animation.core.** { *; }
+-keep class androidx.compose.animation.** { *; }
+
 # ---- Compose Multiplatform --------------------------------------------------
 
 # Keep resource library internals and generated Res accessor classes so R8 does
