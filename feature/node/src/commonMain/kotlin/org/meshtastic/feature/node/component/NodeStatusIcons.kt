@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
@@ -46,17 +47,11 @@ import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
-import org.meshtastic.core.ui.icon.DeviceSleep
-import org.meshtastic.core.ui.icon.Disconnected
+import org.meshtastic.core.ui.component.ConnectionsNavIcon
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.MqttDelivered
-import org.meshtastic.core.ui.icon.MqttSyncing
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
-import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
-import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
-import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,11 +63,12 @@ fun NodeStatusIcons(
     isMuted: Boolean,
     connectionState: ConnectionState,
     modifier: Modifier = Modifier,
+    deviceType: DeviceType? = null,
     contentColor: Color = LocalContentColor.current,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
         if (isThisNode) {
-            ThisNodeStatusBadge(connectionState)
+            ThisNodeStatusBadge(connectionState = connectionState, deviceType = deviceType)
         }
 
         if (isUnmessageable) {
@@ -104,7 +100,7 @@ fun NodeStatusIcons(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ThisNodeStatusBadge(connectionState: ConnectionState) {
+private fun ThisNodeStatusBadge(connectionState: ConnectionState, deviceType: DeviceType?) {
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
         tooltip = {
@@ -123,53 +119,8 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState) {
         },
         state = rememberTooltipState(),
     ) {
-        when (connectionState) {
-            ConnectionState.Connected -> ConnectedStatusIcon()
-            ConnectionState.Connecting -> ConnectingStatusIcon()
-            ConnectionState.Disconnected -> DisconnectedStatusIcon()
-            ConnectionState.DeviceSleep -> DeviceSleepStatusIcon()
-        }
+        ConnectionsNavIcon(connectionState = connectionState, deviceType = deviceType, modifier = Modifier.size(24.dp))
     }
-}
-
-@Composable
-private fun ConnectedStatusIcon() {
-    Icon(
-        imageVector = MeshtasticIcons.MqttDelivered,
-        contentDescription = stringResource(Res.string.connected),
-        modifier = Modifier.size(24.dp),
-        tint = MaterialTheme.colorScheme.StatusGreen,
-    )
-}
-
-@Composable
-private fun ConnectingStatusIcon() {
-    Icon(
-        imageVector = MeshtasticIcons.MqttSyncing,
-        contentDescription = stringResource(Res.string.connecting),
-        modifier = Modifier.size(24.dp),
-        tint = MaterialTheme.colorScheme.StatusOrange,
-    )
-}
-
-@Composable
-private fun DisconnectedStatusIcon() {
-    Icon(
-        imageVector = MeshtasticIcons.Disconnected,
-        contentDescription = stringResource(Res.string.disconnected),
-        modifier = Modifier.size(24.dp),
-        tint = MaterialTheme.colorScheme.StatusRed,
-    )
-}
-
-@Composable
-private fun DeviceSleepStatusIcon() {
-    Icon(
-        imageVector = MeshtasticIcons.DeviceSleep,
-        contentDescription = stringResource(Res.string.device_sleeping),
-        modifier = Modifier.size(24.dp),
-        tint = MaterialTheme.colorScheme.StatusYellow,
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
