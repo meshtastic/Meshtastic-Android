@@ -84,37 +84,18 @@ private const val HEARTBEAT_POLL_MS = 250L
 /** Minimum ms between re-requesting the same missing sequence number. */
 private const val MISSING_SEQ_RETRY_MS = 1_000L
 
-/** Size in bytes of an encoded replay-request payload (big-endian uint32). */
-private const val REPLAY_REQUEST_BYTES = 4
-
 /** Maximum configurable flush window in milliseconds. */
 private const val MAX_FLUSH_WINDOW_MS = 5_000L
-
-/** Size in bytes of a heartbeat-status payload (two big-endian uint32s). */
-private const val HEARTBEAT_STATUS_BYTES = 8
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-private fun encodeUint32BE(value: Int): ByteArray = Buffer().apply { writeInt(value) }.readByteArray()
 
 /** Size in bytes of an encoded uint32 (big-endian). */
 private const val UINT32_BYTES = 4
 
 private fun decodeUint32BE(bytes: ByteArray, offset: Int = 0): Int =
     Buffer().apply { write(bytes, offset, UINT32_BYTES) }.readInt()
-
-private fun encodeHeartbeatStatus(lastTxSeq: Int, lastRxSeq: Int): ByteArray = Buffer()
-    .apply {
-        writeInt(lastTxSeq)
-        writeInt(lastRxSeq)
-    }
-    .readByteArray()
-
-private fun decodeHeartbeatStatus(bytes: ByteArray): Pair<Int, Int>? = bytes
-    .takeIf { it.size >= HEARTBEAT_STATUS_BYTES }
-    ?.let { Buffer().apply { write(it) }.let { buf -> buf.readInt() to buf.readInt() } }
 
 // ---------------------------------------------------------------------------
 // Sent-frame record for retransmission history
@@ -128,6 +109,9 @@ private data class SentFrame(
     val payload: ByteString,
     val cols: Int,
     val rows: Int,
+    val flags: Int = 0,
+    val lastTxSeq: Int = 0,
+    val lastRxSeq: Int = 0,
 )
 
 // ---------------------------------------------------------------------------
@@ -237,6 +221,9 @@ class RemoteShellViewModel(
                 payload = frame.payload,
                 cols = frame.cols,
                 rows = frame.rows,
+                flags = frame.flags,
+                last_tx_seq = frame.lastTxSeq,
+                last_rx_seq = frame.lastRxSeq,
             ),
             remember = false,
         )
@@ -547,7 +534,8 @@ class RemoteShellViewModel(
                             session_id = sessionId.value,
                             seq = allocSeq(),
                             ack_seq = currentAckSeq(),
-                            payload = encodeHeartbeatStatus(highestSentSeq(), currentAckSeq()).toByteString(),
+                            last_tx_seq = highestSentSeq(),
+                            last_rx_seq = currentAckSeq(),
                         ),
                         isHeartbeat = true,
                     )
@@ -576,9 +564,8 @@ class RemoteShellViewModel(
         pruneSentFrames(frame.ack_seq)
 
         if (frame.op == RemoteShell.OpCode.ACK) {
-            val payload = frame.payload.toByteArray()
-            if (payload.size >= REPLAY_REQUEST_BYTES) {
-                replayFrom(decodeUint32BE(payload))
+            if (frame.last_rx_seq > 0) {
+                replayFrom(frame.last_rx_seq + 1)
             }
             return
         }
@@ -640,11 +627,10 @@ class RemoteShellViewModel(
                 _sessionState.update { SessionState.CLOSED }
             }
             RemoteShell.OpCode.PONG -> {
-                val payload = frame.payload.toByteArray()
-                if (payload.isEmpty()) return
-                val (peerLastTxSeq, peerLastRxSeq) = decodeHeartbeatStatus(payload) ?: return
+                val peerLastTxSeq = frame.last_tx_seq
+                val peerLastRxSeq = frame.last_rx_seq
                 val ourHighestTx = highestSentSeq()
-                if (peerLastRxSeq < ourHighestTx) {
+                if (peerLastRxSeq in 1..<ourHighestTx) {
                     replayFrom(peerLastRxSeq + 1)
                 }
                 if (peerLastTxSeq > currentAckSeq()) {
@@ -661,14 +647,13 @@ class RemoteShellViewModel(
     // region --- Frame dispatch ---
 
     private suspend fun sendAck(replayFrom: Int? = null) {
-        val payload = replayFrom?.let { encodeUint32BE(it).toByteString() } ?: ByteString.EMPTY
         sendFrame(
             RemoteShell(
                 op = RemoteShell.OpCode.ACK,
                 session_id = sessionId.value,
                 seq = 0,
                 ack_seq = currentAckSeq(),
-                payload = payload,
+                last_rx_seq = replayFrom?.let { it - 1 } ?: 0,
             ),
             remember = false,
         )
@@ -685,6 +670,9 @@ class RemoteShellViewModel(
                     payload = frame.payload,
                     cols = frame.cols,
                     rows = frame.rows,
+                    flags = frame.flags,
+                    lastTxSeq = frame.last_tx_seq,
+                    lastRxSeq = frame.last_rx_seq,
                 ),
             )
         }
