@@ -25,6 +25,7 @@ import androidx.work.WorkerParameters
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineDispatcher
+import org.koin.plugin.module.dsl.koinApplication
 import org.koin.test.verify.definition
 import org.koin.test.verify.injectedParameters
 import org.koin.test.verify.verify
@@ -59,5 +60,20 @@ class KoinVerificationTest {
                     definition<MetricsViewModel>(Int::class),
                 ),
             )
+    }
+
+    @Test
+    fun verifyTypedBootstrapLoadsModuleGraph() {
+        // koinApplication<T>() is a K2 compiler plugin stub. If the plugin fails to
+        // transform it, the stub throws NotImplementedError at runtime. This test
+        // validates that the production bootstrap path is correctly transformed by
+        // successfully creating and closing the generated Koin application.
+        val app = koinApplication<AndroidKoinApp>()
+        try {
+            // No-op: reaching this point proves the typed bootstrap path did not
+            // throw and the generated application could be created.
+        } finally {
+            app.close()
+        }
     }
 }

@@ -37,9 +37,8 @@ import kotlinx.coroutines.withTimeout
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
-import org.koin.core.context.startKoin
-import org.meshtastic.app.di.AppKoinModule
-import org.meshtastic.app.di.module
+import org.koin.plugin.module.dsl.startKoin
+import org.meshtastic.app.di.AndroidKoinApp
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.repository.MeshPrefs
@@ -64,10 +63,9 @@ open class MeshUtilApplication :
         super.onCreate()
         ContextServices.app = this
 
-        startKoin {
+        startKoin<AndroidKoinApp> {
             androidContext(this@MeshUtilApplication)
             workManagerFactory()
-            modules(AppKoinModule().module())
         }
 
         // Schedule periodic MeshLog cleanup
