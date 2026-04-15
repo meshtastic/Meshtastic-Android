@@ -36,7 +36,7 @@ Choose the right tool for the job:
 **Rules:**
 1. **NEVER use `%.Nf` in strings.xml** — CMP cannot substitute them. Use `%N$s` and pre-format floats.
 2. **Prefer `MetricFormatter`** over scattered `formatString("%.1f°C", temp)` calls.
-3. **`formatString` (expect/actual)** is still needed for: hex formats, multi-arg templates fetched at runtime, and chart axis formatters. It works on both JVM and iOS.
+3. **`formatString` (pure Kotlin)** is a pure-Kotlin `commonMain` implementation for: hex formats, multi-arg templates fetched at runtime, and chart axis formatters. Located in `core:common` `Formatter.kt`.
 4. **`NumberFormatter`** always uses `.` as decimal separator — intentional for mesh networking precision.
 
 - **Workflow to Add a String:**
