@@ -121,8 +121,8 @@ kotlin {
 ```
 
 **What the plugin provides automatically:**
-- `commonMain`: `compose-multiplatform-material3`, `compose-multiplatform-materialIconsExtended`, `jetbrains-lifecycle-viewmodel-compose`, `koin-compose-viewmodel`, `kermit`
-- `androidMain`: `androidx-compose-bom` (platform), `accompanist-permissions`, `androidx-activity-compose`, `androidx-compose-material3`, `androidx-compose-material-iconsExtended`, `androidx-compose-ui-text`, `androidx-compose-ui-tooling-preview`
+- `commonMain`: `compose-multiplatform-material3`, `jetbrains-lifecycle-viewmodel-compose`, `jetbrains-lifecycle-runtime-compose`, `koin-compose-viewmodel`, `kermit`
+- `androidMain`: `androidx-compose-bom` (platform), `accompanist-permissions`, `androidx-activity-compose`, `androidx-compose-material3`, `androidx-compose-ui-text`, `androidx-compose-ui-tooling-preview`
 - `commonTest`: `core:testing`
 
 **Why:** Eliminates ~15 duplicate dependency declarations per feature module (modelled after Now in Android's `AndroidFeatureImplConventionPlugin`).

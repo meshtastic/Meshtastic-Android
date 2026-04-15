@@ -47,7 +47,6 @@ include(
     ":feature:firmware",
     ":feature:wifi-provision",
     ":feature:widget",
-    ":mesh_service_example",
     ":desktop",
 )
 rootProject.name = "MeshtasticAndroid"

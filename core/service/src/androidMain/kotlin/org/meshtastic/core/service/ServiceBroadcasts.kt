@@ -133,7 +133,7 @@ class ServiceBroadcasts(private val context: Context, private val serviceReposit
             explicitBroadcast(Intent(ACTION_MESH_DISCONNECTED))
         }
 
-        // Restore legacy action for other consumers (e.g. mesh_service_example)
+        // Restore legacy action for other consumers (e.g. ATAK plugins)
         val legacyIntent =
             Intent(ACTION_CONNECTION_CHANGED).apply {
                 putExtra(EXTRA_CONNECTED, stateStr)
