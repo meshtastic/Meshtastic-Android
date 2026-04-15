@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -43,12 +43,11 @@ import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.core.common.util.ioDispatcher as defaultIoDispatcher
 
 /**
  * Shared base ViewModel for the map feature, providing node data, waypoints, map filter preferences, and traceroute
- * overlay state.
- *
- * Platform-specific map ViewModels (fdroid/google) extend this to add flavor-specific map provider logic.
+ * overlay state. [MapViewModel] extends this with camera persistence and map style management.
  */
 @Suppress("TooManyFunctions")
 open class BaseMapViewModel(
@@ -56,6 +55,7 @@ open class BaseMapViewModel(
     protected val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
+    private val ioDispatcher: CoroutineDispatcher = defaultIoDispatcher,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
@@ -65,14 +65,12 @@ open class BaseMapViewModel(
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
 
-    val myId = nodeRepository.myId
-
     val isConnected =
         radioController.connectionState
             .map { it is org.meshtastic.core.model.ConnectionState.Connected }
             .stateInWhileSubscribed(initialValue = false)
 
-    val nodes: StateFlow<List<Node>> =
+    private val nodes: StateFlow<List<Node>> =
         nodeRepository
             .getNodes()
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
@@ -88,8 +86,8 @@ open class BaseMapViewModel(
             .getWaypoints()
             .mapLatest { list ->
                 list
-                    .filter { it.waypoint != null }
-                    .associateBy { packet -> packet.waypoint!!.id }
+                    .mapNotNull { packet -> packet.waypoint?.let { wpt -> wpt.id to packet } }
+                    .toMap()
                     .filterValues {
                         val expire = it.waypoint?.expire ?: 0
                         expire == 0 || expire.toLong() > nowSeconds
@@ -141,9 +139,6 @@ open class BaseMapViewModel(
         mapPrefs.setLastHeardTrackFilter(filter.seconds)
     }
 
-    open fun getUser(userId: String?) =
-        nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
-
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
     fun deleteWaypoint(id: Int) =
@@ -192,6 +187,20 @@ open class BaseMapViewModel(
                     lastHeardTrackFilter.value,
                 ),
             )
+
+    /** Nodes with position, filtered by favorites and last-heard preferences. */
+    val filteredNodes: StateFlow<List<Node>> =
+        combine(nodesWithPosition, mapFilterStateFlow) { nodes, filter ->
+            val myNum = myNodeNum
+            nodes
+                .filter { node -> !filter.onlyFavorites || node.isFavorite || node.num == myNum }
+                .filter { node ->
+                    filter.lastHeardFilter.seconds == 0L ||
+                        (nowSeconds - node.lastHeard) <= filter.lastHeardFilter.seconds ||
+                        node.num == myNum
+                }
+        }
+            .stateInWhileSubscribed(initialValue = emptyList())
 }
 
 /**
@@ -201,14 +210,14 @@ open class BaseMapViewModel(
  * @property nodesForMarkers Nodes to render as map markers (with snapshot positions when available).
  * @property nodeLookup Node-num-keyed map for polyline coordinate resolution.
  */
-data class TracerouteNodeSelection(
+internal data class TracerouteNodeSelection(
     val overlayNodeNums: Set<Int>,
     val nodesForMarkers: List<Node>,
     val nodeLookup: Map<Int, Node>,
 )
 
 /** Convenience extension that delegates to [tracerouteNodeSelection] using the VM's [getNodeOrFallback]. */
-fun BaseMapViewModel.tracerouteNodeSelection(
+internal fun BaseMapViewModel.tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
     nodes: List<Node>,
@@ -225,7 +234,7 @@ fun BaseMapViewModel.tracerouteNodeSelection(
  *
  * @param getNodeOrFallback Provides a [Node] for a given num, falling back to a stub if not in the DB.
  */
-fun tracerouteNodeSelection(
+internal fun tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
     nodes: List<Node>,

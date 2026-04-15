@@ -14,23 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.map.model
+package org.meshtastic.feature.map
 
-import kotlin.uuid.Uuid
+import androidx.compose.runtime.Composable
 
-/** Supported custom overlay layer formats. */
-internal enum class LayerType {
-    KML,
-    GEOJSON,
-}
-
-/** A user-importable map overlay layer (KML or GeoJSON file). */
-internal data class MapLayerItem(
-    val id: String = Uuid.random().toString(),
-    val name: String,
-    val uriString: String? = null,
-    val isVisible: Boolean = true,
-    val layerType: LayerType,
-    val isNetwork: Boolean = false,
-    val isRefreshing: Boolean = false,
-)
+/**
+ * Renders platform-specific offline map management UI if the platform supports it. The composable receives the current
+ * style URI and [cameraState] for downloading the visible region.
+ *
+ * On unsupported platforms, this is a no-op.
+ */
+@Composable expect fun OfflineMapContent(styleUri: String, cameraState: org.maplibre.compose.camera.CameraState)

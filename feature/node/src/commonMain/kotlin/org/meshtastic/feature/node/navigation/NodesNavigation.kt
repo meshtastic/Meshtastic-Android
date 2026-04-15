@@ -66,6 +66,7 @@ import org.meshtastic.feature.node.metrics.PositionLogScreen
 import org.meshtastic.feature.node.metrics.PowerMetricsScreen
 import org.meshtastic.feature.node.metrics.SignalMetricsScreen
 import org.meshtastic.feature.node.metrics.TracerouteLogScreen
+import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 import kotlin.reflect.KClass
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -143,8 +144,14 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoute.TracerouteMap>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
-        val tracerouteMapScreen = org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider.current
-        tracerouteMapScreen(args.destNum, args.requestId, args.logUuid) { backStack.removeLastOrNull() }
+        val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(args.destNum) }
+        metricsViewModel.setNodeId(args.destNum)
+        TracerouteMapScreen(
+            metricsViewModel = metricsViewModel,
+            requestId = args.requestId,
+            logUuid = args.logUuid,
+            onNavigateUp = { backStack.removeLastOrNull() },
+        )
     }
 
     NodeDetailScreen.entries.forEach { routeInfo ->

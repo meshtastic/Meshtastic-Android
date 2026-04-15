@@ -34,13 +34,15 @@ import org.meshtastic.core.resources.map_filter
 import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.toggle_my_position
-import org.meshtastic.core.ui.icon.LocationDisabled
+import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
+import org.meshtastic.core.ui.icon.NearMe
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import kotlin.math.abs
 
 /**
  * Shared map controls overlay using [HorizontalFloatingToolbar] for Material 3 Expressive styling. Provides compass,
@@ -70,6 +72,7 @@ fun MapControlsOverlay(
     mapTypeContent: @Composable () -> Unit = {},
     layersContent: @Composable () -> Unit = {},
     isLocationTrackingEnabled: Boolean = false,
+    isTrackingBearing: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
     showRefresh: Boolean = false,
     isRefreshing: Boolean = false,
@@ -114,21 +117,29 @@ fun MapControlsOverlay(
             }
         }
 
-        // Location tracking button
+        // Location tracking button — 3 states: Off (MyLocation), Tracking (NearMe), TrackingNorth (LocationOn)
         MapButton(
-            icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
+            icon =
+            when {
+                !isLocationTrackingEnabled -> MeshtasticIcons.MyLocation
+                isTrackingBearing -> MeshtasticIcons.NearMe
+                else -> MeshtasticIcons.LocationOn
+            },
             contentDescription = stringResource(Res.string.toggle_my_position),
+            iconTint = if (isLocationTrackingEnabled) MaterialTheme.colorScheme.primary else null,
             onClick = onToggleLocationTracking,
         )
     }
 }
+
+private const val BEARING_NORTH_THRESHOLD = 0.5f
 
 @Composable
 private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Boolean) {
     val iconTint =
         when {
             isFollowing -> MaterialTheme.colorScheme.primary
-            bearing == 0f -> MaterialTheme.colorScheme.StatusRed
+            abs(bearing) < BEARING_NORTH_THRESHOLD -> MaterialTheme.colorScheme.StatusRed
             else -> null
         }
     MapButton(

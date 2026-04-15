@@ -31,6 +31,8 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.collections.immutable)
+            api(libs.maplibre.compose)
+            implementation(libs.maplibre.compose.material3)
             implementation(projects.core.data)
             implementation(projects.core.database)
             implementation(projects.core.datastore)

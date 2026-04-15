@@ -362,6 +362,7 @@
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_new">New waypoint</string>
+    <string name="waypoint_lock_to_my_node">Lock to my node</string>
     <string name="waypoint_received">Received waypoint: %1$s</string>
     <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
     <string name="remove">Remove</string>
@@ -835,6 +836,7 @@
     <string name="only_favorites">Only Favorites</string>
     <string name="show_waypoints">Show Waypoints</string>
     <string name="show_precision_circle">Show Precision Circles</string>
+    <string name="zoom_to_fit_all">Zoom to Fit All Nodes</string>
     <string name="client_notification">Client Notification</string>
     <string name="key_verification_title">Key Verification</string>
     <string name="key_verification_request_title">Key Verification Request</string>
@@ -1159,6 +1161,17 @@
     <string name="bluetooth_feature_config">Configuration</string>
     <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
     <string name="map_style_selection">Map style selection</string>
+    <string name="map_style_osm">OpenStreetMap</string>
+    <string name="map_style_light">Light</string>
+    <string name="map_style_terrain">Terrain</string>
+    <string name="map_style_road_map">Road Map</string>
+    <string name="map_style_dark">Dark</string>
+    <string name="offline_maps">Offline Maps</string>
+    <string name="offline_download">Download</string>
+    <string name="offline_download_visible_region">Download visible region</string>
+    <string name="offline_saves_tiles">Saves tiles for offline use</string>
+    <string name="offline_downloaded_regions">Downloaded Regions</string>
+    <string name="offline_unnamed_region">Unnamed Region</string>
 
     <string name="local_stats_battery">Battery: %1$d%</string>
     <string name="local_stats_nodes">Nodes: %1$d online / %2$d total</string>

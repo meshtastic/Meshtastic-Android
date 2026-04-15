@@ -14,23 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.map.model
+package org.meshtastic.feature.map
 
-import kotlin.uuid.Uuid
+import androidx.compose.runtime.Composable
+import org.maplibre.compose.location.LocationProvider
 
-/** Supported custom overlay layer formats. */
-internal enum class LayerType {
-    KML,
-    GEOJSON,
-}
-
-/** A user-importable map overlay layer (KML or GeoJSON file). */
-internal data class MapLayerItem(
-    val id: String = Uuid.random().toString(),
-    val name: String,
-    val uriString: String? = null,
-    val isVisible: Boolean = true,
-    val layerType: LayerType,
-    val isNetwork: Boolean = false,
-    val isRefreshing: Boolean = false,
-)
+/**
+ * Returns a platform-appropriate [LocationProvider], or `null` if the platform doesn't support location.
+ * - Android: uses the platform `LocationManager` via `rememberDefaultLocationProvider()`.
+ * - iOS: uses `CLLocationManager` via `rememberDefaultLocationProvider()`.
+ * - Desktop/JS: returns `null` (no location hardware).
+ */
+@Composable expect fun rememberLocationProviderOrNull(): LocationProvider?
