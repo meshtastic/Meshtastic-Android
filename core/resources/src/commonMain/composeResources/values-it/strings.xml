@@ -239,6 +239,8 @@
     <string name="theme_dark">Scuro</string>
     <string name="theme_system">Predefinito di sistema</string>
     <string name="choose_theme">Scegli tema</string>
+    <string name="contrast_medium">Medium</string>
+    <string name="contrast_high">Alto</string>
     <string name="provide_location_to_mesh">Fornire la posizione alla mesh</string>
     <string name="use_homoglyph_characters_encoding">Codifica compatta per cirillico</string>
     <plurals name="delete_messages">

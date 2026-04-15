@@ -229,6 +229,8 @@
     <string name="theme_dark">深色</string>
     <string name="theme_system">系統預設</string>
     <string name="choose_theme">選擇主題</string>
+    <string name="contrast_medium">中等</string>
+    <string name="contrast_high">高</string>
     <string name="provide_location_to_mesh">將手機位置提供給Mesh網路</string>
     <string name="use_homoglyph_characters_encoding">使用同形異意字元編碼處理西里爾字母</string>
     <plurals name="delete_messages">
@@ -323,6 +325,7 @@
     <string name="battery">電池</string>
     <string name="channel_utilization">頻道利用率</string>
     <string name="air_utilization">空中時間使用率</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="temperature">溫度</string>
     <string name="humidity">濕度</string>
     <string name="soil_temperature">土壤溫度</string>

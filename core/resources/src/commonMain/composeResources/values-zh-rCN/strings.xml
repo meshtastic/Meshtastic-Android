@@ -243,6 +243,7 @@
     <string name="theme_dark">深色</string>
     <string name="theme_system">系统默认设置</string>
     <string name="choose_theme">选择主题</string>
+    <string name="contrast_standard">标准</string>
     <string name="provide_location_to_mesh">向网格提供手机位置</string>
     <string name="use_homoglyph_characters_encoding">紧凑的Cyrillic编码</string>
     <plurals name="delete_messages">
@@ -339,9 +340,7 @@
     <string name="battery">电池</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
-    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
-    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
-    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">温度</string>
     <string name="humidity">湿度</string>

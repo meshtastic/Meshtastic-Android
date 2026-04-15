@@ -301,9 +301,7 @@
     <string name="battery">Батерия</string>
     <string name="channel_utilization">Използване на канала</string>
     <string name="air_utilization">Използване на ефира</string>
-    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
-    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
-    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="logs">записа</string>
     <string name="hops_away">Брой отскоци</string>

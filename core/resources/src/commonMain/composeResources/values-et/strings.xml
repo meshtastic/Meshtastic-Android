@@ -253,10 +253,15 @@
     <string name="reset_to_defaults">Taasta vaikesätted</string>
     <string name="apply">Rakenda</string>
     <string name="theme">Teema</string>
+    <string name="contrast">Kontrastsus</string>
     <string name="theme_light">Hele</string>
     <string name="theme_dark">Tume</string>
     <string name="theme_system">Süsteemi vaikesäte</string>
     <string name="choose_theme">Vali teema</string>
+    <string name="choose_contrast">Kontrastsuse tase</string>
+    <string name="contrast_standard">Standard</string>
+    <string name="contrast_medium">Keskmine</string>
+    <string name="contrast_high">Kõrge</string>
     <string name="provide_location_to_mesh">Jaga telefoni asukohta mesh-võrku</string>
     <string name="use_homoglyph_characters_encoding">Kompaktne kodeering kirillitsa jaoks</string>
     <plurals name="delete_messages">
@@ -354,9 +359,9 @@
     <string name="battery">Aku</string>
     <string name="channel_utilization">Kanali kasutus</string>
     <string name="air_utilization">Saate kasutus</string>
-    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
-    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
-    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Temperatuur</string>
     <string name="humidity">Niiskus</string>
@@ -723,6 +728,7 @@
     <string name="rainfall_24h">Vihm (24h)</string>
     <string name="weight">Kaal</string>
     <string name="radiation">Radiatsioon</string>
+    <string name="one_wire_temperature">1-juhtmeline temperatuur</string>
     <string name="store_forward_config"><![CDATA[Salvesta & saada sätted]]></string>
     <string name="indoor_air_quality_iaq">Siseõhu kvaliteet (IAQ)</string>
     <string name="url">URL</string>

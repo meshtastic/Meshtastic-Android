@@ -223,6 +223,7 @@
     <string name="theme_dark">Ciemny</string>
     <string name="theme_system">Domyślne ustawienie systemowe</string>
     <string name="choose_theme">Wybierz motyw</string>
+    <string name="contrast_standard">Standardowy</string>
     <string name="provide_location_to_mesh">Podaj lokalizację telefonu do sieci</string>
     <plurals name="delete_messages">
         <item quantity="one">Usunąć wiadomość?</item>

@@ -326,6 +326,7 @@
     <string name="battery">Batterie</string>
     <string name="channel_utilization">UtilCanal</string>
     <string name="air_utilization">UtilAir</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="temperature">Temp</string>
     <string name="humidity">Hum</string>
     <string name="soil_temperature">Temp sol</string>

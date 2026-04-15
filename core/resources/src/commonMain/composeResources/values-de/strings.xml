@@ -257,6 +257,8 @@
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">System</string>
     <string name="choose_theme">Design auswählen</string>
+    <string name="contrast_medium">Medium Fast</string>
+    <string name="contrast_high">Hoch</string>
     <string name="provide_location_to_mesh">Standort zum Mesh angeben</string>
     <string name="use_homoglyph_characters_encoding">Kompakte Kodierung für Kyrillisch</string>
     <plurals name="delete_messages">
@@ -354,9 +356,7 @@
     <string name="battery">Akku</string>
     <string name="channel_utilization">Kanalauslastung</string>
     <string name="air_utilization">Sendezeit</string>
-    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
-    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
-    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Temperatur</string>
     <string name="humidity">Feuchtigkeit</string>

@@ -216,6 +216,7 @@
     <string name="theme_dark">Tmavý</string>
     <string name="theme_system">Podle systému</string>
     <string name="choose_theme">Vyberte vzhled</string>
+    <string name="contrast_high">Vysoká</string>
     <string name="provide_location_to_mesh">Poskytnout polohu síti</string>
     <string name="use_homoglyph_characters_encoding">Úsporné kódování pro cyriliku</string>
     <plurals name="delete_messages">
@@ -312,6 +313,7 @@
     <string name="battery">Baterie</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Teplota</string>
     <string name="humidity">Vlhkost</string>

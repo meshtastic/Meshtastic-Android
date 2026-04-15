@@ -151,6 +151,7 @@
     <string name="theme_dark">Тамна</string>
     <string name="theme_system">Прати систем</string>
     <string name="choose_theme">Одабери тему</string>
+    <string name="contrast_standard">Стандардно</string>
     <string name="provide_location_to_mesh">Обезбедите локацију телефона меш мрежи</string>
     <plurals name="delete_messages">
         <item quantity="one">Обриши поруку?</item>
