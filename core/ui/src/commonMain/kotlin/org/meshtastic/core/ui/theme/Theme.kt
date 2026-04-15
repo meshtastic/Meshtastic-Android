@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("UnusedPrivateProperty")
+@file:Suppress("MatchingDeclarationName")
 
 package org.meshtastic.core.ui.theme
 
@@ -25,6 +25,7 @@ import androidx.compose.material3.MotionScheme.Companion.expressive
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
@@ -272,19 +273,33 @@ val unspecified_scheme = ColorFamily(Color.Unspecified, Color.Unspecified, Color
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
+    contrastLevel: ContrastLevel = ContrastLevel.STANDARD,
     content:
     @Composable()
     () -> Unit,
 ) {
-    val dynamicScheme = if (dynamicColor) dynamicColorScheme(darkTheme) else null
-    val colorScheme = dynamicScheme ?: if (darkTheme) darkScheme else lightScheme
+    val dynamicScheme =
+        if (dynamicColor && contrastLevel == ContrastLevel.STANDARD) {
+            dynamicColorScheme(darkTheme)
+        } else {
+            null
+        }
+    val colorScheme =
+        dynamicScheme
+            ?: when (contrastLevel) {
+                ContrastLevel.MEDIUM -> if (darkTheme) mediumContrastDarkColorScheme else mediumContrastLightColorScheme
+                ContrastLevel.HIGH -> if (darkTheme) highContrastDarkColorScheme else highContrastLightColorScheme
+                else -> if (darkTheme) darkScheme else lightScheme
+            }
 
-    MaterialExpressiveTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        motionScheme = expressive(),
-        content = content,
-    )
+    CompositionLocalProvider(LocalContrastLevel provides contrastLevel) {
+        MaterialExpressiveTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            motionScheme = expressive(),
+            content = content,
+        )
+    }
 }
 
 const val MODE_DYNAMIC = 6969420

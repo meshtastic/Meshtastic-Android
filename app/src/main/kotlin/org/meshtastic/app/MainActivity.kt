@@ -124,6 +124,8 @@ class MainActivity : ComponentActivity() {
             setSingletonImageLoaderFactory { get<ImageLoader>() }
 
             val theme by model.theme.collectAsStateWithLifecycle()
+            val contrastLevelValue by model.contrastLevel.collectAsStateWithLifecycle()
+            val contrastLevel = org.meshtastic.core.ui.theme.ContrastLevel.fromValue(contrastLevelValue)
             val dynamic = theme == MODE_DYNAMIC
             val dark =
                 when (theme) {
@@ -141,7 +143,7 @@ class MainActivity : ComponentActivity() {
             }
 
             AppCompositionLocals {
-                AppTheme(dynamicColor = dynamic, darkTheme = dark) {
+                AppTheme(dynamicColor = dynamic, darkTheme = dark, contrastLevel = contrastLevel) {
                     val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
 
                     // Signal to the system that the initial UI is "fully drawn"

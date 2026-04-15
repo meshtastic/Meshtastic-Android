@@ -56,6 +56,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
+import org.meshtastic.feature.settings.component.ContrastPickerDialog
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.PersistenceSection
 import org.meshtastic.feature.settings.component.PrivacySection
@@ -155,6 +156,14 @@ fun SettingsScreen(
         )
     }
 
+    var showContrastPickerDialog by remember { mutableStateOf(false) }
+    if (showContrastPickerDialog) {
+        ContrastPickerDialog(
+            onClickContrast = { settingsViewModel.setContrastLevel(it) },
+            onDismiss = { showContrastPickerDialog = false },
+        )
+    }
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -227,6 +236,7 @@ fun SettingsScreen(
                 AppearanceSection(
                     onShowLanguagePicker = { showLanguagePickerDialog = true },
                     onShowThemePicker = { showThemePickerDialog = true },
+                    onShowContrastPicker = { showContrastPickerDialog = true },
                 )
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {

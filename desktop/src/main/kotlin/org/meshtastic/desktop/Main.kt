@@ -169,7 +169,8 @@ private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
     val uiPrefs = koinInject<UiPrefs>()
     val themePref by uiPrefs.theme.collectAsState(initial = -1)
     val localePref by uiPrefs.locale.collectAsState(initial = "")
-
+    val contrastLevelValue by uiPrefs.contrastLevel.collectAsState(initial = 0)
+    val contrastLevel = org.meshtastic.core.ui.theme.ContrastLevel.fromValue(contrastLevelValue)
     Locale.setDefault(localePref.takeIf { it.isNotEmpty() }?.let(Locale::forLanguageTag) ?: systemLocale)
 
     val isDarkTheme =
@@ -179,7 +180,7 @@ private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
             else -> isSystemInDarkTheme()
         }
 
-    MeshtasticDesktopApp(uiViewModel, isDarkTheme)
+    MeshtasticDesktopApp(uiViewModel, isDarkTheme, contrastLevel)
 }
 
 // ----- Application chrome (tray, window, navigation) -----
@@ -187,7 +188,11 @@ private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
 /** Composes the system tray, window, and Coil image loader. */
 @Composable
 @OptIn(ExperimentalCoilApi::class)
-private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDarkTheme: Boolean) {
+private fun ApplicationScope.MeshtasticDesktopApp(
+    uiViewModel: UIViewModel,
+    isDarkTheme: Boolean,
+    contrastLevel: org.meshtastic.core.ui.theme.ContrastLevel,
+) {
     var isAppVisible by remember { mutableStateOf(true) }
     var isWindowReady by remember { mutableStateOf(false) }
     val trayState = rememberTrayState()
@@ -219,7 +224,7 @@ private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDa
     )
 
     if (isWindowReady && isAppVisible) {
-        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState) { isAppVisible = false }
+        MeshtasticWindow(uiViewModel, isDarkTheme, contrastLevel, appIcon, windowState) { isAppVisible = false }
     }
 }
 
@@ -267,6 +272,7 @@ private fun WindowBoundsManager(
 private fun ApplicationScope.MeshtasticWindow(
     uiViewModel: UIViewModel,
     isDarkTheme: Boolean,
+    contrastLevel: org.meshtastic.core.ui.theme.ContrastLevel,
     appIcon: Painter,
     windowState: WindowState,
     onCloseRequest: () -> Unit,
@@ -281,7 +287,9 @@ private fun ApplicationScope.MeshtasticWindow(
         onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
     ) {
         CoilImageLoaderSetup()
-        AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
+        AppTheme(darkTheme = isDarkTheme, contrastLevel = contrastLevel) {
+            DesktopMainScreen(uiViewModel, multiBackstack)
+        }
     }
 }
 

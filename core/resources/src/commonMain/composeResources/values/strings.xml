@@ -278,10 +278,15 @@
     <string name="reset_to_defaults">Reset to defaults</string>
     <string name="apply">Apply</string>
     <string name="theme">Theme</string>
+    <string name="contrast">Contrast</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System default</string>
     <string name="choose_theme">Choose theme</string>
+    <string name="choose_contrast">Contrast level</string>
+    <string name="contrast_standard">Standard</string>
+    <string name="contrast_medium">Medium</string>
+    <string name="contrast_high">High</string>
     <string name="provide_location_to_mesh">Provide phone location to mesh</string>
     <string name="use_homoglyph_characters_encoding">Compact encoding for Cyrillic</string>
     <plurals name="delete_messages">
