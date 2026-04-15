@@ -40,6 +40,10 @@ compose-multiplatform = "1.11.0-beta02"
 # CMP-bundled version. Bump this together with compose-multiplatform.
 skiko = "0.144.5"
 compose-multiplatform-material3 = "1.11.0-alpha06"
+# AndroidX Compose test/tracing artifacts share a version track with CMP but are resolved
+# independently by Maven. Pinning them to their own ref prevents Renovate from bumping the
+# CMP plugin version when a new AndroidX Compose pre-release appears.
+androidx-compose = "1.11.0-beta02"
 androidx-compose-material = "1.7.8"
 jetbrains-adaptive = "1.3.0-alpha06"
 
@@ -122,8 +126,8 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 androidx-work-testing = { module = "androidx.work:work-testing", version = "2.11.2" }
 
 # AndroidX Compose (explicit versions — BOM removed; CMP is the sole version authority)
-androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "compose-multiplatform" }
-androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose-multiplatform" } # Required by Robolectric Compose tests (registers ComponentActivity)
+androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidx-compose" }
+androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose" } # Required by Robolectric Compose tests (registers ComponentActivity)
 
 # Compose Multiplatform
 compose-multiplatform-animation = { module = "org.jetbrains.compose.animation:animation", version.ref = "compose-multiplatform" }
