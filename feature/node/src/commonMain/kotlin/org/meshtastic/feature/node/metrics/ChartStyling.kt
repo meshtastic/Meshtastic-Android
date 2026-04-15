@@ -57,7 +57,7 @@ import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
  * **Design principles** (per [design#53](https://github.com/meshtastic/design/issues/53)):
  * - Default to thin lines **without** point markers to avoid clutter on dense timeseries.
  * - Show a single dot only at the marker/cursor position (handled by [rememberMarker]).
- * - Use `Interpolator.catmullRom()` for smooth curves that pass through every data point.
+ * - Use `Interpolator.cubic()` for smooth monotone curves that won't overshoot between sparse points.
  * - Reserve bold lines for the single most-important series; use subtle/gradient fills for secondary data.
  */
 @Suppress("TooManyFunctions")
@@ -73,15 +73,21 @@ object ChartStyling {
      *
      * @param lineColor The color of the line
      * @param lineWidth Width of the line in dp
+     * @param interpolator The line interpolation strategy. Defaults to monotone
+     *   [cubic][LineCartesianLayer.Interpolator.cubic] which won't overshoot between sparse data points (unlike
+     *   catmull-rom). Use [Sharp][LineCartesianLayer.Interpolator.Sharp] for discrete/integer metrics like hop counts.
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createStyledLine(lineColor: Color, lineWidth: Float = MEDIUM_LINE_WIDTH_DP): LineCartesianLayer.Line =
-        LineCartesianLayer.rememberLine(
-            fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
-            stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
-            interpolator = LineCartesianLayer.Interpolator.catmullRom(),
-        )
+    fun createStyledLine(
+        lineColor: Color,
+        lineWidth: Float = MEDIUM_LINE_WIDTH_DP,
+        interpolator: LineCartesianLayer.Interpolator = LineCartesianLayer.Interpolator.cubic(),
+    ): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
+        fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
+        stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
+        interpolator = interpolator,
+    )
 
     /**
      * Creates a line with a gradient area fill effect. Ideal for emphasising a single series or showing magnitude. The
@@ -92,14 +98,18 @@ object ChartStyling {
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createGradientLine(lineColor: Color, lineWidth: Float = MEDIUM_LINE_WIDTH_DP): LineCartesianLayer.Line {
+    fun createGradientLine(
+        lineColor: Color,
+        lineWidth: Float = MEDIUM_LINE_WIDTH_DP,
+        interpolator: LineCartesianLayer.Interpolator = LineCartesianLayer.Interpolator.cubic(),
+    ): LineCartesianLayer.Line {
         val gradientBrush =
             Brush.verticalGradient(colors = listOf(lineColor.copy(alpha = 0.3f), lineColor.copy(alpha = 0.05f)))
         return LineCartesianLayer.rememberLine(
             fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
             areaFill = LineCartesianLayer.AreaFill.single(Fill(gradientBrush)),
             stroke = LineCartesianLayer.LineStroke.Continuous(lineWidth.dp),
-            interpolator = LineCartesianLayer.Interpolator.catmullRom(),
+            interpolator = interpolator,
         )
     }
 
@@ -110,8 +120,11 @@ object ChartStyling {
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createBoldLine(lineColor: Color): LineCartesianLayer.Line =
-        createStyledLine(lineColor = lineColor, lineWidth = THICK_LINE_WIDTH_DP)
+    fun createBoldLine(
+        lineColor: Color,
+        interpolator: LineCartesianLayer.Interpolator = LineCartesianLayer.Interpolator.cubic(),
+    ): LineCartesianLayer.Line =
+        createStyledLine(lineColor = lineColor, lineWidth = THICK_LINE_WIDTH_DP, interpolator = interpolator)
 
     /**
      * Creates a subtle line suitable for secondary metrics that should not dominate the chart.
@@ -131,7 +144,10 @@ object ChartStyling {
      * @return Configured [LineCartesianLayer.Line]
      */
     @Composable
-    fun createDashedLine(lineColor: Color): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
+    fun createDashedLine(
+        lineColor: Color,
+        interpolator: LineCartesianLayer.Interpolator = LineCartesianLayer.Interpolator.cubic(),
+    ): LineCartesianLayer.Line = LineCartesianLayer.rememberLine(
         fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
         stroke =
         LineCartesianLayer.LineStroke.Dashed(
@@ -139,7 +155,7 @@ object ChartStyling {
             dashLength = 6.dp,
             gapLength = 3.dp,
         ),
-        interpolator = LineCartesianLayer.Interpolator.catmullRom(),
+        interpolator = interpolator,
     )
 
     /**

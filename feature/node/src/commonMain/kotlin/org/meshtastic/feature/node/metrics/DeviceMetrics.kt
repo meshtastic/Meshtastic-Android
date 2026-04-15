@@ -307,12 +307,13 @@ private fun DeviceMetricsChart(
             }
         }
 
+        val percentRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0) }
         val leftLayer =
             rememberConditionalLayer(
                 hasData = leftLayerSeriesStyles.isNotEmpty(),
                 lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
                 verticalAxisPosition = Axis.Position.Vertical.Start,
-                rangeProvider = CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0),
+                rangeProvider = percentRangeProvider,
             )
 
         val rightLayer =
