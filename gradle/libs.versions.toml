@@ -33,7 +33,7 @@ testRetry = "1.6.4"
 turbine = "1.2.1"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0-beta02"
+compose-multiplatform = "1.11.0-rc01"
 # Skiko is an internal CMP implementation detail. Pin it to the version shipped by CMP to
 # silence the "Skiko dependencies' versions are incompatible" warning emitted when transitive
 # dependencies (e.g. coil3) carry an older skiko requirement that Gradle then upgrades to the
