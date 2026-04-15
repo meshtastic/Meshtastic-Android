@@ -582,6 +582,9 @@
     <string name="output_duration_milliseconds">Väljundi kestvus (millisekundit)</string>
     <string name="nag_timeout_seconds">Häire ajalõpp (sekundit)</string>
     <string name="ringtone">Helin</string>
+    <string name="ringtone_imported">Imporditud helin</string>
+    <string name="ringtone_file_empty">Fail on tühi</string>
+    <string name="ringtone_import_error">Viga importimisel: %1$s</string>
     <string name="play">Mängi ette</string>
     <string name="use_i2s_as_buzzer">Kasuta I2S summerina</string>
     <string name="lora_config">LoRa</string>
