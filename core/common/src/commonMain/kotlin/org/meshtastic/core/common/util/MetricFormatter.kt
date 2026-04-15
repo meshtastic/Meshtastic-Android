@@ -31,10 +31,10 @@ object MetricFormatter {
         return "${NumberFormatter.format(value, 1)}$unit"
     }
 
-    fun voltage(volts: Float, decimalPlaces: Int = 2): String = "${NumberFormatter.format(volts, decimalPlaces)}V"
+    fun voltage(volts: Float, decimalPlaces: Int = 2): String = "${NumberFormatter.format(volts, decimalPlaces)} V"
 
     fun current(milliAmps: Float, decimalPlaces: Int = 1): String =
-        "${NumberFormatter.format(milliAmps, decimalPlaces)}mA"
+        "${NumberFormatter.format(milliAmps, decimalPlaces)} mA"
 
     fun percent(value: Float, decimalPlaces: Int = 1): String = "${NumberFormatter.format(value, decimalPlaces)}%"
 

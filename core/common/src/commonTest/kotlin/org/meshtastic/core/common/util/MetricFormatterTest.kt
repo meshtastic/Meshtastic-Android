@@ -38,17 +38,17 @@ class MetricFormatterTest {
 
     @Test
     fun voltage() {
-        assertEquals("3.72V", MetricFormatter.voltage(3.72f))
+        assertEquals("3.72 V", MetricFormatter.voltage(3.72f))
     }
 
     @Test
     fun voltageOneDecimal() {
-        assertEquals("3.7V", MetricFormatter.voltage(3.725f, decimalPlaces = 1))
+        assertEquals("3.7 V", MetricFormatter.voltage(3.725f, decimalPlaces = 1))
     }
 
     @Test
     fun current() {
-        assertEquals("150.3mA", MetricFormatter.current(150.3f))
+        assertEquals("150.3 mA", MetricFormatter.current(150.3f))
     }
 
     @Test

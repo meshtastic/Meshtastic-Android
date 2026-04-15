@@ -393,7 +393,7 @@ private suspend fun cleanupTemporaryFiles(
     fileHandler: FirmwareFileHandler,
     tempFirmwareFile: FirmwareArtifact?,
 ): FirmwareArtifact? {
-    runCatching {
+    safeCatching {
         tempFirmwareFile?.takeIf { it.isTemporary }?.let { fileHandler.deleteFile(it) }
         fileHandler.cleanupAllTemporaryFiles()
     }
