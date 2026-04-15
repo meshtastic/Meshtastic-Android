@@ -129,6 +129,7 @@ class MeshConnectionManagerImplTest {
         packetRepository,
         workerManager,
         appWidgetUpdater,
+        DataLayerHeartbeatSender(packetHandler),
         scope,
     )
 

@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -59,7 +58,6 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import kotlin.time.Duration.Companion.milliseconds
@@ -86,6 +84,7 @@ class MeshConnectionManagerImpl(
     private val packetRepository: PacketRepository,
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
+    private val heartbeatSender: DataLayerHeartbeatSender,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConnectionManager {
     /**
@@ -93,9 +92,6 @@ class MeshConnectionManagerImpl(
      * concurrently (e.g. flow collector vs. sleep-timeout coroutine).
      */
     private val connectionMutex = Mutex()
-
-    /** Monotonically increasing nonce for pre-handshake heartbeats, preventing firmware dedup. */
-    private val preHandshakeNonce = atomic(0)
 
     private var preHandshakeJob: Job? = null
     private var sleepTimeout: Job? = null
@@ -208,22 +204,11 @@ class MeshConnectionManagerImpl(
         // (sendToRadio is fire-and-forget through async coroutine launches).
         preHandshakeJob =
             scope.handledLaunch {
-                sendPreHandshakeHeartbeat()
+                heartbeatSender.sendHeartbeat("pre-handshake")
                 delay(PRE_HANDSHAKE_SETTLE_MS)
                 Logger.i { "Starting mesh handshake (Stage 1)" }
                 startConfigOnly()
             }
-    }
-
-    @Suppress("TooGenericExceptionCaught")
-    private fun sendPreHandshakeHeartbeat() {
-        try {
-            val nonce = preHandshakeNonce.incrementAndGet()
-            packetHandler.sendToRadio(ToRadio(heartbeat = Heartbeat(nonce = nonce)))
-            Logger.d { "Pre-handshake heartbeat enqueued (nonce=$nonce)" }
-        } catch (e: Exception) {
-            Logger.w(e) { "Failed to enqueue pre-handshake heartbeat; proceeding with config" }
-        }
     }
 
     private fun startHandshakeStallGuard(stage: Int, action: () -> Unit) {

@@ -98,7 +98,7 @@ class MeshConfigFlowManagerImplTest {
                 serviceBroadcasts = serviceBroadcasts,
                 analytics = analytics,
                 commandSender = commandSender,
-                packetHandler = packetHandler,
+                heartbeatSender = DataLayerHeartbeatSender(packetHandler),
                 scope = testScope,
             )
     }

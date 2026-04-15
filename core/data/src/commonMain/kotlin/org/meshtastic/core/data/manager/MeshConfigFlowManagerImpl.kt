@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import okio.IOException
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
@@ -32,7 +31,6 @@ import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
@@ -40,9 +38,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
 import org.meshtastic.proto.HardwareModel
-import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.NodeInfo
-import org.meshtastic.proto.ToRadio
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
@@ -57,16 +53,13 @@ class MeshConfigFlowManagerImpl(
     private val serviceBroadcasts: ServiceBroadcasts,
     private val analytics: PlatformAnalytics,
     private val commandSender: CommandSender,
-    private val packetHandler: PacketHandler,
+    private val heartbeatSender: DataLayerHeartbeatSender,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigFlowManager {
     private val wantConfigDelay = 100L
 
     /** Monotonically increasing generation so async clears from a stale handshake are discarded. */
     private val handshakeGeneration = atomic(0L)
-
-    /** Monotonically increasing nonce for inter-stage heartbeats, preventing firmware dedup. */
-    private val heartbeatNonce = atomic(0)
 
     /**
      * Type-safe handshake state machine. Each state carries exactly the data that is valid during that phase,
@@ -94,10 +87,8 @@ class MeshConfigFlowManagerImpl(
          * [myNodeInfo] was committed at the Stage 1→2 transition. [nodes] accumulates [NodeInfo] packets until
          * `config_complete_id` arrives.
          */
-        data class ReceivingNodeInfo(
-            val myNodeInfo: SharedMyNodeInfo,
-            val nodes: MutableList<NodeInfo> = mutableListOf(),
-        ) : HandshakeState()
+        data class ReceivingNodeInfo(val myNodeInfo: SharedMyNodeInfo, val nodes: List<NodeInfo> = emptyList()) :
+            HandshakeState()
 
         /** Both stages finished. The app is fully connected. */
         data class Complete(val myNodeInfo: SharedMyNodeInfo) : HandshakeState()
@@ -161,20 +152,10 @@ class MeshConfigFlowManagerImpl(
 
         scope.handledLaunch {
             delay(wantConfigDelay)
-            sendHeartbeat()
+            heartbeatSender.sendHeartbeat("inter-stage")
             delay(wantConfigDelay)
             Logger.i { "Requesting NodeInfo (Stage 2)" }
             connectionManager.value.startNodeInfoOnly()
-        }
-    }
-
-    private fun sendHeartbeat() {
-        try {
-            val nonce = heartbeatNonce.incrementAndGet()
-            packetHandler.sendToRadio(ToRadio(heartbeat = Heartbeat(nonce = nonce)))
-            Logger.d { "Heartbeat sent between nonce stages (nonce=$nonce)" }
-        } catch (ex: IOException) {
-            Logger.w(ex) { "Failed to send heartbeat; proceeding with node-info stage" }
         }
     }
 
@@ -185,16 +166,12 @@ class MeshConfigFlowManagerImpl(
 
         // Transition state immediately (synchronously) to prevent duplicate handling.
         // The async work below (DB writes, broadcasts) proceeds without the guard.
+        // Because nodes is now immutable, no snapshot is needed — state.nodes IS the snapshot.
+        // Any stall-guard retry that re-enters handleNodeInfo will see Complete state and be ignored.
         handshakeState = HandshakeState.Complete(myNodeInfo = info)
 
-        // Snapshot and clear immediately so that a concurrent stall-guard retry (which
-        // resends want_config_id and causes the firmware to restart the node_info burst)
-        // starts accumulating into a fresh list rather than doubling this batch.
-        val nodesToProcess = state.nodes.toList()
-        state.nodes.clear()
-
         val entities =
-            nodesToProcess.mapNotNull { nodeInfo ->
+            state.nodes.mapNotNull { nodeInfo ->
                 nodeManager.installNodeInfo(nodeInfo, withBroadcast = false)
                 nodeManager.nodeDBbyNodeNum[nodeInfo.num]
                     ?: run {
@@ -259,7 +236,7 @@ class MeshConfigFlowManagerImpl(
     override fun handleNodeInfo(info: NodeInfo) {
         val state = handshakeState
         if (state is HandshakeState.ReceivingNodeInfo) {
-            state.nodes.add(info)
+            handshakeState = state.copy(nodes = state.nodes + info)
         } else {
             Logger.w { "Ignoring NodeInfo outside Stage 2 (state=$state)" }
         }
