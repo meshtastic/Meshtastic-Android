@@ -79,7 +79,7 @@ private val noOpProvision: (String, String) -> Unit = { _, _ -> }
 
 @PreviewLightDark
 @Composable
-private fun ScanningBlePreview() {
+fun ScanningBlePreview() {
     AppTheme { Surface(Modifier.fillMaxSize()) { ScanningBleContent() } }
 }
 
@@ -89,7 +89,7 @@ private fun ScanningBlePreview() {
 
 @PreviewLightDark
 @Composable
-private fun DeviceFoundPreview() {
+fun DeviceFoundPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             DeviceFoundContent(deviceName = "mpwrd-nm-A1B2", onProceed = noOp, onCancel = noOp)
@@ -99,7 +99,7 @@ private fun DeviceFoundPreview() {
 
 @PreviewLightDark
 @Composable
-private fun DeviceFoundNoNamePreview() {
+fun DeviceFoundNoNamePreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) { DeviceFoundContent(deviceName = null, onProceed = noOp, onCancel = noOp) }
     }
@@ -111,7 +111,7 @@ private fun DeviceFoundNoNamePreview() {
 
 @PreviewLightDark
 @Composable
-private fun ScanningNetworksPreview() {
+fun ScanningNetworksPreview() {
     AppTheme { Surface(Modifier.fillMaxSize()) { ScanningNetworksContent() } }
 }
 
@@ -121,7 +121,7 @@ private fun ScanningNetworksPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedWithNetworksPreview() {
+fun ConnectedWithNetworksPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -139,7 +139,7 @@ private fun ConnectedWithNetworksPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedEmptyNetworksPreview() {
+fun ConnectedEmptyNetworksPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -157,7 +157,7 @@ private fun ConnectedEmptyNetworksPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedScanningPreview() {
+fun ConnectedScanningPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -175,7 +175,7 @@ private fun ConnectedScanningPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedProvisioningPreview() {
+fun ConnectedProvisioningPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -193,7 +193,7 @@ private fun ConnectedProvisioningPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedSuccessPreview() {
+fun ConnectedSuccessPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -211,7 +211,7 @@ private fun ConnectedSuccessPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedFailedPreview() {
+fun ConnectedFailedPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -233,7 +233,7 @@ private fun ConnectedFailedPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedLongSsidPreview() {
+fun ConnectedLongSsidPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -251,7 +251,7 @@ private fun ConnectedLongSsidPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedManyNetworksPreview() {
+fun ConnectedManyNetworksPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
@@ -269,7 +269,7 @@ private fun ConnectedManyNetworksPreview() {
 
 @PreviewLightDark
 @Composable
-private fun DeviceFoundLongNamePreview() {
+fun DeviceFoundLongNamePreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             DeviceFoundContent(
@@ -287,7 +287,7 @@ private fun DeviceFoundLongNamePreview() {
 
 @PreviewLightDark
 @Composable
-private fun ProvisionStatusCardProvisioningPreview() {
+fun ProvisionStatusCardProvisioningPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -299,7 +299,7 @@ private fun ProvisionStatusCardProvisioningPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ProvisionStatusCardSuccessPreview() {
+fun ProvisionStatusCardSuccessPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -311,7 +311,7 @@ private fun ProvisionStatusCardSuccessPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ProvisionStatusCardFailedPreview() {
+fun ProvisionStatusCardFailedPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -323,7 +323,7 @@ private fun ProvisionStatusCardFailedPreview() {
 
 @PreviewLightDark
 @Composable
-private fun NetworkRowPreview() {
+fun NetworkRowPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -336,7 +336,7 @@ private fun NetworkRowPreview() {
 
 @PreviewLightDark
 @Composable
-private fun NetworkRowLongSsidPreview() {
+fun NetworkRowLongSsidPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -353,6 +353,6 @@ private fun NetworkRowLongSsidPreview() {
 
 @PreviewLightDark
 @Composable
-private fun MpwrdDisclaimerBannerPreview() {
+fun MpwrdDisclaimerBannerPreview() {
     AppTheme { Surface { Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) { MpwrdDisclaimerBanner() } } }
 }

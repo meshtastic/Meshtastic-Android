@@ -18,7 +18,6 @@ package org.meshtastic.core.ui.component.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.model.DeviceMetrics.Companion.currentTime
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetrics
@@ -27,7 +26,12 @@ import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
-import kotlin.random.Random
+
+/**
+ * Fixed epoch timestamp (2026-01-01T00:00:00 UTC) used for deterministic preview rendering. Using a fixed value instead
+ * of [currentTime] ensures screenshot tests produce stable images.
+ */
+private const val FIXED_LAST_HEARD = 1767225600
 
 class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
     val mickeyMouse =
@@ -42,7 +46,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
                 role = Config.DeviceConfig.Role.ROUTER,
             ),
             position = Position(latitude_i = 338125110, longitude_i = -1179189760, altitude = 138, sats_in_view = 4),
-            lastHeard = currentTime(),
+            lastHeard = FIXED_LAST_HEARD,
             channel = 0,
             snr = 12.5F,
             rssi = -42,
@@ -60,7 +64,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
 
     val minnieMouse =
         mickeyMouse.copy(
-            num = Random.nextInt(),
+            num = 1928,
             user =
             User(
                 long_name = "Minnie Mouse",
@@ -76,9 +80,9 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
 
     private val donaldDuck =
         Node(
-            num = Random.nextInt(),
+            num = 1934,
             position = Position(latitude_i = 338052347, longitude_i = -1179208460, altitude = 121, sats_in_view = 66),
-            lastHeard = currentTime() - 300,
+            lastHeard = FIXED_LAST_HEARD - 300,
             channel = 0,
             snr = 12.5F,
             rssi = -42,
@@ -123,7 +127,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
             paxcounter = Paxcount(),
         )
 
-    private val almostNothing = Node(num = Random.nextInt())
+    private val almostNothing = Node(num = 9999)
 
     override val values: Sequence<Node>
         get() =

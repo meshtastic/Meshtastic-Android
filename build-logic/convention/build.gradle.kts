@@ -186,5 +186,10 @@ gradlePlugin {
             id = "meshtastic.root"
             implementationClass = "RootConventionPlugin"
         }
+
+        register("screenshotTesting") {
+            id = "meshtastic.screenshot.testing"
+            implementationClass = "ScreenshotTestingConventionPlugin"
+        }
     }
 }

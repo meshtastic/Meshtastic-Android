@@ -45,17 +45,18 @@ Run these when relevant to map, provider, or flavor-specific behavior:
 
 ## 4) CI Pipeline Architecture
 
-CI is defined in `.github/workflows/reusable-check.yml` and structured as four parallel job groups:
+CI is defined in `.github/workflows/reusable-check.yml` (unit tests, lint, build) and `.github/workflows/screenshot-tests.yml` (visual regression). These run as **independent parallel workflows** on PRs.
 
 1. **`lint-check`** — Runs spotless, detekt, Android lint, and KMP smoke compile in a single Gradle invocation (avoids 3x cold-start overhead). Uses `fetch-depth: 0` (full clone) for spotless ratcheting and version code calculation. Produces `cache_read_only` output and computed `version_code` for downstream jobs.
-2. **`test-shards`** — A 3-shard matrix that runs unit tests in parallel (depends on `lint-check`):
+2. **`test-shards`** — A 3-shard matrix that runs tests in parallel (depends on `lint-check`):
    - `shard-core`: `allTests` for all `core:*` KMP modules.
    - `shard-feature`: `allTests` for all `feature:*` KMP modules.
-   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`, `mesh_service_example`).
+   - `shard-app`: Explicit test tasks for pure-Android/JVM modules (`app`, `desktop`, `core:barcode`).
    Each shard generates Kover XML coverage and uploads test results + coverage to Codecov with per-shard flags.
    Downstream jobs use `fetch-depth: 1` and receive `VERSION_CODE` from lint-check via env var, enabling shallow clones.
 3. **`android-check`** — Builds APKs for all flavors (depends on `lint-check`).
 4. **`build-desktop`** — Multi-OS matrix (`macos-latest`, `windows-latest`, `ubuntu-24.04`, `ubuntu-24.04-arm`) that builds desktop distributions via `createDistributable` (depends on `lint-check`).
+5. **`screenshot-tests.yml`** — Standalone workflow that runs `validateGoogleDebugScreenshotTest` **independently** from the main CI pipeline (no lint-check dependency). Uses `dorny/paths-filter` to skip when no UI files changed. On failure, uploads `screenshot-diffs` artifact and writes `GITHUB_STEP_SUMMARY`.
 
 ### Runner Strategy (Three Tiers)
 - **`ubuntu-24.04-arm`** — Lightweight/utility jobs (status checks, labelers, triage, changelog, release metadata, stale, moderation). Benefits from ARM runners' shorter queue times.
@@ -86,3 +87,114 @@ CI is defined in `.github/workflows/reusable-check.yml` and structured as four p
 - **Path filtering:** `check-changes` in `pull-request.yml` must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.).
 - **AboutLibraries:** Runs in `offlineMode` by default (no GitHub/SPDX API calls). Release builds pass `-PaboutLibraries.release=true` via Fastlane/Gradle CLI to enable remote license fetching. Do NOT re-gate on `CI` or `GITHUB_TOKEN` alone.
 
+## 5) Screenshot Testing (Compose Preview)
+
+The project uses the Google `com.android.compose.screenshot` plugin (v0.0.1-alpha14) for visual regression testing of CMP UI components.
+
+### KMP Limitations
+- **Android-only plugin**: Only works with `com.android.application` / `com.android.library` — not `com.android.kotlin.multiplatform.library`. Tests live in the `app` module.
+- **AndroidX `@Preview` required**: The plugin recognizes `androidx.compose.ui.tooling.preview.Preview` only, not the JetBrains `org.jetbrains.compose.ui.tooling.preview.Preview`.
+- Preview files use Android-specific annotations (e.g. `uiMode = Configuration.UI_MODE_NIGHT_YES`) and must live in `app/src/screenshotTest/`, **never** in `commonMain`.
+
+### File Layout
+```
+app/src/screenshotTest/kotlin/org/meshtastic/app/
+  ├── CoreComponentScreenshotTests.kt        # @PreviewTest classes (26 test files total)
+  ├── PreferenceScreenshotTests.kt
+  ├── NodeInfoScreenshotTests.kt
+  ├── WifiProvisionScreenshotTests.kt
+  ├── ...                                    # (26 test files, 164 @PreviewTest methods)
+  └── preview/
+      ├── BasicComponentPreviews.kt          # Buttons, text, icons, @MultiPreview definition
+      ├── ExtendedComponentPreviews.kt       # Cards, inputs, dialogs, chips
+      ├── NodeDataInfoPreviews.kt            # Distance, LastHeard, Hops, Channel, SNR/RSSI
+      ├── WifiProvisionComponentPreviews.kt  # Wi-Fi provision re-exports
+      ├── NodeDetailComponentPreviews.kt     # Node detail re-exports
+      └── ...                                # (27 preview files total)
+
+app/src/screenshotTestGoogleDebug/reference/  # 328 committed .png baselines
+app/build/reports/screenshotTest/preview/     # HTML diff reports (generated at validation time)
+```
+
+### Commands
+```bash
+# Generate/update reference images
+./gradlew updateGoogleDebugScreenshotTest    # Google flavor
+./gradlew updateFdroidDebugScreenshotTest    # F-Droid flavor
+
+# Validate against references
+./gradlew validateGoogleDebugScreenshotTest
+./gradlew validateFdroidDebugScreenshotTest
+```
+
+> Do NOT use bare `updateDebugScreenshotTest` — it is ambiguous with product flavors.
+
+### Writing a Preview + Test
+1. Create a preview composable in `app/src/screenshotTest/.../preview/` using `@MultiPreview` and wrapping in `AppTheme`.
+2. Create a test class in `app/src/screenshotTest/.../` with methods annotated `@PreviewTest` + `@MultiPreview` + `@Composable` that call the preview composable.
+3. Run `updateGoogleDebugScreenshotTest` to generate baselines, commit the `.png` files.
+
+### @MultiPreview Coverage
+The `@MultiPreview` annotation (defined in `BasicComponentPreviews.kt`) generates **2 variants per test method**: Light Phone and Dark Phone (`uiMode = Configuration.UI_MODE_NIGHT_YES`).
+
+Additional variants (font scale, foldable, tablet, RTL) are commented out in `BasicComponentPreviews.kt` for future re-enablement once CI rendering times allow.
+
+With **164 test methods** across **26 test files**, the total is **328 reference images**.
+
+### Component Coverage
+Screenshot tests cover components from the following modules:
+- **`core:ui`** — Buttons, text, icons, cards, preferences, dialogs, telemetry, node info, alerts, utility components
+- **`feature:node`** — Node detail components, metrics, status icons, data info
+- **`feature:messaging`** — QuickChat, reactions, message input, message actions, delivery info
+- **`feature:connections`** — Empty state, connecting device info, segmented bar, device list
+- **`feature:settings`** — AppInfo, Appearance, Persistence sections, radio config dialogs, debug filters
+- **`feature:wifi-provision`** — All 19 Wi-Fi provisioning UI components
+
+### Convention Plugin
+- `meshtastic.screenshot.testing` (in `build-logic/convention`) configures the experimental flag and `screenshotTestImplementation` dependencies.
+- Must be applied **after** `alias(libs.plugins.screenshot)` in the consumer's `plugins {}` block.
+
+### CI Integration
+- Screenshot validation runs in a **standalone workflow** (`screenshot-tests.yml`) that is **completely independent** from the main CI pipeline (`reusable-check.yml`).
+- This means screenshot tests start immediately on push — they do NOT wait for lint-check or any other job to complete first.
+- The workflow uses `dorny/paths-filter` to detect UI-related file changes. When no UI files changed, the expensive Gradle validation is skipped and the status gate (`Screenshot Status`) passes immediately.
+- On `merge_group` events, screenshot validation always runs regardless of path filters.
+- The `screenshot-check` job runs on `ubuntu-24.04` with a **45-minute timeout**.
+- On failure, a `GITHUB_STEP_SUMMARY` annotation lists the names of failed tests and directs reviewers to download the `screenshot-diffs` artifact for diff images.
+- The diff report (HTML with side-by-side expected/actual/diff views) is located at `app/build/reports/screenshotTest/preview/` inside the artifact.
+
+### CI Failure Behavior
+When screenshot tests fail in CI, behavior depends on the PR context:
+- **Fork PRs**: CI hard-fails with an error message instructing the contributor to run `./gradlew updateGoogleDebugScreenshotTest` locally and push the updated images.
+- **Same-repo PRs / merge queue / main**: CI hard-fails with instructions to update references locally.
+- A dedicated `screenshot-diffs` artifact is uploaded containing the diff images for debugging.
+
+### Image Difference Threshold
+- Configured at `app/build.gradle.kts` via `testOptions.screenshotTests.imageDifferenceThreshold = 0.02f` (2%).
+- **Rationale**: Compose Preview Screenshot Testing uses layoutlib for host-side rendering, but anti-aliasing and font hinting differ between macOS (where developers typically generate references) and Linux (CI runner). A 2% threshold absorbs these sub-pixel differences without masking real regressions.
+- Emoji characters (e.g. `🔔` in `QuickChatRow`) render with different glyphs across platforms and are the primary source of visual diff. Avoid emoji literals in preview data where possible.
+- Revisit this threshold when the plugin exits alpha or if false negatives appear.
+
+### Reference Image Generation
+- **OS guidance**: Reference images are best generated on the same OS as CI (`ubuntu-24.04`). Generating locally on macOS is acceptable because the 2% threshold absorbs rendering differences.
+- **Determinism**: Preview composables must use fixed/deterministic data. Avoid `Random`, `currentTime()`, or other non-deterministic values in preview parameters. Use hardcoded constants instead. For relative-time displays (e.g. `LastHeardInfo`), use `nowSeconds - offset` so the rendered text (e.g. "5m") remains constant across runs.
+- **Updating references**: Run `./gradlew updateGoogleDebugScreenshotTest`, then commit the updated `.png` files under `app/src/screenshotTestGoogleDebug/reference/`.
+
+### Debugging CI Failures
+1. **Check the job summary**: The `screenshot-check` job writes a step summary listing which tests failed. Look for the "Screenshot Test Failures" section in the `Screenshot Tests` workflow checks.
+2. **Download the artifact**: Download the `screenshot-diffs` artifact (just the diff PNGs) from the workflow run's artifacts page (retained for 7 days).
+3. **Inspect diff images**: Each failed test has `_expected.png`, `_actual.png`, and `_diff.png` files.
+4. **Common causes**:
+   - Font rendering differences (macOS vs Linux) — usually within threshold; if not, let CI regenerate.
+   - Non-deterministic preview data (random values, timestamps) — fix the preview to use constants.
+   - Emoji rendering (platform-specific glyphs) — avoid emoji in preview data or increase threshold.
+   - Genuine UI regression — update the component or regenerate references if the change is intentional.
+
+## 6) Shell & Tooling Conventions
+- **Terminal Pagers:** When running shell commands like `git diff` or `git log`, ALWAYS use `--no-pager` (e.g., `git --no-pager diff`) to prevent getting stuck in an interactive prompt.
+- **Text Search:** Prefer `rg` (ripgrep) over `grep` or `find` for fast text searching across the codebase.
+
+## 7) Agent/Developer Guidance
+- Start with the smallest set that validates your touched area.
+- If unable to run full validation locally, report exactly what ran and what remains.
+- Keep documentation synced in `AGENTS.md` and `.skills/` directories.

@@ -1,0 +1,159 @@
+name: Screenshot Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.gitignore'
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screenshots-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_TOKEN: ${{ github.token }}
+  GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
+  GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
+  GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
+
+jobs:
+  # Fast check: skip the heavy Gradle validation when no UI-related files changed.
+  check-ui-changes:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-24.04-arm
+    outputs:
+      ui_changed: ${{ steps.filter.outputs.ui }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          token: ''
+          filters: |
+            ui:
+              - 'app/src/screenshotTest/**'
+              - 'app/src/screenshotTestGoogleDebug/**'
+              - 'app/src/main/**'
+              - 'app/build.gradle.kts'
+              - 'core/ui/**'
+              - 'core/model/**'
+              - 'core/resources/**'
+              - 'feature/**/component/**'
+              - 'feature/**/ui/**'
+              - 'build-logic/**'
+              - 'gradle/libs.versions.toml'
+              - '.github/workflows/screenshot-tests.yml'
+              - '.github/actions/gradle-setup/**'
+
+  screenshot-check:
+    needs: check-ui-changes
+    if: >-
+      needs.check-ui-changes.outputs.ui_changed == 'true'
+      || github.event_name == 'merge_group'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: 'true'
+
+      - name: Validate screenshot tests
+        id: screenshotsverify
+        continue-on-error: true
+        run: ./gradlew :app:validateGoogleDebugScreenshotTest -Pci=true --scan
+
+      - name: Upload screenshot diffs
+        if: >-
+          always()
+          && steps.screenshotsverify.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshot-diffs
+          path: |
+            app/build/outputs/screenshotTest-results/preview/debug/google/diffs/
+            app/build/outputs/screenshotTest-results/preview/debug/google/rendered/
+          retention-days: 7
+
+      - name: Screenshot test summary
+        if: always() && steps.screenshotsverify.outcome != 'cancelled'
+        shell: bash
+        run: |
+          DIFFS_DIR="app/build/outputs/screenshotTest-results/preview/debug/google/diffs"
+          {
+            if [ "${{ steps.screenshotsverify.outcome }}" = "failure" ]; then
+              FAIL_COUNT=$(find "$DIFFS_DIR" -name "*.png" 2>/dev/null | wc -l | tr -d ' ')
+              echo "## :x: Screenshot Tests — ${FAIL_COUNT} image(s) differ"
+              echo ""
+              echo "Download the **screenshot-diffs** artifact to inspect diff images."
+              echo ""
+              echo "<details>"
+              echo "<summary>Failed images</summary>"
+              echo ""
+              find "$DIFFS_DIR" -name "*.png" 2>/dev/null | sort | while read -r f; do
+                echo "- \`$(basename "$f" .png)\`"
+              done
+              echo ""
+              echo "</details>"
+              echo ""
+              echo '```bash'
+              echo "./gradlew updateGoogleDebugScreenshotTest"
+              echo '```'
+              echo "Commit the updated images under \`app/src/screenshotTestGoogleDebug/reference/\`."
+            else
+              REF_COUNT=$(find app/src/screenshotTestGoogleDebug/reference -name "*.png" 2>/dev/null | wc -l | tr -d ' ')
+              echo "## :white_check_mark: Screenshot Tests — ${REF_COUNT} images verified"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail screenshot tests (fork PR)
+        if: >-
+          steps.screenshotsverify.outcome == 'failure'
+          && github.event_name == 'pull_request'
+          && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "::error::Screenshot tests failed. Please run './gradlew updateGoogleDebugScreenshotTest' locally and push the updated images."
+          exit 1
+
+      - name: Fail screenshot tests (same-repo PR or merge queue)
+        if: >-
+          steps.screenshotsverify.outcome == 'failure'
+          && (github.event_name != 'pull_request'
+              || github.event.pull_request.head.repo.full_name == github.repository)
+        run: |
+          echo "::error::Screenshot tests failed. Run './gradlew updateGoogleDebugScreenshotTest' and commit the updated images."
+          exit 1
+
+  # Status gate: always reports so this can be a required check.
+  # Succeeds when screenshots pass OR when no UI files changed (skipped).
+  check-screenshot-status:
+    name: Screenshot Status
+    runs-on: ubuntu-24.04-arm
+    permissions: {}
+    needs: [check-ui-changes, screenshot-check]
+    if: always()
+    steps:
+      - name: Check screenshot result
+        run: |
+          if [[ "${{ needs.screenshot-check.result }}" == "failure" || "${{ needs.screenshot-check.result }}" == "cancelled" ]]; then
+            echo "::error::Screenshot tests failed"
+            exit 1
+          fi
+          echo "Screenshot tests passed (or skipped — no UI changes detected)."

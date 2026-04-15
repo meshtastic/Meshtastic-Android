@@ -34,6 +34,8 @@ plugins {
     alias(libs.plugins.secrets)
     alias(libs.plugins.aboutlibraries)
     id("dev.mokkery")
+    alias(libs.plugins.screenshot)
+    id("meshtastic.screenshot.testing")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -178,7 +180,13 @@ configure<ApplicationExtension> {
     }
     bundle { language { enableSplit = false } }
 
-    testOptions { unitTests { isIncludeAndroidResources = true } }
+    testOptions {
+        unitTests { isIncludeAndroidResources = true }
+        @Suppress("MagicNumber")
+        screenshotTests {
+            imageDifferenceThreshold = 0.02f // 2% tolerance for cross-platform font/emoji rendering
+        }
+    }
 }
 
 secrets {

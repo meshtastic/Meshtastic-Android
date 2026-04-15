@@ -102,9 +102,10 @@ jobs:
 
   # ── Sharded Unit Tests ──────────────────────────────────────────────
   # Tests are split into 3 shards that run in parallel:
-  #   shard-core:    core:* KMP module tests (allTests)
-  #   shard-feature: feature:* KMP module tests (allTests)
-  #   shard-app:     Pure-Android/JVM tests (app, desktop, core:barcode, etc.)
+  #   shard-core:       core:* KMP module tests (allTests)
+  #   shard-feature:    feature:* KMP module tests (allTests)
+  #   shard-app:        Pure-Android/JVM tests (app, desktop, core:barcode, etc.)
+  # Screenshot tests run in a separate workflow (screenshot-tests.yml).
   test-shards:
     runs-on: ubuntu-24.04
     permissions:
@@ -193,6 +194,7 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
+      # ── Run tests ──
       - name: Run Tests & Coverage (${{ matrix.shard.name }})
         run: |
           kover_tasks=""

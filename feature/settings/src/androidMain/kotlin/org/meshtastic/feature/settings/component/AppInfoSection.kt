@@ -160,7 +160,7 @@ private fun AppVersionButton(
 
 @Preview(showBackground = true)
 @Composable
-private fun AppInfoSectionPreview() {
+fun AppInfoSectionPreview() {
     AppTheme {
         AppInfoSection(
             appVersionName = "2.5.0",
