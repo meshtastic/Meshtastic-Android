@@ -213,7 +213,7 @@ jobs:
           files: "**/build/test-results/**/*.xml"
 
       - name: Upload coverage to Codecov
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.run_coverage }}
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
