@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -58,6 +59,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import kotlin.time.Duration.Companion.milliseconds
@@ -92,6 +94,10 @@ class MeshConnectionManagerImpl(
      */
     private val connectionMutex = Mutex()
 
+    /** Monotonically increasing nonce for pre-handshake heartbeats, preventing firmware dedup. */
+    private val preHandshakeNonce = atomic(0)
+
+    private var preHandshakeJob: Job? = null
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
     private var handshakeTimeout: Job? = null
@@ -172,6 +178,8 @@ class MeshConnectionManagerImpl(
 
         sleepTimeout?.cancel()
         sleepTimeout = null
+        preHandshakeJob?.cancel()
+        preHandshakeJob = null
         handshakeTimeout?.cancel()
         handshakeTimeout = null
 
@@ -192,9 +200,30 @@ class MeshConnectionManagerImpl(
             serviceRepository.setConnectionState(ConnectionState.Connecting)
         }
         serviceBroadcasts.broadcastConnection()
-        Logger.i { "Starting mesh handshake (Stage 1)" }
         connectTimeMsec = nowMillis
-        startConfigOnly()
+
+        // Send a wake-up heartbeat before the config request. The firmware may be in a
+        // power-saving state where the NimBLE callback context needs warming up. The 100ms
+        // delay ensures the heartbeat BLE write is enqueued before the want_config_id
+        // (sendToRadio is fire-and-forget through async coroutine launches).
+        preHandshakeJob =
+            scope.handledLaunch {
+                sendPreHandshakeHeartbeat()
+                delay(PRE_HANDSHAKE_SETTLE_MS)
+                Logger.i { "Starting mesh handshake (Stage 1)" }
+                startConfigOnly()
+            }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private fun sendPreHandshakeHeartbeat() {
+        try {
+            val nonce = preHandshakeNonce.incrementAndGet()
+            packetHandler.sendToRadio(ToRadio(heartbeat = Heartbeat(nonce = nonce)))
+            Logger.d { "Pre-handshake heartbeat enqueued (nonce=$nonce)" }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to enqueue pre-handshake heartbeat; proceeding with config" }
+        }
     }
 
     private fun startHandshakeStallGuard(stage: Int, action: () -> Unit) {
@@ -380,6 +409,15 @@ class MeshConnectionManagerImpl(
         // disconnected, regardless of the device's ls_secs configuration. Without this
         // cap, routers (ls_secs=3600) leave the UI in DeviceSleep for over an hour.
         private const val MAX_SLEEP_TIMEOUT_SECONDS = 300
+
+        /**
+         * Delay between the pre-handshake heartbeat and the want_config_id send.
+         *
+         * Ensures the heartbeat BLE write completes and the firmware's NimBLE callback context is warmed up before the
+         * config request arrives. 100ms is well above observed ESP32 task scheduling latency (~10–50ms) while adding
+         * negligible connection latency.
+         */
+        private const val PRE_HANDSHAKE_SETTLE_MS = 100L
 
         private val HANDSHAKE_TIMEOUT = 30.seconds
 

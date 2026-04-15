@@ -25,6 +25,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -63,6 +64,9 @@ class MeshConfigFlowManagerImpl(
 
     /** Monotonically increasing generation so async clears from a stale handshake are discarded. */
     private val handshakeGeneration = atomic(0L)
+
+    /** Monotonically increasing nonce for inter-stage heartbeats, preventing firmware dedup. */
+    private val heartbeatNonce = atomic(0)
 
     /**
      * Type-safe handshake state machine. Each state carries exactly the data that is valid during that phase,
@@ -139,6 +143,18 @@ class MeshConfigFlowManagerImpl(
             return
         }
 
+        // Warn if firmware is below the absolute minimum supported version.
+        // The UI layer already enforces this via FirmwareVersionCheck, so we just log here
+        // for diagnostics rather than hard-disconnecting.
+        finalizedInfo.firmwareVersion?.let { fwVersion ->
+            if (DeviceVersion(fwVersion) < DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)) {
+                Logger.w {
+                    "Firmware $fwVersion is below minimum ${DeviceVersion.ABS_MIN_FW_VERSION} — " +
+                        "protocol incompatibilities may occur"
+                }
+            }
+        }
+
         handshakeState = HandshakeState.ReceivingNodeInfo(myNodeInfo = finalizedInfo)
         Logger.i { "myNodeInfo committed (nodeNum=${finalizedInfo.myNodeNum})" }
         connectionManager.value.onRadioConfigLoaded()
@@ -154,8 +170,9 @@ class MeshConfigFlowManagerImpl(
 
     private fun sendHeartbeat() {
         try {
-            packetHandler.sendToRadio(ToRadio(heartbeat = Heartbeat()))
-            Logger.d { "Heartbeat sent between nonce stages" }
+            val nonce = heartbeatNonce.incrementAndGet()
+            packetHandler.sendToRadio(ToRadio(heartbeat = Heartbeat(nonce = nonce)))
+            Logger.d { "Heartbeat sent between nonce stages (nonce=$nonce)" }
         } catch (ex: IOException) {
             Logger.w(ex) { "Failed to send heartbeat; proceeding with node-info stage" }
         }
