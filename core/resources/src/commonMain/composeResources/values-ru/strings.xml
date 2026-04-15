@@ -257,10 +257,15 @@
     <string name="reset_to_defaults">Сброс значений по умолчанию</string>
     <string name="apply">Применить</string>
     <string name="theme">Тема</string>
+    <string name="contrast">Контрастность</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Темная</string>
     <string name="theme_system">По умолчанию</string>
     <string name="choose_theme">Выберите тему</string>
+    <string name="choose_contrast">Уровень контрастности</string>
+    <string name="contrast_standard">Стандартный</string>
+    <string name="contrast_medium">Средний</string>
+    <string name="contrast_high">Высокий</string>
     <string name="provide_location_to_mesh">Предоставление местоположения для сети</string>
     <string name="use_homoglyph_characters_encoding">Компактная кодировка кириллицы</string>
     <plurals name="delete_messages">
@@ -360,9 +365,9 @@
     <string name="battery">Батарея</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
-    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
-    <string name="device_metrics_voltage_value">%1$s: %2$.1f В</string>
-    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s В</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Темп</string>
     <string name="humidity">Влажн</string>
@@ -731,6 +736,7 @@
     <string name="rainfall_24h">Дождь (24ч)</string>
     <string name="weight">Вес</string>
     <string name="radiation">Радиация</string>
+    <string name="one_wire_temperature">Темп. 1-Wire</string>
     <string name="store_forward_config"><![CDATA[Настройки Store & Forward]]></string>
     <string name="indoor_air_quality_iaq">Качество воздуха в помещении (IAQ)</string>
     <string name="url">URL-адрес</string>

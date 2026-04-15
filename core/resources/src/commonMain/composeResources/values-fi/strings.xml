@@ -354,9 +354,7 @@
     <string name="battery">Akku</string>
     <string name="channel_utilization">Kanavan käyttöaste</string>
     <string name="air_utilization">Lähetysajan käyttöaste</string>
-    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
-    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
-    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Lämpötila</string>
     <string name="humidity">Kosteus</string>
@@ -723,6 +721,7 @@
     <string name="rainfall_24h">Sademäärä (24 h)</string>
     <string name="weight">Paino</string>
     <string name="radiation">Säteily</string>
+    <string name="one_wire_temperature">Lämpötila (1-Wire)</string>
     <string name="store_forward_config"><![CDATA[Varastoi & välitä asetukset]]></string>
     <string name="indoor_air_quality_iaq">Sisäilmanlaatu (IAQ)</string>
     <string name="url">URL-osoite</string>
