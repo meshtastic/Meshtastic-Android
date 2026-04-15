@@ -17,7 +17,7 @@
 package org.meshtastic.core.network.repository
 
 import app.cash.turbine.test
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.test.Test
@@ -27,7 +27,7 @@ import kotlin.test.assertTrue
 class JvmServiceDiscoveryTest {
 
     private val testDispatchers =
-        StandardTestDispatcher().let { dispatcher ->
+        UnconfinedTestDispatcher().let { dispatcher ->
             CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher)
         }
 

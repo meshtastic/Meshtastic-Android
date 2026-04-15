@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.service
 
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +30,7 @@ import kotlin.test.assertNotNull
 @Config(sdk = [34])
 class AndroidFileServiceTest {
     private val testDispatchers =
-        StandardTestDispatcher().let { dispatcher ->
+        UnconfinedTestDispatcher().let { dispatcher ->
             CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher)
         }
 
