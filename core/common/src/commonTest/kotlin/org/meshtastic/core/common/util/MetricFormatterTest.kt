@@ -80,4 +80,44 @@ class MetricFormatterTest {
     fun rssi() {
         assertEquals("-90 dBm", MetricFormatter.rssi(-90))
     }
+
+    @Test
+    fun temperatureFreezingFahrenheit() {
+        assertEquals("32.0°F", MetricFormatter.temperature(0.0f, isFahrenheit = true))
+    }
+
+    @Test
+    fun temperatureBoilingFahrenheit() {
+        assertEquals("212.0°F", MetricFormatter.temperature(100.0f, isFahrenheit = true))
+    }
+
+    @Test
+    fun voltageZero() {
+        assertEquals("0.00 V", MetricFormatter.voltage(0.0f))
+    }
+
+    @Test
+    fun currentZero() {
+        assertEquals("0.0 mA", MetricFormatter.current(0.0f))
+    }
+
+    @Test
+    fun percentZero() {
+        assertEquals("0%", MetricFormatter.percent(0))
+    }
+
+    @Test
+    fun percentHundred() {
+        assertEquals("100%", MetricFormatter.percent(100))
+    }
+
+    @Test
+    fun rssiZero() {
+        assertEquals("0 dBm", MetricFormatter.rssi(0))
+    }
+
+    @Test
+    fun snrNegative() {
+        assertEquals("-5.5 dB", MetricFormatter.snr(-5.5f))
+    }
 }
