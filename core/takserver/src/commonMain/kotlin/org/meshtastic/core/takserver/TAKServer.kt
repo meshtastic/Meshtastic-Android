@@ -14,194 +14,60 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("TooGenericExceptionCaught")
-
 package org.meshtastic.core.takserver
 
-import co.touchlab.kermit.Logger
-import io.ktor.network.selector.SelectorManager
-import io.ktor.network.sockets.ServerSocket
-import io.ktor.network.sockets.Socket
-import io.ktor.network.sockets.SocketAddress
-import io.ktor.network.sockets.aSocket
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.di.CoroutineDispatchers
-import kotlin.random.Random
-import kotlinx.coroutines.isActive as coroutineIsActive
 
-class TAKServer(private val dispatchers: CoroutineDispatchers, private val port: Int = DEFAULT_TAK_PORT) {
-    private var serverSocket: ServerSocket? = null
-    private var selectorManager: SelectorManager? = null
-    private var running = false
-    private var serverScope: CoroutineScope? = null
-    private var acceptJob: Job? = null
-    private val connectionsMutex = Mutex()
+/**
+ * Platform-agnostic contract for the Meshtastic TAK server.
+ *
+ * The production implementation on Android / JVM runs a TLS (mTLS) listener on port
+ * [DEFAULT_TAK_PORT] (8089) using the bundled server identity. This matches the
+ * Meshtastic-Apple (iOS) implementation so that a single exported `.zip` data package
+ * is valid for ATAK on Android AND iTAK on iOS without re-configuration.
+ *
+ * The interface deliberately hides the platform socket / TLS primitives so that
+ * `commonMain` code (`TAKServerManagerImpl`, DI, tests) can depend on it without
+ * pulling `javax.net.ssl.*` into the common source set.
+ */
+interface TAKServer {
 
-    private val connections = mutableMapOf<String, TAKClientConnection>()
+    /** Observable count of currently-connected TAK clients (ATAK/iTAK). */
+    val connectionCount: StateFlow<Int>
 
-    private val _connectionCount = MutableStateFlow(0)
-    val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
+    /** Callback invoked on the IO dispatcher for every inbound CoT message from a client. */
+    var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)?
 
-    var onMessage: ((CoTMessage) -> Unit)? = null
+    /** Callback invoked when a TAK client connects. Use to drain queued messages. */
+    var onClientConnected: (() -> Unit)?
 
-    suspend fun start(scope: CoroutineScope): Result<Unit> {
-        // Double-start guard: prevents SelectorManager / ServerSocket leaks
-        if (running) {
-            Logger.w { "TAK Server already running on port $port" }
-            return Result.success(Unit)
-        }
+    /** Bind the listener and begin accepting connections. Idempotent if already running. */
+    suspend fun start(scope: CoroutineScope): Result<Unit>
 
-        return try {
-            serverScope = scope
-            // Close any stale SelectorManager before creating a new one
-            selectorManager?.close()
-            selectorManager = SelectorManager(dispatchers.default)
-            serverSocket = aSocket(selectorManager!!).tcp().bind(hostname = "127.0.0.1", port = port)
+    /** Stop the listener, close all client sockets, and release OS resources. */
+    fun stop()
 
-            running = true
-            acceptJob = scope.launch(dispatchers.io) { acceptLoop() }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Logger.e(e) { "Failed to bind TAK Server to 127.0.0.1:$port" }
-            Result.failure(e)
-        }
-    }
+    /** Broadcast a CoT message to every currently-connected client. */
+    suspend fun broadcast(cotMessage: CoTMessage)
 
-    private suspend fun acceptLoop() {
-        val scope = serverScope ?: return
-        while (running && scope.coroutineIsActive) {
-            try {
-                val clientSocket = serverSocket?.accept()
-                if (clientSocket != null) {
-                    handleConnection(clientSocket)
-                }
-                // No delay on the success path — accept() is already suspending
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Logger.w(e) { "TAK server accept loop iteration failed" }
-                // Back-off only in the error path
-                delay(TAK_ACCEPT_LOOP_DELAY_MS)
-            }
-        }
-    }
+    /** Broadcast raw CoT XML to every currently-connected client.
+     *  Used for mesh-originated messages that should be forwarded verbatim
+     *  without re-parsing through the app's CoTXmlParser (which strips
+     *  shape detail elements like strokeColor, fillColor, vertices, etc.). */
+    suspend fun broadcastRawXml(xml: String)
 
-    private fun handleConnection(clientSocket: Socket) {
-        val scope = serverScope ?: return
-        val endpoint = clientSocket.remoteAddress.toString()
-
-        if (!clientSocket.remoteAddress.isLoopback()) {
-            Logger.w { "TAK server rejected non-loopback connection from $endpoint" }
-            clientSocket.close()
-            return
-        }
-
-        val connectionId = Random.nextInt().toString(TAK_HEX_RADIX)
-        val clientInfo = TAKClientInfo(id = connectionId, endpoint = endpoint)
-
-        val connection =
-            TAKClientConnection(
-                socket = clientSocket,
-                clientInfo = clientInfo,
-                onEvent = { event -> handleConnectionEvent(connectionId, event) },
-                scope = scope,
-            )
-
-        scope.launch {
-            connectionsMutex.withLock {
-                connections[connectionId] = connection
-                _connectionCount.value = connections.size
-            }
-            connection.start()
-        }
-    }
-
-    private fun handleConnectionEvent(connectionId: String, event: TAKConnectionEvent) {
-        when (event) {
-            is TAKConnectionEvent.Message -> {
-                onMessage?.invoke(event.cotMessage)
-            }
-            is TAKConnectionEvent.Disconnected -> {
-                serverScope?.launch {
-                    connectionsMutex.withLock {
-                        connections.remove(connectionId)
-                        _connectionCount.value = connections.size
-                    }
-                }
-            }
-            is TAKConnectionEvent.Error -> {
-                Logger.w(event.error) { "TAK client connection error: $connectionId" }
-                serverScope?.launch {
-                    connectionsMutex.withLock {
-                        connections.remove(connectionId)
-                        _connectionCount.value = connections.size
-                    }
-                }
-            }
-            is TAKConnectionEvent.Connected -> {
-                /* no-op: logged by TAKClientConnection.start() */
-            }
-            is TAKConnectionEvent.ClientInfoUpdated -> {
-                /* no-op: TAKClientConnection tracks updated info locally */
-            }
-        }
-    }
-
-    fun stop() {
-        running = false
-        acceptJob?.cancel()
-        acceptJob = null
-
-        // Close connections synchronously — TAKClientConnection.close() is non-suspending,
-        // so we don't need to launch into the (possibly-cancelled) serverScope.
-        val toClose: List<TAKClientConnection>
-        // We can't use Mutex.withLock here (non-suspending context) so we swap & clear under a
-        // best-effort copy — worst case a connection added concurrently is closed by socket teardown.
-        toClose = connections.values.toList()
-        connections.clear()
-        _connectionCount.value = 0
-        toClose.forEach { it.close() }
-
-        serverSocket?.close()
-        serverSocket = null
-
-        selectorManager?.close()
-        selectorManager = null
-        serverScope = null
-    }
-
-    suspend fun broadcast(cotMessage: CoTMessage) {
-        val currentConnections = connectionsMutex.withLock { connections.values.toList() }
-        currentConnections.forEach { connection ->
-            try {
-                connection.send(cotMessage)
-            } catch (e: Exception) {
-                Logger.w(e) { "Failed to broadcast CoT to TAK client ${connection.clientInfo.id}" }
-                connection.close()
-            }
-        }
-    }
-
-    suspend fun hasConnections(): Boolean = connectionsMutex.withLock { connections.isNotEmpty() }
+    /** Returns true if at least one TAK client is currently connected. */
+    suspend fun hasConnections(): Boolean
 }
 
 /**
- * Returns true if this [SocketAddress] represents a loopback address (IPv4 127.x.x.x or IPv6 ::1).
- *
- * Ktor's [SocketAddress.toString] returns strings like "/127.0.0.1:4242" (JVM) or "127.0.0.1:4242" on other platforms,
- * so we strip any leading slash and check prefixes without parsing the host. This keeps the check in commonMain without
- * an expect/actual.
+ * Platform factory for [TAKServer]. The JVM/Android implementation lives in
+ * `jvmAndroidMain` and uses JSSE (`SSLServerSocket`) with the bundled
+ * `server.p12` identity and `ca.pem` client trust store.
  */
-private fun SocketAddress.isLoopback(): Boolean {
-    val addr = toString().removePrefix("/")
-    return addr.startsWith("127.") || addr.startsWith("::1") || addr.startsWith("[::1]")
-}
+expect fun createTAKServer(
+    dispatchers: CoroutineDispatchers,
+    port: Int = DEFAULT_TAK_PORT,
+): TAKServer

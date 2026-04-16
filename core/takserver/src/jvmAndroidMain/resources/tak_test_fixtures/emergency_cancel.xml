@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="emergency-cancel-01" type="b-a-o-can" time="2026-03-15T20:32:00Z" start="2026-03-15T20:32:00Z" stale="2026-03-15T20:37:00Z" how="h-e">
+  <point lat="17.99950" lon="140.00050" hae="150" ce="15" le="15"/>
+  <detail>
+    <contact callsign="TESTNODE-04"/>
+    <link uid="ANDROID-0000000000000004" relation="p-p" type="a-f-G-U-C"/>
+    <link uid="emergency-01" relation="p-p" type="b-a-o-tbl"/>
+    <emergency cancel="true"/>
+    <remarks/>
+  </detail>
+</event>

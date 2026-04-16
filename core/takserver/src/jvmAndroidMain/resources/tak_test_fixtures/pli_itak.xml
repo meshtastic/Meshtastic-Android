@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="23131970-4D02-4092-A30A-8A49EBD04AA0" type="a-f-G-U-C" how="m-g" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-15T14:24:10Z">
+  <point lat="18.01200" lon="140.02300" hae="108.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <contact callsign="iPad" phone="" endpoint="*:-1:stcp"/>
+    <__group name="Cyan" role="Team Member"/>
+    <status battery="100"/>
+    <track speed="-1.0" course="228.20"/>
+    <uid Droid="iPad"/>
+  </detail>
+</event>

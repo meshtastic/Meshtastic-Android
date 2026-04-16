@@ -40,14 +40,13 @@ import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.NodeRepository
+
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
-import org.meshtastic.core.takserver.fountain.CoTHandler
 import org.meshtastic.proto.LocalModuleConfig
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -59,7 +58,7 @@ class MeshServiceOrchestratorTest {
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val packetHandler: PacketHandler = mock(MockMode.autofill)
     private val nodeManager: NodeManager = mock(MockMode.autofill)
-    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
+
     private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
     private val commandSender: CommandSender = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
@@ -69,7 +68,6 @@ class MeshServiceOrchestratorTest {
     private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
     private val takServerManager: TAKServerManager = mock(MockMode.autofill)
     private val takPrefs: TakPrefs = mock(MockMode.autofill)
-    private val cotHandler: CoTHandler = mock(MockMode.autofill)
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -91,17 +89,14 @@ class MeshServiceOrchestratorTest {
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
         every { takServerManager.isRunning } returns takRunningFlow
         every { takServerManager.inboundMessages } returns MutableSharedFlow()
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         every { router.actionHandler } returns actionHandler
 
         val takMeshIntegration =
             TAKMeshIntegration(
                 takServerManager = takServerManager,
                 commandSender = commandSender,
-                nodeRepository = nodeRepository,
                 serviceRepository = serviceRepository,
                 meshConfigHandler = meshConfigHandler,
-                cotHandler = cotHandler,
             )
 
         return MeshServiceOrchestrator(

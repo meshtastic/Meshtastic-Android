@@ -100,6 +100,7 @@ val MeshtasticNavSavedStateConfig = SavedStateConfiguration {
 
             // Settings - Advanced routes
             subclass(SettingsRoutes.CleanNodeDb::class, SettingsRoutes.CleanNodeDb.serializer())
+            subclass(SettingsRoutes.TakServer::class, SettingsRoutes.TakServer.serializer())
             subclass(SettingsRoutes.DebugPanel::class, SettingsRoutes.DebugPanel.serializer())
             subclass(SettingsRoutes.About::class, SettingsRoutes.About.serializer())
             subclass(SettingsRoutes.FilterSettings::class, SettingsRoutes.FilterSettings.serializer())

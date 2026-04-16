@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="ICAO000001" type="a-n-A-C-F" how="m-g" time="2026-03-15T17:45:00Z" start="2026-03-15T17:45:00Z" stale="2026-03-15T17:45:45Z">
+  <point lat="15.00000" lon="160.00000" hae="3048" ce="9999999" le="9999999"/>
+  <detail><contact callsign="TST100-NTEST1-A3"/><track speed="223.58" course="76.16"/><UID Droid="TST100-NTEST1-A3"/><_radio rssi="-19.4" gps="true"/><link uid="ANDROID-0000000000000003" type="a-f-G-U" relation="p-p"/><remarks>000001 ICAO: 000001 REG: NTEST1 Flight: TST100 Type: A321 Squawk: 3456 DO-260B Category: A3     #adsbreceiver</remarks><_flow-tags_ TAK-Server-00000000000000000000000000000001="2026-03-15T17:45:00Z"/></detail>
+</event>

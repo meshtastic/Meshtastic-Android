@@ -191,7 +191,7 @@ class MeshDataHandlerImpl(
             }
 
             PortNum.ATAK_PLUGIN,
-            PortNum.ATAK_FORWARDER,
+            PortNum.ATAK_PLUGIN_V2,
             PortNum.PRIVATE_APP,
             -> {
                 shouldBroadcast = true

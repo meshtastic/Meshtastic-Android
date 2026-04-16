@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="tele-01" type="u-d-f-m" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <link point="33.12840,-107.25130"/>
+    <link point="33.12908,-107.25137"/>
+    <link point="33.12961,-107.25159"/>
+    <link point="33.12988,-107.25192"/>
+    <link point="33.12983,-107.25234"/>
+    <link point="33.12946,-107.25280"/>
+    <link point="33.12886,-107.25326"/>
+    <link point="33.12817,-107.25368"/>
+    <link point="33.12752,-107.25401"/>
+    <link point="33.12706,-107.25423"/>
+    <link point="33.12690,-107.25430"/>
+    <link point="33.12706,-107.25423"/>
+    <link point="33.12752,-107.25401"/>
+    <link point="33.12817,-107.25368"/>
+    <link point="33.12886,-107.25326"/>
+    <link point="33.12946,-107.25280"/>
+    <link point="33.12983,-107.25234"/>
+    <link point="33.12988,-107.25192"/>
+    <link point="33.12961,-107.25159"/>
+    <link point="33.12908,-107.25137"/>
+    <link point="33.12840,-107.25130"/>
+    <link point="33.12772,-107.25137"/>
+    <link point="33.12719,-107.25159"/>
+    <link point="33.12692,-107.25192"/>
+    <link point="33.12697,-107.25234"/>
+    <link point="33.12734,-107.25280"/>
+    <link point="33.12794,-107.25326"/>
+    <link point="33.12863,-107.25368"/>
+    <link point="33.12928,-107.25401"/>
+    <link point="33.12974,-107.25423"/>
+    <link point="33.12990,-107.25430"/>
+    <link point="33.12974,-107.25423"/>
+    <link point="33.12928,-107.25401"/>
+    <link point="33.12863,-107.25368"/>
+    <link point="33.12794,-107.25326"/>
+    <link point="33.12734,-107.25280"/>
+    <link point="33.12697,-107.25234"/>
+    <link point="33.12692,-107.25192"/>
+    <link point="33.12719,-107.25159"/>
+    <link point="33.12772,-107.25137"/>
+    <strokeColor value="-65281"/>
+    <strokeWeight value="2.5"/>
+    <contact callsign="Telestration 1"/>
+    <remarks/>
+    <archive/>
+    <labels_on value="false"/>
+    <precisionlocation altsrc="???"/>
+  </detail>
+</event>

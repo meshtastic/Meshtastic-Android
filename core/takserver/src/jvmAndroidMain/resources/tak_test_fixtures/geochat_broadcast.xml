@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="GeoChat.ANDROID-0000000000000003.All Chat Rooms.a1b2c3d4" type="b-t-f" how="h-g-i-g-o" time="2026-03-15T19:00:00Z" start="2026-03-15T19:00:00Z" stale="2026-03-15T19:02:00Z">
+  <point lat="18.05000" lon="140.05000" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <__chat parent="RootContactGroup" groupOwner="false" messageId="a1b2c3d4" chatroom="All Chat Rooms" id="All Chat Rooms" senderCallsign="ETHEL">
+      <chatgrp uid0="ANDROID-0000000000000003" uid1="All Chat Rooms" id="All Chat Rooms"/>
+    </__chat>
+    <link uid="ANDROID-0000000000000003" type="a-f-G-U-C" relation="p-p"/>
+    <__serverdestination destinations="0.0.0.0:4242:tcp:ANDROID-0000000000000003"/>
+    <remarks source="BAO.F.ATAK.ANDROID-0000000000000003" to="All Chat Rooms" time="2026-03-15T19:00:00Z">at breach</remarks>
+  </detail>
+</event>

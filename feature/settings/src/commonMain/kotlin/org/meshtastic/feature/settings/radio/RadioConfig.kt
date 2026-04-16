@@ -203,6 +203,13 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
         )
 
         ListItem(
+            text = "TAK Server",
+            leadingIcon = Icons.Rounded.Settings,
+            enabled = enabled,
+            onClick = { onNavigate(SettingsRoutes.TakServer) },
+        )
+
+        ListItem(
             text = stringResource(Res.string.debug_panel),
             leadingIcon = Icons.Rounded.BugReport,
             enabled = enabled,

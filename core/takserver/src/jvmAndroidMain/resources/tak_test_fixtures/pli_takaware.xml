@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="F7749720-1356-4A23-80F4-0010A587DF6C" type="a-f-G-U-C" how="m-g" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-15T14:27:10Z">
+  <point lat="18.01500" lon="140.01800" hae="107.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <contact callsign="iPadTAKAware" endpoint="*:-1:stcp"/>
+    <__group role="Team Member" name="Cyan"/>
+    <status battery="95"/>
+    <track speed="-1.0" course="265.64"/>
+    <uid Droid="iPadTAKAware"/>
+  </detail>
+</event>

@@ -64,6 +64,7 @@ import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StatusMessageConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TAKConfigScreen
+import org.meshtastic.feature.settings.radio.component.TakServerScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.TrafficManagementConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
@@ -183,6 +184,10 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
                 ModuleRoute.TAK -> TAKConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
             }
         }
+    }
+
+    entry<SettingsRoutes.TakServer> {
+        TakServerScreen(onBack = { backStack.removeLastOrNull() })
     }
 
     entry<SettingsRoutes.DebugPanel> {

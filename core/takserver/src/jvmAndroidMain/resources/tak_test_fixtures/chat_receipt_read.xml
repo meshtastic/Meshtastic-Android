@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="receipt-r-01" type="b-t-f-r" time="2026-03-15T19:01:00Z" start="2026-03-15T19:01:00Z" stale="2026-03-15T19:02:00Z" how="h-g-i-g-o">
+  <point lat="12.00000" lon="90.00000" hae="-22" ce="9999999" le="9999999"/>
+  <detail>
+    <contact callsign="TESTNODE-02"/>
+    <link uid="GeoChat.ANDROID-0000000000000002.All Chat Rooms.d4e5f6a7" relation="p-p" type="b-t-f"/>
+    <remarks/>
+  </detail>
+</event>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="d7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f2a" type="a-f-G-U-C-I" how="h-e" time="2026-03-15T16:10:00Z" start="2026-03-15T16:10:00Z" stale="2026-03-15T16:14:00Z">
+  <point lat="12.00000" lon="91.00000" hae="999999" ce="999999" le="999999"/>
+  <detail><contact callsign="TESTNODE-02" endpoint="*:-1:stcp"/><__group name="Cyan" role="Team Member"/><takv device="Chrome - 134" platform="WebTAK" os="Windows - 11" version="4.12.1"/><link relation="p-p" type="a-f-G-U-C-I" uid="d7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f2a"/><_flow-tags_ TAK-Server-00000000000000000000000000000001="2026-03-15T16:10:00Z"/></detail>
+</event>

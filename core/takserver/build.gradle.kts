@@ -51,7 +51,51 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        jvmAndroidMain.dependencies {}
+        jvmAndroidMain.dependencies {
+            // TAKPacket-SDK for v2 compression/decompression (via JitPack).
+            //
+            // We depend on the `-jvm` variant directly rather than the parent
+            // `com.github.meshtastic:TAKPacket-SDK` coordinate. JitPack does
+            // not publish a root-level Gradle module metadata (.module) file
+            // for the KMP parent, only per-target ones. With just the parent
+            // POM, Gradle reads the four KMP variants (jvm, iosarm64,
+            // iossimulatorarm64, metadata) as unconditional Maven deps and
+            // tries to resolve them ALL against this Android consumer — the
+            // iOS klibs declare `platform.type=native` with no androidJvm
+            // variant, so variant selection fails with "No matching variant".
+            //
+            // Depending directly on `takpacket-sdk-jvm` skips the parent POM
+            // entirely and goes straight to the JVM artifact's own module
+            // metadata, which is compatible with both `jvm()` and Android
+            // targets in this `jvmAndroidMain` source set. It still pulls
+            // zstd-jni + xpp3 + wire-runtime-jvm + kotlin-stdlib as
+            // transitive deps from the JVM variant's POM.
+            //
+            // zstd-jni's @aar variant is still declared explicitly in the
+            // androidMain source set below so Android gets the .so files.
+            implementation("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk-jvm:v0.1.3") {
+                // The SDK's jvmMain declares zstd-jni as a runtime dep (standard
+                // JAR with desktop native libs). Android needs the @aar variant
+                // instead (ships arm/arm64/x86/x86_64 .so files). Both packaging
+                // formats contain the same Java classes, so Android's dex merger
+                // hits "Duplicate class" errors if both land on the classpath.
+                // Exclude here; androidMain re-adds it as @aar below, and jvmMain
+                // re-adds the JAR for desktop.
+                exclude(group = "com.github.luben", module = "zstd-jni")
+            }
+        }
+
+        jvmMain.dependencies {
+            // Desktop JVM: standard JAR bundles native libs for desktop archs.
+            implementation("com.github.luben:zstd-jni:1.5.7-7")
+        }
+
+        androidMain.dependencies {
+            // Android: @aar variant ships .so files for arm/arm64/x86/x86_64.
+            // Without this, zstd-jni's ZstdDictCompress.<clinit> throws
+            // UnsatisfiedLinkError and poisons TakV2Compressor permanently.
+            implementation("com.github.luben:zstd-jni:1.5.7-7@aar")
+        }
 
         commonTest.dependencies {
             implementation(projects.core.testing)

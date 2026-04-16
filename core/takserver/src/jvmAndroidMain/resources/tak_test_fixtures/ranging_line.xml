@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="58df2fcd-e33e-414f-a718-b18b50cd3137" type="u-rb-a" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <link uid="anchor-1" relation="p-p" type="b-m-p-w" point="33.12840,-107.25280"/>
+    <range value="1250.5"/>
+    <bearing value="135.0"/>
+    <contact callsign="RB Line 1"/>
+    <remarks/>
+    <archive/>
+    <labels_on value="false"/>
+    <precisionlocation altsrc="???"/>
+  </detail>
+</event>

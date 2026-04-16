@@ -20,10 +20,19 @@ package org.meshtastic.core.takserver
 
 import kotlin.time.Instant
 
+/**
+ * Serialize this [CoTMessage] to a single `<event>` XML element suitable for the CoT streaming
+ * TCP protocol used by ATAK / iTAK / WinTAK clients.
+ *
+ * **Important:** the output must NOT include an `<?xml ... ?>` declaration. The CoT stream
+ * protocol is a continuous sequence of `<event>` elements concatenated together; an XML
+ * declaration is only legal at the very start of a document and ATAK will drop the connection
+ * as malformed the moment it sees a second declaration mid-stream.
+ */
 fun CoTMessage.toXml(): String {
     val sb = StringBuilder()
     sb.append(
-        "<?xml version='1.0' encoding='UTF-8' standalone='yes'?><event version='2.0' uid='${uid.xmlEscaped()}' type='$type' time='${time.toXmlString()}' start='${start.toXmlString()}' stale='${stale.toXmlString()}' how='$how'><point lat='$latitude' lon='$longitude' hae='$hae' ce='$ce' le='$le'/><detail>",
+        "<event version='2.0' uid='${uid.xmlEscaped()}' type='$type' time='${time.toXmlString()}' start='${start.toXmlString()}' stale='${stale.toXmlString()}' how='$how'><point lat='$latitude' lon='$longitude' hae='$hae' ce='$ce' le='$le'/><detail>",
     )
 
     contact?.let {
@@ -63,4 +72,19 @@ fun CoTMessage.toXml(): String {
     return sb.toString()
 }
 
-private fun Instant.toXmlString(): String = this.toString()
+/**
+ * Format this [Instant] for CoT XML `time` / `start` / `stale` attributes.
+ *
+ * Always emits millisecond precision (`YYYY-MM-DDThh:mm:ss.SSSZ`). kotlinx-datetime's default
+ * [Instant.toString] can emit up to nanosecond precision; some TAK implementations choke on
+ * anything beyond milliseconds, so we truncate to ms and always include the millisecond field
+ * even when it would otherwise be zero.
+ */
+private fun Instant.toXmlString(): String {
+    val millis = this.toEpochMilliseconds()
+    val truncated = Instant.fromEpochMilliseconds(millis)
+    val base = truncated.toString()
+    // kotlinx-datetime omits the fractional part when it's zero; pad it ourselves so the
+    // CoT timestamp format is stable at ms precision.
+    return if (base.contains('.')) base else base.removeSuffix("Z") + ".000Z"
+}

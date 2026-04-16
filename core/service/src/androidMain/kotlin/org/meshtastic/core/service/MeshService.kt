@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -72,6 +73,16 @@ class MeshService : Service() {
 
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
+    /**
+     * Partial wake lock held while the foreground service is running. Prevents the CPU
+     * from being throttled while the TAK server's keepalive coroutines, socket writes,
+     * and mesh packet handlers need to run on a regular cadence. Without this, OEM
+     * battery optimizations can pause coroutines for long enough that connected TAK
+     * clients (ATAK/iTAK) time out waiting for data, even though the foreground
+     * service itself keeps the process alive.
+     */
+    private var wakeLock: PowerManager.WakeLock? = null
 
     private val myNodeNum: Int
         get() = nodeManager.myNodeNum.value ?: throw RadioNotConnectedException()
@@ -162,11 +173,47 @@ class MeshService : Service() {
 
         return if (!wantForeground) {
             Logger.i { "Stopping mesh service because no device is selected" }
+            releaseWakeLock()
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             stopSelf()
             START_NOT_STICKY
         } else {
+            acquireWakeLock()
             START_STICKY
+        }
+    }
+
+    private fun acquireWakeLock() {
+        if (wakeLock?.isHeld == true) return
+        try {
+            val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+            val lock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK,
+                "Meshtastic::MeshServiceWakeLock",
+            ).apply {
+                setReferenceCounted(false)
+            }
+            lock.acquire()
+            wakeLock = lock
+            Logger.i { "Acquired partial wake lock for mesh service" }
+        } catch (e: SecurityException) {
+            Logger.w(e) { "Failed to acquire wake lock — WAKE_LOCK permission missing?" }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to acquire wake lock" }
+        }
+    }
+
+    private fun releaseWakeLock() {
+        val lock = wakeLock ?: return
+        try {
+            if (lock.isHeld) {
+                lock.release()
+                Logger.i { "Released partial wake lock for mesh service" }
+            }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to release wake lock" }
+        } finally {
+            wakeLock = null
         }
     }
 
@@ -179,6 +226,7 @@ class MeshService : Service() {
 
     override fun onDestroy() {
         Logger.i { "Destroying mesh service" }
+        releaseWakeLock()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         orchestrator.stop()
         serviceJob.cancel()

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="6d09b6f6-720a-4eef-a197-183012512316" type="u-d-c-c" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <shape>
+      <ellipse major="226.98" minor="226.98" angle="360"/>
+      <link uid="6d09b6f6-720a-4eef-a197-183012512316.Style" type="b-x-KmlStyle" relation="p-c">
+        <Style>
+          <LineStyle>
+            <color>ffffffff</color>
+            <width>4.0</width>
+          </LineStyle>
+        </Style>
+      </link>
+    </shape>
+    <strokeColor value="-1"/>
+    <strokeWeight value="4.0"/>
+    <fillColor value="-1761607681"/>
+    <contact callsign="Drawing Circle 1"/>
+    <remarks/>
+    <archive/>
+    <labels_on value="true"/>
+    <precisionlocation altsrc="???"/>
+  </detail>
+</event>

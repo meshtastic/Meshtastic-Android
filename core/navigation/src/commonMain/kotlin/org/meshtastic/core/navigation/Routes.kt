@@ -162,6 +162,8 @@ object SettingsRoutes {
 
     @Serializable data object CleanNodeDb : Route
 
+    @Serializable data object TakServer : Route
+
     @Serializable data object DebugPanel : Route
 
     @Serializable data object About : Route

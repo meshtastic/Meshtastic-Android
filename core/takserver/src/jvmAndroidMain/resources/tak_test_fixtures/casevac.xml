@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="casevac-f7e6d5c4" type="b-r-f-h-c" how="h-e" time="2026-03-15T20:00:00Z" start="2026-03-15T20:00:00Z" stale="2026-03-15T20:10:00Z">
+  <point lat="18.00000" lon="141.00000" hae="100" ce="10" le="10"/>
+  <detail>
+    <contact callsign="CASEVAC-1"/>
+    <link uid="ANDROID-0000000000000002" relation="p-p" type="a-f-G-U-C"/>
+    <remarks>2 urgent surgical, 1 priority. LZ marked with green smoke. No enemy activity.</remarks>
+    <_flow-tags_ TAK-Server-00000000000000000000000000000001="2026-03-15T20:00:00Z"/>
+  </detail>
+</event>

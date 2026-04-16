@@ -14,18 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.takserver.fountain
+package org.meshtastic.core.takserver
 
-import org.meshtastic.core.takserver.CoTMessage
-
-/**
- * Handles incoming and outgoing generic Cursor on Target (CoT) messages wrapped in Meshtastic DataPackets.
- *
- * Defines the contract for routing Direct (unfragmented) vs Fountain-encoded packets, and processing decompressed
- * EXI/Zlib XML payloads.
- */
-interface CoTHandler {
-    suspend fun sendGenericCoT(cotMessage: CoTMessage)
-
-    suspend fun handleIncomingForwarderPacket(payload: ByteArray, senderNodeNum: Int)
+/** iOS no-op — iTAK accepts routes via TCP streaming, no data package needed. */
+internal actual object AtakFileWriter {
+    actual fun writeToImportDir(fileName: String, zipBytes: ByteArray): Boolean = false
 }

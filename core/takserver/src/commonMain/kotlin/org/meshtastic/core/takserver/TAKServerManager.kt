@@ -27,27 +27,32 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.meshtastic.core.model.Node
+
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+
+/** A CoT message received from a connected TAK client, paired with the client's identity. */
+data class InboundCoTMessage(val cotMessage: CoTMessage, val clientInfo: TAKClientInfo? = null)
 
 interface TAKServerManager {
     val isRunning: StateFlow<Boolean>
     val connectionCount: StateFlow<Int>
-    val inboundMessages: SharedFlow<CoTMessage>
+    val inboundMessages: SharedFlow<InboundCoTMessage>
 
     /** Start the TAK server using [scope]. Port is fixed at [TAKServer] construction time. */
     fun start(scope: CoroutineScope)
 
     fun stop()
 
-    fun broadcastNode(node: Node, team: String = DEFAULT_TAK_TEAM_NAME, role: String = DEFAULT_TAK_ROLE_NAME)
-
     fun broadcast(cotMessage: CoTMessage)
+
+    /** Broadcast raw XML verbatim to TAK clients, bypassing CoTMessage parsing. */
+    fun broadcastRawXml(xml: String)
 }
 
 class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager {
 
     private var scope: CoroutineScope? = null
-    private val lastBroadcastPositionsMutex = Mutex()
 
     private val _isRunning = MutableStateFlow(false)
     override val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
@@ -55,10 +60,20 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     // Mirror TAKServer's event-driven connection count — no polling needed
     override val connectionCount: StateFlow<Int> = takServer.connectionCount
 
-    private val _inboundMessages = MutableSharedFlow<CoTMessage>()
-    override val inboundMessages: SharedFlow<CoTMessage> = _inboundMessages.asSharedFlow()
+    private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>()
+    override val inboundMessages: SharedFlow<InboundCoTMessage> = _inboundMessages.asSharedFlow()
 
-    private var lastBroadcastPositions = mutableMapOf<Int, Int>()
+    // Offline message queue — buffers mesh-originated CoT messages when no TAK
+    // clients are connected, then drains them when a client reconnects. Entries
+    // expire after OFFLINE_QUEUE_TTL to avoid delivering stale situational data.
+    private data class QueuedMessage(val cotMessage: CoTMessage, val enqueuedAt: kotlin.time.Instant)
+    private val offlineQueue = ArrayDeque<QueuedMessage>()
+    private val offlineQueueMutex = Mutex()
+
+    companion object {
+        private val OFFLINE_QUEUE_TTL = 5.minutes
+        private const val OFFLINE_QUEUE_MAX_SIZE = 50
+    }
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -69,7 +84,10 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
 
         scope.launch {
             // Wire up inbound message handler BEFORE starting so no messages are lost
-            takServer.onMessage = { cotMessage -> scope.launch { _inboundMessages.emit(cotMessage) } }
+            takServer.onMessage = { cotMessage, clientInfo ->
+                scope.launch { _inboundMessages.emit(InboundCoTMessage(cotMessage, clientInfo)) }
+            }
+            takServer.onClientConnected = { drainOfflineQueue() }
 
             val result = takServer.start(scope)
             if (result.isSuccess) {
@@ -91,61 +109,46 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
         Logger.i { "TAK Server stopped" }
     }
 
-    override fun broadcastNode(node: Node, team: String, role: String) {
-        if (!_isRunning.value) return
-        val currentScope = scope ?: return
-
-        currentScope.launch {
-            if (!takServer.hasConnections()) return@launch
-
-            val position = node.validPosition
-            if (position == null) {
-                broadcastNodeInfoOnly(node, team, role)
-                return@launch
-            }
-
-            val shouldBroadcast =
-                lastBroadcastPositionsMutex.withLock {
-                    val last = lastBroadcastPositions[node.num]
-                    if (position.time == last) {
-                        false
-                    } else {
-                        lastBroadcastPositions[node.num] = position.time
-                        true
-                    }
-                }
-            if (!shouldBroadcast) return@launch
-
-            val cotMessage =
-                position.toCoTMessage(
-                    uid = node.user.id,
-                    callsign = node.user.toTakCallsign(),
-                    team = team,
-                    role = role,
-                    battery = node.deviceMetrics.battery_level ?: 100,
-                )
-
-            takServer.broadcast(cotMessage)
-        }
-    }
-
-    private fun broadcastNodeInfoOnly(node: Node, team: String, role: String) {
-        val currentScope = scope ?: return
-        val cotMessage =
-            node.user.toCoTMessage(
-                position = null,
-                team = team,
-                role = role,
-                battery = node.deviceMetrics.battery_level ?: 100,
-            )
-
-        currentScope.launch {
-            if (!takServer.hasConnections()) return@launch
-            takServer.broadcast(cotMessage)
-        }
-    }
-
     override fun broadcast(cotMessage: CoTMessage) {
-        scope?.launch { takServer.broadcast(cotMessage) }
+        scope?.launch {
+            if (takServer.hasConnections()) {
+                takServer.broadcast(cotMessage)
+            } else {
+                // No TAK clients connected — queue for delivery when one reconnects
+                offlineQueueMutex.withLock {
+                    // Evict expired entries
+                    val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL
+                    while (offlineQueue.isNotEmpty() && offlineQueue.first().enqueuedAt < cutoff) {
+                        offlineQueue.removeFirst()
+                    }
+                    // Cap size to prevent unbounded growth
+                    if (offlineQueue.size >= OFFLINE_QUEUE_MAX_SIZE) {
+                        offlineQueue.removeFirst()
+                    }
+                    offlineQueue.addLast(QueuedMessage(cotMessage, Clock.System.now()))
+                }
+            }
+        }
+    }
+
+    override fun broadcastRawXml(xml: String) {
+        scope?.launch { takServer.broadcastRawXml(xml) }
+    }
+
+    /** Drain any queued messages to the newly connected TAK client. Called by the server
+     *  when a TAK client connects (Connected event). */
+    internal fun drainOfflineQueue() {
+        scope?.launch {
+            val messages = offlineQueueMutex.withLock {
+                val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL
+                val valid = offlineQueue.filter { it.enqueuedAt >= cutoff }.map { it.cotMessage }
+                offlineQueue.clear()
+                valid
+            }
+            if (messages.isNotEmpty()) {
+                Logger.i { "Draining ${messages.size} queued message(s) to reconnected TAK client" }
+                messages.forEach { takServer.broadcast(it) }
+            }
+        }
     }
 }

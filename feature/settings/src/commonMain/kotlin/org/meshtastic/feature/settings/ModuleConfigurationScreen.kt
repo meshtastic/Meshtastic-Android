@@ -49,12 +49,13 @@ fun ModuleConfigurationScreen(
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
 
+    val deviceRole = state.radioConfig.device?.role
     val modules =
-        remember(state.metadata, excludedModulesUnlocked) {
+        remember(state.metadata, deviceRole, excludedModulesUnlocked) {
             if (excludedModulesUnlocked) {
                 ModuleRoute.entries
             } else {
-                ModuleRoute.filterExcludedFrom(state.metadata, state.userConfig.role)
+                ModuleRoute.filterExcludedFrom(state.metadata, deviceRole)
             }
         }
 

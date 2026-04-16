@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="9405e320-9356-41c4-8449-f46990aa17f8" type="b-m-p-s-m" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-g-i-g-o">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <status readiness="true"/>
+    <archive/>
+    <link uid="ANDROID-0000000000000001" production_time="2026-03-15T14:21:09Z" type="a-f-G-U-C" parent_callsign="SIM-01" relation="p-p"/>
+    <contact callsign="R 1"/>
+    <remarks/>
+    <color argb="-65536"/>
+    <precisionlocation altsrc="???"/>
+    <usericon iconsetpath="COT_MAPPING_SPOTMAP/b-m-p-s-m/-65536"/>
+  </detail>
+</event>

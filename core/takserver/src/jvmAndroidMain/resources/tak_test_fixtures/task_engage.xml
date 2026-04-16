@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="task-01" type="t-s" time="2026-03-15T21:00:00Z" start="2026-03-15T21:00:00Z" stale="2026-03-15T22:00:00Z" how="h-e">
+  <point lat="17.99700" lon="140.00300" hae="80" ce="9999999" le="9999999"/>
+  <detail>
+    <contact callsign="Task-Alpha"/>
+    <task type="engage" priority="High" status="Pending" assignee="ANDROID-0000000000000005" note="cover by fire"/>
+    <link uid="target-01" relation="p-p" type="a-f-G"/>
+    <remarks/>
+  </detail>
+</event>

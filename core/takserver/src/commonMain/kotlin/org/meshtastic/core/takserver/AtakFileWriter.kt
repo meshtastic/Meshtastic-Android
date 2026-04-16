@@ -14,14 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.takserver.fountain
+package org.meshtastic.core.takserver
 
-internal expect object ZlibCodec {
-    fun compress(data: ByteArray): ByteArray?
-
-    fun decompress(data: ByteArray): ByteArray?
-}
-
-internal expect object CryptoCodec {
-    fun sha256Prefix8(data: ByteArray): ByteArray
+/**
+ * Writes data package files to ATAK's auto-import directory.
+ *
+ * On Android, the actual implementation writes to
+ * `/sdcard/atak/tools/datapackage/` which ATAK monitors for new zip files.
+ * On other platforms this is a no-op.
+ */
+internal expect object AtakFileWriter {
+    /**
+     * Write a data package zip to ATAK's monitored import directory.
+     * @return true if the file was written successfully, false otherwise.
+     */
+    fun writeToImportDir(fileName: String, zipBytes: ByteArray): Boolean
 }

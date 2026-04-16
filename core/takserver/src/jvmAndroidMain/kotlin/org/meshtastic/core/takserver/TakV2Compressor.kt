@@ -72,6 +72,17 @@ internal actual object TakV2Compressor {
     }
 
     /**
+     * Decompress a V2 wire payload and reconstruct CoT XML via the SDK's
+     * CotXmlBuilder. This handles ALL payload types (DrawnShape, Marker,
+     * Route, etc.) without going through the Wire proto intermediate,
+     * avoiding the gap where `toCoTMessage()` only handles PLI/GeoChat.
+     */
+    actual fun decompressToXml(wirePayload: ByteArray): String {
+        val data = getSdkCompressor().decompress(wirePayload)
+        return org.meshtastic.tak.CotXmlBuilder().build(data)
+    }
+
+    /**
      * Convert Wire-generated TAKPacketV2 → SDK's TakPacketV2Data.
      */
     private fun wireToSdkData(packet: TAKPacketV2): TakPacketV2Data {

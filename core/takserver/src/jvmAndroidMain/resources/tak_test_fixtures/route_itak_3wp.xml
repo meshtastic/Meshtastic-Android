@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="139a3009-681e-4b1a-8f23-dbb49a2c338d" type="b-m-r" how="h-e" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z">
+  <point lat="33.12840" lon="-107.25280" hae="0.0" ce="0.0" le="0.0"/>
+  <detail>
+    <contact callsign="Route Alpha"/>
+    <link uid="d71306c3-93a5-41f4-b323-8a5b10f0e968" callsign="SP" type="b-m-p-w" point="33.12840, -107.25280"/>
+    <link uid="06bdf9c8-bbdd-4ba6-80c5-f814855df756" callsign="" type="b-m-p-c" point="33.12640, -107.25580"/>
+    <link uid="a5449578-97d2-4e33-b9d3-390b3155abd1" callsign="VDO" type="b-m-p-w" point="33.12890, -107.25240"/>
+    <link_attr color="-65281" method="Walking" prefix="CP" direction="Infil"/>
+  </detail>
+</event>

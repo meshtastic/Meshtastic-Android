@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="ellipse-01" type="u-d-c-e" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <shape>
+      <ellipse major="250.0" minor="125.0" angle="45"/>
+    </shape>
+    <strokeColor value="-65536"/>
+    <strokeWeight value="3.0"/>
+    <fillColor value="-1761607681"/>
+    <contact callsign="Ellipse 1"/>
+    <remarks/>
+    <archive/>
+    <labels_on value="false"/>
+    <precisionlocation altsrc="???"/>
+  </detail>
+</event>
