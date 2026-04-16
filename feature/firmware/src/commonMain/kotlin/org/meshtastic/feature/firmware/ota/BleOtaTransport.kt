@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
@@ -48,7 +47,7 @@ class BleOtaTransport(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
     private val address: String,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher,
 ) : UnifiedOtaProtocol {
 
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)

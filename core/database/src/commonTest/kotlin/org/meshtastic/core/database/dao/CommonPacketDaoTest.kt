@@ -271,6 +271,42 @@ abstract class CommonPacketDaoTest {
         assertFalse(excludingFiltered.any { it.packet.filtered })
     }
 
+    @Test
+    fun testGetPacketsByPacketIdsChunked() = runTest {
+        // Regression test for SQLITE_MAX_VARIABLE_NUMBER (999) limit. Inserting >999 packets and
+        // looking them up by id must not throw; callers are expected to chunk, and each chunk
+        // must return the correct rows.
+        val totalPackets = 2000
+        val chunkSize = NodeInfoDao.MAX_BIND_PARAMS
+        val contactKey = "chunk-test"
+        val baseTime = nowMillis
+        val packetIds = (1..totalPackets).toList()
+
+        packetIds.forEach { id ->
+            packetDao.insert(
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = myNodeNum,
+                    port_num = PortNum.TEXT_MESSAGE_APP.value,
+                    contact_key = contactKey,
+                    received_time = baseTime + id,
+                    read = false,
+                    data =
+                    DataPacket(
+                        to = DataPacket.ID_BROADCAST,
+                        bytes = "Chunk $id".encodeToByteArray().toByteString(),
+                        dataType = PortNum.TEXT_MESSAGE_APP.value,
+                    ),
+                    packetId = id,
+                ),
+            )
+        }
+
+        val fetched = packetIds.chunked(chunkSize).flatMap { packetDao.getPacketsByPacketIds(it) }
+        assertEquals(totalPackets, fetched.size)
+        assertEquals(packetIds.toSet(), fetched.map { it.packet.packetId }.toSet())
+    }
+
     companion object {
         private const val SAMPLE_SIZE = 10
     }

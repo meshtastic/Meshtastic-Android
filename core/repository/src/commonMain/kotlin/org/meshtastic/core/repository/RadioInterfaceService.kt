@@ -17,6 +17,7 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
@@ -68,11 +69,25 @@ interface RadioInterfaceService : RadioTransportCallback {
     /** Whether we are currently using a mock transport. */
     fun isMockTransport(): Boolean
 
-    /** Flow of raw data received from the radio. */
-    val receivedData: SharedFlow<ByteArray>
+    /**
+     * Flow of raw data received from the radio.
+     *
+     * Emissions preserve the order in which bytes arrived from the hardware — this is required because the firmware
+     * handshake (initial config packet ordering) depends on strict FIFO delivery. Implementations MUST guarantee
+     * ordering; do not swap in a [SharedFlow] without preserving order.
+     */
+    val receivedData: Flow<ByteArray>
 
     /** Flow of radio activity events. */
     val meshActivity: SharedFlow<MeshActivity>
+
+    /**
+     * Drains any bytes currently buffered in [receivedData] without emitting them to collectors.
+     *
+     * Callers invoke this before attaching a fresh collector after a stop/start cycle so stale bytes buffered while no
+     * collector was attached do not get replayed ahead of the next session's handshake.
+     */
+    fun resetReceivedBuffer()
 
     /** Sends a raw byte array to the radio. */
     fun sendToRadio(bytes: ByteArray)

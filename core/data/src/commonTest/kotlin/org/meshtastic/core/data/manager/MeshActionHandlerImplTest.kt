@@ -47,6 +47,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -68,6 +69,7 @@ class MeshActionHandlerImplTest {
     private val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
     private val meshPrefs = mock<MeshPrefs>(MockMode.autofill)
+    private val uiPrefs = mock<UiPrefs>(MockMode.autofill)
     private val databaseManager = mock<DatabaseManager>(MockMode.autofill)
     private val notificationManager = mock<NotificationManager>(MockMode.autofill)
     private val messageProcessor = mock<MeshMessageProcessor>(MockMode.autofill)
@@ -100,6 +102,7 @@ class MeshActionHandlerImplTest {
         dataHandler = lazy { dataHandler },
         analytics = analytics,
         meshPrefs = meshPrefs,
+        uiPrefs = uiPrefs,
         databaseManager = databaseManager,
         notificationManager = notificationManager,
         messageProcessor = lazy { messageProcessor },
@@ -356,7 +359,7 @@ class MeshActionHandlerImplTest {
     @Test
     fun handleRequestPosition_provideLocation_validPosition_usesGivenPosition() {
         handler = createHandler(testScope)
-        every { meshPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(true)
+        every { uiPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(true)
 
         val validPosition = Position(37.7749, -122.4194, 10)
         handler.handleRequestPosition(REMOTE_NODE_NUM, validPosition, MY_NODE_NUM)
@@ -367,7 +370,7 @@ class MeshActionHandlerImplTest {
     @Test
     fun handleRequestPosition_provideLocation_invalidPosition_fallsBackToNodeDB() {
         handler = createHandler(testScope)
-        every { meshPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(true)
+        every { uiPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(true)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
         val invalidPosition = Position(0.0, 0.0, 0)
@@ -380,7 +383,7 @@ class MeshActionHandlerImplTest {
     @Test
     fun handleRequestPosition_doNotProvide_sendsZeroPosition() {
         handler = createHandler(testScope)
-        every { meshPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(false)
+        every { uiPrefs.shouldProvideNodeLocation(MY_NODE_NUM) } returns MutableStateFlow(false)
 
         val validPosition = Position(37.7749, -122.4194, 10)
         handler.handleRequestPosition(REMOTE_NODE_NUM, validPosition, MY_NODE_NUM)

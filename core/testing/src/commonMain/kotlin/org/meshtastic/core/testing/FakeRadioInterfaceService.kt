@@ -18,10 +18,13 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
@@ -48,8 +51,10 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(null)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow
 
-    private val _receivedData = MutableSharedFlow<ByteArray>()
-    override val receivedData: SharedFlow<ByteArray> = _receivedData
+    // Use an unbounded Channel to mirror SharedRadioInterfaceService semantics. A MutableSharedFlow would
+    // hide the stop/start backlog bug that motivated the resetReceivedBuffer() API.
+    private val _receivedData = Channel<ByteArray>(Channel.UNLIMITED)
+    override val receivedData: Flow<ByteArray> = _receivedData.receiveAsFlow()
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
     override val meshActivity: SharedFlow<MeshActivity> = _meshActivity
@@ -88,13 +93,18 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     }
 
     override fun handleFromRadio(bytes: ByteArray) {
-        // In a real implementation, this would emit to receivedData
+        _receivedData.trySend(bytes)
+    }
+
+    override fun resetReceivedBuffer() {
+        @Suppress("EmptyWhileBlock", "ControlFlowWithEmptyBody")
+        while (_receivedData.tryReceive().isSuccess) Unit
     }
 
     // --- Helper methods for testing ---
 
-    suspend fun emitFromRadio(bytes: ByteArray) {
-        _receivedData.emit(bytes)
+    fun emitFromRadio(bytes: ByteArray) {
+        _receivedData.trySend(bytes)
     }
 
     fun setConnectionState(state: ConnectionState) {

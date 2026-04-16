@@ -30,7 +30,7 @@ class NopRadioTransport(val address: String) : RadioTransport {
         // No-op
     }
 
-    override fun close() {
+    override suspend fun close() {
         // No-op
     }
 }

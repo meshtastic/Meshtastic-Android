@@ -16,13 +16,11 @@
  */
 package org.meshtastic.core.repository
 
-import okio.Closeable
-
 /**
  * Interface for hardware transports (BLE, Serial, TCP, etc.) that handles raw byte communication. This is the
  * KMP-compatible replacement for the legacy Android-specific IRadioInterface.
  */
-interface RadioTransport : Closeable {
+interface RadioTransport {
     /** Sends a raw byte array to the radio hardware. */
     fun handleSendToRadio(p: ByteArray)
 
@@ -39,4 +37,13 @@ interface RadioTransport : Closeable {
      * function can be implemented by transports to see if we are really connected.
      */
     fun keepAlive() {}
+
+    /**
+     * Closes the connection to the device.
+     *
+     * Implementations that perform potentially-blocking teardown (e.g. BLE GATT disconnect) MUST run that work inside
+     * `withContext(NonCancellable)` so a cancelled caller cannot skip cleanup, leaving the underlying resource leaked.
+     * Callers must invoke this from a coroutine — it must never be called from a blocking context (no `runBlocking`).
+     */
+    suspend fun close()
 }

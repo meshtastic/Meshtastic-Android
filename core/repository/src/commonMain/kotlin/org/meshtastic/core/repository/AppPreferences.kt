@@ -213,10 +213,6 @@ interface MeshPrefs {
 
     fun setDeviceAddress(address: String?)
 
-    fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean>
-
-    fun setShouldProvideNodeLocation(nodeNum: Int?, provide: Boolean)
-
     fun getStoreForwardLastRequest(address: String?): StateFlow<Int>
 
     fun setStoreForwardLastRequest(address: String?, timestamp: Int)

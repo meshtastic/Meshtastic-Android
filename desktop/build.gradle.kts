@@ -127,7 +127,10 @@ compose.desktop {
             isEnabled.set(true)
             obfuscate.set(false) // Open-source project — obfuscation adds no value
             optimize.set(true)
-            configurationFiles.from(project.file("proguard-rules.pro"))
+            configurationFiles.from(
+                rootProject.file("config/proguard/shared-rules.pro"),
+                project.file("proguard-rules.pro"),
+            )
         }
 
         nativeDistributions {

@@ -167,7 +167,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
 
     override suspend fun close() {
         withContext(ioDispatcher) {
-            runCatching {
+            safeCatching {
                 socket?.close()
                 selectorManager?.close()
             }

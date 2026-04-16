@@ -26,14 +26,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.onlineTimeThreshold
-import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.LocalStats
@@ -78,12 +76,10 @@ data class LocalStatsWidgetUiState(
     val updateTimeMillis: Long = 0,
 )
 
+private const val WIDGET_SUBSCRIPTION_TIMEOUT_MS = 5_000L
+
 @Single
-class LocalStatsWidgetStateProvider(
-    nodeRepository: NodeRepository,
-    serviceRepository: ServiceRepository,
-    appWidgetUpdater: AppWidgetUpdater,
-) {
+class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, serviceRepository: ServiceRepository) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -105,8 +101,11 @@ class LocalStatsWidgetStateProvider(
                 mapToUiState(input.connectionState, input.totalNodes, input.onlineNodes, input.stats, input.localNode)
             }
             .distinctUntilChanged()
-            .onEach { appWidgetUpdater.updateAll() }
-            .stateIn(scope = scope, started = SharingStarted.Eagerly, initialValue = LocalStatsWidgetUiState())
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(WIDGET_SUBSCRIPTION_TIMEOUT_MS),
+                initialValue = LocalStatsWidgetUiState(),
+            )
 
     private data class StateInput(
         val connectionState: ConnectionState,

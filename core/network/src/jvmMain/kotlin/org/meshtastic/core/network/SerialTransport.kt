@@ -154,7 +154,7 @@ private constructor(
         serialPort = null
     }
 
-    override fun close() {
+    override suspend fun close() {
         Logger.d { "[$portName] Closing serial transport" }
         readJob?.cancel()
         readJob = null

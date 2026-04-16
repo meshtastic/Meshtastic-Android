@@ -30,7 +30,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
@@ -67,7 +66,7 @@ class SecureDfuTransport(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
     private val address: String,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher,
 ) {
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(transportScope, "Secure DFU")
@@ -252,7 +251,7 @@ class SecureDfuTransport(
      * accept a fresh DFU session.
      */
     suspend fun abort() {
-        runCatching {
+        safeCatching {
             bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
                 val controlChar = service.characteristic(SecureDfuUuids.CONTROL_POINT)
                 service.write(controlChar, byteArrayOf(DfuOpcode.ABORT), BleWriteType.WITH_RESPONSE)
@@ -264,7 +263,7 @@ class SecureDfuTransport(
 
     /** Disconnect from the DFU target and cancel the transport coroutine scope. */
     suspend fun close() {
-        runCatching { bleConnection.disconnect() }.onFailure { Logger.w(it) { "DFU: Error during disconnect" } }
+        safeCatching { bleConnection.disconnect() }.onFailure { Logger.w(it) { "DFU: Error during disconnect" } }
         transportScope.cancel()
     }
 

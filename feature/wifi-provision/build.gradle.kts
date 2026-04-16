@@ -31,6 +31,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.ble)
             implementation(projects.core.common)
+            implementation(projects.core.di)
             implementation(projects.core.navigation)
             implementation(projects.core.resources)
             implementation(projects.core.ui)

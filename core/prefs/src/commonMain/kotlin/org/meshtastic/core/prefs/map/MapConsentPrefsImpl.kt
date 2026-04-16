@@ -42,7 +42,7 @@ class MapConsentPrefsImpl(
 ) : MapConsentPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    private val consentFlows = atomic(persistentMapOf<Int?, StateFlow<Boolean>>())
+    private val consentFlows = atomic(persistentMapOf<Int?, Lazy<StateFlow<Boolean>>>())
 
     override fun shouldReportLocation(nodeNum: Int?): StateFlow<Boolean> = cachedFlow(consentFlows, nodeNum) {
         val key = booleanPreferencesKey(nodeNum.toString())

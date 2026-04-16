@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    id("meshtastic.kmp.jvm.android")
 }
 
 kotlin {

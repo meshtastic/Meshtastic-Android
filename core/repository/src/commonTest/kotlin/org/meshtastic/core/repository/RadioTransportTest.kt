@@ -16,13 +16,14 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class RadioTransportTest {
 
     @Test
-    fun `RadioTransport can be implemented`() {
+    fun `RadioTransport can be implemented`() = runTest {
         var sentData: ByteArray? = null
         var closed = false
         var keepAliveCalled = false
@@ -37,7 +38,7 @@ class RadioTransportTest {
                     keepAliveCalled = true
                 }
 
-                override fun close() {
+                override suspend fun close() {
                     closed = true
                 }
             }

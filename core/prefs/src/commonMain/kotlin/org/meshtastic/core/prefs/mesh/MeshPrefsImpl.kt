@@ -18,7 +18,6 @@ package org.meshtastic.core.prefs.mesh
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -45,8 +44,7 @@ class MeshPrefsImpl(
 ) : MeshPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    private val locationFlows = atomic(persistentMapOf<Int?, StateFlow<Boolean>>())
-    private val storeForwardFlows = atomic(persistentMapOf<String?, StateFlow<Int>>())
+    private val storeForwardFlows = atomic(persistentMapOf<String?, Lazy<StateFlow<Int>>>())
 
     override val deviceAddress: StateFlow<String?> =
         dataStore.data
@@ -63,15 +61,6 @@ class MeshPrefsImpl(
                 }
             }
         }
-    }
-
-    override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> = cachedFlow(locationFlows, nodeNum) {
-        val key = booleanPreferencesKey(provideLocationKey(nodeNum))
-        dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
-    }
-
-    override fun setShouldProvideNodeLocation(nodeNum: Int?, provide: Boolean) {
-        scope.launch { dataStore.edit { prefs -> prefs[booleanPreferencesKey(provideLocationKey(nodeNum))] = provide } }
     }
 
     override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> = cachedFlow(storeForwardFlows, address) {
@@ -91,8 +80,6 @@ class MeshPrefsImpl(
             }
         }
     }
-
-    private fun provideLocationKey(nodeNum: Int?) = "provide-location-$nodeNum"
 
     private fun storeForwardKey(address: String?): String = "store-forward-last-request-${normalizeAddress(address)}"
 

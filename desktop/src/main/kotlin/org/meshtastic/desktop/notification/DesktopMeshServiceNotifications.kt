@@ -22,6 +22,7 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.desktop_notification_title
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.low_battery_message
 import org.meshtastic.core.resources.low_battery_title
@@ -141,7 +142,7 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
     override fun showClientNotification(clientNotification: ClientNotification) {
         notificationManager.dispatch(
             Notification(
-                title = "Meshtastic",
+                title = getString(Res.string.desktop_notification_title),
                 message = clientNotification.message,
                 category = Notification.Category.Alert,
                 id = clientNotification.toString().hashCode(),

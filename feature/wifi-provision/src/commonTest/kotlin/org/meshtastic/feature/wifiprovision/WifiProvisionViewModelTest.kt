@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -62,7 +63,15 @@ class WifiProvisionViewModelTest {
         scanner = FakeBleScanner()
         connection = FakeBleConnection()
         viewModel =
-            WifiProvisionViewModel(bleScanner = scanner, bleConnectionFactory = FakeBleConnectionFactory(connection))
+            WifiProvisionViewModel(
+                bleScanner = scanner,
+                bleConnectionFactory = FakeBleConnectionFactory(connection),
+                dispatchers = CoroutineDispatchers(
+                    io = testDispatcher,
+                    main = testDispatcher,
+                    default = testDispatcher,
+                ),
+            )
     }
 
     @AfterTest

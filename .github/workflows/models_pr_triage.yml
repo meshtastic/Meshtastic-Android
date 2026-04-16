@@ -44,13 +44,16 @@ jobs:
         uses: actions/ai-inference@v2
         id: quality
         continue-on-error: true
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         with:
           max-tokens: 20
           prompt: |
             Is this GitHub pull request spam, AI-generated slop, or low quality?
 
-            Title: ${{ github.event.pull_request.title }}
-            Body: ${{ github.event.pull_request.body }}
+            Title: ${{ env.PR_TITLE }}
+            Body: ${{ env.PR_BODY }}
 
             Respond with exactly one of: spam, ai-generated, needs-review, ok
           system-prompt: You detect spam and low-quality contributions. Be conservative - only flag obvious spam or AI slop.
@@ -94,6 +97,9 @@ jobs:
         uses: actions/ai-inference@v2
         id: classify
         continue-on-error: true
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         with:
           max-tokens: 30
           prompt: |
@@ -105,8 +111,8 @@ jobs:
             Use enhancement if it adds a new feature, improves performance, or adds new functionality.
             Use refactor if it restructures code without changing behavior, cleans up code, or improves architecture.
 
-            Title: ${{ github.event.pull_request.title }}
-            Body: ${{ github.event.pull_request.body }}
+            Title: ${{ env.PR_TITLE }}
+            Body: ${{ env.PR_BODY }}
           system-prompt: You classify pull requests into categories. Be conservative and pick the most appropriate single label.
           model: openai/gpt-4o-mini
 

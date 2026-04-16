@@ -25,7 +25,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,6 +37,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -42,7 +45,7 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.ignoreException
+import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
@@ -95,8 +98,13 @@ class SharedRadioInterfaceService(
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(radioPrefs.devAddr.value)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
 
-    private val _receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 64)
-    override val receivedData: SharedFlow<ByteArray> = _receivedData
+    // Unbounded Channel preserves strict FIFO delivery of incoming radio bytes, which the
+    // firmware handshake depends on (initial config packet ordering). A SharedFlow with
+    // `launch { emit() }` per packet reorders under concurrent dispatch and breaks config load.
+    // trySend on an UNLIMITED channel never suspends and never drops, so handleFromRadio can
+    // remain a non-suspend synchronous callback.
+    private val _receivedData = Channel<ByteArray>(Channel.UNLIMITED)
+    override val receivedData: Flow<ByteArray> = _receivedData.receiveAsFlow()
 
     private val _meshActivity =
         MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
@@ -148,6 +156,7 @@ class SharedRadioInterfaceService(
                             }
                         }
                     }
+                    .catch { Logger.e(it) { "devAddr flow crashed" } }
                     .launchIn(processLifecycle.coroutineScope)
 
                 bluetoothRepository.state
@@ -216,7 +225,7 @@ class SharedRadioInterfaceService(
 
         processLifecycle.coroutineScope.launch {
             transportMutex.withLock {
-                ignoreException { stopTransportLocked() }
+                ignoreExceptionSuspend { stopTransportLocked() }
                 startTransportLocked()
             }
         }
@@ -245,7 +254,7 @@ class SharedRadioInterfaceService(
     }
 
     /** Must be called under [transportMutex]. */
-    private fun stopTransportLocked() {
+    private suspend fun stopTransportLocked() {
         val currentTransport = radioTransport
         Logger.i { "Stopping transport $currentTransport" }
         isStarted = false
@@ -322,11 +331,26 @@ class SharedRadioInterfaceService(
     override fun handleFromRadio(bytes: ByteArray) {
         try {
             lastDataReceivedMillis = nowMillis
-            processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(bytes) }
+            // trySend synchronously onto the unbounded Channel so packet order matches arrival
+            // order. The previous `launch { emit() }` pattern dispatched each packet onto a
+            // fresh coroutine, letting the scheduler reorder them — which broke the firmware
+            // config handshake (see PhoneAPI.cpp initial-handshake sequence).
+            val result = _receivedData.trySend(bytes)
+            if (result.isFailure) {
+                Logger.e(result.exceptionOrNull()) { "Failed to enqueue ${bytes.size} received bytes; dropping packet" }
+            }
             _meshActivity.tryEmit(MeshActivity.Receive)
         } catch (t: Throwable) {
             Logger.e(t) { "handleFromRadio failed while emitting data" }
         }
+    }
+
+    override fun resetReceivedBuffer() {
+        // Drain any bytes buffered while no collector was attached. Without this, a stop/start cycle
+        // would replay stale bytes ahead of the next session's firmware handshake, since the channel
+        // outlives the orchestrator's per-start scope.
+        @Suppress("EmptyWhileBlock", "ControlFlowWithEmptyBody")
+        while (_receivedData.tryReceive().isSuccess) Unit
     }
 
     override fun onConnect() {
