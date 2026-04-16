@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">過濾器</string>
     <string name="desc_node_filter_clear">清除節點過濾器</string>
     <string name="node_filter_title">篩選條件</string>
@@ -40,6 +41,7 @@
     <string name="internal">內部傳輸</string>
     <string name="node_sort_via_favorite">通過喜好</string>
     <string name="node_filter_show_ignored">僅顯示已忽略的節點</string>
+    <string name="node_filter_exclude_mqtt">排除 MQTT</string>
     <string name="unrecognized">無法識別</string>
     <string name="message_status_enroute">正在等待確認</string>
     <string name="message_status_queued">發送佇列中</string>
@@ -168,12 +170,20 @@
     <string name="connecting">正在連線</string>
     <string name="not_connected">未連線</string>
     <string name="no_device_selected">未選擇裝置</string>
+    <string name="unknown_device">未知的裝置</string>
+    <string name="no_network_devices_found">找不到網路裝置</string>
+    <string name="no_usb_devices_found">找不到 USB 裝置</string>
+    <string name="usb">USB</string>
+    <string name="demo_mode">展示模式</string>
     <string name="connected_sleeping">已連接裝置，但該裝置正在休眠中</string>
     <string name="app_too_old">需要應用程式更新</string>
     <string name="must_update">您必須在應用商店(或 Github)更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
     <string name="none">無（停用）</string>
     <string name="meshtastic_service_notifications">服務通知</string>
     <string name="acknowledgements">致謝</string>
+    <string name="open_source_libraries">開放原始碼函式庫</string>
+    <string name="open_source_description">Meshtastic 採用以下開源函式庫建構而成。點擊任一函式庫以查看其授權條款。</string>
+    <string name="library_count">%1$d 函式庫</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
     <string name="debug_panel">偵錯面板</string>
     <string name="debug_decoded_payload">解析封包：</string>
@@ -204,7 +214,14 @@
     <string name="match_all">符合全部條件</string>
     <string name="debug_clear_logs_confirm">這將完全移除裝置上的所有日誌封包與資料庫記錄 - 這是一個完整的重設，且無法復原。</string>
     <string name="clear">清除</string>
+    <string name="search_emoji">搜尋表情符號……</string>
+    <string name="more_reactions">更多符號</string>
     <string name="channel_label">頻道</string>
+    <string name="a11y_label_value">%1$s: %2$s</string>
+    <string name="a11y_message_from">來自 %1$s 的訊息：%2$s</string>
+    <string name="preview_header">標頭</string>
+    <string name="preview_custom_composable_line_one">這是一個一個一個可客製化的組合元件</string>
+    <string name="preview_custom_composable_line_two">還支援多行文字與多種樣式</string>
     <string name="message_delivery_status">訊息傳遞狀態</string>
     <string name="new_messages_below">下方有新的訊息</string>
     <string name="meshtastic_messages_notifications">私訊通知</string>
@@ -225,10 +242,13 @@
     <string name="reset_to_defaults">恢復預設設置</string>
     <string name="apply">套用</string>
     <string name="theme">主題</string>
+    <string name="contrast">對比度</string>
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
     <string name="theme_system">系統預設</string>
     <string name="choose_theme">選擇主題</string>
+    <string name="choose_contrast">對比度等級</string>
+    <string name="contrast_standard">標準</string>
     <string name="contrast_medium">中等</string>
     <string name="contrast_high">高</string>
     <string name="provide_location_to_mesh">將手機位置提供給Mesh網路</string>
@@ -316,6 +336,8 @@
     <string name="currently">目前：</string>
     <string name="mute_status_always">永久靜音</string>
     <string name="mute_status_unmuted">未靜音</string>
+    <string name="mute_status_muted_for_days">已靜音 %1$d 天 %2$s 小時</string>
+    <string name="mute_status_muted_for_hours">已靜音 %1$s 小時</string>
     <string name="mute_add">將「%1$s」的通知設為靜音？</string>
     <string name="mute_remove">取消「%1$s」的通知靜音？</string>
     <string name="replace">替換</string>
@@ -325,7 +347,10 @@
     <string name="battery">電池</string>
     <string name="channel_utilization">頻道利用率</string>
     <string name="air_utilization">空中時間使用率</string>
+    <string name="device_metrics_percent_value">%1$s：%2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s：%2$s%V</string>
     <string name="device_metrics_numeric_value">%1$s</string>
+    <string name="device_metrics_label_value">%1$s：%2$s</string>
     <string name="temperature">溫度</string>
     <string name="humidity">濕度</string>
     <string name="soil_temperature">土壤溫度</string>
@@ -379,12 +404,21 @@
     <string name="traceroute_duration">持續時間：%1$s 秒</string>
     <string name="traceroute_route_towards_dest">追蹤至目的地的路由：\n\n</string>
     <string name="traceroute_route_back_to_us">追蹤回到本機的路由：\n\n</string>
+    <string name="traceroute_forward_hops">去程跳數</string>
+    <string name="traceroute_return_hops">回程跳數</string>
+    <string name="traceroute_round_trip">來回跳數</string>
+    <string name="traceroute_no_response">無回應</string>
+    <string name="free_memory_description">可用系統記憶體（位元組）</string>
     <string name="one_hour_short">1小時</string>
     <string name="twenty_four_hours">二十四小時</string>
     <string name="one_week">一週</string>
     <string name="two_weeks">二週</string>
     <string name="one_month">1個月</string>
     <string name="max">最大值</string>
+    <string name="min">最小</string>
+    <string name="avg">平均</string>
+    <string name="expand_chart">展開圖表</string>
+    <string name="collapse_chart">收起圖表</string>
     <string name="unknown_age">未知年齡</string>
     <string name="copy">複製</string>
     <string name="alert_bell_text">警鈴字符！</string>
@@ -398,11 +432,17 @@
     <string name="channel_1">頻道1</string>
     <string name="channel_2">頻道2</string>
     <string name="channel_3">頻道3</string>
+    <string name="channel_4">頻道 4</string>
+    <string name="channel_5">頻道 5</string>
+    <string name="channel_6">頻道 6</string>
+    <string name="channel_7">頻道 7</string>
+    <string name="channel_8">頻道 8</string>
     <string name="current">當前</string>
     <string name="voltage">電壓</string>
     <string name="are_you_sure">你確定嗎？</string>
     <string name="router_role_confirmation_text"><![CDATA[我已經閱讀了<a href=“ https://meshtastic.org/docs/configuration/radio/device/#roles “>設備角色檔案</a>和關於<a href=”http://meshtastic.org/blog/choosing-the-right-device-role “>選擇正確的設備角色的博客文章 </a>。]]></string>
     <string name="i_know_what_i_m_doing">我知道我在做什麼。</string>
+    <string name="low_battery_message">節點 %1$s 電量過低 (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">低電量通知</string>
     <string name="low_battery_title">低電量：%1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低電量通知(收藏節點)</string>
@@ -528,6 +568,9 @@
     <string name="output_duration_milliseconds">輸出持續時間（毫秒）</string>
     <string name="nag_timeout_seconds">通知逾時時間（秒）</string>
     <string name="ringtone">鈴聲</string>
+    <string name="ringtone_imported">已匯入鈴聲</string>
+    <string name="ringtone_file_empty">檔案為空</string>
+    <string name="ringtone_import_error">匯入錯誤：%1$s</string>
     <string name="play">播放</string>
     <string name="use_i2s_as_buzzer">使用 I2S 控制蜂鳴器</string>
     <string name="lora_config">LoRa</string>
@@ -622,6 +665,8 @@
     <string name="serial_enabled">啟用序列埠</string>
     <string name="echo_enabled">啟用 Echo</string>
     <string name="serial_baud_rate">序列埠鮑率</string>
+    <string name="serial_rx_pin">RX</string>
+    <string name="serial_tx_pin">TX</string>
     <string name="timeout">逾時</string>
     <string name="serial_mode">序列埠模式</string>
     <string name="override_console_serial_port">覆蓋控制台序列埠</string>
@@ -656,8 +701,15 @@
     <string name="distance">距離</string>
     <string name="lux">照度</string>
     <string name="wind">風速</string>
+    <string name="wind_speed">風速</string>
+    <string name="wind_gust">陣風</string>
+    <string name="wind_lull">風停</string>
+    <string name="wind_direction">風向</string>
+    <string name="rainfall_1h">降雨（1h）</string>
+    <string name="rainfall_24h">降雨（24h）</string>
     <string name="weight">重量</string>
     <string name="radiation">輻射</string>
+    <string name="one_wire_temperature">1-Wire 溫度</string>
     <string name="store_forward_config"><![CDATA[儲存與轉發設定]]></string>
     <string name="indoor_air_quality_iaq">室內空氣品質 (IAQ)</string>
     <string name="url">網址</string>
@@ -674,6 +726,7 @@
     <string name="timestamp">時間戳記</string>
     <string name="heading">航向</string>
     <string name="speed">速度</string>
+    <string name="speed_kmh">%1$d Km/h</string>
     <string name="sats">衛星數</string>
     <string name="alt">海拔</string>
     <string name="freq">頻率</string>
@@ -739,6 +792,8 @@
     <string name="show_waypoints">顯示路徑</string>
     <string name="show_precision_circle">顯示定位精準度</string>
     <string name="client_notification">客户端通知</string>
+    <string name="duplicated_public_key_title">偵測到重複的公鑰</string>
+    <string name="low_entropy_key_title">偵測到加密金鑰強度不足</string>
     <string name="compromised_keys">偵測到金鑰已洩漏，點選確定後重新產生金鑰。</string>
     <string name="regenerate_private_key">重新產生私鑰</string>
     <string name="regenerate_keys_confirmation">您確定要重新產生密鑰嗎?\n\n連線過的其他節點需要刪除並重新交換金鑰後才能恢復加密通訊連線。</string>
@@ -791,6 +846,12 @@
     <string name="type_a_message">請輸入訊息</string>
     <string name="pax_metrics_log">PAX 人流計量</string>
     <string name="pax">PAX</string>
+    <string name="pax_total_format">PAX: %1$d</string>
+    <string name="pax_ble_format">B:%1$d</string>
+    <string name="pax_wifi_format">W:%1$d</string>
+    <string name="pax_total_marker">PAX: %1$s</string>
+    <string name="pax_ble_marker">BLE: %1$s</string>
+    <string name="pax_wifi_marker">WiFi: %1$s</string>
     <string name="no_pax_metrics_logs">無可用的 PAX 人流計量資料。</string>
     <string name="ble_devices">藍牙裝置</string>
     <string name="connected_device">連接裝置</string>
@@ -912,6 +973,7 @@
     <string name="firmware_update_stable">穩定版</string>
     <string name="firmware_update_alpha">Alpha 測試版</string>
     <string name="firmware_update_disconnect_warning">注意：更新期間將會暫時中斷您的裝置連線。</string>
+    <string name="firmware_update_downloading_percent">正在下載韌體... %1$d%</string>
     <string name="firmware_update_error">錯誤: %1$s</string>
     <string name="firmware_update_retry">重試</string>
     <string name="firmware_update_success">更新成功！</string>
@@ -954,6 +1016,7 @@
     <string name="firmware_update_release_notes">版本說明</string>
     <string name="firmware_update_unknown_error">未知錯誤</string>
     <string name="firmware_update_node_info_missing">缺少節點使用者資訊。</string>
+    <string name="firmware_update_battery_low">電量過低 (%1$d%%)，請在更新前為您的裝置充電。</string>
     <string name="firmware_update_retrieval_failed">無法取得韌體檔案。</string>
     <string name="firmware_update_usb_failed">USB 更新失敗</string>
     <string name="firmware_update_hash_rejected">韌體雜湊值遭拒。裝置可能需要雜湊值配置或開機載入程式更新。</string>
@@ -1027,8 +1090,10 @@
     <string name="bluetooth_feature_config">設定</string>
     <string name="bluetooth_feature_config_description">無線管理你的裝置設定與頻道。</string>
     <string name="map_style_selection">地圖樣式選擇</string>
+    <string name="local_stats_battery">電量：%1$d%</string>
     <string name="local_stats_nodes">線上 %1$d / 總計 %2$d</string>
     <string name="local_stats_uptime">上線時間: %1$s</string>
+    <string name="local_stats_utilization">頻道使用率: %1$s% | 空中傳輸佔用率: %2$s%</string>
     <string name="local_stats_traffic">流量: 傳送 %1$d / 接收 %2$d (丟棄: %3$d)</string>
     <string name="local_stats_relays">中繼: %1$d (取消: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">診斷: %1$s</string>
@@ -1047,6 +1112,8 @@
     <string name="add_local_mbtiles_file">新增本機 MBTiles 檔案</string>
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK 設定</string>
+    <string name="tak_server_enabled">啓用本地 TAK 伺服器</string>
+    <string name="tak_server_enabled_desc">在 8089 埠啟動一個用於 ATAK 連線的 TCP 伺服器</string>
     <string name="tak_team">隊伍顏色</string>
     <string name="tak_role">隊員角色</string>
     <string name="tak_team_unspecified_color">未指定</string>
@@ -1090,6 +1157,18 @@
     <string name="traffic_management_exhaust_hop_position">僅本地定位資訊（中繼）</string>
     <string name="traffic_management_router_preserve_hops">保留路由跳數</string>
     <string name="note">注意</string>
+    <string name="device_storage_ui_title">裝置儲存空間與使用者介面（唯讀）</string>
+    <string name="no_files_manifested">未發現任何檔案。</string>
     <string name="connect">連線</string>
     <string name="done">完成</string>
+    <string name="wifi_provisioning">mPWRD-OS 的 Wi-Fi 設定</string>
+    <string name="wifi_provision_description">透過藍牙為您的 mPWRD-OS 裝置設定 Wi-Fi 憑證。</string>
+    <string name="wifi_provision_mpwrd_disclaimer">進一步了解 mPWRD-OS 專案\nhttps://github.com/mPWRD-OS</string>
+    <string name="wifi_provision_scanning_ble">正在搜尋裝置…</string>
+    <string name="wifi_provision_device_found">找到裝置</string>
+    <string name="wifi_provision_scanning_wifi">正在搜尋…</string>
+    <string name="wifi_provision_no_networks">找不到網路</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_available_networks">可用的網路</string>
+    <string name="wifi_provision_ssid_label">網路名稱（SSID）</string>
 </resources>

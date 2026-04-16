@@ -253,10 +253,13 @@
     <string name="reset_to_defaults">Auf Standardeinstellungen zurücksetzen</string>
     <string name="apply">Anwenden</string>
     <string name="theme">Design</string>
+    <string name="contrast">Kontrast</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">System</string>
     <string name="choose_theme">Design auswählen</string>
+    <string name="choose_contrast">Kontrast</string>
+    <string name="contrast_standard">Standard</string>
     <string name="contrast_medium">Medium Fast</string>
     <string name="contrast_high">Hoch</string>
     <string name="provide_location_to_mesh">Standort zum Mesh angeben</string>
@@ -356,6 +359,8 @@
     <string name="battery">Akku</string>
     <string name="channel_utilization">Kanalauslastung</string>
     <string name="air_utilization">Sendezeit</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Temperatur</string>
@@ -582,6 +587,9 @@
     <string name="output_duration_milliseconds">Ausgabedauer (GPIO)</string>
     <string name="nag_timeout_seconds">Nervige Verzögerung (Sekunden)</string>
     <string name="ringtone">Klingelton</string>
+    <string name="ringtone_imported">Importierter Klingelton</string>
+    <string name="ringtone_file_empty">Datei ist leer</string>
+    <string name="ringtone_import_error">Fehler beim Importieren: %1$s</string>
     <string name="play">Wiedergabe</string>
     <string name="use_i2s_as_buzzer">I2S als Buzzer verwenden</string>
     <string name="lora_config">LoRa</string>
@@ -720,6 +728,7 @@
     <string name="rainfall_24h">Regen (24 Std.)</string>
     <string name="weight">Gewicht</string>
     <string name="radiation">Strahlung</string>
+    <string name="one_wire_temperature">1-Wire Temperature</string>
     <string name="store_forward_config"><![CDATA[Speichern & Weiterleiten Einstellungen]]></string>
     <string name="indoor_air_quality_iaq">Luftqualität im Innenbereich (IAQ)</string>
     <string name="url">URL</string>
