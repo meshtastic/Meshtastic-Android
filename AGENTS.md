@@ -18,6 +18,7 @@ You are an expert Android and Kotlin Multiplatform (KMP) engineer working on Mes
   - `.skills/testing-ci/` - Validation commands, CI pipeline architecture, CI Gradle properties.
   - `.skills/implement-feature/` - Step-by-step feature workflow.
   - `.skills/code-review/` - PR validation checklist.
+  - `.skills/new-branch/` - Canonical recipe for branching off upstream/main and rebasing stale PRs.
 - **Active Status:** Read `docs/kmp-status.md` and `docs/roadmap.md` to understand the current KMP migration epoch.
 </context_and_memory>
 
@@ -72,6 +73,33 @@ Do NOT duplicate content into agent-specific files. When you modify architecture
 - **Zero Lint Tolerance:** A task is incomplete if `detekt` fails or `spotlessCheck` does not pass for touched modules.
 - **Read Before Refactoring:** When a pattern contradicts best practices, analyze whether it is legacy debt or a deliberate architectural choice before proposing a change.
 </rules>
+
+<copilot_cli_workflow>
+These tips apply when the agent is the GitHub Copilot CLI. Other agent runtimes may ignore this
+section.
+
+- **Delegate long autonomous work.** For sweeping audits, multi-hour investigations, or "fleet"
+  prompts (*"investigate why X is broken on release"*, *"audit the diff since tag vX.Y.Z"*,
+  *"review the codebase for best practices against spec Z"*), prefer `/delegate` so the GitHub
+  cloud agent opens a PR while the user keeps working locally. Don't tie up an interactive
+  session on work that can run unattended.
+- **Use `/research` for "latest hotness" prompts.** When the user asks for *"the latest scoop"*
+  on Kotlin / KMP / Compose / Koin trends, the built-in `/research` slash command performs deep
+  research across GitHub and the web with better source grounding than an ad-hoc prompt.
+- **Use `/plan` mode for "noodle it out" prompts.** When the user asks for an implementation
+  plan, a "walk me through next steps", or explicitly says "don't do anything yet" — switch to
+  plan mode (Shift+Tab or `/plan`). Plans persist in the session workspace and keep the agent
+  from prematurely editing files. Continue to write long-form plans and Mermaid diagrams to
+  `.agent_plans/` (git-ignored) for multi-module refactors.
+- **`/share` audit and review outputs.** After large audits, PR safety reviews, or release-cycle
+  quality passes, offer `/share` to export the findings to a gist or markdown file. These
+  reports are valuable artifacts — don't let them die in session history.
+- **Prefer `/rewind` or `ctrl+s` over retyping.** If a turn went sideways, `/rewind` reverts
+  file changes and the turn; `ctrl+s` submits while preserving the input for quick iteration.
+  Avoid re-issuing the same prompt verbatim.
+- **New-branch flow lives in a skill.** When the user says "fresh branch off fetched origin/main"
+  or "rebase PR #NNNN", consult `.skills/new-branch/SKILL.md` rather than re-deriving the recipe.
+</copilot_cli_workflow>
 
 <git_and_prs>
 - **Commit Hygiene:** Squash fixup/polish/review-feedback commits before opening a PR. Each commit should represent a logical, self-contained unit of work — not a back-and-forth conversation.

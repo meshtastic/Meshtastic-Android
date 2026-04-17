@@ -237,15 +237,6 @@ class FakeMeshPrefs : MeshPrefs {
         deviceAddress.value = address
     }
 
-    private val provideLocation = mutableMapOf<Int?, MutableStateFlow<Boolean>>()
-
-    override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> =
-        provideLocation.getOrPut(nodeNum) { MutableStateFlow(true) }
-
-    override fun setShouldProvideNodeLocation(nodeNum: Int?, provide: Boolean) {
-        provideLocation.getOrPut(nodeNum) { MutableStateFlow(provide) }.value = provide
-    }
-
     private val lastRequest = mutableMapOf<String?, MutableStateFlow<Int>>()
 
     override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> =

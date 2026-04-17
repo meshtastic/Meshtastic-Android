@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.feature.wifiprovision.domain.NymeaWifiService
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
@@ -106,6 +107,7 @@ sealed interface WifiProvisionError {
 class WifiProvisionViewModel(
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
+    private val dispatchers: CoroutineDispatchers,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WifiProvisionUiState())
@@ -127,7 +129,7 @@ class WifiProvisionViewModel(
         _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, error = null) }
 
         viewModelScope.launch {
-            val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory)
+            val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory, dispatchers.default)
             service = nymeaService
 
             nymeaService

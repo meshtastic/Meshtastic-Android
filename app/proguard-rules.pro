@@ -3,12 +3,16 @@
 # ============================================================================
 # Open-source project: obfuscation and optimization are disabled. We rely on
 # tree-shaking (unused code removal) for APK size reduction.
+#
+# Cross-platform library rules (Koin, kotlinx-serialization, Wire, Room,
+# Ktor, Coil, Kable, Kermit, Okio, DataStore, Paging, Lifecycle, Navigation 3,
+# AboutLibraries, Markdown, QRCode, CMP resources, core model) live in
+# config/proguard/shared-rules.pro and are wired in by the
+# AndroidApplicationConventionPlugin. This file holds only Android-specific
+# rules and R8-only directives.
 # ============================================================================
 
 # ---- General ----------------------------------------------------------------
-
-# Preserve line numbers for meaningful crash traces
--keepattributes SourceFile,LineNumberTable
 
 # Open-source — no need to obfuscate
 -dontobfuscate
@@ -30,27 +34,11 @@
 # for auditing. Inspect this file after a release build to see what libraries inject.
 -printconfiguration build/outputs/mapping/r8-merged-config.txt
 
-# ---- Networking (transitive references from Ktor) ---------------------------
+# ---- Networking (transitive references from Ktor on Android) ----------------
 
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
-
-# ---- Wire Protobuf ----------------------------------------------------------
-
-# Wire-generated proto message classes (accessed via ADAPTER companion reflection)
--keep class org.meshtastic.proto.** { *; }
-
-# ---- Room KMP (room3) ------------------------------------------------------
-
-# Preserve generated database constructors (Room uses reflection to instantiate)
--keep class * extends androidx.room3.RoomDatabase { <init>(); }
-
-# ---- Koin DI ----------------------------------------------------------------
-
-# Prevent R8 from merging exception classes (observed as io.ktor.http.URLDecodeException
-# replacing Koin's InstanceCreationException in stack traces, making crashes undiagnosable).
--keep class org.koin.core.error.** { *; }
 
 # ---- Compose Runtime & Animation --------------------------------------------
 
@@ -64,12 +52,3 @@
 -keep class androidx.compose.animation.** { *; }
 -keep class androidx.compose.foundation.** { *; }
 -keep class androidx.compose.material3.** { *; }
-
-# ---- Compose Multiplatform --------------------------------------------------
-
-# Keep resource library internals and generated Res accessor classes so R8 does
-# not tree-shake the resource loading infrastructure. Without these rules the
-# fdroid flavor crashes at startup with a misleading URLDecodeException due to
-# R8 exception-class merging.
--keep class org.jetbrains.compose.resources.** { *; }
--keep class org.meshtastic.core.resources.** { *; }

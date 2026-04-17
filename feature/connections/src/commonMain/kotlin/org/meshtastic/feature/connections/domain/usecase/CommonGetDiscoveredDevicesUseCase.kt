@@ -18,14 +18,15 @@ package org.meshtastic.feature.connections.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.demo_mode
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.meshtastic
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
@@ -49,7 +50,7 @@ class CommonGetDiscoveredDevicesUseCase(
                     tcpServices,
                     recentList,
                 ->
-                val defaultName = runCatching { getString(Res.string.meshtastic) }.getOrDefault("Meshtastic")
+                val defaultName = safeCatchingAll { getStringSuspend(Res.string.meshtastic) }.getOrDefault("Meshtastic")
                 processTcpServices(tcpServices, recentList, defaultName)
             }
 
@@ -71,7 +72,7 @@ class CommonGetDiscoveredDevicesUseCase(
                 usbList +
                     if (showMock) {
                         val demoModeLabel =
-                            runCatching { getString(Res.string.demo_mode) }.getOrDefault("Demo Mode")
+                            safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode")
                         listOf(DeviceListEntry.Mock(demoModeLabel))
                     } else {
                         emptyList()

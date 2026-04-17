@@ -19,13 +19,15 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.koin.core.annotation.Named
+import kotlinx.coroutines.isActive
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
@@ -59,18 +61,15 @@ class MeshServiceOrchestrator(
     private val takPrefs: TakPrefs,
     private val databaseManager: DatabaseManager,
     private val connectionManager: MeshConnectionManager,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val dispatchers: CoroutineDispatchers,
 ) {
-    private var serviceJob: Job? = null
-    private var takJob: Job? = null
-
-    /** The coroutine scope for the service. */
-    val serviceScope: CoroutineScope
-        get() = scope
+    // Per-start coroutine scope. A fresh scope is created on each start() and cancelled on stop(), so all collectors
+    // launched from start() are torn down cleanly and do not accumulate across start/stop/start cycles.
+    private var scope: CoroutineScope? = null
 
     /** Whether the orchestrator is currently running. */
     val isRunning: Boolean
-        get() = serviceJob?.isActive == true
+        get() = scope?.isActive == true
 
     /**
      * Starts the mesh service components and wires up data flows.
@@ -85,27 +84,31 @@ class MeshServiceOrchestrator(
         }
 
         Logger.i { "Starting mesh service orchestrator" }
-        val job = Job()
-        serviceJob = job
+        val newScope = CoroutineScope(SupervisorJob() + dispatchers.default)
+        scope = newScope
+
+        // Drop any bytes that piled up in the service's receivedData channel since the last stop(). The channel
+        // outlives the orchestrator's per-start scope, so without this drain a stop/start cycle would replay stale
+        // packets ahead of the fresh session's firmware handshake.
+        radioInterfaceService.resetReceivedBuffer()
 
         serviceNotifications.initChannels()
         connectionManager.updateStatusNotification()
 
         // Observe TAK server pref to start/stop
-        takJob =
-            takPrefs.isTakServerEnabled
-                .onEach { isEnabled ->
-                    if (isEnabled && !takServerManager.isRunning.value) {
-                        Logger.i { "TAK Server enabled by preference, starting integration" }
-                        takMeshIntegration.start(scope)
-                    } else if (!isEnabled && takServerManager.isRunning.value) {
-                        Logger.i { "TAK Server disabled by preference, stopping integration" }
-                        takMeshIntegration.stop()
-                    }
+        takPrefs.isTakServerEnabled
+            .onEach { isEnabled ->
+                if (isEnabled && !takServerManager.isRunning.value) {
+                    Logger.i { "TAK Server enabled by preference, starting integration" }
+                    takMeshIntegration.start(newScope)
+                } else if (!isEnabled && takServerManager.isRunning.value) {
+                    Logger.i { "TAK Server disabled by preference, stopping integration" }
+                    takMeshIntegration.stop()
                 }
-                .launchIn(scope)
+            }
+            .launchIn(newScope)
 
-        scope.handledLaunch {
+        newScope.handledLaunch {
             // Ensure the per-device database is active before the radio connects.
             // On Android this is handled by MeshUtilApplication.init(); on Desktop (and any
             // future KMP host) the orchestrator is the first entry point, so it must initialize
@@ -119,18 +122,18 @@ class MeshServiceOrchestrator(
 
         radioInterfaceService.receivedData
             .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum.value) }
-            .launchIn(scope)
+            .launchIn(newScope)
 
         radioInterfaceService.connectionError
             .onEach { errorMessage -> serviceRepository.setErrorMessage(errorMessage, Severity.Warn) }
-            .launchIn(scope)
+            .launchIn(newScope)
 
         // Each action is dispatched in its own supervised coroutine so that a failure in one
         // action (e.g. a timeout in sendAdminAwait) cannot terminate the collector and silently
         // drop all subsequent service actions for the rest of the session.
         serviceRepository.serviceAction
-            .onEach { action -> scope.handledLaunch { router.actionHandler.onServiceAction(action) } }
-            .launchIn(scope)
+            .onEach { action -> newScope.handledLaunch { router.actionHandler.onServiceAction(action) } }
+            .launchIn(newScope)
 
         nodeManager.loadCachedNodeDB()
     }
@@ -142,13 +145,11 @@ class MeshServiceOrchestrator(
      */
     fun stop() {
         Logger.i { "Stopping mesh service orchestrator" }
-        takJob?.cancel()
-        takJob = null
         // Guard stop() so we don't emit a spurious "stopped" log when TAK was never started
         if (takServerManager.isRunning.value) {
             takMeshIntegration.stop()
         }
-        serviceJob?.cancel()
-        serviceJob = null
+        scope?.cancel()
+        scope = null
     }
 }

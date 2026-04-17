@@ -74,7 +74,7 @@ open class TcpRadioTransport(
         transport.start(address)
     }
 
-    override fun close() {
+    override suspend fun close() {
         Logger.d { "[$address] Closing TCP transport" }
         closing = true
         transport.stop()

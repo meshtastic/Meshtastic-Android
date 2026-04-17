@@ -23,7 +23,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
-private const val SDK_INT_ANDROID_16 = 37
+private val SDK_INT_ANDROID_16 = Build.VERSION_CODES.BAKLAVA
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

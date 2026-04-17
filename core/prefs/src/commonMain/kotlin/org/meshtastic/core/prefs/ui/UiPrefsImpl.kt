@@ -46,7 +46,7 @@ class UiPrefsImpl(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
-    private val provideNodeLocationFlows = atomic(persistentMapOf<Int, StateFlow<Boolean>>())
+    private val provideNodeLocationFlows = atomic(persistentMapOf<Int, Lazy<StateFlow<Boolean>>>())
 
     override val appIntroCompleted: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_APP_INTRO_COMPLETED] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)

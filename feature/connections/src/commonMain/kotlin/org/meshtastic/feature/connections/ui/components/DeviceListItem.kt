@@ -36,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,15 +76,11 @@ fun DeviceListItem(
 ) {
     // Throttle the RSSI updates to match the connected device polling rate
     var displayedRssi by remember { mutableIntStateOf(rssi ?: 0) }
-    LaunchedEffect(rssi) {
-        if (displayedRssi == 0) {
-            displayedRssi = rssi ?: 0
-        }
-    }
+    val currentRssi by rememberUpdatedState(rssi)
     LaunchedEffect(Unit) {
         while (true) {
             delay(RSSI_UPDATE_RATE_MS)
-            displayedRssi = rssi ?: 0
+            displayedRssi = currentRssi ?: 0
         }
     }
 

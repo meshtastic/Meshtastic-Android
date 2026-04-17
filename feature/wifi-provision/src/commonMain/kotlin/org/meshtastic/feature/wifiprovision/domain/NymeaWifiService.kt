@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
@@ -67,7 +66,7 @@ import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 class NymeaWifiService(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher,
 ) {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + dispatcher)

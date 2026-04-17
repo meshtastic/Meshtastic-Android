@@ -45,6 +45,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -63,6 +64,7 @@ class MeshActionHandlerImpl(
     private val dataHandler: Lazy<MeshDataHandler>,
     private val analytics: PlatformAnalytics,
     private val meshPrefs: MeshPrefs,
+    private val uiPrefs: UiPrefs,
     private val databaseManager: DatabaseManager,
     private val notificationManager: NotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
@@ -207,7 +209,7 @@ class MeshActionHandlerImpl(
 
     override fun handleRequestPosition(destNum: Int, position: Position, myNodeNum: Int) {
         if (destNum != myNodeNum) {
-            val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum).value
+            val provideLocation = uiPrefs.shouldProvideNodeLocation(myNodeNum).value
             val currentPosition =
                 when {
                     provideLocation && position.isValid() -> position

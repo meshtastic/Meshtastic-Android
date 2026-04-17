@@ -20,9 +20,11 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
@@ -59,6 +61,12 @@ class DefaultFirmwareUpdateManagerTest {
     private val bleScanner: BleScanner = mock(MockMode.autofill)
     private val bleConnectionFactory: BleConnectionFactory = mock(MockMode.autofill)
     private val firmwareRetriever = FirmwareRetriever(fileHandler)
+    private val dispatchers =
+        CoroutineDispatchers(
+            io = Dispatchers.Unconfined,
+            main = Dispatchers.Unconfined,
+            default = Dispatchers.Unconfined,
+        )
 
     private val secureDfuHandler =
         SecureDfuHandler(
@@ -67,6 +75,7 @@ class DefaultFirmwareUpdateManagerTest {
             radioController = radioController,
             bleScanner = bleScanner,
             bleConnectionFactory = bleConnectionFactory,
+            dispatchers = dispatchers,
         )
 
     private val usbUpdateHandler =
@@ -84,6 +93,7 @@ class DefaultFirmwareUpdateManagerTest {
             nodeRepository = nodeRepository,
             bleScanner = bleScanner,
             bleConnectionFactory = bleConnectionFactory,
+            dispatchers = dispatchers,
         )
 
     private fun createManager(address: String?): DefaultFirmwareUpdateManager {

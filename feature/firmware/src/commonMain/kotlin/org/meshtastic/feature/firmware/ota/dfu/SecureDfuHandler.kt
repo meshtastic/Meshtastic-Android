@@ -28,6 +28,7 @@ import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.resources.Res
@@ -70,6 +71,7 @@ class SecureDfuHandler(
     private val radioController: RadioController,
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
+    private val dispatchers: CoroutineDispatchers,
 ) : FirmwareUpdateHandler {
 
     @Suppress("LongMethod")
@@ -108,7 +110,7 @@ class SecureDfuHandler(
                 var transport: SecureDfuTransport? = null
                 var completed = false
                 try {
-                    transport = SecureDfuTransport(bleScanner, bleConnectionFactory, target)
+                    transport = SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
 
                     transport.triggerButtonlessDfu().onFailure { e ->
                         Logger.w(e) { "DFU: Buttonless trigger failed ($e) — device may already be in DFU mode" }

@@ -19,19 +19,31 @@ package org.meshtastic.core.prefs
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.collections.immutable.PersistentMap
 
-internal inline fun <K, V> cachedFlow(cache: AtomicRef<PersistentMap<K, V>>, key: K, build: () -> V): V {
-    var resolved = cache.value[key]
-    if (resolved == null) {
-        val newValue = build()
-        while (resolved == null) {
-            val current = cache.value
-            val currentValue = current[key]
-            if (currentValue != null) {
-                resolved = currentValue
-            } else if (cache.compareAndSet(current, current.put(key, newValue))) {
-                resolved = newValue
-            }
+/**
+ * Look up [key] in [cache]; if absent, construct a value via [build] and insert it atomically.
+ *
+ * [build] is wrapped in a [Lazy] before being published to [cache], so concurrent first-access of the same key never
+ * invokes [build] more than once — only the winner of the CAS has its [Lazy] evaluated, and all readers share that same
+ * result. This matters when [build] eagerly launches a coroutine (e.g. `Flow.stateIn(scope, Eagerly, …)`): the naive
+ * approach would leak the losing coroutine into a never-cancelled scope.
+ */
+@Suppress("ReturnCount")
+internal inline fun <K, V> cachedFlow(
+    cache: AtomicRef<PersistentMap<K, Lazy<V>>>,
+    key: K,
+    crossinline build: () -> V,
+): V {
+    cache.value[key]?.let {
+        return it.value
+    }
+    val newLazy = lazy(LazyThreadSafetyMode.SYNCHRONIZED) { build() }
+    while (true) {
+        val current = cache.value
+        current[key]?.let {
+            return it.value
+        }
+        if (cache.compareAndSet(current, current.put(key, newLazy))) {
+            return newLazy.value
         }
     }
-    return checkNotNull(resolved)
 }

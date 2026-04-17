@@ -77,7 +77,9 @@ internal fun Project.configureKotlinMultiplatform() {
     // upgrades to the CMP-bundled version, triggering a "Skiko dependencies'
     // versions are incompatible" warning from CMP's compatibility checker.
     // Force the version to match CMP so the checker sees a consistent graph.
-    val skikoVersion = libs.version("skiko")
+    // Pinned here rather than in the version catalog because this plugin is the
+    // only consumer — bump together with the compose-multiplatform version.
+    val skikoVersion = "0.144.5"
     configurations.configureEach {
         resolutionStrategy.eachDependency {
             if (requested.group == "org.jetbrains.skiko") {

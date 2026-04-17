@@ -22,9 +22,8 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
@@ -37,6 +36,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
@@ -396,14 +396,14 @@ class BleRadioTransport(
     }
 
     /** Closes the connection to the device. */
-    override fun close() {
+    override suspend fun close() {
         Logger.i { "[$address] Disconnecting. ${formatSessionStats()}" }
         connectionScope.cancel("close() called")
-        // GATT cleanup must outlive scope cancellation — GlobalScope is intentional.
-        // SharedRadioInterfaceService cancels the scope immediately after close(), so a
-        // coroutine launched there may never run, leaking BluetoothGatt (causes GATT 133).
-        @OptIn(DelicateCoroutinesApi::class)
-        GlobalScope.launch {
+        // GATT cleanup must run under NonCancellable so a cancelled caller cannot skip it,
+        // which would leak BluetoothGatt and trigger status 133 on the next reconnect.
+        // Using withContext (not runBlocking) keeps the caller's thread free — this is
+        // critical when close() is invoked from the main thread during process shutdown.
+        withContext(NonCancellable) {
             try {
                 withTimeoutOrNull(GATT_CLEANUP_TIMEOUT) { bleConnection.disconnect() }
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {

@@ -18,12 +18,15 @@ package org.meshtastic.core.takserver
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -58,6 +61,12 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     private val _inboundMessages = MutableSharedFlow<CoTMessage>()
     override val inboundMessages: SharedFlow<CoTMessage> = _inboundMessages.asSharedFlow()
 
+    // Unbounded channel preserves FIFO ordering of inbound CoT messages under load.
+    // onMessage is a non-suspend callback, so we trySend (always succeeds for UNLIMITED)
+    // and a single consumer coroutine drains into _inboundMessages in order.
+    private var inboundChannel: Channel<CoTMessage>? = null
+    private var inboundDrainJob: Job? = null
+
     private var lastBroadcastPositions = mutableMapOf<Int, Int>()
 
     override fun start(scope: CoroutineScope) {
@@ -68,8 +77,11 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
         }
 
         scope.launch {
-            // Wire up inbound message handler BEFORE starting so no messages are lost
-            takServer.onMessage = { cotMessage -> scope.launch { _inboundMessages.emit(cotMessage) } }
+            // Wire up inbound message handler BEFORE starting so no messages are lost.
+            val channel = Channel<CoTMessage>(Channel.UNLIMITED)
+            inboundChannel = channel
+            inboundDrainJob = scope.launch { channel.consumeAsFlow().collect { _inboundMessages.emit(it) } }
+            takServer.onMessage = { cotMessage -> channel.trySend(cotMessage) }
 
             val result = takServer.start(scope)
             if (result.isSuccess) {
@@ -79,6 +91,10 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
                 Logger.e(result.exceptionOrNull()) { "Failed to start TAK Server" }
                 // Clear onMessage if start failed so we don't hold a reference unnecessarily
                 takServer.onMessage = null
+                inboundDrainJob?.cancel()
+                inboundDrainJob = null
+                channel.close()
+                inboundChannel = null
             }
         }
     }
@@ -86,6 +102,10 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     override fun stop() {
         takServer.stop()
         takServer.onMessage = null
+        inboundChannel?.close()
+        inboundChannel = null
+        inboundDrainJob?.cancel()
+        inboundDrainJob = null
         _isRunning.value = false
         scope = null
         Logger.i { "TAK Server stopped" }

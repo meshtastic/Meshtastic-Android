@@ -32,10 +32,12 @@ class KmpLibraryComposeConventionPlugin : Plugin<Project> {
             apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
 
             extensions.configure<KotlinMultiplatformExtension> {
-                sourceSets.getByName("commonMain").dependencies {
-                    implementation(libs.library("compose-multiplatform-runtime"))
-                    // API because consuming modules will usually need the resource types
-                    api(libs.library("compose-multiplatform-resources"))
+                sourceSets.matching { it.name == "commonMain" }.configureEach {
+                    dependencies {
+                        implementation(libs.library("compose-multiplatform-runtime"))
+                        // API because consuming modules will usually need the resource types
+                        api(libs.library("compose-multiplatform-resources"))
+                    }
                 }
             }
             configureComposeCompiler()

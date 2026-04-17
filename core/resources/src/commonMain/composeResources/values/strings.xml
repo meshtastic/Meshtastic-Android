@@ -1261,4 +1261,8 @@
     <string name="wifi_provision_ssid_placeholder">Enter or select a network</string>
     <string name="wifi_provision_status_applied">WiFi configured successfully!</string>
     <string name="wifi_provision_status_failed">Failed to apply WiFi configuration</string>
+    <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
+    <string name="desktop_tray_show">Show Meshtastic</string>
+    <string name="desktop_tray_quit">Quit</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

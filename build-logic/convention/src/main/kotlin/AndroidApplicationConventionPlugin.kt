@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -26,7 +25,6 @@ import org.meshtastic.buildlogic.configureTestOptions
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-
             apply(plugin = "com.android.application")
             apply(plugin = "org.gradle.test-retry")
             apply(plugin = "meshtastic.android.lint")
@@ -38,11 +36,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
-                
-                defaultConfig {
-                    vectorDrawables.useSupportLibrary = true
-                }
 
+                defaultConfig { vectorDrawables.useSupportLibrary = true }
 
                 buildTypes {
                     getByName("release") {
@@ -50,7 +45,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         isShrinkResources = true
                         proguardFiles(
                             getDefaultProguardFile("proguard-android-optimize.txt"),
-                            "proguard-rules.pro"
+                            rootProject.file("config/proguard/shared-rules.pro"),
+                            "proguard-rules.pro",
                         )
                     }
                     getByName("debug") {
@@ -62,9 +58,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     }
                 }
 
-                buildFeatures {
-                    buildConfig = true
-                }
+                buildFeatures { buildConfig = true }
             }
             configureTestOptions()
         }

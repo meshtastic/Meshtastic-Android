@@ -144,7 +144,7 @@ class MockRadioTransport(
         }
     }
 
-    override fun close() {
+    override suspend fun close() {
         Logger.i { "Closing the mock transport" }
     }
 

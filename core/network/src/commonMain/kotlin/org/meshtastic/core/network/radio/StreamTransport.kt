@@ -35,7 +35,7 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
     private val codec =
         StreamFrameCodec(onPacketReceived = { callback.handleFromRadio(it) }, logTag = "StreamTransport")
 
-    override fun close() {
+    override suspend fun close() {
         Logger.d { "Closing stream for good" }
         onDeviceDisconnect(true)
     }

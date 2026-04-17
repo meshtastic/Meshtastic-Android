@@ -23,13 +23,15 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.atLeast
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CommandSender
@@ -70,8 +72,11 @@ class MeshServiceOrchestratorTest {
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val testScope = CoroutineScope(testDispatcher)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
 
     /** Stubs the shared flow dependencies used by every test and returns an orchestrator. */
     private fun createOrchestrator(
@@ -114,7 +119,7 @@ class MeshServiceOrchestratorTest {
             takPrefs = takPrefs,
             databaseManager = databaseManager,
             connectionManager = connectionManager,
-            scope = testScope,
+            dispatchers = dispatchers,
         )
     }
 
@@ -216,5 +221,80 @@ class MeshServiceOrchestratorTest {
 
         orchestrator.stop()
         assertFalse(orchestrator.isRunning)
+    }
+
+    /**
+     * Regression test for a bug where `stop()` did not actually tear down the FromRadio collectors. Collectors were
+     * attached to an injected process-wide ServiceScope rather than a per-start scope, so `start() -> stop() ->
+     * start()` caused duplicate collectors and every FromRadio packet was handled 2x (then 3x, etc.).
+     */
+    @Test
+    fun testFromRadioCollectorsTornDownOnStopAndRestartedCleanlyOnStart() {
+        val receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 8)
+        val orchestrator = createOrchestrator(receivedData = receivedData)
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+
+        orchestrator.start()
+        val packet1 = byteArrayOf(1, 2, 3)
+        receivedData.tryEmit(packet1)
+        verifySuspend(exactly(1)) { messageProcessor.handleFromRadio(packet1, null) }
+
+        orchestrator.stop()
+        val packet2 = byteArrayOf(4, 5, 6)
+        receivedData.tryEmit(packet2)
+        // After stop(), the collector must be gone - the handler should not be invoked for packet2.
+        verifySuspend(exactly(0)) { messageProcessor.handleFromRadio(packet2, null) }
+
+        orchestrator.start()
+        val packet3 = byteArrayOf(7, 8, 9)
+        receivedData.tryEmit(packet3)
+        // After restart, a single fresh collector must process packet3 exactly once (not twice).
+        verifySuspend(exactly(1)) { messageProcessor.handleFromRadio(packet3, null) }
+
+        orchestrator.stop()
+    }
+
+    /**
+     * Regression test for a channel-buffer-replay bug: the production [RadioInterfaceService] buffers inbound bytes in
+     * a process-lifetime `Channel(UNLIMITED)`. Between `stop()` and the next `start()`, any bytes that arrive sit in
+     * the channel and would be replayed to the fresh collector — prepending stale packets to the next session's
+     * firmware handshake. `start()` must call [RadioInterfaceService.resetReceivedBuffer] before attaching the
+     * collector.
+     */
+    @Test
+    fun testStartDrainsReceivedBufferBeforeAttachingCollector() {
+        val orchestrator = createOrchestrator()
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+
+        orchestrator.start()
+        orchestrator.stop()
+        orchestrator.start()
+
+        // resetReceivedBuffer must be invoked at least once per start() (twice total for two starts).
+        verify(atLeast(2)) { radioInterfaceService.resetReceivedBuffer() }
+
+        orchestrator.stop()
+    }
+
+    /** Additional regression: after many start/stop cycles, collectors must not accumulate. */
+    @Test
+    fun testRepeatedStartStopDoesNotAccumulateCollectors() {
+        val receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 8)
+        val orchestrator = createOrchestrator(receivedData = receivedData)
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+
+        repeat(5) {
+            orchestrator.start()
+            orchestrator.stop()
+        }
+
+        orchestrator.start()
+        val packet = byteArrayOf(42)
+        receivedData.tryEmit(packet)
+
+        // Despite six total start() calls, only the most recent collector is live.
+        verifySuspend(exactly(1)) { messageProcessor.handleFromRadio(packet, null) }
+
+        orchestrator.stop()
     }
 }

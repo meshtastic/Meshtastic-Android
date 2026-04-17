@@ -60,6 +60,7 @@ import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.first
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.decodeToSvgPainter
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
 import org.meshtastic.core.common.BuildConfigProvider
@@ -70,6 +71,10 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.desktop_tray_quit
+import org.meshtastic.core.resources.desktop_tray_show
+import org.meshtastic.core.resources.desktop_tray_tooltip
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -216,11 +221,11 @@ private fun ApplicationScope.MeshtasticDesktopApp(
     Tray(
         state = trayState,
         icon = trayIcon,
-        tooltip = "Meshtastic Desktop",
+        tooltip = stringResource(Res.string.desktop_tray_tooltip),
         onAction = { isAppVisible = true },
         menu = {
-            Item("Show Meshtastic", onClick = { isAppVisible = true })
-            Item("Quit", onClick = ::exitApplication)
+            Item(stringResource(Res.string.desktop_tray_show), onClick = { isAppVisible = true })
+            Item(stringResource(Res.string.desktop_tray_quit), onClick = ::exitApplication)
         },
     )
 

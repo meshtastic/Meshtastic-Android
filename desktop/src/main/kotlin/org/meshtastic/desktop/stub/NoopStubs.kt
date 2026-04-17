@@ -80,6 +80,10 @@ class NoopRadioInterfaceService : RadioInterfaceService {
         logWarn("NoopRadioInterfaceService.sendToRadio(${bytes.size} bytes)")
     }
 
+    override fun resetReceivedBuffer() {
+        // No-op: this stub never buffers bytes.
+    }
+
     override fun connect() {
         logWarn("NoopRadioInterfaceService.connect()")
     }

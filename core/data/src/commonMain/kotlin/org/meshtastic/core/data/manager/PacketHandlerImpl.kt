@@ -22,7 +22,9 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -73,12 +75,31 @@ class PacketHandlerImpl(
     private val queueMutex = Mutex()
     private val queuedPackets = mutableListOf<MeshPacket>()
 
+    // Unbounded channel preserves FIFO ordering of fire-and-forget sendToRadio(MeshPacket)
+    // calls. The non-suspend entry point does trySend (always succeeds for UNLIMITED) and
+    // a single consumer coroutine enqueues packets under queueMutex in arrival order.
+    private val outboundChannel = Channel<MeshPacket>(Channel.UNLIMITED)
+
     // Set to true by stopPacketQueue() under queueMutex. Checked by startPacketQueueLocked()
     // and the queue processor's finally block to prevent restarting a stopped queue.
     private var queueStopped = false
 
     private val responseMutex = Mutex()
     private val queueResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
+
+    init {
+        // Single consumer serializes enqueues from the non-suspend sendToRadio(MeshPacket)
+        // entry point, preserving FIFO across rapid concurrent callers.
+        scope.launch {
+            outboundChannel.consumeAsFlow().collect { packet ->
+                queueMutex.withLock {
+                    queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
+                    queuedPackets.add(packet)
+                    startPacketQueueLocked()
+                }
+            }
+        }
+    }
 
     override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }
@@ -104,13 +125,9 @@ class PacketHandlerImpl(
     }
 
     override fun sendToRadio(packet: MeshPacket) {
-        scope.launch {
-            queueMutex.withLock {
-                queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
-                queuedPackets.add(packet)
-                startPacketQueueLocked()
-            }
-        }
+        // Non-suspend entry point — order-preserving via unbounded channel drained by
+        // a single consumer coroutine. trySend on UNLIMITED never fails for capacity.
+        outboundChannel.trySend(packet)
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
