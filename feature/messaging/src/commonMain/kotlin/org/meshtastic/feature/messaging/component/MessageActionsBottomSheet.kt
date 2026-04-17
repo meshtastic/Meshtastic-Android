@@ -36,11 +36,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.action_copy_message
+import org.meshtastic.core.resources.action_delete_message
+import org.meshtastic.core.resources.action_react_with_emoji
+import org.meshtastic.core.resources.action_select_message
+import org.meshtastic.core.resources.action_send_reply
+import org.meshtastic.core.resources.action_show_message_status
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.device_metrics_label_value
@@ -55,6 +62,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
 
+@Suppress("LongMethod")
 @Composable
 fun MessageActionsContent(
     quickEmojis: List<String>,
@@ -83,20 +91,35 @@ fun MessageActionsContent(
                     Text(stringResource(Res.string.device_metrics_label_value, title, statusText.orEmpty()))
                 },
                 leadingContent = { MessageStatusIcon(status = status) },
-                modifier = Modifier.clickable(onClick = onStatus),
+                modifier =
+                Modifier.clickable(
+                    onClickLabel = stringResource(Res.string.action_show_message_status),
+                    role = Role.Button,
+                    onClick = onStatus,
+                ),
             )
         }
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.reply)) },
             leadingContent = { Icon(MeshtasticIcons.Reply, contentDescription = stringResource(Res.string.reply)) },
-            modifier = Modifier.clickable(onClick = onReply),
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_send_reply),
+                role = Role.Button,
+                onClick = onReply,
+            ),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.copy)) },
             leadingContent = { Icon(MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy)) },
-            modifier = Modifier.clickable(onClick = onCopy),
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_copy_message),
+                role = Role.Button,
+                onClick = onCopy,
+            ),
         )
 
         ListItem(
@@ -104,13 +127,23 @@ fun MessageActionsContent(
             leadingContent = {
                 Icon(MeshtasticIcons.SelectAll, contentDescription = stringResource(Res.string.select))
             },
-            modifier = Modifier.clickable(onClick = onSelect),
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_select_message),
+                role = Role.Button,
+                onClick = onSelect,
+            ),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.delete)) },
             leadingContent = { Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete)) },
-            modifier = Modifier.clickable(onClick = onDelete),
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_delete_message),
+                role = Role.Button,
+                onClick = onDelete,
+            ),
         )
     }
 }
@@ -130,7 +163,12 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
                 Modifier.size(40.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { onReact(emoji) },
+                    .clickable(
+                        onClickLabel = stringResource(Res.string.action_react_with_emoji),
+                        role = Role.Button,
+                    ) {
+                        onReact(emoji)
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = emoji, style = MaterialTheme.typography.titleMedium)

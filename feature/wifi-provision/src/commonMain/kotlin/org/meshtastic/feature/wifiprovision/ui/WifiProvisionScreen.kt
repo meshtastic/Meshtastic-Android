@@ -76,6 +76,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -87,6 +88,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.action_select_network
 import org.meshtastic.core.resources.apply
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
@@ -489,7 +491,12 @@ internal fun NetworkRow(network: WifiNetwork, isSelected: Boolean, onClick: () -
             }
         },
         colors = ListItemDefaults.colors(containerColor = containerColor),
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier =
+        Modifier.clickable(
+            onClickLabel = stringResource(Res.string.action_select_network),
+            role = Role.Button,
+            onClick = onClick,
+        ),
     )
 }
 
