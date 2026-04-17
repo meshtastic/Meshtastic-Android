@@ -1046,4 +1046,5 @@
     <string name="traffic_management_enabled">Module activé</string>
     <string name="connect">Connecter</string>
     <string name="done">Terminé</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

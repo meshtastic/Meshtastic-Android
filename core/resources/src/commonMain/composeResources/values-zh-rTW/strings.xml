@@ -1171,4 +1171,5 @@
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_available_networks">可用的網路</string>
     <string name="wifi_provision_ssid_label">網路名稱（SSID）</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

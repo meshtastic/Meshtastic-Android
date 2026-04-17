@@ -199,4 +199,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

@@ -652,4 +652,5 @@
     <string name="traffic_management_config">トラフィック管理設定</string>
     <string name="traffic_management_enabled">モジュール有効</string>
     <string name="connect">接続</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

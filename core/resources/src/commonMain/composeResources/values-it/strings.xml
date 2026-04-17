@@ -960,4 +960,5 @@
     <string name="note">Note</string>
     <string name="connect">Connetti</string>
     <string name="done">Fatto</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

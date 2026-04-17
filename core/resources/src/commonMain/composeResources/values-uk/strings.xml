@@ -721,4 +721,5 @@
     <string name="tak_team_green">Зелений</string>
     <string name="connect">Під’єднатися</string>
     <string name="done">Готово</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

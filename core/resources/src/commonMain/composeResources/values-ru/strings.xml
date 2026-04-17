@@ -1224,4 +1224,5 @@
     <string name="wifi_provision_ssid_placeholder">Введите или выберите сеть</string>
     <string name="wifi_provision_status_applied">Wi-Fi успешно настроен!</string>
     <string name="wifi_provision_status_failed">Не удалось применить настройку Wi-Fi</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

@@ -960,4 +960,5 @@
     <string name="wifi_provision_ssid_placeholder">Въведете или изберете мрежа</string>
     <string name="wifi_provision_status_applied">WiFi е конфигуриран успешно!</string>
     <string name="wifi_provision_status_failed">Прилагането на конфигурацията за WiFi не е успешно</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

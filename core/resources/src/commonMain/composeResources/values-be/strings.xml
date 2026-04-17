@@ -219,4 +219,5 @@
     <string name="tak_team_red">Чырвоны</string>
     <string name="tak_team_blue">Сіні</string>
     <string name="tak_team_green">Зялёны</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

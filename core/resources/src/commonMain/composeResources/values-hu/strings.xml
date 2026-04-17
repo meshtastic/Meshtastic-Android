@@ -850,4 +850,5 @@
     <string name="tak_team_blue">Kék</string>
     <string name="tak_team_green">Zöld</string>
     <string name="connect">Csatlakozás</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>
