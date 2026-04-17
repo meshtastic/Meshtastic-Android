@@ -177,3 +177,24 @@
 
 # Core model classes (used in serialization, Room, and Koin injection)
 -keep class org.meshtastic.core.model.** { *; }
+
+# ---- Compose Runtime & Animation --------------------------------------------
+
+# Defence-in-depth: prevent tree-shaking of Compose infrastructure classes that
+# are referenced indirectly through compiler-generated state machines. Applies
+# to BOTH R8 (Android app) and ProGuard (desktop distribution).
+#
+# Why shared: CMP 1.11 ships consumer rules with -assumenosideeffects on
+# Composer.<clinit>() / ComposerImpl.<clinit>() and -assumevalues on
+# ComposeRuntimeFlags / ComposeStackTraceMode. If the optimizer runs (R8 full
+# mode on Android, ProGuard with optimize.set(true) on desktop) these call
+# sites can be rewritten even when the target classes are kept, causing the
+# recomposer / frame-clock / animation state machines to silently freeze on
+# the first frame. -dontoptimize (set per-host) is the primary defence; these
+# keep rules are a safety net against future toolchain changes. See #5146.
+-keep class androidx.compose.runtime.** { *; }
+-keep class androidx.compose.ui.** { *; }
+-keep class androidx.compose.animation.core.** { *; }
+-keep class androidx.compose.animation.** { *; }
+-keep class androidx.compose.foundation.** { *; }
+-keep class androidx.compose.material3.** { *; }
