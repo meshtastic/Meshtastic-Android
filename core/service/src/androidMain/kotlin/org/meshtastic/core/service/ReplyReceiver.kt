@@ -25,10 +25,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.PacketRepository
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.
@@ -43,6 +45,8 @@ class ReplyReceiver :
     private val radioController: RadioController by inject()
 
     private val meshServiceNotifications: MeshServiceNotifications by inject()
+
+    private val packetRepository: PacketRepository by inject()
 
     private val dispatchers: CoroutineDispatchers by inject()
 
@@ -65,6 +69,7 @@ class ReplyReceiver :
             scope.launch {
                 try {
                     sendMessage(message, contactKey)
+                    packetRepository.clearUnreadCount(contactKey, nowMillis)
                     meshServiceNotifications.cancelMessageNotification(contactKey)
                 } finally {
                     pendingResult.finish()
