@@ -509,17 +509,10 @@ class MeshServiceNotificationsImpl(
 
     override fun cancelMessageNotification(contactKey: String) {
         notificationManager.cancel(contactKey.hashCode())
-        // Refresh (or remove) the group summary so the notification shade / Auto HUN doesn't
-        // continue surfacing a stale summary after the last child is dismissed.
-        val remainingChildren =
-            notificationManager.activeNotifications.count { sbn ->
-                sbn.id != SUMMARY_ID && sbn.notification.group == GROUP_KEY_MESSAGES
-            }
-        if (remainingChildren == 0) {
-            notificationManager.cancel(SUMMARY_ID)
-        } else {
-            showGroupSummary()
-        }
+        // Always drop the group summary — reading notificationManager.activeNotifications right
+        // after cancel() races with NotificationManagerService, so we can't reliably count what's
+        // left. The next incoming message re-builds the summary via showGroupSummary().
+        notificationManager.cancel(SUMMARY_ID)
     }
 
     override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(node.num)
