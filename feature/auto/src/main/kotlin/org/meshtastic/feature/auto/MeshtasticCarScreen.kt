@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.auto
 
+import androidx.car.app.CarAppApiLevels
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
@@ -23,6 +24,7 @@ import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
+import androidx.car.app.model.MessageTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Tab
 import androidx.car.app.model.TabContents
@@ -56,12 +58,21 @@ import org.meshtastic.proto.ChannelSettings
 /**
  * Root screen displayed in Android Auto.
  *
- * Shows three tabs mirroring the iOS CarPlay tab-based navigation:
- * - **Status**: Connection state and active device name
- * - **Favorites**: Favorited mesh nodes with unread message counts
- * - **Channels**: Active channels with unread message counts
+ * Renders a three-tab UI mirroring the iOS CarPlay tab-based navigation:
+ * - **Status** — Connection state and device name
+ * - **Favorites** — Favourited mesh nodes with unread message counts
+ * - **Channels** — Active channels with unread message counts
  *
- * Requires Car API level 2+ (androidx.car.app:app 1.2.0+) for [TabTemplate] support.
+ * `TabTemplate` requires Car API level 6. On hosts running Car API level 1–5 the
+ * screen falls back to a single [ListTemplate] showing the same data (status row +
+ * favourites + channels) without tab chrome. The manifest declares
+ * `minCarApiLevel=1` so the app remains usable on all supported vehicles.
+ *
+ * When the user taps a [MessagingStyle][androidx.core.app.NotificationCompat.MessagingStyle]
+ * notification in the Android Auto notification shade, the host calls
+ * [MeshtasticCarSession.onNewIntent] with the conversation deep-link URI.
+ * The session delegates to [selectContactKey] so the correct tab is pre-selected
+ * before [onGetTemplate] fires.
  */
 class MeshtasticCarScreen(carContext: CarContext) :
     Screen(carContext),
@@ -81,6 +92,13 @@ class MeshtasticCarScreen(carContext: CarContext) :
     private var favoriteNodes: List<Node> = emptyList()
     private var channels: List<Pair<Int, ChannelSettings>> = emptyList()
     private var unreadCounts: Map<String, Int> = emptyMap()
+
+    /**
+     * True until the first [collect] emission arrives from the repository flows.
+     * While loading, [onGetTemplate] returns a spinner [MessageTemplate] instead of
+     * an empty/disconnected screen.
+     */
+    private var isLoading = true
 
     init {
         lifecycle.addObserver(this)
@@ -143,12 +161,29 @@ class MeshtasticCarScreen(carContext: CarContext) :
                         favoriteNodes = favorites
                         channels = chs
                         unreadCounts = counts
+                        isLoading = false
                         invalidate()
                     }
             }
     }
 
     override fun onGetTemplate(): Template {
+        // MessageTemplate.setLoading() requires Car API 5+. On older hosts fall through
+        // to the ListTemplate fallback immediately (StateFlows emit their cached state
+        // near-instantly so the transient empty state is barely visible).
+        if (isLoading && carContext.carAppApiLevel >= CarAppApiLevels.LEVEL_5) {
+            return MessageTemplate.Builder("Loading…")
+                .setHeaderAction(Action.APP_ICON)
+                .setLoading(true)
+                .build()
+        }
+
+        // TabTemplate requires Car API level 6. Fall back to a combined ListTemplate
+        // on older hosts so the app remains functional on all supported vehicles.
+        if (carContext.carAppApiLevel < CarAppApiLevels.LEVEL_6) {
+            return buildFallbackListTemplate()
+        }
+
         val tabCallback =
             object : TabTemplate.TabCallback {
                 override fun onTabSelected(tabContentId: String) {
@@ -192,6 +227,61 @@ class MeshtasticCarScreen(carContext: CarContext) :
             .build()
     }
 
+    /**
+     * Called by [MeshtasticCarSession.onNewIntent] when the user taps a conversation
+     * notification in the Android Auto notification shade.
+     *
+     * Selects the [TAB_FAVORITES] tab if [contactKey] looks like a DM (starts with a
+     * channel digit followed by a node ID), or [TAB_CHANNELS] if it is a broadcast
+     * conversation. Triggers a template refresh so the correct tab is highlighted.
+     */
+    fun selectContactKey(contactKey: String) {
+        activeTabId = if (contactKey.endsWith(DataPacket.ID_BROADCAST)) TAB_CHANNELS else TAB_FAVORITES
+        invalidate()
+    }
+
+    /**
+     * Fallback template for Car API level 1–5 hosts that do not support [TabTemplate].
+     *
+     * Shows a single [ListTemplate] with the status row followed by all favourites
+     * and all channels — the same data as the tab UI but in a combined list.
+     */
+    private fun buildFallbackListTemplate(): ListTemplate {
+        val items = ItemList.Builder()
+
+        // Status row
+        val statusText =
+            when (connectionState) {
+                is ConnectionState.Connected -> "Connected"
+                is ConnectionState.Disconnected -> "Disconnected"
+                is ConnectionState.DeviceSleep -> "Device Sleeping"
+                is ConnectionState.Connecting -> "Connecting…"
+            }
+        val deviceName = nodeRepository.ourNodeInfo.value?.user?.long_name.orEmpty()
+        items.addItem(
+            Row.Builder()
+                .setTitle(statusText)
+                .apply { if (deviceName.isNotEmpty()) addText(deviceName) }
+                .setBrowsable(false)
+                .build(),
+        )
+
+        // Favourite nodes
+        favoriteNodes.take(MAX_LIST_ITEMS).forEach { node ->
+            items.addItem(buildFavoriteNodeRow(node))
+        }
+
+        // Channels
+        channels.take(MAX_LIST_ITEMS).forEach { (index, settings) ->
+            items.addItem(buildChannelRow(index, settings))
+        }
+
+        return ListTemplate.Builder()
+            .setTitle("Meshtastic")
+            .setSingleList(items.build())
+            .build()
+    }
+
     private fun carIcon(resId: Int) =
         CarIcon.Builder(IconCompat.createWithResource(carContext, resId)).setTint(CarColor.DEFAULT).build()
 
@@ -222,16 +312,8 @@ class MeshtasticCarScreen(carContext: CarContext) :
         if (favoriteNodes.isEmpty()) {
             items.setNoItemsMessage("No favorite contacts")
         } else {
-            for (node in favoriteNodes.take(MAX_LIST_ITEMS)) {
-                val contactKey = "0${node.user.id}"
-                val unread = unreadCounts[contactKey] ?: 0
-                val name = node.user.long_name.ifEmpty { node.user.short_name }.ifEmpty { "Unknown" }
-                val subtitle = buildString {
-                    append(node.user.short_name)
-                    if (node.hopsAway >= 0) append(" · ${node.hopsAway} hops")
-                    if (unread > 0) append(" · $unread unread")
-                }
-                items.addItem(Row.Builder().setTitle(name).addText(subtitle).setBrowsable(false).build())
+            favoriteNodes.take(MAX_LIST_ITEMS).forEach { node ->
+                items.addItem(buildFavoriteNodeRow(node))
             }
         }
 
@@ -261,6 +343,18 @@ class MeshtasticCarScreen(carContext: CarContext) :
             .apply { if (subtitle.isNotEmpty()) addText(subtitle) }
             .setBrowsable(false)
             .build()
+    }
+
+    private fun buildFavoriteNodeRow(node: Node): Row {
+        val contactKey = "0${node.user.id}"
+        val unread = unreadCounts[contactKey] ?: 0
+        val name = node.user.long_name.ifEmpty { node.user.short_name }.ifEmpty { "Unknown" }
+        val subtitle = buildString {
+            append(node.user.short_name)
+            if (node.hopsAway >= 0) append(" · ${node.hopsAway} hops")
+            if (unread > 0) append(" · $unread unread")
+        }
+        return Row.Builder().setTitle(name).addText(subtitle).setBrowsable(false).build()
     }
 
     companion object {

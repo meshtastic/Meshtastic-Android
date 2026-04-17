@@ -33,11 +33,13 @@
             </intent-filter>
         </service>
 
-        <!-- TabTemplate is annotated @RequiresCarApi(6); the host throws HostException
-             if we claim a lower minCarApiLevel than any template we actually use. -->
+        <!-- Car API level 1 is sufficient for MessagingStyle notification projection and
+             ListTemplate. The browsable TabTemplate UI requires Car API 6; the screen
+             detects the host's level at runtime and falls back to a ListTemplate on
+             older hosts so the app remains usable on all vehicles. -->
         <meta-data
             android:name="androidx.car.app.minCarApiLevel"
-            android:value="6" />
+            android:value="1" />
     </application>
 
 </manifest>
