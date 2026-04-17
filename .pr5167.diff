@@ -1,0 +1,295 @@
+diff --git a/core/common/src/commonMain/kotlin/org/meshtastic/core/common/di/ApplicationCoroutineScope.kt b/core/common/src/commonMain/kotlin/org/meshtastic/core/common/di/ApplicationCoroutineScope.kt
+new file mode 100644
+index 0000000000..2a27b96906
+--- /dev/null
++++ b/core/common/src/commonMain/kotlin/org/meshtastic/core/common/di/ApplicationCoroutineScope.kt
+@@ -0,0 +1,39 @@
++/*
++ * Copyright (c) 2026 Meshtastic LLC
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++package org.meshtastic.core.common.di
++
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.SupervisorJob
++import org.koin.core.annotation.Single
++import org.meshtastic.core.common.util.ioDispatcher
++
++/**
++ * A process-wide [CoroutineScope] that outlives individual ViewModels and UI components.
++ *
++ * Use this scope for fire-and-forget cleanup work that must continue after a ViewModel's own scope has been cancelled
++ * (for example, deleting temporary files in `onCleared()`). Backed by a [SupervisorJob] so failures in one child do not
++ * cancel siblings, and by [ioDispatcher] so work runs off the main thread.
++ *
++ * Prefer scoping work to a more specific scope (like `viewModelScope`) whenever possible; this scope is an escape hatch
++ * and should be used sparingly.
++ */
++interface ApplicationCoroutineScope : CoroutineScope
++
++@Single(binds = [ApplicationCoroutineScope::class])
++internal class ApplicationCoroutineScopeImpl : ApplicationCoroutineScope {
++    override val coroutineContext = SupervisorJob() + ioDispatcher
++}
+diff --git a/core/ui/src/androidMain/kotlin/org/meshtastic/core/ui/util/PlatformUtils.kt b/core/ui/src/androidMain/kotlin/org/meshtastic/core/ui/util/PlatformUtils.kt
+index 231c84d401..5365ab95e2 100644
+--- a/core/ui/src/androidMain/kotlin/org/meshtastic/core/ui/util/PlatformUtils.kt
++++ b/core/ui/src/androidMain/kotlin/org/meshtastic/core/ui/util/PlatformUtils.kt
+@@ -37,12 +37,12 @@ import androidx.lifecycle.compose.LifecycleEventEffect
+ import co.touchlab.kermit.Logger
+ import com.eygraber.uri.toAndroidUri
+ import com.eygraber.uri.toKmpUri
+-import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.withContext
+ import org.jetbrains.compose.resources.StringResource
+ import org.jetbrains.compose.resources.getString
+ import org.meshtastic.core.common.gpsDisabled
+ import org.meshtastic.core.common.util.CommonUri
++import org.meshtastic.core.common.util.ioDispatcher
+ import java.net.URLEncoder
+ 
+ @Composable
+@@ -146,7 +146,7 @@ actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) ->
+     val context = LocalContext.current
+     return remember(context) {
+         { uri, maxChars ->
+-            withContext(Dispatchers.IO) {
++            withContext(ioDispatcher) {
+                 @Suppress("TooGenericExceptionCaught")
+                 try {
+                     val androidUri = uri.toAndroidUri()
+diff --git a/core/ui/src/jvmMain/kotlin/org/meshtastic/core/ui/util/PlatformUtils.kt b/core/ui/src/jvmMain/kotlin/org/meshtastic/core/ui/util/PlatformUtils.kt
+index 031e1fe35d..a938f92ea6 100644
+--- a/core/ui/src/jvmMain/kotlin/org/meshtastic/core/ui/util/PlatformUtils.kt
++++ b/core/ui/src/jvmMain/kotlin/org/meshtastic/core/ui/util/PlatformUtils.kt
+@@ -20,10 +20,10 @@ package org.meshtastic.core.ui.util
+ 
+ import androidx.compose.runtime.Composable
+ import co.touchlab.kermit.Logger
+-import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.withContext
+ import org.jetbrains.compose.resources.StringResource
+ import org.meshtastic.core.common.util.CommonUri
++import org.meshtastic.core.common.util.ioDispatcher
+ import java.awt.Desktop
+ import java.awt.FileDialog
+ import java.awt.Frame
+@@ -89,7 +89,7 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
+ /** JVM — Reads text from a file URI. */
+ @Composable
+ actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { uri, maxChars ->
+-    withContext(Dispatchers.IO) {
++    withContext(ioDispatcher) {
+         @Suppress("TooGenericExceptionCaught")
+         try {
+             val file = File(URI(uri.toString()))
+diff --git a/feature/firmware/src/commonMain/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModel.kt b/feature/firmware/src/commonMain/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModel.kt
+index dc1c459716..f8ff9fcac8 100644
+--- a/feature/firmware/src/commonMain/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModel.kt
++++ b/feature/firmware/src/commonMain/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModel.kt
+@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
+ import kotlinx.coroutines.withTimeoutOrNull
+ import org.jetbrains.compose.resources.StringResource
+ import org.koin.core.annotation.KoinViewModel
++import org.meshtastic.core.common.di.ApplicationCoroutineScope
+ import org.meshtastic.core.common.util.CommonUri
+ import org.meshtastic.core.common.util.safeCatching
+ import org.meshtastic.core.database.entity.FirmwareRelease
+@@ -91,6 +92,7 @@ class FirmwareUpdateViewModel(
+     private val firmwareUpdateManager: FirmwareUpdateManager,
+     private val usbManager: FirmwareUsbManager,
+     private val fileHandler: FirmwareFileHandler,
++    private val applicationScope: ApplicationCoroutineScope,
+ ) : ViewModel() {
+ 
+     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
+@@ -124,12 +126,10 @@ class FirmwareUpdateViewModel(
+ 
+     override fun onCleared() {
+         super.onCleared()
+-        // viewModelScope is already cancelled when onCleared() runs, so launch cleanup in a
+-        // standalone scope. SupervisorJob prevents the coroutine from propagating failures to a
+-        // shared parent, and NonCancellable on the launch keeps cleanup running even if the scope
+-        // is cancelled concurrently.
+-        @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
+-        kotlinx.coroutines.GlobalScope.launch(NonCancellable) {
++        // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
++        // application-wide scope (SupervisorJob + ioDispatcher). NonCancellable keeps cleanup
++        // running even if something tries to cancel it mid-flight.
++        applicationScope.launch(NonCancellable) {
+             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+         }
+     }
+diff --git a/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateIntegrationTest.kt b/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateIntegrationTest.kt
+index 4c48a1ced5..030d84effd 100644
+--- a/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateIntegrationTest.kt
++++ b/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateIntegrationTest.kt
+@@ -108,6 +108,7 @@ class FirmwareUpdateIntegrationTest {
+         firmwareUpdateManager,
+         usbManager,
+         fileHandler,
++        TestApplicationCoroutineScope(testDispatcher),
+     )
+ 
+     @Test
+diff --git a/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModelTest.kt b/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModelTest.kt
+index 7032ed4088..a8eddff838 100644
+--- a/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModelTest.kt
++++ b/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModelTest.kt
+@@ -124,6 +124,7 @@ class FirmwareUpdateViewModelTest {
+         firmwareUpdateManager,
+         usbManager,
+         fileHandler,
++        TestApplicationCoroutineScope(testDispatcher),
+     )
+ 
+     @Test
+diff --git a/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/TestApplicationCoroutineScope.kt b/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/TestApplicationCoroutineScope.kt
+new file mode 100644
+index 0000000000..3ef5c44ef4
+--- /dev/null
++++ b/feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/TestApplicationCoroutineScope.kt
+@@ -0,0 +1,26 @@
++/*
++ * Copyright (c) 2026 Meshtastic LLC
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++package org.meshtastic.feature.firmware
++
++import kotlinx.coroutines.CoroutineDispatcher
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.SupervisorJob
++import org.meshtastic.core.common.di.ApplicationCoroutineScope
++
++internal class TestApplicationCoroutineScope(dispatcher: CoroutineDispatcher) :
++    ApplicationCoroutineScope,
++    CoroutineScope by CoroutineScope(SupervisorJob() + dispatcher)
+diff --git a/feature/firmware/src/jvmTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModelFileTest.kt b/feature/firmware/src/jvmTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModelFileTest.kt
+index acb1545bdd..23a0d03ab2 100644
+--- a/feature/firmware/src/jvmTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModelFileTest.kt
++++ b/feature/firmware/src/jvmTest/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateViewModelFileTest.kt
+@@ -116,6 +116,7 @@ class FirmwareUpdateViewModelFileTest {
+         firmwareUpdateManager,
+         usbManager,
+         fileHandler,
++        TestApplicationCoroutineScope(testDispatcher),
+     )
+ 
+     // -----------------------------------------------------------------------
+diff --git a/feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/debugging/LogExporter.kt b/feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/debugging/LogExporter.kt
+index c251b4d5ef..315ad1da85 100644
+--- a/feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/debugging/LogExporter.kt
++++ b/feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/debugging/LogExporter.kt
+@@ -27,6 +27,7 @@ import co.touchlab.kermit.Logger
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.launch
+ import kotlinx.coroutines.withContext
++import org.meshtastic.core.common.util.ioDispatcher
+ import org.meshtastic.core.resources.Res
+ import org.meshtastic.core.resources.debug_export_failed
+ import org.meshtastic.core.resources.debug_export_success
+@@ -48,7 +49,7 @@ actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.U
+ }
+ 
+ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<DebugViewModel.UiMeshLog>) =
+-    withContext(Dispatchers.IO) {
++    withContext(ioDispatcher) {
+         try {
+             if (logs.isEmpty()) {
+                 withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
+diff --git a/feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/tak/PrefExporter.kt b/feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/tak/PrefExporter.kt
+index 9afde85e5f..a28a576788 100644
+--- a/feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/tak/PrefExporter.kt
++++ b/feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/tak/PrefExporter.kt
+@@ -24,9 +24,9 @@ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.rememberCoroutineScope
+ import androidx.compose.ui.platform.LocalContext
+ import co.touchlab.kermit.Logger
+-import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.launch
+ import kotlinx.coroutines.withContext
++import org.meshtastic.core.common.util.ioDispatcher
+ 
+ @Composable
+ actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit {
+@@ -41,7 +41,7 @@ actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteAr
+     return { fileName -> exportLauncher.launch(fileName) }
+ }
+ 
+-private suspend fun exportZipToUri(context: Context, targetUri: Uri, data: ByteArray) = withContext(Dispatchers.IO) {
++private suspend fun exportZipToUri(context: Context, targetUri: Uri, data: ByteArray) = withContext(ioDispatcher) {
+     try {
+         context.contentResolver.openOutputStream(targetUri)?.use { os -> os.write(data) }
+         Logger.i { "TAK data package exported successfully to $targetUri" }
+diff --git a/feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/debugging/LogExporter.kt b/feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/debugging/LogExporter.kt
+index 5b63cc90a3..a9a7285593 100644
+--- a/feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/debugging/LogExporter.kt
++++ b/feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/debugging/LogExporter.kt
+@@ -19,9 +19,9 @@ package org.meshtastic.feature.settings.debugging
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.rememberCoroutineScope
+ import co.touchlab.kermit.Logger
+-import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.launch
+ import kotlinx.coroutines.withContext
++import org.meshtastic.core.common.util.ioDispatcher
+ import java.awt.FileDialog
+ import java.awt.Frame
+ import java.io.File
+@@ -41,7 +41,7 @@ actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.U
+                 return@launch
+             }
+ 
+-            withContext(Dispatchers.IO) {
++            withContext(ioDispatcher) {
+                 // Run file dialog to ask user where to save
+                 val fileDialog = FileDialog(null as Frame?, "Export Logs", FileDialog.SAVE)
+                 fileDialog.file = fileName
+diff --git a/feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/tak/PrefExporter.kt b/feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/tak/PrefExporter.kt
+index 9fb71379fc..bfbb85bc0d 100644
+--- a/feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/tak/PrefExporter.kt
++++ b/feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/tak/PrefExporter.kt
+@@ -19,9 +19,9 @@ package org.meshtastic.feature.settings.tak
+ import androidx.compose.runtime.Composable
+ import androidx.compose.runtime.rememberCoroutineScope
+ import co.touchlab.kermit.Logger
+-import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.launch
+ import kotlinx.coroutines.withContext
++import org.meshtastic.core.common.util.ioDispatcher
+ import java.awt.FileDialog
+ import java.awt.Frame
+ import java.io.File
+@@ -44,7 +44,7 @@ actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteAr
+                 if (directory != null && file != null) {
+                     val targetFile = File(directory, file)
+                     val data = dataPackageProvider()
+-                    withContext(Dispatchers.IO) { targetFile.writeBytes(data) }
++                    withContext(ioDispatcher) { targetFile.writeBytes(data) }
+                     Logger.i { "TAK data package exported successfully to ${targetFile.absolutePath}" }
+                 }
+             }
