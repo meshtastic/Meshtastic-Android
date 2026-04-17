@@ -38,4 +38,8 @@ dependencies {
     implementation(libs.androidx.car.app)
     implementation(libs.kermit)
     implementation(libs.koin.annotations)
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.kotest.assertions)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

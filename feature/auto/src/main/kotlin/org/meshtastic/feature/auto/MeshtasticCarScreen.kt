@@ -45,17 +45,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.PortNum
 
 /**
  * Root screen displayed in Android Auto.
@@ -67,6 +62,10 @@ import org.meshtastic.proto.PortNum
  *   (always visible even when empty, sorted by channel index), followed by DM conversations
  *   sorted by most-recent message descending. This is the same ordering used by
  *   [org.meshtastic.feature.messaging.ui.contact.ContactsViewModel].
+ *
+ * Pure business-logic (contact ordering, row text, favourites sorting) is separated into
+ * [CarScreenDataBuilder], which is free of Car App Library dependencies and is unit-tested
+ * independently.
  *
  * `TabTemplate` requires Car API level 6. On hosts running Car API level 1–5 the screen falls
  * back to a single [ListTemplate] that includes a status row, favorite-node rows, and the
@@ -132,23 +131,23 @@ class MeshtasticCarScreen(carContext: CarContext) :
                 radioConfigRepository.channelSetFlow,
             ) { myId, rawContacts, channelSet ->
                 // Channel placeholders are always included so every configured channel is
-                // visible even before any messages have been sent/received — mirroring the
-                // behaviour of ContactsViewModel.contactList.
-                val placeholders = buildChannelPlaceholders(channelSet)
+                // visible even before any messages have been sent/received.
+                val placeholders = CarScreenDataBuilder.buildChannelPlaceholders(channelSet)
                 // Real DB entries take precedence over placeholders when present.
                 val merged = rawContacts + (placeholders - rawContacts.keys)
-                buildCarContacts(merged, myId, channelSet)
+                CarScreenDataBuilder.buildCarContacts(merged, myId, channelSet) { userId ->
+                    nodeRepository.getUser(userId)
+                }
             }
                 .distinctUntilChanged()
                 .flatMapLatest { baseContacts ->
                     if (baseContacts.isEmpty()) {
                         flowOf(emptyList())
                     } else {
-                        val unreadFlows =
-                            baseContacts.map { contact ->
-                                packetRepository.getUnreadCountFlow(contact.contactKey)
-                                    .map { unread -> contact.copy(unreadCount = unread) }
-                            }
+                        val unreadFlows = baseContacts.map { contact ->
+                            packetRepository.getUnreadCountFlow(contact.contactKey)
+                                .map { unread -> contact.copy(unreadCount = unread) }
+                        }
                         combine(unreadFlows) { it.toList() }
                     }
                 }
@@ -167,84 +166,16 @@ class MeshtasticCarScreen(carContext: CarContext) :
             }
         }
 
-        // Favorite nodes — filter nodeDBbyNum to isFavorite, sort alphabetically.
+        // Favorite nodes — filter to isFavorite only, sort alphabetically.
         scope.launch {
             nodeRepository.nodeDBbyNum
-                .map { db ->
-                    db.values
-                        .filter { it.isFavorite }
-                        .sortedWith(compareBy { it.user.long_name.ifEmpty { it.user.short_name } })
-                }
+                .map { db -> CarScreenDataBuilder.sortFavorites(db.values) }
                 .distinctUntilChanged()
                 .collect { nodes ->
                     favorites = nodes
                     invalidate()
                 }
         }
-    }
-
-    /** Returns a map of `"<ch>^all" → placeholder DataPacket` for every configured channel. */
-    private fun buildChannelPlaceholders(channelSet: ChannelSet): Map<String, DataPacket> =
-        (0 until channelSet.settings.size).associate { ch ->
-            // dataType uses PortNum.TEXT_MESSAGE_APP (value 1) to match the placeholder
-            // construction in ContactsViewModel and PacketRepository contact queries.
-            "${ch}${DataPacket.ID_BROADCAST}" to
-                DataPacket(bytes = null, dataType = PortNum.TEXT_MESSAGE_APP.value, time = 0L, channel = ch)
-        }
-
-    /**
-     * Converts the merged DB + placeholder map into an ordered [CarContact] list.
-     *
-     * Channels (keys ending with [DataPacket.ID_BROADCAST]) appear first sorted by channel index.
-     * DM conversations follow sorted by [CarContact.lastMessageTime] descending — matching the
-     * ordering used by the phone's Contacts screen.
-     */
-    private fun buildCarContacts(
-        merged: Map<String, DataPacket>,
-        myId: String?,
-        channelSet: ChannelSet,
-    ): List<CarContact> {
-        val all =
-            merged.map { (contactKey, packet) ->
-                val fromLocal = packet.from == DataPacket.ID_LOCAL || packet.from == myId
-                val toBroadcast = packet.to == DataPacket.ID_BROADCAST
-                val userId = if (fromLocal) packet.to else packet.from
-
-                // Resolve the user once; used for both displayName and message prefix.
-                val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
-
-                val displayName =
-                    if (toBroadcast) {
-                        channelSet.getChannel(packet.channel)?.name?.takeIf { it.isNotEmpty() }
-                            ?: "Channel ${packet.channel}"
-                    } else {
-                        // userId can be null for malformed packets (e.g. both `from` and `to`
-                        // are null). Fall back to a broadcast lookup which returns an "Unknown"
-                        // user rather than crashing.
-                        user.long_name.ifEmpty { user.short_name }.ifEmpty { "Unknown" }
-                    }
-
-                // Mirror ContactsViewModel: prefix received DM text with the sender's short name,
-                // matching how ContactItem's ChatMetadata renders lastMessageText.
-                val shortName = if (!toBroadcast) user.short_name else ""
-                val lastMessageText =
-                    packet.text?.let { text ->
-                        if (fromLocal || shortName.isEmpty()) text else "$shortName: $text"
-                    }
-
-                CarContact(
-                    contactKey = contactKey,
-                    displayName = displayName,
-                    unreadCount = 0, // filled in reactively by flatMapLatest below
-                    isBroadcast = toBroadcast,
-                    channelIndex = packet.channel,
-                    lastMessageTime = if (packet.time != 0L) packet.time else null,
-                    lastMessageText = lastMessageText,
-                )
-            }
-
-        return all.filter { it.isBroadcast }.sortedBy { it.channelIndex } +
-            all.filter { !it.isBroadcast }.sortedByDescending { it.lastMessageTime ?: 0L }
     }
 
     // ---- Template building ----
@@ -265,44 +196,24 @@ class MeshtasticCarScreen(carContext: CarContext) :
             return buildFallbackListTemplate()
         }
 
-        val tabCallback =
-            object : TabTemplate.TabCallback {
-                override fun onTabSelected(tabContentId: String) {
-                    activeTabId = tabContentId
-                    invalidate()
-                }
+        val tabCallback = object : TabTemplate.TabCallback {
+            override fun onTabSelected(tabContentId: String) {
+                activeTabId = tabContentId
+                invalidate()
             }
+        }
 
-        val activeContent =
-            when (activeTabId) {
-                TAB_FAVORITES -> TabContents.Builder(buildFavoritesTemplate()).build()
-                TAB_MESSAGES -> TabContents.Builder(buildMessagesTemplate()).build()
-                else -> TabContents.Builder(buildStatusTemplate()).build()
-            }
+        val activeContent = when (activeTabId) {
+            TAB_FAVORITES -> TabContents.Builder(buildFavoritesTemplate()).build()
+            TAB_MESSAGES -> TabContents.Builder(buildMessagesTemplate()).build()
+            else -> TabContents.Builder(buildStatusTemplate()).build()
+        }
 
         return TabTemplate.Builder(tabCallback)
             .setHeaderAction(Action.APP_ICON)
-            .addTab(
-                Tab.Builder()
-                    .setTitle("Status")
-                    .setIcon(carIcon(R.drawable.auto_ic_status))
-                    .setContentId(TAB_STATUS)
-                    .build(),
-            )
-            .addTab(
-                Tab.Builder()
-                    .setTitle("Favorites")
-                    .setIcon(carIcon(R.drawable.auto_ic_favorites))
-                    .setContentId(TAB_FAVORITES)
-                    .build(),
-            )
-            .addTab(
-                Tab.Builder()
-                    .setTitle("Messages")
-                    .setIcon(carIcon(R.drawable.auto_ic_channels))
-                    .setContentId(TAB_MESSAGES)
-                    .build(),
-            )
+            .addTab(Tab.Builder().setTitle("Status").setIcon(carIcon(R.drawable.auto_ic_status)).setContentId(TAB_STATUS).build())
+            .addTab(Tab.Builder().setTitle("Favorites").setIcon(carIcon(R.drawable.auto_ic_favorites)).setContentId(TAB_FAVORITES).build())
+            .addTab(Tab.Builder().setTitle("Messages").setIcon(carIcon(R.drawable.auto_ic_channels)).setContentId(TAB_MESSAGES).build())
             .setTabContents(activeContent)
             .setActiveTabContentId(activeTabId)
             .build()
@@ -338,79 +249,15 @@ class MeshtasticCarScreen(carContext: CarContext) :
      *   mirrors the signal row and last-heard chip in NodeItem.
      * - **Text 2**: battery percentage and short name — mirrors the battery row and node chip.
      */
-    private fun buildFavoritesTemplate(): ListTemplate {
-        val items = ItemList.Builder()
-        val capped = favorites.take(MAX_LIST_ITEMS)
-        if (capped.isEmpty()) {
-            items.setNoItemsMessage("No favorite nodes")
-        } else {
-            capped.forEach { node -> items.addItem(buildFavoriteNodeRow(node)) }
-        }
-        return ListTemplate.Builder().setTitle("Favorites").setSingleList(items.build()).build()
-    }
-
-    /**
-     * Builds a single favorite-node row.
-     *
-     * Mirrors the content of [org.meshtastic.feature.node.component.NodeItem]:
-     * - Title  → `long_name` (prominent, matches NodeItem header text)
-     * - Text 1 → online/offline + hop distance (matches NodeItem signal row)
-     * - Text 2 → battery level + short name chip equivalent (matches NodeItem battery row)
-     */
-    private fun buildFavoriteNodeRow(node: Node): Row {
-        val name = node.user.long_name.ifEmpty { node.user.short_name }.ifEmpty { "Unknown" }
-
-        // Mirror NodeItem's signal row: online status + hops / direct info.
-        val statusText = buildString {
-            if (node.isOnline) {
-                append("Online")
-                when {
-                    node.hopsAway == 0 -> append(" · Direct")
-                    node.hopsAway > 0 -> append(" · ${node.hopsAway} hops")
-                }
-            } else {
-                append("Offline")
-                if (node.lastHeard > 0) {
-                    // DateFormatter.formatRelativeTime takes millis; lastHeard is in seconds.
-                    val ago = DateFormatter.formatRelativeTime(node.lastHeard * 1000L)
-                    append(" · $ago")
-                }
-            }
-        }
-
-        // Mirror NodeItem's battery row + node chip: "[SHORT] · 85%" or just "[SHORT]".
-        val detailText = buildString {
-            val shortName = node.user.short_name
-            if (shortName.isNotEmpty()) append(shortName)
-            val battery = node.batteryLevelStr
-            if (battery.isNotEmpty()) {
-                if (isNotEmpty()) append(" · ")
-                append(battery)
-            }
-        }
-
-        return Row.Builder()
-            .setTitle(name)
-            .addText(statusText)
-            .apply { if (detailText.isNotEmpty()) addText(detailText) }
-            .setBrowsable(false)
-            .build()
-    }
+    private fun buildFavoritesTemplate(): ListTemplate =
+        buildListTemplate("Favorites", favorites, "No favorite nodes") { buildFavoriteNodeRow(it) }
 
     /**
      * Builds the Messages tab content: channels first (always present, even if empty), followed
      * by DM conversations sorted by most-recent message — identical to the phone's Contacts screen.
      */
-    private fun buildMessagesTemplate(): ListTemplate {
-        val items = ItemList.Builder()
-        val capped = contacts.take(MAX_LIST_ITEMS)
-        if (capped.isEmpty()) {
-            items.setNoItemsMessage("No conversations")
-        } else {
-            capped.forEach { contact -> items.addItem(buildContactRow(contact)) }
-        }
-        return ListTemplate.Builder().setTitle("Messages").setSingleList(items.build()).build()
-    }
+    private fun buildMessagesTemplate(): ListTemplate =
+        buildListTemplate("Messages", contacts, "No conversations") { buildContactRow(it) }
 
     /**
      * Fallback for Car API level 1–5 hosts that do not support [TabTemplate].
@@ -439,17 +286,34 @@ class MeshtasticCarScreen(carContext: CarContext) :
     }
 
     private fun buildStatusRow(): Row {
-        val statusText =
-            when (connectionState) {
-                is ConnectionState.Connected -> "Connected"
-                is ConnectionState.Disconnected -> "Disconnected"
-                is ConnectionState.DeviceSleep -> "Device Sleeping"
-                is ConnectionState.Connecting -> "Connecting…"
-            }
+        val statusText = when (connectionState) {
+            is ConnectionState.Connected -> "Connected"
+            is ConnectionState.Disconnected -> "Disconnected"
+            is ConnectionState.DeviceSleep -> "Device Sleeping"
+            is ConnectionState.Connecting -> "Connecting…"
+        }
         val deviceName = nodeRepository.ourNodeInfo.value?.user?.long_name.orEmpty()
         return Row.Builder()
             .setTitle(statusText)
-            .apply { if (deviceName.isNotEmpty()) addText(deviceName) }
+            .addTextIfNotEmpty(deviceName)
+            .setBrowsable(false)
+            .build()
+    }
+
+    /**
+     * Builds a single favorite-node row.
+     *
+     * Mirrors the content of [org.meshtastic.feature.node.component.NodeItem]:
+     * - Title  → `long_name` (prominent, matches NodeItem header text)
+     * - Text 1 → online/offline + hop distance (matches NodeItem signal row)
+     * - Text 2 → battery level + short name chip equivalent (matches NodeItem battery row)
+     */
+    private fun buildFavoriteNodeRow(node: Node): Row {
+        val name = node.user.long_name.ifEmpty { node.user.short_name }.ifEmpty { "Unknown" }
+        return Row.Builder()
+            .setTitle(name)
+            .addText(CarScreenDataBuilder.nodeStatusText(node))
+            .addTextIfNotEmpty(CarScreenDataBuilder.nodeDetailText(node))
             .setBrowsable(false)
             .build()
     }
@@ -464,48 +328,41 @@ class MeshtasticCarScreen(carContext: CarContext) :
      * - **Text 2** → `"N unread"` when there are unread messages, or the last-message timestamp
      *   when there are none (matches the unread badge and date in ContactHeader/ChatMetadata).
      */
-    private fun buildContactRow(contact: CarContact): Row {
-        // Mirror ChatMetadata: show the last message text or a placeholder for empty channels.
-        val preview = contact.lastMessageText?.takeIf { it.isNotEmpty() } ?: "No messages yet"
-
-        // Mirror ContactItem header date + ChatMetadata unread badge.
-        val secondaryText = when {
-            contact.unreadCount > 0 -> "${contact.unreadCount} unread"
-            contact.lastMessageTime != null ->
-                DateFormatter.formatShortDate(contact.lastMessageTime)
-            else -> ""
-        }
-
-        return Row.Builder()
+    private fun buildContactRow(contact: CarContact): Row =
+        Row.Builder()
             .setTitle(contact.displayName)
-            .addText(preview)
-            .apply { if (secondaryText.isNotEmpty()) addText(secondaryText) }
+            .addText(CarScreenDataBuilder.contactPreviewText(contact))
+            .addTextIfNotEmpty(CarScreenDataBuilder.contactSecondaryText(contact))
             .setBrowsable(false)
             .build()
-    }
 
     private fun carIcon(resId: Int) =
         CarIcon.Builder(IconCompat.createWithResource(carContext, resId)).setTint(CarColor.DEFAULT).build()
 
-    // ---- Internal model ----
+    /** Adds [text] as a new text line only when it is non-empty, avoiding blank Car UI rows. */
+    private fun Row.Builder.addTextIfNotEmpty(text: String): Row.Builder =
+        apply { if (text.isNotEmpty()) addText(text) }
 
     /**
-     * Lightweight projection of a conversation used exclusively within this screen.
+     * DRY helper: builds a [ListTemplate] from a list of items, capping at [MAX_LIST_ITEMS].
      *
-     * [isBroadcast] and [channelIndex] drive ordering (channels before DMs, channels sorted by
-     * index). [lastMessageTime] drives DM ordering (most-recent first).
-     * [lastMessageText] mirrors `ContactsViewModel.contactList`'s `lastMessageText` — received
-     * DMs are prefixed with the sender's short name, matching [ContactItem]'s ChatMetadata.
+     * Shows [noItemsMessage] when the list is empty.
      */
-    private data class CarContact(
-        val contactKey: String,
-        val displayName: String,
-        val unreadCount: Int,
-        val isBroadcast: Boolean,
-        val channelIndex: Int,
-        val lastMessageTime: Long?,
-        val lastMessageText: String?,
-    )
+    private fun <T> buildListTemplate(
+        title: String,
+        items: List<T>,
+        noItemsMessage: String,
+        buildRow: (T) -> Row,
+    ): ListTemplate {
+        val listBuilder = ItemList.Builder()
+        val capped = items.take(MAX_LIST_ITEMS)
+        if (capped.isEmpty()) {
+            listBuilder.setNoItemsMessage(noItemsMessage)
+        } else {
+            capped.forEach { listBuilder.addItem(buildRow(it)) }
+        }
+        return ListTemplate.Builder().setTitle(title).setSingleList(listBuilder.build()).build()
+    }
 
     companion object {
         private const val TAB_STATUS = "status"
@@ -520,4 +377,3 @@ class MeshtasticCarScreen(carContext: CarContext) :
         private const val MAX_LIST_ITEMS = 6
     }
 }
-
