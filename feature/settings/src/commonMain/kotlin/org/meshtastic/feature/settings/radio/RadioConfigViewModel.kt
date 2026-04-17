@@ -43,6 +43,7 @@ import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
@@ -52,6 +53,7 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -125,6 +127,7 @@ open class RadioConfigViewModel(
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase,
     private val locationService: LocationService,
     private val fileService: FileService,
+    private val mqttManager: MqttManager,
 ) : ViewModel() {
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
@@ -137,6 +140,9 @@ open class RadioConfigViewModel(
     fun toggleHomoglyphCharactersEncodingEnabled() {
         toggleHomoglyphEncodingUseCase()
     }
+
+    /** MQTT proxy connection state for the settings UI. */
+    val mqttConnectionState: StateFlow<MqttConnectionState> = mqttManager.mqttConnectionState
 
     private val destNumFlow = MutableStateFlow(savedStateHandle.get<Int>("destNum"))
 

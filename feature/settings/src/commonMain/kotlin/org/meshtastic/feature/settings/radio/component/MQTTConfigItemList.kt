@@ -18,17 +18,32 @@
 
 package org.meshtastic.feature.settings.radio.component
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.address
 import org.meshtastic.core.resources.default_mqtt_address
@@ -38,6 +53,11 @@ import org.meshtastic.core.resources.map_reporting
 import org.meshtastic.core.resources.mqtt
 import org.meshtastic.core.resources.mqtt_config
 import org.meshtastic.core.resources.mqtt_enabled
+import org.meshtastic.core.resources.mqtt_status_connected
+import org.meshtastic.core.resources.mqtt_status_connecting
+import org.meshtastic.core.resources.mqtt_status_disconnected
+import org.meshtastic.core.resources.mqtt_status_inactive
+import org.meshtastic.core.resources.mqtt_status_reconnecting
 import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.proxy_to_client_enabled
 import org.meshtastic.core.resources.root_topic
@@ -54,6 +74,7 @@ import org.meshtastic.proto.ModuleConfig
 fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
+    val mqttProxyState by viewModel.mqttConnectionState.collectAsStateWithLifecycle()
     val destNum = destNode?.num
     val mqttConfig = state.moduleConfig.mqtt ?: ModuleConfig.MQTTConfig()
     val formState = rememberConfigState(initialValue = mqttConfig)
@@ -86,6 +107,8 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             viewModel.setModuleConfig(config)
         },
     ) {
+        item { MqttStatusRow(mqttProxyState) }
+
         item {
             TitledCard(title = stringResource(Res.string.mqtt_config)) {
                 SwitchPreference(
@@ -210,3 +233,32 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 }
 
 private const val MIN_INTERVAL_SECS = 3600
+
+private val AmberColor = Color(0xFFFFA000)
+private val GreenColor = Color(0xFF4CAF50)
+
+@Composable
+private fun MqttStatusRow(state: MqttConnectionState) {
+    val (label, color) =
+        when (state) {
+            MqttConnectionState.INACTIVE ->
+                stringResource(Res.string.mqtt_status_inactive) to MaterialTheme.colorScheme.outline
+            MqttConnectionState.DISCONNECTED ->
+                stringResource(Res.string.mqtt_status_disconnected) to MaterialTheme.colorScheme.error
+            MqttConnectionState.CONNECTING -> stringResource(Res.string.mqtt_status_connecting) to AmberColor
+            MqttConnectionState.CONNECTED -> stringResource(Res.string.mqtt_status_connected) to GreenColor
+            MqttConnectionState.RECONNECTING -> stringResource(Res.string.mqtt_status_reconnecting) to AmberColor
+        }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(horizontal = 4.dp),
+    ) {
+        Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(color))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}

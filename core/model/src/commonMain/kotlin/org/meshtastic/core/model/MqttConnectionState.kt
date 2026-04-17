@@ -14,23 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.repository
+package org.meshtastic.core.model
 
-import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.model.MqttConnectionState
-import org.meshtastic.proto.MqttClientProxyMessage
+/** App-level MQTT proxy connection state, decoupled from the MQTT library's internal type. */
+enum class MqttConnectionState {
+    /** The MQTT proxy has not been started (disabled or not yet initialized). */
+    INACTIVE,
 
-/** Interface for managing MQTT proxy communication. */
-interface MqttManager {
-    /** Observable MQTT proxy connection state for UI consumption. */
-    val mqttConnectionState: StateFlow<MqttConnectionState>
+    /** The MQTT client is not connected to the broker. */
+    DISCONNECTED,
 
-    /** Starts the MQTT proxy with the given settings. */
-    fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean)
+    /** The MQTT client is actively connecting to the broker. */
+    CONNECTING,
 
-    /** Stops the MQTT manager. */
-    fun stop()
+    /** The MQTT client is connected and subscribed to topics. */
+    CONNECTED,
 
-    /** Handles an MQTT proxy message from the radio. */
-    fun handleMqttProxyMessage(message: MqttClientProxyMessage)
+    /** The MQTT client lost connection and is attempting to reconnect. */
+    RECONNECTING,
 }

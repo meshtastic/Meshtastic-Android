@@ -53,6 +53,7 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -99,6 +100,7 @@ class RadioConfigViewModelTest {
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase = mock(MockMode.autofill)
     private val locationService: LocationService = mock(MockMode.autofill)
     private val fileService: FileService = mock(MockMode.autofill)
+    private val mqttManager: MqttManager = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
 
     private lateinit var viewModel: RadioConfigViewModel
@@ -120,6 +122,9 @@ class RadioConfigViewModelTest {
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { serviceRepository.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+
+        every { mqttManager.mqttConnectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.INACTIVE)
 
         every { uiPrefs.showQuickChat } returns MutableStateFlow(false)
 
@@ -152,6 +157,7 @@ class RadioConfigViewModelTest {
         processRadioResponseUseCase = processRadioResponseUseCase,
         locationService = locationService,
         fileService = fileService,
+        mqttManager = mqttManager,
     )
 
     @Test

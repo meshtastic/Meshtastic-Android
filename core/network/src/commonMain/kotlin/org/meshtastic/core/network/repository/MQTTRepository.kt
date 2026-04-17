@@ -17,6 +17,8 @@
 package org.meshtastic.core.network.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.proto.MqttClientProxyMessage
 
 /** Interface defining the MQTT interactions used for proxying messages to and from the mesh. */
@@ -38,4 +40,7 @@ interface MQTTRepository {
      * @param retained Whether the message should be retained by the broker.
      */
     fun publish(topic: String, data: ByteArray, retained: Boolean)
+
+    /** Observable MQTT connection lifecycle state (DISCONNECTED → CONNECTING → CONNECTED → RECONNECTING). */
+    val connectionState: StateFlow<ConnectionState>
 }

@@ -44,6 +44,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.MqttClientProxyMessage
+import org.meshtastic.mqtt.ConnectionState as MqttConnectionState
 import org.meshtastic.proto.Position as ProtoPosition
 
 /**
@@ -162,6 +163,8 @@ class NoopMQTTRepository : MQTTRepository {
     override val proxyMessageFlow: Flow<MqttClientProxyMessage> = emptyFlow()
 
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {}
+
+    override val connectionState = MutableStateFlow(MqttConnectionState.DISCONNECTED)
 }
 
 // endregion
