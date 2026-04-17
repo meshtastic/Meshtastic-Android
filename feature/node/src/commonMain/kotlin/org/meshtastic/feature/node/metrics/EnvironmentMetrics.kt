@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
@@ -165,7 +166,10 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                     MetricIndicator(Environment.HUMIDITY.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = formatString("%s %.2f%%", stringResource(Res.string.humidity), humidity),
+                        text =
+                        "${stringResource(
+                            Res.string.humidity,
+                        )} ${MetricFormatter.percent(humidity, decimalPlaces = 2)}",
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         modifier = Modifier.padding(vertical = 0.dp),
@@ -178,7 +182,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                     MetricIndicator(Environment.BAROMETRIC_PRESSURE.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = formatString("%.2f hPa", pressure),
+                        text = MetricFormatter.pressure(pressure, decimalPlaces = 2),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         modifier = Modifier.padding(vertical = 0.dp),
@@ -286,7 +290,7 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
             if (hasVoltage) {
                 val voltage = envMetrics.voltage!!
                 Text(
-                    text = formatString("%s %.2f V", stringResource(Res.string.voltage), voltage),
+                    text = "${stringResource(Res.string.voltage)} ${MetricFormatter.voltage(voltage)}",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
@@ -294,7 +298,10 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
             if (hasCurrent) {
                 val currentValue = envMetrics.current!!
                 Text(
-                    text = formatString("%s %.2f mA", stringResource(Res.string.current), currentValue),
+                    text =
+                    "${stringResource(
+                        Res.string.current,
+                    )} ${MetricFormatter.current(currentValue, decimalPlaces = 2)}",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
@@ -387,7 +394,11 @@ private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
                         envMetrics.wind_direction!!,
                     )
                 } else {
-                    formatString("%s %.1f m/s", stringResource(Res.string.wind_speed), envMetrics.wind_speed!!)
+                    formatString(
+                        "%s %s",
+                        stringResource(Res.string.wind_speed),
+                        MetricFormatter.windSpeed(envMetrics.wind_speed!!),
+                    )
                 }
             Text(
                 text = dirText,
@@ -403,14 +414,14 @@ private fun WindGustLullRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         if (hasGust) {
             Text(
-                text = formatString("%s %.1f m/s", stringResource(Res.string.wind_gust), envMetrics.wind_gust!!),
+                text = "${stringResource(Res.string.wind_gust)} ${MetricFormatter.windSpeed(envMetrics.wind_gust!!)}",
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
             )
         }
         if (hasLull) {
             Text(
-                text = formatString("%s %.1f m/s", stringResource(Res.string.wind_lull), envMetrics.wind_lull!!),
+                text = "${stringResource(Res.string.wind_lull)} ${MetricFormatter.windSpeed(envMetrics.wind_lull!!)}",
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
             )
@@ -427,7 +438,10 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (has1h) {
                 Text(
-                    text = formatString("%s %.1f mm", stringResource(Res.string.rainfall_1h), envMetrics.rainfall_1h!!),
+                    text =
+                    "${stringResource(
+                        Res.string.rainfall_1h,
+                    )} ${MetricFormatter.rainfall(envMetrics.rainfall_1h!!)}",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
@@ -435,7 +449,9 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
             if (has24h) {
                 Text(
                     text =
-                    formatString("%s %.1f mm", stringResource(Res.string.rainfall_24h), envMetrics.rainfall_24h!!),
+                    "${stringResource(
+                        Res.string.rainfall_24h,
+                    )} ${MetricFormatter.rainfall(envMetrics.rainfall_24h!!)}",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )

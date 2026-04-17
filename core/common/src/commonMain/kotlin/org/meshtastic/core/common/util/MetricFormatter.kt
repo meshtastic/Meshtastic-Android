@@ -23,6 +23,7 @@ package org.meshtastic.core.common.util
  * All methods return locale-independent strings using [NumberFormatter] (dot decimal separator), which is intentional
  * for a mesh networking app where consistency matters.
  */
+@Suppress("TooManyFunctions")
 object MetricFormatter {
 
     fun temperature(celsius: Float, isFahrenheit: Boolean): String {
@@ -47,6 +48,12 @@ object MetricFormatter {
     fun snr(value: Float, decimalPlaces: Int = 1): String = "${NumberFormatter.format(value, decimalPlaces)} dB"
 
     fun rssi(value: Int): String = "$value dBm"
+
+    fun windSpeed(metersPerSecond: Float, decimalPlaces: Int = 1): String =
+        "${NumberFormatter.format(metersPerSecond, decimalPlaces)} m/s"
+
+    fun rainfall(millimeters: Float, decimalPlaces: Int = 1): String =
+        "${NumberFormatter.format(millimeters, decimalPlaces)} mm"
 }
 
 private const val FAHRENHEIT_SCALE = 1.8f

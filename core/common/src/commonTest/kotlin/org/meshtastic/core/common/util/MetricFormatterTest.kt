@@ -120,4 +120,24 @@ class MetricFormatterTest {
     fun snrNegative() {
         assertEquals("-5.5 dB", MetricFormatter.snr(-5.5f))
     }
+
+    @Test
+    fun windSpeed() {
+        assertEquals("12.3 m/s", MetricFormatter.windSpeed(12.34f))
+    }
+
+    @Test
+    fun windSpeedZero() {
+        assertEquals("0.0 m/s", MetricFormatter.windSpeed(0.0f))
+    }
+
+    @Test
+    fun rainfall() {
+        assertEquals("2.5 mm", MetricFormatter.rainfall(2.54f))
+    }
+
+    @Test
+    fun rainfallZero() {
+        assertEquals("0.0 mm", MetricFormatter.rainfall(0.0f))
+    }
 }

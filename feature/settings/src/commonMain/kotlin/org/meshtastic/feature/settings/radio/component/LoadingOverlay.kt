@@ -39,7 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.feature.settings.radio.ResponseState
 
 private const val LOADING_OVERLAY_ALPHA = 0.8f
@@ -73,7 +73,7 @@ fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                         )
                         Text(
-                            text = formatString("%.0f%%", progress * PERCENTAGE_FACTOR),
+                            text = MetricFormatter.percent(progress * PERCENTAGE_FACTOR, decimalPlaces = 0),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                         )
