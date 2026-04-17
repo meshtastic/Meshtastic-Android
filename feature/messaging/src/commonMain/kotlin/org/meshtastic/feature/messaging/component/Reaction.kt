@@ -143,7 +143,7 @@ internal fun ReactionRow(
 
     AnimatedVisibility(emojiGroups.isNotEmpty(), modifier = modifier) {
         LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            items(emojiGroups.entries.toList()) { entry ->
+            items(emojiGroups.entries.toList(), key = { it.key }) { entry ->
                 val emoji = entry.key
                 val reactions = entry.value
                 val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
@@ -237,7 +237,7 @@ internal fun ReactionDialog(
     }
 
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        items(groupedEmojis.entries.toList()) { entry ->
+        items(groupedEmojis.entries.toList(), key = { it.key }) { entry ->
             val emoji = entry.key
             val reactions = entry.value
             val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
@@ -265,7 +265,7 @@ internal fun ReactionDialog(
     HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
     LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(filteredReactions) { reaction ->
+        items(filteredReactions, key = { reaction -> "${reaction.user.id}:${reaction.emoji}" }) { reaction ->
             Column(modifier = Modifier.padding(horizontal = 8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

@@ -92,6 +92,7 @@ import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.hide_password
 import org.meshtastic.core.resources.img_mpwrd_logo
+import org.meshtastic.core.resources.mpwrd_os
 import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.show_password
 import org.meshtastic.core.resources.wifi_provision_available_networks
@@ -513,7 +514,7 @@ internal fun MpwrdDisclaimerBanner() {
         ) {
             Image(
                 painter = painterResource(Res.drawable.img_mpwrd_logo),
-                contentDescription = "mPWRD-OS",
+                contentDescription = stringResource(Res.string.mpwrd_os),
                 modifier = Modifier.size(MPWRD_LOGO_SIZE_DP.dp).clip(RoundedCornerShape(8.dp)),
             )
             AutoLinkText(
