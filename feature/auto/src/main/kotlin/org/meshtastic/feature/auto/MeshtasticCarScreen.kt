@@ -19,11 +19,14 @@ package org.meshtastic.feature.auto
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.CarIcon
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
-import androidx.car.app.model.SectionedItemList
+import androidx.car.app.model.Tab
+import androidx.car.app.model.TabTemplate
 import androidx.car.app.model.Template
+import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.CoroutineScope
@@ -51,10 +54,12 @@ import org.meshtastic.proto.ChannelSettings
 /**
  * Root screen displayed in Android Auto.
  *
- * Shows three sections mirroring the iOS CarPlay implementation:
+ * Shows three tabs mirroring the iOS CarPlay tab-based navigation:
  * - **Status**: Connection state and active device name
  * - **Favorites**: Favorited mesh nodes with unread message counts
  * - **Channels**: Active channels with unread message counts
+ *
+ * Requires Car API level 2+ (androidx.car.app:app 1.2.0+) for [TabTemplate] support.
  */
 class MeshtasticCarScreen(carContext: CarContext) :
     Screen(carContext),
@@ -69,6 +74,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var observeJob: Job? = null
 
+    private var activeTabId = TAB_STATUS
     private var connectionState: ConnectionState = ConnectionState.Disconnected
     private var favoriteNodes: List<Node> = emptyList()
     private var channels: List<Pair<Int, ChannelSettings>> = emptyList()
@@ -141,24 +147,48 @@ class MeshtasticCarScreen(carContext: CarContext) :
     }
 
     override fun onGetTemplate(): Template {
-        val listBuilder = ListTemplate.Builder()
-
-        listBuilder.addSectionedList(SectionedItemList.create(buildStatusSection(), "Status"))
-
-        val favoritesSection = buildFavoritesSection()
-        if (favoritesSection.items.isNotEmpty()) {
-            listBuilder.addSectionedList(SectionedItemList.create(favoritesSection, "Favorites"))
+        val tabCallback = TabTemplate.TabCallback { tabContentId ->
+            activeTabId = tabContentId
+            invalidate()
         }
 
-        val channelsSection = buildChannelsSection()
-        if (channelsSection.items.isNotEmpty()) {
-            listBuilder.addSectionedList(SectionedItemList.create(channelsSection, "Channels"))
+        val activeContent = when (activeTabId) {
+            TAB_FAVORITES -> TabTemplate.TabContents.Builder(buildFavoritesTemplate()).build()
+            TAB_CHANNELS -> TabTemplate.TabContents.Builder(buildChannelsTemplate()).build()
+            else -> TabTemplate.TabContents.Builder(buildStatusTemplate()).build()
         }
 
-        return listBuilder.setTitle("Meshtastic").setHeaderAction(Action.APP_ICON).build()
+        return TabTemplate.Builder(tabCallback)
+            .setHeaderAction(Action.APP_ICON)
+            .addTab(
+                Tab.Builder()
+                    .setTitle("Status")
+                    .setIcon(carIcon(R.drawable.auto_ic_status))
+                    .setContentId(TAB_STATUS)
+                    .build(),
+            )
+            .addTab(
+                Tab.Builder()
+                    .setTitle("Favorites")
+                    .setIcon(carIcon(R.drawable.auto_ic_favorites))
+                    .setContentId(TAB_FAVORITES)
+                    .build(),
+            )
+            .addTab(
+                Tab.Builder()
+                    .setTitle("Channels")
+                    .setIcon(carIcon(R.drawable.auto_ic_channels))
+                    .setContentId(TAB_CHANNELS)
+                    .build(),
+            )
+            .setTabContents(activeContent)
+            .setActiveTabContentId(activeTabId)
+            .build()
     }
 
-    private fun buildStatusSection(): ItemList {
+    private fun carIcon(resId: Int) = CarIcon.Builder(IconCompat.createWithResource(carContext, resId)).build()
+
+    private fun buildStatusTemplate(): ListTemplate {
         val statusText =
             when (connectionState) {
                 is ConnectionState.Connected -> "Connected"
@@ -177,55 +207,70 @@ class MeshtasticCarScreen(carContext: CarContext) :
                 .setBrowsable(false)
                 .build()
 
-        return ItemList.Builder().addItem(row).build()
+        return ListTemplate.Builder()
+            .setTitle("Status")
+            .setSingleList(ItemList.Builder().addItem(row).build())
+            .build()
     }
 
-    private fun buildFavoritesSection(): ItemList {
-        val builder = ItemList.Builder()
-
-        for (node in favoriteNodes.take(MAX_LIST_ITEMS)) {
-            val contactKey = "0${node.user.id}"
-            val unread = unreadCounts[contactKey] ?: 0
-            val name = node.user.long_name.ifEmpty { node.user.short_name }.ifEmpty { "Unknown" }
-            val subtitle = buildString {
-                append(node.user.short_name)
-                if (node.hopsAway >= 0) append(" · ${node.hopsAway} hops")
-                if (unread > 0) append(" · $unread unread")
+    private fun buildFavoritesTemplate(): ListTemplate {
+        val items = ItemList.Builder()
+        if (favoriteNodes.isEmpty()) {
+            items.setNoItemsMessage("No favorite contacts")
+        } else {
+            for (node in favoriteNodes.take(MAX_LIST_ITEMS)) {
+                val contactKey = "0${node.user.id}"
+                val unread = unreadCounts[contactKey] ?: 0
+                val name = node.user.long_name.ifEmpty { node.user.short_name }.ifEmpty { "Unknown" }
+                val subtitle = buildString {
+                    append(node.user.short_name)
+                    if (node.hopsAway >= 0) append(" · ${node.hopsAway} hops")
+                    if (unread > 0) append(" · $unread unread")
+                }
+                items.addItem(Row.Builder().setTitle(name).addText(subtitle).setBrowsable(false).build())
             }
-
-            val row = Row.Builder().setTitle(name).addText(subtitle).setBrowsable(false).build()
-            builder.addItem(row)
         }
 
-        return builder.build()
+        return ListTemplate.Builder()
+            .setTitle("Favorites")
+            .setSingleList(items.build())
+            .build()
     }
 
-    private fun buildChannelsSection(): ItemList {
-        val builder = ItemList.Builder()
+    private fun buildChannelsTemplate(): ListTemplate {
+        val items = ItemList.Builder()
+        if (channels.isEmpty()) {
+            items.setNoItemsMessage("No active channels")
+        } else {
+            for ((index, channelSettings) in channels.take(MAX_LIST_ITEMS)) {
+                val contactKey = "${index}${DataPacket.ID_BROADCAST}"
+                val unread = unreadCounts[contactKey] ?: 0
+                val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
+                val subtitle = if (unread > 0) "$unread unread" else ""
 
-        for ((index, channelSettings) in channels.take(MAX_LIST_ITEMS)) {
-            val contactKey = "${index}${DataPacket.ID_BROADCAST}"
-            val unread = unreadCounts[contactKey] ?: 0
-            val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
-            val subtitle = if (unread > 0) "$unread unread" else ""
-
-            val row =
-                Row.Builder()
-                    .setTitle(channelName)
-                    .apply { if (subtitle.isNotEmpty()) addText(subtitle) }
-                    .setBrowsable(false)
-                    .build()
-
-            builder.addItem(row)
+                val row =
+                    Row.Builder()
+                        .setTitle(channelName)
+                        .apply { if (subtitle.isNotEmpty()) addText(subtitle) }
+                        .setBrowsable(false)
+                        .build()
+                items.addItem(row)
+            }
         }
 
-        return builder.build()
+        return ListTemplate.Builder()
+            .setTitle("Channels")
+            .setSingleList(items.build())
+            .build()
     }
 
     companion object {
+        private const val TAB_STATUS = "status"
+        private const val TAB_FAVORITES = "favorites"
+        private const val TAB_CHANNELS = "channels"
+
         /**
-         * Android Auto enforces a maximum item count per [ListTemplate] section. Car API level 1 supports up to 6 items
-         * per section.
+         * Android Auto enforces a maximum item count per [ListTemplate]. Car API level 2 supports up to 6 items.
          */
         private const val MAX_LIST_ITEMS = 6
     }
