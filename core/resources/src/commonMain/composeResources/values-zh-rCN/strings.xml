@@ -1114,4 +1114,5 @@
     <string name="note">备注</string>
     <string name="connect">连接</string>
     <string name="done">完成</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

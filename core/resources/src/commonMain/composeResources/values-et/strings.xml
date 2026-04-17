@@ -1208,4 +1208,5 @@
     <string name="wifi_provision_ssid_placeholder">Sisestage või valige võrk</string>
     <string name="wifi_provision_status_applied">WiFi edukalt seadistatud!</string>
     <string name="wifi_provision_status_failed">WiFi sätete rakendamine ebaõnnestus</string>
+    <string name="desktop_notification_title">Kärgvõrgustik</string>
 </resources>

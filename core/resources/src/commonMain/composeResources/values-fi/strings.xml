@@ -1209,4 +1209,5 @@
     <string name="wifi_provision_ssid_placeholder">Syötä tai valitse verkko</string>
     <string name="wifi_provision_status_applied">WiFi määritetty onnistuneesti!</string>
     <string name="wifi_provision_status_failed">WiFi-asetusten käyttöönotto epäonnistui</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

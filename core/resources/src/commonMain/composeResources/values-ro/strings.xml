@@ -1168,4 +1168,5 @@
     <string name="wifi_provision_ssid_placeholder">Introdu sau selecteaza o retea</string>
     <string name="wifi_provision_status_applied">WiFi configurat cu succes!</string>
     <string name="wifi_provision_status_failed">Nu s-a reușit aplicarea configurației Wi-Fi</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

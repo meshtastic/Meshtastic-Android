@@ -968,4 +968,5 @@
     <string name="note">Poznámka</string>
     <string name="connect">Připojit</string>
     <string name="done">Hotovo</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>

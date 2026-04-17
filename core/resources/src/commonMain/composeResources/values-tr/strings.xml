@@ -546,4 +546,5 @@
     <string name="tak_team_blue">Mavi</string>
     <string name="tak_team_green">Yeşil</string>
     <string name="connect">Bağlan</string>
+    <string name="desktop_notification_title">Meshtastic</string>
 </resources>
