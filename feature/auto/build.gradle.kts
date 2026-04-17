@@ -14,24 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.auto
 
-import androidx.car.app.CarAppService
-import androidx.car.app.Session
-import androidx.car.app.SessionInfo
-import androidx.car.app.validation.HostValidator
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.koin)
+}
 
-/**
- * Entry point for the Meshtastic Android Auto experience.
- *
- * Registers with the Android Auto host to provide a browsable list of
- * favorite contacts and active channels for messaging.
- */
-class MeshtasticCarAppService : CarAppService() {
+android {
+    namespace = "org.meshtastic.feature.auto"
+    resourcePrefix = "auto_"
 
-    override fun createHostValidator(): HostValidator =
-        HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
+    // Car App Library requires API 23+; bump above the app's default minSdk
+    // so we can use conversation shortcuts and LocusId APIs cleanly.
+    defaultConfig { minSdk = 23 }
+}
 
-    override fun onCreateSession(sessionInfo: SessionInfo): Session =
-        MeshtasticCarSession()
+dependencies {
+    implementation(projects.core.common)
+    implementation(projects.core.model)
+    implementation(projects.core.proto)
+    implementation(projects.core.repository)
+
+    implementation(libs.androidx.car.app)
+    implementation(libs.kermit)
+    implementation(libs.koin.annotations)
 }

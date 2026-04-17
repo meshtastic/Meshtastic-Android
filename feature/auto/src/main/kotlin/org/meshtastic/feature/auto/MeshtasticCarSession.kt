@@ -14,18 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.auto
+package org.meshtastic.feature.auto
 
 import android.content.Intent
 import androidx.car.app.Screen
 import androidx.car.app.Session
 
-/**
- * Android Auto session that hosts the [MeshtasticCarScreen] root screen.
- */
+/** Android Auto session that hosts the [MeshtasticCarScreen] root screen. */
 class MeshtasticCarSession : Session() {
 
-    override fun onCreateScreen(intent: Intent): Screen {
-        return MeshtasticCarScreen(carContext)
-    }
+    override fun onCreateScreen(intent: Intent): Screen = MeshtasticCarScreen(carContext)
 }

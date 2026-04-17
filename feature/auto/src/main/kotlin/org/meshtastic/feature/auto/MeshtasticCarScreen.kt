@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.auto
+package org.meshtastic.feature.auto
 
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
@@ -33,6 +33,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -86,110 +88,97 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
     private fun startObserving() {
         observeJob?.cancel()
-        observeJob = scope.launch {
-            val stateFlow = serviceRepository.connectionState
-                .distinctUntilChanged()
+        observeJob =
+            scope.launch {
+                // serviceRepository.connectionState is a StateFlow — distinctUntilChanged is a no-op on it.
+                val stateFlow = serviceRepository.connectionState
 
-            val favoritesFlow = nodeRepository.nodeDBbyNum
-                .map { nodes ->
-                    val myNum = nodeRepository.myNodeInfo.value?.myNodeNum
-                    nodes.values
-                        .filter { it.isFavorite && !it.isIgnored && it.num != myNum }
-                        .sortedBy { it.user.long_name }
+                val favoritesFlow =
+                    nodeRepository.nodeDBbyNum
+                        .map { nodes ->
+                            val myNum = nodeRepository.myNodeInfo.value?.myNodeNum
+                            nodes.values
+                                .filter { it.isFavorite && !it.isIgnored && it.num != myNum }
+                                .sortedBy { it.user.long_name }
+                        }
+                        .distinctUntilChanged()
+
+                val channelsFlow =
+                    radioConfigRepository.channelSetFlow
+                        .map { cs ->
+                            cs.settings.filterIndexed { index, settings -> index == 0 || settings.name.isNotEmpty() }
+                        }
+                        .distinctUntilChanged()
+
+                combine(stateFlow, favoritesFlow, channelsFlow) { state, favorites, chs ->
+                    Triple(state, favorites, chs)
                 }
-                .distinctUntilChanged()
+                    .flatMapLatest { (state, favorites, chs) ->
+                        // Build per-conversation unread flows so the car screen invalidates
+                        // on new messages, not just on topology/channel changes.
+                        val contactKeys =
+                            favorites.map { "0${it.user.id}" } +
+                                chs.mapIndexed { i, _ -> "${i}${DataPacket.ID_BROADCAST}" }
 
-            val channelsFlow = radioConfigRepository.channelSetFlow
-                .map { cs ->
-                    cs.settings.filterIndexed { index, settings ->
-                        index == 0 || settings.name.isNotEmpty()
+                        if (contactKeys.isEmpty()) {
+                            flowOf(Triple(state, favorites, chs) to emptyMap())
+                        } else {
+                            val unreadFlows =
+                                contactKeys.map { key ->
+                                    packetRepository.getUnreadCountFlow(key).map { count -> key to count }
+                                }
+                            combine(unreadFlows) { pairs -> Triple(state, favorites, chs) to pairs.toMap() }
+                        }
                     }
-                }
-                .distinctUntilChanged()
-
-            combine(stateFlow, favoritesFlow, channelsFlow) { state, favorites, chs ->
-                Triple(state, favorites, chs)
-            }.collect { (state, favorites, chs) ->
-                connectionState = state
-                favoriteNodes = favorites
-                channels = chs
-
-                // Collect unread counts for all conversations
-                val counts = mutableMapOf<String, Int>()
-                for (node in favorites) {
-                    val key = "0${node.user.id}"
-                    counts[key] = packetRepository.getUnreadCount(key)
-                }
-                for ((index, _) in chs.withIndex()) {
-                    val key = "${index}${DataPacket.ID_BROADCAST}"
-                    counts[key] = packetRepository.getUnreadCount(key)
-                }
-                unreadCounts = counts
-
-                invalidate()
+                    .collect { (triple, counts) ->
+                        val (state, favorites, chs) = triple
+                        connectionState = state
+                        favoriteNodes = favorites
+                        channels = chs
+                        unreadCounts = counts
+                        invalidate()
+                    }
             }
-        }
     }
 
     override fun onGetTemplate(): Template {
         val listBuilder = ListTemplate.Builder()
 
-        // Status section
-        listBuilder.addSectionedList(
-            SectionedItemList.create(
-                buildStatusSection(),
-                "Status",
-            ),
-        )
+        listBuilder.addSectionedList(SectionedItemList.create(buildStatusSection(), "Status"))
 
-        // Favorites section
         val favoritesSection = buildFavoritesSection()
         if (favoritesSection.items.isNotEmpty()) {
-            listBuilder.addSectionedList(
-                SectionedItemList.create(
-                    favoritesSection,
-                    "Favorites",
-                ),
-            )
+            listBuilder.addSectionedList(SectionedItemList.create(favoritesSection, "Favorites"))
         }
 
-        // Channels section
         val channelsSection = buildChannelsSection()
         if (channelsSection.items.isNotEmpty()) {
-            listBuilder.addSectionedList(
-                SectionedItemList.create(
-                    channelsSection,
-                    "Channels",
-                ),
-            )
+            listBuilder.addSectionedList(SectionedItemList.create(channelsSection, "Channels"))
         }
 
-        return listBuilder
-            .setTitle("Meshtastic")
-            .setHeaderAction(Action.APP_ICON)
-            .build()
+        return listBuilder.setTitle("Meshtastic").setHeaderAction(Action.APP_ICON).build()
     }
 
     private fun buildStatusSection(): ItemList {
-        val statusText = when (connectionState) {
-            is ConnectionState.Connected -> "Connected"
-            is ConnectionState.Disconnected -> "Disconnected"
-            is ConnectionState.DeviceSleep -> "Device Sleeping"
-            is ConnectionState.Connecting -> "Connecting..."
-        }
+        val statusText =
+            when (connectionState) {
+                is ConnectionState.Connected -> "Connected"
+                is ConnectionState.Disconnected -> "Disconnected"
+                is ConnectionState.DeviceSleep -> "Device Sleeping"
+                is ConnectionState.Connecting -> "Connecting..."
+            }
 
         val deviceName = nodeRepository.ourNodeInfo.value?.user?.long_name ?: ""
         val subtitle = if (deviceName.isNotEmpty()) deviceName else null
 
-        val row = Row.Builder()
-            .setTitle(statusText)
-            .apply { if (subtitle != null) addText(subtitle) }
-            .setBrowsable(false)
-            .build()
+        val row =
+            Row.Builder()
+                .setTitle(statusText)
+                .apply { if (subtitle != null) addText(subtitle) }
+                .setBrowsable(false)
+                .build()
 
-        return ItemList.Builder()
-            .addItem(row)
-            .build()
+        return ItemList.Builder().addItem(row).build()
     }
 
     private fun buildFavoritesSection(): ItemList {
@@ -205,12 +194,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
                 if (unread > 0) append(" · $unread unread")
             }
 
-            val row = Row.Builder()
-                .setTitle(name)
-                .addText(subtitle)
-                .setBrowsable(false)
-                .build()
-
+            val row = Row.Builder().setTitle(name).addText(subtitle).setBrowsable(false).build()
             builder.addItem(row)
         }
 
@@ -226,11 +210,12 @@ class MeshtasticCarScreen(carContext: CarContext) :
             val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
             val subtitle = if (unread > 0) "$unread unread" else ""
 
-            val row = Row.Builder()
-                .setTitle(channelName)
-                .apply { if (subtitle.isNotEmpty()) addText(subtitle) }
-                .setBrowsable(false)
-                .build()
+            val row =
+                Row.Builder()
+                    .setTitle(channelName)
+                    .apply { if (subtitle.isNotEmpty()) addText(subtitle) }
+                    .setBrowsable(false)
+                    .build()
 
             builder.addItem(row)
         }
@@ -240,10 +225,9 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
     companion object {
         /**
-         * Android Auto enforces a maximum item count per [ListTemplate] section.
-         * Car API level 1 supports up to 6 items per section.
+         * Android Auto enforces a maximum item count per [ListTemplate] section. Car API level 1 supports up to 6 items
+         * per section.
          */
         private const val MAX_LIST_ITEMS = 6
     }
 }
-

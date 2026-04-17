@@ -46,6 +46,7 @@ include(
     ":feature:settings",
     ":feature:firmware",
     ":feature:wifi-provision",
+    ":feature:auto",
     ":feature:widget",
     ":desktop",
 )

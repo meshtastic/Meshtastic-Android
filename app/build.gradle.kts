@@ -235,6 +235,7 @@ dependencies {
     implementation(projects.feature.settings)
     implementation(projects.feature.firmware)
     implementation(projects.feature.wifiProvision)
+    implementation(projects.feature.auto)
     implementation(projects.feature.widget)
 
     implementation(libs.jetbrains.compose.material3.adaptive)
@@ -270,7 +271,6 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
     implementation(libs.kotlinx.datetime)
-    implementation(libs.androidx.car.app)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)
