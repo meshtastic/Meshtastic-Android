@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -91,6 +92,7 @@ class FirmwareUpdateViewModel(
     private val firmwareUpdateManager: FirmwareUpdateManager,
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
+    private val applicationScope: ApplicationCoroutineScope,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
@@ -124,12 +126,10 @@ class FirmwareUpdateViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        // viewModelScope is already cancelled when onCleared() runs, so launch cleanup in a
-        // standalone scope. SupervisorJob prevents the coroutine from propagating failures to a
-        // shared parent, and NonCancellable on the launch keeps cleanup running even if the scope
-        // is cancelled concurrently.
-        @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
-        kotlinx.coroutines.GlobalScope.launch(NonCancellable) {
+        // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
+        // application-wide scope (SupervisorJob + ioDispatcher). NonCancellable keeps cleanup
+        // running even if something tries to cancel it mid-flight.
+        applicationScope.launch(NonCancellable) {
             tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
         }
     }

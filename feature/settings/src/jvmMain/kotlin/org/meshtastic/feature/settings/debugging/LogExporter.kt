@@ -19,9 +19,9 @@ package org.meshtastic.feature.settings.debugging
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.ioDispatcher
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
@@ -41,7 +41,7 @@ actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.U
                 return@launch
             }
 
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 // Run file dialog to ask user where to save
                 val fileDialog = FileDialog(null as Frame?, "Export Logs", FileDialog.SAVE)
                 fileDialog.file = fileName

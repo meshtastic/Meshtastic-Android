@@ -37,12 +37,12 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toAndroidUri
 import com.eygraber.uri.toKmpUri
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
 import java.net.URLEncoder
 
 @Composable
@@ -146,7 +146,7 @@ actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) ->
     val context = LocalContext.current
     return remember(context) {
         { uri, maxChars ->
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 @Suppress("TooGenericExceptionCaught")
                 try {
                     val androidUri = uri.toAndroidUri()

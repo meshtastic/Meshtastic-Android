@@ -20,10 +20,10 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
@@ -89,7 +89,7 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 /** JVM — Reads text from a file URI. */
 @Composable
 actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { uri, maxChars ->
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
         @Suppress("TooGenericExceptionCaught")
         try {
             val file = File(URI(uri.toString()))
