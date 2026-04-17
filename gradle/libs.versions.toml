@@ -33,12 +33,16 @@ testRetry = "1.6.4"
 turbine = "1.2.1"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0-beta02"
-compose-multiplatform-material3 = "1.11.0-alpha06"
+# Pinned to the latest stable CMP train while we investigate the animation-freeze
+# regression that first appeared on 1.11.0-beta02 (see PR #5174 / internal.60 history).
+# `compose-multiplatform-material3` has no 1.10.x stable — 1.10.0-alpha05 is the
+# matching pre-release that pairs with CMP 1.10.x.
+compose-multiplatform = "1.10.3"
+compose-multiplatform-material3 = "1.10.0-alpha05"
 # AndroidX Compose test/tracing artifacts share a version track with CMP but are resolved
 # independently by Maven. Pinning them to their own ref prevents Renovate from bumping the
 # CMP plugin version when a new AndroidX Compose pre-release appears.
-androidx-compose = "1.11.0-rc01"
+androidx-compose = "1.10.3"
 androidx-compose-material = "1.7.8"
 jetbrains-adaptive = "1.3.0-alpha06"
 
