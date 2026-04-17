@@ -158,6 +158,34 @@ class ConversationShortcutManager(
             setPackage(context.packageName)
         }
 
+    /**
+     * Ensures a long-lived conversation shortcut exists for [contactKey]. Called on demand when a notification is about
+     * to reference a shortcut id that may not have been pre-published (e.g., an incoming DM on a non-primary channel,
+     * or from a non-favorite node). Android Auto requires a matching published shortcut to project the notification as
+     * a messaging HUN.
+     */
+    fun ensureConversationShortcut(contactKey: String, person: Person, label: String) {
+        val alreadyPublished = ShortcutManagerCompat.getDynamicShortcuts(context).any { it.id == contactKey }
+        if (alreadyPublished) return
+        val shortcut =
+            ShortcutInfoCompat.Builder(context, contactKey)
+                .setShortLabel(label)
+                .setLongLabel(label)
+                .setLocusId(LocusIdCompat(contactKey))
+                .setPerson(person)
+                .setLongLived(true)
+                .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
+                .setIntent(conversationIntent(contactKey))
+                .build()
+        try {
+            ShortcutManagerCompat.pushDynamicShortcut(context, shortcut)
+        } catch (e: IllegalArgumentException) {
+            Logger.e(e) { "Failed to publish on-demand shortcut $contactKey" }
+        } catch (e: IllegalStateException) {
+            Logger.e(e) { "Failed to publish on-demand shortcut $contactKey" }
+        }
+    }
+
     private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat {
         val size = ICON_SIZE
         val bitmap = createBitmap(size, size)

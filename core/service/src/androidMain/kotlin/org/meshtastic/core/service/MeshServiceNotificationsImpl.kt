@@ -110,6 +110,7 @@ class MeshServiceNotificationsImpl(
     private val context: Context,
     private val packetRepository: Lazy<PacketRepository>,
     private val nodeRepository: Lazy<NodeRepository>,
+    private val shortcutManager: Lazy<ConversationShortcutManager>,
 ) : MeshServiceNotifications {
 
     private val notificationManager = context.getSystemService<NotificationManager>()!!
@@ -618,6 +619,8 @@ class MeshServiceNotificationsImpl(
         }
         val lastMessage = history.last()
 
+        ensureShortcutForNotification(contactKey, isBroadcast, channelName, lastMessage)
+
         builder
             .setCategory(Notification.CATEGORY_MESSAGE)
             .setAutoCancel(true)
@@ -773,6 +776,36 @@ class MeshServiceNotificationsImpl(
         }
     }
 
+    private fun ensureShortcutForNotification(
+        contactKey: String,
+        isBroadcast: Boolean,
+        channelName: String?,
+        lastMessage: Message,
+    ) {
+        val person =
+            if (isBroadcast) {
+                Person.Builder().setName(channelName ?: contactKey).setKey(contactKey).build()
+            } else {
+                Person.Builder()
+                    .setName(lastMessage.node.user.long_name)
+                    .setKey(lastMessage.node.user.id)
+                    .setIcon(
+                        createPersonIcon(
+                            lastMessage.node.user.short_name,
+                            lastMessage.node.colors.second,
+                            lastMessage.node.colors.first,
+                        ),
+                    )
+                    .build()
+            }
+        val label =
+            when {
+                isBroadcast -> channelName ?: contactKey
+                else -> lastMessage.node.user.long_name.ifEmpty { lastMessage.node.user.short_name }
+            }
+        shortcutManager.value.ensureConversationShortcut(contactKey, person, label)
+    }
+
     private fun createReplyAction(contactKey: String): NotificationCompat.Action {
         val replyLabel = getString(Res.string.reply)
         val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(replyLabel).build()
@@ -792,6 +825,9 @@ class MeshServiceNotificationsImpl(
 
         return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, replyLabel, replyPendingIntent)
             .addRemoteInput(remoteInput)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+            .setShowsUserInterface(false)
+            .setAllowGeneratedReplies(true)
             .build()
     }
 
@@ -810,7 +846,10 @@ class MeshServiceNotificationsImpl(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
-        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent).build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+            .setShowsUserInterface(false)
+            .build()
     }
 
     private fun createReactionAction(
