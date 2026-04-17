@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.desc_node_filter_clear
 import org.meshtastic.core.resources.node_filter_exclude_infrastructure
 import org.meshtastic.core.resources.node_filter_exclude_mqtt
@@ -178,14 +180,19 @@ private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Un
         onValueChange = onTextChange,
         trailingIcon = {
             if (filterText.isNotEmpty() || isFocused) {
+                val clearLabel = stringResource(Res.string.clear)
                 Icon(
                     MeshtasticIcons.Close,
                     contentDescription = stringResource(Res.string.desc_node_filter_clear),
                     modifier =
-                    Modifier.clickable {
-                        onTextChange("")
-                        focusManager.clearFocus()
-                    },
+                    Modifier.clickable(
+                        onClickLabel = clearLabel,
+                        role = Role.Button,
+                        onClick = {
+                            onTextChange("")
+                            focusManager.clearFocus()
+                        },
+                    ),
                 )
             }
         },

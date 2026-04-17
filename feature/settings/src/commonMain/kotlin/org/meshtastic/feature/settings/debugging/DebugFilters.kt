@@ -57,8 +57,10 @@ import org.meshtastic.core.resources.debug_filter_clear
 import org.meshtastic.core.resources.debug_filter_included
 import org.meshtastic.core.resources.debug_filter_preset_title
 import org.meshtastic.core.resources.debug_filters
+import org.meshtastic.core.resources.filter_icon
 import org.meshtastic.core.resources.match_all
 import org.meshtastic.core.resources.match_any
+import org.meshtastic.core.resources.remove_filter
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Close
@@ -281,8 +283,18 @@ fun DebugActiveFilters(
                         selected = true,
                         onClick = { onFilterTextsChange(filterTexts - filter) },
                         label = { Text(filter) },
-                        leadingIcon = { Icon(imageVector = MeshtasticIcons.FilterAlt, contentDescription = null) },
-                        trailingIcon = { Icon(imageVector = MeshtasticIcons.Close, contentDescription = null) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = MeshtasticIcons.FilterAlt,
+                                contentDescription = stringResource(Res.string.filter_icon),
+                            )
+                        },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = MeshtasticIcons.Close,
+                                contentDescription = stringResource(Res.string.remove_filter),
+                            )
+                        },
                     )
                 }
             }

@@ -30,6 +30,7 @@ import org.meshtastic.core.model.getColorFrom
 import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.export_tak_data_package
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.tak_config
 import org.meshtastic.core.resources.tak_role
@@ -74,7 +75,10 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         onBack = onBack,
         actions = {
             IconButton(onClick = { exportLauncher("Meshtastic_TAK_Server.zip") }) {
-                Icon(imageVector = MeshtasticIcons.Share, contentDescription = "Export TAK Data Package")
+                Icon(
+                    imageVector = MeshtasticIcons.Share,
+                    contentDescription = stringResource(Res.string.export_tak_data_package),
+                )
             }
         },
         configState = formState,

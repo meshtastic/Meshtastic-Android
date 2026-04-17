@@ -59,6 +59,7 @@ import org.meshtastic.core.resources.are_you_sure
 import org.meshtastic.core.resources.button_gpio
 import org.meshtastic.core.resources.buzzer_gpio
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.clear_time_zone
 import org.meshtastic.core.resources.config_device_doubleTapAsButtonPress_summary
 import org.meshtastic.core.resources.config_device_ledHeartbeatEnabled_summary
 import org.meshtastic.core.resources.config_device_tripleClickAsAdHocPing_summary
@@ -269,7 +270,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     onValueChanged = { formState.value = formState.value.copy(tzdef = it) },
                     trailingIcon = {
                         IconButton(onClick = { formState.value = formState.value.copy(tzdef = "") }) {
-                            Icon(imageVector = MeshtasticIcons.Close, contentDescription = null)
+                            Icon(
+                                imageVector = MeshtasticIcons.Close,
+                                contentDescription = stringResource(Res.string.clear_time_zone),
+                            )
                         }
                     },
                 )
@@ -282,7 +286,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     shape = RectangleShape,
                     onClick = { formState.value = formState.value.copy(tzdef = appTzPosixString) },
                 ) {
-                    Icon(imageVector = MeshtasticIcons.PhoneAndroid, contentDescription = null)
+                    Icon(
+                        imageVector = MeshtasticIcons.PhoneAndroid,
+                        contentDescription = stringResource(Res.string.config_device_use_phone_tz),
+                    )
 
                     Spacer(modifier = Modifier.width(8.dp))
 
