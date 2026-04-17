@@ -20,15 +20,23 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.mqtt.ConnectionState
+import org.meshtastic.mqtt.MqttException
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
 
@@ -40,18 +48,30 @@ class MqttManagerImpl(
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MqttManager {
     private var mqttMessageFlow: Job? = null
+    private val proxyActive = MutableStateFlow(false)
+
+    override val mqttConnectionState: StateFlow<MqttConnectionState> =
+        combine(proxyActive, mqttRepository.connectionState) { active, libState ->
+            if (!active) MqttConnectionState.INACTIVE else libState.toAppState()
+        }
+            .stateIn(scope, SharingStarted.Eagerly, MqttConnectionState.INACTIVE)
 
     override fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean) {
         if (mqttMessageFlow?.isActive == true) return
         if (enabled && proxyToClientEnabled) {
+            proxyActive.value = true
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
                     .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
                     .catch { throwable ->
-                        serviceRepository.setErrorMessage(
-                            text = "MqttClientProxy failed: $throwable",
-                            severity = Severity.Warn,
-                        )
+                        proxyActive.value = false
+                        val message =
+                            when (throwable) {
+                                is MqttException.ConnectionRejected -> "MQTT: connection rejected (check credentials)"
+                                is MqttException.ConnectionLost -> "MQTT: connection lost"
+                                else -> "MQTT proxy failed: ${throwable.message}"
+                            }
+                        serviceRepository.setErrorMessage(text = message, severity = Severity.Warn)
                     }
                     .launchIn(scope)
         }
@@ -63,6 +83,7 @@ class MqttManagerImpl(
             mqttMessageFlow?.cancel()
             mqttMessageFlow = null
         }
+        proxyActive.value = false
     }
 
     override fun handleMqttProxyMessage(message: MqttClientProxyMessage) {
@@ -78,5 +99,12 @@ class MqttManagerImpl(
             }
             else -> {}
         }
+    }
+
+    private fun ConnectionState.toAppState(): MqttConnectionState = when (this) {
+        ConnectionState.DISCONNECTED -> MqttConnectionState.DISCONNECTED
+        ConnectionState.CONNECTING -> MqttConnectionState.CONNECTING
+        ConnectionState.CONNECTED -> MqttConnectionState.CONNECTED
+        ConnectionState.RECONNECTING -> MqttConnectionState.RECONNECTING
     }
 }

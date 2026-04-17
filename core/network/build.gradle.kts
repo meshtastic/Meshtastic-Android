@@ -40,8 +40,7 @@ kotlin {
             implementation(projects.core.ble)
 
             implementation(libs.okio)
-            implementation(libs.kmqtt.client)
-            implementation(libs.kmqtt.common)
+            api(libs.meshtastic.mqtt.client)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
