@@ -492,6 +492,8 @@ Rango de Valores 0 - 500.</string>
     <string name="ignore_mqtt">Ignorar Paquetes MQTT</string>
     <string name="ok_to_mqtt">Permitir MQTT</string>
     <string name="mqtt_config">Configuración MQTT</string>
+    <string name="mqtt_status_disconnected">Desconectado</string>
+    <string name="mqtt_status_connected">Conectado</string>
     <string name="mqtt_enabled">Activar el MQTT</string>
     <string name="address">Dirección del Servidor MQTT</string>
     <string name="username">Usuario</string>

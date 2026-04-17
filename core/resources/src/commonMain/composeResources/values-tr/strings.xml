@@ -366,6 +366,8 @@
     <string name="pa_fan_disabled">PA fanı devre dışı</string>
     <string name="ignore_mqtt">MQTT'yi Yoksay</string>
     <string name="mqtt_config">MQTT Yapılandırması</string>
+    <string name="mqtt_status_disconnected">Bağlantı kesildi</string>
+    <string name="mqtt_status_connected">Bağlandı</string>
     <string name="mqtt_enabled">MQTT etkin</string>
     <string name="address">Adres</string>
     <string name="username">Kullanıcı adı</string>

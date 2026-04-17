@@ -133,6 +133,7 @@
     <string name="traceroute_log">בדיקת מסלול</string>
     <string name="messages">הודעות</string>
     <string name="region_frequency_plan">אזור</string>
+    <string name="mqtt_status_disconnected">מנותק</string>
     <string name="distance">מרחק</string>
     <string name="bottom_nav_settings">הגדרות</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->

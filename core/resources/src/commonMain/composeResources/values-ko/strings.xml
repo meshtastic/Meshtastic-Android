@@ -373,6 +373,8 @@
     <string name="pa_fan_disabled">PA fan 비활성화됨</string>
     <string name="ignore_mqtt">MQTT로 부터 수신 무시</string>
     <string name="mqtt_config">MQTT 설정</string>
+    <string name="mqtt_status_disconnected">연결 끊김</string>
+    <string name="mqtt_status_connected">연결됨</string>
     <string name="mqtt_enabled">MQTT 활성화</string>
     <string name="address">서버 주소</string>
     <string name="username">사용자명</string>

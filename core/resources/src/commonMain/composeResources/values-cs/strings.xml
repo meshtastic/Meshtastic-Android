@@ -525,6 +525,8 @@
     <string name="ignore_mqtt">Ignorovat MQTT</string>
     <string name="ok_to_mqtt">OK do MQTT</string>
     <string name="mqtt_config">Nastavení MQTT</string>
+    <string name="mqtt_status_disconnected">Odpojeno</string>
+    <string name="mqtt_status_connected">Připojeno</string>
     <string name="mqtt_enabled">MQTT povoleno</string>
     <string name="address">Adresa</string>
     <string name="username">Uživatelské jméno</string>

@@ -217,6 +217,7 @@
     <string name="alert_bell_text">Skambučio simbolis!</string>
     <string name="red">Raudona</string>
     <string name="region_frequency_plan">Regionas</string>
+    <string name="mqtt_status_disconnected">Atsijungta</string>
     <string name="public_key">Viešasis raktas</string>
     <string name="private_key">Privatus raktas</string>
     <string name="timeout">Baigėsi laikas</string>

@@ -154,6 +154,7 @@
     <string name="messages">الرسائل</string>
     <string name="lora_config">إعدادات لورا</string>
     <string name="region_frequency_plan">الجهة</string>
+    <string name="mqtt_status_disconnected">انقطع الاتصال</string>
     <string name="timeout">استغرق وقت طويل</string>
     <string name="distance">المسافة</string>
     <string name="bottom_nav_settings">الإعدادات</string>

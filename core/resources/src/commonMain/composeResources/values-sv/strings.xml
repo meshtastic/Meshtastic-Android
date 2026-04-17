@@ -529,6 +529,8 @@
     <string name="ignore_mqtt">Ignorera MQTT</string>
     <string name="ok_to_mqtt">Ok till MQTT</string>
     <string name="mqtt_config">MQTT-konfiguration</string>
+    <string name="mqtt_status_disconnected">Frånkopplad</string>
+    <string name="mqtt_status_connected">Ansluten</string>
     <string name="mqtt_enabled">MQTT är aktiverat</string>
     <string name="address">Adress</string>
     <string name="username">Användarnamn</string>

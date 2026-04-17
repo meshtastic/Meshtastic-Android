@@ -45,6 +45,7 @@
     <string name="unrecognized">無法識別</string>
     <string name="message_status_enroute">正在等待確認</string>
     <string name="message_status_queued">發送佇列中</string>
+    <string name="message_status_delivered">已傳送至 Mesh</string>
     <string name="message_status_unknown">不明</string>
     <string name="message_status_sfpp_routing">透過 SF++ 鏈路由…</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 鏈上確認</string>
@@ -122,6 +123,7 @@
     <string name="config_position_gps_update_interval_summary">嘗試獲取 GPS 位置的頻率（&lt; 10 秒將保持 GPS 模組開啟）。</string>
     <string name="config_position_flags_summary">位置訊息可選的附加欄位。包含的欄位越多，訊息越大，將造成空中時間拉長和封包遺失的風險增加。</string>
     <string name="config_power_is_power_saving_summary">將盡可能使所有元件進入睡眠狀態。對於 tracker 和 sensor 角色，此模式將包含 LoRa 無線電。如果您想搭配手機應用程式使用設備，或正在使用沒有使用者按鈕的設備，請勿啟用此設定。</string>
+    <string name="config_security_public_key">從您的私鑰生成並傳送給網狀網路中的其他節點，以供它們計算出共享密鑰。</string>
     <string name="config_security_private_key">用於與遠端設備交換密鑰。</string>
     <string name="config_security_admin_key">被授權可對此節點發送管理訊息的公鑰。</string>
     <string name="config_security_is_managed">設備處於受管理狀態，使用者無法變更任何設備設定。</string>
@@ -594,6 +596,8 @@
     <string name="ignore_mqtt">無視MQTT</string>
     <string name="ok_to_mqtt">允許轉發至 MQTT</string>
     <string name="mqtt_config">MQTT配置</string>
+    <string name="mqtt_status_disconnected">已中斷連線</string>
+    <string name="mqtt_status_connected">已連線</string>
     <string name="mqtt_enabled">啟用MQTT服務器</string>
     <string name="address">地址</string>
     <string name="username">用戶名</string>
@@ -853,6 +857,7 @@
     <string name="pax_ble_marker">BLE: %1$s</string>
     <string name="pax_wifi_marker">WiFi: %1$s</string>
     <string name="no_pax_metrics_logs">無可用的 PAX 人流計量資料。</string>
+    <string name="wifi_devices">mPWRD-OS 的 Wi-Fi 設定</string>
     <string name="ble_devices">藍牙裝置</string>
     <string name="connected_device">連接裝置</string>
     <string name="routing_error_rate_limit_exceeded">超過速率限制，請稍後再嘗試。</string>
@@ -1158,6 +1163,7 @@
     <string name="traffic_management_router_preserve_hops">保留路由跳數</string>
     <string name="note">注意</string>
     <string name="device_storage_ui_title">裝置儲存空間與使用者介面（唯讀）</string>
+    <string name="device_theme_language">主題 %1$s，語言 %2$s</string>
     <string name="no_files_manifested">未發現任何檔案。</string>
     <string name="connect">連線</string>
     <string name="done">完成</string>
@@ -1166,10 +1172,19 @@
     <string name="wifi_provision_mpwrd_disclaimer">進一步了解 mPWRD-OS 專案\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_scanning_ble">正在搜尋裝置…</string>
     <string name="wifi_provision_device_found">找到裝置</string>
+    <string name="wifi_provision_scan_networks">搜尋網路</string>
     <string name="wifi_provision_scanning_wifi">正在搜尋…</string>
+    <string name="wifi_provision_sending_credentials">正在套用 Wi-Fi 設定…</string>
     <string name="wifi_provision_no_networks">找不到網路</string>
+    <string name="wifi_provision_connect_failed">無法連接：%1$s</string>
+    <string name="wifi_provision_scan_failed">無法搜尋到 Wi-Fi 網路：%1$s</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_available_networks">可用的網路</string>
     <string name="wifi_provision_ssid_label">網路名稱（SSID）</string>
+    <string name="wifi_provision_ssid_placeholder">手動輸入或選擇一個網路</string>
+    <string name="wifi_provision_status_applied">Wi-Fi 已設定完成！</string>
+    <string name="wifi_provision_status_failed">無法套用 Wi-Fi 設定</string>
+    <string name="desktop_tray_show">顯示 Meshtastic</string>
+    <string name="desktop_tray_quit">離開</string>
     <string name="desktop_notification_title">Meshtastic</string>
 </resources>

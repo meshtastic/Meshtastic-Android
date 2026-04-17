@@ -226,6 +226,7 @@
     <string name="copy">Kopiraj</string>
     <string name="alert_bell_text">Znak opozorilnega zvonca!</string>
     <string name="region_frequency_plan">Regija</string>
+    <string name="mqtt_status_disconnected">Prekinjeno</string>
     <string name="public_key">Javni ključ</string>
     <string name="private_key">Zasebni ključ</string>
     <string name="timeout">Časovna omejitev</string>
