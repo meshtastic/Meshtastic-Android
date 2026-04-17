@@ -108,6 +108,7 @@ class FirmwareUpdateIntegrationTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
+        TestApplicationCoroutineScope(testDispatcher),
     )
 
     @Test

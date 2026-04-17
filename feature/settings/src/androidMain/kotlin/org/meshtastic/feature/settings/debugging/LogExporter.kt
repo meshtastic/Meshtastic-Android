@@ -27,6 +27,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_export_failed
 import org.meshtastic.core.resources.debug_export_success
@@ -48,7 +49,7 @@ actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.U
 }
 
 private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<DebugViewModel.UiMeshLog>) =
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
         try {
             if (logs.isEmpty()) {
                 withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
