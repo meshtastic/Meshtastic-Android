@@ -159,26 +159,28 @@ fun GenericMetricChart(
  *
  * @param isEmpty Whether the chart data is empty — when true, nothing is rendered.
  * @param legendData Legend items shown below the chart.
- * @param key Optional key for the [CartesianChartModelProducer] (e.g. a selected channel). Pass a different value to
- *   recreate the producer.
  * @param hiddenSet Indices of hidden legend items (toggleable legend).
  * @param onToggle Callback when a legend item is toggled; when null, a read-only legend is rendered.
  * @param content Builder lambda receiving the [CartesianChartModelProducer] and a standard `Modifier.weight(1f)`
  *   suitable for the chart area.
+ *
+ * A single [CartesianChartModelProducer] is created per scaffold instance. Vico forbids swapping the producer attached
+ * to a live [CartesianChartHost] (it throws "A new `CartesianChartModelProducer` was provided…"), so callers must push
+ * new data through [CartesianChartModelProducer.runTransaction] instead of recreating the producer. Keying the scaffold
+ * on external state (e.g. a selected channel) caused exactly that crash, so the previous `key` parameter was removed.
  */
 @Composable
 fun MetricChartScaffold(
     isEmpty: Boolean,
     legendData: List<LegendData>,
     modifier: Modifier = Modifier,
-    key: Any? = Unit,
     hiddenSet: Set<Int> = emptySet(),
     onToggle: ((Int) -> Unit)? = null,
     content: @Composable ColumnScope.(CartesianChartModelProducer, Modifier) -> Unit,
 ) {
     Column(modifier = modifier) {
         if (isEmpty) return@Column
-        val modelProducer = remember(key) { CartesianChartModelProducer() }
+        val modelProducer = remember { CartesianChartModelProducer() }
         val chartModifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp)
         content(modelProducer, chartModifier)
         Legend(
