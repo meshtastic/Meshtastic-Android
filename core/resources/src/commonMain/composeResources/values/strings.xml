@@ -408,12 +408,9 @@
     <string name="userinfo">User Info</string>
     <string name="meshtastic_new_nodes_notifications">New node notifications</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
     <string name="device_metrics_log">Device Metrics</string>
-    <string name="node_map">Node Map</string>
     <string name="position_log">Position</string>
     <string name="last_position_update">Last position update</string>
     <string name="env_metrics_log">Environment Metrics</string>
@@ -460,7 +457,6 @@
     <string name="one_month">1M</string>
     <string name="max">Max</string>
     <string name="min">Min</string>
-    <string name="avg">Avg</string>
     <string name="expand_chart">Expand chart</string>
     <string name="collapse_chart">Collapse chart</string>
     <string name="unknown_age">Unknown Age</string>
