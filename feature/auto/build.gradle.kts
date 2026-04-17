@@ -15,10 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.koin)
-}
+plugins { alias(libs.plugins.meshtastic.android.library) }
 
 android {
     namespace = "org.meshtastic.feature.auto"
@@ -33,7 +30,10 @@ dependencies {
 
     implementation(libs.androidx.car.app)
     implementation(libs.kermit)
-    implementation(libs.koin.annotations)
+    // KoinComponent for service-locator-style injection inside Car App Library callbacks.
+    // No @Single/@Factory bindings live in this module, so the meshtastic.koin convention
+    // plugin (which adds koin-annotations + the KSP compiler) is not needed here.
+    implementation(libs.koin.core)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.kotest.assertions)

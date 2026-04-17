@@ -24,9 +24,7 @@ import android.app.TaskStackBuilder
 import android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
 import android.content.Context
 import android.content.Intent
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
@@ -34,7 +32,6 @@ import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.content.LocusIdCompat
 import androidx.core.content.getSystemService
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.flow.first
@@ -122,8 +119,6 @@ class MeshServiceNotificationsImpl(
         private const val SNIPPET_LENGTH = 30
         private const val GROUP_KEY_MESSAGES = "com.geeksville.mesh.GROUP_MESSAGES"
         private const val SUMMARY_ID = 1
-        private const val PERSON_ICON_SIZE = 128
-        private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
         private const val STATS_UPDATE_MINUTES = 15
         private val STATS_UPDATE_INTERVAL = STATS_UPDATE_MINUTES.minutes
         private const val BULLET = "• "
@@ -537,9 +532,11 @@ class MeshServiceNotificationsImpl(
                 }
                 .first()
 
-        val unread = history.filter { !it.read }
-        if (unread.isEmpty()) return
-        val displayHistory = unread.take(MAX_HISTORY_MESSAGES).reversed()
+        // For the brief outgoing-reply confirmation we don't gate on unread state — the
+        // user just sent something and Android Auto needs to reflect that in the
+        // MessagingStyle notification regardless of whether other unread messages remain.
+        // We still cap the displayed history so the notification stays compact.
+        val displayHistory = history.take(MAX_HISTORY_MESSAGES).reversed()
 
         val dest = if (contactKey.isNotEmpty()) contactKey.substring(1) else contactKey
         val isBroadcast = dest == DataPacket.ID_BROADCAST
@@ -939,32 +936,8 @@ class MeshServiceNotificationsImpl(
             .setContentIntent(contentIntent ?: openAppIntent)
     }
 
-    private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat {
-        val bitmap = createBitmap(PERSON_ICON_SIZE, PERSON_ICON_SIZE)
-        val canvas = Canvas(bitmap)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-        // Draw background circle
-        paint.color = backgroundColor
-        canvas.drawCircle(PERSON_ICON_SIZE / 2f, PERSON_ICON_SIZE / 2f, PERSON_ICON_SIZE / 2f, paint)
-
-        // Draw initials
-        paint.color = foregroundColor
-        paint.textSize = PERSON_ICON_SIZE * PERSON_ICON_TEXT_SIZE_RATIO
-        paint.textAlign = Paint.Align.CENTER
-        val initial =
-            if (name.isNotEmpty()) {
-                val codePoint = name.codePointAt(0)
-                String(Character.toChars(codePoint)).uppercase()
-            } else {
-                "?"
-            }
-        val xPos = canvas.width / 2f
-        val yPos = (canvas.height / 2f - (paint.descent() + paint.ascent()) / 2f)
-        canvas.drawText(initial, xPos, yPos, paint)
-
-        return IconCompat.createWithBitmap(bitmap)
-    }
+    private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat =
+        PersonIconFactory.create(name, backgroundColor, foregroundColor)
 
     // endregion
 

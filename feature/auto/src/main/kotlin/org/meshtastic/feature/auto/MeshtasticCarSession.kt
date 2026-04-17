@@ -25,31 +25,25 @@ class MeshtasticCarSession : Session() {
 
     override fun onCreateScreen(intent: Intent): Screen {
         val screen = MeshtasticCarScreen(carContext)
-        handleIntent(intent, screen)
+        applyIntent(intent, screen)
         return screen
     }
 
     /**
-     * Called by the Android Auto host when the session is re-activated from an
-     * existing [MessagingStyle][androidx.core.app.NotificationCompat.MessagingStyle]
-     * notification tap or a launcher shortcut.
+     * Called by the Android Auto host when the session is re-activated from an existing
+     * [MessagingStyle][androidx.core.app.NotificationCompat.MessagingStyle] notification tap or a
+     * launcher shortcut. Switches the root screen to the Messages tab.
      *
-     * Parses the conversation [contactKey] from the deep-link URI
-     * (`meshtastic://messages/<contactKey>`) and delegates to
-     * [MeshtasticCarScreen.selectContactKey] so the correct tab is pre-selected.
+     * The deep-link URI (`meshtastic://meshtastic/messages/<contactKey>`) carries the originating
+     * contact key, but `androidx.car.app.model.ListTemplate` does not currently expose a
+     * programmatic scroll API, so we cannot focus a specific conversation row.
      */
     override fun onNewIntent(intent: Intent) {
         val screen = screenManager.top as? MeshtasticCarScreen ?: return
-        handleIntent(intent, screen)
+        applyIntent(intent, screen)
     }
 
-    private fun handleIntent(intent: Intent, screen: MeshtasticCarScreen) {
-        // Deep-link URIs from MessagingStyle notifications look like:
-        //   meshtastic://messages/0!abcd1234   (DM: channel=0, nodeId=!abcd1234)
-        //   meshtastic://messages/2^all        (channel broadcast, e.g. contactKey "2^all")
-        // Both channels and DMs now live in the same Messages tab, so we simply
-        // switch to that tab regardless of the contact type.
-        val contactKey = intent.data?.lastPathSegment ?: return
-        screen.selectContactKey(contactKey)
+    private fun applyIntent(intent: Intent, screen: MeshtasticCarScreen) {
+        if (intent.data?.lastPathSegment != null) screen.selectMessagesTab()
     }
 }

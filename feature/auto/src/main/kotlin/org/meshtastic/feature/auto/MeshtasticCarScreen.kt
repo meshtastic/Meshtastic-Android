@@ -74,7 +74,7 @@ import org.meshtastic.core.repository.ServiceRepository
  *
  * When the user taps a [MessagingStyle][androidx.core.app.NotificationCompat.MessagingStyle]
  * notification in the Android Auto notification shade the host calls
- * [MeshtasticCarSession.onNewIntent] which delegates to [selectContactKey] to switch to the
+ * [MeshtasticCarSession.onNewIntent] which delegates to [selectMessagesTab] to switch to the
  * Messages tab.
  */
 class MeshtasticCarScreen(carContext: CarContext) :
@@ -252,14 +252,15 @@ class MeshtasticCarScreen(carContext: CarContext) :
     }
 
     /**
-     * Called by [MeshtasticCarSession.onNewIntent] when the user taps a conversation notification
-     * in the Android Auto notification shade. Switches to [TAB_MESSAGES] regardless of whether
-     * the originating contact is a channel broadcast or a DM, because both appear in the same tab.
+     * Called by [MeshtasticCarSession.onNewIntent] when the user taps a conversation
+     * notification in the Android Auto notification shade. Switches to [TAB_MESSAGES] —
+     * channels and DMs both live in the same tab, so no per-key handling is required.
      *
-     * The [contactKey] parameter is accepted for API symmetry with the session and may be used in
-     * the future to scroll the Messages list to the tapped conversation.
+     * `androidx.car.app.model.ListTemplate` does not currently expose a programmatic scroll
+     * API, so we cannot focus a specific conversation row. If/when a scroll API is added,
+     * the contactKey can be threaded through `MeshtasticCarSession.onNewIntent`.
      */
-    fun selectContactKey(@Suppress("UNUSED_PARAMETER") contactKey: String) {
+    fun selectMessagesTab() {
         activeTabId = TAB_MESSAGES
         invalidate()
     }

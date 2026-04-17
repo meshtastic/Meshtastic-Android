@@ -19,13 +19,10 @@ package org.meshtastic.core.service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutInfo
-import android.graphics.Canvas
-import android.graphics.Paint
 import androidx.core.app.Person
 import androidx.core.content.LocusIdCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
@@ -186,34 +183,6 @@ class ConversationShortcutManager(
         }
     }
 
-    private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat {
-        val size = ICON_SIZE
-        val bitmap = createBitmap(size, size)
-        val canvas = Canvas(bitmap)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-        paint.color = backgroundColor
-        canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
-
-        paint.color = foregroundColor
-        paint.textSize = size * TEXT_SIZE_RATIO
-        paint.textAlign = Paint.Align.CENTER
-        val initial =
-            if (name.isNotEmpty()) {
-                val codePoint = name.codePointAt(0)
-                String(Character.toChars(codePoint)).uppercase()
-            } else {
-                "?"
-            }
-        val xPos = canvas.width / 2f
-        val yPos = (canvas.height / 2f - (paint.descent() + paint.ascent()) / 2f)
-        canvas.drawText(initial, xPos, yPos, paint)
-
-        return IconCompat.createWithBitmap(bitmap)
-    }
-
-    companion object {
-        private const val ICON_SIZE = 128
-        private const val TEXT_SIZE_RATIO = 0.5f
-    }
+    private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat =
+        PersonIconFactory.create(name, backgroundColor, foregroundColor)
 }
