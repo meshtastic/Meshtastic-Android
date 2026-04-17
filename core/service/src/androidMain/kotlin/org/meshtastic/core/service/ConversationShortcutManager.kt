@@ -96,83 +96,65 @@ class ConversationShortcutManager(
 
     private fun publishShortcuts(favorites: List<Node>, channels: List<ChannelSettings>) {
         val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
-        val shortcuts = mutableListOf<ShortcutInfoCompat>()
-
-        // Favorite node shortcuts (direct message conversations)
-        for (node in favorites) {
-            if (node.num == myNodeNum) continue
-            val contactKey = "0${node.user.id}"
-            val person =
-                Person.Builder()
-                    .setName(node.user.long_name)
-                    .setKey(node.user.id)
-                    .setIcon(createPersonIcon(node.user.short_name, node.colors.second, node.colors.first))
-                    .build()
-
-            val shortcut =
-                ShortcutInfoCompat.Builder(context, contactKey)
-                    .setShortLabel(node.user.long_name.ifEmpty { node.user.short_name })
-                    .setLongLabel(node.user.long_name.ifEmpty { node.user.short_name })
-                    .setLocusId(LocusIdCompat(contactKey))
-                    .setPerson(person)
-                    .setLongLived(true)
-                    .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
-                    .setIntent(
-                        Intent(Intent.ACTION_VIEW, "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()).apply {
-                            setPackage(context.packageName)
-                        },
-                    )
-                    .build()
-
-            shortcuts.add(shortcut)
-        }
-
-        // Channel shortcuts (broadcast conversations)
-        for ((index, channelSettings) in channels.withIndex()) {
-            val contactKey = "${index}${DataPacket.ID_BROADCAST}"
-            val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
-            val person = Person.Builder().setName(channelName).setKey("channel-$index").build()
-
-            val shortcut =
-                ShortcutInfoCompat.Builder(context, contactKey)
-                    .setShortLabel(channelName)
-                    .setLongLabel(channelName)
-                    .setLocusId(LocusIdCompat(contactKey))
-                    .setPerson(person)
-                    .setLongLived(true)
-                    .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
-                    .setIntent(
-                        Intent(Intent.ACTION_VIEW, "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()).apply {
-                            setPackage(context.packageName)
-                        },
-                    )
-                    .build()
-
-            shortcuts.add(shortcut)
-        }
+        val shortcuts =
+            favorites.filter { it.num != myNodeNum }.map { buildFavoriteShortcut(it) } +
+                channels.mapIndexed { index, settings -> buildChannelShortcut(settings, index) }
 
         try {
             val limit = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)
-            // Remove shortcuts for conversations that are no longer in favorites/channels,
-            // so stale entries don't clutter the share sheet.
             val currentKeys = shortcuts.map { it.id }.toSet()
             val stale = ShortcutManagerCompat.getDynamicShortcuts(context).map { it.id }.filter { it !in currentKeys }
-            if (stale.isNotEmpty()) {
-                ShortcutManagerCompat.removeDynamicShortcuts(context, stale)
-            }
-            // Push each shortcut individually to preserve usage/ranking history.
-            // pushDynamicShortcut upserts without wiping other shortcuts.
+            if (stale.isNotEmpty()) ShortcutManagerCompat.removeDynamicShortcuts(context, stale)
             for (shortcut in shortcuts.take(limit)) {
                 ShortcutManagerCompat.pushDynamicShortcut(context, shortcut)
             }
-            val published = shortcuts.size.coerceAtMost(limit)
-            Logger.d {
-                "Published $published conversation shortcuts (${favorites.size} favorites, ${channels.size} channels)"
-            }
-        } catch (e: Exception) {
+            Logger.d { "Published ${shortcuts.size.coerceAtMost(limit)} conversation shortcuts" }
+        } catch (e: IllegalArgumentException) {
+            Logger.e(e) { "Failed to publish conversation shortcuts" }
+        } catch (e: IllegalStateException) {
             Logger.e(e) { "Failed to publish conversation shortcuts" }
         }
     }
+
+    private fun buildFavoriteShortcut(node: Node): ShortcutInfoCompat {
+        val contactKey = "0${node.user.id}"
+        val label = node.user.long_name.ifEmpty { node.user.short_name }
+        val person =
+            Person.Builder()
+                .setName(node.user.long_name)
+                .setKey(node.user.id)
+                .setIcon(createPersonIcon(node.user.short_name, node.colors.second, node.colors.first))
+                .build()
+        return ShortcutInfoCompat.Builder(context, contactKey)
+            .setShortLabel(label)
+            .setLongLabel(label)
+            .setLocusId(LocusIdCompat(contactKey))
+            .setPerson(person)
+            .setLongLived(true)
+            .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
+            .setIntent(conversationIntent(contactKey))
+            .build()
+    }
+
+    private fun buildChannelShortcut(channelSettings: ChannelSettings, index: Int): ShortcutInfoCompat {
+        val contactKey = "${index}${DataPacket.ID_BROADCAST}"
+        val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
+        val person = Person.Builder().setName(channelName).setKey("channel-$index").build()
+        return ShortcutInfoCompat.Builder(context, contactKey)
+            .setShortLabel(channelName)
+            .setLongLabel(channelName)
+            .setLocusId(LocusIdCompat(contactKey))
+            .setPerson(person)
+            .setLongLived(true)
+            .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
+            .setIntent(conversationIntent(contactKey))
+            .build()
+    }
+
+    private fun conversationIntent(contactKey: String): Intent =
+        Intent(Intent.ACTION_VIEW, "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()).apply {
+            setPackage(context.packageName)
+        }
 
     private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat {
         val size = ICON_SIZE
