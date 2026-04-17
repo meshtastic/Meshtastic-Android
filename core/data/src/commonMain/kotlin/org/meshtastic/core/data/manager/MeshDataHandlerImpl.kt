@@ -357,7 +357,7 @@ class MeshDataHandlerImpl(
                     read = fromLocal || isFiltered,
                     filtered = isFiltered,
                 )
-                if (!isFiltered) {
+                if (!isFiltered && !fromLocal) {
                     handlePacketNotification(dataPacket, contactKey, updateNotification)
                 }
             }

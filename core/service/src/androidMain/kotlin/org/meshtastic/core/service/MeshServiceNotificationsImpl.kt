@@ -782,26 +782,33 @@ class MeshServiceNotificationsImpl(
         channelName: String?,
         lastMessage: Message,
     ) {
+        val contactNode =
+            if (isBroadcast) {
+                null
+            } else {
+                // contactKey format: "${channel}${nodeId}"; the remote contact is the node keyed by nodeId,
+                // which is stable regardless of whether the latest message in history is incoming or outgoing.
+                val nodeId = contactKey.drop(1)
+                nodeRepository.value.getNode(nodeId)
+            }
         val person =
             if (isBroadcast) {
                 Person.Builder().setName(channelName ?: contactKey).setKey(contactKey).build()
             } else {
+                val node = contactNode ?: lastMessage.node
                 Person.Builder()
-                    .setName(lastMessage.node.user.long_name)
-                    .setKey(lastMessage.node.user.id)
-                    .setIcon(
-                        createPersonIcon(
-                            lastMessage.node.user.short_name,
-                            lastMessage.node.colors.second,
-                            lastMessage.node.colors.first,
-                        ),
-                    )
+                    .setName(node.user.long_name)
+                    .setKey(node.user.id)
+                    .setIcon(createPersonIcon(node.user.short_name, node.colors.second, node.colors.first))
                     .build()
             }
         val label =
             when {
                 isBroadcast -> channelName ?: contactKey
-                else -> lastMessage.node.user.long_name.ifEmpty { lastMessage.node.user.short_name }
+                else -> {
+                    val node = contactNode ?: lastMessage.node
+                    node.user.long_name.ifEmpty { node.user.short_name }
+                }
             }
         shortcutManager.value.ensureConversationShortcut(contactKey, person, label)
     }

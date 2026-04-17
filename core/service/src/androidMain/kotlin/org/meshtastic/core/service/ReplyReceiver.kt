@@ -20,7 +20,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -65,7 +64,6 @@ class ReplyReceiver :
         if (remoteInput != null) {
             val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
             val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString() ?: ""
-            Logger.d { "ReplyReceiver: onReceive contactKey='$contactKey' msgLen=${message.length}" }
 
             val pendingResult = goAsync()
             scope.launch {
@@ -73,7 +71,6 @@ class ReplyReceiver :
                     sendMessage(message, contactKey)
                     packetRepository.clearUnreadCount(contactKey, nowMillis)
                     meshServiceNotifications.cancelMessageNotification(contactKey)
-                    Logger.d { "ReplyReceiver: reply flow complete for contactKey='$contactKey'" }
                 } finally {
                     pendingResult.finish()
                 }
