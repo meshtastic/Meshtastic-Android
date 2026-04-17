@@ -17,13 +17,13 @@
 package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -41,11 +41,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.network
@@ -108,11 +112,19 @@ fun DeviceListItem(
             is DeviceListEntry.Mock -> stringResource(Res.string.add)
         }
 
+    val selectLabel = stringResource(Res.string.action_select_device)
+    val isSelected = connectionState is ConnectionState.Connected
     val clickableModifier =
         if (onDelete != null) {
-            Modifier.combinedClickable(onClick = onSelect, onLongClick = onDelete)
+            Modifier.semantics { selected = isSelected }
+                .combinedClickable(
+                    onClickLabel = selectLabel,
+                    role = Role.RadioButton,
+                    onClick = onSelect,
+                    onLongClick = onDelete,
+                )
         } else {
-            Modifier.clickable(onClick = onSelect)
+            Modifier.selectable(selected = isSelected, role = Role.RadioButton, onClick = onSelect)
         }
 
     ListItem(

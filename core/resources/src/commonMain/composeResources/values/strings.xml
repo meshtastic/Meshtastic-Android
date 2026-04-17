@@ -1276,4 +1276,12 @@
     <string name="filter_icon">Filter</string>
     <string name="remove_filter">Remove filter</string>
     <string name="show_iaq_legend">Show air quality legend</string>
+    <string name="action_show_message_status">Show message status</string>
+    <string name="action_send_reply">Send reply</string>
+    <string name="action_copy_message">Copy message</string>
+    <string name="action_select_message">Select message</string>
+    <string name="action_delete_message">Delete message</string>
+    <string name="action_react_with_emoji">React with emoji</string>
+    <string name="action_select_device">Select device</string>
+    <string name="action_select_network">Select network</string>
 </resources>
