@@ -20,12 +20,10 @@
 -keepattributes SourceFile,LineNumberTable,*Annotation*,Signature,InnerClasses,EnclosingMethod,Exceptions,RuntimeVisibleAnnotations
 
 # ---- Kotlin / Coroutines ----------------------------------------------------
-
--keep class kotlin.Metadata { *; }
--keep class kotlin.reflect.** { *; }
--keep class kotlin.coroutines.Continuation { *; }
--keep class kotlinx.coroutines.** { *; }
--dontwarn kotlinx.coroutines.**
+# Kotlin stdlib and kotlinx-coroutines ship their own consumer ProGuard rules
+# (kotlin-stdlib and kotlinx-coroutines-core consumer-rules.pro) which keep
+# Metadata, Continuation, kotlin.reflect internals, and debug metadata. No
+# explicit wildcards needed here.
 
 # ---- Koin DI (reflection-based injection) -----------------------------------
 
@@ -41,9 +39,7 @@
 -keep @org.koin.core.annotation.ComponentScan class * { *; }
 -keep @org.koin.core.annotation.Single class * { *; }
 -keep @org.koin.core.annotation.Factory class * { *; }
-
-# Generated Koin module extensions (Koin Annotations plugin output)
--keep class org.meshtastic.**.di.** { *; }
+-keep @org.koin.core.annotation.KoinViewModel class * { *; }
 
 # ---- kotlinx-serialization --------------------------------------------------
 
@@ -63,13 +59,14 @@
 
 # ---- Wire Protobuf ----------------------------------------------------------
 
-# Wire generates ADAPTER companion objects accessed via reflection
--keep class com.squareup.wire.** { *; }
--dontwarn com.squareup.wire.**
-
-# Generated proto message classes (both meshtastic protos and internal package)
--keep class org.meshtastic.proto.** { *; }
--keep class meshtastic.** { *; }
+# Wire generates an ADAPTER static field on every Message subclass accessed
+# reflectively during encoding/decoding. Keep those fields and the
+# ProtoAdapter subclasses themselves; Wire's bundled consumer rules preserve
+# the runtime itself.
+-keepclassmembers class * extends com.squareup.wire.Message {
+    public static *** ADAPTER;
+}
+-keepclassmembers class * extends com.squareup.wire.ProtoAdapter { *; }
 
 # Suppress warnings about missing Android Parcelable (Wire cross-platform stubs
 # when compiling for non-Android JVM targets; harmless on Android).
@@ -86,40 +83,24 @@
 -keep class org.meshtastic.core.database.MeshtasticDatabaseConstructor { *; }
 -keep class org.meshtastic.core.database.MeshtasticDatabase { *; }
 
-# Room DAOs — Room generates implementations at compile time; keep interfaces
--keep class org.meshtastic.core.database.dao.** { *; }
-
-# Room Entities — accessed via reflection for column mapping
--keep class org.meshtastic.core.database.entity.** { *; }
-
-# Room TypeConverters — invoked reflectively
--keep class org.meshtastic.core.database.Converters { *; }
-
-# Room generated _Impl classes
--keep class **_Impl { *; }
+# Room's own consumer rules (from androidx.room3) keep DAOs, entities,
+# generated _Impl classes, and TypeConverters referenced from the database.
 
 # ---- SQLite bundled --------------------------------------------------------
-
--keep class androidx.sqlite.** { *; }
--dontwarn androidx.sqlite.**
+# androidx.sqlite ships consumer rules.
 
 # ---- Ktor (ServiceLoader + plugin discovery) --------------------------------
 
--keep class io.ktor.** { *; }
--dontwarn io.ktor.**
-
-# Keep ServiceLoader metadata files
+# Keep ServiceLoader metadata files (ktor discovers HttpClientEngineFactory
+# implementations reflectively via ServiceLoader).
 -keepclassmembers class * implements io.ktor.client.HttpClientEngineFactory { *; }
 
 # ---- Coil 3 (image loading) -------------------------------------------------
-
--keep class coil3.** { *; }
--dontwarn coil3.**
+# coil3 ships consumer rules.
 
 # ---- Kable BLE --------------------------------------------------------------
-
--keep class com.juul.kable.** { *; }
--dontwarn com.juul.kable.**
+# com.juul.kable ships consumer rules; if release builds fail with missing
+# Kable classes, restore a narrow keep for the specific reflection-loaded type.
 
 # ---- Compose Multiplatform resources ----------------------------------------
 
@@ -127,17 +108,14 @@
 # Without these the fdroid flavor has crashed at startup with a misleading
 # URLDecodeException due to R8 exception-class merging.
 -keep class org.jetbrains.compose.resources.** { *; }
--keep class org.meshtastic.core.resources.** { *; }
+-keep class org.meshtastic.core.resources.Res { *; }
+-keepclassmembers class org.meshtastic.core.resources.Res$* { *; }
 
 # ---- AboutLibraries ---------------------------------------------------------
-
--keep class com.mikepenz.aboutlibraries.** { *; }
--dontwarn com.mikepenz.aboutlibraries.**
+# com.mikepenz.aboutlibraries ships consumer rules.
 
 # ---- Multiplatform Markdown Renderer ----------------------------------------
-
--keep class com.mikepenz.markdown.** { *; }
--dontwarn com.mikepenz.markdown.**
+# com.mikepenz.markdown ships consumer rules.
 
 # ---- QR Code Kotlin ---------------------------------------------------------
 
@@ -147,36 +125,24 @@
 -dontwarn qrcode.**
 
 # ---- Kermit logging ---------------------------------------------------------
-
--keep class co.touchlab.kermit.** { *; }
--dontwarn co.touchlab.kermit.**
+# co.touchlab.kermit ships consumer rules.
 
 # ---- Okio -------------------------------------------------------------------
-
--keep class okio.** { *; }
--dontwarn okio.**
+# okio ships consumer rules.
 
 # ---- DataStore --------------------------------------------------------------
-
--keep class androidx.datastore.** { *; }
--dontwarn androidx.datastore.**
+# androidx.datastore ships consumer rules.
 
 # ---- Paging -----------------------------------------------------------------
-
--keep class androidx.paging.** { *; }
--dontwarn androidx.paging.**
+# androidx.paging ships consumer rules.
 
 # ---- Lifecycle / Navigation 3 / ViewModel (JetBrains forks) -----------------
-
--keep class androidx.lifecycle.** { *; }
--keep class androidx.navigation3.** { *; }
--dontwarn androidx.lifecycle.**
--dontwarn androidx.navigation3.**
+# androidx.lifecycle and androidx.navigation3 ship consumer rules.
 
 # ---- Meshtastic shared model ------------------------------------------------
-
-# Core model classes (used in serialization, Room, and Koin injection)
--keep class org.meshtastic.core.model.** { *; }
+# core.model types are reached via static references from Koin-wired graphs,
+# Room entities, and kotlinx-serialization @Serializable companions — all of
+# which have their own keep rules above.
 
 # ---- Compose Runtime & Animation --------------------------------------------
 

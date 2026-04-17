@@ -46,8 +46,9 @@
 -keep class org.meshtastic.desktop.MainKt { *; }
 
 # ---- Ktor Java engine (desktop-only; Android uses OkHttp) -------------------
-
--keep class io.ktor.client.engine.java.** { *; }
+# io.ktor.client.engine.java ships consumer rules; the shared
+# HttpClientEngineFactory ServiceLoader keep in shared-rules.pro covers the
+# reflective discovery path.
 
 # ---- Meshtastic desktop host shell ------------------------------------------
 
