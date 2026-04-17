@@ -211,9 +211,27 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
         return TabTemplate.Builder(tabCallback)
             .setHeaderAction(Action.APP_ICON)
-            .addTab(Tab.Builder().setTitle("Status").setIcon(carIcon(R.drawable.auto_ic_status)).setContentId(TAB_STATUS).build())
-            .addTab(Tab.Builder().setTitle("Favorites").setIcon(carIcon(R.drawable.auto_ic_favorites)).setContentId(TAB_FAVORITES).build())
-            .addTab(Tab.Builder().setTitle("Messages").setIcon(carIcon(R.drawable.auto_ic_channels)).setContentId(TAB_MESSAGES).build())
+            .addTab(
+                Tab.Builder()
+                    .setTitle("Status")
+                    .setIcon(carIcon(R.drawable.auto_ic_status))
+                    .setContentId(TAB_STATUS)
+                    .build(),
+            )
+            .addTab(
+                Tab.Builder()
+                    .setTitle("Favorites")
+                    .setIcon(carIcon(R.drawable.auto_ic_favorites))
+                    .setContentId(TAB_FAVORITES)
+                    .build(),
+            )
+            .addTab(
+                Tab.Builder()
+                    .setTitle("Messages")
+                    .setIcon(carIcon(R.drawable.auto_ic_channels))
+                    .setContentId(TAB_MESSAGES)
+                    .build(),
+            )
             .setTabContents(activeContent)
             .setActiveTabContentId(activeTabId)
             .build()
