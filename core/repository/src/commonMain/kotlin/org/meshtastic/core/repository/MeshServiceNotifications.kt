@@ -74,6 +74,13 @@ interface MeshServiceNotifications {
      */
     suspend fun markConversationRead(contactKey: String)
 
+    /**
+     * Appends an outgoing [text] message attributed to the local user to the currently posted conversation notification
+     * for [contactKey]. Used so that assistants such as Android Auto can briefly observe the reply in the
+     * MessagingStyle history before the notification is cancelled. No-op when there is nothing to update.
+     */
+    suspend fun appendOutgoingMessage(contactKey: String, text: String)
+
     fun cancelLowBatteryNotification(node: Node)
 
     fun clearClientNotification(notification: ClientNotification)

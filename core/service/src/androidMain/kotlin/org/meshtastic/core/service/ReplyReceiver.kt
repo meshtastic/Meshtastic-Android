@@ -65,6 +65,7 @@ class ReplyReceiver :
             scope.launch {
                 try {
                     sendMessage(message, contactKey)
+                    meshServiceNotifications.appendOutgoingMessage(contactKey, message)
                     meshServiceNotifications.markConversationRead(contactKey)
                 } finally {
                     pendingResult.finish()

@@ -440,20 +440,23 @@ class MeshServiceNotificationsImpl(
         showGroupSummary()
     }
 
+    private fun buildMePerson(): Person {
+        val ourNode = nodeRepository.value.ourNodeInfo.value
+        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
+        return Person.Builder()
+            .setName(meName)
+            .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
+            .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
+            .build()
+    }
+
     private fun showGroupSummary() {
         val activeNotifications =
             notificationManager.activeNotifications.filter {
                 it.id != SUMMARY_ID && it.notification.group == GROUP_KEY_MESSAGES
             }
 
-        val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
-        val me =
-            Person.Builder()
-                .setName(meName)
-                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
-                .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
-                .build()
+        val me = buildMePerson()
 
         val messagingStyle =
             NotificationCompat.MessagingStyle(me)
@@ -520,6 +523,39 @@ class MeshServiceNotificationsImpl(
         cancelMessageNotification(contactKey)
     }
 
+    override suspend fun appendOutgoingMessage(contactKey: String, text: String) {
+        if (text.isEmpty()) return
+        val ourNode = nodeRepository.value.ourNodeInfo.value
+        val history =
+            packetRepository.value
+                .getMessagesFrom(contactKey, includeFiltered = false) { nodeId ->
+                    if (nodeId == DataPacket.ID_LOCAL) {
+                        ourNode ?: nodeRepository.value.getNode(nodeId)
+                    } else {
+                        nodeRepository.value.getNode(nodeId ?: "")
+                    }
+                }
+                .first()
+
+        val unread = history.filter { !it.read }
+        if (unread.isEmpty()) return
+        val displayHistory = unread.take(MAX_HISTORY_MESSAGES).reversed()
+
+        val dest = if (contactKey.isNotEmpty()) contactKey.substring(1) else contactKey
+        val isBroadcast = dest == DataPacket.ID_BROADCAST
+
+        val notification =
+            createConversationNotification(
+                contactKey = contactKey,
+                isBroadcast = isBroadcast,
+                channelName = null,
+                history = displayHistory,
+                isSilent = true,
+                extraOutgoingMessage = text,
+            )
+        notificationManager.notify(contactKey.hashCode(), notification)
+    }
+
     override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(node.num)
 
     override fun clearClientNotification(notification: ClientNotification) =
@@ -561,6 +597,7 @@ class MeshServiceNotificationsImpl(
         channelName: String?,
         history: List<Message>,
         isSilent: Boolean = false,
+        extraOutgoingMessage: String? = null,
     ): Notification {
         val type = if (isBroadcast) NotificationType.BroadcastMessage else NotificationType.DirectMessage
         val builder = commonBuilder(type, createOpenMessageIntent(contactKey))
@@ -569,14 +606,7 @@ class MeshServiceNotificationsImpl(
             builder.setSilent(true)
         }
 
-        val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
-        val me =
-            Person.Builder()
-                .setName(meName)
-                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
-                .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
-                .build()
+        val me = buildMePerson()
 
         val style =
             NotificationCompat.MessagingStyle(me)
@@ -620,6 +650,9 @@ class MeshServiceNotificationsImpl(
                     reactor,
                 )
             }
+        }
+        if (!extraOutgoingMessage.isNullOrEmpty()) {
+            style.addMessage(extraOutgoingMessage, nowMillis, me)
         }
         val lastMessage = history.last()
 

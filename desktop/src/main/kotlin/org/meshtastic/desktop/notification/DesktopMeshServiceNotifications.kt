@@ -158,6 +158,10 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
         notificationManager.cancel(contactKey.hashCode())
     }
 
+    override suspend fun appendOutgoingMessage(contactKey: String, text: String) {
+        // No-op: desktop tray notifications don't carry MessagingStyle history to augment.
+    }
+
     override fun cancelLowBatteryNotification(node: Node) {
         notificationManager.cancel(node.num)
     }
