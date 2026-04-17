@@ -15,14 +15,8 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
-
-<!-- Material Design "chat" icon — used for the Channels tab in Android Auto -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <path
-        android:fillColor="@color/auto_icon_color"
-        android:pathData="M20,2L4,2c-1.1,0 -2,0.9 -2,2v18l4,-4h14c1.1,0 2,-0.9 2,-2L22,4c0,-1.1 -0.9,-2 -2,-2z" />
-</vector>
+<resources>
+    <!-- Default fill color for Car tab icons. The CarIcon tint (CarColor.DEFAULT) overrides
+         this at runtime; the named constant keeps the vector drawables maintainable. -->
+    <color name="auto_icon_color">#FFFFFF</color>
+</resources>

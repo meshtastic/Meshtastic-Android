@@ -23,10 +23,6 @@ plugins {
 android {
     namespace = "org.meshtastic.feature.auto"
     resourcePrefix = "auto_"
-
-    // Car App Library requires API 23+; bump above the app's default minSdk
-    // so we can use conversation shortcuts and LocusId APIs cleanly.
-    defaultConfig { minSdk = 23 }
 }
 
 dependencies {

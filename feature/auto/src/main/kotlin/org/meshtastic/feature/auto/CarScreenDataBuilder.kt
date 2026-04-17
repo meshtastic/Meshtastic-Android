@@ -55,12 +55,18 @@ internal object CarScreenDataBuilder {
      *
      * @param resolveUser Returns the [User] for a given node-ID string. The caller is responsible
      *   for providing a null-safe fallback (typically [NodeRepository.getUser]).
+     * @param channelLabel Produces the display name for a channel given its index.
+     *   Defaults to `"Channel N"`; callers can supply a localised string.
+     * @param unknownLabel Fallback display name when neither long name nor short name is available.
+     *   Defaults to `"Unknown"`; callers can supply a localised string.
      */
     fun buildCarContacts(
         merged: Map<String, DataPacket>,
         myId: String?,
         channelSet: ChannelSet,
         resolveUser: (String) -> User,
+        channelLabel: (Int) -> String = { "Channel $it" },
+        unknownLabel: String = "Unknown",
     ): List<CarContact> {
         val all = merged.map { (contactKey, packet) ->
             val fromLocal = packet.from == DataPacket.ID_LOCAL || packet.from == myId
@@ -72,11 +78,11 @@ internal object CarScreenDataBuilder {
 
             val displayName = if (toBroadcast) {
                 channelSet.getChannel(packet.channel)?.name?.takeIf { it.isNotEmpty() }
-                    ?: "Channel ${packet.channel}"
+                    ?: channelLabel(packet.channel)
             } else {
                 // userId can be null for malformed packets (e.g. both `from` and `to` are null).
                 // Fall back to a broadcast lookup which returns an "Unknown" user rather than crashing.
-                user.long_name.ifEmpty { user.short_name }.ifEmpty { "Unknown" }
+                user.long_name.ifEmpty { user.short_name }.ifEmpty { unknownLabel }
             }
 
             // Mirror ContactsViewModel: prefix received DM text with the sender's short name,
@@ -125,21 +131,31 @@ internal object CarScreenDataBuilder {
      * - `"Offline · <time ago>"` when [Node.lastHeard] is set
      * - `"Offline"` otherwise
      *
+     * @param labelOnline  Localised "Online" label; defaults to English.
+     * @param labelOffline Localised "Offline" label; defaults to English.
+     * @param labelDirect  Suffix appended when [Node.hopsAway] == 0 (include leading " · ");
+     *   defaults to `" · Direct"`.
+     * @param labelHops    Produces the hop-count suffix given the count (include leading " · ");
+     *   defaults to `" · N hops"`.
      * @param formatRelativeTime Converts a millis timestamp to a human-readable "X ago" string.
      *   Defaults to [DateFormatter.formatRelativeTime]; injectable for testing.
      */
     fun nodeStatusText(
         node: Node,
+        labelOnline: String = "Online",
+        labelOffline: String = "Offline",
+        labelDirect: String = " · Direct",
+        labelHops: (Int) -> String = { " · $it hops" },
         formatRelativeTime: (Long) -> String = DateFormatter::formatRelativeTime,
     ): String = buildString {
         if (node.isOnline) {
-            append("Online")
+            append(labelOnline)
             when {
-                node.hopsAway == 0 -> append(" · Direct")
-                node.hopsAway > 0 -> append(" · ${node.hopsAway} hops")
+                node.hopsAway == 0 -> append(labelDirect)
+                node.hopsAway > 0 -> append(labelHops(node.hopsAway))
             }
         } else {
-            append("Offline")
+            append(labelOffline)
             if (node.lastHeard > 0) {
                 append(" · ${formatRelativeTime(node.lastHeard * 1000L)}")
             }
@@ -166,27 +182,34 @@ internal object CarScreenDataBuilder {
      * Returns the message preview line for a contact row (Text 1 in the Car UI row).
      *
      * Mirrors `ChatMetadata`'s `lastMessageText` display: shows the last message text
-     * (with sender prefix for received DMs), or `"No messages yet"` for empty channels.
+     * (with sender prefix for received DMs), or [noMessagesLabel] for empty channels.
+     *
+     * @param noMessagesLabel Localised empty-state label; defaults to `"No messages yet"`.
      */
-    fun contactPreviewText(contact: CarContact): String =
-        contact.lastMessageText?.takeIf { it.isNotEmpty() } ?: "No messages yet"
+    fun contactPreviewText(
+        contact: CarContact,
+        noMessagesLabel: String = "No messages yet",
+    ): String = contact.lastMessageText?.takeIf { it.isNotEmpty() } ?: noMessagesLabel
 
     /**
      * Returns the secondary metadata line for a contact row (Text 2 in the Car UI row).
      *
      * Mirrors ContactItem's unread badge + date header:
-     * - `"N unread"` when there are unread messages
+     * - [unreadLabel] result when there are unread messages
      * - Formatted short date of the last message otherwise
      * - Empty string when there are no messages at all
      *
+     * @param unreadLabel  Produces the unread-count label given the count.
+     *   Defaults to `"N unread"`; callers can supply a localised format string.
      * @param formatShortDate Converts a millis timestamp to a short date string.
      *   Defaults to [DateFormatter.formatShortDate]; injectable for testing.
      */
     fun contactSecondaryText(
         contact: CarContact,
+        unreadLabel: (Int) -> String = { "$it unread" },
         formatShortDate: (Long) -> String = DateFormatter::formatShortDate,
     ): String = when {
-        contact.unreadCount > 0 -> "${contact.unreadCount} unread"
+        contact.unreadCount > 0 -> unreadLabel(contact.unreadCount)
         contact.lastMessageTime != null -> formatShortDate(contact.lastMessageTime)
         else -> ""
     }

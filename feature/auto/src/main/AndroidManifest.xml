@@ -17,16 +17,12 @@
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Android Auto: declare as a messaging/communications app -->
+    <!-- Android Auto Car App Service for browsable messaging UI -->
     <application>
-        <meta-data
-            android:name="com.google.android.gms.car.application"
-            android:resource="@xml/auto_app_desc" />
-
-        <!-- Android Auto Car App Service for browsable messaging UI -->
         <service
             android:name="org.meshtastic.feature.auto.MeshtasticCarAppService"
-            android:exported="true">
+            android:exported="true"
+            android:permission="androidx.car.app.CarAppService">
             <intent-filter>
                 <action android:name="androidx.car.app.CarAppService" />
                 <category android:name="androidx.car.app.category.MESSAGING" />

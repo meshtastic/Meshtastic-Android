@@ -920,7 +920,10 @@ class MeshServiceNotificationsImpl(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
-        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_add, label, pendingIntent).build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_add, label, pendingIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_NONE)
+            .setShowsUserInterface(false)
+            .build()
     }
 
     private fun commonBuilder(

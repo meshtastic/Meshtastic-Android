@@ -19,6 +19,7 @@ package org.meshtastic.feature.auto
 import androidx.car.app.CarAppApiLevels
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
+import androidx.car.app.constraints.ConstraintManager
 import androidx.car.app.model.Action
 import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
@@ -88,6 +89,16 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
+    /**
+     * Per-host list item cap, retrieved once on first template render via
+     * [ConstraintManager.getContentLimit]. Replaces a hardcoded constant so that
+     * hosts that allow more than the minimum 5 items are fully utilised.
+     */
+    private val listContentLimit: Int by lazy {
+        carContext.getCarService(ConstraintManager::class.java)
+            .getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_LIST)
+    }
+
     private var activeTabId = TAB_STATUS
     private var connectionState: ConnectionState = ConnectionState.Disconnected
 
@@ -105,10 +116,14 @@ class MeshtasticCarScreen(carContext: CarContext) :
     private var contacts: List<CarContact> = emptyList()
 
     /**
-     * True until the first [collect] emission arrives from the repository flows, preventing a
-     * flash of an empty/disconnected screen on Car API ≥ 5 hosts.
+     * True until the first combined emission from all repository flows arrives.
+     *
+     * On Car API ≥ 5 this prevents a flash of empty content before data loads by showing a
+     * [MessageTemplate] loading spinner. On older API levels the loading spinner is unavailable
+     * so [isLoading] starts as `false` and the fallback [ListTemplate] handles the empty state
+     * with [ItemList.Builder.setNoItemsMessage].
      */
-    private var isLoading = true
+    private var isLoading = carContext.carAppApiLevel >= CarAppApiLevels.LEVEL_5
 
     init {
         lifecycle.addObserver(this)
@@ -123,56 +138,55 @@ class MeshtasticCarScreen(carContext: CarContext) :
     }
 
     private fun startObserving() {
-        // Observe the contact list (channels + DMs) with reactive unread counts.
+        // Build the contacts sub-flow independently so it can feed the outer combine below.
+        val contactsFlow = combine(
+            nodeRepository.myId,
+            packetRepository.getContacts(),
+            radioConfigRepository.channelSetFlow,
+        ) { myId, rawContacts, channelSet ->
+            // Channel placeholders are always included so every configured channel is
+            // visible even before any messages have been sent/received.
+            val placeholders = CarScreenDataBuilder.buildChannelPlaceholders(channelSet)
+            // Real DB entries take precedence over placeholders when present.
+            val merged = rawContacts + (placeholders - rawContacts.keys)
+            CarScreenDataBuilder.buildCarContacts(
+                merged, myId, channelSet,
+                resolveUser = { userId -> nodeRepository.getUser(userId) },
+                channelLabel = { carContext.getString(R.string.auto_channel_number, it) },
+                unknownLabel = carContext.getString(R.string.auto_unknown),
+            )
+        }
+            .distinctUntilChanged()
+            .flatMapLatest { baseContacts ->
+                if (baseContacts.isEmpty()) {
+                    flowOf(emptyList())
+                } else {
+                    val unreadFlows = baseContacts.map { contact ->
+                        packetRepository.getUnreadCountFlow(contact.contactKey)
+                            .map { unread -> contact.copy(unreadCount = unread) }
+                    }
+                    combine(unreadFlows) { it.toList() }
+                }
+            }
+
+        val favoritesFlow = nodeRepository.nodeDBbyNum
+            .map { db -> CarScreenDataBuilder.sortFavorites(db.values) }
+            .distinctUntilChanged()
+
+        // All three data sources feed a single combined collector so that each batch of
+        // repository changes produces exactly one invalidate() call, avoiding unnecessary
+        // template rebuilds and staying well within the host's update-rate budget.
         scope.launch {
             combine(
-                nodeRepository.myId,
-                packetRepository.getContacts(),
-                radioConfigRepository.channelSetFlow,
-            ) { myId, rawContacts, channelSet ->
-                // Channel placeholders are always included so every configured channel is
-                // visible even before any messages have been sent/received.
-                val placeholders = CarScreenDataBuilder.buildChannelPlaceholders(channelSet)
-                // Real DB entries take precedence over placeholders when present.
-                val merged = rawContacts + (placeholders - rawContacts.keys)
-                CarScreenDataBuilder.buildCarContacts(merged, myId, channelSet) { userId ->
-                    nodeRepository.getUser(userId)
-                }
-            }
-                .distinctUntilChanged()
-                .flatMapLatest { baseContacts ->
-                    if (baseContacts.isEmpty()) {
-                        flowOf(emptyList())
-                    } else {
-                        val unreadFlows = baseContacts.map { contact ->
-                            packetRepository.getUnreadCountFlow(contact.contactKey)
-                                .map { unread -> contact.copy(unreadCount = unread) }
-                        }
-                        combine(unreadFlows) { it.toList() }
-                    }
-                }
-                .collect { updated ->
-                    contacts = updated
+                serviceRepository.connectionState,
+                favoritesFlow,
+                contactsFlow,
+            ) { connState, favs, ctcts -> Triple(connState, favs, ctcts) }
+                .collect { (connState, favs, ctcts) ->
+                    connectionState = connState
+                    favorites = favs
+                    contacts = ctcts
                     isLoading = false
-                    invalidate()
-                }
-        }
-
-        // Connection state is observed separately since it only affects the Status tab.
-        scope.launch {
-            serviceRepository.connectionState.collect { state ->
-                connectionState = state
-                invalidate()
-            }
-        }
-
-        // Favorite nodes — filter to isFavorite only, sort alphabetically.
-        scope.launch {
-            nodeRepository.nodeDBbyNum
-                .map { db -> CarScreenDataBuilder.sortFavorites(db.values) }
-                .distinctUntilChanged()
-                .collect { nodes ->
-                    favorites = nodes
                     invalidate()
                 }
         }
@@ -181,10 +195,10 @@ class MeshtasticCarScreen(carContext: CarContext) :
     // ---- Template building ----
 
     override fun onGetTemplate(): Template {
-        // MessageTemplate.setLoading() requires Car API 5+. On older hosts fall through
-        // to the ListTemplate fallback (StateFlows emit their cached state near-instantly).
-        if (isLoading && carContext.carAppApiLevel >= CarAppApiLevels.LEVEL_5) {
-            return MessageTemplate.Builder("Loading…")
+        // MessageTemplate.setLoading() requires Car API 5+. isLoading is only ever true
+        // on ≥5 hosts (see initialisation above), so no additional level check is needed here.
+        if (isLoading) {
+            return MessageTemplate.Builder(carContext.getString(R.string.auto_loading))
                 .setHeaderAction(Action.APP_ICON)
                 .setLoading(true)
                 .build()
@@ -213,21 +227,21 @@ class MeshtasticCarScreen(carContext: CarContext) :
             .setHeaderAction(Action.APP_ICON)
             .addTab(
                 Tab.Builder()
-                    .setTitle("Status")
+                    .setTitle(carContext.getString(R.string.auto_tab_status))
                     .setIcon(carIcon(R.drawable.auto_ic_status))
                     .setContentId(TAB_STATUS)
                     .build(),
             )
             .addTab(
                 Tab.Builder()
-                    .setTitle("Favorites")
+                    .setTitle(carContext.getString(R.string.auto_tab_favorites))
                     .setIcon(carIcon(R.drawable.auto_ic_favorites))
                     .setContentId(TAB_FAVORITES)
                     .build(),
             )
             .addTab(
                 Tab.Builder()
-                    .setTitle("Messages")
+                    .setTitle(carContext.getString(R.string.auto_tab_messages))
                     .setIcon(carIcon(R.drawable.auto_ic_channels))
                     .setContentId(TAB_MESSAGES)
                     .build(),
@@ -254,7 +268,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
     private fun buildStatusTemplate(): ListTemplate =
         ListTemplate.Builder()
-            .setTitle("Status")
+            .setTitle(carContext.getString(R.string.auto_tab_status))
             .setSingleList(ItemList.Builder().addItem(buildStatusRow()).build())
             .build()
 
@@ -268,27 +282,35 @@ class MeshtasticCarScreen(carContext: CarContext) :
      * - **Text 2**: battery percentage and short name — mirrors the battery row and node chip.
      */
     private fun buildFavoritesTemplate(): ListTemplate =
-        buildListTemplate("Favorites", favorites, "No favorite nodes") { buildFavoriteNodeRow(it) }
+        buildListTemplate(
+            carContext.getString(R.string.auto_tab_favorites),
+            favorites,
+            carContext.getString(R.string.auto_no_favorites),
+        ) { buildFavoriteNodeRow(it) }
 
     /**
      * Builds the Messages tab content: channels first (always present, even if empty), followed
      * by DM conversations sorted by most-recent message — identical to the phone's Contacts screen.
      */
     private fun buildMessagesTemplate(): ListTemplate =
-        buildListTemplate("Messages", contacts, "No conversations") { buildContactRow(it) }
+        buildListTemplate(
+            carContext.getString(R.string.auto_tab_messages),
+            contacts,
+            carContext.getString(R.string.auto_no_conversations),
+        ) { buildContactRow(it) }
 
     /**
      * Fallback for Car API level 1–5 hosts that do not support [TabTemplate].
      *
      * Shows a status row, then favorite-node rows, then conversation rows, all capped at
-     * [MAX_LIST_ITEMS] total — matching the three-tab content in a single list.
+     * [listContentLimit] total — matching the three-tab content in a single list.
      *
      * The remaining slots after status are split evenly: half for favorites, half for messages.
      * This prevents a long favorites list from crowding out all conversation entries.
      */
     private fun buildFallbackListTemplate(): ListTemplate {
         val items = ItemList.Builder()
-        var remaining = MAX_LIST_ITEMS
+        var remaining = listContentLimit
         items.addItem(buildStatusRow())
         remaining--
         // Give each section at most half the remaining space so neither dominates.
@@ -300,15 +322,18 @@ class MeshtasticCarScreen(carContext: CarContext) :
         contacts.take(remaining).forEach { contact ->
             items.addItem(buildContactRow(contact))
         }
-        return ListTemplate.Builder().setTitle("Meshtastic").setSingleList(items.build()).build()
+        return ListTemplate.Builder()
+            .setTitle(carContext.getString(R.string.auto_fallback_title))
+            .setSingleList(items.build())
+            .build()
     }
 
     private fun buildStatusRow(): Row {
         val statusText = when (connectionState) {
-            is ConnectionState.Connected -> "Connected"
-            is ConnectionState.Disconnected -> "Disconnected"
-            is ConnectionState.DeviceSleep -> "Device Sleeping"
-            is ConnectionState.Connecting -> "Connecting…"
+            is ConnectionState.Connected -> carContext.getString(R.string.auto_status_connected)
+            is ConnectionState.Disconnected -> carContext.getString(R.string.auto_status_disconnected)
+            is ConnectionState.DeviceSleep -> carContext.getString(R.string.auto_status_sleeping)
+            is ConnectionState.Connecting -> carContext.getString(R.string.auto_status_connecting)
         }
         val deviceName = nodeRepository.ourNodeInfo.value?.user?.long_name.orEmpty()
         return Row.Builder()
@@ -327,10 +352,19 @@ class MeshtasticCarScreen(carContext: CarContext) :
      * - Text 2 → battery level + short name chip equivalent (matches NodeItem battery row)
      */
     private fun buildFavoriteNodeRow(node: Node): Row {
-        val name = node.user.long_name.ifEmpty { node.user.short_name }.ifEmpty { "Unknown" }
+        val name = node.user.long_name.ifEmpty { node.user.short_name }
+            .ifEmpty { carContext.getString(R.string.auto_unknown) }
         return Row.Builder()
             .setTitle(name)
-            .addText(CarScreenDataBuilder.nodeStatusText(node))
+            .addText(
+                CarScreenDataBuilder.nodeStatusText(
+                    node,
+                    labelOnline = carContext.getString(R.string.auto_node_online),
+                    labelOffline = carContext.getString(R.string.auto_node_offline),
+                    labelDirect = carContext.getString(R.string.auto_node_direct),
+                    labelHops = { carContext.getString(R.string.auto_node_hops, it) },
+                ),
+            )
             .addTextIfNotEmpty(CarScreenDataBuilder.nodeDetailText(node))
             .setBrowsable(false)
             .build()
@@ -349,8 +383,18 @@ class MeshtasticCarScreen(carContext: CarContext) :
     private fun buildContactRow(contact: CarContact): Row =
         Row.Builder()
             .setTitle(contact.displayName)
-            .addText(CarScreenDataBuilder.contactPreviewText(contact))
-            .addTextIfNotEmpty(CarScreenDataBuilder.contactSecondaryText(contact))
+            .addText(
+                CarScreenDataBuilder.contactPreviewText(
+                    contact,
+                    noMessagesLabel = carContext.getString(R.string.auto_no_messages),
+                ),
+            )
+            .addTextIfNotEmpty(
+                CarScreenDataBuilder.contactSecondaryText(
+                    contact,
+                    unreadLabel = { carContext.getString(R.string.auto_unread_count, it) },
+                ),
+            )
             .setBrowsable(false)
             .build()
 
@@ -362,7 +406,8 @@ class MeshtasticCarScreen(carContext: CarContext) :
         apply { if (text.isNotEmpty()) addText(text) }
 
     /**
-     * DRY helper: builds a [ListTemplate] from a list of items, capping at [MAX_LIST_ITEMS].
+     * DRY helper: builds a [ListTemplate] from a list of items, capping at [listContentLimit]
+     * (the per-host limit reported by [ConstraintManager]).
      *
      * Shows [noItemsMessage] when the list is empty.
      */
@@ -373,7 +418,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
         buildRow: (T) -> Row,
     ): ListTemplate {
         val listBuilder = ItemList.Builder()
-        val capped = items.take(MAX_LIST_ITEMS)
+        val capped = items.take(listContentLimit)
         if (capped.isEmpty()) {
             listBuilder.setNoItemsMessage(noItemsMessage)
         } else {
@@ -386,12 +431,5 @@ class MeshtasticCarScreen(carContext: CarContext) :
         private const val TAB_STATUS = "status"
         private const val TAB_FAVORITES = "favorites"
         private const val TAB_MESSAGES = "messages"
-
-        /**
-         * Car App Library enforces a per-[ListTemplate] item cap via
-         * `ConstraintManager.CONTENT_LIMIT_TYPE_LIST`. 6 is the conservative floor across all
-         * supported hosts.
-         */
-        private const val MAX_LIST_ITEMS = 6
     }
 }
