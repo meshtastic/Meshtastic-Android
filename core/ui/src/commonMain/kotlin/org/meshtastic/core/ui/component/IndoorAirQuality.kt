@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,6 +59,7 @@ import org.meshtastic.core.resources.preview_gauge
 import org.meshtastic.core.resources.preview_gradient
 import org.meshtastic.core.resources.preview_pill
 import org.meshtastic.core.resources.preview_text
+import org.meshtastic.core.resources.show_iaq_legend
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ThumbUp
 import org.meshtastic.core.ui.icon.Warning
@@ -120,13 +122,18 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
         Column {
             when (displayMode) {
                 IaqDisplayMode.Pill -> {
+                    val legendLabel = stringResource(Res.string.show_iaq_legend)
                     Box(
                         modifier =
                         Modifier.clip(RoundedCornerShape(10.dp))
                             .background(iaqEnum.color)
                             .width(125.dp)
                             .height(30.dp)
-                            .clickable { isLegendOpen = true },
+                            .clickable(
+                                onClickLabel = legendLabel,
+                                role = Role.Button,
+                                onClick = { isLegendOpen = true },
+                            ),
                     ) {
                         Row(
                             modifier = Modifier.padding(4.dp).align(Alignment.CenterStart),
@@ -144,7 +151,15 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                 }
 
                 IaqDisplayMode.Dot -> {
-                    Column(modifier = Modifier.clickable { isLegendOpen = true }) {
+                    val legendLabel = stringResource(Res.string.show_iaq_legend)
+                    Column(
+                        modifier =
+                        Modifier.clickable(
+                            onClickLabel = legendLabel,
+                            role = Role.Button,
+                            onClick = { isLegendOpen = true },
+                        ),
+                    ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(text = "$iaq")
                             Spacer(modifier = Modifier.width(4.dp))
@@ -154,17 +169,30 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                 }
 
                 IaqDisplayMode.Text -> {
+                    val legendLabel = stringResource(Res.string.show_iaq_legend)
                     Text(
                         text = getIaqDescriptionWithRange(iaqEnum),
                         fontSize = 12.sp,
-                        modifier = Modifier.clickable { isLegendOpen = true },
+                        modifier =
+                        Modifier.clickable(
+                            onClickLabel = legendLabel,
+                            role = Role.Button,
+                            onClick = { isLegendOpen = true },
+                        ),
                     )
                 }
 
                 IaqDisplayMode.Gauge -> {
+                    val legendLabel = stringResource(Res.string.show_iaq_legend)
                     CircularProgressIndicator(
                         progress = { iaq / 500f },
-                        modifier = Modifier.size(60.dp).clickable { isLegendOpen = true },
+                        modifier =
+                        Modifier.size(60.dp)
+                            .clickable(
+                                onClickLabel = legendLabel,
+                                role = Role.Button,
+                                onClick = { isLegendOpen = true },
+                            ),
                         strokeWidth = 8.dp,
                         color = iaqEnum.color,
                     )
@@ -172,9 +200,15 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                 }
 
                 IaqDisplayMode.Gradient -> {
+                    val legendLabel = stringResource(Res.string.show_iaq_legend)
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.clickable { isLegendOpen = true },
+                        modifier =
+                        Modifier.clickable(
+                            onClickLabel = legendLabel,
+                            role = Role.Button,
+                            onClick = { isLegendOpen = true },
+                        ),
                     ) {
                         LinearProgressIndicator(
                             progress = { iaq / 500f },
