@@ -515,6 +515,11 @@ class MeshServiceNotificationsImpl(
         notificationManager.cancel(SUMMARY_ID)
     }
 
+    override suspend fun markConversationRead(contactKey: String) {
+        packetRepository.value.clearUnreadCount(contactKey, nowMillis)
+        cancelMessageNotification(contactKey)
+    }
+
     override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(node.num)
 
     override fun clearClientNotification(notification: ClientNotification) =

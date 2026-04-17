@@ -154,6 +154,10 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
         notificationManager.cancel(contactKey.hashCode())
     }
 
+    override suspend fun markConversationRead(contactKey: String) {
+        notificationManager.cancel(contactKey.hashCode())
+    }
+
     override fun cancelLowBatteryNotification(node: Node) {
         notificationManager.cancel(node.num)
     }

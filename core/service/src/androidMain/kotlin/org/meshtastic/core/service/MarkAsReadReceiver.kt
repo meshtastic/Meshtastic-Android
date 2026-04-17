@@ -24,17 +24,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.repository.PacketRepository
 
 /** A [BroadcastReceiver] that handles "Mark as read" actions from notifications. */
 class MarkAsReadReceiver :
     BroadcastReceiver(),
     KoinComponent {
-
-    private val packetRepository: PacketRepository by inject()
 
     private val serviceNotifications: MeshServiceNotifications by inject()
 
@@ -54,8 +50,7 @@ class MarkAsReadReceiver :
 
             scope.launch {
                 try {
-                    packetRepository.clearUnreadCount(contactKey, nowMillis)
-                    serviceNotifications.cancelMessageNotification(contactKey)
+                    serviceNotifications.markConversationRead(contactKey)
                 } finally {
                     pendingResult.finish()
                 }

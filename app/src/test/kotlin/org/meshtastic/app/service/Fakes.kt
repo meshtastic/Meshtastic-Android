@@ -74,6 +74,8 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
 
     override fun cancelMessageNotification(contactKey: String) {}
 
+    override suspend fun markConversationRead(contactKey: String) {}
+
     override fun cancelLowBatteryNotification(node: Node) {}
 
     override fun clearClientNotification(notification: ClientNotification) {}

@@ -67,6 +67,13 @@ interface MeshServiceNotifications {
 
     fun cancelMessageNotification(contactKey: String)
 
+    /**
+     * Marks the conversation for [contactKey] as read: clears its unread count in the packet repository and cancels the
+     * posted message notification (and the group summary). Intended for use by notification action receivers (reply,
+     * mark-as-read, reaction) to keep behavior consistent.
+     */
+    suspend fun markConversationRead(contactKey: String)
+
     fun cancelLowBatteryNotification(node: Node)
 
     fun clearClientNotification(notification: ClientNotification)

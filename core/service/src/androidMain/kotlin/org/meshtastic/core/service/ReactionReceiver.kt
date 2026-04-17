@@ -27,6 +27,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.ServiceRepository
 
 /**
@@ -40,6 +41,8 @@ class ReactionReceiver :
     KoinComponent {
 
     private val serviceRepository: ServiceRepository by inject()
+
+    private val meshServiceNotifications: MeshServiceNotifications by inject()
 
     private val dispatchers: CoroutineDispatchers by inject()
 
@@ -57,6 +60,7 @@ class ReactionReceiver :
         scope.launch {
             try {
                 serviceRepository.onServiceAction(ServiceAction.Reaction(reaction, replyId, contactKey))
+                meshServiceNotifications.markConversationRead(contactKey)
             } catch (e: Exception) {
                 Logger.e(e) { "Error sending reaction" }
             } finally {
