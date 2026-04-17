@@ -34,8 +34,4 @@ class MeshtasticCarAppService : CarAppService() {
 
     override fun onCreateSession(sessionInfo: SessionInfo): Session =
         MeshtasticCarSession()
-
-    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-    override fun onCreateSession(): Session =
-        MeshtasticCarSession()
 }

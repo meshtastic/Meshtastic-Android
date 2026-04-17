@@ -75,7 +75,11 @@ class ConversationShortcutManager(
                 .distinctUntilChanged()
 
             val channelsFlow = radioConfigRepository.channelSetFlow
-                .map { cs -> cs.settings.filter { it.name.isNotEmpty() || cs.settings.indexOf(it) == 0 } }
+                .map { cs ->
+                    cs.settings.filterIndexed { index, settings ->
+                        settings.name.isNotEmpty() || index == 0
+                    }
+                }
                 .distinctUntilChanged()
 
             combine(favoritesFlow, channelsFlow) { favorites, channels ->
