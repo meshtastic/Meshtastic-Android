@@ -560,6 +560,8 @@
     <string name="ignore_mqtt">Ignora MQTT</string>
     <string name="ok_to_mqtt">OK per MQTT</string>
     <string name="mqtt_config">Configurazione MQTT</string>
+    <string name="mqtt_status_disconnected">Disconnesso</string>
+    <string name="mqtt_status_connected">Connesso</string>
     <string name="mqtt_enabled">MQTT abilitato</string>
     <string name="address">Indirizzo</string>
     <string name="username">Username</string>

@@ -167,6 +167,8 @@
     <string name="play">Граць</string>
     <string name="lora_config">LoRa</string>
     <string name="region_frequency_plan">Рэгіён</string>
+    <string name="mqtt_status_disconnected">Адлучана</string>
+    <string name="mqtt_status_connected">Злучаны</string>
     <string name="username">Імя карыстальніка</string>
     <string name="password">Пароль</string>
     <string name="enabled">Уключана</string>

@@ -401,6 +401,8 @@
     <string name="override_frequency_mhz">Перевизначити частоту</string>
     <string name="ignore_mqtt">Ігнорувати MQTT</string>
     <string name="mqtt_config">Налаштування MQTT</string>
+    <string name="mqtt_status_disconnected">Відключено</string>
+    <string name="mqtt_status_connected">Під’єднано</string>
     <string name="mqtt_enabled">MQTT увімкнений</string>
     <string name="address">Адреса</string>
     <string name="username">Ім'я користувача</string>

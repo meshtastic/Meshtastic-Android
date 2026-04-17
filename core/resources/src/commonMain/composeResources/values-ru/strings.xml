@@ -621,6 +621,8 @@
     <string name="ignore_mqtt">Игнорировать MQTT</string>
     <string name="ok_to_mqtt">ОК в MQTT</string>
     <string name="mqtt_config">Настройка MQTT</string>
+    <string name="mqtt_status_disconnected">Отключено</string>
+    <string name="mqtt_status_connected">Подключено</string>
     <string name="mqtt_enabled">MQTT включен</string>
     <string name="address">Адрес</string>
     <string name="username">Имя пользователя</string>

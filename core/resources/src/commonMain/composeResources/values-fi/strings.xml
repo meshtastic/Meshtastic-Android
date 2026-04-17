@@ -613,6 +613,8 @@
     <string name="ignore_mqtt">Ohita MQTT</string>
     <string name="ok_to_mqtt">MQTT päällä</string>
     <string name="mqtt_config">MQTT asetukset</string>
+    <string name="mqtt_status_disconnected">Ei yhdistetty</string>
+    <string name="mqtt_status_connected">Yhdistetty</string>
     <string name="mqtt_enabled">MQTT käytössä</string>
     <string name="address">Osoite</string>
     <string name="username">Käyttäjänimi</string>
@@ -1209,5 +1211,8 @@
     <string name="wifi_provision_ssid_placeholder">Syötä tai valitse verkko</string>
     <string name="wifi_provision_status_applied">WiFi määritetty onnistuneesti!</string>
     <string name="wifi_provision_status_failed">WiFi-asetusten käyttöönotto epäonnistui</string>
+    <string name="desktop_tray_tooltip">Meshtastic työpöytä</string>
+    <string name="desktop_tray_show">Näytä Meshtastic</string>
+    <string name="desktop_tray_quit">Lopeta</string>
     <string name="desktop_notification_title">Meshtastic</string>
 </resources>

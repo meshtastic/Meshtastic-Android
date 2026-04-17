@@ -149,6 +149,7 @@
     <string name="mute_always">Sempre</string>
     <string name="traceroute_log">Traza-ruta</string>
     <string name="region_frequency_plan">Rexión</string>
+    <string name="mqtt_status_disconnected">Desconectado</string>
     <string name="distance">Distancia</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->

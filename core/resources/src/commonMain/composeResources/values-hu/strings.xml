@@ -515,6 +515,8 @@
     <string name="ignore_mqtt">MQTT figyelmen kívül hagyása</string>
     <string name="ok_to_mqtt">MQTT-re továbbítható</string>
     <string name="mqtt_config">MQTT beállítások</string>
+    <string name="mqtt_status_disconnected">Szétkapcsolva</string>
+    <string name="mqtt_status_connected">Csatlakoztatva</string>
     <string name="mqtt_enabled">MQTT engedélyezve</string>
     <string name="address">Cím</string>
     <string name="username">Felhasználónév</string>
