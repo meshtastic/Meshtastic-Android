@@ -599,6 +599,8 @@
     <string name="ignore_mqtt">Ignoră MQTT</string>
     <string name="ok_to_mqtt">Acceptă MQTT</string>
     <string name="mqtt_config">Configurare MQTT</string>
+    <string name="mqtt_status_disconnected">Deconectat</string>
+    <string name="mqtt_status_connected">Conectat</string>
     <string name="mqtt_enabled">MQTT activat</string>
     <string name="address">Adresă</string>
     <string name="username">Nume de utilizator</string>

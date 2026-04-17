@@ -366,6 +366,8 @@
     <string name="ignore_incoming">Ignorar entrada</string>
     <string name="ignore_mqtt">Ignorar MQTT</string>
     <string name="mqtt_config">Configuração MQTT</string>
+    <string name="mqtt_status_disconnected">Desconectado</string>
+    <string name="mqtt_status_connected">Ligado</string>
     <string name="mqtt_enabled">MQTT ativo</string>
     <string name="address">Endereço</string>
     <string name="username">Utilizador</string>

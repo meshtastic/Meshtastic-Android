@@ -424,6 +424,8 @@
     <string name="pa_fan_disabled">PAファン無効</string>
     <string name="ignore_mqtt">MQTT を無視</string>
     <string name="mqtt_config">MQTT設定</string>
+    <string name="mqtt_status_disconnected">切断</string>
+    <string name="mqtt_status_connected">接続済</string>
     <string name="mqtt_enabled">MQTTを有効化</string>
     <string name="address">アドレス</string>
     <string name="username">ユーザー名</string>

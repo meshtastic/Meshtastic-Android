@@ -119,6 +119,7 @@
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
     <string name="traceroute_log">Ferilkönnun</string>
     <string name="region_frequency_plan">Svæði</string>
+    <string name="mqtt_status_disconnected">Aftengd</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

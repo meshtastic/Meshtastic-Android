@@ -554,6 +554,8 @@
     <string name="ignore_mqtt">Ignorer MQTT</string>
     <string name="ok_to_mqtt">Transmission des paquets vers MQTT</string>
     <string name="mqtt_config">Configuration MQTT</string>
+    <string name="mqtt_status_disconnected">Déconnecté</string>
+    <string name="mqtt_status_connected">Connecté</string>
     <string name="mqtt_enabled">MQTT activé</string>
     <string name="address">Adresse</string>
     <string name="username">Nom d'utilisateur</string>

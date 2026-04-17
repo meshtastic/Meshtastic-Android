@@ -201,10 +201,15 @@
     <string name="reset_to_defaults">Възстановяване на настройките по подразбиране</string>
     <string name="apply">Приложи</string>
     <string name="theme">Тема</string>
+    <string name="contrast">Контраст</string>
     <string name="theme_light">Светла</string>
     <string name="theme_dark">Тъмна</string>
     <string name="theme_system">По подразбиране на системата</string>
     <string name="choose_theme">Избор на тема</string>
+    <string name="choose_contrast">Ниво на контраста</string>
+    <string name="contrast_standard">Стандартен</string>
+    <string name="contrast_medium">Среден</string>
+    <string name="contrast_high">Висок</string>
     <string name="provide_location_to_mesh">Изпращане на местоположение в мрежата</string>
     <string name="use_homoglyph_characters_encoding">Компактно кодиране за Кирилица</string>
     <plurals name="delete_messages">
@@ -301,6 +306,8 @@
     <string name="battery">Батерия</string>
     <string name="channel_utilization">Използване на канала</string>
     <string name="air_utilization">Използване на ефира</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="logs">записа</string>
@@ -483,6 +490,8 @@
     <string name="frequency_slot">Честотен слот</string>
     <string name="ignore_mqtt">Игнориране на MQTT</string>
     <string name="mqtt_config">Конфигуриране на MQTT</string>
+    <string name="mqtt_status_disconnected">Прекъсната връзка</string>
+    <string name="mqtt_status_connected">Свързано</string>
     <string name="mqtt_enabled">MQTT е активиран</string>
     <string name="address">Адрес</string>
     <string name="username">Потребителско име</string>
@@ -960,5 +969,6 @@
     <string name="wifi_provision_ssid_placeholder">Въведете или изберете мрежа</string>
     <string name="wifi_provision_status_applied">WiFi е конфигуриран успешно!</string>
     <string name="wifi_provision_status_failed">Прилагането на конфигурацията за WiFi не е успешно</string>
+    <string name="desktop_tray_quit">Изход</string>
     <string name="desktop_notification_title">Meshtastic</string>
 </resources>

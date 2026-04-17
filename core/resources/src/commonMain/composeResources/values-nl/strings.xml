@@ -312,6 +312,8 @@
     <string name="ignore_incoming">Inkomende negeren</string>
     <string name="ignore_mqtt">Negeer MQTT</string>
     <string name="mqtt_config">MQTT Configuratie</string>
+    <string name="mqtt_status_disconnected">Niet verbonden</string>
+    <string name="mqtt_status_connected">Verbonden</string>
     <string name="mqtt_enabled">MQTT ingeschakeld</string>
     <string name="address">Adres</string>
     <string name="username">Gebruikersnaam</string>

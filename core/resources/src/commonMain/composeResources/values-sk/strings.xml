@@ -362,6 +362,8 @@
     <string name="lora_config">LoRa</string>
     <string name="bandwidth">Šírka pásma</string>
     <string name="region_frequency_plan">Región</string>
+    <string name="mqtt_status_disconnected">Odpojené</string>
+    <string name="mqtt_status_connected">Pripojený</string>
     <string name="address">Adresa</string>
     <string name="username">Používateľské meno</string>
     <string name="password">Heslo</string>

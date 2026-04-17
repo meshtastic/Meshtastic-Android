@@ -150,6 +150,7 @@
     <string name="details">Detalji</string>
     <string name="red">Crveno</string>
     <string name="region_frequency_plan">Regija</string>
+    <string name="mqtt_status_disconnected">Odspojeno</string>
     <string name="distance">Udaljenost</string>
     <string name="meshtastic">Meshtastic</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->

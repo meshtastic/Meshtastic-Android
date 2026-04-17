@@ -213,6 +213,7 @@
     </plurals>
     <string name="traceroute_diff">Céimeanna i dtreo %1$d Céimeanna ar ais %2$d</string>
     <string name="region_frequency_plan">Réigiún</string>
+    <string name="mqtt_status_disconnected">Na ceangailte</string>
     <string name="timeout">Am tráth</string>
     <string name="distance">Sáth</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
