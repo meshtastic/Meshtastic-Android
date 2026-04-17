@@ -638,6 +638,11 @@
     <string name="ignore_mqtt">Ignore MQTT</string>
     <string name="ok_to_mqtt">Ok to MQTT</string>
     <string name="mqtt_config">MQTT Config</string>
+    <string name="mqtt_status_inactive">Inactive</string>
+    <string name="mqtt_status_disconnected">Disconnected</string>
+    <string name="mqtt_status_connecting">Connecting…</string>
+    <string name="mqtt_status_connected">Connected</string>
+    <string name="mqtt_status_reconnecting">Reconnecting…</string>
     <string name="mqtt_enabled">MQTT enabled</string>
     <string name="address">Address</string>
     <string name="username">Username</string>

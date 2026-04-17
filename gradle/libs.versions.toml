@@ -74,7 +74,7 @@ spotless = "8.4.0"
 wire = "6.2.0"
 vico = "3.1.0"
 kable = "0.42.0"
-kmqtt = "1.0.0"
+mqttastic = "0.1.0"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 
@@ -222,8 +222,7 @@ markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-rend
 material = { module = "com.google.android.material:material", version = "1.13.0" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
-kmqtt-client = { module = "io.github.davidepianca98:kmqtt-client", version.ref = "kmqtt" }
-kmqtt-common = { module = "io.github.davidepianca98:kmqtt-common", version.ref = "kmqtt" }
+meshtastic-mqtt-client = { module = "org.meshtastic:mqtt-client", version.ref = "mqttastic" }
 
 jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
