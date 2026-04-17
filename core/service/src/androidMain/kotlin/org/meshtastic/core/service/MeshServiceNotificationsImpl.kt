@@ -119,7 +119,6 @@ class MeshServiceNotificationsImpl(
         const val MAX_BATTERY_LEVEL = 100
         private val NOTIFICATION_LIGHT_COLOR = Color.BLUE
         private const val MAX_HISTORY_MESSAGES = 10
-        private const val MIN_CONTEXT_MESSAGES = 3
         private const val SNIPPET_LENGTH = 30
         private const val GROUP_KEY_MESSAGES = "com.geeksville.mesh.GROUP_MESSAGES"
         private const val SUMMARY_ID = 1
@@ -426,14 +425,8 @@ class MeshServiceNotificationsImpl(
                 .first()
 
         val unread = history.filter { !it.read }
-        val displayHistory =
-            if (unread.size < MIN_CONTEXT_MESSAGES) {
-                history.take(MIN_CONTEXT_MESSAGES).reversed()
-            } else {
-                unread.take(MAX_HISTORY_MESSAGES).reversed()
-            }
-
-        if (displayHistory.isEmpty()) return
+        if (unread.isEmpty()) return
+        val displayHistory = unread.take(MAX_HISTORY_MESSAGES).reversed()
 
         val notification =
             createConversationNotification(
