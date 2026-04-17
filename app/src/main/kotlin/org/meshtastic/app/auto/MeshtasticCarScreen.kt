@@ -19,7 +19,6 @@ package org.meshtastic.app.auto
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
-import androidx.car.app.model.CarIcon
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
@@ -172,7 +171,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
     }
 
     private fun buildStatusSection(): ItemList {
-        val statusText = when (val state = connectionState) {
+        val statusText = when (connectionState) {
             is ConnectionState.Connected -> "Connected"
             is ConnectionState.Disconnected -> "Disconnected"
             is ConnectionState.DeviceSleep -> "Device Sleeping"

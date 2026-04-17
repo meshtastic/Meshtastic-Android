@@ -16,8 +16,6 @@
  */
 package org.meshtastic.app.auto
 
-import android.content.Intent
-import android.content.pm.ApplicationInfo
 import androidx.car.app.CarAppService
 import androidx.car.app.Session
 import androidx.car.app.SessionInfo
@@ -31,24 +29,13 @@ import androidx.car.app.validation.HostValidator
  */
 class MeshtasticCarAppService : CarAppService() {
 
-    override fun createHostValidator(): HostValidator {
-        return if (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) {
-            HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
-        } else {
-            HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
-        }
-    }
+    override fun createHostValidator(): HostValidator =
+        HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
 
-    override fun onCreateSession(sessionInfo: SessionInfo): Session {
-        return MeshtasticCarSession()
-    }
+    override fun onCreateSession(sessionInfo: SessionInfo): Session =
+        MeshtasticCarSession()
 
     @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
-    override fun onCreateSession(): Session {
-        return MeshtasticCarSession()
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-    }
+    override fun onCreateSession(): Session =
+        MeshtasticCarSession()
 }

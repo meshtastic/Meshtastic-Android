@@ -32,11 +32,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.repository.NodeRepository
@@ -125,7 +125,7 @@ class ConversationShortcutManager(
 
         // Channel shortcuts (broadcast conversations)
         for ((index, channelSettings) in channels.withIndex()) {
-            val contactKey = "${index}${org.meshtastic.core.model.DataPacket.ID_BROADCAST}"
+            val contactKey = "${index}${DataPacket.ID_BROADCAST}"
             val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
             val person = Person.Builder()
                 .setName(channelName)
