@@ -67,7 +67,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var observeJob: Job? = null
 
-    private var connectionState: ConnectionState = ConnectionState.Disconnected()
+    private var connectionState: ConnectionState = ConnectionState.Disconnected
     private var favoriteNodes: List<Node> = emptyList()
     private var channels: List<ChannelSettings> = emptyList()
     private var unreadCounts: Map<String, Int> = emptyMap()
@@ -195,10 +195,10 @@ class MeshtasticCarScreen(carContext: CarContext) :
     private fun buildFavoritesSection(): ItemList {
         val builder = ItemList.Builder()
 
-        for (node in favoriteNodes) {
+        for (node in favoriteNodes.take(MAX_LIST_ITEMS)) {
             val contactKey = "0${node.user.id}"
             val unread = unreadCounts[contactKey] ?: 0
-            val name = node.user.long_name.ifEmpty { node.user.short_name }
+            val name = node.user.long_name.ifEmpty { node.user.short_name }.ifEmpty { "Unknown" }
             val subtitle = buildString {
                 append(node.user.short_name)
                 if (node.hopsAway >= 0) append(" · ${node.hopsAway} hops")
@@ -220,7 +220,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
     private fun buildChannelsSection(): ItemList {
         val builder = ItemList.Builder()
 
-        for ((index, channelSettings) in channels.withIndex()) {
+        for ((index, channelSettings) in channels.take(MAX_LIST_ITEMS).withIndex()) {
             val contactKey = "${index}${DataPacket.ID_BROADCAST}"
             val unread = unreadCounts[contactKey] ?: 0
             val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
@@ -237,4 +237,13 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
         return builder.build()
     }
+
+    companion object {
+        /**
+         * Android Auto enforces a maximum item count per [ListTemplate] section.
+         * Car API level 1 supports up to 6 items per section.
+         */
+        private const val MAX_LIST_ITEMS = 6
+    }
 }
+
