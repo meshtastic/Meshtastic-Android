@@ -182,12 +182,10 @@ private fun PowerMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    MetricChartScaffold(
-        isEmpty = telemetries.isEmpty(),
-        legendData = LEGEND_DATA,
-        modifier = modifier,
-        key = selectedChannel,
-    ) { modelProducer, chartModifier ->
+    MetricChartScaffold(isEmpty = telemetries.isEmpty(), legendData = LEGEND_DATA, modifier = modifier) {
+            modelProducer,
+            chartModifier,
+        ->
         val currentColor = PowerMetric.CURRENT.color
         val voltageColor = PowerMetric.VOLTAGE.color
         val marker =
