@@ -47,6 +47,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -58,19 +59,17 @@ import org.meshtastic.proto.PortNum
 /**
  * Root screen displayed in Android Auto.
  *
- * Renders a two-tab UI that mirrors the app's Contacts screen:
- * - **Status** — Connection state and device name
+ * Renders a three-tab UI:
+ * - **Status** — Connection state and device name.
+ * - **Favorites** — All nodes the user has starred, with online/hop status shown as a subtitle.
  * - **Messages** — All conversations: active channels displayed first as permanent placeholders
  *   (always visible even when empty, sorted by channel index), followed by DM conversations
  *   sorted by most-recent message descending. This is the same ordering used by
  *   [org.meshtastic.feature.messaging.ui.contact.ContactsViewModel].
  *
- * Unlike the previous three-tab design (Status / Favorites / Channels), this view reflects
- * every conversation in the database—not just favorited nodes—and correctly handles DMs
- * on non-primary channels.
- *
  * `TabTemplate` requires Car API level 6. On hosts running Car API level 1–5 the screen falls
- * back to a single [ListTemplate] that includes a status row followed by the same contact list.
+ * back to a single [ListTemplate] that includes a status row, favorite-node rows, and the
+ * contact list.
  *
  * When the user taps a [MessagingStyle][androidx.core.app.NotificationCompat.MessagingStyle]
  * notification in the Android Auto notification shade the host calls
@@ -91,6 +90,12 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
     private var activeTabId = TAB_STATUS
     private var connectionState: ConnectionState = ConnectionState.Disconnected
+
+    /**
+     * Favorite nodes sorted alphabetically by long name. Updated reactively from
+     * [NodeRepository.nodeDBbyNum] whenever the user stars or un-stars a node.
+     */
+    private var favorites: List<Node> = emptyList()
 
     /**
      * Ordered contact list for the Messages tab: channel entries first (sorted by channel index,
@@ -159,6 +164,17 @@ class MeshtasticCarScreen(carContext: CarContext) :
                 connectionState = state
                 invalidate()
             }
+        }
+
+        // Favorite nodes — filter nodeDBbyNum to isFavorite, sort alphabetically.
+        scope.launch {
+            nodeRepository.nodeDBbyNum
+                .map { db -> db.values.filter { it.isFavorite }.sortedBy { it.user.long_name.ifEmpty { it.user.short_name } } }
+                .distinctUntilChanged()
+                .collect { nodes ->
+                    favorites = nodes
+                    invalidate()
+                }
         }
     }
 
@@ -243,6 +259,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
         val activeContent =
             when (activeTabId) {
+                TAB_FAVORITES -> TabContents.Builder(buildFavoritesTemplate()).build()
                 TAB_MESSAGES -> TabContents.Builder(buildMessagesTemplate()).build()
                 else -> TabContents.Builder(buildStatusTemplate()).build()
             }
@@ -254,6 +271,13 @@ class MeshtasticCarScreen(carContext: CarContext) :
                     .setTitle("Status")
                     .setIcon(carIcon(R.drawable.auto_ic_status))
                     .setContentId(TAB_STATUS)
+                    .build(),
+            )
+            .addTab(
+                Tab.Builder()
+                    .setTitle("Favorites")
+                    .setIcon(carIcon(R.drawable.auto_ic_favorites))
+                    .setContentId(TAB_FAVORITES)
                     .build(),
             )
             .addTab(
