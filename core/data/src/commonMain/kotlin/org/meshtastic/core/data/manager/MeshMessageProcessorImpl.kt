@@ -32,6 +32,8 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
+import org.meshtastic.core.model.util.toOneLineString
+import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -125,11 +127,11 @@ class MeshMessageProcessorImpl(
                 proto.xmodemPacket != null -> "XmodemPacket" to proto.xmodemPacket.toString()
                 proto.deviceuiConfig != null -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
                 proto.fileInfo != null -> "FileInfo" to proto.fileInfo.toString()
-                proto.my_info != null -> "MyInfo" to proto.my_info.toString()
-                proto.node_info != null -> "NodeInfo" to proto.node_info.toString()
-                proto.config != null -> "Config" to proto.config.toString()
-                proto.moduleConfig != null -> "ModuleConfig" to proto.moduleConfig.toString()
-                proto.channel != null -> "Channel" to proto.channel.toString()
+                proto.my_info != null -> "MyInfo" to proto.my_info!!.toOneLineString()
+                proto.node_info != null -> "NodeInfo" to proto.node_info!!.toPIIString()
+                proto.config != null -> "Config" to proto.config!!.toOneLineString()
+                proto.moduleConfig != null -> "ModuleConfig" to proto.moduleConfig!!.toOneLineString()
+                proto.channel != null -> "Channel" to proto.channel!!.toOneLineString()
                 proto.clientNotification != null -> "ClientNotification" to proto.clientNotification.toString()
                 else -> return
             }

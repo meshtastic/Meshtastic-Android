@@ -40,15 +40,6 @@
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
 
-# ---- Compose Runtime & Animation --------------------------------------------
-
-# Defence-in-depth: prevent R8 tree-shaking of Compose infrastructure classes
-# that are referenced indirectly through compiler-generated state machines.
-# With -dontoptimize above these are largely redundant, but they provide a
-# safety net against future toolchain changes.
--keep class androidx.compose.runtime.** { *; }
--keep class androidx.compose.ui.** { *; }
--keep class androidx.compose.animation.core.** { *; }
--keep class androidx.compose.animation.** { *; }
--keep class androidx.compose.foundation.** { *; }
--keep class androidx.compose.material3.** { *; }
+# Compose runtime/ui/animation/foundation/material3 keep rules now live in
+# config/proguard/shared-rules.pro so both Android (R8) and desktop (ProGuard)
+# get the same defence-in-depth coverage against CMP 1.11 optimizer folding.

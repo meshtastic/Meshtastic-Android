@@ -18,8 +18,11 @@
 
 package org.meshtastic.core.model.util
 
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.Telemetry
 
 /**
@@ -45,6 +48,24 @@ fun Config.toOneLineString(): String {
 
 fun MeshPacket.toOneLineString(): String {
     val redactedFields = """(public_key|private_key|admin_key)=[^,}]+""" // Redact keys
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
+fun Channel.toOneLineString(): String {
+    // Redact the channel preshared key (psk) from logs.
+    val redactedFields = """(psk)=[^,}]+"""
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
+fun ModuleConfig.toOneLineString(): String {
+    // Redact MQTT credentials from logs.
+    val redactedFields = """(password|username)=[^,}]+"""
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
+fun MyNodeInfo.toOneLineString(): String {
+    // Redact the hardware unique identifier from logs.
+    val redactedFields = """(device_id)=[^,}]+"""
     return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
 }
 
