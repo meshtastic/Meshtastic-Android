@@ -32,6 +32,7 @@ import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
+import androidx.core.content.LocusIdCompat
 import androidx.core.content.getSystemService
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
@@ -622,6 +623,8 @@ class MeshServiceNotificationsImpl(
             .setAutoCancel(true)
             .setStyle(style)
             .setGroup(GROUP_KEY_MESSAGES)
+            .setShortcutId(contactKey)
+            .setLocusId(LocusIdCompat(contactKey))
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setWhen(lastMessage.receivedTime)
             .setShowWhen(true)

@@ -76,6 +76,8 @@ class MeshService : Service() {
 
     private val notifications: MeshServiceNotifications by inject()
 
+    private val shortcutManager: ConversationShortcutManager by inject()
+
     /** Android-typed accessor for the foreground service notification. */
     private val androidNotifications: MeshServiceNotificationsImpl
         get() = notifications as MeshServiceNotificationsImpl
@@ -118,6 +120,7 @@ class MeshService : Service() {
 
         try {
             orchestrator.start()
+            shortcutManager.startObserving(serviceScope)
             isServiceInitialized = true
         } catch (e: IllegalStateException) {
             // Koin throws IllegalStateException when the DI graph is not yet initialized.
@@ -209,6 +212,7 @@ class MeshService : Service() {
         Logger.i { "Destroying mesh service" }
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         if (isServiceInitialized) {
+            shortcutManager.stopObserving()
             orchestrator.stop()
         }
         serviceJob.cancel()

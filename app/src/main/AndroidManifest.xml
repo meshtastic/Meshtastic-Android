@@ -153,6 +153,25 @@
             android:name="google_analytics_default_allow_analytics_storage"
             android:value="false" />
 
+        <!-- Android Auto: declare as a messaging/communications app -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
+        <!-- Android Auto Car App Service for browsable messaging UI -->
+        <service
+            android:name="org.meshtastic.app.auto.MeshtasticCarAppService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.MESSAGING" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="1" />
+
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="org.meshtastic.core.service.MeshService"

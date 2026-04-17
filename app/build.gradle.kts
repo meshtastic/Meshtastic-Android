@@ -270,6 +270,7 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.androidx.car.app)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)

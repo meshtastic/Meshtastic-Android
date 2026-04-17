@@ -1,0 +1,241 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.app.auto
+
+import androidx.car.app.CarContext
+import androidx.car.app.Screen
+import androidx.car.app.model.Action
+import androidx.car.app.model.CarIcon
+import androidx.car.app.model.ItemList
+import androidx.car.app.model.ListTemplate
+import androidx.car.app.model.Row
+import androidx.car.app.model.SectionedItemList
+import androidx.car.app.model.Template
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.proto.ChannelSettings
+
+/**
+ * Root screen displayed in Android Auto.
+ *
+ * Shows three sections mirroring the iOS CarPlay implementation:
+ * - **Status**: Connection state and active device name
+ * - **Favorites**: Favorited mesh nodes with unread message counts
+ * - **Channels**: Active channels with unread message counts
+ */
+class MeshtasticCarScreen(carContext: CarContext) :
+    Screen(carContext),
+    KoinComponent,
+    DefaultLifecycleObserver {
+
+    private val nodeRepository: NodeRepository by inject()
+    private val radioConfigRepository: RadioConfigRepository by inject()
+    private val packetRepository: PacketRepository by inject()
+    private val serviceRepository: ServiceRepository by inject()
+
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var observeJob: Job? = null
+
+    private var connectionState: ConnectionState = ConnectionState.Disconnected()
+    private var favoriteNodes: List<Node> = emptyList()
+    private var channels: List<ChannelSettings> = emptyList()
+    private var unreadCounts: Map<String, Int> = emptyMap()
+
+    init {
+        lifecycle.addObserver(this)
+    }
+
+    override fun onCreate(owner: LifecycleOwner) {
+        startObserving()
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        scope.cancel()
+    }
+
+    private fun startObserving() {
+        observeJob?.cancel()
+        observeJob = scope.launch {
+            val stateFlow = serviceRepository.connectionState
+                .distinctUntilChanged()
+
+            val favoritesFlow = nodeRepository.nodeDBbyNum
+                .map { nodes ->
+                    val myNum = nodeRepository.myNodeInfo.value?.myNodeNum
+                    nodes.values
+                        .filter { it.isFavorite && !it.isIgnored && it.num != myNum }
+                        .sortedBy { it.user.long_name }
+                }
+                .distinctUntilChanged()
+
+            val channelsFlow = radioConfigRepository.channelSetFlow
+                .map { cs ->
+                    cs.settings.filterIndexed { index, settings ->
+                        index == 0 || settings.name.isNotEmpty()
+                    }
+                }
+                .distinctUntilChanged()
+
+            combine(stateFlow, favoritesFlow, channelsFlow) { state, favorites, chs ->
+                Triple(state, favorites, chs)
+            }.collect { (state, favorites, chs) ->
+                connectionState = state
+                favoriteNodes = favorites
+                channels = chs
+
+                // Collect unread counts for all conversations
+                val counts = mutableMapOf<String, Int>()
+                for (node in favorites) {
+                    val key = "0${node.user.id}"
+                    counts[key] = packetRepository.getUnreadCount(key)
+                }
+                for ((index, _) in chs.withIndex()) {
+                    val key = "${index}${DataPacket.ID_BROADCAST}"
+                    counts[key] = packetRepository.getUnreadCount(key)
+                }
+                unreadCounts = counts
+
+                invalidate()
+            }
+        }
+    }
+
+    override fun onGetTemplate(): Template {
+        val listBuilder = ListTemplate.Builder()
+
+        // Status section
+        listBuilder.addSectionedList(
+            SectionedItemList.create(
+                buildStatusSection(),
+                "Status",
+            ),
+        )
+
+        // Favorites section
+        val favoritesSection = buildFavoritesSection()
+        if (favoritesSection.items.isNotEmpty()) {
+            listBuilder.addSectionedList(
+                SectionedItemList.create(
+                    favoritesSection,
+                    "Favorites",
+                ),
+            )
+        }
+
+        // Channels section
+        val channelsSection = buildChannelsSection()
+        if (channelsSection.items.isNotEmpty()) {
+            listBuilder.addSectionedList(
+                SectionedItemList.create(
+                    channelsSection,
+                    "Channels",
+                ),
+            )
+        }
+
+        return listBuilder
+            .setTitle("Meshtastic")
+            .setHeaderAction(Action.APP_ICON)
+            .build()
+    }
+
+    private fun buildStatusSection(): ItemList {
+        val statusText = when (val state = connectionState) {
+            is ConnectionState.Connected -> "Connected"
+            is ConnectionState.Disconnected -> "Disconnected"
+            is ConnectionState.DeviceSleep -> "Device Sleeping"
+            is ConnectionState.Connecting -> "Connecting..."
+        }
+
+        val deviceName = nodeRepository.ourNodeInfo.value?.user?.long_name ?: ""
+        val subtitle = if (deviceName.isNotEmpty()) deviceName else null
+
+        val row = Row.Builder()
+            .setTitle(statusText)
+            .apply { if (subtitle != null) addText(subtitle) }
+            .setBrowsable(false)
+            .build()
+
+        return ItemList.Builder()
+            .addItem(row)
+            .build()
+    }
+
+    private fun buildFavoritesSection(): ItemList {
+        val builder = ItemList.Builder()
+
+        for (node in favoriteNodes) {
+            val contactKey = "0${node.user.id}"
+            val unread = unreadCounts[contactKey] ?: 0
+            val name = node.user.long_name.ifEmpty { node.user.short_name }
+            val subtitle = buildString {
+                append(node.user.short_name)
+                if (node.hopsAway >= 0) append(" · ${node.hopsAway} hops")
+                if (unread > 0) append(" · $unread unread")
+            }
+
+            val row = Row.Builder()
+                .setTitle(name)
+                .addText(subtitle)
+                .setBrowsable(false)
+                .build()
+
+            builder.addItem(row)
+        }
+
+        return builder.build()
+    }
+
+    private fun buildChannelsSection(): ItemList {
+        val builder = ItemList.Builder()
+
+        for ((index, channelSettings) in channels.withIndex()) {
+            val contactKey = "${index}${DataPacket.ID_BROADCAST}"
+            val unread = unreadCounts[contactKey] ?: 0
+            val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
+            val subtitle = if (unread > 0) "$unread unread" else ""
+
+            val row = Row.Builder()
+                .setTitle(channelName)
+                .apply { if (subtitle.isNotEmpty()) addText(subtitle) }
+                .setBrowsable(false)
+                .build()
+
+            builder.addItem(row)
+        }
+
+        return builder.build()
+    }
+}
