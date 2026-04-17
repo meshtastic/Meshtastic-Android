@@ -19,11 +19,13 @@ package org.meshtastic.feature.auto
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.model.Action
+import androidx.car.app.model.CarColor
 import androidx.car.app.model.CarIcon
 import androidx.car.app.model.ItemList
 import androidx.car.app.model.ListTemplate
 import androidx.car.app.model.Row
 import androidx.car.app.model.Tab
+import androidx.car.app.model.TabContents
 import androidx.car.app.model.TabTemplate
 import androidx.car.app.model.Template
 import androidx.core.graphics.drawable.IconCompat
@@ -147,16 +149,20 @@ class MeshtasticCarScreen(carContext: CarContext) :
     }
 
     override fun onGetTemplate(): Template {
-        val tabCallback = TabTemplate.TabCallback { tabContentId ->
-            activeTabId = tabContentId
-            invalidate()
-        }
+        val tabCallback =
+            object : TabTemplate.TabCallback {
+                override fun onTabSelected(tabContentId: String) {
+                    activeTabId = tabContentId
+                    invalidate()
+                }
+            }
 
-        val activeContent = when (activeTabId) {
-            TAB_FAVORITES -> TabTemplate.TabContents.Builder(buildFavoritesTemplate()).build()
-            TAB_CHANNELS -> TabTemplate.TabContents.Builder(buildChannelsTemplate()).build()
-            else -> TabTemplate.TabContents.Builder(buildStatusTemplate()).build()
-        }
+        val activeContent =
+            when (activeTabId) {
+                TAB_FAVORITES -> TabContents.Builder(buildFavoritesTemplate()).build()
+                TAB_CHANNELS -> TabContents.Builder(buildChannelsTemplate()).build()
+                else -> TabContents.Builder(buildStatusTemplate()).build()
+            }
 
         return TabTemplate.Builder(tabCallback)
             .setHeaderAction(Action.APP_ICON)
@@ -186,7 +192,8 @@ class MeshtasticCarScreen(carContext: CarContext) :
             .build()
     }
 
-    private fun carIcon(resId: Int) = CarIcon.Builder(IconCompat.createWithResource(carContext, resId)).build()
+    private fun carIcon(resId: Int) =
+        CarIcon.Builder(IconCompat.createWithResource(carContext, resId)).setTint(CarColor.DEFAULT).build()
 
     private fun buildStatusTemplate(): ListTemplate {
         val statusText =
@@ -207,10 +214,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
                 .setBrowsable(false)
                 .build()
 
-        return ListTemplate.Builder()
-            .setTitle("Status")
-            .setSingleList(ItemList.Builder().addItem(row).build())
-            .build()
+        return ListTemplate.Builder().setTitle("Status").setSingleList(ItemList.Builder().addItem(row).build()).build()
     }
 
     private fun buildFavoritesTemplate(): ListTemplate {
@@ -231,10 +235,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
             }
         }
 
-        return ListTemplate.Builder()
-            .setTitle("Favorites")
-            .setSingleList(items.build())
-            .build()
+        return ListTemplate.Builder().setTitle("Favorites").setSingleList(items.build()).build()
     }
 
     private fun buildChannelsTemplate(): ListTemplate {
@@ -242,25 +243,23 @@ class MeshtasticCarScreen(carContext: CarContext) :
         if (channels.isEmpty()) {
             items.setNoItemsMessage("No active channels")
         } else {
-            for ((index, channelSettings) in channels.take(MAX_LIST_ITEMS)) {
-                val contactKey = "${index}${DataPacket.ID_BROADCAST}"
-                val unread = unreadCounts[contactKey] ?: 0
-                val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
-                val subtitle = if (unread > 0) "$unread unread" else ""
-
-                val row =
-                    Row.Builder()
-                        .setTitle(channelName)
-                        .apply { if (subtitle.isNotEmpty()) addText(subtitle) }
-                        .setBrowsable(false)
-                        .build()
-                items.addItem(row)
+            channels.take(MAX_LIST_ITEMS).forEach { (index, settings) ->
+                items.addItem(buildChannelRow(index, settings))
             }
         }
 
-        return ListTemplate.Builder()
-            .setTitle("Channels")
-            .setSingleList(items.build())
+        return ListTemplate.Builder().setTitle("Channels").setSingleList(items.build()).build()
+    }
+
+    private fun buildChannelRow(index: Int, channelSettings: ChannelSettings): Row {
+        val contactKey = "${index}${DataPacket.ID_BROADCAST}"
+        val unread = unreadCounts[contactKey] ?: 0
+        val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
+        val subtitle = if (unread > 0) "$unread unread" else ""
+        return Row.Builder()
+            .setTitle(channelName)
+            .apply { if (subtitle.isNotEmpty()) addText(subtitle) }
+            .setBrowsable(false)
             .build()
     }
 
@@ -270,7 +269,8 @@ class MeshtasticCarScreen(carContext: CarContext) :
         private const val TAB_CHANNELS = "channels"
 
         /**
-         * Android Auto enforces a maximum item count per [ListTemplate]. Car API level 2 supports up to 6 items.
+         * Android Auto enforces a per-[ListTemplate] item cap via [androidx.car.app.constraints.ConstraintManager]'s
+         * `CONTENT_LIMIT_TYPE_LIST`. 6 is the conservative floor across supported hosts.
          */
         private const val MAX_LIST_ITEMS = 6
     }

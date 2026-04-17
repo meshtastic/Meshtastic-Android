@@ -33,10 +33,11 @@
             </intent-filter>
         </service>
 
-        <!-- TabTemplate requires Car API level 2 (androidx.car.app 1.2.0+) -->
+        <!-- TabTemplate is annotated @RequiresCarApi(6); the host throws HostException
+             if we claim a lower minCarApiLevel than any template we actually use. -->
         <meta-data
             android:name="androidx.car.app.minCarApiLevel"
-            android:value="2" />
+            android:value="6" />
     </application>
 
 </manifest>
