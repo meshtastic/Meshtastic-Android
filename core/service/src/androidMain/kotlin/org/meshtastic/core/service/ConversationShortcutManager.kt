@@ -79,7 +79,9 @@ class ConversationShortcutManager(
                 val channelsFlow =
                     radioConfigRepository.channelSetFlow
                         .map { cs ->
-                            cs.settings.filterIndexed { index, settings -> settings.name.isNotEmpty() || index == 0 }
+                            cs.settings.mapIndexedNotNull { index, settings ->
+                                if (index == 0 || settings.name.isNotEmpty()) index to settings else null
+                            }
                         }
                         .distinctUntilChanged()
 
@@ -94,11 +96,11 @@ class ConversationShortcutManager(
         observeJob = null
     }
 
-    private fun publishShortcuts(favorites: List<Node>, channels: List<ChannelSettings>) {
+    private fun publishShortcuts(favorites: List<Node>, channels: List<Pair<Int, ChannelSettings>>) {
         val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
         val shortcuts =
             favorites.filter { it.num != myNodeNum }.map { buildFavoriteShortcut(it) } +
-                channels.mapIndexed { index, settings -> buildChannelShortcut(settings, index) }
+                channels.map { (index, settings) -> buildChannelShortcut(settings, index) }
 
         try {
             val limit = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)

@@ -71,7 +71,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
     private var connectionState: ConnectionState = ConnectionState.Disconnected
     private var favoriteNodes: List<Node> = emptyList()
-    private var channels: List<ChannelSettings> = emptyList()
+    private var channels: List<Pair<Int, ChannelSettings>> = emptyList()
     private var unreadCounts: Map<String, Int> = emptyMap()
 
     init {
@@ -106,7 +106,9 @@ class MeshtasticCarScreen(carContext: CarContext) :
                 val channelsFlow =
                     radioConfigRepository.channelSetFlow
                         .map { cs ->
-                            cs.settings.filterIndexed { index, settings -> index == 0 || settings.name.isNotEmpty() }
+                            cs.settings.mapIndexedNotNull { index, settings ->
+                                if (index == 0 || settings.name.isNotEmpty()) index to settings else null
+                            }
                         }
                         .distinctUntilChanged()
 
@@ -114,11 +116,8 @@ class MeshtasticCarScreen(carContext: CarContext) :
                     Triple(state, favorites, chs)
                 }
                     .flatMapLatest { (state, favorites, chs) ->
-                        // Build per-conversation unread flows so the car screen invalidates
-                        // on new messages, not just on topology/channel changes.
                         val contactKeys =
-                            favorites.map { "0${it.user.id}" } +
-                                chs.mapIndexed { i, _ -> "${i}${DataPacket.ID_BROADCAST}" }
+                            favorites.map { "0${it.user.id}" } + chs.map { (i, _) -> "${i}${DataPacket.ID_BROADCAST}" }
 
                         if (contactKeys.isEmpty()) {
                             flowOf(Triple(state, favorites, chs) to emptyMap())
@@ -204,7 +203,7 @@ class MeshtasticCarScreen(carContext: CarContext) :
     private fun buildChannelsSection(): ItemList {
         val builder = ItemList.Builder()
 
-        for ((index, channelSettings) in channels.take(MAX_LIST_ITEMS).withIndex()) {
+        for ((index, channelSettings) in channels.take(MAX_LIST_ITEMS)) {
             val contactKey = "${index}${DataPacket.ID_BROADCAST}"
             val unread = unreadCounts[contactKey] ?: 0
             val channelName = channelSettings.name.ifEmpty { "Primary Channel" }
