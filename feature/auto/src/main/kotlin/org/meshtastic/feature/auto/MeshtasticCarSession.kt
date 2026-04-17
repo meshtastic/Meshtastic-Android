@@ -46,7 +46,9 @@ class MeshtasticCarSession : Session() {
     private fun handleIntent(intent: Intent, screen: MeshtasticCarScreen) {
         // Deep-link URIs from MessagingStyle notifications look like:
         //   meshtastic://messages/0!abcd1234   (DM: channel=0, nodeId=!abcd1234)
-        //   meshtastic://messages/2^all        (channel broadcast, contactKey e.g. "2^all")
+        //   meshtastic://messages/2^all        (channel broadcast, e.g. contactKey "2^all")
+        // Both channels and DMs now live in the same Messages tab, so we simply
+        // switch to that tab regardless of the contact type.
         val contactKey = intent.data?.lastPathSegment ?: return
         screen.selectContactKey(contactKey)
     }
