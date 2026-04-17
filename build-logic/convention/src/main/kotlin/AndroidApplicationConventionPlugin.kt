@@ -41,8 +41,22 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
                 buildTypes {
                     getByName("release") {
-                        isMinifyEnabled = true
-                        isShrinkResources = true
+                        // DIAGNOSTIC BUILD (internal.60): R8 is fully disabled to prove
+                        // whether the Compose animation freeze observed since CMP 1.11.0-beta02
+                        // is caused by R8 (shrinking / consumer-rule -assumenosideeffects /
+                        // resource shrinking) or by a CMP runtime bug independent of R8.
+                        //
+                        // - If animations work in this build → R8 is the cause; follow up with
+                        //   a narrower diag (weaken Compose -keep rules to allow class-merging,
+                        //   or toggle isShrinkResources only).
+                        // - If animations remain frozen → R8 is innocent; the bug is in
+                        //   compose-multiplatform 1.11.0-beta02 itself. File upstream and
+                        //   downgrade / pin.
+                        //
+                        // REVERT once the diagnostic is concluded — release builds MUST ship
+                        // with R8 enabled.
+                        isMinifyEnabled = false
+                        isShrinkResources = false
                         proguardFiles(
                             getDefaultProguardFile("proguard-android-optimize.txt"),
                             rootProject.file("config/proguard/shared-rules.pro"),
