@@ -18,6 +18,7 @@ package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.MqttConnectionState
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.proto.MqttClientProxyMessage
 
 /** Interface for managing MQTT proxy communication. */
@@ -33,4 +34,15 @@ interface MqttManager {
 
     /** Handles an MQTT proxy message from the radio. */
     fun handleMqttProxyMessage(message: MqttClientProxyMessage)
+
+    /**
+     * Probe an MQTT broker to verify connectivity and credentials without joining the proxy lifecycle. Intended for UI
+     * "Test Connection" affordances.
+     *
+     * @param address Raw broker address as the user would type it (host, host:port, or full URL).
+     * @param tlsEnabled `true` to upgrade bare addresses to `wss://` (ignored when [address] already has a scheme).
+     * @param username Optional MQTT username.
+     * @param password Optional MQTT password.
+     */
+    suspend fun probe(address: String, tlsEnabled: Boolean, username: String?, password: String?): MqttProbeStatus
 }

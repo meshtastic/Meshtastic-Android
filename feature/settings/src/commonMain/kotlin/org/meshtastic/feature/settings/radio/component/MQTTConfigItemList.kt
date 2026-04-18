@@ -21,12 +21,15 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -44,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MqttConnectionState
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.address
 import org.meshtastic.core.resources.default_mqtt_address
@@ -53,11 +58,23 @@ import org.meshtastic.core.resources.map_reporting
 import org.meshtastic.core.resources.mqtt
 import org.meshtastic.core.resources.mqtt_config
 import org.meshtastic.core.resources.mqtt_enabled
+import org.meshtastic.core.resources.mqtt_probe_dns_failure
+import org.meshtastic.core.resources.mqtt_probe_other_failure
+import org.meshtastic.core.resources.mqtt_probe_rejected
+import org.meshtastic.core.resources.mqtt_probe_running
+import org.meshtastic.core.resources.mqtt_probe_success
+import org.meshtastic.core.resources.mqtt_probe_success_with_info
+import org.meshtastic.core.resources.mqtt_probe_tcp_failure
+import org.meshtastic.core.resources.mqtt_probe_timeout
+import org.meshtastic.core.resources.mqtt_probe_tls_failure
 import org.meshtastic.core.resources.mqtt_status_connected
 import org.meshtastic.core.resources.mqtt_status_connecting
 import org.meshtastic.core.resources.mqtt_status_disconnected
+import org.meshtastic.core.resources.mqtt_status_disconnected_with_reason
 import org.meshtastic.core.resources.mqtt_status_inactive
 import org.meshtastic.core.resources.mqtt_status_reconnecting
+import org.meshtastic.core.resources.mqtt_status_reconnecting_with_attempt
+import org.meshtastic.core.resources.mqtt_test_connection
 import org.meshtastic.core.resources.password
 import org.meshtastic.core.resources.proxy_to_client_enabled
 import org.meshtastic.core.resources.root_topic
@@ -75,6 +92,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val mqttProxyState by viewModel.mqttConnectionState.collectAsStateWithLifecycle()
+    val probeStatus by viewModel.mqttProbeStatus.collectAsStateWithLifecycle()
     val destNum = destNode?.num
     val mqttConfig = state.moduleConfig.mqtt ?: ModuleConfig.MQTTConfig()
     val formState = rememberConfigState(initialValue = mqttConfig)
@@ -119,16 +137,13 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                EditTextPreference(
-                    title = stringResource(Res.string.address),
-                    value = formState.value.address,
-                    maxSize = 63, // address max_size:64
+                MqttAddressAndProbe(
                     enabled = state.connected,
-                    isError = false,
-                    keyboardOptions =
-                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(address = it) },
+                    formState = formState,
+                    probeStatus = probeStatus,
+                    focusManager = focusManager,
+                    onProbe = viewModel::probeMqttConnection,
+                    onClearProbe = viewModel::clearMqttProbeStatus,
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -241,13 +256,26 @@ private val GreenColor = Color(0xFF4CAF50)
 private fun MqttStatusRow(state: MqttConnectionState) {
     val (label, color) =
         when (state) {
-            MqttConnectionState.INACTIVE ->
+            is MqttConnectionState.Inactive ->
                 stringResource(Res.string.mqtt_status_inactive) to MaterialTheme.colorScheme.outline
-            MqttConnectionState.DISCONNECTED ->
-                stringResource(Res.string.mqtt_status_disconnected) to MaterialTheme.colorScheme.error
-            MqttConnectionState.CONNECTING -> stringResource(Res.string.mqtt_status_connecting) to AmberColor
-            MqttConnectionState.CONNECTED -> stringResource(Res.string.mqtt_status_connected) to GreenColor
-            MqttConnectionState.RECONNECTING -> stringResource(Res.string.mqtt_status_reconnecting) to AmberColor
+            is MqttConnectionState.Disconnected -> {
+                val text =
+                    state.reason?.let { stringResource(Res.string.mqtt_status_disconnected_with_reason, it) }
+                        ?: stringResource(Res.string.mqtt_status_disconnected)
+                text to MaterialTheme.colorScheme.error
+            }
+            is MqttConnectionState.Connecting -> stringResource(Res.string.mqtt_status_connecting) to AmberColor
+            is MqttConnectionState.Connected -> stringResource(Res.string.mqtt_status_connected) to GreenColor
+            is MqttConnectionState.Reconnecting -> {
+                val err = state.lastError
+                val text =
+                    if (err != null) {
+                        stringResource(Res.string.mqtt_status_reconnecting_with_attempt, state.attempt, err)
+                    } else {
+                        stringResource(Res.string.mqtt_status_reconnecting)
+                    }
+                text to AmberColor
+            }
         }
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -261,4 +289,88 @@ private fun MqttStatusRow(state: MqttConnectionState) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+@Composable
+private fun MqttAddressAndProbe(
+    enabled: Boolean,
+    formState: ConfigState<ModuleConfig.MQTTConfig>,
+    probeStatus: MqttProbeStatus?,
+    focusManager: FocusManager,
+    onProbe: (address: String, tlsEnabled: Boolean, username: String, password: String) -> Unit,
+    onClearProbe: () -> Unit,
+) {
+    EditTextPreference(
+        title = stringResource(Res.string.address),
+        value = formState.value.address,
+        maxSize = 63, // address max_size:64
+        enabled = enabled,
+        isError = false,
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        onValueChanged = {
+            formState.value = formState.value.copy(address = it)
+            onClearProbe()
+        },
+    )
+    HorizontalDivider()
+    MqttProbeRow(
+        enabled = enabled && formState.value.address.isNotBlank(),
+        status = probeStatus,
+        onTestClick = {
+            focusManager.clearFocus()
+            onProbe(
+                formState.value.address,
+                formState.value.tls_enabled,
+                formState.value.username,
+                formState.value.password,
+            )
+        },
+    )
+}
+
+@Composable
+private fun MqttProbeRow(enabled: Boolean, status: MqttProbeStatus?, onTestClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Button(onClick = onTestClick, enabled = enabled && status !is MqttProbeStatus.Probing) {
+                Text(stringResource(Res.string.mqtt_test_connection))
+            }
+            val (probeText, probeColor) = status.toLabel() ?: return@Row
+            Text(text = probeText, style = MaterialTheme.typography.bodySmall, color = probeColor)
+        }
+    }
+}
+
+@Composable
+private fun MqttProbeStatus?.toLabel(): Pair<String, Color>? = when (this) {
+    null -> null
+    is MqttProbeStatus.Probing ->
+        stringResource(Res.string.mqtt_probe_running) to MaterialTheme.colorScheme.onSurfaceVariant
+    is MqttProbeStatus.Success -> {
+        val text =
+            serverInfo?.let { stringResource(Res.string.mqtt_probe_success_with_info, it) }
+                ?: stringResource(Res.string.mqtt_probe_success)
+        text to GreenColor
+    }
+    is MqttProbeStatus.Rejected ->
+        stringResource(Res.string.mqtt_probe_rejected, reason ?: reasonCode.toString()) to
+            MaterialTheme.colorScheme.error
+    is MqttProbeStatus.DnsFailure ->
+        stringResource(Res.string.mqtt_probe_dns_failure) to MaterialTheme.colorScheme.error
+    is MqttProbeStatus.TcpFailure ->
+        stringResource(Res.string.mqtt_probe_tcp_failure) to MaterialTheme.colorScheme.error
+    is MqttProbeStatus.TlsFailure ->
+        stringResource(Res.string.mqtt_probe_tls_failure) to MaterialTheme.colorScheme.error
+    is MqttProbeStatus.Timeout ->
+        stringResource(Res.string.mqtt_probe_timeout, timeoutMs.toInt()) to MaterialTheme.colorScheme.error
+    is MqttProbeStatus.Other ->
+        stringResource(Res.string.mqtt_probe_other_failure) to MaterialTheme.colorScheme.error
 }
