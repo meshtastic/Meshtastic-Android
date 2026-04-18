@@ -528,6 +528,8 @@
     <string name="mqtt_config">MQTT-konfiguration</string>
     <string name="mqtt_status_disconnected">Frånkopplad</string>
     <string name="mqtt_status_connected">Ansluten</string>
+    <string name="mqtt_test_connection">Testa anslutningen</string>
+    <string name="mqtt_probe_other_failure">Anslutningen misslyckades</string>
     <string name="mqtt_enabled">MQTT är aktiverat</string>
     <string name="address">Adress</string>
     <string name="username">Användarnamn</string>

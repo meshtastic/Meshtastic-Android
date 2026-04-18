@@ -614,6 +614,8 @@
     <string name="mqtt_status_connecting">Connexion…</string>
     <string name="mqtt_status_connected">Connecté</string>
     <string name="mqtt_status_reconnecting">Reconnexion…</string>
+    <string name="mqtt_test_connection">Test de la connexion</string>
+    <string name="mqtt_probe_other_failure">Échec de la connexion</string>
     <string name="mqtt_enabled">MQTT activé</string>
     <string name="address">Adresse</string>
     <string name="username">Nom d'utilisateur</string>
