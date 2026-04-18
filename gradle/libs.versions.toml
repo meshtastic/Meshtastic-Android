@@ -43,7 +43,7 @@ compose-multiplatform-material3 = "1.11.0-alpha06"
 # hasn't published yet (see PR #5180). Should normally match `compose-multiplatform`;
 # AndroidCompose.kt's resolutionStrategy force-aligns these groups to the CMP version
 # at resolution time regardless of the declared value here.
-androidx-compose-bom-aligned = "1.11.0-beta02"
+androidx-compose-bom-aligned = "1.11.0-rc01"
 # `androidx-compose-material` (M2) is independent of CMP and pinned separately
 # because some third-party libs (maps-compose-widgets, datadog) drag in
 # unversioned material transitives.
