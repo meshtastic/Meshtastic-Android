@@ -57,6 +57,15 @@
       "automerge": true
     },
     {
+      "description": "Group CMP and the androidx.compose artifacts that track it so Renovate bumps them together (see PR #5180)",
+      "groupName": "compose-multiplatform",
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.compose/",
+        "androidx.compose.runtime:runtime-tracing",
+        "androidx.compose.ui:ui-test-manifest"
+      ]
+    },
+    {
       "description": "Restrict sensitive infrastructure to manual minor updates",
       "matchUpdateTypes": [
         "minor"
