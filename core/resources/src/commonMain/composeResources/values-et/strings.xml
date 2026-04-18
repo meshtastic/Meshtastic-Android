@@ -383,12 +383,9 @@
     <string name="userinfo">Kasutaja teave</string>
     <string name="meshtastic_new_nodes_notifications">Uue sõlme teade</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Signaali ja müra suhe (SNR) on mõõdik, mida kasutatakse soovitud signaali taseme ja taustamüra taseme vahelise suhte määramisel. Meshtastic ja teistes traadita süsteemides näitab kõrgem signaali ja müra suhe selgemat signaali, mis võib parandada andmeedastuse usaldusväärsust ja kvaliteeti.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Vastuvõetud signaali tugevuse indikaator (RSSI), mõõt mida kasutatakse antenni poolt vastuvõetava võimsustaseme määramiseks. Kõrgem RSSI väärtus näitab üldiselt tugevamat ja stabiilsemat ühendust.</string>
     <string name="iaq_definition">Siseõhu kvaliteet (IAQ) on suhtelise skaala väärtus, näiteks mõõtes Bosch BME680 abil. Väärtuste vahemik 0–500.</string>
     <string name="device_metrics_log">Seadme mõõdikud</string>
-    <string name="node_map">Sõlmede kaart</string>
     <string name="position_log">Asukoht</string>
     <string name="last_position_update">Viimase asukoha värskendus</string>
     <string name="env_metrics_log">Keskkonnamõõdikud</string>
@@ -435,7 +432,6 @@
     <string name="one_month">1k</string>
     <string name="max">Maksimaalselt</string>
     <string name="min">Min</string>
-    <string name="avg">Keskm</string>
     <string name="expand_chart">Laienda diagrammi</string>
     <string name="collapse_chart">Ahenda diagrammi</string>
     <string name="unknown_age">Tundmatu vanus</string>
@@ -613,8 +609,11 @@
     <string name="ignore_mqtt">Keela MQTT</string>
     <string name="ok_to_mqtt">Ok MQTTi</string>
     <string name="mqtt_config">MQTT sätted</string>
+    <string name="mqtt_status_inactive">Mitteaktiivne</string>
     <string name="mqtt_status_disconnected">Ühendus katkenud</string>
+    <string name="mqtt_status_connecting">Ühendan…</string>
     <string name="mqtt_status_connected">Ühendatud</string>
+    <string name="mqtt_status_reconnecting">Taas ühendan…</string>
     <string name="mqtt_enabled">MQTT lubatud</string>
     <string name="address">Aadress</string>
     <string name="username">Kasutajatunnus</string>
@@ -1214,4 +1213,5 @@
     <string name="desktop_tray_show">Näita Meshtastic</string>
     <string name="desktop_tray_quit">Sule</string>
     <string name="desktop_notification_title">Kärgvõrgustik</string>
+    <string name="filter_icon">Filtreeri</string>
 </resources>

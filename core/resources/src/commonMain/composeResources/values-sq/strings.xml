@@ -186,10 +186,7 @@
     <string name="encryption_pkc">Kriptimi me Çelës Publik</string>
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
     <string name="meshtastic_new_nodes_notifications">Njoftimet për nyje të reja</string>
-    <string name="snr_definition">Raporti i Sinjalit në Zhurmë, një masë e përdorur në komunikime për të kuantifikuar nivelin e një sinjali të dëshiruar ndaj nivelit të zhurmës në background. Në Meshtastic dhe sisteme të tjera pa tel, një SNR më i lartë tregon një sinjal më të pastër që mund të rrisë besueshmërinë dhe cilësinë e transmetimit të të dhënave.</string>
-    <string name="rssi_definition">Indikatori i Fuqisë së Sinjalit të Marrë, një matje e përdorur për të përcaktuar nivelin e energjisë që po merret nga antena. Një vlerë më e lartë RSSI zakonisht tregon një lidhje më të fortë dhe më të qëndrueshme.</string>
     <string name="iaq_definition">(Cilësia e Ajrit të Brendshëm) shkalla relative e vlerës IAQ siç matet nga Bosch BME680. Intervali i Vlerave 0–500.</string>
-    <string name="node_map">Harta e Nyjës</string>
     <string name="administration">Administratë</string>
     <string name="remote_admin">Administratë e Largët</string>
     <string name="bad">I Keq</string>
@@ -219,4 +216,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="filter_icon">Filtrimi</string>
 </resources>

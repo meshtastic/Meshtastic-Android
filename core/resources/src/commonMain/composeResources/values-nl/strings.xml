@@ -201,11 +201,8 @@
     <string name="encryption_error">Publieke sleutel komt niet overeen</string>
     <string name="meshtastic_new_nodes_notifications">Nieuwe node meldingen</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Signal-to-Noise Ratio, een meeting die wordt gebruikt in de communicatie om het niveau van een gewenst signaal tegenover achtergrondlawaai te kwantificeren. In Meshtastische en andere draadloze systemen geeft een hoger SNR een zuiverder signaal aan dat de betrouwbaarheid en kwaliteit van de gegevensoverdracht kan verbeteren.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Ontvangen Signal Sterkte Indicator, een meting gebruikt om het stroomniveau te bepalen dat de antenne ontvangt. Een hogere RSSI-waarde geeft een sterkere en stabielere verbinding aan.</string>
     <string name="iaq_definition">(Binnenluchtkwaliteit) relatieve schaal IAQ waarde gemeten door Bosch BME680. Waarde tussen 0 en 500.</string>
-    <string name="node_map">Node Kaart</string>
     <string name="position_log">Positie</string>
     <string name="administration">Beheer</string>
     <string name="remote_admin">Extern beheer</string>
@@ -418,4 +415,5 @@
     <string name="tak_team_blue">Blauw</string>
     <string name="tak_team_green">Groen</string>
     <string name="connect">Verbinding maken</string>
+    <string name="filter_icon">Filter</string>
 </resources>

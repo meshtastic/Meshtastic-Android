@@ -213,11 +213,8 @@
     <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="meshtastic_new_nodes_notifications">새로운 노드 알림</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">통신에서 원하는 신호의 수준을 배경 잡음의 수준과 비교하여 정량화하는 데 사용되는 신호 대 잡음비 Signal-to-Noise Ratio, SNR는 Meshtastic와 같은 무선 시스템에서 SNR이 높을수록 더 선명한 신호를 나타내어 데이터 전송의 안정성과 품질을 향상시킬 수 있습니다.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">수신 신호 강도 지표 Received Signal Strength Indicator, RSSI는 안테나가 수신하는 신호의 전력 수준을 측정하는 데 사용되는 지표입니다. RSSI 값이 높을수록 일반적으로 더 강력하고 안정적인 연결을 나타냅니다.</string>
     <string name="iaq_definition">(실내공기질) Bosch BME680으로 측정한 상대적 척도 IAQ 값. 범위 0–500.</string>
-    <string name="node_map">노드 지도</string>
     <string name="position_log">위치</string>
     <string name="last_position_update">최근 위치 업데이트</string>
     <string name="administration">관리</string>
@@ -542,4 +539,5 @@
     <string name="tak_team_green">초록</string>
     <string name="connect">연결</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">필터</string>
 </resources>

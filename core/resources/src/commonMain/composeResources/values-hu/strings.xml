@@ -316,12 +316,9 @@
     <string name="encryption_error">Publikus kulcs nem egyezik</string>
     <string name="meshtastic_new_nodes_notifications">Új állomás értesítések</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Jel–zaj arány (SNR): a kommunikációban a kívánt jel szintjének és a háttérzaj szintjének aránya. A Meshtastic és más vezeték nélküli rendszerek esetében a magasabb SNR tisztább jelet jelent, ami javítja az adatátvitel megbízhatóságát és minőségét.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Vett jelerősség-mutató (RSSI): az antenna által vett jel teljesítményszintjének mérése. A magasabb RSSI általában erősebb, stabilabb kapcsolatot jelez.</string>
     <string name="iaq_definition">(Beltéri levegőminőség) relatív IAQ érték a Bosch BME680 szenzor alapján. Értéktartomány: 0–500.</string>
     <string name="device_metrics_log">Eszközmetrikák</string>
-    <string name="node_map">Állomás Térkép</string>
     <string name="position_log">Pozíció</string>
     <string name="last_position_update">Utolsó pozíciófrissítés</string>
     <string name="env_metrics_log">Környezeti metrikák</string>
@@ -853,4 +850,5 @@
     <string name="tak_team_green">Zöld</string>
     <string name="connect">Csatlakozás</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">Filter</string>
 </resources>
