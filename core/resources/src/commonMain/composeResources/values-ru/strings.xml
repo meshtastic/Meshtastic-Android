@@ -619,6 +619,7 @@
     <string name="mqtt_config">Настройка MQTT</string>
     <string name="mqtt_status_disconnected">Отключено</string>
     <string name="mqtt_status_connected">Подключено</string>
+    <string name="mqtt_test_connection">Проверить соединение</string>
     <string name="mqtt_enabled">MQTT включен</string>
     <string name="address">Адрес</string>
     <string name="username">Имя пользователя</string>

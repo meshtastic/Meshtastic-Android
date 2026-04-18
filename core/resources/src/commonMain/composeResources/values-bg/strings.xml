@@ -488,6 +488,8 @@
     <string name="mqtt_config">Конфигуриране на MQTT</string>
     <string name="mqtt_status_disconnected">Прекъсната връзка</string>
     <string name="mqtt_status_connected">Свързано</string>
+    <string name="mqtt_test_connection">Тестване на връзката</string>
+    <string name="mqtt_probe_other_failure">Връзката е неуспешна</string>
     <string name="mqtt_enabled">MQTT е активиран</string>
     <string name="address">Адрес</string>
     <string name="username">Потребителско име</string>

@@ -611,6 +611,8 @@
     <string name="mqtt_config">MQTT Einstellungen</string>
     <string name="mqtt_status_disconnected">Verbindung getrennt</string>
     <string name="mqtt_status_connected">Verbunden</string>
+    <string name="mqtt_test_connection">Verbindung testen</string>
+    <string name="mqtt_probe_other_failure">Verbindung fehlgeschlagen</string>
     <string name="mqtt_enabled">MQTT aktiviert</string>
     <string name="address">Adresse</string>
     <string name="username">Benutzername</string>
