@@ -35,11 +35,17 @@ turbine = "1.2.1"
 # Compose Multiplatform
 compose-multiplatform = "1.11.0-beta02"
 compose-multiplatform-material3 = "1.11.0-alpha06"
+# `androidx-compose-bom-aligned` tracks androidx.compose.{runtime,ui} test/tracing
+# artifacts that ship in lockstep with CMP. Kept as a separate version ref so Renovate
+# can bump androidx releases (which often land first) without dragging the
+# `org.jetbrains.compose:*` artifacts and Gradle plugin to a version JetBrains
+# hasn't published yet (see PR #5180). Should normally match `compose-multiplatform`;
+# AndroidCompose.kt's resolutionStrategy force-aligns these groups to the CMP version
+# at resolution time regardless of the declared value here.
+androidx-compose-bom-aligned = "1.11.0-beta02"
 # `androidx-compose-material` (M2) is independent of CMP and pinned separately
 # because some third-party libs (maps-compose-widgets, datadog) drag in
-# unversioned material transitives. Test/tracing artifacts in the
-# androidx.compose.{runtime,ui} groups MUST track CMP — use compose-multiplatform
-# as their version ref, not a separate pin.
+# unversioned material transitives.
 androidx-compose-material = "1.7.8"
 jetbrains-adaptive = "1.3.0-alpha06"
 
@@ -122,8 +128,8 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 androidx-work-testing = { module = "androidx.work:work-testing", version = "2.11.2" }
 
 # AndroidX Compose (explicit versions — BOM removed; CMP is the sole version authority)
-androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "compose-multiplatform" }
-androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "compose-multiplatform" } # Required by Robolectric Compose tests (registers ComponentActivity)
+androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidx-compose-bom-aligned" }
+androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose-bom-aligned" } # Required by Robolectric Compose tests (registers ComponentActivity)
 
 # Compose Multiplatform
 compose-multiplatform-animation = { module = "org.jetbrains.compose.animation:animation", version.ref = "compose-multiplatform" }
