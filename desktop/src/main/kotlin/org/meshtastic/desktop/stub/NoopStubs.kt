@@ -164,7 +164,7 @@ class NoopMQTTRepository : MQTTRepository {
 
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {}
 
-    override val connectionState = MutableStateFlow(MqttConnectionState.DISCONNECTED)
+    override val connectionState = MutableStateFlow<MqttConnectionState>(MqttConnectionState.Disconnected.Idle)
 }
 
 // endregion

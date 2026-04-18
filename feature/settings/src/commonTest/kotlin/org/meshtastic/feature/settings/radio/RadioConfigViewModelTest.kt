@@ -124,7 +124,7 @@ class RadioConfigViewModelTest {
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
 
         every { mqttManager.mqttConnectionState } returns
-            MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.INACTIVE)
+            MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.Inactive)
 
         every { uiPrefs.showQuickChat } returns MutableStateFlow(false)
 

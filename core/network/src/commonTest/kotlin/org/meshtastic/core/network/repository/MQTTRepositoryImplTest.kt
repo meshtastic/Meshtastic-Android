@@ -18,24 +18,81 @@ package org.meshtastic.core.network.repository
 
 import kotlinx.serialization.json.Json
 import org.meshtastic.core.model.MqttJsonPayload
+import org.meshtastic.mqtt.MqttEndpoint
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 class MQTTRepositoryImplTest {
 
-    @Test
-    fun `test address parsing logic`() {
-        val address1 = "mqtt.example.com:1883"
-        val (host1, port1) = address1.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: 1883) }
-        assertEquals("mqtt.example.com", host1)
-        assertEquals(1883, port1)
+    // region resolveEndpoint — every behavioral branch of address parsing.
 
-        val address2 = "mqtt.example.com"
-        val (host2, port2) = address2.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: 1883) }
-        assertEquals("mqtt.example.com", host2)
-        assertEquals(1883, port2)
+    @Test
+    fun `bare host without scheme is wrapped as ws WebSocket on the standard port`() {
+        val endpoint = resolveEndpoint(rawAddress = "broker.example.com", tlsEnabled = false)
+
+        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
+        assertEquals("ws://broker.example.com/mqtt", ws.url)
     }
+
+    @Test
+    fun `bare host with TLS enabled is upgraded to wss`() {
+        val endpoint = resolveEndpoint(rawAddress = "broker.example.com", tlsEnabled = true)
+
+        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
+        assertEquals("wss://broker.example.com/mqtt", ws.url)
+    }
+
+    @Test
+    fun `host with explicit port is preserved when wrapped`() {
+        val endpoint = resolveEndpoint(rawAddress = "broker.example.com:9001", tlsEnabled = false)
+
+        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
+        assertEquals("ws://broker.example.com:9001/mqtt", ws.url)
+    }
+
+    @Test
+    fun `address with ws scheme is parsed as-is and tls flag is ignored`() {
+        // tlsEnabled is intentionally true here — when the user supplies a full URL we
+        // must honor whatever scheme they provided, not silently upgrade it.
+        val endpoint = resolveEndpoint(rawAddress = "ws://broker.example.com:8080/custom-path", tlsEnabled = true)
+
+        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
+        assertEquals("ws://broker.example.com:8080/custom-path", ws.url)
+    }
+
+    @Test
+    fun `address with wss scheme is parsed as-is`() {
+        val endpoint = resolveEndpoint(rawAddress = "wss://broker.example.com/secure-mqtt", tlsEnabled = false)
+
+        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
+        assertEquals("wss://broker.example.com/secure-mqtt", ws.url)
+    }
+
+    @Test
+    fun `address with mqtt tcp scheme is parsed as Tcp endpoint`() {
+        val endpoint = resolveEndpoint(rawAddress = "mqtt://broker.example.com:1883", tlsEnabled = false)
+
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(1883, tcp.port)
+        assertEquals(false, tcp.tls)
+    }
+
+    @Test
+    fun `address with mqtts tcp scheme is parsed as Tcp endpoint with tls true`() {
+        val endpoint = resolveEndpoint(rawAddress = "mqtts://broker.example.com:8883", tlsEnabled = false)
+
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(8883, tcp.port)
+        assertEquals(true, tcp.tls)
+    }
+
+    // endregion
+
+    // region MqttJsonPayload — keep the existing JSON contract tests.
 
     @Test
     fun `test json payload parsing`() {
@@ -72,4 +129,6 @@ class MQTTRepositoryImplTest {
         assertTrue(jsonStr.contains("\"from\":12345678"))
         assertTrue(jsonStr.contains("\"payload\":\"Hello World\""))
     }
+
+    // endregion
 }
