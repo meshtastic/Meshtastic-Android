@@ -65,7 +65,6 @@ class MQTTRepositoryImpl(
         private const val DEFAULT_TOPIC_LEVEL = "/2/e/"
         private const val JSON_TOPIC_LEVEL = "/2/json/"
         private const val DEFAULT_SERVER_ADDRESS = "mqtt.meshtastic.org"
-        private const val WEBSOCKET_PATH = "/mqtt"
         private const val KEEPALIVE_SECONDS = 30
         private const val INITIAL_RECONNECT_DELAY_MS = 1000L
         private const val MAX_RECONNECT_DELAY_MS = 30_000L
@@ -74,7 +73,7 @@ class MQTTRepositoryImpl(
 
     @Volatile private var client: MqttClient? = null
 
-    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
     override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -89,7 +88,7 @@ class MQTTRepositoryImpl(
         Logger.i { "MQTT Disconnecting" }
         val c = client
         client = null
-        _connectionState.value = ConnectionState.DISCONNECTED
+        _connectionState.value = ConnectionState.Disconnected.Idle
         scope.launch { safeCatching { c?.close() }.onFailure { e -> Logger.w(e) { "MQTT clean disconnect failed" } } }
     }
 
@@ -102,14 +101,7 @@ class MQTTRepositoryImpl(
         val rootTopic = mqttConfig?.root?.ifEmpty { DEFAULT_TOPIC_ROOT } ?: DEFAULT_TOPIC_ROOT
 
         val rawAddress = mqttConfig?.address ?: DEFAULT_SERVER_ADDRESS
-        val endpoint =
-            if (rawAddress.contains("://")) {
-                MqttEndpoint.parse(rawAddress)
-            } else {
-                // Use WebSocket transport on all platforms for firewall/CDN compatibility.
-                val scheme = if (mqttConfig?.tls_enabled == true) "wss" else "ws"
-                MqttEndpoint.parse("$scheme://$rawAddress$WEBSOCKET_PATH")
-            }
+        val endpoint = resolveEndpoint(rawAddress, mqttConfig?.tls_enabled == true)
 
         val newClient =
             MqttClient(ownerId) {
@@ -226,3 +218,26 @@ class MQTTRepositoryImpl(
         }
     }
 }
+
+/**
+ * Resolve a user-supplied broker address into an [MqttEndpoint].
+ *
+ * Address resolution rules:
+ * - If [rawAddress] already contains a URI scheme (`scheme://…`), parse it directly via [MqttEndpoint.parse] and
+ *   respect whatever transport / port the user encoded.
+ * - Otherwise wrap it as a WebSocket endpoint (`ws[s]://host${WEBSOCKET_PATH}`) so the proxy works over CDNs and
+ *   firewall-restricted networks where raw 1883/8883 may be blocked. The scheme is `wss` when [tlsEnabled] is `true`,
+ *   `ws` otherwise.
+ *
+ * Extracted as a top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up the full
+ * repository, and so `MqttManagerImpl` (in `:core:data`) can reuse the same parsing rules for the probe API. Visibility
+ * is `public` because Kotlin's `internal` is scoped per Gradle module.
+ */
+fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if (rawAddress.contains("://")) {
+    MqttEndpoint.parse(rawAddress)
+} else {
+    val scheme = if (tlsEnabled) "wss" else "ws"
+    MqttEndpoint.parse("$scheme://$rawAddress$WEBSOCKET_PATH")
+}
+
+private const val WEBSOCKET_PATH = "/mqtt"

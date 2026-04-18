@@ -31,12 +31,17 @@ import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.MqttConnectionState
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
+import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.mqtt.ConnectionState
+import org.meshtastic.mqtt.MqttClient
 import org.meshtastic.mqtt.MqttException
+import org.meshtastic.mqtt.ProbeResult
+import org.meshtastic.mqtt.probe
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
 
@@ -52,9 +57,9 @@ class MqttManagerImpl(
 
     override val mqttConnectionState: StateFlow<MqttConnectionState> =
         combine(proxyActive, mqttRepository.connectionState) { active, libState ->
-            if (!active) MqttConnectionState.INACTIVE else libState.toAppState()
+            if (!active) MqttConnectionState.Inactive else libState.toAppState()
         }
-            .stateIn(scope, SharingStarted.Eagerly, MqttConnectionState.INACTIVE)
+            .stateIn(scope, SharingStarted.Eagerly, MqttConnectionState.Inactive)
 
     override fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean) {
         if (mqttMessageFlow?.isActive == true) return
@@ -102,9 +107,55 @@ class MqttManagerImpl(
     }
 
     private fun ConnectionState.toAppState(): MqttConnectionState = when (this) {
-        ConnectionState.DISCONNECTED -> MqttConnectionState.DISCONNECTED
-        ConnectionState.CONNECTING -> MqttConnectionState.CONNECTING
-        ConnectionState.CONNECTED -> MqttConnectionState.CONNECTED
-        ConnectionState.RECONNECTING -> MqttConnectionState.RECONNECTING
+        is ConnectionState.Connecting -> MqttConnectionState.Connecting
+        is ConnectionState.Connected -> MqttConnectionState.Connected
+        is ConnectionState.Reconnecting ->
+            MqttConnectionState.Reconnecting(attempt = attempt, lastError = lastError?.message)
+        is ConnectionState.Disconnected ->
+            reason?.let { MqttConnectionState.Disconnected(reason = it.message) }
+                ?: MqttConnectionState.Disconnected.Idle
+    }
+
+    override suspend fun probe(
+        address: String,
+        tlsEnabled: Boolean,
+        username: String?,
+        password: String?,
+    ): MqttProbeStatus {
+        val endpoint = resolveEndpoint(address, tlsEnabled)
+        val result =
+            MqttClient.probe(endpoint = endpoint) {
+                val user = username?.takeUnless { it.isEmpty() }
+                val pass = password?.takeUnless { it.isEmpty() }
+                if (user != null) this.username = user
+                if (pass != null) password(pass)
+            }
+        return result.toAppStatus()
+    }
+
+    private fun ProbeResult.toAppStatus(): MqttProbeStatus = when (this) {
+        is ProbeResult.Success -> {
+            val info = serverInfo
+            val summary =
+                buildList {
+                    info.assignedClientIdentifier?.let { add("client=$it") }
+                    info.maximumQosOrdinal?.let { add("maxQoS=$it") }
+                    info.serverKeepAliveSeconds?.let { add("keepalive=${it}s") }
+                }
+                    .joinToString(", ")
+                    .ifEmpty { null }
+            MqttProbeStatus.Success(serverInfo = summary)
+        }
+        is ProbeResult.Rejected ->
+            MqttProbeStatus.Rejected(
+                reasonCode = reasonCode.value,
+                reason = message,
+                serverReference = serverReference,
+            )
+        is ProbeResult.DnsFailure -> MqttProbeStatus.DnsFailure(message = cause.message)
+        is ProbeResult.TcpFailure -> MqttProbeStatus.TcpFailure(message = cause.message)
+        is ProbeResult.TlsFailure -> MqttProbeStatus.TlsFailure(message = cause.message)
+        is ProbeResult.Timeout -> MqttProbeStatus.Timeout(timeoutMs = durationMs)
+        is ProbeResult.Other -> MqttProbeStatus.Other(message = cause.message)
     }
 }

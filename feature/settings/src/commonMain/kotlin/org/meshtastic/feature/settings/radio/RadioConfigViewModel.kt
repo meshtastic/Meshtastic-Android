@@ -20,14 +20,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
@@ -44,6 +47,7 @@ import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MqttConnectionState
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
@@ -143,6 +147,38 @@ open class RadioConfigViewModel(
 
     /** MQTT proxy connection state for the settings UI. */
     val mqttConnectionState: StateFlow<MqttConnectionState> = mqttManager.mqttConnectionState
+
+    private val _mqttProbeStatus = MutableStateFlow<MqttProbeStatus?>(null)
+
+    /** Latest result from a [probeMqttConnection] call, or `null` if no probe has been run. */
+    val mqttProbeStatus: StateFlow<MqttProbeStatus?> = _mqttProbeStatus.asStateFlow()
+
+    private var probeJob: Job? = null
+
+    /**
+     * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
+     * a new one. Result is exposed via [mqttProbeStatus].
+     */
+    fun probeMqttConnection(address: String, tlsEnabled: Boolean, username: String?, password: String?) {
+        probeJob?.cancel()
+        _mqttProbeStatus.value = MqttProbeStatus.Probing
+        probeJob =
+            viewModelScope.launch {
+                val result =
+                    runCatching { mqttManager.probe(address, tlsEnabled, username, password) }
+                        .getOrElse { e ->
+                            Logger.w(e) { "MQTT probe threw" }
+                            MqttProbeStatus.Other(message = e.message)
+                        }
+                _mqttProbeStatus.value = result
+            }
+    }
+
+    /** Clear the latest probe result (e.g. when the user edits the address). */
+    fun clearMqttProbeStatus() {
+        probeJob?.cancel()
+        _mqttProbeStatus.value = null
+    }
 
     private val destNumFlow = MutableStateFlow(savedStateHandle.get<Int>("destNum"))
 
