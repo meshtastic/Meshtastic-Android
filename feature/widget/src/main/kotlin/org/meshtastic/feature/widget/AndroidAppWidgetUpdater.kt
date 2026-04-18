@@ -17,22 +17,48 @@
 package org.meshtastic.feature.widget
 
 import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.AppWidgetUpdater
 
+private const val WIDGET_UPDATE_DEBOUNCE_MS = 500L
+
 @Single
-class AndroidAppWidgetUpdater(private val context: Context) : AppWidgetUpdater {
+class AndroidAppWidgetUpdater(private val context: Context, stateProvider: LocalStatsWidgetStateProvider) :
+    AppWidgetUpdater {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    init {
+        // Observe state changes and trigger a widget re-render whenever the data changes.
+        // Glance compositions are ephemeral — the widget cannot self-update via collectAsState()
+        // alone, so we must call updateAll() externally to drive re-renders.
+        @OptIn(FlowPreview::class)
+        scope.launch {
+            stateProvider.state
+                .debounce(WIDGET_UPDATE_DEBOUNCE_MS)
+                .distinctUntilChanged { old, new -> old.copy(updateTimeMillis = 0) == new.copy(updateTimeMillis = 0) }
+                .collect { if (hasWidgetInstances()) updateAll() }
+        }
+    }
+
+    private suspend fun hasWidgetInstances(): Boolean =
+        GlanceAppWidgetManager(context).getGlanceIds(LocalStatsWidget::class.java).isNotEmpty()
+
     override suspend fun updateAll() {
-        // Kickstart the widget composition.
-        // The widget internally uses collectAsState() and its own sampled StateFlow
-        // to drive updates automatically without excessive IPC and recreation.
         @Suppress("TooGenericExceptionCaught")
         try {
             LocalStatsWidget().updateAll(context)
         } catch (e: Exception) {
-            co.touchlab.kermit.Logger.e(e) { "Failed to update widgets" }
+            Logger.e(e) { "Failed to update widgets" }
         }
     }
 }

@@ -76,8 +76,6 @@ data class LocalStatsWidgetUiState(
     val updateTimeMillis: Long = 0,
 )
 
-private const val WIDGET_SUBSCRIPTION_TIMEOUT_MS = 5_000L
-
 @Single
 class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, serviceRepository: ServiceRepository) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -100,12 +98,7 @@ class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, serviceRepos
             .map { input ->
                 mapToUiState(input.connectionState, input.totalNodes, input.onlineNodes, input.stats, input.localNode)
             }
-            .distinctUntilChanged()
-            .stateIn(
-                scope = scope,
-                started = SharingStarted.WhileSubscribed(WIDGET_SUBSCRIPTION_TIMEOUT_MS),
-                initialValue = LocalStatsWidgetUiState(),
-            )
+            .stateIn(scope = scope, started = SharingStarted.Eagerly, initialValue = LocalStatsWidgetUiState())
 
     private data class StateInput(
         val connectionState: ConnectionState,
