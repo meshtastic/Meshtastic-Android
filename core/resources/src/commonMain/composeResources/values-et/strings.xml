@@ -1213,5 +1213,17 @@
     <string name="desktop_tray_show">Näita Meshtastic</string>
     <string name="desktop_tray_quit">Sule</string>
     <string name="desktop_notification_title">Kärgvõrgustik</string>
+    <string name="export_tak_data_package">Ekspordi TAK andmepakett</string>
+    <string name="clear_time_zone">Eemalda ajatsoon</string>
     <string name="filter_icon">Filtreeri</string>
+    <string name="remove_filter">Eemalda filter</string>
+    <string name="show_iaq_legend">Näita õhukvaliteedi ajalugu</string>
+    <string name="action_show_message_status">Kuva sõnumi olek</string>
+    <string name="action_send_reply">Saada vastus</string>
+    <string name="action_copy_message">Kopeeri sõnum</string>
+    <string name="action_select_message">Vali sõnum</string>
+    <string name="action_delete_message">Kustuta sõnum</string>
+    <string name="action_react_with_emoji">Vasta emotikoniga</string>
+    <string name="action_select_device">Vali seade</string>
+    <string name="action_select_network">Vali võrk</string>
 </resources>
