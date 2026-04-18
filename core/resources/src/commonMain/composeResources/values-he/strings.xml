@@ -148,4 +148,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="filter_icon">פילטר</string>
 </resources>

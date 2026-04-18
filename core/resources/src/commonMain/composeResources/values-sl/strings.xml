@@ -196,11 +196,8 @@
     <string name="encryption_error">Neujemanje javnega ključa</string>
     <string name="meshtastic_new_nodes_notifications">Obvestila novih vozlišč</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Razmerje med signalom in šumom je merilo, ki se uporablja v komunikacijah za količinsko opredelitev ravni želenega signala glede na raven hrupa v ozadju. V Meshtastic in drugih brezžičnih sistemih višji SNR pomeni jasnejši signal, ki lahko poveča zanesljivost in kakovost prenosa podatkov.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Indikator moči sprejetega signala je meritev, ki se uporablja za določanje ravni moči, ki jo sprejema antena. Višja vrednost RSSI na splošno pomeni močnejšo in stabilnejšo povezavo.</string>
     <string name="iaq_definition">(Kakovost zraka v zaprtih prostorih) relativna vrednost IAQ na lestvici, izmerjena z Bosch BME680. Razpon vrednosti 0–500.</string>
-    <string name="node_map">Zemljevid vozlišč</string>
     <string name="administration">Administracija</string>
     <string name="remote_admin">Administracija na daljavo</string>
     <string name="bad">Slab</string>
@@ -245,4 +242,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="filter_icon">Filter</string>
 </resources>

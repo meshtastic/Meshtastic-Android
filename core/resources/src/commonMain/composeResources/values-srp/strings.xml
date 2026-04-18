@@ -241,12 +241,9 @@
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
     <string name="meshtastic_new_nodes_notifications">Обавештења о новим чворовима</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Однос сигнал/шум SNR је мера која се користи у комуникацијама за квантитативно одређивање нивоа жељеног сигнала у односу на ниво позадинског шума. У Мештастик и другим бежичним системима, већи SNR указује на јаснији сигнал који може побољшати поузданост и квалитет преноса података.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Индикатор јачине примљеног сигнала RSSI је мера која се користи за одређивање нивоа снаге која се прима преко антене. Виша вредност RSSI генерално указује на јачу и стабилнију везу.</string>
     <string name="iaq_definition">Индекс квалитета ваздуха (IAQ) као мера за одређивање квалитета ваздуха унутрашњости, мерен са Bosch BME680. Вредности се крећу у распону од 0 до 500.</string>
     <string name="device_metrics_log">Метрика уређаја</string>
-    <string name="node_map">Мапа чворова</string>
     <string name="position_log">Позиција</string>
     <string name="env_metrics_log">Метрике сензора</string>
     <string name="administration">Администрација</string>
@@ -432,4 +429,5 @@
     <string name="bluetooth_permission">Блутут</string>
     <string name="powered">Напајано</string>
     <!-- Network Map Layers -->
+    <string name="filter_icon">Филтер</string>
 </resources>

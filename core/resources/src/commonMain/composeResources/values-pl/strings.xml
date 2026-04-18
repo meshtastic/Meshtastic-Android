@@ -333,12 +333,9 @@
     <string name="userinfo">Informacje o użytkowniku</string>
     <string name="meshtastic_new_nodes_notifications">Powiadomienia o nowych węzłach</string>
     <string name="snr">SNR:</string>
-    <string name="snr_definition">Współczynnik sygnału do szumu (Signal-to-Noise Ratio) - miara stosowana w komunikacji do określania poziomu pożądanego sygnału w stosunku do poziomu szumu tła. W Meshtastic i innych systemach bezprzewodowych wyższy współczynnik SNR oznacza czystszy sygnał, który może zwiększyć niezawodność i jakość transmisji danych.</string>
     <string name="rssi">RSSI:</string>
-    <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
     <string name="iaq_definition">Jakość powietrza w pomieszczeniach (Indoor Air Quality) - wartość względna w skali IAQ mierzona czujnikiem BME680. Zakres wartości: 0–500.</string>
     <string name="device_metrics_log">Metryka urządzenia</string>
-    <string name="node_map">Ślad na mapie</string>
     <string name="position_log">Pozycjonowanie</string>
     <string name="last_position_update">Ostatnia aktualizacja lokalizacji</string>
     <string name="env_metrics_log">Metryki środowiskowe</string>
@@ -752,4 +749,5 @@
     <string name="connect">Połącz</string>
     <string name="done">Wykonano</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">Filtr</string>
 </resources>

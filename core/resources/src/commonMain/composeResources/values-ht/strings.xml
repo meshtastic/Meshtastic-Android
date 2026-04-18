@@ -186,10 +186,7 @@
     <string name="encryption_pkc">Chifreman Kle Piblik</string>
     <string name="encryption_error">Pa matche kle piblik</string>
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
-    <string name="snr_definition">Rapò Siynal sou Bri, yon mezi ki itilize nan kominikasyon pou mezire nivo siynal vle a kont nivo bri ki nan anviwònman an. Nan Meshtastic ak lòt sistèm san fil, yon SNR pi wo endike yon siynal pi klè ki ka amelyore fyab ak kalite transmisyon done.</string>
-    <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
     <string name="iaq_definition">(Kalite Lèy Entèryè) echèl relatif valè IAQ jan li mezire pa Bosch BME680. Ranje valè 0–500.</string>
-    <string name="node_map">Kat Nœud</string>
     <string name="administration">Administrasyon</string>
     <string name="remote_admin">Administrasyon Remote</string>
     <string name="bad">Move</string>
@@ -218,4 +215,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="filter_icon">Filtre</string>
 </resources>

@@ -174,4 +174,5 @@
     <!-- Message Filter -->
     <string name="bluetooth_permission">إعدادات بلوتوث</string>
     <!-- Network Map Layers -->
+    <string name="filter_icon">عربي</string>
 </resources>

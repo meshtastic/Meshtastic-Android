@@ -376,12 +376,9 @@
     <string name="userinfo">Info utilizator</string>
     <string name="meshtastic_new_nodes_notifications">Notificări noduri noi</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Raportul semnal-zgomot (Signal-to-Noise Ratio), o măsură utilizată în comunicații pentru a cuantifica nivelul unui semnal dorit în raport cu nivelul zgomotului de fond. În Meshtastic și în alte sisteme wireless, un SNR mai mare indică un semnal mai clar, care poate îmbunătăți fiabilitatea și calitatea transmiterii datelor.</string>
     <string name="rssi"> RSSI</string>
-    <string name="rssi_definition">Indicatorul intensității semnalului recepționat (Received Signal Strength Indicator), o măsurătoare utilizată pentru a determina nivelul de putere recepționat de antenă. O valoare RSSI mai mare indică, în general, o conexiune mai puternică și mai stabilă.</string>
     <string name="iaq_definition">(Calitatea aerului interior) valoarea IAQ pe o scară relativă, măsurată cu Bosch BME680. Intervalul valorilor: 0–500.</string>
     <string name="device_metrics_log">Valori dispozitiv</string>
-    <string name="node_map">Harta nodurilor</string>
     <string name="position_log">Poziție</string>
     <string name="last_position_update">Ultima actualizare a poziției</string>
     <string name="env_metrics_log">Indicatori de mediu</string>
@@ -424,7 +421,6 @@
     <string name="one_week">1W</string>
     <string name="two_weeks">2W</string>
     <string name="max">Maxim</string>
-    <string name="avg">Medie</string>
     <string name="expand_chart">Extindeți graficul</string>
     <string name="collapse_chart">Restrânge graficul</string>
     <string name="unknown_age">Vârstă necunoscută</string>
@@ -1171,4 +1167,5 @@
     <string name="wifi_provision_status_applied">WiFi configurat cu succes!</string>
     <string name="wifi_provision_status_failed">Nu s-a reușit aplicarea configurației Wi-Fi</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">Filtru</string>
 </resources>

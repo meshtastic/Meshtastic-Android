@@ -190,7 +190,6 @@
     <string name="meshtastic_new_nodes_notifications">Naujo įtaiso pranešimas</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
-    <string name="node_map">Įtaisų žemėlapis</string>
     <string name="administration">Administravimas</string>
     <string name="remote_admin">Nuotolinis administravimas</string>
     <string name="bad">Silpnas</string>
@@ -238,4 +237,5 @@
     <!-- Message Filter -->
     <!-- Network Map Layers -->
     <string name="tak_team_red">Raudona</string>
+    <string name="filter_icon">Filtras</string>
 </resources>

@@ -165,4 +165,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="filter_icon">Filtro</string>
 </resources>

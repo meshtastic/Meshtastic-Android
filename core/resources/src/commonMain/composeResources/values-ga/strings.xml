@@ -190,10 +190,7 @@
     <string name="encryption_pkc">Cóid Poiblí Eochair</string>
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
     <string name="meshtastic_new_nodes_notifications">Fógartha faoi na nodes nua</string>
-    <string name="snr_definition">Ráta Sigineal go Torann, tomhas a úsáidtear i gcomhfhreagras chun an leibhéal de shígnéil inmhianaithe agus torann cúlra a mheas. I Meshtastic agus i gcórais gan sreang eile, ciallaíonn SNR níos airde go bhfuil sígneál níos soiléire ann agus ábalta méadú ar chreideamh agus cáilíocht an tarchur sonraí.</string>
-    <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
     <string name="iaq_definition">(Cáilíocht Aeir Inmheánach) scála ábhartha den luach QAÍ a thomhas ag Bosch BME680. Scála Luach 0–500.</string>
-    <string name="node_map">Léarscáil an Node</string>
     <string name="administration">Rialachas</string>
     <string name="remote_admin">Rialú iargúlta</string>
     <string name="bad">Go dona</string>
@@ -230,4 +227,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="filter_icon">Scagaire</string>
 </resources>

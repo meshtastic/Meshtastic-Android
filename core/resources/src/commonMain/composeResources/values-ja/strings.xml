@@ -275,11 +275,8 @@
     <string name="encryption_error">公開キーが一致しません</string>
     <string name="meshtastic_new_nodes_notifications">新しいノードの通知</string>
     <string name="snr">SN比</string>
-    <string name="snr_definition">信号対ノイズ比（SN比）は、通信において、目的の信号のレベルを背景ノイズのレベルに対して定量化するために使用される尺度です。Meshtasticや他の無線システムでは、SN比が高いほど信号が鮮明であることを示し、データ伝送の信頼性と品質を向上させることができます。</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">受信信号強度インジケーター（RSSI）は、アンテナで受信している電力レベルを測定するための指標です。一般的にRSSI値が高いほど、より強力で安定した接続を示します。</string>
     <string name="iaq_definition">(屋内空気品質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0-500。</string>
-    <string name="node_map">ノードマップ</string>
     <string name="position_log">位置</string>
     <string name="administration">管理</string>
     <string name="remote_admin">リモート管理</string>
@@ -655,4 +652,5 @@
     <string name="traffic_management_enabled">モジュール有効</string>
     <string name="connect">接続</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">絞り込み</string>
 </resources>
