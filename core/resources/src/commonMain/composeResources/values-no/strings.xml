@@ -194,11 +194,8 @@
     <string name="encryption_error">Direktemeldinger bruker den nye offentlige nøkkelinfrastrukturen for kryptering. Krever firmware versjon 2.5 eller høyere.</string>
     <string name="meshtastic_new_nodes_notifications">Varsel om nye noder</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Signal-to-Noise Ratio, et mål som brukes i kommunikasjon for å sette nivået av et ønsket signal til bakgrunnstrøynivået. I Meshtastic og andre trådløse systemer tyder et høyere SNR på et klarere signal som kan forbedre påliteligheten og kvaliteten på dataoverføringen.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">\"Received Signal Strength Indicator\", en måling som brukes til å bestemme strømnivået som mottas av antennen. Høyere RSSI verdi indikerer generelt en sterkere og mer stabil forbindelse.</string>
     <string name="iaq_definition">(Innendørs luftkvalitet) relativ skala IAQ-verdi målt ved Bosch BME680. Verdi 0–500.</string>
-    <string name="node_map">Nodekart</string>
     <string name="administration">Administrasjon</string>
     <string name="remote_admin">Fjernadministrasjon</string>
     <string name="bad">Dårlig</string>
@@ -241,4 +238,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="filter_icon">Filter</string>
 </resources>

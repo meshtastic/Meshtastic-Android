@@ -389,12 +389,9 @@
     <string name="userinfo">Пользовательская информация</string>
     <string name="meshtastic_new_nodes_notifications">Уведомления о новых нодах</string>
     <string name="snr">Сигнал/шум</string>
-    <string name="snr_definition">Соотношение сигнал/шум, мера, используемая в коммуникациях для количественной оценки уровня желаемого сигнала по отношению к уровню фонового шума. В Meshtastic и других беспроводных системах более высокий SNR указывает на более четкий сигнал, который может повысить надежность и качество передачи данных.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Индикатор уровня принимаемого сигнала, измерение, используемое для определения уровня мощности, принимаемой антенной. Более высокое значение RSSI обычно указывает на более сильное и стабильное соединение.</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
     <string name="device_metrics_log">Интервал передачи</string>
-    <string name="node_map">Карта нод</string>
     <string name="position_log">Местоположение</string>
     <string name="last_position_update">Обновление последнего местоположения</string>
     <string name="env_metrics_log">Метрики окружения</string>
@@ -443,7 +440,6 @@
     <string name="one_month">1М</string>
     <string name="max">Макс</string>
     <string name="min">Мин</string>
-    <string name="avg">Сред</string>
     <string name="expand_chart">Развернуть диаграмму</string>
     <string name="collapse_chart">Свернуть диаграмму</string>
     <string name="unknown_age">Неизвестный возраст</string>
@@ -1227,4 +1223,6 @@
     <string name="wifi_provision_status_applied">Wi-Fi успешно настроен!</string>
     <string name="wifi_provision_status_failed">Не удалось применить настройку Wi-Fi</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">Фильтр</string>
+    <string name="action_select_device">Выберите устройство</string>
 </resources>

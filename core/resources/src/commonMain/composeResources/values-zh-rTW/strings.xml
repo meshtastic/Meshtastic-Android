@@ -373,12 +373,9 @@
     <string name="userinfo">使用者資訊</string>
     <string name="meshtastic_new_nodes_notifications">新節點通知</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">信噪比（SNR），用於通訊中量化所需信號與背景噪音水平的指標。在 Meshtastic 及其他無線系統中，信噪比越高表示信號越清晰，可以提高數據傳輸的可靠性和品質。</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="iaq_definition">(室內空氣品質) 相對尺度 IAQ 值，由 Bosch BME680 測量。值範圍 0–500。</string>
     <string name="device_metrics_log">裝置計量資料</string>
-    <string name="node_map">節點地圖</string>
     <string name="position_log">位置</string>
     <string name="last_position_update">最後位置更新</string>
     <string name="env_metrics_log">環境計量資料</string>
@@ -418,7 +415,6 @@
     <string name="one_month">1個月</string>
     <string name="max">最大值</string>
     <string name="min">最小</string>
-    <string name="avg">平均</string>
     <string name="expand_chart">展開圖表</string>
     <string name="collapse_chart">收起圖表</string>
     <string name="unknown_age">未知年齡</string>
@@ -1187,4 +1183,6 @@
     <string name="desktop_tray_show">顯示 Meshtastic</string>
     <string name="desktop_tray_quit">離開</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">過濾器</string>
+    <string name="action_select_device">選擇裝置</string>
 </resources>

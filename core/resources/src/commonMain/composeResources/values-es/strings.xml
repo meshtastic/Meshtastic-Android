@@ -300,13 +300,10 @@
     <string name="encryption_error">Clave pública no coincide</string>
     <string name="meshtastic_new_nodes_notifications">Notificaciones de nuevo nodo</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">SNR: Ratio de señal a ruido, una medida utilizada en las comunicaciones para cuantificar el nivel de una señal deseada respecto al nivel del ruido de fondo. En Meshtastic y otros sistemas inalámbricos, un mayor SNR indica una señal más clara que puede mejorar la fiabilidad y la calidad de la transmisión de datos.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Indicador de Fuerza de Señal Recibida (RSSI en inglés), una medida utilizada para determinar el nivel de potencia que está siendo recibido por la antena. Un valor de RSSI más alto generalmente indica una conexión más fuerte y estable.</string>
     <string name="iaq_definition">(Calidad de Aire interior) escala relativa del valor IAQ como mediciones del sensor Bosch BME680.
 Rango de Valores 0 - 500.</string>
     <string name="device_metrics_log">Métricas de Dispositivo</string>
-    <string name="node_map">Mapa de Nodos</string>
     <string name="position_log">Posición</string>
     <string name="last_position_update">Última actualización</string>
     <string name="env_metrics_log">Métricas de Entorno</string>
@@ -839,4 +836,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="connect">Conectar</string>
     <string name="done">Hecho</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">Filtro</string>
 </resources>

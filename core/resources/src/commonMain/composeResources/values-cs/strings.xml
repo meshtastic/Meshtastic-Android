@@ -331,12 +331,9 @@
     <string name="userinfo">Informace o uživateli</string>
     <string name="meshtastic_new_nodes_notifications">Oznámení o nových uzlech</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Poměr signálu k šumu (SNR) je veličina používaná k vyjádření poměru mezi úrovní požadovaného signálu a úrovní šumu na pozadí. V Meshtastic a dalších bezdrátových systémech vyšší hodnota SNR značí čistší signál, což může zvýšit spolehlivost a kvalitu přenosu dat.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Indikátor síly přijímaného signálu, měření, které se používá k určení hladiny výkonu přijímané anténou. Vyšší hodnota RSSI obvykle znamená silnější a stabilnější spojení.</string>
     <string name="iaq_definition">(Vnitřní kvalita ovzduší) relativní hodnota IAQ měřená Bosch BME680. Hodnota rozsahu 0–500.</string>
     <string name="device_metrics_log">Metriky zařízení</string>
-    <string name="node_map">Mapa uzlu</string>
     <string name="position_log">Pozice</string>
     <string name="last_position_update">Poslední aktualizace pozice</string>
     <string name="env_metrics_log">Metriky prostředí</string>
@@ -971,4 +968,5 @@
     <string name="connect">Připojit</string>
     <string name="done">Hotovo</string>
     <string name="desktop_notification_title">Meshtastic</string>
+    <string name="filter_icon">Filtr</string>
 </resources>
