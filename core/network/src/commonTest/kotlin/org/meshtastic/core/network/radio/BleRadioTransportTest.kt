@@ -95,10 +95,10 @@ class BleRadioTransportTest {
      * [RadioInterfaceService.onDisconnect] must be called so the higher layers can react (e.g. start the device-sleep
      * timeout in [MeshConnectionManagerImpl]).
      *
-     * Virtual-time breakdown (DEFAULT_FAILURE_THRESHOLD = 3): t = 1 000 ms — iteration 1 settle delay elapses,
-     * connectAndAwait throws, backoff 5 s starts t = 6 000 ms — backoff ends t = 7 000 ms — iteration 2 settle delay
-     * elapses, connectAndAwait throws, backoff 10 s starts t = 17 000 ms — backoff ends t = 18 000 ms — iteration 3
-     * settle delay elapses, connectAndAwait throws → onDisconnect called
+     * Virtual-time breakdown (DEFAULT_FAILURE_THRESHOLD = 3, DEFAULT_SETTLE_DELAY = 3 s): t = 3 000 ms — iteration 1
+     * settle delay elapses, connectAndAwait throws, backoff 5 s starts t = 8 000 ms — backoff ends t = 11 000 ms —
+     * iteration 2 settle delay elapses, connectAndAwait throws, backoff 10 s starts t = 21 000 ms — backoff ends t = 24
+     * 000 ms — iteration 3 settle delay elapses, connectAndAwait throws → onDisconnect called
      */
     @Test
     fun `onDisconnect is called after DEFAULT_FAILURE_THRESHOLD consecutive failures`() = runTest {
@@ -119,10 +119,10 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
 
-        // Advance through exactly 3 failure iterations (≈18 001 ms virtual time).
+        // Advance through exactly 3 failure iterations (≈24 001 ms virtual time).
         // The 4th iteration's backoff hasn't elapsed yet, so the coroutine is suspended
         // and advanceTimeBy returns cleanly.
-        advanceTimeBy(18_001L)
+        advanceTimeBy(24_001L)
 
         verify { service.onDisconnect(any(), any()) }
 
@@ -134,9 +134,9 @@ class BleRadioTransportTest {
      * After [BleReconnectPolicy.DEFAULT_MAX_FAILURES] (10) consecutive failures, the reconnect loop should stop and
      * signal a permanent disconnect. This prevents infinite battery drain when the device is genuinely offline.
      *
-     * Time budget for 10 failures with bonded device (no scan): Each iteration = 1s settle + connectAndAwait throw +
-     * backoff Backoffs: 5s, 10s, 20s, 40s, 60s, 60s, 60s, 60s, 60s, (exit at failure 10 before backoff) Total ≈ 10×1s
-     * settle + 5+10+20+40+60+60+60+60+60 = 10 + 375 = 385s ≈ 385_000ms We use a generous 400_000ms to cover any timing
+     * Time budget for 10 failures with bonded device (no scan): Each iteration = 3s settle + connectAndAwait throw +
+     * backoff Backoffs: 5s, 10s, 20s, 40s, 60s, 60s, 60s, 60s, 60s, (exit at failure 10 before backoff) Total ≈ 10×3s
+     * settle + 5+10+20+40+60+60+60+60+60 = 30 + 375 = 405s ≈ 405_000ms We use a generous 410_000ms to cover any timing
      * variance.
      */
     @Test
@@ -159,7 +159,7 @@ class BleRadioTransportTest {
         bleTransport.start()
 
         // Advance enough time for all 10 failures to occur.
-        advanceTimeBy(400_001L)
+        advanceTimeBy(410_001L)
 
         // Should have been called with isPermanent=true at least once (the final call).
         verify { service.onDisconnect(isPermanent = true, errorMessage = any()) }

@@ -156,8 +156,8 @@ class BleReconnectPolicy(
          * Empirically validated against the meshtastic-client KMP SDK probes (Apr 2026): with a 1.5 s pause between
          * disconnect→reconnect cycles, 3/5–4/5 attempts failed mid-handshake (Stage1Draining timeouts) because the
          * firmware had not yet released its GATT session from the previous cycle. With ≥ 5 s pause, success rate rose
-         * to 5/5 against a strong (-53 dBm) link. 3 s is a conservative compromise on Android, whose BLE stack is
-         * more mature than btleplug+CoreBluetooth, but the firmware-side cleanup constraint is the same.
+         * to 5/5 against a strong (-53 dBm) link. 3 s is a conservative compromise on Android, whose BLE stack is more
+         * mature than btleplug+CoreBluetooth, but the firmware-side cleanup constraint is the same.
          */
         val DEFAULT_SETTLE_DELAY = 3.seconds
         val DEFAULT_MIN_STABLE_CONNECTION = 5.seconds
