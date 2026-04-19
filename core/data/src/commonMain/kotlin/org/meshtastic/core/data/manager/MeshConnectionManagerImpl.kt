@@ -60,6 +60,7 @@ import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
@@ -211,11 +212,11 @@ class MeshConnectionManagerImpl(
             }
     }
 
-    private fun startHandshakeStallGuard(stage: Int, action: () -> Unit) {
+    private fun startHandshakeStallGuard(stage: Int, timeout: Duration, action: () -> Unit) {
         handshakeTimeout?.cancel()
         handshakeTimeout =
             scope.handledLaunch {
-                delay(HANDSHAKE_TIMEOUT)
+                delay(timeout)
                 if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
                     // Attempt one retry. Note: the firmware silently drops identical consecutive
                     // writes (per-connection dedup). If the first want_config_id was received and
@@ -291,13 +292,13 @@ class MeshConnectionManagerImpl(
 
     override fun startConfigOnly() {
         val action = { packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE)) }
-        startHandshakeStallGuard(1, action)
+        startHandshakeStallGuard(1, HANDSHAKE_TIMEOUT_STAGE1, action)
         action()
     }
 
     override fun startNodeInfoOnly() {
         val action = { packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE)) }
-        startHandshakeStallGuard(2, action)
+        startHandshakeStallGuard(2, HANDSHAKE_TIMEOUT_STAGE2, action)
         action()
     }
 
@@ -404,7 +405,14 @@ class MeshConnectionManagerImpl(
          */
         private const val PRE_HANDSHAKE_SETTLE_MS = 100L
 
-        private val HANDSHAKE_TIMEOUT = 30.seconds
+        private val HANDSHAKE_TIMEOUT_STAGE1 = 30.seconds
+
+        /**
+         * Stage 2 drains the full node database, which can be significantly larger than Stage 1 config on big meshes.
+         * 60 s matches the meshtastic-client SDK timeout and avoids premature stall-guard triggers on meshes with 50+
+         * nodes.
+         */
+        private val HANDSHAKE_TIMEOUT_STAGE2 = 60.seconds
 
         // Shorter window for the retry attempt: if the device genuinely didn't receive the
         // first want_config_id the retry completes within a few seconds. Waiting another 30s
