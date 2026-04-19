@@ -170,7 +170,7 @@ configuration settings screen. Constraints are sourced from two layers:
 | Field | Type | Validation | Notes |
 |-------|------|------------|-------|
 | `public_key` | Base64 | 32 bytes; read-only | Auto-derived from private key |
-| `private_key` | Base64 | 32 bytes | Key generation applies bit masking: `f[0] &= 0xF8`, `f[31] = (f[31] & 0x7F) \| 0x40` |
+| `private_key` | Base64 | 32 bytes | Key generation applies bit masking: `f[0] &= 0xF8`, `f[31] = (f[31] & 0x7F) ǀ 0x40` |
 | `admin_key` | Base64 list | maxCount: 3; each entry 32 bytes | — |
 | `serial_enabled` | Boolean | Toggle | — |
 | `debug_log_api_enabled` | Boolean | Toggle | — |
@@ -280,7 +280,7 @@ configuration settings screen. Constraints are sourced from two layers:
 | `inputbroker_event_cw` | Enum | Dropdown: `InputEventChar` entries | — |
 | `inputbroker_event_ccw` | Enum | Dropdown: `InputEventChar` entries | — |
 | `updown1_enabled` | Boolean | Toggle | — |
-| `allow_input_source` | String | maxSize: 63 bytes (proto max_size: 16) | — |
+| `allow_input_source` | String | maxSize: 63 bytes (proto max_size: 16; UI intentionally allows more) | — |
 | `send_bell` | Boolean | Toggle | — |
 | `messages` | String | maxSize: 200 bytes (proto max_size: 201) | Pipe-delimited canned messages |
 
@@ -396,7 +396,7 @@ context restricts the available choices to a specific subset of `FixedUpdateInte
 
 | Configuration | Range | Values (seconds) |
 |---------------|-------|------------------|
-| `ALL` | All entries | Every `FixedUpdateIntervals` value |
+| `ALL` | 0 – 2147483647 | 0, 1, 2, 3, 4, 5, 8, 10, 15, 20, 30, 40, 45, 60, 80, 90, 120, 300, 600, 900, 1800, 3600, 7200, 10800, 14400, 18000, 21600, 43200, 64800, 86400, 129600, 172800, 259200, 2147483647 |
 | `BROADCAST_SHORT` | 30 min – 72 hr | 1800, 3600, 7200, 10800, 14400, 18000, 21600, 43200, 64800, 86400, 129600, 172800, 259200 |
 | `BROADCAST_MEDIUM` | 1 hr – 72 hr | 3600, 7200, 10800, 14400, 18000, 21600, 43200, 64800, 86400, 129600, 172800, 259200 |
 | `BROADCAST_LONG` | 3 hr – 72 hr | 10800, 14400, 18000, 21600, 43200, 64800, 86400, 129600, 172800, 259200 |
