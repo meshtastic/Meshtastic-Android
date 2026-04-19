@@ -131,16 +131,17 @@ class BleRadioTransportTest {
     }
 
     /**
-     * After [BleReconnectPolicy.DEFAULT_MAX_FAILURES] (10) consecutive failures, the reconnect loop should stop and
-     * signal a permanent disconnect. This prevents infinite battery drain when the device is genuinely offline.
+     * Reconnect policy must NEVER give up on its own. The transport is only ever instantiated for the user-selected
+     * device, and explicit-disconnect is owned by the service layer (close()). Even after a sustained failure storm —
+     * well beyond the legacy [BleReconnectPolicy.DEFAULT_MAX_FAILURES] — the transport must keep retrying and must
+     * never call `onDisconnect(isPermanent = true)` from the give-up path.
      *
-     * Time budget for 10 failures with bonded device (no scan): Each iteration = 3s settle + connectAndAwait throw +
-     * backoff Backoffs: 5s, 10s, 20s, 40s, 60s, 60s, 60s, 60s, 60s, (exit at failure 10 before backoff) Total ≈ 10×3s
-     * settle + 5+10+20+40+60+60+60+60+60 = 30 + 375 = 405s ≈ 405_000ms We use a generous 410_000ms to cover any timing
-     * variance.
+     * Time budget for 15 failures with bonded device (no scan): each iteration ≈ 3 s settle + immediate throw +
+     * backoff. Backoffs cap at 60 s after failure 5: 5+10+20+40+60+60+60+60+60+60+60+60+60+60+60 = 735 s, plus 15×3 s
+     * settle = 45 s, total ≈ 780 s. Use 800_000 ms to cover variance.
      */
     @Test
-    fun `reconnect loop stops after DEFAULT_MAX_FAILURES with permanent disconnect`() = runTest {
+    fun `reconnect loop never gives up - no permanent disconnect from policy`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device)
 
@@ -158,11 +159,15 @@ class BleRadioTransportTest {
             )
         bleTransport.start()
 
-        // Advance enough time for all 10 failures to occur.
-        advanceTimeBy(410_001L)
+        // Run well past where the legacy policy (maxFailures = 10) would have given up.
+        advanceTimeBy(800_001L)
 
-        // Should have been called with isPermanent=true at least once (the final call).
-        verify { service.onDisconnect(isPermanent = true, errorMessage = any()) }
+        // Transient disconnects (isPermanent = false) are expected once the failure threshold is hit;
+        // the policy must NEVER signal a permanent disconnect on its own. Only explicit close()
+        // (verified separately by the service layer) may emit isPermanent = true.
+        verify(mode = dev.mokkery.verify.VerifyMode.not) {
+            service.onDisconnect(isPermanent = true, errorMessage = any())
+        }
 
         bleTransport.close()
     }

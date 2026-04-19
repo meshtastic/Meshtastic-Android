@@ -26,7 +26,9 @@ import com.juul.kable.UnmetRequirementException
 /**
  * Classification of a BLE-layer exception for the transport layer to act on.
  *
- * @property isPermanent `true` if the condition won't resolve without user intervention (e.g. Bluetooth disabled).
+ * @property isPermanent `true` if the condition cannot resolve without explicit user re-selection of the device.
+ *   Currently always `false` — all known BLE exceptions can resolve without user intervention (BT toggling, permission
+ *   grants, transient GATT errors). Reserved for future use.
  * @property gattStatus the platform GATT status code when available (Android-specific).
  * @property message a human-readable description of the failure.
  */
@@ -50,6 +52,9 @@ fun Throwable.classifyBleException(): BleExceptionInfo? = when (this) {
     is GattRequestRejectedException ->
         BleExceptionInfo(isPermanent = false, message = "GATT request rejected (busy)")
     is UnmetRequirementException ->
-        BleExceptionInfo(isPermanent = true, message = message ?: "Bluetooth LE unavailable")
+        // Bluetooth disabled or runtime permission missing. Both can resolve without re-selecting the
+        // device (user re-enables BT, or grants permission). Surface as transient so the transport keeps
+        // retrying; UI can show a hint based on the message.
+        BleExceptionInfo(isPermanent = false, message = message ?: "Bluetooth LE unavailable")
     else -> null
 }
