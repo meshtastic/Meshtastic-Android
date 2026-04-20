@@ -166,9 +166,7 @@ class BleRadioTransportTest {
         // Transient disconnects (isPermanent = false) are expected once the failure threshold is hit;
         // the policy must NEVER signal a permanent disconnect on its own. Only explicit close()
         // (verified separately by the service layer) may emit isPermanent = true.
-        verify(mode = VerifyMode.not) {
-            service.onDisconnect(isPermanent = true, errorMessage = any())
-        }
+        verify(mode = VerifyMode.not) { service.onDisconnect(isPermanent = true, errorMessage = any()) }
 
         bleTransport.close()
     }
