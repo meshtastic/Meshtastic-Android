@@ -37,18 +37,20 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
 
     override suspend fun close() {
         Logger.d { "Closing stream for good" }
-        onDeviceDisconnect(true)
+        onDeviceDisconnect(waitForStopped = true, isPermanent = true)
     }
 
     /**
-     * Notify the transport callback that our device has gone away, but wait for it to come back.
+     * Signals the transport callback that the device has disconnected and optionally waits for the transport to stop.
      *
      * @param waitForStopped if true we should wait for the transport to finish - must be false if called from inside
      *   transport callbacks
-     * @param isPermanent true if the device is definitely gone (e.g. USB unplugged), false if it may come back (e.g.
-     *   TCP transient disconnect). Defaults to true for serial — subclasses may override with false.
+     * @param isPermanent true only when the user has explicitly disconnected (e.g. [close] was called). USB unplug, I/O
+     *   errors, and similar conditions are transient — the transport may recover when the device is replugged or the OS
+     *   re-enumerates. Defaults to false so callbacks default to "may come back"; [close] passes true explicitly to
+     *   signal a user-initiated terminal disconnect.
      */
-    protected open fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean = true) {
+    protected open fun onDeviceDisconnect(waitForStopped: Boolean, isPermanent: Boolean = false) {
         callback.onDisconnect(isPermanent = isPermanent)
     }
 

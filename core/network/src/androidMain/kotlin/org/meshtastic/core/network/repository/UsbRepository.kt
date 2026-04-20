@@ -54,9 +54,7 @@ class UsbRepository(
         _serialDevices
             .mapLatest { serialDevices ->
                 val serialProber = usbSerialProberLazy.value
-                buildMap {
-                    serialDevices.forEach { (k, v) -> serialProber.probeDevice(v)?.let { driver -> put(k, driver) } }
-                }
+                buildMap { serialDevices.forEach { (k, v) -> serialProber.probeDevice(v)?.let { put(k, it) } } }
             }
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 
@@ -83,6 +81,8 @@ class UsbRepository(
         processLifecycle.coroutineScope.launch(dispatchers.default) { refreshStateInternal() }
     }
 
-    private suspend fun refreshStateInternal() =
-        withContext(dispatchers.default) { _serialDevices.emit(usbManagerLazy.value?.deviceList ?: emptyMap()) }
+    private suspend fun refreshStateInternal() = withContext(dispatchers.default) {
+        val devices = usbManagerLazy.value?.deviceList ?: emptyMap()
+        _serialDevices.emit(devices)
+    }
 }

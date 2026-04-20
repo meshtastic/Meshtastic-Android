@@ -108,7 +108,10 @@ class SerialRadioTransport(
                                     "Uptime: ${uptime}ms, " +
                                     "Packets RX: $packetsReceived ($bytesReceived bytes)"
                             }
-                            onDeviceDisconnect(false)
+                            // USB unplug / cable error is transient — the transport will reconnect when
+                            // the device is replugged or the OS re-enumerates the port. Only an explicit
+                            // close() (user disconnects) should signal a permanent disconnect.
+                            onDeviceDisconnect(waitForStopped = false, isPermanent = false)
                         }
                     },
                 )

@@ -133,7 +133,11 @@ class BleRadioTransport(
 
     @Volatile private var isFullyConnected = false
     private var connectionJob: Job? = null
-    private val reconnectPolicy = BleReconnectPolicy()
+
+    // Never give up while the user has this device selected. Higher layers (SharedRadioInterfaceService)
+    // own the explicit-disconnect lifecycle and will close() us when the user picks a different device or
+    // toggles the connection off; until then, retry forever with the policy's exponential-backoff cap (60 s).
+    private val reconnectPolicy = BleReconnectPolicy(maxFailures = Int.MAX_VALUE)
 
     private val heartbeatSender =
         HeartbeatSender(

@@ -59,6 +59,7 @@ import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
@@ -90,6 +91,8 @@ import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 
 class MainActivity : ComponentActivity() {
     private val model: UIViewModel by viewModel()
+
+    private val usbRepository: UsbRepository by inject()
 
     /**
      * Activity-lifecycle-aware client that binds to the mesh service. Note: This is used implicitly as it registers
@@ -164,6 +167,16 @@ class MainActivity : ComponentActivity() {
         addOnNewIntentListener { intent -> handleIntent(intent) }
 
         handleIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Belt-and-suspenders for the Android 12+ attach-intent quirk: if the activity is
+        // resumed while a USB device is already attached (e.g. process restart, returning
+        // from another app), the manifest-declared attach intent may have already fired
+        // before UsbRepository was constructed. Re-poll deviceList here so the UI reflects
+        // reality without requiring the user to physically replug.
+        usbRepository.refreshState()
     }
 
     @Composable
@@ -257,6 +270,11 @@ class MainActivity : ComponentActivity() {
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
                 Logger.d { "USB device attached" }
+                // Android 12+ delivers ACTION_USB_DEVICE_ATTACHED only to manifest-declared
+                // receivers, so the runtime-registered UsbBroadcastReceiver inside UsbRepository
+                // never sees this event. Forward it explicitly so the serialDevices StateFlow
+                // refreshes and the device shows up in the Connect → Serial tab.
+                usbRepository.refreshState()
                 showSettingsPage()
             }
 

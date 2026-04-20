@@ -129,7 +129,10 @@ private constructor(
                         // Ignore errors during port close
                     }
                     if (isActive) {
-                        onDeviceDisconnect(true)
+                        // Serial read loop ended unexpectedly (cable unplug, I/O error). Treat as
+                        // transient — the user did not explicitly disconnect, and the port may come
+                        // back when the device is replugged or the OS re-enumerates it.
+                        onDeviceDisconnect(waitForStopped = true, isPermanent = false)
                     }
                 }
             }
@@ -169,8 +172,10 @@ private constructor(
         private const val READ_TIMEOUT_MS = 100
 
         /**
-         * Creates and opens a [SerialTransport]. If the port cannot be opened, the transport signals a permanent
-         * disconnect to the [callback] and returns the (non-connected) instance.
+         * Creates and opens a [SerialTransport]. If the port cannot be opened, the transport signals a transient
+         * disconnect to the [callback] and returns the (non-connected) instance. The open failure is treated as
+         * non-permanent so higher-layer reconnect orchestration can retry (e.g. when the device is replugged or the
+         * user grants permission); only an explicit close should signal a permanent disconnect.
          */
         fun open(
             portName: String,
@@ -183,7 +188,7 @@ private constructor(
             if (!transport.startConnection()) {
                 val errorMessage = diagnoseOpenFailure(portName)
                 Logger.w { "[$portName] Serial port could not be opened; signalling disconnect. $errorMessage" }
-                callback.onDisconnect(isPermanent = true, errorMessage = errorMessage)
+                callback.onDisconnect(isPermanent = false, errorMessage = errorMessage)
             }
             return transport
         }

@@ -55,3 +55,4 @@ wireless-install.sh
 firebase-debug.log
 .agent_plans/
 .agent_refs/
+.agent_artifacts/
