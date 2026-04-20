@@ -63,7 +63,7 @@ class HandleNodeActionTest {
     @Test
     fun `remove action delegates to viewModel and does not navigate up immediately`() = runTest(testDispatcher) {
         val node = Node(num = 1234, user = User(id = "!1234"))
-        every { nodeManagementActions.requestRemoveNode(any(), any()) } returns Unit
+        every { nodeManagementActions.requestRemoveNode(any(), any(), any()) } returns Unit
         val viewModel = createViewModel()
         var navigateUpCalled = false
 
@@ -76,7 +76,7 @@ class HandleNodeActionTest {
             viewModel = viewModel,
         )
 
-        verify { nodeManagementActions.requestRemoveNode(any(), node) }
+        verify { nodeManagementActions.requestRemoveNode(any(), node, any()) }
         assertFalse(navigateUpCalled)
     }
 

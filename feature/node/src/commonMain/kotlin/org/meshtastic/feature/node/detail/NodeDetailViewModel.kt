@@ -89,9 +89,10 @@ class NodeDetailViewModel(
     }
 
     /** Dispatches high-level node management actions like removal, muting, or favoriting. */
-    fun handleNodeMenuAction(action: NodeMenuAction) {
+    fun handleNodeMenuAction(action: NodeMenuAction, onAfterRemove: () -> Unit = {}) {
         when (action) {
-            is NodeMenuAction.Remove -> nodeManagementActions.requestRemoveNode(viewModelScope, action.node)
+            is NodeMenuAction.Remove ->
+                nodeManagementActions.requestRemoveNode(viewModelScope, action.node, onAfterRemove)
             is NodeMenuAction.Ignore -> nodeManagementActions.requestIgnoreNode(viewModelScope, action.node)
             is NodeMenuAction.Mute -> nodeManagementActions.requestMuteNode(viewModelScope, action.node)
             is NodeMenuAction.Favorite -> nodeManagementActions.requestFavoriteNode(viewModelScope, action.node)
