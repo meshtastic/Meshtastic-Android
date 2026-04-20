@@ -26,10 +26,11 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Encapsulates the BLE reconnection policy with exponential backoff.
  *
- * The policy tracks consecutive failures and decides whether to retry, signal a transient disconnect (DeviceSleep), or
- * give up permanently.
+ * The policy tracks consecutive failures and decides whether to retry or signal a transient disconnect (DeviceSleep).
+ * When [maxFailures] is reached the [execute] loop invokes [execute]'s `onPermanentDisconnect` callback and returns;
+ * set [maxFailures] to [Int.MAX_VALUE] (as [BleRadioTransport] does) to disable the give-up path entirely.
  *
- * @param maxFailures maximum consecutive failures before giving up permanently
+ * @param maxFailures maximum consecutive failures before giving up; use [Int.MAX_VALUE] to retry indefinitely
  * @param failureThreshold after this many consecutive failures, signal a transient disconnect
  * @param settleDelay delay before each connection attempt to let the BLE stack settle
  * @param minStableConnection minimum time a connection must stay up to be considered "stable"
@@ -148,7 +149,18 @@ class BleReconnectPolicy(
     companion object {
         const val DEFAULT_MAX_FAILURES = 10
         const val DEFAULT_FAILURE_THRESHOLD = 3
-        val DEFAULT_SETTLE_DELAY = 1.seconds
+
+        /**
+         * Delay applied before every connection attempt (including the first) so the BLE stack and the firmware-side
+         * GATT session have time to settle.
+         *
+         * Empirically validated against the meshtastic-client KMP SDK probes (Apr 2026): with a 1.5 s pause between
+         * disconnect→reconnect cycles, 3/5–4/5 attempts failed mid-handshake (Stage1Draining timeouts) because the
+         * firmware had not yet released its GATT session from the previous cycle. With ≥ 5 s pause, success rate rose
+         * to 5/5 against a strong (-53 dBm) link. 3 s is a conservative compromise on Android, whose BLE stack is more
+         * mature than btleplug+CoreBluetooth, but the firmware-side cleanup constraint is the same.
+         */
+        val DEFAULT_SETTLE_DELAY = 3.seconds
         val DEFAULT_MIN_STABLE_CONNECTION = 5.seconds
 
         internal val RECONNECT_BASE_DELAY = 5.seconds

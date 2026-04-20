@@ -78,7 +78,11 @@ open class TcpRadioTransport(
         Logger.d { "[$address] Closing TCP transport" }
         closing = true
         transport.stop()
-        callback.onDisconnect(isPermanent = true)
+        // Do NOT emit onDisconnect(isPermanent = true) here. The explicit-disconnect signal is the
+        // service layer's responsibility (SharedRadioInterfaceService.stopTransportLocked); emitting
+        // it from close() caused a double-disconnect and prevented the auto-reconnect loop from
+        // owning its own lifecycle. The `closing` guard above suppresses the listener's transient
+        // disconnect during teardown.
     }
 
     override fun keepAlive() {

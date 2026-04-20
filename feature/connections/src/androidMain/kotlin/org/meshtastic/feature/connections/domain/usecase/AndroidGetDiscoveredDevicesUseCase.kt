@@ -60,7 +60,14 @@ class AndroidGetDiscoveredDevicesUseCase(
     override fun invoke(showMock: Boolean): Flow<DiscoveredDevices> {
         val nodeDb = nodeRepository.nodeDBbyNum
 
-        val bondedBleFlow = bluetoothRepository.state.map { ble -> ble.bondedDevices.map { DeviceListEntry.Ble(it) } }
+        // Filter out non-Meshtastic peripherals (headphones, cars, watches, etc.).
+        // BluetoothAdapter.bondedDevices returns every bonded device on the phone, so we
+        // must restrict the picker to entries whose advertised name matches the
+        // Meshtastic firmware pattern (see MeshtasticBleConstants.BLE_NAME_PATTERN).
+        val bondedBleFlow =
+            bluetoothRepository.state.map { ble ->
+                ble.bondedDevices.filter { it.getMeshtasticShortName() != null }.map { DeviceListEntry.Ble(it) }
+            }
 
         val processedTcpFlow =
             combine(networkRepository.resolvedList, recentAddressesDataSource.recentAddresses) {
