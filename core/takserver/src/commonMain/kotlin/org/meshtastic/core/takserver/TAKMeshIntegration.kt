@@ -142,7 +142,7 @@ class TAKMeshIntegration(
         // Strip non-essential elements before compression to save wire bytes
         val xml = stripNonEssentialElements(freshXml)
 
-        Logger.d { "RAW CoT OUT (mesh, ${cotMessage.type}): $rawXml" }
+        // Logger.d { "RAW CoT OUT (mesh, ${cotMessage.type}): $rawXml" }
 
         // Route through the SDK parser/compressor which handles all typed
         // payloads (DrawnShape, Marker, Route, Aircraft, etc.) with compact
@@ -239,7 +239,7 @@ class TAKMeshIntegration(
                 .replace("""<?xml version="1.0" encoding="UTF-8"?>""", "")
                 .replace(Regex("""\s*\n\s*"""), "")
                 .trim()
-            Logger.d { "RAW CoT IN (mesh): $xml" }
+            // Logger.d { "RAW CoT IN (mesh): $xml" }
             // Routes: ATAK ignores b-m-r CoT events over TCP streaming.
             // Convert to a KML data package and write to ATAK's auto-import dir.
             if (xml.contains("""type="b-m-r"""")) {
