@@ -22,6 +22,7 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -165,7 +166,7 @@ class BleRadioTransportTest {
         // Transient disconnects (isPermanent = false) are expected once the failure threshold is hit;
         // the policy must NEVER signal a permanent disconnect on its own. Only explicit close()
         // (verified separately by the service layer) may emit isPermanent = true.
-        verify(mode = dev.mokkery.verify.VerifyMode.not) {
+        verify(mode = VerifyMode.not) {
             service.onDisconnect(isPermanent = true, errorMessage = any())
         }
 

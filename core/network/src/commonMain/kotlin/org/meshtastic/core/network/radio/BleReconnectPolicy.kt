@@ -26,10 +26,11 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Encapsulates the BLE reconnection policy with exponential backoff.
  *
- * The policy tracks consecutive failures and decides whether to retry, signal a transient disconnect (DeviceSleep), or
- * give up permanently.
+ * The policy tracks consecutive failures and decides whether to retry or signal a transient disconnect (DeviceSleep).
+ * When [maxFailures] is reached the [execute] loop invokes [execute]'s `onPermanentDisconnect` callback and returns;
+ * set [maxFailures] to [Int.MAX_VALUE] (as [BleRadioTransport] does) to disable the give-up path entirely.
  *
- * @param maxFailures maximum consecutive failures before giving up permanently
+ * @param maxFailures maximum consecutive failures before giving up; use [Int.MAX_VALUE] to retry indefinitely
  * @param failureThreshold after this many consecutive failures, signal a transient disconnect
  * @param settleDelay delay before each connection attempt to let the BLE stack settle
  * @param minStableConnection minimum time a connection must stay up to be considered "stable"

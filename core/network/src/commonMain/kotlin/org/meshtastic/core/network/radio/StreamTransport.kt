@@ -41,7 +41,7 @@ abstract class StreamTransport(protected val callback: RadioTransportCallback, p
     }
 
     /**
-     * Notify the transport callback that our device has gone away, but wait for it to come back.
+     * Signals the transport callback that the device has disconnected and optionally waits for the transport to stop.
      *
      * @param waitForStopped if true we should wait for the transport to finish - must be false if called from inside
      *   transport callbacks
