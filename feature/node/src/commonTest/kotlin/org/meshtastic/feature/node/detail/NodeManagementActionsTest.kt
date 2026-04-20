@@ -30,6 +30,7 @@ import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.proto.User
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NodeManagementActionsTest {
@@ -68,5 +69,24 @@ class NodeManagementActionsTest {
                 choices = any(),
             )
         }
+    }
+
+    @Test
+    fun requestRemoveNode_invokes_onAfterRemove_when_user_confirms() {
+        val realAlertManager = AlertManager()
+        val actionsWithRealAlert =
+            NodeManagementActions(
+                nodeRepository = nodeRepository,
+                serviceRepository = serviceRepository,
+                radioController = radioController,
+                alertManager = realAlertManager,
+            )
+        val node = Node(num = 123, user = User(long_name = "Test Node"))
+        var afterRemoveCalled = false
+
+        actionsWithRealAlert.requestRemoveNode(testScope, node) { afterRemoveCalled = true }
+        realAlertManager.currentAlert.value?.onConfirm?.invoke()
+
+        assertTrue(afterRemoveCalled)
     }
 }

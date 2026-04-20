@@ -50,11 +50,14 @@ constructor(
     private val radioController: RadioController,
     private val alertManager: AlertManager,
 ) {
-    open fun requestRemoveNode(scope: CoroutineScope, node: Node) {
+    open fun requestRemoveNode(scope: CoroutineScope, node: Node, onAfterRemove: () -> Unit = {}) {
         alertManager.showAlert(
             titleRes = Res.string.remove,
             messageRes = Res.string.remove_node_text,
-            onConfirm = { removeNode(scope, node.num) },
+            onConfirm = {
+                removeNode(scope, node.num)
+                onAfterRemove()
+            },
         )
     }
 
