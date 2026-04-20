@@ -43,6 +43,7 @@
     <string name="unrecognized">Okänd</string>
     <string name="message_status_enroute">Inväntar kvittens</string>
     <string name="message_status_queued">Kvittens köad</string>
+    <string name="message_status_delivered">Levererad till nät</string>
     <string name="message_status_unknown">Okänd</string>
     <string name="routing_error_none">Kvitterad</string>
     <string name="routing_error_no_route">Ingen rutt</string>
@@ -370,6 +371,7 @@
     <string name="traceroute_duration">Varaktighet: %1$s s</string>
     <string name="traceroute_route_towards_dest">Rutt spårad mot destination:\n\n</string>
     <string name="traceroute_route_back_to_us">Rutten spårad tillbaka till oss:\n\n</string>
+    <string name="traceroute_no_response">Inget svar</string>
     <string name="one_hour_short">1h</string>
     <string name="twenty_four_hours">24T</string>
     <string name="one_week">1V</string>
