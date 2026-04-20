@@ -486,9 +486,16 @@
     <string name="frequency_slot">Честотен слот</string>
     <string name="ignore_mqtt">Игнориране на MQTT</string>
     <string name="mqtt_config">Конфигуриране на MQTT</string>
+    <string name="mqtt_status_inactive">Неактивен</string>
     <string name="mqtt_status_disconnected">Прекъсната връзка</string>
+    <string name="mqtt_status_connecting">Свързване…</string>
     <string name="mqtt_status_connected">Свързано</string>
+    <string name="mqtt_status_reconnecting">Повторно свързване…</string>
+    <string name="mqtt_status_reconnecting_with_attempt">Повторно свързване (опит %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Тестване на връзката</string>
+    <string name="mqtt_probe_success">Достъпен. Брокерът е приел идентификационните данни.</string>
+    <string name="mqtt_probe_success_with_info">Достъпен (%1$s)</string>
+    <string name="mqtt_probe_dns_failure">Хостът не е намерен</string>
     <string name="mqtt_probe_other_failure">Връзката е неуспешна</string>
     <string name="mqtt_enabled">MQTT е активиран</string>
     <string name="address">Адрес</string>
@@ -971,4 +978,5 @@
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Филтър</string>
     <string name="action_select_device">Изберете устройство</string>
+    <string name="action_select_network">Изберете мрежа</string>
 </resources>
