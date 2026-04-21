@@ -67,8 +67,16 @@ class AndroidPhoneLocationProvider(private val context: Context, private val dis
         val listener =
             object : LocationListenerCompat {
                 override fun onLocationChanged(location: Location) {
-                    lastLocation = location
-                    sendUpdate()
+                    // Subscribing to both GPS and NETWORK providers means coarse Wi-Fi/cell fixes
+                    // would otherwise overwrite a fresh, accurate GPS fix on every callback,
+                    // making the compass distance/bearing jitter between two positions
+                    // (see issue #4864). Apply the canonical isBetterLocation filter so we
+                    // prefer the most accurate, recent fix and fall back to network only
+                    // when no usable GPS fix is available.
+                    if (isBetterLocation(location, lastLocation)) {
+                        lastLocation = location
+                        sendUpdate()
+                    }
                 }
 
                 override fun onProviderEnabled(provider: String) = sendUpdate()
@@ -88,7 +96,9 @@ class AndroidPhoneLocationProvider(private val context: Context, private val dis
             lastLocation =
                 providers
                     .mapNotNull { provider -> locationManager.getLastKnownLocation(provider) }
-                    .maxByOrNull { it.time }
+                    .reduceOrNull { best, candidate ->
+                        if (isBetterLocation(candidate, best)) candidate else best
+                    }
 
             sendUpdate()
 
@@ -124,5 +134,41 @@ class AndroidPhoneLocationProvider(private val context: Context, private val dis
 
     companion object {
         private const val MIN_UPDATE_INTERVAL_MS = 1_000L
+        private const val SIGNIFICANTLY_NEWER_MS = 2 * 60 * 1000L
+        private const val SIGNIFICANTLY_LESS_ACCURATE_M = 200f
+
+        /**
+         * Canonical Android "is this fix better than the last one?" comparison (adapted from the framework's
+         * LocationListener guide). Without this, subscribing to GPS_PROVIDER and NETWORK_PROVIDER simultaneously causes
+         * coarse Wi-Fi/cell fixes to overwrite recent fine GPS fixes, making the compass distance and bearing jump
+         * between two positions (issue #4864).
+         */
+        @Suppress("ReturnCount")
+        internal fun isBetterLocation(candidate: Location, current: Location?): Boolean {
+            if (current == null) return true
+
+            val timeDelta = candidate.time - current.time
+            val isSignificantlyNewer = timeDelta > SIGNIFICANTLY_NEWER_MS
+            val isSignificantlyOlder = timeDelta < -SIGNIFICANTLY_NEWER_MS
+            val isNewer = timeDelta > 0
+
+            // A much newer fix is always preferred even if accuracy is worse — the device
+            // has likely moved, so a stale "accurate" fix is worse than a fresh coarse one.
+            if (isSignificantlyNewer) return true
+            if (isSignificantlyOlder) return false
+
+            val accuracyDelta = candidate.accuracy - current.accuracy
+            val isMoreAccurate = accuracyDelta < 0f
+            val isLessAccurate = accuracyDelta > 0f
+            val isSignificantlyLessAccurate = accuracyDelta > SIGNIFICANTLY_LESS_ACCURATE_M
+            val isFromSameProvider = candidate.provider == current.provider
+
+            return when {
+                isMoreAccurate -> true
+                isNewer && !isLessAccurate -> true
+                isNewer && !isSignificantlyLessAccurate && isFromSameProvider -> true
+                else -> false
+            }
+        }
     }
 }
