@@ -2,7 +2,7 @@
 xmlutil = "0.91.3"
 
 # Android
-agp = "9.2.0-rc01"
+agp = "9.2.0"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
