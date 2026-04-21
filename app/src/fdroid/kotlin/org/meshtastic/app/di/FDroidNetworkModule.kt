@@ -25,12 +25,18 @@ import org.meshtastic.core.network.service.ApiService
 @Module
 class FDroidNetworkModule {
 
+    /**
+     * F-Droid builds intentionally avoid network calls to the Meshtastic API.
+     *
+     * We throw [UnsupportedOperationException] (an [Exception], not an [Error]) so that `safeCatching {}` in the
+     * repositories captures the failure and falls back to the bundled JSON assets instead of crashing the app.
+     */
     @Single
     fun provideApiService(): ApiService = object : ApiService {
         override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> =
-            throw NotImplementedError("API calls to getDeviceHardware are not supported on Fdroid builds.")
+            throw UnsupportedOperationException("getDeviceHardware is not supported on F-Droid builds.")
 
         override suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
-            throw NotImplementedError("API calls to getFirmwareReleases are not supported on Fdroid builds.")
+            throw UnsupportedOperationException("getFirmwareReleases is not supported on F-Droid builds.")
     }
 }
