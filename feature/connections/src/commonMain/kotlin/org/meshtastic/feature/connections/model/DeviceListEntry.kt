@@ -34,6 +34,14 @@ sealed class DeviceListEntry(
     val address: String
         get() = fullAddress.substring(1)
 
+    /**
+     * The string shown as the device row's second line. Defaults to [address] (the stable id used as the DB key and
+     * registry key); subclasses may override to show a more user-meaningful port/host string (e.g.
+     * `/dev/bus/usb/001/002` for USB) while [address] remains the stable key internally.
+     */
+    open val displayAddress: String
+        get() = address
+
     abstract fun copy(node: Node?): DeviceListEntry
 
     override fun toString(): String =
@@ -58,9 +66,19 @@ sealed class DeviceListEntry(
         override val fullAddress: String,
         override val bonded: Boolean,
         override val node: Node? = null,
+        val portPath: String? = null,
     ) : DeviceListEntry(name = name, fullAddress = fullAddress, bonded = bonded, node = node) {
-        override fun copy(node: Node?): Usb =
-            copy(usbData = usbData, name = name, fullAddress = fullAddress, bonded = bonded, node = node)
+        override val displayAddress: String
+            get() = portPath ?: address
+
+        override fun copy(node: Node?): Usb = copy(
+            usbData = usbData,
+            name = name,
+            fullAddress = fullAddress,
+            bonded = bonded,
+            node = node,
+            portPath = portPath,
+        )
     }
 
     data class Tcp(override val name: String, override val fullAddress: String, override val node: Node? = null) :

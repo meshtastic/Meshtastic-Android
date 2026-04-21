@@ -146,7 +146,7 @@ fun DeviceListItem(
                 tint = iconTint,
             )
         },
-        supportingContent = { Text(text = device.address, style = MaterialTheme.typography.bodyLarge) },
+        supportingContent = { Text(text = device.displayAddress, style = MaterialTheme.typography.bodyLarge) },
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (rssi != null) {

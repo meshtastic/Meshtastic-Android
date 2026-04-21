@@ -50,11 +50,23 @@ class UsbRepository(
 ) {
     private val _serialDevices = MutableStateFlow(emptyMap<String, UsbDevice>())
 
+    /**
+     * Drivers keyed by [stableUsbId] (`VID:PID:SERIAL` or `VID:PID` fallback) so that the identity persists across
+     * replug/reboot. Downstream consumers (transport factories, discovery use case) resolve drivers through this map
+     * and therefore inherit a stable device address.
+     */
     val serialDevices =
         _serialDevices
             .mapLatest { serialDevices ->
                 val serialProber = usbSerialProberLazy.value
-                buildMap { serialDevices.forEach { (k, v) -> serialProber.probeDevice(v)?.let { put(k, it) } } }
+                buildMap {
+                    serialDevices.values.forEach { device ->
+                        serialProber.probeDevice(device)?.let { driver ->
+                            // Last writer wins if two identical boards present without serial numbers.
+                            put(driver.device.stableUsbId(), driver)
+                        }
+                    }
+                }
             }
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 

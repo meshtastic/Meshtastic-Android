@@ -85,6 +85,7 @@ class AndroidGetDiscoveredDevicesUseCase(
                             d.device.deviceName,
                         ),
                         bonded = usbManagerLazy.value.hasPermission(d.device),
+                        portPath = d.device.deviceName,
                     )
                 }
             }
