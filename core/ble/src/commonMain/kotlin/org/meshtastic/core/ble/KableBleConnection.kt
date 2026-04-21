@@ -91,9 +91,9 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
  */
 class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
-    private var peripheral: Peripheral? = null
-    private var stateJob: Job? = null
-    private var connectionScope: CoroutineScope? = null
+    @Volatile private var peripheral: Peripheral? = null
+    @Volatile private var stateJob: Job? = null
+    @Volatile private var connectionScope: CoroutineScope? = null
 
     companion object {
         /** Settle delay between a direct connect failure and the autoConnect fallback attempt. */
