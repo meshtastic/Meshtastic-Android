@@ -205,6 +205,7 @@ fun EditTextPreference(
     onFocusChanged: (FocusState) -> Unit = {},
     trailingIcon: (@Composable () -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    multiline: Boolean = false,
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -212,7 +213,8 @@ fun EditTextPreference(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().onFocusEvent { onFocusChanged(it) },
             value = value,
-            singleLine = true,
+            singleLine = !multiline,
+            maxLines = if (multiline) 5 else 1,
             enabled = enabled,
             isError = isError,
             onValueChange = {
