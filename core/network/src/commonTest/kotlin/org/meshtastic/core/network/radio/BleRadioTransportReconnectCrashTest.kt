@@ -27,7 +27,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleConnection
@@ -61,7 +60,6 @@ import kotlin.time.Duration
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleRadioTransportReconnectCrashTest {
 
-    private val testScope = TestScope()
     private val scanner = FakeBleScanner()
     private val bluetoothRepository = FakeBluetoothRepository()
     private val connection = FakeBleConnection()

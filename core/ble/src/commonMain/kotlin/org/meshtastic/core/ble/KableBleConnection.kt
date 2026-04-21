@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
