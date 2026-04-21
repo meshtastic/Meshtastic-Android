@@ -90,7 +90,7 @@ fun SettingsScreen(
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
-    var showEditDeviceProfileDialog by rememberSaveable { mutableStateOf(false) }
+    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
     val importConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
