@@ -350,6 +350,13 @@ class BleRadioTransport(
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
 
+                // Ask the platform for a low-latency / high-throughput connection interval
+                // (~7.5 ms on Android). The Meshtastic firmware happily accepts this and it
+                // materially speeds up the initial config drain and any bulk fromRadio reads.
+                if (bleConnection.requestHighConnectionPriority()) {
+                    Logger.d { "[$address] Requested high BLE connection priority" }
+                }
+
                 this@BleRadioTransport.callback.onConnect()
             }
         } catch (e: CancellationException) {

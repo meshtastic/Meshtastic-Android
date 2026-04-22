@@ -24,9 +24,9 @@ import dev.mokkery.mock
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleConnection
@@ -237,19 +237,19 @@ class BleRadioTransportReconnectCrashTest {
  */
 private class CancellingProfileBleConnection : BleConnection {
 
-    private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
-    override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
+    private val _deviceFlow = MutableStateFlow<BleDevice?>(null)
+    override val deviceFlow: StateFlow<BleDevice?> = _deviceFlow.asStateFlow()
 
-    private val _connectionState = MutableSharedFlow<BleConnectionState>(replay = 1)
-    override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
+    private val _connectionState = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
+    override val connectionState: StateFlow<BleConnectionState> = _connectionState.asStateFlow()
 
     override val device: BleDevice? = null
 
     var disconnectCalls = 0
 
     override suspend fun connect(device: BleDevice) {
-        _deviceFlow.emit(device)
-        _connectionState.emit(BleConnectionState.Connected)
+        _deviceFlow.value = device
+        _connectionState.value = BleConnectionState.Connected
     }
 
     override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState {
@@ -259,8 +259,8 @@ private class CancellingProfileBleConnection : BleConnection {
 
     override suspend fun disconnect() {
         disconnectCalls++
-        _connectionState.emit(BleConnectionState.Disconnected())
-        _deviceFlow.emit(null)
+        _connectionState.value = BleConnectionState.Disconnected()
+        _deviceFlow.value = null
     }
 
     override suspend fun <T> profile(
