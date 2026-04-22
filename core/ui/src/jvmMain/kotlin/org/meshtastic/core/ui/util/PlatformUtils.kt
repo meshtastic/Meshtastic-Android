@@ -140,6 +140,9 @@ actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied
     onGranted()
 }
 
+/** JVM — local network permission is always considered granted on Desktop. */
+@Composable actual fun isLocalNetworkPermissionGranted(): Boolean = true
+
 /** JVM no-op — Desktop does not require runtime notification permissions. */
 @Composable
 actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {

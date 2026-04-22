@@ -272,6 +272,21 @@ actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied
 }
 
 @Composable
+actual fun isLocalNetworkPermissionGranted(): Boolean {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // Pre-Android 12, no runtime local-network permission exists; access is implicit via INTERNET.
+        return true
+    }
+    val context = LocalContext.current
+    return rememberOnResumeState {
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_LOCAL_NETWORK,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+}
+
+@Composable
 actual fun isLocationPermissionGranted(): Boolean {
     val context = LocalContext.current
     return rememberOnResumeState {

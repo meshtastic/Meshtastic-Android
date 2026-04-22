@@ -71,6 +71,12 @@ expect fun rememberSaveFileLauncher(
 @Composable
 expect fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
 
+/**
+ * Returns whether ACCESS_LOCAL_NETWORK is currently granted. Always `true` on platforms / API levels that don't gate
+ * local-network access behind a runtime permission.
+ */
+@Composable expect fun isLocalNetworkPermissionGranted(): Boolean
+
 /** Returns a launcher to request the POST_NOTIFICATIONS permission. No-op on platforms that don't require it. */
 @Composable
 expect fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
