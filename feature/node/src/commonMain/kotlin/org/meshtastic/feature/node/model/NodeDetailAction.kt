@@ -29,6 +29,12 @@ sealed interface NodeDetailAction {
 
     data class HandleNodeMenuAction(val action: NodeMenuAction) : NodeDetailAction
 
+    /** Open the remote-administration screen, ensuring a fresh session passkey first. */
+    data class OpenRemoteAdmin(val nodeNum: Int) : NodeDetailAction
+
+    /** Force-refresh device metadata (firmware version, edition, role) for the given node. */
+    data class RefreshMetadata(val nodeNum: Int) : NodeDetailAction
+
     data object ShareContact : NodeDetailAction
 
     // Opens the compass sheet scoped to a target node and the user’s preferred units.

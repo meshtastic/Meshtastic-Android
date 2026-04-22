@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import okio.ByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
@@ -55,6 +54,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
@@ -80,6 +80,7 @@ class MeshConnectionManagerImpl(
     private val historyManager: HistoryManager,
     private val radioConfigRepository: RadioConfigRepository,
     private val commandSender: CommandSender,
+    private val sessionManager: SessionManager,
     private val nodeManager: NodeManager,
     private val analytics: PlatformAnalytics,
     private val packetRepository: PacketRepository,
@@ -237,7 +238,7 @@ class MeshConnectionManagerImpl(
 
     private fun tearDownConnection() {
         packetHandler.stopPacketQueue()
-        commandSender.setSessionPasskey(ByteString.EMPTY) // Prevent stale passkey on reconnect.
+        sessionManager.clearAll() // Prevent stale per-node passkeys on reconnect.
         locationManager.stop()
         mqttManager.stop()
     }

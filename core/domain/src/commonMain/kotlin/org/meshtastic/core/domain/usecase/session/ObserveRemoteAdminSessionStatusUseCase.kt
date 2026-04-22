@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,19 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.data.di
+package org.meshtastic.core.domain.usecase.session
 
-import org.koin.core.annotation.ComponentScan
-import org.koin.core.annotation.Module
+import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
-import org.meshtastic.core.model.util.MeshDataMapper
-import org.meshtastic.core.model.util.NodeIdLookup
-import kotlin.time.Clock
+import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.repository.SessionManager
 
-@Module
-@ComponentScan("org.meshtastic.core.data")
-class CoreDataModule {
-    @Single fun provideMeshDataMapper(nodeIdLookup: NodeIdLookup): MeshDataMapper = MeshDataMapper(nodeIdLookup)
-
-    @Single fun provideClock(): Clock = Clock.System
+/**
+ * Thin wrapper that exposes the durable per-node [SessionStatus] flow to UI consumers without leaking the
+ * [SessionManager] into ViewModels.
+ */
+@Single
+open class ObserveRemoteAdminSessionStatusUseCase(private val sessionManager: SessionManager) {
+    open operator fun invoke(destNum: Int): Flow<SessionStatus> = sessionManager.observeSessionStatus(destNum)
 }
