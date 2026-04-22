@@ -173,6 +173,7 @@
     <string name="no_network_devices_found">Nici un dispozitiv de rețea găsit</string>
     <string name="no_usb_devices_found">Niciun dispozitiv USB găsit</string>
     <string name="usb">USB</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Mod demonstrativ</string>
     <string name="connected_sleeping">Connectat la dispozitivi, dar e în modul de sleep</string>
     <string name="app_too_old">Aplicație prea veche</string>
@@ -758,6 +759,7 @@
     <string name="request_host_metrics">Valori Gazdă</string>
     <string name="request_pax_metrics">Valori Pax</string>
     <string name="request_metadata">Metadate</string>
+    <string name="retry">Reîncercați</string>
     <string name="actions">Acţiuni</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Utilizaţi formatul ceasului 12h</string>
@@ -865,6 +867,8 @@
     <string name="firmware_edition">Ediţie firmware</string>
     <string name="recent_network_devices">Dispozitive recente de rețea</string>
     <string name="discovered_network_devices">Dispozitive ale rețelei descoperite</string>
+    <string name="scanning_network">Scanare…</string>
+    <string name="scanning_bluetooth">Scanare…</string>
     <string name="bluetooth_available_devices">Dispozitive bluetooth disponibile</string>
     <string name="get_started">Să începem</string>
     <string name="intro_welcome">Bine ai venit la</string>

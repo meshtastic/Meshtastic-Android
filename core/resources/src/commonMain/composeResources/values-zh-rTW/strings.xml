@@ -176,6 +176,8 @@
     <string name="no_network_devices_found">找不到網路裝置</string>
     <string name="no_usb_devices_found">找不到 USB 裝置</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">低功耗藍牙</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">展示模式</string>
     <string name="connected_sleeping">已連接裝置，但該裝置正在休眠中</string>
     <string name="app_too_old">需要應用程式更新</string>

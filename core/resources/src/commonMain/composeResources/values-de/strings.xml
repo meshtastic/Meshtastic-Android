@@ -176,6 +176,9 @@
     <string name="no_network_devices_found">Keine Netzwerkgeräte gefunden</string>
     <string name="no_usb_devices_found">Kein USB-Gerät gefunden.</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">BLE</string>
+    <string name="transport_tcp">TCP</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Demo Modus</string>
     <string name="connected_sleeping">Mit Funkgerät verbunden, aber es ist im Schlafmodus</string>
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
