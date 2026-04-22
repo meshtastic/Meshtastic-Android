@@ -87,6 +87,9 @@ internal object NymeaBleConstants {
 
     /** Trigger a fresh WiFi scan. */
     const val CMD_SCAN = 4
+
+    /** Request current connection details (includes IP address if connected). */
+    const val CMD_GET_CONNECTION = 5
     // endregion
 
     // region Response error codes
