@@ -93,6 +93,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
     @Volatile private var peripheral: Peripheral? = null
 
+    @Volatile private var peripheralAddress: String? = null
+
     @Volatile private var stateJob: Job? = null
 
     @Volatile private var connectionScope: CoroutineScope? = null
@@ -126,39 +128,61 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
             platformConfig(device) { autoConnect }
         }
 
-        val p =
-            meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
-                ?: createPeripheral(device.address) { commonConfig() }
+        // Reuse the existing peripheral when reconnecting to the same address and the caller
+        // didn't supply a fresh advertisement. Avoids tearing down Kable's GATT state +
+        // per-peripheral scope between firmware-drop reconnect cycles, which is the common
+        // path. A fresh advertisement (BLE scan result) always wins because it carries
+        // timing/RSSI hints that improve the next connect attempt.
+        val existing = peripheral
+        val canReuse =
+            existing != null &&
+                meshtasticDevice.advertisement == null &&
+                peripheralAddress.equals(device.address, ignoreCase = true)
 
-        // Install ownership of the new peripheral atomically. Cancellation between
-        // peripheral construction and field assignment would strand `p` (Kable allocates
-        // a per-peripheral scope + Bluetooth-state observer eagerly), so the cleanup,
-        // assignment, and ActiveBleConnection update must complete as a single unit.
-        // _deviceFlow.emit() is intentionally outside this block — making it
-        // non-cancellable could hang teardown on a slow collector.
-        withContext(NonCancellable) {
-            cleanUpPeripheral(device.address)
-            peripheral = p
-            ActiveBleConnection.active = ActiveConnection(p, device.address)
+        val p =
+            if (canReuse) {
+                Logger.d { "[${device.address}] Reusing existing peripheral for reconnect" }
+                existing!!
+            } else {
+                meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
+                    ?: createPeripheral(device.address) { commonConfig() }
+            }
+
+        if (!canReuse) {
+            // Install ownership of the new peripheral atomically. Cancellation between
+            // peripheral construction and field assignment would strand `p` (Kable allocates
+            // a per-peripheral scope + Bluetooth-state observer eagerly), so the cleanup,
+            // assignment, and ActiveBleConnection update must complete as a single unit.
+            // _deviceFlow.emit() is intentionally outside this block — making it
+            // non-cancellable could hang teardown on a slow collector.
+            withContext(NonCancellable) {
+                cleanUpPeripheral(device.address)
+                peripheral = p
+                peripheralAddress = device.address
+                ActiveBleConnection.active = ActiveConnection(p, device.address)
+            }
         }
 
         _deviceFlow.emit(device)
 
-        stateJob?.cancel()
-        var hasStartedConnecting = false
-        stateJob =
-            p.state
-                .onEach { kableState ->
-                    val mappedState = kableState.toBleConnectionState(hasStartedConnecting) ?: return@onEach
-                    if (kableState is State.Connecting || kableState is State.Connected) {
-                        hasStartedConnecting = true
+        if (!canReuse || stateJob?.isActive != true) {
+            stateJob?.cancel()
+            // Capture in a local so the lambda mutation doesn't race with field reads.
+            var hasStartedConnecting = false
+            stateJob =
+                p.state
+                    .onEach { kableState ->
+                        val mappedState = kableState.toBleConnectionState(hasStartedConnecting) ?: return@onEach
+                        if (kableState is State.Connecting || kableState is State.Connected) {
+                            hasStartedConnecting = true
+                        }
+
+                        meshtasticDevice.updateState(mappedState)
+
+                        _connectionState.emit(mappedState)
                     }
-
-                    meshtasticDevice.updateState(mappedState)
-
-                    _connectionState.emit(mappedState)
-                }
-                .launchIn(scope)
+                    .launchIn(scope)
+        }
 
         while (p.state.value !is State.Connected) {
             autoConnect =
@@ -220,6 +244,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         val owned = peripheral
         safeClosePeripheral("disconnect")
         peripheral = null
+        peripheralAddress = null
         connectionScope = null
 
         if (owned != null && ActiveBleConnection.active?.peripheral === owned) {
