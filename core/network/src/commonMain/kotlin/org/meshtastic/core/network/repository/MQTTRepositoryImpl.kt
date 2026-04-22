@@ -225,9 +225,8 @@ class MQTTRepositoryImpl(
  * Address resolution rules:
  * - If [rawAddress] already contains a URI scheme (`scheme://…`), parse it directly via [MqttEndpoint.parse] and
  *   respect whatever transport / port the user encoded.
- * - Otherwise wrap it as a WebSocket endpoint (`ws[s]://host${WEBSOCKET_PATH}`) so the proxy works over CDNs and
- *   firewall-restricted networks where raw 1883/8883 may be blocked. The scheme is `wss` when [tlsEnabled] is `true`,
- *   `ws` otherwise.
+ * - Otherwise wrap it as a TCP endpoint using standard MQTT ports: port 8883 if [tlsEnabled] is `true`,
+ *   port 1883 otherwise. This allows standard MQTT brokers to work out of the box.
  *
  * Extracted as a top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up the full
  * repository, and so `MqttManagerImpl` (in `:core:data`) can reuse the same parsing rules for the probe API. Visibility
@@ -236,8 +235,7 @@ class MQTTRepositoryImpl(
 fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if (rawAddress.contains("://")) {
     MqttEndpoint.parse(rawAddress)
 } else {
-    val scheme = if (tlsEnabled) "wss" else "ws"
-    MqttEndpoint.parse("$scheme://$rawAddress$WEBSOCKET_PATH")
+    val port = if (tlsEnabled) 8883 else 1883
+    val scheme = if (tlsEnabled) "ssl" else "tcp"
+    MqttEndpoint.parse("$scheme://$rawAddress:$port")
 }
-
-private const val WEBSOCKET_PATH = "/mqtt"
