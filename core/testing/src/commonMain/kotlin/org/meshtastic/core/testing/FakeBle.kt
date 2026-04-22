@@ -34,6 +34,7 @@ import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.BluetoothState
+import org.meshtastic.core.ble.DisconnectReason
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
@@ -106,6 +107,14 @@ class FakeBleConnection :
     /** Number of times [disconnect] has been invoked. */
     var disconnectCalls: Int = 0
 
+    /** Number of times [connectAndAwait] has been invoked (including failures). */
+    var connectAndAwaitCalls: Int = 0
+
+    /** Externally simulate a remote disconnect (e.g. node power-cycle) for tests that exercise reconnect. */
+    fun simulateRemoteDisconnect(reason: DisconnectReason = DisconnectReason.Timeout) {
+        _connectionState.value = BleConnectionState.Disconnected(reason)
+    }
+
     /** Service UUIDs that should appear missing — `profile()` throws `NoSuchElementException` for these. */
     val missingServices: MutableSet<Uuid> = mutableSetOf()
 
@@ -124,6 +133,7 @@ class FakeBleConnection :
     }
 
     override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState {
+        connectAndAwaitCalls++
         connectException?.let { throw it }
         if (failNextN > 0) {
             failNextN--

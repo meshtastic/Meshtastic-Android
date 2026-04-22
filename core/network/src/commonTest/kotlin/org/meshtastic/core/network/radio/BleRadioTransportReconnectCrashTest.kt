@@ -35,6 +35,7 @@ import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.ble.DisconnectReason
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -226,6 +227,63 @@ class BleRadioTransportReconnectCrashTest {
             throwingConnection.disconnectCalls >= 1,
             "disconnect() must be called after CancellationException in profile() — GATT leak fix",
         )
+    }
+
+    // ─── Reconnect after a stable connection drops ───────────────────────────────────────────────
+
+    /**
+     * Regression test for the BLE reconnect hang.
+     *
+     * Symptom: after a stable connection (uptime > minStableConnection) was terminated by a remote disconnect (e.g.
+     * node power-cycle), the transport's reconnect loop never iterated — `attemptConnection` ran exactly once, the GATT
+     * disconnect callback fired, and then nothing.
+     *
+     * Root cause: `attemptConnection` wrapped its disconnect-watcher in a `coroutineScope {
+     * connectionState.onEach{...}.launchIn(this); connectionState.first { Disconnected } }` block. `coroutineScope`
+     * waits for ALL launched children before returning, but the `.launchIn` collector on a hot `StateFlow` (or
+     * `SharedFlow(replay=1)`) never completes naturally. After `.first` returned, the scope hung forever, blocking
+     * `BleReconnectPolicy.execute` from issuing the next attempt.
+     *
+     * This test exercises the full happy-path reconnect cycle: connect → stable uptime → external disconnect → expect a
+     * second `connectAndAwait` call. With the bug present, only one `connectAndAwait` call ever happens.
+     */
+    @Test
+    fun `transport reconnects after a stable connection is dropped remotely`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Radio")
+        bluetoothRepository.bond(device)
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+
+        // Settle delay (3 s) + connect + handshake.
+        advanceTimeBy(4_000L)
+        assertTrue(connection.connectAndAwaitCalls == 1, "First connect must happen during initial start window")
+
+        // Stay connected long enough to be considered stable (> minStableConnection = 5 s).
+        advanceTimeBy(10_000L)
+
+        // Simulate the firmware dying mid-session — the same path a node power-cycle takes.
+        connection.simulateRemoteDisconnect(reason = DisconnectReason.Timeout)
+
+        // Settle delay (3 s) before the next attempt + re-connect window. Generous to absorb
+        // the policy retry backoff (5 s on first failure) plus another 3 s settle delay.
+        advanceTimeBy(30_000L)
+
+        assertTrue(
+            connection.connectAndAwaitCalls >= 2,
+            "Reconnect loop must call connectAndAwait again after a remote disconnect " +
+                "(actual calls: ${connection.connectAndAwaitCalls})",
+        )
+
+        bleTransport.close()
     }
 }
 

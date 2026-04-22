@@ -26,9 +26,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -258,24 +258,25 @@ class BleRadioTransport(
         isFullyConnected = true
         onConnected()
 
-        // Scope the connectionState listener to this iteration so it's
-        // cancelled automatically before the next reconnect cycle.
-        var disconnectReason: DisconnectReason = DisconnectReason.Unknown
-        coroutineScope {
-            bleConnection.connectionState
-                .onEach { s ->
-                    if (s is BleConnectionState.Disconnected && isFullyConnected) {
-                        isFullyConnected = false
-                        disconnectReason = s.reason
-                        onDisconnected()
-                    }
-                }
-                .catch { e -> Logger.w(e) { "[$address] bleConnection.connectionState flow crashed" } }
-                .launchIn(this)
+        discoverServicesAndSetupCharacteristics()
 
-            discoverServicesAndSetupCharacteristics()
+        // Wait for the StateFlow to actually reflect Connected before watching for the next
+        // Disconnected. connectAndAwait returns synchronously based on the underlying Kable
+        // peripheral state, but our _connectionState observer runs on a separate coroutine and
+        // may lag. Without this gate the next .first { Disconnected } below could match the
+        // *previous* cycle's stale Disconnected value and fire immediately, breaking reconnect.
+        bleConnection.connectionState.first { it is BleConnectionState.Connected }
 
-            bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+        // Suspend until the next Disconnected emission. We deliberately do NOT wrap this in a
+        // coroutineScope { launchIn(...); first(...) } pattern: launching a hot StateFlow
+        // collector inside coroutineScope hangs the scope after .first returns (the launched
+        // collector never completes naturally, and coroutineScope waits for all children).
+        val disconnectedState =
+            bleConnection.connectionState.filterIsInstance<BleConnectionState.Disconnected>().first()
+        val disconnectReason = disconnectedState.reason
+        if (isFullyConnected) {
+            isFullyConnected = false
+            onDisconnected()
         }
 
         Logger.i { "[$address] BLE connection dropped (reason: $disconnectReason), preparing to reconnect" }
