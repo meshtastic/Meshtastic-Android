@@ -344,19 +344,18 @@ class BleRadioTransport(
 
                 this@BleRadioTransport.callback.onConnect()
             }
-        } catch (e: Exception) {
-            if (e is CancellationException) {
-                // Scope was cancelled externally — still ensure GATT cleanup runs so we don't
-                // leak a BluetoothGatt handle and trigger GATT status 133 on the next attempt.
-                withContext(NonCancellable) {
-                    try {
-                        bleConnection.disconnect()
-                    } catch (ignored: Exception) {
-                        Logger.w(ignored) { "[$address] disconnect() failed during cancellation cleanup" }
-                    }
+        } catch (e: CancellationException) {
+            // Scope was cancelled externally — still ensure GATT cleanup runs so we don't
+            // leak a BluetoothGatt handle and trigger GATT status 133 on the next attempt.
+            withContext(NonCancellable) {
+                try {
+                    bleConnection.disconnect()
+                } catch (ignored: Exception) {
+                    Logger.w(ignored) { "[$address] disconnect() failed during cancellation cleanup" }
                 }
-                throw e
             }
+            throw e
+        } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
             // Disconnect to let the outer reconnect loop see a clean Disconnected state.
             // Do NOT call handleFailure here — the reconnect loop owns failure counting.
