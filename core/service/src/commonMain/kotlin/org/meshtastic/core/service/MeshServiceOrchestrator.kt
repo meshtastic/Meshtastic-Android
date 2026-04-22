@@ -24,6 +24,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
@@ -148,6 +149,14 @@ class MeshServiceOrchestrator(
         // Guard stop() so we don't emit a spurious "stopped" log when TAK was never started
         if (takServerManager.isRunning.value) {
             takMeshIntegration.stop()
+        }
+        // Best-effort polite goodbye on service teardown (onDestroy / process shutdown). We launch
+        // on a fresh detached scope — not the orchestrator's per-start scope — so the subsequent
+        // scope.cancel() below doesn't interrupt the short drain delay inside disconnect(). The
+        // coroutine is fire-and-forget; typical runtime is ~100-150ms which comfortably fits
+        // inside Android's onDestroy() grace window.
+        CoroutineScope(SupervisorJob() + dispatchers.default).launch {
+            runCatching { radioInterfaceService.disconnect() }
         }
         scope?.cancel()
         scope = null

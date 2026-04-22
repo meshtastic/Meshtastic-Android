@@ -95,6 +95,13 @@ interface RadioInterfaceService : RadioTransportCallback {
     /** Initiates the connection to the radio. */
     fun connect()
 
+    /**
+     * Explicitly tears down the active transport, sending a polite `ToRadio(disconnect = true)` goodbye frame first
+     * when a transport is live. Safe to call when nothing is connected — implementations must no-op in that case.
+     * Suspends until the teardown completes.
+     */
+    suspend fun disconnect()
+
     /** Returns the current device address. */
     fun getDeviceAddress(): String?
 
