@@ -15,7 +15,7 @@ navigation3 = "1.1.0"
 paging = "3.4.2"
 room = "3.0.0-alpha03"
 koin = "4.2.1"
-koin-plugin = "1.0.0-RC1"
+koin-plugin = "1.0.0-RC2"
 
 # Kotlin
 kotlin = "2.3.21-RC2"
