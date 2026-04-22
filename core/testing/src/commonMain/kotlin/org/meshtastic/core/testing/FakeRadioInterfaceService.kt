@@ -75,6 +75,10 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
         connectCalled = true
     }
 
+    override suspend fun disconnect() {
+        connectCalled = false
+    }
+
     override fun getDeviceAddress(): String? = _currentDeviceAddressFlow.value
 
     override fun setDeviceAddress(deviceAddr: String?): Boolean {
