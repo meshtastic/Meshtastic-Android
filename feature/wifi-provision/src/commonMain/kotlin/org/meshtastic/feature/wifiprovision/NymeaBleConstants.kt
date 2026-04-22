@@ -70,6 +70,9 @@ internal object NymeaBleConstants {
     /** Maximum time to wait for a command response. */
     val RESPONSE_TIMEOUT = 15.seconds
 
+    /** Timeout for optional GetConnection metadata lookup after a successful connect command. */
+    val CONNECTION_INFO_TIMEOUT = 2.seconds
+
     /** Settle time after subscribing to notifications before sending commands. */
     val SUBSCRIPTION_SETTLE = 300.milliseconds
     // endregion
