@@ -1306,6 +1306,17 @@
     <string name="wifi_provision_ssid_placeholder">Enter or select a network</string>
     <string name="wifi_provision_status_applied">WiFi configured successfully!</string>
     <string name="wifi_provision_status_failed">Failed to apply WiFi configuration</string>
+    <string name="wifi_provision_success_device_connected">Device Connected</string>
+    <string name="wifi_provision_success_description">Your mPWRD-OS device has joined the Wi-Fi network.</string>
+    <string name="wifi_provision_success_ip_address">IP Address</string>
+    <string name="wifi_provision_success_setup_title">Complete Device Setup</string>
+    <string name="wifi_provision_success_setup_description">Sign in over SSH to change the default username and password.</string>
+    <string name="wifi_provision_success_username">Username</string>
+    <string name="wifi_provision_success_ssh_label">SSH Command</string>
+    <string name="wifi_provision_success_ssh_command">ssh root@%1$s</string>
+    <string name="wifi_provision_success_open_ssh">Open SSH Client</string>
+    <string name="wifi_provision_success_missing_ip">unknown-host</string>
+    <string name="wifi_provision_success_done">Done</string>
     <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
     <string name="desktop_tray_show">Show Meshtastic</string>
     <string name="desktop_tray_quit">Quit</string>
