@@ -16,38 +16,23 @@
  */
 package org.meshtastic.feature.settings.tak
 
-import android.os.Build
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import org.meshtastic.core.ui.util.rememberRequestLocalNetworkPermission
 
-private val SDK_INT_ANDROID_16 = Build.VERSION_CODES.BAKLAVA
-
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult: (Boolean) -> Unit) {
-    if (Build.VERSION.SDK_INT >= SDK_INT_ANDROID_16) {
-        val permissionState =
-            rememberPermissionState("android.permission.ACCESS_LOCAL_NETWORK") { granted ->
-                // Callback fires after the system dialog is dismissed — report the result
-                // directly so onPermissionResult is the single authority for grant/deny.
-                if (isTakServerEnabled) onPermissionResult(granted)
-            }
+    // ACCESS_LOCAL_NETWORK runtime permission (Android 17 / API 37+) is required for the TAK Server's
+    // localhost socket binding (127.0.0.1:8087). It is also required globally for NSD/mDNS device discovery
+    // when targetSdk >= 37, and is requested up-front from the Connections screen, so it will usually
+    // already be granted by the time the user enables TAK. This composable handles the standalone case
+    // (e.g. user opens TAK settings before ever tapping the network-scan toggle).
+    val requestPermission =
+        rememberRequestLocalNetworkPermission(
+            onGranted = { onPermissionResult(true) },
+            onDenied = { onPermissionResult(false) },
+        )
 
-        LaunchedEffect(isTakServerEnabled) {
-            if (isTakServerEnabled) {
-                if (permissionState.status.isGranted) {
-                    // Already granted — confirm immediately so the orchestrator may proceed.
-                    onPermissionResult(true)
-                } else {
-                    // Show system dialog; result is delivered via the callback above.
-                    permissionState.launchPermissionRequest()
-                }
-            }
-        }
-    } else {
-        LaunchedEffect(isTakServerEnabled) { onPermissionResult(true) }
+    if (isTakServerEnabled) {
+        requestPermission()
     }
 }

@@ -59,6 +59,11 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 @Composable actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
 
 @Composable
+actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
+
+@Composable actual fun isLocalNetworkPermissionGranted(): Boolean = true
+
+@Composable
 actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
 
 @Composable actual fun isLocationPermissionGranted(): Boolean = true
