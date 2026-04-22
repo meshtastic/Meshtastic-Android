@@ -29,27 +29,33 @@ class MQTTRepositoryImplTest {
     // region resolveEndpoint — every behavioral branch of address parsing.
 
     @Test
-    fun `bare host without scheme is wrapped as ws WebSocket on the standard port`() {
+    fun `bare host without scheme is wrapped as plain Tcp on the standard MQTT port`() {
         val endpoint = resolveEndpoint(rawAddress = "broker.example.com", tlsEnabled = false)
 
-        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
-        assertEquals("ws://broker.example.com/mqtt", ws.url)
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(1883, tcp.port)
+        assertEquals(false, tcp.tls)
     }
 
     @Test
-    fun `bare host with TLS enabled is upgraded to wss`() {
+    fun `bare host with TLS enabled is wrapped as Tcp on the secure MQTT port`() {
         val endpoint = resolveEndpoint(rawAddress = "broker.example.com", tlsEnabled = true)
 
-        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
-        assertEquals("wss://broker.example.com/mqtt", ws.url)
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(8883, tcp.port)
+        assertEquals(true, tcp.tls)
     }
 
     @Test
-    fun `host with explicit port is preserved when wrapped`() {
+    fun `host with explicit port is preserved when wrapped as Tcp`() {
         val endpoint = resolveEndpoint(rawAddress = "broker.example.com:9001", tlsEnabled = false)
 
-        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
-        assertEquals("ws://broker.example.com:9001/mqtt", ws.url)
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(9001, tcp.port)
+        assertEquals(false, tcp.tls)
     }
 
     @Test

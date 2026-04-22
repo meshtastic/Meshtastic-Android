@@ -51,10 +51,6 @@ class UsbBroadcastReceiver(private val usbRepository: UsbRepository) : Broadcast
                 Logger.d { "USB device '$deviceName' was attached" }
                 usbRepository.refreshState()
             }
-            UsbManager.EXTRA_PERMISSION_GRANTED -> {
-                Logger.d { "USB device '$deviceName' was granted permission" }
-                usbRepository.refreshState()
-            }
         }
     }
 }

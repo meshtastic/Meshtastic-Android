@@ -47,14 +47,14 @@ fun EmptyStateContent(
             imageVector = imageVector,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+            tint = MaterialTheme.colorScheme.outlineVariant,
         )
         Text(
             text = text,
             modifier = Modifier.padding(top = 16.dp),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.outline,
         )
         if (action != null) {
             Column(modifier = Modifier.padding(top = 24.dp)) { action() }

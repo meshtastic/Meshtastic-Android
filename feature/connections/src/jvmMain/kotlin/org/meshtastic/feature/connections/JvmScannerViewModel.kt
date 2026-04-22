@@ -19,9 +19,11 @@ package org.meshtastic.feature.connections
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 
 /**
@@ -39,7 +41,9 @@ class JvmScannerViewModel(
     radioPrefs: RadioPrefs,
     recentAddressesDataSource: RecentAddressesDataSource,
     getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
+    networkRepository: NetworkRepository,
     dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
+    uiPrefs: UiPrefs,
     bleScanner: org.meshtastic.core.ble.BleScanner? = null,
 ) : ScannerViewModel(
     serviceRepository,
@@ -48,6 +52,8 @@ class JvmScannerViewModel(
     radioPrefs,
     recentAddressesDataSource,
     getDiscoveredDevicesUseCase,
+    networkRepository,
     dispatchers,
+    uiPrefs,
     bleScanner,
 )
