@@ -46,10 +46,12 @@ import org.meshtastic.core.resources.ic_memory
 import org.meshtastic.core.resources.ic_perm_scan_wifi
 import org.meshtastic.core.resources.ic_power
 import org.meshtastic.core.resources.ic_router
+import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.pax
 import org.meshtastic.core.resources.position_log
 import org.meshtastic.core.resources.power
+import org.meshtastic.core.resources.remote_shell
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -66,6 +68,8 @@ import org.meshtastic.feature.node.metrics.PositionLogScreen
 import org.meshtastic.feature.node.metrics.PowerMetricsScreen
 import org.meshtastic.feature.node.metrics.SignalMetricsScreen
 import org.meshtastic.feature.node.metrics.TracerouteLogScreen
+import org.meshtastic.feature.node.metrics.terminal.RemoteShellScreen
+import org.meshtastic.feature.node.metrics.terminal.RemoteShellViewModel
 import kotlin.reflect.KClass
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -147,6 +151,15 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         tracerouteMapScreen(args.destNum, args.requestId, args.logUuid) { backStack.removeLastOrNull() }
     }
 
+    // RemoteShell uses its own ViewModel and is wired up separately from the MetricsViewModel-based screens.
+    entry<NodeDetailRoute.RemoteShell>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
+        val remoteShellViewModel = koinViewModel<RemoteShellViewModel> { parametersOf(args.destNum) }
+        RemoteShellScreen(
+            viewModel = remoteShellViewModel,
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
+        )
+    }
+
     NodeDetailScreen.entries.forEach { routeInfo ->
         when (routeInfo.routeClass) {
             NodeDetailRoute.DeviceMetrics::class ->
@@ -165,6 +178,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
                 addNodeDetailScreenComposable<NodeDetailRoute.PaxMetrics>(backStack, routeInfo) { it.destNum }
             NodeDetailRoute.NeighborInfoLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.NeighborInfoLog>(backStack, routeInfo) { it.destNum }
+            // NodeDetailRoute.RemoteShell is handled by the dedicated entry above.
             else -> Unit
         }
     }
@@ -247,5 +261,13 @@ enum class NodeDetailScreen(
         NodeDetailRoute.PaxMetrics::class,
         Res.drawable.ic_group,
         { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM, onNavigateUp) },
+    ),
+    REMOTE_SHELL(
+        Res.string.remote_shell,
+        NodeDetailRoute.RemoteShell::class,
+        Res.drawable.ic_terminal,
+        // Navigation for RemoteShell is handled by a dedicated entry<NodeDetailRoute.RemoteShell>
+        // block in nodeDetailGraph() that resolves RemoteShellViewModel instead of MetricsViewModel.
+        { _, _ -> },
     ),
 }

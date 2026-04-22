@@ -64,6 +64,12 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for ESP32 Unified OTA. Supported since firmware v2.7.18. */
     val supportsEsp32Ota = atLeast(V2_7_18)
 
+    /**
+     * Support for the RemoteShell module (PTY-over-mesh, REMOTE_SHELL_APP portnum). Defined in protobufs HEAD
+     * (post-v2.7.21); gated to [UNRELEASED] until a firmware release ships it.
+     */
+    val supportsRemoteShell = atLeast(UNRELEASED)
+
     companion object {
         private val V2_6_8 = DeviceVersion("2.6.8")
         private val V2_6_9 = DeviceVersion("2.6.9")

@@ -45,6 +45,7 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
@@ -84,6 +85,7 @@ class MeshDataHandlerTest {
     private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
     private val telemetryHandler: TelemetryPacketHandler = mock(MockMode.autofill)
     private val adminPacketHandler: AdminPacketHandler = mock(MockMode.autofill)
+    private val remoteShellHandler: RemoteShellHandler = mock(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -108,6 +110,7 @@ class MeshDataHandlerTest {
                 storeForwardHandler = storeForwardHandler,
                 telemetryHandler = telemetryHandler,
                 adminPacketHandler = adminPacketHandler,
+                remoteShellHandler = remoteShellHandler,
                 scope = testScope,
             )
 

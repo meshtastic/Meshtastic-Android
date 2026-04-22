@@ -48,6 +48,7 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
@@ -96,6 +97,7 @@ class MeshDataHandlerImpl(
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
+    private val remoteShellHandler: RemoteShellHandler,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
 
@@ -179,6 +181,12 @@ class MeshDataHandlerImpl(
 
             PortNum.ADMIN_APP -> {
                 adminPacketHandler.handleAdminMessage(packet, myNodeNum)
+            }
+
+            PortNum.REMOTE_SHELL_APP -> {
+                remoteShellHandler.handleRemoteShell(packet)
+                // Do not broadcast — RemoteShell frames are point-to-point PTY I/O
+                shouldBroadcast = false
             }
 
             PortNum.NEIGHBORINFO_APP -> {
