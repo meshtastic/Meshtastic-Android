@@ -64,6 +64,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
+import org.meshtastic.core.ui.util.isLocalNetworkPermissionGranted
+import org.meshtastic.core.ui.util.rememberRequestLocalNetworkPermission
 import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 import org.meshtastic.core.ui.viewmodel.ConnectionsViewModel
 import org.meshtastic.feature.connections.MOCK_DEVICE_PREFIX
@@ -118,12 +120,23 @@ fun ConnectionsScreen(
 
     val bleAutoScan by scanModel.bleAutoScan.collectAsStateWithLifecycle()
     val networkAutoScan by scanModel.networkAutoScan.collectAsStateWithLifecycle()
+    val localNetworkPermissionGranted = isLocalNetworkPermissionGranted()
+
+    // Android 17 (API 37) gates NSD/mDNS behind ACCESS_LOCAL_NETWORK. Without this prompt the platform
+    // falls back to the system "Choose a device to connect" picker on every discoverServices() call.
+    // Granting the permission upfront lets discovery run silently in-app.
+    val requestLocalNetworkPermission =
+        rememberRequestLocalNetworkPermission(
+            onGranted = { scanModel.startNetworkScan() },
+            onDenied = { scanModel.stopNetworkScan() },
+        )
 
     // Auto-start scans on screen entry when the user has previously opted in via the toggle. Stop on exit so we don't
-    // drain battery in the background.
-    DisposableEffect(Unit) {
+    // drain battery in the background. Network auto-start is additionally gated on the runtime local-network grant so
+    // we don't trigger the system picker for users who declined the permission.
+    DisposableEffect(localNetworkPermissionGranted) {
         if (bleAutoScan) scanModel.startBleScan()
-        if (networkAutoScan) scanModel.startNetworkScan()
+        if (networkAutoScan && localNetworkPermissionGranted) scanModel.startNetworkScan()
         onDispose {
             scanModel.stopBleScan()
             scanModel.stopNetworkScan()
@@ -263,7 +276,18 @@ fun ConnectionsScreen(
                                 isNetworkScanning = isNetworkScanning,
                                 onSelectDevice = { scanModel.onSelected(it) },
                                 onToggleBleScan = { scanModel.toggleBleScan() },
-                                onToggleNetworkScan = { scanModel.toggleNetworkScan() },
+                                onToggleNetworkScan = {
+                                    if (isNetworkScanning || localNetworkPermissionGranted) {
+                                        scanModel.toggleNetworkScan()
+                                    } else {
+                                        // Prefer requesting the runtime grant over letting the platform fall
+                                        // back to the system NSD picker. Persist the user's intent so that if
+                                        // they grant after the prompt, the scan starts via the launcher's
+                                        // onGranted callback and stays on for next session.
+                                        scanModel.persistNetworkAutoScanIntent(true)
+                                        requestLocalNetworkPermission()
+                                    }
+                                },
                                 onAddManualAddress = { _, fullAddress ->
                                     val displayAddress = fullAddress.removePrefix(TCP_DEVICE_PREFIX)
                                     scanModel.addRecentAddress(fullAddress, displayAddress)
