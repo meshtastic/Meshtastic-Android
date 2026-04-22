@@ -162,6 +162,24 @@ class FakeUiPrefs : UiPrefs {
         networkAutoScan.value = enabled
     }
 
+    override val showBleTransport = MutableStateFlow(true)
+
+    override fun setShowBleTransport(enabled: Boolean) {
+        showBleTransport.value = enabled
+    }
+
+    override val showNetworkTransport = MutableStateFlow(true)
+
+    override fun setShowNetworkTransport(enabled: Boolean) {
+        showNetworkTransport.value = enabled
+    }
+
+    override val showUsbTransport = MutableStateFlow(true)
+
+    override fun setShowUsbTransport(enabled: Boolean) {
+        showUsbTransport.value = enabled
+    }
+
     private val nodeLocationEnabled = mutableMapOf<Int, MutableStateFlow<Boolean>>()
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =

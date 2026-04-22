@@ -114,6 +114,23 @@ open class ScannerViewModel(
     /** User preference that controls whether NSD network scanning auto-starts when the Connections screen opens. */
     val networkAutoScan: StateFlow<Boolean> = uiPrefs.networkAutoScan
 
+    // ── Transport-section visibility (filter chips) ───────────────────────────────────────────
+
+    /** Whether the BLE section is visible in the Connections device list. Defaults to `true`. */
+    val showBleTransport: StateFlow<Boolean> = uiPrefs.showBleTransport
+
+    /** Whether the Network (TCP/NSD) section is visible in the Connections device list. Defaults to `true`. */
+    val showNetworkTransport: StateFlow<Boolean> = uiPrefs.showNetworkTransport
+
+    /** Whether the USB section is visible in the Connections device list. Defaults to `true`. */
+    val showUsbTransport: StateFlow<Boolean> = uiPrefs.showUsbTransport
+
+    fun setShowBleTransport(enabled: Boolean) = uiPrefs.setShowBleTransport(enabled)
+
+    fun setShowNetworkTransport(enabled: Boolean) = uiPrefs.setShowNetworkTransport(enabled)
+
+    fun setShowUsbTransport(enabled: Boolean) = uiPrefs.setShowUsbTransport(enabled)
+
     /**
      * Resolved NSD services flow, gated by [_isNetworkScanning]. When scanning is inactive, emits `emptyList()` so
      * `NsdManager.discoverServices()` is never triggered. Android 15+ shows a system consent dialog the first time

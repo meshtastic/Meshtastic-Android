@@ -76,6 +76,7 @@ import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
 import org.meshtastic.feature.connections.ui.components.DeviceList
+import org.meshtastic.feature.connections.ui.components.TransportFilterChips
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -120,6 +121,9 @@ fun ConnectionsScreen(
 
     val bleAutoScan by scanModel.bleAutoScan.collectAsStateWithLifecycle()
     val networkAutoScan by scanModel.networkAutoScan.collectAsStateWithLifecycle()
+    val showBleTransport by scanModel.showBleTransport.collectAsStateWithLifecycle()
+    val showNetworkTransport by scanModel.showNetworkTransport.collectAsStateWithLifecycle()
+    val showUsbTransport by scanModel.showUsbTransport.collectAsStateWithLifecycle()
     val localNetworkPermissionGranted = isLocalNetworkPermissionGranted()
 
     // Android 17 (API 37) gates NSD/mDNS behind ACCESS_LOCAL_NETWORK. Without this prompt the platform
@@ -261,6 +265,17 @@ fun ConnectionsScreen(
                                 )
                             }
                         }
+
+                        // Inclusive transport-visibility filter chips. Sit between the connection card and the
+                        // device list so users can hide entire transports they're not using.
+                        TransportFilterChips(
+                            showBle = showBleTransport,
+                            showNetwork = showNetworkTransport,
+                            showUsb = showUsbTransport,
+                            onToggleBle = { scanModel.setShowBleTransport(!showBleTransport) },
+                            onToggleNetwork = { scanModel.setShowNetworkTransport(!showNetworkTransport) },
+                            onToggleUsb = { scanModel.setShowUsbTransport(!showUsbTransport) },
+                        )
                     },
                     second = {
                         // ── Unified device list ──
@@ -274,6 +289,9 @@ fun ConnectionsScreen(
                                 recentTcpDevices = recentTcpDevices,
                                 isBleScanning = isBleScanning,
                                 isNetworkScanning = isNetworkScanning,
+                                showBleSection = showBleTransport,
+                                showNetworkSection = showNetworkTransport,
+                                showUsbSection = showUsbTransport,
                                 onSelectDevice = { scanModel.onSelected(it) },
                                 onToggleBleScan = { scanModel.toggleBleScan() },
                                 onToggleNetworkScan = {

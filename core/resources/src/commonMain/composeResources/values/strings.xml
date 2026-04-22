@@ -203,6 +203,9 @@
     <string name="no_network_devices_found">No network devices found</string>
     <string name="no_usb_devices_found">No USB devices found</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">BLE</string>
+    <string name="transport_tcp">TCP</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Demo Mode</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="app_too_old">Application update required</string>

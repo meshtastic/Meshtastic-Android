@@ -117,6 +117,9 @@ fun DeviceList(
     onAddManualAddress: (address: String, fullAddress: String) -> Unit,
     onRemoveRecentAddress: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
+    showBleSection: Boolean = true,
+    showNetworkSection: Boolean = true,
+    showUsbSection: Boolean = true,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -138,33 +141,39 @@ fun DeviceList(
     }
 
     LazyColumn(modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        bluetoothSection(
-            bleDevices = bleDevices,
-            connectionState = connectionState,
-            selectedDevice = selectedDevice,
-            isBleScanning = isBleScanning,
-            onSelectDevice = onSelectDevice,
-            onToggleBleScan = onToggleBleScan,
-        )
+        if (showBleSection) {
+            bluetoothSection(
+                bleDevices = bleDevices,
+                connectionState = connectionState,
+                selectedDevice = selectedDevice,
+                isBleScanning = isBleScanning,
+                onSelectDevice = onSelectDevice,
+                onToggleBleScan = onToggleBleScan,
+            )
+        }
 
-        usbSection(
-            usbDevices = usbDevices,
-            connectionState = connectionState,
-            selectedDevice = selectedDevice,
-            onSelectDevice = onSelectDevice,
-        )
+        if (showNetworkSection) {
+            networkSection(
+                discoveredTcpDevices = discoveredTcpDevices,
+                recentTcpDevices = recentTcpDevices,
+                connectionState = connectionState,
+                selectedDevice = selectedDevice,
+                isNetworkScanning = isNetworkScanning,
+                onSelectDevice = onSelectDevice,
+                onToggleNetworkScan = onToggleNetworkScan,
+                onAddManually = { showAddDialog = true },
+                onRemoveRecentAddress = onRemoveRecentAddress,
+            )
+        }
 
-        networkSection(
-            discoveredTcpDevices = discoveredTcpDevices,
-            recentTcpDevices = recentTcpDevices,
-            connectionState = connectionState,
-            selectedDevice = selectedDevice,
-            isNetworkScanning = isNetworkScanning,
-            onSelectDevice = onSelectDevice,
-            onToggleNetworkScan = onToggleNetworkScan,
-            onAddManually = { showAddDialog = true },
-            onRemoveRecentAddress = onRemoveRecentAddress,
-        )
+        if (showUsbSection) {
+            usbSection(
+                usbDevices = usbDevices,
+                connectionState = connectionState,
+                selectedDevice = selectedDevice,
+                onSelectDevice = onSelectDevice,
+            )
+        }
     }
 }
 
