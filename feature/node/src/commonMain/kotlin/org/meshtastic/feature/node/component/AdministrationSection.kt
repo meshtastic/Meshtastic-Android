@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -72,40 +73,42 @@ fun AdministrationSection(
     isEnsuringSession: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    SectionCard(title = Res.string.administration, modifier = modifier) {
-        Column {
-            // Local nodes don't need a session — they short-circuit straight to the settings screen.
-            if (metricsState.isLocal) {
-                ListItem(
-                    text = stringResource(Res.string.remote_admin),
-                    leadingIcon = MeshtasticIcons.Settings,
-                    onClick = { onAction(NodeDetailAction.OpenRemoteAdmin(node.num)) },
-                )
-            } else {
-                RemoteAdminListItem(
-                    nodeNum = node.num,
-                    sessionStatus = sessionStatus,
-                    isEnsuringSession = isEnsuringSession,
-                    onAction = onAction,
-                )
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        SectionCard(title = Res.string.administration) {
+            Column {
+                // Local nodes don't need a session — they short-circuit straight to the settings screen.
+                if (metricsState.isLocal) {
+                    ListItem(
+                        text = stringResource(Res.string.remote_admin),
+                        leadingIcon = MeshtasticIcons.Settings,
+                        onClick = { onAction(NodeDetailAction.OpenRemoteAdmin(node.num)) },
+                    )
+                } else {
+                    RemoteAdminListItem(
+                        nodeNum = node.num,
+                        sessionStatus = sessionStatus,
+                        isEnsuringSession = isEnsuringSession,
+                        onAction = onAction,
+                    )
 
-                SectionDivider()
+                    SectionDivider()
 
-                ListItem(
-                    text = stringResource(Res.string.refresh_metadata),
-                    leadingIcon = MeshtasticIcons.Memory,
-                    trailingIcon = null,
-                    enabled = !isEnsuringSession,
-                    onClick = { onAction(NodeDetailAction.RefreshMetadata(node.num)) },
-                )
+                    ListItem(
+                        text = stringResource(Res.string.refresh_metadata),
+                        leadingIcon = MeshtasticIcons.Memory,
+                        trailingIcon = null,
+                        enabled = !isEnsuringSession,
+                        onClick = { onAction(NodeDetailAction.RefreshMetadata(node.num)) },
+                    )
+                }
             }
         }
-    }
 
-    val firmwareVersion = node.metadata?.firmware_version
-    val firmwareEdition = metricsState.firmwareEdition
-    if (firmwareVersion != null || (firmwareEdition != null && metricsState.isLocal)) {
-        FirmwareSection(metricsState, firmwareEdition, firmwareVersion, onFirmwareSelect)
+        val firmwareVersion = node.metadata?.firmware_version
+        val firmwareEdition = metricsState.firmwareEdition
+        if (firmwareVersion != null || (firmwareEdition != null && metricsState.isLocal)) {
+            FirmwareSection(metricsState, firmwareEdition, firmwareVersion, onFirmwareSelect)
+        }
     }
 }
 
