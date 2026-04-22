@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -127,25 +128,22 @@ fun DeviceListItem(
             Modifier.selectable(selected = isSelected, role = Role.RadioButton, onClick = onSelect)
         }
 
+    val iconTint =
+        if (connectionState is ConnectionState.Connected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+
     ListItem(
         modifier = modifier.fillMaxWidth().then(clickableModifier).padding(vertical = 4.dp),
-        headlineContent = {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                device.node?.let { node -> NodeChip(node = node) }
-                    ?: Text(text = device.name, style = MaterialTheme.typography.titleLarge)
-            }
-        },
+        headlineContent = { DeviceHeadline(device = device) },
         leadingContent = {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 modifier = Modifier.size(32.dp),
-                tint =
-                if (connectionState is ConnectionState.Connected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+                tint = iconTint,
             )
         },
         supportingContent = { Text(text = device.address, style = MaterialTheme.typography.bodyLarge) },
@@ -164,4 +162,24 @@ fun DeviceListItem(
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
     )
+}
+
+/**
+ * Headline for a device row. When we have a [DeviceListEntry.node] in the local DB (i.e. we've previously connected and
+ * learned the device's mesh identity), render the colored [NodeChip] + the node's long name so users can visually
+ * identify the device at a glance. Otherwise fall back to the raw advertised device name.
+ */
+@Composable
+private fun DeviceHeadline(device: DeviceListEntry) {
+    val node = device.node
+    if (node != null) {
+        NodeChip(node = node)
+    } else {
+        Text(
+            text = device.name,
+            style = MaterialTheme.typography.titleLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }

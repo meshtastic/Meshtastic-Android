@@ -20,27 +20,23 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
+import org.meshtastic.core.resources.connected_sleeping
 import org.meshtastic.core.resources.connecting
-import org.meshtastic.core.resources.disconnect
-import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.resources.must_set_region
+import org.meshtastic.core.resources.not_connected
+import org.meshtastic.core.ui.viewmodel.ConnectionStatus
 
 /**
  * Displays the currently connecting (or connected) device with its name, address, connection status, and a disconnect
@@ -48,48 +44,41 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
  */
 @Composable
 fun ConnectingDeviceInfo(
-    connectionState: ConnectionState,
     deviceName: String,
     deviceAddress: String,
+    connectionStatus: ConnectionStatus,
+    connectionProgress: String?,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val statusText =
-        if (connectionState is ConnectionState.Connected) {
-            stringResource(Res.string.connected)
-        } else {
-            stringResource(Res.string.connecting)
+    val statusLabel =
+        when (connectionStatus) {
+            ConnectionStatus.CONNECTED -> stringResource(Res.string.connected)
+            ConnectionStatus.MUST_SET_REGION -> stringResource(Res.string.must_set_region)
+            ConnectionStatus.CONNECTING -> connectionProgress ?: stringResource(Res.string.connecting)
+            ConnectionStatus.CONNECTED_SLEEPING -> stringResource(Res.string.connected_sleeping)
+            ConnectionStatus.NOT_CONNECTED -> stringResource(Res.string.not_connected)
         }
-    Column(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+
+    Column(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            CircularProgressIndicator(modifier = Modifier.size(64.dp))
+            CircularProgressIndicator(modifier = Modifier.size(40.dp))
 
             Column {
                 Text(text = deviceName, style = MaterialTheme.typography.headlineSmall)
                 Text(text = deviceAddress, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    text = statusText,
+                    text = statusLabel,
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
         }
 
-        Button(
-            shape = RectangleShape,
-            modifier = Modifier.fillMaxWidth().height(40.dp),
-            colors =
-            ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.StatusRed,
-                contentColor = Color.White,
-            ),
-            onClick = onClickDisconnect,
-        ) {
-            Text(stringResource(Res.string.disconnect))
-        }
+        DisconnectButton(onClick = onClickDisconnect)
     }
 }

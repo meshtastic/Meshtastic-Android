@@ -2,7 +2,7 @@
 xmlutil = "0.91.3"
 
 # Android
-agp = "9.2.0-rc01"
+agp = "9.2.0"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -15,7 +15,7 @@ navigation3 = "1.1.0"
 paging = "3.4.2"
 room = "3.0.0-alpha03"
 koin = "4.2.1"
-koin-plugin = "1.0.0-RC1"
+koin-plugin = "1.0.0-RC2"
 
 # Kotlin
 kotlin = "2.3.21-RC2"
@@ -59,7 +59,7 @@ mlkit-barcode-scanning = "17.3.0"
 camerax = "1.6.0"
 
 # Networking
-ktor = "3.4.2"
+ktor = "3.4.3"
 
 # Other
 aboutlibraries = "14.0.1"
@@ -243,7 +243,7 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "32.1.1" }
+android-tools-common = { module = "com.android.tools:common", version = "32.2.0" }
 androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }

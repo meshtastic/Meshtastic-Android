@@ -30,3 +30,11 @@ internal expect fun createPeripheral(address: String, builderAction: PeripheralB
  * MTU has not yet been negotiated on this platform.
  */
 internal expect fun Peripheral.negotiatedMaxWriteLength(): Int?
+
+/**
+ * Requests the highest-throughput BLE connection priority (smallest connection interval) supported by the platform.
+ *
+ * Returns `true` if the request was issued successfully. On platforms without an equivalent API (JVM/iOS) this is a
+ * no-op returning `false`. Used by latency-sensitive flows such as DFU firmware streaming.
+ */
+internal expect fun Peripheral.requestHighConnectionPriority(): Boolean

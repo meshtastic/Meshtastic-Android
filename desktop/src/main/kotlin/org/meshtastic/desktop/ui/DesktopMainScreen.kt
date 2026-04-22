@@ -50,7 +50,7 @@ fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) 
                 uiViewModel = uiViewModel,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel) }
+                val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel, multiBackstack) }
                 MeshtasticNavDisplay(
                     multiBackstack = multiBackstack,
                     entryProvider = provider,

@@ -28,6 +28,7 @@ actual fun SettingsMainScreen(
     radioConfigViewModel: RadioConfigViewModel,
     onClickNodeChip: (Int) -> Unit,
     onNavigate: (Route) -> Unit,
+    onBack: (() -> Unit)?,
 ) {
     DesktopSettingsScreen(
         settingsViewModel = settingsViewModel,

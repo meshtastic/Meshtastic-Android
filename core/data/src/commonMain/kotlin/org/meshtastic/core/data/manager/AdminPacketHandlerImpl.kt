@@ -19,10 +19,10 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.AdminPacketHandler
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
 
@@ -35,19 +35,18 @@ class AdminPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val configHandler: Lazy<MeshConfigHandler>,
     private val configFlowManager: Lazy<MeshConfigFlowManager>,
-    private val commandSender: CommandSender,
+    private val sessionManager: SessionManager,
 ) : AdminPacketHandler {
 
     override fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
         val u = AdminMessage.ADAPTER.decode(payload)
         Logger.d { "Admin message from=${packet.from} fields=${u.summarize()}" }
-        // Guard against clearing a valid passkey: firmware always embeds the key in every
-        // admin response, but a missing (default-empty) field must not reset the stored value.
+        // Firmware embeds the session_passkey in every admin response. A missing (default-empty)
+        // field must not reset stored state, so only record refreshes when bytes arrived.
         val incomingPasskey = u.session_passkey
         if (incomingPasskey.size > 0) {
-            Logger.d { "Session passkey updated (${incomingPasskey.size} bytes)" }
-            commandSender.setSessionPasskey(incomingPasskey)
+            sessionManager.recordSession(packet.from, incomingPasskey)
         }
 
         val fromNum = packet.from

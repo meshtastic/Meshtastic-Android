@@ -219,15 +219,17 @@ class MQTTRepositoryImpl(
     }
 }
 
+private const val MQTT_PORT_PLAIN = 1883
+private const val MQTT_PORT_TLS = 8883
+
 /**
  * Resolve a user-supplied broker address into an [MqttEndpoint].
  *
  * Address resolution rules:
  * - If [rawAddress] already contains a URI scheme (`scheme://…`), parse it directly via [MqttEndpoint.parse] and
  *   respect whatever transport / port the user encoded.
- * - Otherwise wrap it as a WebSocket endpoint (`ws[s]://host${WEBSOCKET_PATH}`) so the proxy works over CDNs and
- *   firewall-restricted networks where raw 1883/8883 may be blocked. The scheme is `wss` when [tlsEnabled] is `true`,
- *   `ws` otherwise.
+ * - Otherwise wrap it as a TCP endpoint using standard MQTT ports: port 8883 if [tlsEnabled] is `true`, port 1883
+ *   otherwise. This allows standard MQTT brokers to work out of the box.
  *
  * Extracted as a top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up the full
  * repository, and so `MqttManagerImpl` (in `:core:data`) can reuse the same parsing rules for the probe API. Visibility
@@ -236,8 +238,9 @@ class MQTTRepositoryImpl(
 fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if (rawAddress.contains("://")) {
     MqttEndpoint.parse(rawAddress)
 } else {
-    val scheme = if (tlsEnabled) "wss" else "ws"
-    MqttEndpoint.parse("$scheme://$rawAddress$WEBSOCKET_PATH")
+    val scheme = if (tlsEnabled) "ssl" else "tcp"
+    val defaultPort = if (tlsEnabled) MQTT_PORT_TLS else MQTT_PORT_PLAIN
+    // Preserve the user-supplied port (if any) instead of naively appending the default.
+    val hostAndPort = if (rawAddress.contains(":")) rawAddress else "$rawAddress:$defaultPort"
+    MqttEndpoint.parse("$scheme://$hostAndPort")
 }
-
-private const val WEBSOCKET_PATH = "/mqtt"

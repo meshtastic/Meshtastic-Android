@@ -49,10 +49,17 @@
 
     <!-- This permission is required for analytics - and soon the MQTT gateway -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Required for Android 17+ (API 37) Local Networking for TAK Server localhost loopback -->
-    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!--
+      Android 17 (API 37) Local Network Protection: targetSdk=37 apps are blocked
+      from local-network access by default. Required for both NSD/mDNS device
+      discovery on the Connections screen and the built-in TAK Server's localhost
+      loopback binding. Requested at runtime via rememberRequestLocalNetworkPermission.
+      See: https://developer.android.com/privacy-and-security/local-network-permission
+    -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <!--
       This permission is optional but recommended so we can be smart

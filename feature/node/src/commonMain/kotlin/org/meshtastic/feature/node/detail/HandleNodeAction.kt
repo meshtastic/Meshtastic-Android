@@ -37,6 +37,8 @@ internal fun handleNodeAction(
     when (action) {
         is NodeDetailAction.Navigate -> onNavigate(action.route)
         is NodeDetailAction.TriggerServiceAction -> viewModel.onServiceAction(action.action)
+        is NodeDetailAction.OpenRemoteAdmin -> viewModel.openRemoteAdmin(action.nodeNum)
+        is NodeDetailAction.RefreshMetadata -> viewModel.refreshMetadata(action.nodeNum)
         is NodeDetailAction.HandleNodeMenuAction -> {
             when (val menuAction = action.action) {
                 is NodeMenuAction.DirectMessage -> {

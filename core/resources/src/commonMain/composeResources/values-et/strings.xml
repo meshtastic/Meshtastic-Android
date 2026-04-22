@@ -176,6 +176,7 @@
     <string name="no_network_devices_found">Võrguseadmeid ei leitud</string>
     <string name="no_usb_devices_found">USB seadmeid ei leitud</string>
     <string name="usb">USB</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Demo režiim</string>
     <string name="connected_sleeping">Ühendatud raadioga, aga see on unerežiimis</string>
     <string name="app_too_old">Vajalik on rakenduse värskendus</string>

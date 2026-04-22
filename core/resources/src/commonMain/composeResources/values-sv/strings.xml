@@ -168,6 +168,7 @@
     <string name="not_connected">Ej ansluten</string>
     <string name="no_device_selected">Ingen enhet vald</string>
     <string name="unknown_device">Okänd enhet</string>
+    <string name="transport_ble">BLE</string>
     <string name="connected_sleeping">Ansluten till radioenhet, men den är i sovläge</string>
     <string name="app_too_old">Applikationen måste uppgraderas</string>
     <string name="must_update">Du måste uppdatera detta program i app-butiken (eller Github). Det är för gammalt för att prata med denna radioenhet. Läs vår <a href="https://meshtastic.org/docs/software/android/installation">dokumentation</a> i detta ämne.</string>
@@ -672,6 +673,7 @@
     <string name="request_power_metrics">Strömdata</string>
     <string name="request_host_metrics">Begär värdens värden</string>
     <string name="request_metadata">Metadata</string>
+    <string name="retry">Försök igen</string>
     <string name="actions">Åtgärder</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Använd 12-timmarsformat</string>

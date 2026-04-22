@@ -59,6 +59,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
+import org.meshtastic.proto.ToRadio
 import kotlin.concurrent.Volatile
 
 /**
@@ -121,6 +122,13 @@ class SharedRadioInterfaceService(
     private var runningTransportId: InterfaceId? = null
     private var isStarted = false
 
+    /**
+     * Set while [stopTransportLocked] is draining the polite disconnect frame. [sendToRadio] checks this so any late
+     * traffic submitted after we've announced disconnection is dropped rather than racing in front of the firmware-side
+     * link teardown.
+     */
+    @Volatile private var isStopping = false
+
     private val listenersInitialized = atomic(false)
     private var heartbeatJob: Job? = null
     private var lastHeartbeatMillis = 0L
@@ -135,6 +143,13 @@ class SharedRadioInterfaceService(
         // zombie (BLE stack didn't report disconnect). Two missed heartbeat intervals gives
         // the firmware a reasonable window to respond or send telemetry.
         private const val LIVENESS_TIMEOUT_MILLIS = HEARTBEAT_INTERVAL_MILLIS * 2
+
+        /**
+         * Upper bound on how long we wait for the polite `ToRadio(disconnect = true)` frame to flush before tearing the
+         * transport down. 500ms gives BLE's write-retry path (`BleRetry` backs off 500ms) room for one attempt on a
+         * flaky GATT connection. Serial and TCP typically flush well under this window.
+         */
+        private const val POLITE_DISCONNECT_DRAIN_MS = 500L
     }
 
     private val initLock = Mutex()
@@ -191,6 +206,10 @@ class SharedRadioInterfaceService(
     override fun connect() {
         processLifecycle.coroutineScope.launch { transportMutex.withLock { startTransportLocked() } }
         initStateListeners()
+    }
+
+    override suspend fun disconnect() {
+        transportMutex.withLock { ignoreExceptionSuspend { stopTransportLocked() } }
     }
 
     override fun isMockTransport(): Boolean = transportFactory.isMockTransport()
@@ -257,9 +276,26 @@ class SharedRadioInterfaceService(
     private suspend fun stopTransportLocked() {
         val currentTransport = radioTransport
         Logger.i { "Stopping transport $currentTransport" }
+        // Best-effort polite goodbye: tell the firmware we're disconnecting on purpose so it can
+        // tear down its side of the link cleanly instead of relying on timeouts / hardware events.
+        // Flip isStopping before sending so any concurrent sendToRadio() drops incoming traffic —
+        // we don't want normal packets racing behind the disconnect frame. Skip only when already
+        // Disconnected; firmware can still consume the goodbye while handshaking or sleeping, so
+        // it's worth sending in every other state. The send is fire-and-forget through the
+        // transport's own scope; the drain delay gives async transports a window to flush before
+        // close() cancels their write scope. BLE's retry path backs off 500ms, so this window
+        // also covers one retry on flaky GATT links.
+        if (currentTransport != null && _connectionState.value != ConnectionState.Disconnected) {
+            isStopping = true
+            ignoreExceptionSuspend {
+                currentTransport.handleSendToRadio(ToRadio(disconnect = true).encode())
+                delay(POLITE_DISCONNECT_DRAIN_MS)
+            }
+        }
         isStarted = false
         radioTransport = null
         runningTransportId = null
+        isStopping = false
         currentTransport?.close()
 
         _serviceScope.cancel("stopping transport")
@@ -310,6 +346,10 @@ class SharedRadioInterfaceService(
     }
 
     override fun sendToRadio(bytes: ByteArray) {
+        if (isStopping) {
+            Logger.d { "sendToRadio: transport stopping, dropping ${bytes.size} bytes" }
+            return
+        }
         // Snapshot the transport to avoid calling handleSendToRadio on a null reference.
         // There is still a benign race: stopTransportLocked() may cancel _serviceScope
         // between the null-check and the launch, causing the coroutine to be silently

@@ -19,6 +19,8 @@ package org.meshtastic.desktop.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import org.meshtastic.core.navigation.MultiBackstack
+import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
@@ -35,11 +37,16 @@ import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
  * Each call delegates to the shared navigation graph extension exported by the corresponding feature module, keeping
  * the desktop shell free of screen-level composable knowledge.
  */
-fun EntryProviderScope<NavKey>.desktopNavGraph(backStack: NavBackStack<NavKey>, uiViewModel: UIViewModel) {
+fun EntryProviderScope<NavKey>.desktopNavGraph(
+    backStack: NavBackStack<NavKey>,
+    uiViewModel: UIViewModel,
+    multiBackstack: MultiBackstack,
+) {
     nodesGraph(
         backStack = backStack,
         scrollToTopEvents = uiViewModel.scrollToTopEventFlow,
         onHandleDeepLink = uiViewModel::handleDeepLink,
+        onNavigateToConnections = { multiBackstack.navigateTopLevel(TopLevelDestination.Connections.route) },
     )
     contactsGraph(backStack, uiViewModel.scrollToTopEventFlow)
     mapGraph(backStack)

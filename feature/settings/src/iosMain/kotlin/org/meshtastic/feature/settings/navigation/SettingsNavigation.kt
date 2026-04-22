@@ -27,6 +27,7 @@ actual fun SettingsMainScreen(
     radioConfigViewModel: RadioConfigViewModel,
     onClickNodeChip: (Int) -> Unit,
     onNavigate: (Route) -> Unit,
+    onBack: (() -> Unit)?,
 ) {
     // TODO: Implement iOS settings main screen
 }

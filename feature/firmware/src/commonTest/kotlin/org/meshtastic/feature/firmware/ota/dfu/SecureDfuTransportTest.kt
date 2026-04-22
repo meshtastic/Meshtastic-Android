@@ -80,9 +80,35 @@ class SecureDfuTransportTest {
         assertEquals(1, connection.disconnectCalls)
     }
 
-    // -----------------------------------------------------------------------
-    // Phase 2: Connect to DFU mode
-    // -----------------------------------------------------------------------
+    @Test
+    fun `triggerButtonlessDfu falls back to legacy DFU service when secure FE59 is missing`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection().apply { missingServices += SecureDfuUuids.SERVICE }
+        val transport =
+            SecureDfuTransport(
+                scanner = scanner,
+                connectionFactory = FakeBleConnectionFactory(connection),
+                address = address,
+                dispatcher = kotlinx.coroutines.Dispatchers.Unconfined,
+            )
+
+        scanner.emitDevice(FakeBleDevice(address))
+
+        val result = transport.triggerButtonlessDfu()
+
+        assertTrue(result.isSuccess, "Legacy fallback should succeed when FE59 is absent")
+        // No write should have hit the secure characteristic.
+        assertTrue(
+            connection.service.writes.none { it.characteristic.uuid == SecureDfuUuids.BUTTONLESS_NO_BONDS },
+            "Should not write to secure buttonless characteristic when FE59 is missing",
+        )
+        // Exactly one write of 0x01 (START_DFU) should have hit the legacy control point.
+        val legacyWrites = connection.service.writes.filter { it.characteristic.uuid == LegacyDfuUuids.CONTROL_POINT }
+        assertEquals(1, legacyWrites.size, "Should have exactly one legacy DFU trigger write")
+        assertContentEquals(byteArrayOf(0x01, 0x04), legacyWrites.single().data)
+        assertEquals(BleWriteType.WITH_RESPONSE, legacyWrites.single().writeType)
+        assertEquals(1, connection.disconnectCalls)
+    }
 
     @Test
     fun `connectToDfuMode succeeds using shared BleService observation`() = runTest {

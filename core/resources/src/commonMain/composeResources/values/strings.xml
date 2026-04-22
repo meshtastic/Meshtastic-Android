@@ -129,6 +129,10 @@
     <string name="label_short_turbo">Short Range - Turbo</string>
     <string name="label_short_fast">Short Range - Fast</string>
     <string name="label_short_slow">Short Range - Slow</string>
+    <string name="label_lite_fast">Lite - Fast</string>
+    <string name="label_lite_slow">Lite - Slow</string>
+    <string name="label_narrow_fast">Narrow - Fast</string>
+    <string name="label_narrow_slow">Narrow - Slow</string>
 
     <string name="config_network_wifi_enabled_summary">Enabling WiFi will disable the bluetooth connection to the app.</string>
     <string name="config_network_eth_enabled_summary">Enabling Ethernet will disable the bluetooth connection to the app. TCP node connections are not available on Apple devices.</string>
@@ -199,6 +203,9 @@
     <string name="no_network_devices_found">No network devices found</string>
     <string name="no_usb_devices_found">No USB devices found</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">BLE</string>
+    <string name="transport_tcp">TCP</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Demo Mode</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="app_too_old">Application update required</string>
@@ -816,6 +823,14 @@
     <string name="request_host_metrics">Host Metrics</string>
     <string name="request_pax_metrics">Pax Metrics</string>
     <string name="request_metadata">Metadata</string>
+    <string name="refresh_metadata">Refresh metadata</string>
+    <string name="establish_session">Connect &amp; administer</string>
+    <string name="establishing_session">Establishing remote session…</string>
+    <string name="session_active">Session active</string>
+    <string name="session_refresh_required">Refresh required</string>
+    <string name="connect_radio_for_remote_admin">Connect to a radio to administer remote nodes.</string>
+    <string name="remote_admin_unreachable">Could not reach node — try again or move closer.</string>
+    <string name="retry">Retry</string>
     <string name="actions">Actions</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Use 12h clock format</string>
@@ -933,7 +948,24 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="discovered_network_devices">Discovered Network Devices</string>
+    <string name="scan_network_devices">Scan for network devices</string>
+    <string name="scanning_network">Scanning…</string>
+    <string name="scan_bluetooth_devices">Scan for Bluetooth devices</string>
+    <string name="scanning_bluetooth">Scanning…</string>
     <string name="bluetooth_available_devices">Available Bluetooth Devices</string>
+    <string name="add_network_device_manually">Add device manually…</string>
+    <string name="no_devices_found">No devices found</string>
+    <string name="no_bluetooth_devices_seen">No Bluetooth devices seen</string>
+    <string name="no_bluetooth_devices_hint">Ensure you\'re within range of the device.</string>
+    <string name="no_network_devices_seen">No network devices seen</string>
+    <string name="no_network_devices_hint">Ensure you\'re connected to the same network as the device.</string>
+    <string name="no_usb_devices_seen">No USB devices seen</string>
+    <string name="no_usb_devices_hint">Connect the device via serial or USB.</string>
+    <string name="nodes_empty_disconnected_title">No device connected</string>
+    <string name="nodes_empty_disconnected_hint">Connect to a device to discover nearby nodes.</string>
+    <string name="nodes_empty_searching_title">Searching for nodes</string>
+    <string name="nodes_empty_searching_hint">Nearby nodes will appear here as they\'re discovered.</string>
+    <string name="set_up_connection">Set up connection</string>
 
     <string name="get_started">Get started</string>
     <string name="intro_welcome">Welcome to</string>

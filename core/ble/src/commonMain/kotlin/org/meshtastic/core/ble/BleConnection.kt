@@ -65,6 +65,13 @@ interface BleConnection {
 
     /** Returns the maximum write value length for the given write type, or `null` if unknown. */
     fun maximumWriteValueLength(writeType: BleWriteType): Int?
+
+    /**
+     * Asks the platform to switch to a high-throughput / low-latency BLE connection priority for the duration of the
+     * connection. Used by latency-sensitive flows like firmware updates. Returns `true` if the request was issued.
+     * Default implementation returns `false` for platforms that don't support it.
+     */
+    fun requestHighConnectionPriority(): Boolean = false
 }
 
 /** Represents a BLE service for commonMain. */

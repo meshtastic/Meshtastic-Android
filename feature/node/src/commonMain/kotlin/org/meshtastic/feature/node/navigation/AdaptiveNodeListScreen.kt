@@ -32,6 +32,7 @@ fun AdaptiveNodeListScreen(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
+    onNavigateToConnections: () -> Unit = {},
 ) {
     val nodeListViewModel: NodeListViewModel = koinViewModel()
 
@@ -42,5 +43,6 @@ fun AdaptiveNodeListScreen(
         scrollToTopEvents = scrollToTopEvents,
         activeNodeId = null,
         onHandleDeepLink = onHandleDeepLink,
+        onNavigateToConnections = onNavigateToConnections,
     )
 }

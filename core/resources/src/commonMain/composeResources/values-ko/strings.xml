@@ -97,6 +97,7 @@
     <string name="connected">연결됨</string>
     <string name="connecting">연결 중</string>
     <string name="not_connected">연결되지 않음</string>
+    <string name="transport_ble">BLE</string>
     <string name="connected_sleeping">연결되었지만, 해당 장치는 절전모드입니다.</string>
     <string name="app_too_old">앱 업데이트가 필요합니다.</string>
     <string name="must_update">구글 플레이 스토어 또는 깃허브를 통해서 앱을 업데이트 해야합니다. 앱이 너무 구버전입니다. 이 주제의  <a href="https://meshtastic.org/docs/software/android/installation">docs</a> 를 읽어주세요</string>

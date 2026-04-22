@@ -176,6 +176,8 @@
     <string name="no_network_devices_found">Сетевые устройства не найдены</string>
     <string name="no_usb_devices_found">Устройства USB не найдены</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">BLE</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Демо-режим</string>
     <string name="connected_sleeping">Подключен к радиостанции, но она спит</string>
     <string name="app_too_old">Требуется обновление приложения</string>
@@ -799,6 +801,7 @@
     <string name="request_host_metrics">Метрики хоста</string>
     <string name="request_pax_metrics">Метрика прохожих</string>
     <string name="request_metadata">Метаданные</string>
+    <string name="retry">Повторить</string>
     <string name="actions">Действия</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Использовать 12-часовой формат времени</string>
@@ -909,6 +912,8 @@
     <string name="firmware_edition">Версия прошивки</string>
     <string name="recent_network_devices">Недавние сетевые устройства</string>
     <string name="discovered_network_devices">Найденные сетевые устройства</string>
+    <string name="scanning_network">Поиск...</string>
+    <string name="scanning_bluetooth">Поиск...</string>
     <string name="bluetooth_available_devices">Доступные Bluetooth-устройства</string>
     <string name="get_started">Начать работу</string>
     <string name="intro_welcome">Добро пожаловать в</string>

@@ -234,6 +234,8 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength()
 
+    override fun requestHighConnectionPriority(): Boolean = peripheral?.requestHighConnectionPriority() == true
+
     /** Ensures the previous peripheral's GATT resources are fully released. */
     private suspend fun cleanUpPeripheral(tag: String) {
         withContext(NonCancellable) { safeClosePeripheral(tag) }

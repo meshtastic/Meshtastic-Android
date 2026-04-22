@@ -88,8 +88,12 @@
     <string name="config_security_private_key">Використовується для створення спільного ключа з віддаленим пристроєм.</string>
     <string name="config_security_admin_key">Публічний ключ уповноважений надсилати повідомлення адміністратора на цей вузол.</string>
     <!-- Position Config -->
+    <string name="position_packet">Пакет позиції</string>
+    <string name="broadcast_interval">Інтервал трансляції</string>
     <string name="device_gps">GPS пристрій</string>
+    <string name="fixed_position">Фіксована позиція</string>
     <string name="altitude">Висота</string>
+    <string name="update_interval">Інтервал опитування GPS</string>
     <string name="gps_receive_gpio">GPIO отримання GPS</string>
     <string name="gps_transmit_gpio">GPIO передачі GPS</string>
     <string name="gps_en_gpio">GPS EN GPIO</string>
@@ -121,6 +125,7 @@
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="connecting">Під’єднання</string>
     <string name="not_connected">Не підключено</string>
+    <string name="transport_ble">BLE</string>
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
     <string name="must_update">Ви повинні оновити цю програму в App Store (або Github). Він занадто старий, щоб спілкуватися з цією прошивкою радіо. Будь ласка, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацію</a> у вказаній темі.</string>
@@ -264,6 +269,7 @@
     <string name="wifi_qr_code_scan">Сканувати QR-код Wi-Fi</string>
     <string name="navigate_back">Перейти назад</string>
     <string name="battery">Батарея</string>
+    <string name="channel_utilization">Завантаженість каналу</string>
     <string name="soil_temperature">Температура ґрунту</string>
     <string name="soil_moisture">Вологість ґрунту</string>
     <string name="logs">Журнали подій</string>
@@ -512,6 +518,7 @@
     <string name="request_host_metrics">Показники хоста</string>
     <string name="request_pax_metrics">Показники Pax</string>
     <string name="request_metadata">Метадані</string>
+    <string name="retry">Повторити</string>
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Використовувати 12-г формат часу</string>
