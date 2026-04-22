@@ -95,6 +95,16 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
     @Volatile private var peripheralAddress: String? = null
 
+    /**
+     * The currently-active [MeshtasticBleDevice] whose state should be updated by the long-lived [stateJob].
+     *
+     * The state observer captures *this field*, not its lambda parameter — so when [connect] reuses an existing
+     * peripheral with a *different* device instance for the same address (e.g. the firmware-reported name changed and
+     * the bonded-device cache swapped the instance), the still-running observer keeps updating the most recent device
+     * rather than the stale one captured at observer launch time.
+     */
+    @Volatile private var activeDevice: MeshtasticBleDevice? = null
+
     @Volatile private var stateJob: Job? = null
 
     @Volatile private var connectionScope: CoroutineScope? = null
@@ -165,6 +175,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
 
         _deviceFlow.emit(device)
 
+        // Set BEFORE (re)launching stateJob so the observer always sees the current device.
+        activeDevice = meshtasticDevice
+
         if (!canReuse || stateJob?.isActive != true) {
             stateJob?.cancel()
             // Capture in a local so the lambda mutation doesn't race with field reads.
@@ -177,7 +190,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
                             hasStartedConnecting = true
                         }
 
-                        meshtasticDevice.updateState(mappedState)
+                        // Read field, NOT the captured constructor parameter — see [activeDevice] kdoc.
+                        activeDevice?.updateState(mappedState)
 
                         _connectionState.emit(mappedState)
                     }
@@ -245,6 +259,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
         safeClosePeripheral("disconnect")
         peripheral = null
         peripheralAddress = null
+        activeDevice = null
         connectionScope = null
 
         if (owned != null && ActiveBleConnection.active?.peripheral === owned) {

@@ -19,6 +19,7 @@ package org.meshtastic.core.ble
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlin.math.pow
 import kotlin.random.Random
 
 /** Cap on the per-attempt backoff to prevent unbounded growth. */
@@ -60,8 +61,7 @@ suspend fun <T> retryBleOperation(
                 Logger.w(e) { "[$tag] BLE operation failed after $count attempts, giving up" }
                 throw e
             }
-            val backoffMs =
-                (delayMs * pow(BACKOFF_FACTOR, currentAttempt - 1)).toLong().coerceAtMost(MAX_RETRY_DELAY_MS)
+            val backoffMs = (delayMs * BACKOFF_FACTOR.pow(currentAttempt - 1)).toLong().coerceAtMost(MAX_RETRY_DELAY_MS)
             val jitterRange = (backoffMs / 4).coerceAtLeast(1L)
             val jitter = Random.nextLong(-jitterRange, jitterRange + 1)
             val sleepMs = (backoffMs + jitter).coerceAtLeast(0L)
@@ -69,13 +69,4 @@ suspend fun <T> retryBleOperation(
             delay(sleepMs)
         }
     }
-}
-
-/**
- * Tiny `Math.pow` shim so this stays in commonMain without pulling in `kotlin.math.pow` (which lives only in JVM/JS).
- */
-private fun pow(base: Double, exp: Int): Double {
-    var result = 1.0
-    repeat(exp) { result *= base }
-    return result
 }
