@@ -22,7 +22,6 @@ import com.juul.kable.PeripheralBuilder
 import com.juul.kable.State
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
-import com.juul.kable.logs.Logging
 import com.juul.kable.writeWithoutResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -90,7 +89,8 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
  * fall back to `autoConnect = true` on failure. Only two attempts are made per [connect] call — the caller
  * ([BleRadioTransport]) owns the macro-level retry/backoff loop.
  */
-class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
+class KableBleConnection(private val scope: CoroutineScope, private val loggingConfig: BleLoggingConfig) :
+    BleConnection {
 
     @Volatile private var peripheral: Peripheral? = null
 
@@ -124,11 +124,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
-            logging {
-                engine = KermitLogEngine
-                level = Logging.Level.Events
-                identifier = device.address
-            }
+            logging { applyConfig(loggingConfig, identifier = device.address) }
             observationExceptionHandler { cause ->
                 Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
             }

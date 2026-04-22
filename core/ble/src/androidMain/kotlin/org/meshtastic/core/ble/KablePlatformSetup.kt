@@ -49,9 +49,9 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
             // Requesting the max MTU is critical for preventing dropped packets and stalls.
             @Suppress("MagicNumber")
             val negotiatedMtu = requestMtu(512)
-            Logger.i { "Negotiated MTU: $negotiatedMtu" }
+            Logger.i { "[${device.address}] Negotiated MTU: $negotiatedMtu" }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.w(e) { "Failed to request MTU" }
+            Logger.w(e) { "[${device.address}] Failed to request MTU" }
         }
     }
 }
