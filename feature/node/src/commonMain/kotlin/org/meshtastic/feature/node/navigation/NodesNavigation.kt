@@ -74,12 +74,14 @@ fun EntryProviderScope<NavKey>.nodesGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
+    onNavigateToConnections: () -> Unit = {},
 ) {
     entry<NodesRoute.NodesGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
             onHandleDeepLink = onHandleDeepLink,
+            onNavigateToConnections = onNavigateToConnections,
         )
     }
 
@@ -88,10 +90,11 @@ fun EntryProviderScope<NavKey>.nodesGraph(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
             onHandleDeepLink = onHandleDeepLink,
+            onNavigateToConnections = onNavigateToConnections,
         )
     }
 
-    nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink)
+    nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink, onNavigateToConnections)
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -100,12 +103,14 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
+    onNavigateToConnections: () -> Unit = {},
 ) {
     entry<NodesRoute.NodeDetailGraph>(metadata = { ListDetailSceneStrategy.listPane() }) { args ->
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
             onHandleDeepLink = onHandleDeepLink,
+            onNavigateToConnections = onNavigateToConnections,
         )
     }
 

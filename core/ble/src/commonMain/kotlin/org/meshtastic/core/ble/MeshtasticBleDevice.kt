@@ -48,6 +48,8 @@ class MeshtasticBleDevice(
     override val isConnected: Boolean
         get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.active?.address == address
 
+    override val rssi: Int? = advertisement?.rssi
+
     @OptIn(ExperimentalApi::class)
     override suspend fun readRssi(): Int {
         val active = ActiveBleConnection.active

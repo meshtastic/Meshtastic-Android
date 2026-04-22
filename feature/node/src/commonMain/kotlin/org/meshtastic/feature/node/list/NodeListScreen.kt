@@ -21,18 +21,24 @@ package org.meshtastic.feature.node.list
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,8 +48,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
@@ -55,10 +64,18 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.node_count_template
 import org.meshtastic.core.resources.nodes
+import org.meshtastic.core.resources.nodes_empty_disconnected_hint
+import org.meshtastic.core.resources.nodes_empty_disconnected_title
+import org.meshtastic.core.resources.nodes_empty_searching_hint
+import org.meshtastic.core.resources.nodes_empty_searching_title
+import org.meshtastic.core.resources.set_up_connection
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.NoDevice
+import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
@@ -73,6 +90,7 @@ fun NodeListScreen(
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
+    onNavigateToConnections: () -> Unit = {},
 ) {
     val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
@@ -205,8 +223,75 @@ fun NodeListScreen(
                         }
                     }
                 }
+                if (nodes.isEmpty() && !state.filter.isActive) {
+                    item {
+                        NodeListEmptyState(
+                            connectionState = connectionState,
+                            onNavigateToConnections = onNavigateToConnections,
+                            modifier = Modifier.fillParentMaxSize(),
+                        )
+                    }
+                }
                 item { Spacer(modifier = Modifier.height(88.dp)) }
             }
+        }
+    }
+}
+
+/**
+ * Inline empty state for the Nodes screen. Material 3 inline empty-state guidance: a small muted icon, short title, and
+ * supporting hint. When the user has no device selected (or is otherwise disconnected), an action button routes them to
+ * the Connections tab; when connected with no nodes yet we show a passive "searching" state.
+ */
+@Composable
+private fun NodeListEmptyState(
+    connectionState: ConnectionState,
+    onNavigateToConnections: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isConnected = connectionState == ConnectionState.Connected
+    val (icon: ImageVector, title: String, hint: String) =
+        if (isConnected) {
+            Triple(
+                MeshtasticIcons.Nodes,
+                stringResource(Res.string.nodes_empty_searching_title),
+                stringResource(Res.string.nodes_empty_searching_hint),
+            )
+        } else {
+            Triple(
+                MeshtasticIcons.NoDevice,
+                stringResource(Res.string.nodes_empty_disconnected_title),
+                stringResource(Res.string.nodes_empty_disconnected_hint),
+            )
+        }
+    Column(
+        modifier = modifier.padding(horizontal = 32.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = hint,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        if (!isConnected) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onNavigateToConnections) { Text(stringResource(Res.string.set_up_connection)) }
         }
     }
 }

@@ -283,7 +283,15 @@ private fun ApplicationScope.MeshtasticWindow(
     windowState: WindowState,
     onCloseRequest: () -> Unit,
 ) {
-    val multiBackstack = rememberMultiBackstack(TopLevelDestination.Connections.route)
+    val multiBackstack =
+        rememberMultiBackstack(
+            // Land on Connections for first-run / no-device-selected; otherwise on Nodes.
+            if (uiViewModel.currentDeviceAddressFlow.value.let { it.isNullOrBlank() || it == "n" }) {
+                TopLevelDestination.Connections.route
+            } else {
+                TopLevelDestination.Nodes.route
+            },
+        )
 
     Window(
         onCloseRequest = onCloseRequest,
