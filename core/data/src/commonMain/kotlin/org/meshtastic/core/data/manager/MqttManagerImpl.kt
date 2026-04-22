@@ -44,6 +44,7 @@ import org.meshtastic.mqtt.ProbeResult
 import org.meshtastic.mqtt.probe
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
+import kotlin.time.Clock
 
 @Single
 class MqttManagerImpl(
@@ -125,6 +126,8 @@ class MqttManagerImpl(
         val endpoint = resolveEndpoint(address, tlsEnabled)
         val result =
             MqttClient.probe(endpoint = endpoint) {
+                // Provide a valid client ID for the probe; brokers reject empty identifiers
+                clientId = "MeshtasticProbe-${Clock.System.now().toEpochMilliseconds()}"
                 val user = username?.takeUnless { it.isEmpty() }
                 val pass = password?.takeUnless { it.isEmpty() }
                 if (user != null) this.username = user
