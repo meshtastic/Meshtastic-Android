@@ -71,6 +71,7 @@ class NymeaWifiService(
     connectionFactory: BleConnectionFactory,
     dispatcher: CoroutineDispatcher,
 ) {
+    private val connectionInfoTimeout = 2.seconds
 
     private val serviceScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(serviceScope, TAG)
@@ -245,7 +246,7 @@ class NymeaWifiService(
     private suspend fun fetchConnectionIpAddress(): String? =
         safeCatching {
             sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
-            val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = 2.seconds))
+            val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = connectionInfoTimeout))
             if (response.responseCode == RESPONSE_SUCCESS) {
                 response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
             } else {

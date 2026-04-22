@@ -118,10 +118,13 @@ import org.meshtastic.core.resources.wifi_provision_success_done
 import org.meshtastic.core.resources.wifi_provision_success_ip_address
 import org.meshtastic.core.resources.wifi_provision_success_missing_ip
 import org.meshtastic.core.resources.wifi_provision_success_open_ssh
+import org.meshtastic.core.resources.wifi_provision_success_open_ssh_fallback
+import org.meshtastic.core.resources.wifi_provision_success_password_value
 import org.meshtastic.core.resources.wifi_provision_success_setup_description
 import org.meshtastic.core.resources.wifi_provision_success_setup_title
 import org.meshtastic.core.resources.wifi_provision_success_ssh_label
 import org.meshtastic.core.resources.wifi_provision_success_ssh_command
+import org.meshtastic.core.resources.wifi_provision_success_username_value
 import org.meshtastic.core.resources.wifi_provision_success_username
 import org.meshtastic.core.resources.wifi_provisioning
 import org.meshtastic.core.ui.component.AutoLinkText
@@ -144,8 +147,6 @@ import org.meshtastic.feature.wifiprovision.WifiProvisionViewModel
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 
 private const val NETWORK_LIST_MAX_HEIGHT_DP = 240
-private const val DEFAULT_DEVICE_USERNAME = "root"
-private const val DEFAULT_DEVICE_PASSWORD = "1234"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")
@@ -494,9 +495,11 @@ internal fun ConnectedContent(
 @Composable
 private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
     val openUrl = rememberOpenUrl()
+    val defaultUsername = stringResource(Res.string.wifi_provision_success_username_value)
+    val defaultPassword = stringResource(Res.string.wifi_provision_success_password_value)
     val resolvedIp = ipAddress ?: stringResource(Res.string.wifi_provision_success_missing_ip)
-    val sshCommand = stringResource(Res.string.wifi_provision_success_ssh_command, resolvedIp)
-    val sshUri = "ssh://$DEFAULT_DEVICE_USERNAME@$resolvedIp"
+    val sshCommand = stringResource(Res.string.wifi_provision_success_ssh_command, defaultUsername, resolvedIp)
+    val sshUri = "ssh://$defaultUsername@$resolvedIp"
 
     Column(
         modifier =
@@ -546,11 +549,11 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
                 )
                 ProvisionInfoCard(
                     label = stringResource(Res.string.wifi_provision_success_username),
-                    value = DEFAULT_DEVICE_USERNAME,
+                    value = defaultUsername,
                 )
                 ProvisionInfoCard(
                     label = stringResource(Res.string.password),
-                    value = DEFAULT_DEVICE_PASSWORD,
+                    value = defaultPassword,
                 )
                 ProvisionInfoCard(
                     label = stringResource(Res.string.wifi_provision_success_ssh_label),
@@ -566,6 +569,11 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(Res.string.wifi_provision_success_open_ssh))
                 }
+                Text(
+                    text = stringResource(Res.string.wifi_provision_success_open_ssh_fallback),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
 
