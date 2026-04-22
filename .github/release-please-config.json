@@ -1,0 +1,32 @@
+{
+  "bootstrap-sha": "228d872f9d460173d794b37f49cf4ac042d9826e",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "changelog-path": "CHANGELOG.md",
+      "include-v-in-tag": true,
+      "tag-separator": "",
+      "draft": false,
+      "prerelease": false,
+      "bump-minor-pre-major": false,
+      "bump-patch-for-minor-pre-major": false,
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "config.properties"
+        }
+      ],
+      "changelog-sections": [
+        {"type": "feat",     "section": "🏗️ Features"},
+        {"type": "fix",      "section": "🛠️ Fixes"},
+        {"type": "deps",     "section": "📦 Dependencies"},
+        {"type": "refactor", "section": "♻️ Refactors", "hidden": true},
+        {"type": "chore",    "section": "🔧 Chores",    "hidden": true},
+        {"type": "docs",     "section": "📝 Docs",      "hidden": true},
+        {"type": "test",     "section": "🧪 Tests",     "hidden": true},
+        {"type": "build",    "section": "🏗 Build",     "hidden": true},
+        {"type": "ci",       "section": "⚙️ CI",         "hidden": true}
+      ]
+    }
+  }
+}

@@ -129,8 +129,17 @@ jobs:
       - name: Push Git Tag on Success
         if: ${{ inputs.commit_sha != '' }}
         run: |
-          git tag ${{ inputs.final_tag }} ${{ inputs.commit_sha }}
-          git push origin ${{ inputs.final_tag }}
+          # Create the tag only if it does not already exist on the remote.
+          # release-please may have already created the production tag (vX.Y.Z)
+          # when its Release PR was merged, so we check first to avoid failing.
+          FINAL_TAG="${{ inputs.final_tag }}"
+          COMMIT_SHA="${{ inputs.commit_sha }}"
+          if git ls-remote --tags origin "$FINAL_TAG" | grep -q "$FINAL_TAG"; then
+            echo "Tag $FINAL_TAG already exists on remote (likely created by release-please). Skipping tag push."
+          else
+            git tag "$FINAL_TAG" "$COMMIT_SHA"
+            git push origin "$FINAL_TAG"
+          fi
 
       - name: Update GitHub Release with gh CLI
         env:

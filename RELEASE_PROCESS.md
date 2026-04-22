@@ -2,6 +2,8 @@
 
 This guide summarizes the steps for releasing a new version of Meshtastic-Android. The process is fully automated via GitHub Actions and Fastlane.
 
+For the versioning policy (`versionCode` formula, SemVer bump rules, and the release-please integration), see [docs/versioning.md](docs/versioning.md).
+
 ## Overview
 
 The entire release process is managed by a single, manually-triggered GitHub Action: **`Create or Promote Release`**.
@@ -19,6 +21,25 @@ The entire release process is managed by a single, manually-triggered GitHub Act
 -   **Changelog:** Release notes are auto-generated from PR labels. Ensure PRs are labeled correctly to maintain an accurate changelog.
 
 ## Release Steps
+
+### 0. Prepare the release (release-please)
+
+The repository runs a **release-please** pilot that automatically maintains a **Release PR** on
+`main`.  This PR proposes the next SemVer version bump (determined from
+[Conventional Commit](https://www.conventionalcommits.org/) prefixes) and updates:
+- `CHANGELOG.md`
+- `version.txt`
+- `VERSION_NAME_BASE` in `config.properties`
+
+When the team is ready to cut a new version:
+
+1.  Review the open Release PR (titled `chore(main): release X.Y.Z`) in the repository.
+2.  Make any changelog edits inside the PR using the `BEGIN_COMMIT_OVERRIDE` / `END_COMMIT_OVERRIDE` mechanism (see [docs/versioning.md](docs/versioning.md)).
+3.  **Merge the Release PR.**  release-please will tag the commit as `vX.Y.Z` and open a draft GitHub Release.
+4.  Proceed with the internal build (Step 1 below) using the newly bumped version.
+
+> If you need to force a specific version, push an empty commit with `Release-As: x.y.z` in the
+> body before merging the Release PR.
 
 ### 1. Start an Internal Release
 
@@ -51,6 +72,10 @@ After testing is complete on all pre-release channels, you can create the final 
 2.  Use the same base `version`.
 3.  Select the `production` channel.
 4.  The workflow will create a clean version tag (e.g., `v2.4.0`) and create a **published, stable** (non-prerelease) release on GitHub.
+
+> **Note:** If the release-please Release PR was merged before this step, the `v2.4.0` tag
+> already exists (created by release-please).  The production promotion workflow detects this
+> and skips the duplicate tag push gracefully.
 
 ### 4. Post-Release
 

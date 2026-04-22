@@ -1,0 +1,60 @@
+name: Release Please
+
+# Runs on every push to main. release-please:
+#   1. Parses Conventional Commit messages since the last release.
+#   2. Opens (or updates) a Release PR proposing the next SemVer bump and updating
+#      CHANGELOG.md, version.txt, and VERSION_NAME_BASE in config.properties.
+#   3. When the Release PR is merged, creates a `vX.Y.Z` tag and a draft GitHub Release.
+#
+# The existing channel-promotion pipeline (Create or Promote Release) remains the
+# authoritative deployment path.  See docs/versioning.md for the full decision record.
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          # A PAT is required so that release-please PRs and the resulting
+          # release tag/commit trigger follow-on CI workflows (the built-in
+          # GITHUB_TOKEN does not trigger workflows on its own events).
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: .github/release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # ── Informational output ────────────────────────────────────────────────
+      - name: Print release-please outputs
+        if: always()
+        env:
+          RELEASE_CREATED: ${{ steps.release.outputs.release_created }}
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          VERSION: ${{ steps.release.outputs.version }}
+          PR_NUMBER: ${{ steps.release.outputs.pr }}
+        run: |
+          echo "### release-please summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$RELEASE_CREATED" == "true" ]]; then
+            echo "✅ **Release created:** \`$TAG_NAME\` (v$VERSION)" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Next steps:" >> "$GITHUB_STEP_SUMMARY"
+            echo "1. Run the **Create or Promote Release** workflow with \`base_version: $VERSION\` and \`channel: internal\` to start the deployment pipeline." >> "$GITHUB_STEP_SUMMARY"
+          elif [[ -n "$PR_NUMBER" ]]; then
+            echo "🔄 **Release PR updated:** #$PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ℹ️ No releasable commits found since last release — no PR created." >> "$GITHUB_STEP_SUMMARY"
+          fi
