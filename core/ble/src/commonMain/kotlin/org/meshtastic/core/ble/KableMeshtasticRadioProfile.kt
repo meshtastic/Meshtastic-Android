@@ -47,15 +47,24 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
     private val fromNum = service.characteristic(FROMNUM_CHARACTERISTIC)
     private val logRadioChar = service.characteristic(LOGRADIO_CHARACTERISTIC)
 
+    /**
+     * Cached preferred write type for [toRadio]. Resolved once at construction so the hot send path doesn't have to
+     * walk the discovered services list on every packet.
+     */
+    private val toRadioWriteType: BleWriteType = service.preferredWriteType(toRadio)
+
     companion object {
         private val TRANSIENT_RETRY_DELAY = 500.milliseconds
     }
 
     private val subscriptionReady = CompletableDeferred<Unit>()
 
-    /** Seed with replay=1 so the config-handshake drain starts before FROMNUM notifications are gated in. */
+    /**
+     * Latched signal: a single buffered slot collapses bursts of drain triggers into one pending poll. Capacity 1 with
+     * DROP_OLDEST means we never block writers and never let stale drain requests pile up.
+     */
     private val triggerDrain =
-        MutableSharedFlow<Unit>(replay = 1, extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+        MutableSharedFlow<Unit>(replay = 1, extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override val fromRadio: Flow<ByteArray> = channelFlow {
@@ -97,14 +106,15 @@ class KableMeshtasticRadioProfile(private val service: BleService) : MeshtasticR
         if (service.hasCharacteristic(logRadioChar)) {
             service.observe(logRadioChar).catch { e ->
                 if (e is CancellationException) throw e
-                // logRadio is optional — swallow observation errors silently.
+                // logRadio is optional — log at debug for diagnostics but don't surface to callers.
+                Logger.d(e) { "logRadio observation failure suppressed" }
             }
         } else {
             emptyFlow()
         }
 
     override suspend fun sendToRadio(packet: ByteArray) {
-        service.write(toRadio, packet, service.preferredWriteType(toRadio))
+        service.write(toRadio, packet, toRadioWriteType)
         triggerDrain.tryEmit(Unit)
     }
 
