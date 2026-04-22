@@ -644,6 +644,7 @@
     <string name="installed_firmware_version">Obecnie zainstalowana wersja</string>
     <string name="latest_stable_firmware">Ostatnia stabilna wersja</string>
     <string name="latest_alpha_firmware">Ostatnia wersja alpha</string>
+    <string name="nodes_empty_disconnected_title">Brak podłączonych urządzeń</string>
     <string name="share_your_location_in_real_time">Udostępniaj swoją lokalizację w czasie rzeczywistym i koordynuj działania swojej grupy dzięki zintegrowanym funkcjom GPS.</string>
     <string name="app_notifications">Powiadomienia aplikacji</string>
     <string name="incoming_messages">Wiadomości przychodzące</string>
