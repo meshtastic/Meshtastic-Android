@@ -109,6 +109,9 @@ class FakeBleConnection :
     /** Number of times [disconnect] has been invoked. */
     var disconnectCalls: Int = 0
 
+    /** Service UUIDs that should appear missing — `profile()` throws `NoSuchElementException` for these. */
+    val missingServices: MutableSet<Uuid> = mutableSetOf()
+
     val service = FakeBleService()
 
     override suspend fun connect(device: BleDevice) {
@@ -149,7 +152,12 @@ class FakeBleConnection :
         serviceUuid: Uuid,
         timeout: Duration,
         setup: suspend CoroutineScope.(BleService) -> T,
-    ): T = CoroutineScope(Dispatchers.Unconfined).setup(service)
+    ): T {
+        if (serviceUuid in missingServices) {
+            throw NoSuchElementException("Service $serviceUuid not found")
+        }
+        return CoroutineScope(Dispatchers.Unconfined).setup(service)
+    }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = maxWriteValueLength
 }

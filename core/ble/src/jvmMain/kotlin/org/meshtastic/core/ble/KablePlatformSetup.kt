@@ -31,4 +31,6 @@ internal actual fun createPeripheral(address: String, builderAction: PeripheralB
 // so callers can size their writes without falling back to an overly conservative minimum.
 internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = DEFAULT_JVM_MTU
 
+internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
+
 private const val DEFAULT_JVM_MTU = 512

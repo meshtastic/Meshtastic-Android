@@ -66,3 +66,10 @@ internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? {
     val mtu = (this as? AndroidPeripheral)?.mtu?.value ?: return null
     return (mtu - ATT_HEADER_SIZE).takeIf { it > 0 }
 }
+
+internal actual fun Peripheral.requestHighConnectionPriority(): Boolean {
+    val androidPeripheral = this as? AndroidPeripheral ?: return false
+    return runCatching { androidPeripheral.requestConnectionPriority(AndroidPeripheral.Priority.High) }
+        .onFailure { Logger.w(it) { "requestConnectionPriority(High) threw" } }
+        .getOrDefault(false)
+}
