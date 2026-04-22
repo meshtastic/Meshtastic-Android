@@ -24,9 +24,9 @@ import dev.mokkery.mock
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleConnection
@@ -35,6 +35,7 @@ import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.ble.DisconnectReason
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -227,6 +228,63 @@ class BleRadioTransportReconnectCrashTest {
             "disconnect() must be called after CancellationException in profile() — GATT leak fix",
         )
     }
+
+    // ─── Reconnect after a stable connection drops ───────────────────────────────────────────────
+
+    /**
+     * Regression test for the BLE reconnect hang.
+     *
+     * Symptom: after a stable connection (uptime > minStableConnection) was terminated by a remote disconnect (e.g.
+     * node power-cycle), the transport's reconnect loop never iterated — `attemptConnection` ran exactly once, the GATT
+     * disconnect callback fired, and then nothing.
+     *
+     * Root cause: `attemptConnection` wrapped its disconnect-watcher in a `coroutineScope {
+     * connectionState.onEach{...}.launchIn(this); connectionState.first { Disconnected } }` block. `coroutineScope`
+     * waits for ALL launched children before returning, but the `.launchIn` collector on a hot `StateFlow` (or
+     * `SharedFlow(replay=1)`) never completes naturally. After `.first` returned, the scope hung forever, blocking
+     * `BleReconnectPolicy.execute` from issuing the next attempt.
+     *
+     * This test exercises the full happy-path reconnect cycle: connect → stable uptime → external disconnect → expect a
+     * second `connectAndAwait` call. With the bug present, only one `connectAndAwait` call ever happens.
+     */
+    @Test
+    fun `transport reconnects after a stable connection is dropped remotely`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Radio")
+        bluetoothRepository.bond(device)
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+
+        // Settle delay (3 s) + connect + handshake.
+        advanceTimeBy(4_000L)
+        assertTrue(connection.connectAndAwaitCalls == 1, "First connect must happen during initial start window")
+
+        // Stay connected long enough to be considered stable (> minStableConnection = 5 s).
+        advanceTimeBy(10_000L)
+
+        // Simulate the firmware dying mid-session — the same path a node power-cycle takes.
+        connection.simulateRemoteDisconnect(reason = DisconnectReason.Timeout)
+
+        // Settle delay (3 s) before the next attempt + re-connect window. Generous to absorb
+        // the policy retry backoff (5 s on first failure) plus another 3 s settle delay.
+        advanceTimeBy(30_000L)
+
+        assertTrue(
+            connection.connectAndAwaitCalls >= 2,
+            "Reconnect loop must call connectAndAwait again after a remote disconnect " +
+                "(actual calls: ${connection.connectAndAwaitCalls})",
+        )
+
+        bleTransport.close()
+    }
 }
 
 // ─── Test doubles ────────────────────────────────────────────────────────────────────────────────
@@ -237,19 +295,19 @@ class BleRadioTransportReconnectCrashTest {
  */
 private class CancellingProfileBleConnection : BleConnection {
 
-    private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
-    override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
+    private val _deviceFlow = MutableStateFlow<BleDevice?>(null)
+    override val deviceFlow: StateFlow<BleDevice?> = _deviceFlow.asStateFlow()
 
-    private val _connectionState = MutableSharedFlow<BleConnectionState>(replay = 1)
-    override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
+    private val _connectionState = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
+    override val connectionState: StateFlow<BleConnectionState> = _connectionState.asStateFlow()
 
     override val device: BleDevice? = null
 
     var disconnectCalls = 0
 
     override suspend fun connect(device: BleDevice) {
-        _deviceFlow.emit(device)
-        _connectionState.emit(BleConnectionState.Connected)
+        _deviceFlow.value = device
+        _connectionState.value = BleConnectionState.Connected
     }
 
     override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState {
@@ -259,8 +317,8 @@ private class CancellingProfileBleConnection : BleConnection {
 
     override suspend fun disconnect() {
         disconnectCalls++
-        _connectionState.emit(BleConnectionState.Disconnected())
-        _deviceFlow.emit(null)
+        _connectionState.value = BleConnectionState.Disconnected()
+        _deviceFlow.value = null
     }
 
     override suspend fun <T> profile(

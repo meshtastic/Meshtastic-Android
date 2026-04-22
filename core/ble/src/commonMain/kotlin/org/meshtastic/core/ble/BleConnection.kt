@@ -18,7 +18,7 @@ package org.meshtastic.core.ble
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -41,11 +41,17 @@ interface BleConnection {
     /** The currently connected [BleDevice], or null if not connected. */
     val device: BleDevice?
 
-    /** A flow of the current device. */
-    val deviceFlow: SharedFlow<BleDevice?>
+    /**
+     * A flow of the current device. [StateFlow] semantics: replays the latest value to new collectors and conflates
+     * rapid updates.
+     */
+    val deviceFlow: StateFlow<BleDevice?>
 
-    /** A flow of [BleConnectionState] changes. */
-    val connectionState: SharedFlow<BleConnectionState>
+    /**
+     * A flow of [BleConnectionState] changes. [StateFlow] semantics ensure the latest state is always observable and
+     * distinct-equals deduplication avoids spurious re-emissions.
+     */
+    val connectionState: StateFlow<BleConnectionState>
 
     /** Connects to the given [BleDevice]. */
     suspend fun connect(device: BleDevice)
