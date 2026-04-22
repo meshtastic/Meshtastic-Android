@@ -816,6 +816,14 @@
     <string name="request_host_metrics">Host Metrics</string>
     <string name="request_pax_metrics">Pax Metrics</string>
     <string name="request_metadata">Metadata</string>
+    <string name="refresh_metadata">Refresh metadata</string>
+    <string name="establish_session">Connect &amp; administer</string>
+    <string name="establishing_session">Establishing remote session…</string>
+    <string name="session_active">Session active</string>
+    <string name="session_refresh_required">Refresh required</string>
+    <string name="connect_radio_for_remote_admin">Connect to a radio to administer remote nodes.</string>
+    <string name="remote_admin_unreachable">Could not reach node — try again or move closer.</string>
+    <string name="retry">Retry</string>
     <string name="actions">Actions</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Use 12h clock format</string>

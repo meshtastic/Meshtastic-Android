@@ -119,7 +119,16 @@ fun NodeDetailList(
         }
         item { NotesSection(node = node, onSaveNotes = onSaveNotes) }
         if (!uiState.metricsState.isManaged) {
-            item { AdministrationSection(node, uiState.metricsState, onAction, onFirmwareSelect) }
+            item {
+                AdministrationSection(
+                    node = node,
+                    metricsState = uiState.metricsState,
+                    onAction = onAction,
+                    onFirmwareSelect = onFirmwareSelect,
+                    sessionStatus = uiState.sessionStatus,
+                    isEnsuringSession = uiState.isEnsuringSession,
+                )
+            }
         }
     }
 }

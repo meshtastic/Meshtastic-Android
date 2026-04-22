@@ -100,6 +100,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
             radioConfigViewModel = getRadioConfigViewModel(backStack),
             onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
+            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
@@ -233,6 +234,7 @@ expect fun SettingsMainScreen(
     radioConfigViewModel: RadioConfigViewModel,
     onClickNodeChip: (Int) -> Unit,
     onNavigate: (Route) -> Unit,
+    onBack: (() -> Unit)? = null,
 )
 
 /** Expect declarations for platform-specific config screens. */

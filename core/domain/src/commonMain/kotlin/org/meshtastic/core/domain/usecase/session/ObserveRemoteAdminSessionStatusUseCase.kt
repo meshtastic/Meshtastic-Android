@@ -14,20 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.navigation
+package org.meshtastic.core.domain.usecase.session
 
-import androidx.compose.runtime.Composable
-import org.meshtastic.core.navigation.Route
-import org.meshtastic.feature.settings.SettingsViewModel
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import kotlinx.coroutines.flow.Flow
+import org.koin.core.annotation.Single
+import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.repository.SessionManager
 
-@Composable
-actual fun SettingsMainScreen(
-    settingsViewModel: SettingsViewModel,
-    radioConfigViewModel: RadioConfigViewModel,
-    onClickNodeChip: (Int) -> Unit,
-    onNavigate: (Route) -> Unit,
-    onBack: (() -> Unit)?,
-) {
-    // TODO: Implement iOS settings main screen
+/**
+ * Thin wrapper that exposes the durable per-node [SessionStatus] flow to UI consumers without leaking the
+ * [SessionManager] into ViewModels.
+ */
+@Single
+open class ObserveRemoteAdminSessionStatusUseCase(private val sessionManager: SessionManager) {
+    open operator fun invoke(destNum: Int): Flow<SessionStatus> = sessionManager.observeSessionStatus(destNum)
 }

@@ -50,6 +50,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.Config
@@ -75,6 +76,7 @@ class MeshConnectionManagerImplTest {
     private val historyManager = mock<HistoryManager>(MockMode.autofill)
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
     private val commandSender = mock<CommandSender>(MockMode.autofill)
+    private val sessionManager = mock<SessionManager>(MockMode.autofill)
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
     private val packetRepository = mock<PacketRepository>(MockMode.autofill)
@@ -124,6 +126,7 @@ class MeshConnectionManagerImplTest {
         historyManager,
         radioConfigRepository,
         commandSender,
+        sessionManager,
         nodeManager,
         analytics,
         packetRepository,

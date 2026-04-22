@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import okio.ByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
 import org.meshtastic.proto.AdminMessage
@@ -37,9 +36,6 @@ interface CommandSender {
 
     /** Generates a new unique packet ID. */
     fun generatePacketId(): Int
-
-    /** Sets the session passkey for admin messages. */
-    fun setSessionPasskey(key: ByteString)
 
     /** Sends a data packet to the mesh. */
     fun sendData(p: DataPacket)

@@ -20,19 +20,32 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
+import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
+import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.connect_radio_for_remote_admin
+import org.meshtastic.core.resources.remote_admin_unreachable
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
@@ -51,6 +64,8 @@ data class NodeDetailUiState(
     val availableLogs: Set<LogsType> = emptySet(),
     val lastTracerouteTime: Long? = null,
     val lastRequestNeighborsTime: Long? = null,
+    val sessionStatus: SessionStatus = SessionStatus.NoSession,
+    val isEnsuringSession: Boolean = false,
 )
 
 /**
@@ -58,12 +73,16 @@ data class NodeDetailUiState(
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @KoinViewModel
+@Suppress("LongParameterList")
 class NodeDetailViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeManagementActions: NodeManagementActions,
     private val nodeRequestActions: NodeRequestActions,
     private val serviceRepository: ServiceRepository,
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
+    private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
+    private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase,
+    private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
     private val nodeIdFromRoute: Int? = savedStateHandle.get<Int>("destNum")
@@ -73,12 +92,32 @@ class NodeDetailViewModel(
         combine(MutableStateFlow(nodeIdFromRoute), manualNodeId) { fromRoute, manual -> manual ?: fromRoute }
             .distinctUntilChanged()
 
+    private val isEnsuringSession = MutableStateFlow(false)
+
+    private val sessionStatusFlow =
+        activeNodeId.flatMapLatest { nodeId ->
+            if (nodeId == null) flowOf(SessionStatus.NoSession) else observeRemoteAdminSessionStatus(nodeId)
+        }
+
+    /** One-shot navigation events from session-bearing actions (e.g. successful remote-admin opens). */
+    private val _navigationEvents = Channel<Route>(capacity = Channel.BUFFERED)
+    val navigationEvents: Flow<Route> = _navigationEvents.receiveAsFlow()
+
     /** Primary UI state stream, combining identity, metrics, and global device metadata. */
     val uiState: StateFlow<NodeDetailUiState> =
         activeNodeId
             .flatMapLatest { nodeId ->
-                if (nodeId == null) return@flatMapLatest flowOf(NodeDetailUiState())
-                getNodeDetailsUseCase(nodeId)
+                if (nodeId == null) {
+                    flowOf(NodeDetailUiState())
+                } else {
+                    combine(getNodeDetailsUseCase(nodeId), sessionStatusFlow, isEnsuringSession) {
+                            base,
+                            sessionStatus,
+                            ensuring,
+                        ->
+                        base.copy(sessionStatus = sessionStatus, isEnsuringSession = ensuring)
+                    }
+                }
             }
             .stateInWhileSubscribed(initialValue = NodeDetailUiState())
 
@@ -116,6 +155,37 @@ class NodeDetailViewModel(
     }
 
     fun onServiceAction(action: ServiceAction) = viewModelScope.launch { serviceRepository.onServiceAction(action) }
+
+    /**
+     * Ensure a remote-admin session passkey is fresh, then request navigation to the remote-admin screen. Surfaces a
+     * snackbar with the appropriate guidance on [EnsureSessionResult.Disconnected] or [EnsureSessionResult.Timeout].
+     */
+    fun openRemoteAdmin(destNum: Int) {
+        if (isEnsuringSession.value) return
+        viewModelScope.launch {
+            isEnsuringSession.value = true
+            try {
+                when (ensureRemoteAdminSession(destNum)) {
+                    EnsureSessionResult.AlreadyActive,
+                    EnsureSessionResult.Refreshed,
+                    -> _navigationEvents.trySend(SettingsRoute.Settings(destNum))
+                    EnsureSessionResult.Disconnected ->
+                        snackbarManager.showSnackbar(
+                            UiText.Resource(Res.string.connect_radio_for_remote_admin).resolve(),
+                        )
+                    EnsureSessionResult.Timeout ->
+                        snackbarManager.showSnackbar(UiText.Resource(Res.string.remote_admin_unreachable).resolve())
+                }
+            } finally {
+                isEnsuringSession.value = false
+            }
+        }
+    }
+
+    /**
+     * Re-fetch device metadata (firmware/edition/role) for [destNum]. Refreshes the session passkey as a side effect.
+     */
+    fun refreshMetadata(destNum: Int) = onServiceAction(ServiceAction.GetDeviceMetadata(destNum))
 
     fun setNodeNotes(nodeNum: Int, notes: String) {
         nodeManagementActions.setNodeNotes(viewModelScope, nodeNum, notes)
