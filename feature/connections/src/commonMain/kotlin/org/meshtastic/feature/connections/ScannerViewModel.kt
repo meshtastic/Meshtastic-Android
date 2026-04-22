@@ -265,6 +265,15 @@ open class ScannerViewModel(
         uiPrefs.setNetworkAutoScan(_isNetworkScanning.value)
     }
 
+    /**
+     * Persist the user's intent to auto-scan the network on next screen entry without flipping the active scan flag.
+     * Used by the Connections screen when it must defer the actual scan start until after the system permission grant
+     * dialog resolves — the persisted intent ensures auto-start fires once permission is granted.
+     */
+    fun persistNetworkAutoScanIntent(enabled: Boolean) {
+        uiPrefs.setNetworkAutoScan(enabled)
+    }
+
     // ── Device selection / disconnect ───────────────────────────────────────────────────────
 
     fun changeDeviceAddress(address: String) {
