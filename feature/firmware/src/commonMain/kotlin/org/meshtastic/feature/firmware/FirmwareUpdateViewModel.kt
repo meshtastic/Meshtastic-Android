@@ -239,7 +239,7 @@ class FirmwareUpdateViewModel(
                                 tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                             }
                         } catch (e: CancellationException) {
-                            Logger.i { "Firmware update cancelled" }
+                            Logger.w(e) { "Firmware update cancelled — cause: ${e.cause} message: ${e.message}" }
                             _state.value = FirmwareUpdateState.Idle
                             checkForUpdates()
                             throw e

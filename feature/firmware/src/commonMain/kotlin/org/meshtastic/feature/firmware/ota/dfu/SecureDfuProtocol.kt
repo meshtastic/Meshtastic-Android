@@ -43,6 +43,35 @@ internal object SecureDfuUuids {
     val BUTTONLESS_WITH_BONDS: Uuid = Uuid.parse("8EC90004-F315-4F60-9FB8-838830DAEA50")
 }
 
+/**
+ * Nordic Legacy DFU service UUIDs (also used by Adafruit's `BLEDfu` helper class). Meshtastic firmware exposes this
+ * service when built **without** `BLE_DFU_SECURE`. The buttonless trigger is a single write of `0x01` (`START_DFU`) to
+ * the Control Point characteristic; the device then disconnects and reboots into the bootloader (which itself runs
+ * Secure DFU on modern Adafruit/oltaco bootloaders).
+ *
+ * Reference: `Adafruit_nRF52_Arduino/libraries/Bluefruit52Lib/src/services/BLEDfu.cpp`.
+ */
+internal object LegacyDfuUuids {
+    /** Legacy DFU service — exposed by app firmware to trigger reboot into the bootloader. */
+    val SERVICE: Uuid = Uuid.parse("00001530-1212-EFDE-1523-785FEABCD123")
+
+    /**
+     * Control Point: NOTIFY + WRITE. Notifications must be subscribed before writing or the device returns
+     * `ATTERR_CPS_CCCD_CONFIG_ERROR`.
+     */
+    val CONTROL_POINT: Uuid = Uuid.parse("00001531-1212-EFDE-1523-785FEABCD123")
+}
+
+/** Secure DFU buttonless trigger: single-byte `0x01` (START_DFU) to FE59 service. */
+internal const val BUTTONLESS_ENTER_BOOTLOADER: Byte = 0x01
+
+/**
+ * Legacy DFU buttonless trigger payload per Nordic's `LegacyButtonlessDfuImpl.java:53`: `[OP_CODE_START_DFU=0x01,
+ * IMAGE_TYPE_APPLICATION=0x04]`. The Adafruit `BLEDfu` (and original Nordic SDK 6.x bootloader) require both bytes —
+ * sending only the opcode is a spec violation that some bootloader builds silently drop.
+ */
+internal val LEGACY_BUTTONLESS_ENTER_BOOTLOADER: ByteArray = byteArrayOf(0x01, 0x04)
+
 // ---------------------------------------------------------------------------
 // Protocol opcodes
 // ---------------------------------------------------------------------------

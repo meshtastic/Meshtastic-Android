@@ -50,7 +50,10 @@ import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
 import org.meshtastic.feature.firmware.ProgressState
 import org.meshtastic.feature.firmware.ota.ThroughputTracker
+import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
+import org.meshtastic.feature.firmware.ota.scanForBleDevice
 import org.meshtastic.feature.firmware.stripFormatArgs
+import kotlin.time.Duration.Companion.seconds
 
 private const val PERCENT_MAX = 100
 private const val GATT_RELEASE_DELAY_MS = 1_500L
@@ -60,7 +63,11 @@ private const val CONNECT_ATTEMPTS = 4
 private const val KIB_DIVISOR = 1024f
 
 /**
- * KMP [FirmwareUpdateHandler] for nRF52 devices using the Nordic Secure DFU protocol over Kable BLE.
+ * KMP [FirmwareUpdateHandler] for nRF52 devices.
+ *
+ * Despite its historical name, this handler now drives **both** Nordic Secure DFU (service `FE59`) and Nordic Legacy
+ * DFU / Adafruit `BLEDfu` (service `1530`). After triggering the buttonless reboot it sniffs which DFU service the
+ * bootloader exposes and dispatches to the matching [DfuUploadTransport] implementation.
  *
  * All platform I/O (zip extraction, file reading) is delegated to [FirmwareFileHandler].
  */
@@ -107,28 +114,47 @@ class SecureDfuHandler(
                 radioController.setDeviceAddress("n")
                 delay(GATT_RELEASE_DELAY_MS)
 
-                var transport: SecureDfuTransport? = null
-                var completed = false
+                // The trigger always uses SecureDfuTransport — it speaks both Secure (FE59) and Legacy (1530)
+                // buttonless triggers and falls back automatically (commit f26f610c0).
+                val triggerTransport = SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
                 try {
-                    transport = SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
-
-                    transport.triggerButtonlessDfu().onFailure { e ->
+                    triggerTransport.triggerButtonlessDfu().onFailure { e ->
                         Logger.w(e) { "DFU: Buttonless trigger failed ($e) — device may already be in DFU mode" }
                     }
-                    delay(DFU_REBOOT_WAIT_MS)
+                } finally {
+                    withContext(NonCancellable) { triggerTransport.close() }
+                }
+                delay(DFU_REBOOT_WAIT_MS)
 
-                    // ── 4. Connect to device in DFU mode ─────────────────────────────
+                // ── 4. Service detection: which DFU protocol does the bootloader speak? ─
+                val protocol = detectBootloaderProtocol(target, updateState)
+                Logger.i { "DFU: Bootloader protocol detected: $protocol" }
+                val transport: DfuUploadTransport =
+                    when (protocol) {
+                        DfuProtocolKind.LEGACY ->
+                            LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+                        DfuProtocolKind.SECURE ->
+                            SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+                    }
+
+                var completed = false
+                try {
+                    // ── 5. Connect to device in DFU mode ─────────────────────────────
                     if (!connectWithRetry(transport, updateState)) return@withContext null
 
-                    // ── 5. Init packet ────────────────────────────────────────────
+                    // ── 6. Init packet ────────────────────────────────────────────
                     updateState(
                         FirmwareUpdateState.Processing(
                             ProgressState(UiText.Resource(Res.string.firmware_update_starting_dfu)),
                         ),
                     )
+                    Logger.i {
+                        "DFU: Sending init packet (${pkg.initPacket.size} bytes) and firmware " +
+                            "(${pkg.firmware.size} bytes) via $protocol"
+                    }
                     transport.transferInitPacket(pkg.initPacket).getOrThrow()
 
-                    // ── 6. Firmware ───────────────────────────────────────────────
+                    // ── 7. Firmware ───────────────────────────────────────────────
                     val uploadMsg = UiText.Resource(Res.string.firmware_update_uploading)
                     updateState(FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f)))
 
@@ -160,7 +186,7 @@ class SecureDfuHandler(
                         }
                         .getOrThrow()
 
-                    // ── 7. Validate ───────────────────────────────────────────────
+                    // ── 8. Validate ───────────────────────────────────────────────
                     updateState(
                         FirmwareUpdateState.Processing(
                             ProgressState(UiText.Resource(Res.string.firmware_update_validating)),
@@ -174,8 +200,8 @@ class SecureDfuHandler(
                     // Send ABORT if cancelled mid-transfer, then always clean up.
                     // NonCancellable ensures this runs even when the coroutine is being cancelled.
                     withContext(NonCancellable) {
-                        if (!completed) transport?.abort()
-                        transport?.close()
+                        if (!completed) transport.abort()
+                        transport.close()
                     }
                 }
             }
@@ -198,8 +224,35 @@ class SecureDfuHandler(
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
+    /**
+     * Detect which DFU protocol the bootloader speaks by scanning for advertised service UUIDs. We scan for the legacy
+     * service (1530) first with a short timeout — Adafruit/oltaco bootloaders always advertise it, while Nordic Secure
+     * bootloaders never do, so a hit unambiguously means Legacy. Miss ⇒ assume Secure (preserves current behavior on
+     * unaffected devices).
+     */
+    private suspend fun detectBootloaderProtocol(
+        target: String,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ): DfuProtocolKind {
+        updateState(
+            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_waiting_reboot))),
+        )
+        val targetAddresses = setOf(target, calculateMacPlusOne(target))
+        val legacyHit =
+            scanForBleDevice(
+                scanner = bleScanner,
+                tag = "DFU detect",
+                serviceUuid = LegacyDfuUuids.SERVICE,
+                retryCount = 1,
+                retryDelay = 0.seconds,
+                scanTimeout = DETECT_SCAN_TIMEOUT,
+                predicate = { it.address in targetAddresses },
+            )
+        return if (legacyHit != null) DfuProtocolKind.LEGACY else DfuProtocolKind.SECURE
+    }
+
     private suspend fun connectWithRetry(
-        transport: SecureDfuTransport,
+        transport: DfuUploadTransport,
         updateState: (FirmwareUpdateState) -> Unit,
     ): Boolean {
         updateState(
@@ -259,5 +312,16 @@ class SecureDfuHandler(
             )
         }
         return path
+    }
+
+    /** Result of [detectBootloaderProtocol]. */
+    internal enum class DfuProtocolKind {
+        SECURE,
+        LEGACY,
+    }
+
+    private companion object {
+        /** Detection scan timeout — short because we only want to confirm/refute an advertised legacy service. */
+        private val DETECT_SCAN_TIMEOUT = 8.seconds
     }
 }
