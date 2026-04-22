@@ -139,10 +139,17 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
             meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
                 ?: createPeripheral(device.address) { commonConfig() }
 
-        cleanUpPeripheral(device.address)
-        peripheral = p
-
-        ActiveBleConnection.active = ActiveConnection(p, device.address)
+        // Install ownership of the new peripheral atomically. Cancellation between
+        // peripheral construction and field assignment would strand `p` (Kable allocates
+        // a per-peripheral scope + Bluetooth-state observer eagerly), so the cleanup,
+        // assignment, and ActiveBleConnection update must complete as a single unit.
+        // _deviceFlow.emit() is intentionally outside this block — making it
+        // non-cancellable could hang teardown on a slow collector.
+        withContext(NonCancellable) {
+            cleanUpPeripheral(device.address)
+            peripheral = p
+            ActiveBleConnection.active = ActiveConnection(p, device.address)
+        }
 
         _deviceFlow.emit(device)
 
@@ -212,11 +219,18 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         stateJob?.cancel()
         stateJob = null
 
+        // Capture the peripheral we own before clearing it so we can identity-check
+        // ActiveBleConnection below. A stale disconnect from an earlier connection
+        // attempt's exception handler must not clobber a newer connection that has
+        // already installed itself as active.
+        val owned = peripheral
         safeClosePeripheral("disconnect")
         peripheral = null
         connectionScope = null
 
-        ActiveBleConnection.active = null
+        if (owned != null && ActiveBleConnection.active?.peripheral === owned) {
+            ActiveBleConnection.active = null
+        }
 
         _deviceFlow.emit(null)
     }
