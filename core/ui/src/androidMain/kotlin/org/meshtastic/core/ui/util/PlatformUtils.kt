@@ -257,6 +257,21 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
 }
 
 @Composable
+actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // Pre-Android 12, no local network permission required
+        return remember { { onGranted() } }
+    }
+    val currentOnGranted = rememberUpdatedState(onGranted)
+    val currentOnDenied = rememberUpdatedState(onDenied)
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) currentOnGranted.value() else currentOnDenied.value()
+        }
+    return remember(launcher) { { launcher.launch(android.Manifest.permission.ACCESS_LOCAL_NETWORK) } }
+}
+
+@Composable
 actual fun isLocationPermissionGranted(): Boolean {
     val context = LocalContext.current
     return rememberOnResumeState {

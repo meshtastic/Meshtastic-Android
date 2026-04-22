@@ -134,6 +134,12 @@ actual fun rememberOpenLocationSettings(): () -> Unit = { Logger.w { "Location s
 @Composable
 actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = { onGranted() }
 
+/** JVM no-op — Desktop does not require runtime local network permissions. */
+@Composable
+actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
+    onGranted()
+}
+
 /** JVM no-op — Desktop does not require runtime notification permissions. */
 @Composable
 actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {

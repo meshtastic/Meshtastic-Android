@@ -67,6 +67,10 @@ expect fun rememberSaveFileLauncher(
 /** Returns a launcher to request Bluetooth scan + connect permissions. No-op on platforms without runtime BLE perms. */
 @Composable expect fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
 
+/** Returns a launcher to request the ACCESS_LOCAL_NETWORK permission. No-op on platforms that don't require it. */
+@Composable
+expect fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
+
 /** Returns a launcher to request the POST_NOTIFICATIONS permission. No-op on platforms that don't require it. */
 @Composable
 expect fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
