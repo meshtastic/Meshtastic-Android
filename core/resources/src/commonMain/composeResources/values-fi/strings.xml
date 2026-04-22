@@ -176,6 +176,8 @@
     <string name="no_network_devices_found">Verkkolaitteita ei löytynyt</string>
     <string name="no_usb_devices_found">USB-laitteita ei löytynyt</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">BLE</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Esittelytila</string>
     <string name="connected_sleeping">Yhdistetty radioon, mutta se on lepotilassa</string>
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>

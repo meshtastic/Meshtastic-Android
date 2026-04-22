@@ -124,6 +124,7 @@
     <string name="ip_address">IP adresa: </string>
     <string name="connected">Блутут повезан</string>
     <string name="not_connected">Nije povezan</string>
+    <string name="transport_ble">БЛЕ</string>
     <string name="connected_sleeping">Povezan na radio uređaj, ali uređaj je u stanju spavanja</string>
     <string name="app_too_old">Nepohodno je ažuriranje aplikacije </string>
     <string name="must_update">Morate da ažurirate ovu aplikaciju na prodavnici aplikacija (ili Github-u). Previše je stara da bi razgovarala sa ovim radio firmverom. Molimo vas da pročitate naše <a href="https://meshtastic.org/docs/software/android/installation">dokumente</a> o ovoj temi.</string>
