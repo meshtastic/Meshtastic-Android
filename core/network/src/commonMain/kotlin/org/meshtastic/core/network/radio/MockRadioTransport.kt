@@ -66,6 +66,10 @@ class MockRadioTransport(
 
     companion object {
         private const val MY_NODE = 0x42424242
+
+        @Suppress("MagicNumber")
+        private val FAKE_SESSION_PASSKEY: okio.ByteString =
+            okio.ByteString.of(0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77)
     }
 
     private var currentPacketId = 50
@@ -297,7 +301,9 @@ class MockRadioTransport(
     )
 
     private fun sendAdmin(fromIn: Int, toIn: Int, reqId: Int, initFn: AdminMessage.() -> AdminMessage) {
-        val adminMsg = AdminMessage().initFn()
+        // Embed a deterministic 8-byte fake passkey so SessionManager can record a session refresh — mirrors what real
+        // firmware always attaches to admin responses (see firmware/src/modules/AdminModule.cpp:1460-1481).
+        val adminMsg = AdminMessage().initFn().copy(session_passkey = FAKE_SESSION_PASSKEY)
         val p =
             makeDataPacket(
                 fromIn,

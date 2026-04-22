@@ -27,12 +27,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
+import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.proto.User
@@ -51,12 +56,16 @@ class NodeDetailViewModelTest {
     private val nodeRequestActions: NodeRequestActions = mock()
     private val serviceRepository: ServiceRepository = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
+    private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
+    private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
+    private val snackbarManager: SnackbarManager = mock()
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
         every { getNodeDetailsUseCase(any()) } returns emptyFlow()
+        every { observeRemoteAdminSessionStatus(any()) } returns flowOf(SessionStatus.NoSession)
 
         viewModel = createViewModel(1234)
     }
@@ -67,6 +76,9 @@ class NodeDetailViewModelTest {
         nodeRequestActions = nodeRequestActions,
         serviceRepository = serviceRepository,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
+        ensureRemoteAdminSession = ensureRemoteAdminSession,
+        observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
+        snackbarManager = snackbarManager,
     )
 
     @AfterTest

@@ -37,6 +37,7 @@ import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.AirQualityMetrics
@@ -60,7 +61,7 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
 import org.meshtastic.proto.Position as ProtoPosition
 
-@Suppress("TooManyFunctions", "CyclomaticComplexMethod")
+@Suppress("TooManyFunctions", "CyclomaticComplexMethod", "LongParameterList")
 @Single
 class CommandSenderImpl(
     private val packetHandler: PacketHandler,
@@ -68,10 +69,10 @@ class CommandSenderImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
+    private val sessionManager: SessionManager,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : CommandSender {
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
-    private val sessionPasskey = atomic(ByteString.EMPTY)
 
     private val localConfig = MutableStateFlow(LocalConfig())
     private val channelSet = MutableStateFlow(ChannelSet())
@@ -91,10 +92,6 @@ class CommandSenderImpl(
         val numPacketIds = ((1L shl PACKET_ID_SHIFT_BITS) - 1)
         val next = currentPacketId.incrementAndGet() and PACKET_ID_MASK
         return ((next % numPacketIds) + 1L).toInt()
-    }
-
-    override fun setSessionPasskey(key: ByteString) {
-        sessionPasskey.value = key
     }
 
     private fun computeHopLimit(): Int = (localConfig.value.lora?.hop_limit ?: 0).takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
@@ -174,7 +171,7 @@ class CommandSenderImpl(
     }
 
     override fun sendAdmin(destNum: Int, requestId: Int, wantResponse: Boolean, initFn: () -> AdminMessage) {
-        val adminMsg = initFn().copy(session_passkey = sessionPasskey.value)
+        val adminMsg = initFn().copy(session_passkey = sessionManager.getPasskey(destNum))
         val packet =
             buildAdminPacket(to = destNum, id = requestId, wantResponse = wantResponse, adminMessage = adminMsg)
         packetHandler.sendToRadio(packet)
@@ -186,7 +183,7 @@ class CommandSenderImpl(
         wantResponse: Boolean,
         initFn: () -> AdminMessage,
     ): Boolean {
-        val adminMsg = initFn().copy(session_passkey = sessionPasskey.value)
+        val adminMsg = initFn().copy(session_passkey = sessionManager.getPasskey(destNum))
         val packet =
             buildAdminPacket(to = destNum, id = requestId, wantResponse = wantResponse, adminMessage = adminMsg)
         return packetHandler.sendToRadioAndAwait(packet)

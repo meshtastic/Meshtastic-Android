@@ -28,11 +28,13 @@ actual fun SettingsMainScreen(
     radioConfigViewModel: RadioConfigViewModel,
     onClickNodeChip: (Int) -> Unit,
     onNavigate: (Route) -> Unit,
+    onBack: (() -> Unit)?,
 ) {
     SettingsScreen(
         settingsViewModel = settingsViewModel,
         viewModel = radioConfigViewModel,
         onClickNodeChip = onClickNodeChip,
         onNavigate = onNavigate,
+        onBack = onBack,
     )
 }

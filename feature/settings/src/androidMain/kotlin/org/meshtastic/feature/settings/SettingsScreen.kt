@@ -80,6 +80,7 @@ fun SettingsScreen(
     viewModel: RadioConfigViewModel,
     onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
+    onBack: (() -> Unit)? = null,
 ) {
     val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
@@ -167,6 +168,8 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
+            // Show back arrow when remotely administering (caller supplies onBack and we're not on the local node).
+            val showBack = onBack != null && !state.isLocal
             MainAppBar(
                 title = stringResource(Res.string.bottom_nav_settings),
                 subtitle =
@@ -178,8 +181,8 @@ fun SettingsScreen(
                 },
                 ourNode = ourNode,
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
-                canNavigateUp = false,
-                onNavigateUp = {},
+                canNavigateUp = showBack,
+                onNavigateUp = { onBack?.invoke() },
                 actions = {},
                 onClickChip = { node -> onClickNodeChip(node.num) },
             )
