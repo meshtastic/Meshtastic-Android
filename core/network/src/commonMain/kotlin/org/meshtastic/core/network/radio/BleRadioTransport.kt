@@ -103,9 +103,17 @@ class BleRadioTransport(
     internal val address: String,
 ) : RadioTransport {
 
+    // Detached cleanup scope for last-ditch GATT teardown from the exception handler.
+    // Must NOT be a child of `scope`: when an uncaught exception fires in connectionScope,
+    // upper layers often tear down `scope` immediately. Launching cleanup on `scope` then
+    // races the cancellation and may never start, leaking BluetoothGatt (status 133 on
+    // the next reconnect). This scope is cancelled in close() once our own disconnect
+    // has completed and the safety net is no longer needed.
+    private val cleanupScope: CoroutineScope = CoroutineScope(SupervisorJob() + scope.coroutineContext.minusKey(Job))
+
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Logger.w(throwable) { "[$address] Uncaught exception in connectionScope" }
-        scope.launch {
+        cleanupScope.launch {
             try {
                 bleConnection.disconnect()
             } catch (e: Exception) {
@@ -427,6 +435,10 @@ class BleRadioTransport(
                 Logger.w(e) { "[$address] Failed to disconnect in close()" }
             }
         }
+        // Our own disconnect succeeded — the exception-handler safety net is no longer
+        // needed. Cancel the detached cleanup scope so it doesn't outlive us in tests
+        // or process lifetime.
+        cleanupScope.cancel("close() called")
     }
 
     private fun dispatchPacket(packet: ByteArray) {
