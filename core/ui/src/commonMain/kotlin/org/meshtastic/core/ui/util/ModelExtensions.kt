@@ -20,12 +20,16 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.label_lite_fast
+import org.meshtastic.core.resources.label_lite_slow
 import org.meshtastic.core.resources.label_long_fast
 import org.meshtastic.core.resources.label_long_moderate
 import org.meshtastic.core.resources.label_long_slow
 import org.meshtastic.core.resources.label_long_turbo
 import org.meshtastic.core.resources.label_medium_fast
 import org.meshtastic.core.resources.label_medium_slow
+import org.meshtastic.core.resources.label_narrow_fast
+import org.meshtastic.core.resources.label_narrow_slow
 import org.meshtastic.core.resources.label_short_fast
 import org.meshtastic.core.resources.label_short_slow
 import org.meshtastic.core.resources.label_short_turbo
@@ -46,6 +50,10 @@ val ChannelOption.labelRes: StringResource
             ChannelOption.SHORT_FAST -> Res.string.label_short_fast
             ChannelOption.SHORT_SLOW -> Res.string.label_short_slow
             ChannelOption.SHORT_TURBO -> Res.string.label_short_turbo
+            ChannelOption.LITE_FAST -> Res.string.label_lite_fast
+            ChannelOption.LITE_SLOW -> Res.string.label_lite_slow
+            ChannelOption.NARROW_FAST -> Res.string.label_narrow_fast
+            ChannelOption.NARROW_SLOW -> Res.string.label_narrow_slow
         }
 
 fun TracerouteMapAvailability.toMessageRes(): StringResource? = when (this) {

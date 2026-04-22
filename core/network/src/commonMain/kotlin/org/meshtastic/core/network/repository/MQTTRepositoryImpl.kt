@@ -238,7 +238,9 @@ private const val MQTT_PORT_TLS = 8883
 fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if (rawAddress.contains("://")) {
     MqttEndpoint.parse(rawAddress)
 } else {
-    val port = if (tlsEnabled) MQTT_PORT_TLS else MQTT_PORT_PLAIN
     val scheme = if (tlsEnabled) "ssl" else "tcp"
-    MqttEndpoint.parse("$scheme://$rawAddress:$port")
+    val defaultPort = if (tlsEnabled) MQTT_PORT_TLS else MQTT_PORT_PLAIN
+    // Preserve the user-supplied port (if any) instead of naively appending the default.
+    val hostAndPort = if (rawAddress.contains(":")) rawAddress else "$rawAddress:$defaultPort"
+    MqttEndpoint.parse("$scheme://$hostAndPort")
 }
