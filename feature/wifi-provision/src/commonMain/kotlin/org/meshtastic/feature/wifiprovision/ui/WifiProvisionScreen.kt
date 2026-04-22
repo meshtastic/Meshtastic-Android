@@ -124,6 +124,7 @@ import org.meshtastic.core.resources.wifi_provision_success_setup_description
 import org.meshtastic.core.resources.wifi_provision_success_setup_title
 import org.meshtastic.core.resources.wifi_provision_success_ssh_label
 import org.meshtastic.core.resources.wifi_provision_success_ssh_command
+import org.meshtastic.core.resources.wifi_provision_success_ssh_unavailable
 import org.meshtastic.core.resources.wifi_provision_success_username_value
 import org.meshtastic.core.resources.wifi_provision_success_username
 import org.meshtastic.core.resources.wifi_provisioning
@@ -498,8 +499,10 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
     val defaultUsername = stringResource(Res.string.wifi_provision_success_username_value)
     val defaultPassword = stringResource(Res.string.wifi_provision_success_password_value)
     val resolvedIp = ipAddress ?: stringResource(Res.string.wifi_provision_success_missing_ip)
-    val sshCommand = stringResource(Res.string.wifi_provision_success_ssh_command, defaultUsername, resolvedIp)
-    val sshUri = "ssh://$defaultUsername@$resolvedIp"
+    val sshCommand =
+        ipAddress?.let { stringResource(Res.string.wifi_provision_success_ssh_command, defaultUsername, it) }
+            ?: stringResource(Res.string.wifi_provision_success_ssh_unavailable)
+    val sshUri = ipAddress?.let { "ssh://$defaultUsername@$it" }
 
     Column(
         modifier =
@@ -528,6 +531,7 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
         ProvisionInfoCard(
             label = stringResource(Res.string.wifi_provision_success_ip_address),
             value = resolvedIp,
+            copyEnabled = ipAddress != null,
         )
 
         Card(
@@ -558,11 +562,12 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
                 ProvisionInfoCard(
                     label = stringResource(Res.string.wifi_provision_success_ssh_label),
                     value = sshCommand,
+                    copyEnabled = ipAddress != null,
                 )
 
                 Button(
-                    onClick = { openUrl(sshUri) },
-                    enabled = ipAddress != null,
+                    onClick = { sshUri?.let(openUrl) },
+                    enabled = sshUri != null,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Icon(imageVector = MeshtasticIcons.Serial, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -584,7 +589,7 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
 }
 
 @Composable
-private fun ProvisionInfoCard(label: String, value: String) {
+private fun ProvisionInfoCard(label: String, value: String, copyEnabled: Boolean = true) {
     Card(
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
@@ -602,7 +607,9 @@ private fun ProvisionInfoCard(label: String, value: String) {
                 )
                 Text(text = value, style = MaterialTheme.typography.bodyLargeEmphasized)
             }
-            CopyIconButton(valueToCopy = value)
+            if (copyEnabled) {
+                CopyIconButton(valueToCopy = value)
+            }
         }
     }
 }

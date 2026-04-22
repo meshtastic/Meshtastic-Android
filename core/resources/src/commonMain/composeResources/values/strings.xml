@@ -1316,9 +1316,10 @@
     <string name="wifi_provision_success_password_value" translatable="false">1234</string>
     <string name="wifi_provision_success_ssh_label">SSH Command</string>
     <string name="wifi_provision_success_ssh_command">ssh %1$s@%2$s</string>
+    <string name="wifi_provision_success_ssh_unavailable">SSH command available after IP is assigned.</string>
     <string name="wifi_provision_success_open_ssh">Open SSH Client</string>
     <string name="wifi_provision_success_open_ssh_fallback">If no app opens, copy the SSH command and paste it into your SSH client.</string>
-    <string name="wifi_provision_success_missing_ip">unknown-host</string>
+    <string name="wifi_provision_success_missing_ip">IP unavailable</string>
     <string name="wifi_provision_success_done">Done</string>
     <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
     <string name="desktop_tray_show">Show Meshtastic</string>

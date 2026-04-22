@@ -42,6 +42,7 @@ import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT_HIDDEN
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_CONNECTION
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_NETWORKS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_SCAN
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CONNECTION_INFO_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_SUCCESS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_TIMEOUT
@@ -52,7 +53,6 @@ import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_SERVICE_U
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * GATT client for the nymea-networkmanager WiFi provisioning profile.
@@ -71,8 +71,6 @@ class NymeaWifiService(
     connectionFactory: BleConnectionFactory,
     dispatcher: CoroutineDispatcher,
 ) {
-    private val connectionInfoTimeout = 2.seconds
-
     private val serviceScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(serviceScope, TAG)
 
@@ -246,7 +244,7 @@ class NymeaWifiService(
     private suspend fun fetchConnectionIpAddress(): String? =
         safeCatching {
             sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
-            val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = connectionInfoTimeout))
+            val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
             if (response.responseCode == RESPONSE_SUCCESS) {
                 response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
             } else {
