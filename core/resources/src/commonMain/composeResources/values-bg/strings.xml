@@ -136,6 +136,8 @@
     <string name="no_network_devices_found">Няма намерени мрежови устройства</string>
     <string name="no_usb_devices_found">Няма намерени USB устройства</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">BLE</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Демо режим</string>
     <string name="connected_sleeping">Свързан е с радио, но рядиото е в режим на заспиване</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>

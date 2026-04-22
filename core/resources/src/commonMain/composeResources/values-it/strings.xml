@@ -172,6 +172,8 @@
     <string name="no_network_devices_found">Nessun dispositivo di rete trovato</string>
     <string name="no_usb_devices_found">Nessun dispositivo USB trovato</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">BLE</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Modalità Demo</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
     <string name="app_too_old">Aggiornamento dell'applicazione necessario</string>
@@ -713,6 +715,7 @@
     <string name="request_host_metrics">Metriche Host</string>
     <string name="request_pax_metrics">Metriche Pax</string>
     <string name="request_metadata">Metadati</string>
+    <string name="retry">Riprova</string>
     <string name="actions">Azioni</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Usa formato orologio 12h</string>

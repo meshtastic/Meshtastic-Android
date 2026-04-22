@@ -156,6 +156,7 @@
     <string name="connecting">Łączenie</string>
     <string name="not_connected">Nie połączono</string>
     <string name="no_device_selected">Nie wybrano urządzenia</string>
+    <string name="transport_ble">BLE</string>
     <string name="connected_sleeping">Połączono z urządzeniem, ale jest ono w stanie uśpienia</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
     <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub z GitHub, ponieważ aplikacja jest zbyt stara, by skomunikować się z oprogramowaniem zainstalowanym na tym urządzeniu. <a href="https://meshtastic.org/docs/software/android/installation">Więcej informacji (ang.)</a>.</string>
@@ -588,6 +589,7 @@
     <string name="request_power_metrics">Metryki zasilania</string>
     <string name="request_host_metrics">Statystyki hosta</string>
     <string name="request_metadata">Metadane</string>
+    <string name="retry">Ponów próbę</string>
     <string name="firmware">Oprogramowanie</string>
     <string name="use_12h_format">Użyj formatu 12-godzinnego</string>
     <string name="host_metrics_log">Statystyki hosta</string>

@@ -125,6 +125,7 @@
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="connecting">Під’єднання</string>
     <string name="not_connected">Не підключено</string>
+    <string name="transport_ble">BLE</string>
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
     <string name="must_update">Ви повинні оновити цю програму в App Store (або Github). Він занадто старий, щоб спілкуватися з цією прошивкою радіо. Будь ласка, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацію</a> у вказаній темі.</string>
@@ -517,6 +518,7 @@
     <string name="request_host_metrics">Показники хоста</string>
     <string name="request_pax_metrics">Показники Pax</string>
     <string name="request_metadata">Метадані</string>
+    <string name="retry">Повторити</string>
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Використовувати 12-г формат часу</string>

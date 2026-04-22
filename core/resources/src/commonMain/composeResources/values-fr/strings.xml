@@ -176,6 +176,8 @@
     <string name="no_network_devices_found">Aucun périphérique réseau trouvé</string>
     <string name="no_usb_devices_found">Pas de périphérique USB trouvé</string>
     <string name="usb">USB</string>
+    <string name="transport_ble">BLE</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Mode Démo</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="app_too_old">Mise à jour de l’application requise</string>

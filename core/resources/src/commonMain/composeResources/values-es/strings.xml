@@ -143,6 +143,7 @@
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="connecting">Conectando</string>
     <string name="not_connected">No está conectado</string>
+    <string name="transport_ble">BLE</string>
     <string name="connected_sleeping">Conectado a la radio, pero está en reposo</string>
     <string name="app_too_old">Es necesario actualizar la aplicación</string>
     <string name="must_update">Debe actualizar esta aplicación en la tienda de aplicaciones (o en Github). Es demasiado vieja para comunicarse con este firmware de radio. Por favor, lea nuestra <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> sobre este tema.</string>
@@ -635,6 +636,7 @@ Rango de Valores 0 - 500.</string>
     <string name="request_power_metrics">Métricas de Energía</string>
     <string name="request_host_metrics">Métricas del anfitrión</string>
     <string name="request_metadata">Metadatos</string>
+    <string name="retry">Volver a intentar</string>
     <string name="actions">Acciones</string>
     <string name="firmware">Software</string>
     <string name="use_12h_format">Utilizar el formato de 12h para el reloj</string>

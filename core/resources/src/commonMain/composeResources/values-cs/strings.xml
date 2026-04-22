@@ -150,6 +150,7 @@
     <string name="no_network_devices_found">Nenalezena žádná síťová zařízení</string>
     <string name="no_usb_devices_found">Nenalezena žádná USB zařízení</string>
     <string name="usb">USB</string>
+    <string name="transport_usb">USB</string>
     <string name="demo_mode">Demo režim</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači</string>
     <string name="app_too_old">Aplikace je příliš stará</string>
