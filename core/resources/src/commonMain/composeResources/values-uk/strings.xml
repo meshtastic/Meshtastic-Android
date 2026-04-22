@@ -88,8 +88,12 @@
     <string name="config_security_private_key">Використовується для створення спільного ключа з віддаленим пристроєм.</string>
     <string name="config_security_admin_key">Публічний ключ уповноважений надсилати повідомлення адміністратора на цей вузол.</string>
     <!-- Position Config -->
+    <string name="position_packet">Пакет позиції</string>
+    <string name="broadcast_interval">Інтервал трансляції</string>
     <string name="device_gps">GPS пристрій</string>
+    <string name="fixed_position">Фіксована позиція</string>
     <string name="altitude">Висота</string>
+    <string name="update_interval">Інтервал опитування GPS</string>
     <string name="gps_receive_gpio">GPIO отримання GPS</string>
     <string name="gps_transmit_gpio">GPIO передачі GPS</string>
     <string name="gps_en_gpio">GPS EN GPIO</string>
@@ -264,6 +268,7 @@
     <string name="wifi_qr_code_scan">Сканувати QR-код Wi-Fi</string>
     <string name="navigate_back">Перейти назад</string>
     <string name="battery">Батарея</string>
+    <string name="channel_utilization">Завантаженість каналу</string>
     <string name="soil_temperature">Температура ґрунту</string>
     <string name="soil_moisture">Вологість ґрунту</string>
     <string name="logs">Журнали подій</string>
