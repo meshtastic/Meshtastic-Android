@@ -1243,6 +1243,9 @@
     <string name="wifi_provision_ssid_placeholder">Введите или выберите сеть</string>
     <string name="wifi_provision_status_applied">Wi-Fi успешно настроен!</string>
     <string name="wifi_provision_status_failed">Не удалось применить настройку Wi-Fi</string>
+    <string name="wifi_provision_success_ip_address">IP-адрес</string>
+    <string name="wifi_provision_success_username">Имя пользователя</string>
+    <string name="wifi_provision_success_done">Готово</string>
     <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
     <string name="desktop_tray_show">Показать Meshtastic</string>
     <string name="desktop_tray_quit">Выход</string>

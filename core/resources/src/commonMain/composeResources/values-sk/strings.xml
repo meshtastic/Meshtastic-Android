@@ -426,6 +426,7 @@
     <string name="tak_team_red">Červená</string>
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>
+    <string name="wifi_provision_success_username">Používateľské meno</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filter</string>
 </resources>

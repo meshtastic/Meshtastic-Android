@@ -1118,6 +1118,9 @@
     <string name="note">备注</string>
     <string name="connect">连接</string>
     <string name="done">完成</string>
+    <string name="wifi_provision_success_ip_address">IP 地址</string>
+    <string name="wifi_provision_success_username">用户名称</string>
+    <string name="wifi_provision_success_done">完成</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">搜索节点</string>
     <string name="action_select_device">选择设备</string>

@@ -201,5 +201,6 @@
     <string name="tak_team_red">Κόκκινο</string>
     <string name="tak_team_blue">Μπλε</string>
     <string name="tak_team_green">Πράσινο</string>
+    <string name="wifi_provision_success_username">Όνομα χρήστη</string>
     <string name="filter_icon">Φίλτρο</string>
 </resources>
