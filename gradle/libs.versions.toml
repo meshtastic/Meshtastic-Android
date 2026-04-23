@@ -45,9 +45,9 @@ compose-multiplatform-material3 = "1.11.0-alpha07"
 # AndroidCompose.kt's resolutionStrategy force-aligns these groups to *this* version
 # at resolution time, so it is the source of truth for the Android target.
 androidx-compose-bom-aligned = "1.11.0"
-# `androidx-compose-material` (M2) is independent of CMP and pinned separately
-# because some third-party libs (maps-compose-widgets, datadog) drag in
-# unversioned material transitives.
+# `androidx-compose-material` (M2) is independent of CMP. Pinned because
+# maps-compose-widgets requests `androidx.compose.material:material` without
+# a version (relying on a BOM that we exclude). M2 is frozen at 1.7.8.
 androidx-compose-material = "1.7.8"
 jetbrains-adaptive = "1.3.0-alpha07"
 
