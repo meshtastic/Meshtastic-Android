@@ -221,10 +221,25 @@ class NymeaWifiServiceTest {
         val (service, scanner) = createService(connection = connection)
         connectService(service, scanner)
 
-        emitResponse(connection, """{"c":1,"r":0}""")
+        emitResponse(connection, """{"c":1,"r":0,"p":{"i":"10.10.10.61"}}""")
         val result = service.provision("MyNet", "password")
 
-        assertIs<ProvisionResult.Success>(result)
+        val success = assertIs<ProvisionResult.Success>(result)
+        assertEquals("10.10.10.61", success.ipAddress)
+    }
+
+    @Test
+    fun `provision falls back to GetConnection for IP when connect response has no payload`() = runTest {
+        val connection = FakeBleConnection()
+        val (service, scanner) = createService(connection = connection)
+        connectService(service, scanner)
+
+        emitResponse(connection, """{"c":1,"r":0}""")
+        emitResponse(connection, """{"c":5,"r":0,"p":{"i":"10.10.10.62"}}""")
+        val result = service.provision("MyNet", "password")
+
+        val success = assertIs<ProvisionResult.Success>(result)
+        assertEquals("10.10.10.62", success.ipAddress)
     }
 
     @Test
@@ -247,7 +262,7 @@ class NymeaWifiServiceTest {
         val (service, scanner) = createService(connection = connection)
         connectService(service, scanner)
 
-        emitResponse(connection, """{"c":1,"r":0}""")
+        emitResponse(connection, """{"c":1,"r":0,"p":{"i":"10.10.10.61"}}""")
         service.provision("Net", "pass", hidden = false)
 
         val writes =
@@ -266,7 +281,7 @@ class NymeaWifiServiceTest {
         val (service, scanner) = createService(connection = connection)
         connectService(service, scanner)
 
-        emitResponse(connection, """{"c":2,"r":0}""")
+        emitResponse(connection, """{"c":2,"r":0,"p":{"i":"10.10.10.61"}}""")
         service.provision("HiddenNet", "pass", hidden = true)
 
         val writes =

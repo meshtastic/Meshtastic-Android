@@ -82,6 +82,7 @@ class NymeaProtocolTest {
         val response = NymeaJson.decodeFromString<NymeaResponse>("""{"c":4,"r":0}""")
         assertEquals(4, response.command)
         assertEquals(0, response.responseCode)
+        assertEquals(null, response.connectionInfo)
     }
 
     @Test
@@ -89,6 +90,14 @@ class NymeaProtocolTest {
         val response = NymeaJson.decodeFromString<NymeaResponse>("""{"c":1,"r":3}""")
         assertEquals(1, response.command)
         assertEquals(3, response.responseCode)
+    }
+
+    @Test
+    fun `response deserializes connection info payload`() {
+        val response = NymeaJson.decodeFromString<NymeaResponse>("""{"c":5,"r":0,"p":{"i":"10.10.10.61"}}""")
+        assertEquals(5, response.command)
+        assertEquals(0, response.responseCode)
+        assertEquals("10.10.10.61", response.connectionInfo?.ipAddress)
     }
 
     @Test

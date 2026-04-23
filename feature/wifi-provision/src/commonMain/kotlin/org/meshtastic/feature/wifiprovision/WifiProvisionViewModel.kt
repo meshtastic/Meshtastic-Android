@@ -42,6 +42,8 @@ data class WifiProvisionUiState(
     val error: WifiProvisionError? = null,
     /** Name of the BLE device we connected to, shown in the DeviceFound confirmation. */
     val deviceName: String? = null,
+    /** IPv4 address reported by nymea after successful provisioning (if available). */
+    val ipAddress: String? = null,
     /** Provisioning outcome shown as inline status (matches web flasher pattern). */
     val provisionStatus: ProvisionStatus = ProvisionStatus.Idle,
 ) {
@@ -175,6 +177,7 @@ class WifiProvisionViewModel(
             it.copy(
                 phase = WifiProvisionUiState.Phase.Provisioning,
                 error = null,
+                ipAddress = null,
                 provisionStatus = WifiProvisionUiState.ProvisionStatus.Idle,
             )
         }
@@ -186,6 +189,7 @@ class WifiProvisionViewModel(
                     _uiState.update {
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Connected,
+                            ipAddress = result.ipAddress,
                             provisionStatus = WifiProvisionUiState.ProvisionStatus.Success,
                         )
                     }
