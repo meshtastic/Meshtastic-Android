@@ -725,6 +725,7 @@
     <string name="request_host_metrics">主机测量</string>
     <string name="request_pax_metrics">Pax 计量</string>
     <string name="request_metadata">元数据</string>
+    <string name="retry">重试</string>
     <string name="actions">操作</string>
     <string name="firmware">固件</string>
     <string name="use_12h_format">使用 12 小时制格式</string>
@@ -824,6 +825,7 @@
     <string name="recent_network_devices">最近使用的网络设备</string>
     <string name="discovered_network_devices">发现的网络设备</string>
     <string name="bluetooth_available_devices">可用的蓝牙设备</string>
+    <string name="nodes_empty_disconnected_title">设备未连接</string>
     <string name="get_started">开始</string>
     <string name="intro_welcome">欢迎使用</string>
     <string name="stay_connected_anywhere">随时随地保持联系</string>

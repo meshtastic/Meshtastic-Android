@@ -629,6 +629,7 @@
     <string name="request_air_quality_metrics">Показатели на качеството на въздуха</string>
     <string name="request_power_metrics">Показатели на мощност</string>
     <string name="request_metadata">Метаданни</string>
+    <string name="retry">Опитайте отново</string>
     <string name="actions">Действия</string>
     <string name="firmware">Фърмуер</string>
     <string name="use_12h_format">Използване на 12ч формат</string>
@@ -726,7 +727,10 @@
     <string name="firmware_edition">Версия на фърмуера</string>
     <string name="recent_network_devices">Скорошни мрежови устройства</string>
     <string name="discovered_network_devices">Открити мрежови устройства</string>
+    <string name="scanning_network">Сканиране…</string>
+    <string name="scanning_bluetooth">Сканиране…</string>
     <string name="bluetooth_available_devices">Налични Bluetooth устройства</string>
+    <string name="nodes_empty_disconnected_title">Няма свързано устройство</string>
     <string name="get_started">Започнете</string>
     <string name="intro_welcome">Добре дошли в</string>
     <string name="stay_connected_anywhere">Останете свързани навсякъде</string>

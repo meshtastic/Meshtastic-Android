@@ -793,6 +793,7 @@
     <string name="request_host_metrics">Isäntälaitteen mittausarvot</string>
     <string name="request_pax_metrics">Pax mittarit</string>
     <string name="request_metadata">Metatiedot</string>
+    <string name="retry">Yritä uudelleen</string>
     <string name="actions">Toiminnot</string>
     <string name="firmware">Laiteohjelmisto</string>
     <string name="use_12h_format">Käytä 12 tunnin kelloa</string>
@@ -903,7 +904,10 @@
     <string name="firmware_edition">Laiteohjelmistoversio</string>
     <string name="recent_network_devices">Äskettäin havaitut verkkolaitteet</string>
     <string name="discovered_network_devices">Löydetyt verkkolaitteet</string>
+    <string name="scanning_network">Etsitään…</string>
+    <string name="scanning_bluetooth">Etsitään…</string>
     <string name="bluetooth_available_devices">Saatavilla olevat Bluetooth-laitteet</string>
+    <string name="nodes_empty_disconnected_title">Ei laitetta kytkettynä</string>
     <string name="get_started">Näin pääset alkuun</string>
     <string name="intro_welcome">Tervetuloa</string>
     <string name="stay_connected_anywhere">Pysy yhteydessä kaikkialla</string>

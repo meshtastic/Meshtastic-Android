@@ -39,9 +39,11 @@ import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT_HIDDEN
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_CONNECTION
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_NETWORKS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_SCAN
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CONNECTION_INFO_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_SUCCESS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT
@@ -50,6 +52,7 @@ import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_COMMANDER
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_SERVICE_UUID
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
+import kotlin.time.Duration
 
 /**
  * GATT client for the nymea-networkmanager WiFi provisioning profile.
@@ -68,7 +71,6 @@ class NymeaWifiService(
     connectionFactory: BleConnectionFactory,
     dispatcher: CoroutineDispatcher,
 ) {
-
     private val serviceScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(serviceScope, TAG)
 
@@ -184,7 +186,9 @@ class NymeaWifiService(
             sendCommand(json)
             val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
             if (response.responseCode == RESPONSE_SUCCESS) {
-                ProvisionResult.Success
+                val ipAddress =
+                    response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() } ?: fetchConnectionIpAddress()
+                ProvisionResult.Success(ipAddress = ipAddress)
             } else {
                 ProvisionResult.Failure(response.responseCode, nymeaErrorMessage(response.responseCode))
             }
@@ -229,7 +233,25 @@ class NymeaWifiService(
     }
 
     /** Wait up to [RESPONSE_TIMEOUT] for a complete JSON response from the notification channel. */
-    private suspend fun waitForResponse(): String = withTimeout(RESPONSE_TIMEOUT) { responseChannel.receive() }
+    private suspend fun waitForResponse(timeout: Duration = RESPONSE_TIMEOUT): String =
+        withTimeout(timeout) { responseChannel.receive() }
+
+    /**
+     * Best-effort query for current connection info (`CMD_GET_CONNECTION`), returning the reported IP address.
+     *
+     * Uses a short timeout because this is an optional enrichment for UX, not a provisioning success criterion.
+     */
+    private suspend fun fetchConnectionIpAddress(): String? = safeCatching {
+        sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
+        val response =
+            NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
+        if (response.responseCode == RESPONSE_SUCCESS) {
+            response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
+        } else {
+            null
+        }
+    }
+        .getOrNull()
 
     private fun nymeaErrorMessage(code: Int): String = when (code) {
         NymeaBleConstants.RESPONSE_INVALID_COMMAND -> "Invalid command"
