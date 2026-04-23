@@ -582,6 +582,7 @@
     <string name="supported_by_community">Підтримується спільнотою Meshtastic</string>
     <string name="firmware_edition">Тип прошивки</string>
     <string name="discovered_network_devices">Виявлені мережеві пристрої</string>
+    <string name="nodes_empty_disconnected_title">Немає під'єднаних пристроїв</string>
     <string name="get_started">З чого почати</string>
     <string name="intro_welcome">Ласкаво просимо до</string>
     <string name="stay_connected_anywhere">Залишайтесь на зв'язку будь-де</string>

@@ -815,6 +815,7 @@
     <string name="recent_network_devices">Dispositivi di rete recenti</string>
     <string name="discovered_network_devices">Dispositivi di rete rilevati</string>
     <string name="bluetooth_available_devices">Dispositivi Bluetooth Disponibili</string>
+    <string name="nodes_empty_disconnected_title">Nessun dispositivo connesso</string>
     <string name="get_started">Inizia ora</string>
     <string name="intro_welcome">Benvenuto a</string>
     <string name="stay_connected_anywhere">Rimani connesso ovunque</string>

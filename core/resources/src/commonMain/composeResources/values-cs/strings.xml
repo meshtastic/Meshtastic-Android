@@ -662,6 +662,7 @@
     <string name="request_air_quality_metrics">Metriky kvality ovzduší</string>
     <string name="request_power_metrics">Metriky napájení</string>
     <string name="request_metadata">Metadata</string>
+    <string name="retry">Zkusit znovu</string>
     <string name="actions">Akce</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Použít 12h formát hodin</string>
@@ -748,6 +749,7 @@
     <string name="recent_network_devices">Nedávná síťová zařízení</string>
     <string name="discovered_network_devices">Nalezená síťová zařízení</string>
     <string name="bluetooth_available_devices">Dostupná Bluetooth zařízení</string>
+    <string name="nodes_empty_disconnected_title">Není připojeno žádné zařízení</string>
     <string name="get_started">Začněte hned</string>
     <string name="intro_welcome">Vítejte v</string>
     <string name="stay_connected_anywhere">Zůstaňte připojeni kdekoliv</string>
