@@ -99,9 +99,11 @@ private const val MAX_LINES = 3
  * @param message An optional message to pre-fill in the input field.
  * @param viewModel The [MessageViewModel] instance for handling business logic and state.
  * @param navigateToNodeDetails Callback to navigate to a node's detail screen.
+ * @param navigateToQuickChatOptions Callback to navigate to the quick chat options screen.
+ * @param navigateToFilterSettings Callback to navigate to the message filter settings screen.
  * @param onNavigateBack Callback to navigate back from this screen.
  */
-@Suppress("LongMethod", "CyclomaticComplexMethod") // Due to multiple states and event handling
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MessageScreen(
     contactKey: String,
@@ -109,6 +111,7 @@ fun MessageScreen(
     viewModel: MessageViewModel,
     navigateToNodeDetails: (Int) -> Unit,
     navigateToQuickChatOptions: () -> Unit,
+    navigateToFilterSettings: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -321,6 +324,7 @@ fun MessageScreen(
                     filteredCount = filteredCount,
                     showFiltered = showFiltered,
                     onToggleShowFiltered = viewModel::toggleShowFiltered,
+                    onNavigateToFilterSettings = navigateToFilterSettings,
                 )
             }
         },
