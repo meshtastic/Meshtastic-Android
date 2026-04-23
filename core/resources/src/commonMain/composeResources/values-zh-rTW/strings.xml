@@ -787,6 +787,7 @@
     <string name="request_host_metrics">主機資訊</string>
     <string name="request_pax_metrics">人流計量資料</string>
     <string name="request_metadata">中繼資料</string>
+    <string name="retry">重試</string>
     <string name="actions">動作</string>
     <string name="firmware">韌體</string>
     <string name="use_12h_format">使用12小時制</string>
@@ -897,7 +898,10 @@
     <string name="firmware_edition">韌體版本</string>
     <string name="recent_network_devices">最近的網路裝置</string>
     <string name="discovered_network_devices">發現的網路裝置</string>
+    <string name="scanning_network">正在搜尋…</string>
+    <string name="scanning_bluetooth">正在搜尋…</string>
     <string name="bluetooth_available_devices">可連接的藍牙裝置</string>
+    <string name="nodes_empty_disconnected_title">尚未連線裝置</string>
     <string name="get_started">開始使用</string>
     <string name="intro_welcome">歡迎來到</string>
     <string name="stay_connected_anywhere">隨時隨地保持連線</string>
