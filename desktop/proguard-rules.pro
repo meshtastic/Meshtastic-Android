@@ -69,3 +69,15 @@
 
 -dontwarn kotlin.concurrent.atomics.**
 -dontwarn kotlin.uuid.UuidV7Generator
+
+# ---- Vico 3.2.0-next.1 ColorScale (CMP API drift) ---------------------------
+# Vico's new ColorScale* classes (ColorScaleShader, ColorScaleAreaFill,
+# ColorScaleLineFill) reference CMP UI graphics members that don't exist in
+# compose-multiplatform 1.11.0-beta03 (LinearGradientShader-VjE6UOU$default
+# on ShaderKt and Paint.setShader(org.jetbrains.skia.Shader)). We don't use
+# the ColorScale APIs in this app, so suppress these warnings to let ProGuard
+# proceed; otherwise it aborts with "unresolved program class members".
+# Remove once Vico ships a release built against CMP 1.11 stable.
+-dontwarn com.patrykandpatrick.vico.compose.cartesian.ColorScaleShader
+-dontwarn com.patrykandpatrick.vico.compose.cartesian.layer.ColorScaleAreaFill
+-dontwarn com.patrykandpatrick.vico.compose.cartesian.layer.ColorScaleLineFill
