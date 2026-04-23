@@ -1226,6 +1226,8 @@
     <string name="wifi_provision_ssid_placeholder">Sisestage või valige võrk</string>
     <string name="wifi_provision_status_applied">WiFi edukalt seadistatud!</string>
     <string name="wifi_provision_status_failed">WiFi sätete rakendamine ebaõnnestus</string>
+    <string name="wifi_provision_success_username">Kasutajatunnus</string>
+    <string name="wifi_provision_success_done">Valmis</string>
     <string name="desktop_tray_tooltip">Meshtastic töölaud</string>
     <string name="desktop_tray_show">Näita Meshtastic</string>
     <string name="desktop_tray_quit">Sule</string>

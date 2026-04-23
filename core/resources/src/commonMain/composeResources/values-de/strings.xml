@@ -1228,6 +1228,9 @@
     <string name="wifi_provision_ssid_placeholder">Netzwerk eingeben oder auswählen</string>
     <string name="wifi_provision_status_applied">WLAN erfolgreich konfiguriert!</string>
     <string name="wifi_provision_status_failed">WLAN Konfiguration konnte nicht angewendet werden</string>
+    <string name="wifi_provision_success_ip_address">IP Adresse</string>
+    <string name="wifi_provision_success_username">Benutzername</string>
+    <string name="wifi_provision_success_done">Fertig</string>
     <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
     <string name="desktop_tray_show">Meshtastic anzeigen</string>
     <string name="desktop_tray_quit">Beenden</string>

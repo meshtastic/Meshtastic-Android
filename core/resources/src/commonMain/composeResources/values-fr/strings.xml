@@ -1214,6 +1214,9 @@
     <string name="wifi_provision_ssid_placeholder">Saisir ou sélectionnez un réseau</string>
     <string name="wifi_provision_status_applied">WiFi configuré avec succès !</string>
     <string name="wifi_provision_status_failed">Impossible d'appliquer la configuration WiFi</string>
+    <string name="wifi_provision_success_ip_address">Adresse IP</string>
+    <string name="wifi_provision_success_username">Nom d'utilisateur</string>
+    <string name="wifi_provision_success_done">Terminé</string>
     <string name="desktop_tray_tooltip">Meshtastic application de bureau</string>
     <string name="desktop_tray_show">Afficher Meshtastic</string>
     <string name="desktop_tray_quit">Quitter</string>

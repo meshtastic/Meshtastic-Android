@@ -1218,6 +1218,9 @@
     <string name="wifi_provision_ssid_placeholder">手動輸入或選擇一個網路</string>
     <string name="wifi_provision_status_applied">Wi-Fi 已設定完成！</string>
     <string name="wifi_provision_status_failed">無法套用 Wi-Fi 設定</string>
+    <string name="wifi_provision_success_ip_address">IP 位址</string>
+    <string name="wifi_provision_success_username">使用者名稱</string>
+    <string name="wifi_provision_success_done">完成</string>
     <string name="desktop_tray_tooltip">Meshtastic Desktop</string>
     <string name="desktop_tray_show">顯示 Meshtastic</string>
     <string name="desktop_tray_quit">離開</string>
