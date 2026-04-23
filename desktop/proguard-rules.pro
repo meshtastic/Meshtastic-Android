@@ -42,13 +42,7 @@
 -dontprocesskotlinmetadata
 
 # ---- Entry point ------------------------------------------------------------
-
--keep class org.meshtastic.desktop.MainKt { *; }
-
-# ---- Ktor Java engine (desktop-only; Android uses OkHttp) -------------------
-# io.ktor.client.engine.java ships consumer rules; the shared
-# HttpClientEngineFactory ServiceLoader keep in shared-rules.pro covers the
-# reflective discovery path.
+# (org.meshtastic.desktop.MainKt is covered by the package-wide keep below.)
 
 # ---- Meshtastic desktop host shell ------------------------------------------
 
@@ -69,6 +63,42 @@
 
 -dontwarn kotlin.concurrent.atomics.**
 -dontwarn kotlin.uuid.UuidV7Generator
+
+# ---- Library consumer rules ------------------------------------------------
+# The compose-jb gradle plugin auto-injects `default-compose-desktop-rules.pro`
+# (bundled inside org.jetbrains.compose:compose-gradle-plugin) into every
+# desktop ProGuard run. That file already covers:
+#   - kotlin.**, kotlinx.coroutines.** (incl. SwingDispatcherFactory ServiceLoader)
+#   - org.jetbrains.skiko.**, org.jetbrains.skia.**
+#   - kotlinx.serialization.** (incl. @Serializable companion keeps)
+#   - kotlinx.datetime.**
+#   - androidx.compose.runtime SnapshotStateKt + Material3 SliderDefaults
+# So we DO NOT re-declare those here. Source of truth:
+#   https://github.com/JetBrains/compose-multiplatform/blob/master/gradle-plugins/compose/src/main/resources/default-compose-desktop-rules.pro
+#
+# However, the standalone ProGuard 7.7.0 that compose-jb invokes does NOT
+# auto-import library `META-INF/proguard/*.pro` consumer rules from arbitrary
+# jars (only R8/Android does). So any consumer-rule pattern outside the bundled
+# defaults above must be copied here manually (see Ktor SL block below).
+
+# ---- androidx.sqlite bundled driver (JNI native bridge) ---------------------
+# BundledSQLiteDriver loads `libsqliteJni` and the native code calls back into
+# JVM-land via methods on `BundledSQLiteDriverKt` (e.g. `nativeThreadSafeMode`)
+# and member methods on `BundledSQLiteDriver` itself. Because those JVM symbols
+# are referenced only from native code, ProGuard removes them as unused; the
+# native loader then crashes with `NoSuchMethodError: ... name or signature does
+# not match`. Keep the whole driver package — it's small and entirely needed at
+# runtime once the bundled SQLite driver is selected.
+-keep class androidx.sqlite.driver.bundled.** { *; }
+-keepclassmembers class androidx.sqlite.driver.bundled.** { native <methods>; *; }
+
+# ---- Ktor serialization extension providers (ServiceLoader) -----------------
+# io.ktor.serialization.kotlinx-json discovers KotlinxSerializationJsonExtensionProvider
+# via META-INF/services/io.ktor.serialization.kotlinx.KotlinxSerializationExtensionProvider.
+# Without this keep the desktop HttpClient init throws ServiceConfigurationError
+# at first request; on Windows jpackage's launcher swallows the trace and
+# surfaces it as "Failed to launch JVM".
+-keep class * implements io.ktor.serialization.kotlinx.KotlinxSerializationExtensionProvider { *; }
 
 # ---- Vico 3.2.0-next.1 ColorScale (CMP API drift) ---------------------------
 # Vico's new ColorScale* classes (ColorScaleShader, ColorScaleAreaFill,
