@@ -431,5 +431,6 @@
     <string name="bluetooth_permission">Блутут</string>
     <string name="powered">Напајано</string>
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_username">Корисничко име</string>
     <string name="filter_icon">Филтер</string>
 </resources>
