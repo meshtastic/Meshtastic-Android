@@ -191,6 +191,7 @@
     <string name="debug_clear">Vymazat protokoly</string>
     <string name="debug_clear_logs_confirm">Tímto odstraníte všechny logované pakety a záznamy databáze ze zařízení – jde o úplný reset a je nevratný.</string>
     <string name="clear">Vymazat</string>
+    <string name="search_emoji">Hledat emoji...</string>
     <string name="channel_label">Kanál</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="message_delivery_status">Stav doručení zprávy</string>
@@ -213,10 +214,14 @@
     <string name="reset_to_defaults">Obnovit výchozí nastavení</string>
     <string name="apply">Použít</string>
     <string name="theme">Vzhled</string>
+    <string name="contrast">Kontrast</string>
     <string name="theme_light">Světlý</string>
     <string name="theme_dark">Tmavý</string>
     <string name="theme_system">Podle systému</string>
     <string name="choose_theme">Vyberte vzhled</string>
+    <string name="choose_contrast">Úroveň kontrastu</string>
+    <string name="contrast_standard">Standardní</string>
+    <string name="contrast_medium">Střední</string>
     <string name="contrast_high">Vysoká</string>
     <string name="provide_location_to_mesh">Poskytnout polohu síti</string>
     <string name="use_homoglyph_characters_encoding">Úsporné kódování pro cyriliku</string>
@@ -927,7 +932,12 @@
     <string name="replace_channels_and_settings_description">Tento QR kód obsahuje kompletní konfiguraci. Tímto se NAHRADÍ vaše stávající kanály a nastavení rádia. Všechny existující kanály budou odstraněny.</string>
     <string name="loading">Načítám</string>
     <!-- Message Filter -->
+    <string name="filter_settings">Filtr zpráv</string>
     <string name="filter_enable">Zapnout filtrování</string>
+    <string name="filter_enable_summary">Skrýt zprávy obsahující filtrovaná slova</string>
+    <string name="filter_words">Filtrovat slova</string>
+    <string name="filter_words_summary">Zprávy obsahující tato slova budou skryté</string>
+    <string name="filter_no_words">Nejsou nastavena žádná slova filtru</string>
     <string name="filter_show_count">Zobrazit %1$d filtrované</string>
     <string name="filter_hide_count">Skrýt %1$d filtrované</string>
     <string name="filter_message_label">Filtrované</string>
@@ -968,10 +978,12 @@
     <string name="tak_team_green">Zelená</string>
     <string name="traffic_management_position_min_interval">Minimální interval pozice (v sekundách)</string>
     <string name="note">Poznámka</string>
+    <string name="device_theme_language">Vzhled: %1$s, Jazyk: %2$s</string>
     <string name="connect">Připojit</string>
     <string name="done">Hotovo</string>
     <string name="wifi_provision_success_username">Uživatelské jméno</string>
     <string name="wifi_provision_success_done">Hotovo</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filtr</string>
+    <string name="action_react_with_emoji">Reagovat s emoji</string>
 </resources>
