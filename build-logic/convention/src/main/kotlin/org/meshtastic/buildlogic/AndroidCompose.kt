@@ -32,10 +32,12 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
         exclude(mapOf("group" to "androidx.compose", "module" to "compose-bom"))
     }
 
-    // CMP publishes these core AndroidX groups at the CMP version tag.
-    // Material, Material3, and Adaptive follow separate AndroidX version numbers
-    // and must NOT be included here (see CMP release notes for the mapping table).
-    val cmpVersion = libs.version("compose-multiplatform")
+    // CMP publishes these core AndroidX groups at an AndroidX version tag that
+    // tracks (but does not equal) the CMP version. The exact mapping lives in
+    // the CMP release notes; we mirror it via the `androidx-compose-bom-aligned`
+    // version ref in libs.versions.toml. Material, Material3, and Adaptive follow
+    // separate AndroidX version numbers and must NOT be included here.
+    val androidxComposeVersion = libs.version("androidx-compose-bom-aligned")
     val cmpAlignedGroups = setOf(
         "androidx.compose.animation",
         "androidx.compose.foundation",
@@ -51,7 +53,7 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     configurations.configureEach {
         resolutionStrategy.eachDependency {
             if (requested.group in cmpAlignedGroups) {
-                useVersion(cmpVersion)
+                useVersion(androidxComposeVersion)
             } else if (requested.group == "androidx.compose.material") {
                 useVersion(materialVersion)
             }
