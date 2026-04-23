@@ -725,6 +725,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="firmware_edition">Edición de firmware</string>
     <string name="recent_network_devices">Dispositivos de red recientes</string>
     <string name="discovered_network_devices">Dispositivos de red descubiertos</string>
+    <string name="nodes_empty_disconnected_title">No hay dispositivos conectados</string>
     <string name="get_started">Empezar</string>
     <string name="intro_welcome">Bienvenido a</string>
     <string name="stay_connected_anywhere">Manténgase conectado en cualquier lugar</string>

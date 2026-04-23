@@ -408,6 +408,7 @@
     <string name="security_icon_help_dismiss">Отпусти</string>
     <string name="delete_messages_title">Обриши поруке?</string>
     <string name="message_input_label">Порука</string>
+    <string name="nodes_empty_disconnected_title">Нема повезаних уређаја</string>
     <string name="settings">подешавања</string>
     <string name="map_type_satellite">Сателит</string>
     <string name="map_type_hybrid">Хибридни</string>

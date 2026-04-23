@@ -783,6 +783,7 @@
     <string name="request_host_metrics">Métriques de l’hôte</string>
     <string name="request_pax_metrics">Métriques de Pax</string>
     <string name="request_metadata">Métadonnées</string>
+    <string name="retry">Réessayer</string>
     <string name="actions">Actions</string>
     <string name="firmware">Micrologiciel</string>
     <string name="use_12h_format">Utiliser le format horaire 12h</string>
@@ -893,7 +894,10 @@
     <string name="firmware_edition">Version du micrologiciel</string>
     <string name="recent_network_devices">Périphériques réseaux récents</string>
     <string name="discovered_network_devices">Appareils réseau découverts</string>
+    <string name="scanning_network">Recherche…</string>
+    <string name="scanning_bluetooth">Recherche…</string>
     <string name="bluetooth_available_devices">Périphériques Bluetooth disponibles</string>
+    <string name="nodes_empty_disconnected_title">Aucun appareil connecté</string>
     <string name="get_started">Commencer</string>
     <string name="intro_welcome">Bienvenue sur</string>
     <string name="stay_connected_anywhere">Restez connecté n'importe où</string>

@@ -771,6 +771,7 @@
     <string name="recent_network_devices">Senaste nätverksenheterna</string>
     <string name="discovered_network_devices">Upptäckta nätverksenheter</string>
     <string name="bluetooth_available_devices">Tillgängliga blåtandsenheter</string>
+    <string name="nodes_empty_disconnected_title">Ingen ansluten enhet</string>
     <string name="get_started">Kom igång</string>
     <string name="intro_welcome">Välkommen till</string>
     <string name="stay_connected_anywhere">Håll dig uppkopplad var som helst</string>

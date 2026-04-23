@@ -22,18 +22,16 @@ import com.juul.kable.PeripheralBuilder
 import com.juul.kable.State
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
-import com.juul.kable.logs.Logging
 import com.juul.kable.writeWithoutResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.job
@@ -90,7 +88,8 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
  * fall back to `autoConnect = true` on failure. Only two attempts are made per [connect] call — the caller
  * ([BleRadioTransport]) owns the macro-level retry/backoff loop.
  */
-class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
+class KableBleConnection(private val scope: CoroutineScope, private val loggingConfig: BleLoggingConfig) :
+    BleConnection {
 
     @Volatile private var peripheral: Peripheral? = null
 
@@ -103,19 +102,15 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         private val AUTOCONNECT_FALLBACK_DELAY = 1.seconds
     }
 
-    private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
-    override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
+    private val _deviceFlow = MutableStateFlow<BleDevice?>(null)
+    override val deviceFlow: StateFlow<BleDevice?> = _deviceFlow.asStateFlow()
 
     override val device: BleDevice?
-        get() = _deviceFlow.replayCache.firstOrNull()
+        get() = _deviceFlow.value
 
     private val _connectionState =
-        MutableSharedFlow<BleConnectionState>(
-            replay = 1,
-            extraBufferCapacity = 1,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
-    override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
+        MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected(DisconnectReason.Unknown))
+    override val connectionState: StateFlow<BleConnectionState> = _connectionState.asStateFlow()
 
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override suspend fun connect(device: BleDevice) {
@@ -124,11 +119,7 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
-            logging {
-                engine = KermitLogEngine
-                level = Logging.Level.Events
-                identifier = device.address
-            }
+            logging { applyConfig(loggingConfig, identifier = device.address) }
             observationExceptionHandler { cause ->
                 Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
             }
@@ -182,8 +173,11 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
                     if (autoConnect) {
-                        // autoConnect already true and still failed — don't loop forever.
-                        Logger.w { "[${device.address}] autoConnect attempt failed, giving up" }
+                        // Already on the autoConnect path and still failing: surface a clear Disconnected
+                        // and let the outer reconnect loop (BleRadioTransport) own the macro retry budget.
+                        Logger.w {
+                            "[${device.address}] autoConnect attempt also failed; deferring to outer reconnect loop"
+                        }
                         _connectionState.emit(BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed))
                         throw e
                     }

@@ -915,6 +915,7 @@
     <string name="scanning_network">Поиск...</string>
     <string name="scanning_bluetooth">Поиск...</string>
     <string name="bluetooth_available_devices">Доступные Bluetooth-устройства</string>
+    <string name="nodes_empty_disconnected_title">Нет подключенных устройств</string>
     <string name="get_started">Начать работу</string>
     <string name="intro_welcome">Добро пожаловать в</string>
     <string name="stay_connected_anywhere">Оставайтесь на связи везде</string>

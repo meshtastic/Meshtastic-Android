@@ -870,6 +870,7 @@
     <string name="scanning_network">Scanare…</string>
     <string name="scanning_bluetooth">Scanare…</string>
     <string name="bluetooth_available_devices">Dispozitive bluetooth disponibile</string>
+    <string name="nodes_empty_disconnected_title">Niciun dispozitiv conectat</string>
     <string name="get_started">Să începem</string>
     <string name="intro_welcome">Bine ai venit la</string>
     <string name="stay_connected_anywhere">Rămâneţi conectat oriunde</string>
