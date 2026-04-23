@@ -63,6 +63,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -74,6 +75,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
@@ -86,6 +88,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_select_network
@@ -139,6 +142,7 @@ import org.meshtastic.core.ui.icon.Serial
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
 import org.meshtastic.core.ui.icon.Wifi
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.feature.wifiprovision.WifiProvisionError
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
@@ -528,47 +532,53 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
             modifier = Modifier.align(Alignment.CenterHorizontally),
         )
 
-        ProvisionInfoCard(
-            label = stringResource(Res.string.wifi_provision_success_ip_address),
-            value = resolvedIp,
-            copyEnabled = ipAddress != null,
-        )
+        Card(
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        ) {
+            ProvisionInfoItem(
+                label = stringResource(Res.string.wifi_provision_success_ip_address),
+                value = resolvedIp,
+                copyEnabled = ipAddress != null,
+            )
+        }
 
         Card(
             shape = MaterialTheme.shapes.large,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
             ) {
                 Text(
                     text = stringResource(Res.string.wifi_provision_success_setup_title),
                     style = MaterialTheme.typography.titleLargeEmphasized,
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp),
                 )
                 Text(
                     text = stringResource(Res.string.wifi_provision_success_setup_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp),
                 )
-                ProvisionInfoCard(
+                ProvisionInfoItem(
                     label = stringResource(Res.string.wifi_provision_success_username),
                     value = defaultUsername,
                 )
-                ProvisionInfoCard(
+                ProvisionInfoItem(
                     label = stringResource(Res.string.password),
                     value = defaultPassword,
                 )
-                ProvisionInfoCard(
+                ProvisionInfoItem(
                     label = stringResource(Res.string.wifi_provision_success_ssh_label),
                     value = sshCommand,
                     copyEnabled = ipAddress != null,
                 )
 
-                Button(
+                FilledTonalButton(
                     onClick = { sshUri?.let(openUrl) },
                     enabled = sshUri != null,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp, bottom = 12.dp),
                 ) {
                     Icon(imageVector = MeshtasticIcons.Serial, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
@@ -578,6 +588,7 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
                     text = stringResource(Res.string.wifi_provision_success_open_ssh_fallback),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }
         }
@@ -589,29 +600,17 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
 }
 
 @Composable
-private fun ProvisionInfoCard(label: String, value: String, copyEnabled: Boolean = true) {
-    Card(
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(text = value, style = MaterialTheme.typography.bodyLargeEmphasized)
-            }
+private fun ProvisionInfoItem(label: String, value: String, copyEnabled: Boolean = true) {
+    ListItem(
+        overlineContent = { Text(text = label, style = MaterialTheme.typography.labelLarge) },
+        headlineContent = { Text(text = value, style = MaterialTheme.typography.bodyLargeEmphasized) },
+        trailingContent = {
             if (copyEnabled) {
                 CopyIconButton(valueToCopy = value)
             }
-        }
-    }
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    )
 }
 
 @Composable
@@ -693,5 +692,18 @@ private fun CenteredStatusContent(content: @Composable () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         content()
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ProvisionSuccessContentPreview() {
+    AppTheme {
+        Surface {
+            ProvisionSuccessContent(
+                ipAddress = "192.168.1.100",
+                onDone = {}
+            )
+        }
     }
 }
