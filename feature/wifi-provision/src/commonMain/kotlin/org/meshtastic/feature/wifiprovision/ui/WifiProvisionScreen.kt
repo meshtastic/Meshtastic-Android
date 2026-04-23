@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+@file:Suppress("TooManyFunctions", "LongMethod")
+
 package org.meshtastic.feature.wifiprovision.ui
 
 import androidx.compose.animation.AnimatedVisibility
@@ -84,11 +87,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_select_network
@@ -125,11 +128,11 @@ import org.meshtastic.core.resources.wifi_provision_success_open_ssh_fallback
 import org.meshtastic.core.resources.wifi_provision_success_password_value
 import org.meshtastic.core.resources.wifi_provision_success_setup_description
 import org.meshtastic.core.resources.wifi_provision_success_setup_title
-import org.meshtastic.core.resources.wifi_provision_success_ssh_label
 import org.meshtastic.core.resources.wifi_provision_success_ssh_command
+import org.meshtastic.core.resources.wifi_provision_success_ssh_label
 import org.meshtastic.core.resources.wifi_provision_success_ssh_unavailable
-import org.meshtastic.core.resources.wifi_provision_success_username_value
 import org.meshtastic.core.resources.wifi_provision_success_username
+import org.meshtastic.core.resources.wifi_provision_success_username_value
 import org.meshtastic.core.resources.wifi_provisioning
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.CopyIconButton
@@ -547,9 +550,7 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
             shape = MaterialTheme.shapes.large,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            ) {
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
                 Text(
                     text = stringResource(Res.string.wifi_provision_success_setup_title),
                     style = MaterialTheme.typography.titleLargeEmphasized,
@@ -565,10 +566,7 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
                     label = stringResource(Res.string.wifi_provision_success_username),
                     value = defaultUsername,
                 )
-                ProvisionInfoItem(
-                    label = stringResource(Res.string.password),
-                    value = defaultPassword,
-                )
+                ProvisionInfoItem(label = stringResource(Res.string.password), value = defaultPassword)
                 ProvisionInfoItem(
                     label = stringResource(Res.string.wifi_provision_success_ssh_label),
                     value = sshCommand,
@@ -580,7 +578,11 @@ private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
                     enabled = sshUri != null,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp, bottom = 12.dp),
                 ) {
-                    Icon(imageVector = MeshtasticIcons.Serial, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = MeshtasticIcons.Serial,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(Res.string.wifi_provision_success_open_ssh))
                 }
@@ -698,12 +700,5 @@ private fun CenteredStatusContent(content: @Composable () -> Unit) {
 @PreviewLightDark
 @Composable
 private fun ProvisionSuccessContentPreview() {
-    AppTheme {
-        Surface {
-            ProvisionSuccessContent(
-                ipAddress = "192.168.1.100",
-                onDone = {}
-            )
-        }
-    }
+    AppTheme { Surface { ProvisionSuccessContent(ipAddress = "192.168.1.100", onDone = {}) } }
 }

@@ -42,8 +42,8 @@ import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT_HIDDEN
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_CONNECTION
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_NETWORKS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_SCAN
-import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CONNECTION_INFO_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CONNECTION_INFO_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_SUCCESS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT
@@ -241,16 +241,17 @@ class NymeaWifiService(
      *
      * Uses a short timeout because this is an optional enrichment for UX, not a provisioning success criterion.
      */
-    private suspend fun fetchConnectionIpAddress(): String? =
-        safeCatching {
-            sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
-            val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
-            if (response.responseCode == RESPONSE_SUCCESS) {
-                response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
-            } else {
-                null
-            }
-        }.getOrNull()
+    private suspend fun fetchConnectionIpAddress(): String? = safeCatching {
+        sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
+        val response =
+            NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
+        if (response.responseCode == RESPONSE_SUCCESS) {
+            response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
+        } else {
+            null
+        }
+    }
+        .getOrNull()
 
     private fun nymeaErrorMessage(code: Int): String = when (code) {
         NymeaBleConstants.RESPONSE_INVALID_COMMAND -> "Invalid command"
