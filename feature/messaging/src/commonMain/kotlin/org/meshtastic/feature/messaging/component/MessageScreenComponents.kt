@@ -75,6 +75,7 @@ import org.meshtastic.core.resources.delete_messages_title
 import org.meshtastic.core.resources.filter_disable_for_contact
 import org.meshtastic.core.resources.filter_enable_for_contact
 import org.meshtastic.core.resources.filter_hide_count
+import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.filter_show_count
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.resources.new_messages_below
@@ -103,6 +104,7 @@ import org.meshtastic.core.ui.icon.More
 import org.meshtastic.core.ui.icon.Muted
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
+import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.Unmuted
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
@@ -297,6 +299,7 @@ fun MessageTopBar(
     filteredCount: Int = 0,
     showFiltered: Boolean = false,
     onToggleShowFiltered: () -> Unit = {},
+    onNavigateToFilterSettings: () -> Unit = {},
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -328,6 +331,7 @@ fun MessageTopBar(
             filteredCount = filteredCount,
             showFiltered = showFiltered,
             onToggleShowFiltered = onToggleShowFiltered,
+            onNavigateToFilterSettings = onNavigateToFilterSettings,
         )
     },
 )
@@ -344,6 +348,7 @@ private fun MessageTopBarActions(
     filteredCount: Int,
     showFiltered: Boolean,
     onToggleShowFiltered: () -> Unit,
+    onNavigateToFilterSettings: () -> Unit,
 ) {
     if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
         NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
@@ -364,6 +369,7 @@ private fun MessageTopBarActions(
             filteredCount = filteredCount,
             showFiltered = showFiltered,
             onToggleShowFiltered = onToggleShowFiltered,
+            onNavigateToFilterSettings = onNavigateToFilterSettings,
         )
     }
 }
@@ -380,6 +386,7 @@ private fun OverFlowMenu(
     filteredCount: Int,
     showFiltered: Boolean,
     onToggleShowFiltered: () -> Unit,
+    onNavigateToFilterSettings: () -> Unit,
 ) {
     if (expanded) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
@@ -389,6 +396,7 @@ private fun OverFlowMenu(
                 FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
             }
             FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
+            FilterSettingsMenuItem(onDismiss, onNavigateToFilterSettings)
         }
     }
 }
@@ -460,6 +468,19 @@ private fun FilterToggleMenuItem(filteringDisabled: Boolean, onDismiss: () -> Un
                 contentDescription = title,
             )
         },
+    )
+}
+
+@Composable
+private fun FilterSettingsMenuItem(onDismiss: () -> Unit, onNavigate: () -> Unit) {
+    val title = stringResource(Res.string.filter_settings)
+    DropdownMenuItem(
+        text = { Text(title) },
+        onClick = {
+            onDismiss()
+            onNavigate()
+        },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.Settings, contentDescription = title) },
     )
 }
 

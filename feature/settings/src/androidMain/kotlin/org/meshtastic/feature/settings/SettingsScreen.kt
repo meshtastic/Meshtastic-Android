@@ -46,6 +46,7 @@ import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.export_configuration
+import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
@@ -53,6 +54,7 @@ import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
@@ -246,6 +248,15 @@ fun SettingsScreen(
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
                         onNavigate(WifiProvisionRoute.WifiProvision())
+                    }
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.filter_settings)) {
+                    ListItem(
+                        text = stringResource(Res.string.filter_settings),
+                        leadingIcon = MeshtasticIcons.FilterList,
+                    ) {
+                        onNavigate(SettingsRoute.FilterSettings)
                     }
                 }
 
