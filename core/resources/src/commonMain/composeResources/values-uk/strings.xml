@@ -979,6 +979,12 @@
     <string name="analytics_platforms">Аналітичні платформи:</string>
     <string name="for_more_information_see_our_privacy_policy">Для додаткової інформації, перегляньте нашу політику конфіденційності.</string>
     <string name="unset">Невстановлене - 0</string>
+    <plurals name="relays">
+        <item quantity="one">Пройшло через %1$d вузол</item>
+        <item quantity="few">Пройшло через %1$d вузлів</item>
+        <item quantity="many">Пройшло через %1$d вузлів</item>
+        <item quantity="other">Пройшло через %1$d вузли</item>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s зазвичай постачається із завантажувачем, який не підтримує оновлення OTA. Вам може знадобитися завантажувач з можливістю оновлень OTA через USB перед прошиванням OTA.</string>
     <string name="learn_more">Докладніше</string>
     <string name="dont_show_again_for_device">Не показувати знову для цього пристрою</string>
