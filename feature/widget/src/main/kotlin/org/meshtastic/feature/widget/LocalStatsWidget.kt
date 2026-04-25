@@ -18,6 +18,7 @@ package org.meshtastic.feature.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -36,13 +37,13 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.components.TitleBar
@@ -148,10 +149,8 @@ class LocalStatsWidget :
                     GlanceModifier.fillMaxSize()
                         .clickable(
                             actionStartActivity(
-                                android.content.ComponentName(
-                                    context.packageName,
-                                    "org.meshtastic.app.MainActivity",
-                                ),
+                                context.packageManager.getLaunchIntentForPackage(context.packageName)
+                                    ?: Intent().setClassName(context.packageName, "org.meshtastic.app.MainActivity"),
                             ),
                         ),
                 ) {
