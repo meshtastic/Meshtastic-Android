@@ -161,6 +161,7 @@ configure<ApplicationExtension> {
             if (name == "google") {
                 manifestPlaceholders["MAPS_API_KEY"] = "dummy"
             }
+            buildConfigField("boolean", "MAPS_ENABLED", (name != "minimal").toString())
         }
     }
 
@@ -230,12 +231,14 @@ dependencies {
     implementation(projects.feature.intro)
     implementation(projects.feature.messaging)
     implementation(projects.feature.connections)
-    implementation(projects.feature.map)
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
     implementation(projects.feature.firmware)
     implementation(projects.feature.wifiProvision)
     implementation(projects.feature.widget)
+
+    googleImplementation(projects.feature.map)
+    fdroidImplementation(projects.feature.map)
 
     implementation(libs.jetbrains.compose.material3.adaptive)
     implementation(libs.jetbrains.compose.material3.adaptive.layout)

@@ -53,7 +53,8 @@ class AnalyticsConventionPlugin : Plugin<Project> {
             plugins.withId("com.google.gms.google-services") {
                 tasks.configureEach {
                     if (
-                        name.contains("GoogleServices", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)
+                        name.contains("GoogleServices", ignoreCase = true) &&
+                        (name.contains("fdroid", ignoreCase = true) || name.contains("minimal", ignoreCase = true))
                     ) {
                         enabled = false
                     }
@@ -62,7 +63,10 @@ class AnalyticsConventionPlugin : Plugin<Project> {
 
             plugins.withId("com.google.firebase.crashlytics") {
                 tasks.configureEach {
-                    if (name.contains("Crashlytics", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)) {
+                    if (
+                        name.contains("Crashlytics", ignoreCase = true) &&
+                        (name.contains("fdroid", ignoreCase = true) || name.contains("minimal", ignoreCase = true))
+                    ) {
                         enabled = false
                     }
                 }
@@ -80,7 +84,8 @@ class AnalyticsConventionPlugin : Plugin<Project> {
                         (
                             name.contains("datadog", ignoreCase = true) ||
                                 name.contains("uploadMapping", ignoreCase = true)
-                            ) && name.contains("fdroid", ignoreCase = true)
+                            ) &&
+                        (name.contains("fdroid", ignoreCase = true) || name.contains("minimal", ignoreCase = true))
                     ) {
                         enabled = false
                     }
@@ -90,7 +95,7 @@ class AnalyticsConventionPlugin : Plugin<Project> {
                 // but we strip the datadog.buildId file from its output to preserve fdroid
                 // sterility — no analytics artifacts should ship in the open-source flavor.
                 tasks.withType<InjectBuildIdToAssetsTask>().configureEach {
-                    if (name.contains("Fdroid", ignoreCase = true)) {
+                    if (name.contains("Fdroid", ignoreCase = true) || name.contains("Minimal", ignoreCase = true)) {
                         doLast {
                             // Constant: GenerateBuildIdTask.BUILD_ID_FILE_NAME
                             val buildIdFile = File(outputAssets.get().asFile, "datadog.buildId")

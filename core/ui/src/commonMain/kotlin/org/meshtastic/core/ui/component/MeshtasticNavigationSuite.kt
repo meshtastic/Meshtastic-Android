@@ -74,6 +74,7 @@ fun MeshtasticNavigationSuite(
     multiBackstack: MultiBackstack,
     uiViewModel: UIViewModel,
     modifier: Modifier = Modifier,
+    destinations: List<TopLevelDestination> = TopLevelDestination.entries,
     content: @Composable () -> Unit,
 ) {
     val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle()
@@ -92,7 +93,7 @@ fun MeshtasticNavigationSuite(
         modifier = modifier,
         layoutType = layoutType,
         navigationSuiteItems = {
-            TopLevelDestination.entries.forEach { destination ->
+            destinations.forEach { destination ->
                 val isSelected = destination == topLevelDestination
                 item(
                     selected = isSelected,

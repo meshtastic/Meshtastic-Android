@@ -25,7 +25,7 @@ android {
     namespace = "org.meshtastic.feature.widget"
     resourcePrefix = "widget_"
 
-    defaultConfig { minSdk = 26 }
+    defaultConfig { minSdk = 24 }
 }
 
 dependencies {
