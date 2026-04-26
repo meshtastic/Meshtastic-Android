@@ -48,6 +48,14 @@
     <!-- %d is replaced with the channel index at runtime -->
     <string name="auto_channel_number">Channel %d</string>
 
+    <!-- Local stats (Status tab) -->
+    <string name="auto_stats_battery">Battery: %1$s</string>
+    <string name="auto_stats_powered">Powered</string>
+    <string name="auto_stats_channel_util">Ch Util: %1$s · Air Util: %2$s</string>
+    <string name="auto_stats_nodes">Nodes: %1$d/%2$d online</string>
+    <string name="auto_stats_uptime">Uptime: %1$s</string>
+    <string name="auto_stats_traffic">TX: %1$d · RX: %2$d · Dupe: %3$d</string>
+
     <!-- Generic fallback label when a node has no name -->
     <string name="auto_unknown">Unknown</string>
 </resources>

@@ -20,7 +20,9 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getChannel
+import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.User
 
@@ -212,5 +214,41 @@ internal object CarScreenDataBuilder {
         contact.unreadCount > 0 -> unreadLabel(contact.unreadCount)
         contact.lastMessageTime != null -> formatShortDate(contact.lastMessageTime)
         else -> ""
+    }
+
+    /**
+     * Builds a [CarLocalStats] snapshot from the device's [Node], [LocalStats], and node DB.
+     *
+     * Falls back to [Node.deviceMetrics] when [LocalStats] hasn't been populated yet — the
+     * same strategy used by [org.meshtastic.feature.widget.LocalStatsWidgetStateProvider].
+     */
+    @Suppress("MagicNumber")
+    fun buildLocalStats(
+        ourNode: Node?,
+        stats: LocalStats,
+        allNodes: Collection<Node>,
+    ): CarLocalStats {
+        val metrics = ourNode?.deviceMetrics
+        val batteryLevel = metrics?.battery_level ?: 0
+        val hasStats = stats.uptime_seconds != 0
+        val channelUtil = if (hasStats) stats.channel_utilization else metrics?.channel_utilization ?: 0f
+        val airUtilTx = if (hasStats) stats.air_util_tx else metrics?.air_util_tx ?: 0f
+        val uptimeSecs = if (hasStats) stats.uptime_seconds else metrics?.uptime_seconds ?: 0
+
+        val totalNodes = allNodes.size
+        val onlineNodes = allNodes.count { it.lastHeard > onlineTimeThreshold() }
+
+        return CarLocalStats(
+            batteryLevel = batteryLevel,
+            hasBattery = metrics?.battery_level != null,
+            channelUtilization = channelUtil,
+            airUtilization = airUtilTx,
+            totalNodes = totalNodes,
+            onlineNodes = onlineNodes,
+            uptimeSeconds = uptimeSecs,
+            numPacketsTx = stats.num_packets_tx,
+            numPacketsRx = stats.num_packets_rx,
+            numRxDupe = stats.num_rx_dupe,
+        )
     }
 }

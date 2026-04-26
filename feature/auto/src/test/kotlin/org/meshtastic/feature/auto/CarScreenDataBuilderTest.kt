@@ -27,6 +27,7 @@ import org.meshtastic.core.model.DeviceMetrics
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 import kotlin.test.Test
 
@@ -490,6 +491,100 @@ class CarScreenDataBuilderTest {
     fun `contactSecondaryText - unread takes precedence over lastMessageTime`() {
         val contact = makeCarContact(unreadCount = 3, lastMessageTime = 500L)
         CarScreenDataBuilder.contactSecondaryText(contact, formatShortDate = { "should not appear" }) shouldBe "3 unread"
+    }
+
+    // ---- buildLocalStats ----
+
+    @Test
+    fun `buildLocalStats - returns defaults when ourNode is null and stats are empty`() {
+        val result = CarScreenDataBuilder.buildLocalStats(null, LocalStats(), emptyList())
+
+        result.hasBattery shouldBe false
+        result.batteryLevel shouldBe 0
+        result.channelUtilization shouldBe 0f
+        result.airUtilization shouldBe 0f
+        result.totalNodes shouldBe 0
+        result.onlineNodes shouldBe 0
+        result.uptimeSeconds shouldBe 0
+    }
+
+    @Test
+    fun `buildLocalStats - reads battery from device metrics`() {
+        val node = Node(
+            num = 1,
+            user = User(long_name = "Me"),
+            deviceMetrics = DeviceMetrics(battery_level = 85),
+        )
+        val result = CarScreenDataBuilder.buildLocalStats(node, LocalStats(), emptyList())
+
+        result.hasBattery shouldBe true
+        result.batteryLevel shouldBe 85
+    }
+
+    @Test
+    fun `buildLocalStats - prefers LocalStats utilization over device metrics`() {
+        val node = Node(
+            num = 1,
+            user = User(long_name = "Me"),
+            deviceMetrics = DeviceMetrics(channel_utilization = 5f, air_util_tx = 1f),
+        )
+        val stats = LocalStats(
+            uptime_seconds = 100,
+            channel_utilization = 18.5f,
+            air_util_tx = 3.2f,
+        )
+        val result = CarScreenDataBuilder.buildLocalStats(node, stats, emptyList())
+
+        result.channelUtilization shouldBe 18.5f
+        result.airUtilization shouldBe 3.2f
+        result.uptimeSeconds shouldBe 100
+    }
+
+    @Test
+    fun `buildLocalStats - falls back to device metrics when LocalStats uptime is zero`() {
+        val node = Node(
+            num = 1,
+            user = User(long_name = "Me"),
+            deviceMetrics = DeviceMetrics(
+                channel_utilization = 5f,
+                air_util_tx = 1f,
+                uptime_seconds = 3600,
+            ),
+        )
+        val result = CarScreenDataBuilder.buildLocalStats(node, LocalStats(), emptyList())
+
+        result.channelUtilization shouldBe 5f
+        result.airUtilization shouldBe 1f
+        result.uptimeSeconds shouldBe 3600
+    }
+
+    @Test
+    fun `buildLocalStats - counts total and online nodes`() {
+        val nowSecs = (System.currentTimeMillis() / 1000).toInt()
+        val nodes = listOf(
+            Node(num = 1, lastHeard = nowSecs),
+            Node(num = 2, lastHeard = nowSecs),
+            Node(num = 3, lastHeard = 0), // offline
+        )
+        val result = CarScreenDataBuilder.buildLocalStats(null, LocalStats(), nodes)
+
+        result.totalNodes shouldBe 3
+        result.onlineNodes shouldBe 2
+    }
+
+    @Test
+    fun `buildLocalStats - copies traffic counters from LocalStats`() {
+        val stats = LocalStats(
+            uptime_seconds = 1,
+            num_packets_tx = 145,
+            num_packets_rx = 892,
+            num_rx_dupe = 42,
+        )
+        val result = CarScreenDataBuilder.buildLocalStats(null, stats, emptyList())
+
+        result.numPacketsTx shouldBe 145
+        result.numPacketsRx shouldBe 892
+        result.numRxDupe shouldBe 42
     }
 
     // ---- helpers ----

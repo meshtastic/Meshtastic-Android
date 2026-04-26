@@ -48,6 +48,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -57,7 +58,9 @@ import org.meshtastic.core.repository.ServiceRepository
  * Root screen displayed in Android Auto.
  *
  * Renders a three-tab UI:
- * - **Status** — Connection state and device name.
+ * - **Status** — Connection state, device name, and local device stats (battery,
+ *   channel/air utilization, online nodes, uptime, traffic) — the same key metrics
+ *   surfaced by the home-screen Local Stats widget.
  * - **Favorites** — All nodes the user has starred, with online/hop status shown as a subtitle.
  * - **Messages** — All conversations: active channels displayed first as permanent placeholders
  *   (always visible even when empty, sorted by channel index), followed by DM conversations
@@ -101,6 +104,12 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
     private var activeTabId = TAB_STATUS
     private var connectionState: ConnectionState = ConnectionState.Disconnected
+
+    /**
+     * Local device statistics for the Status tab — battery, utilization, nodes, uptime.
+     * Mirrors the key metrics shown by the home-screen Local Stats widget.
+     */
+    private var localStats: CarLocalStats = CarLocalStats()
 
     /**
      * Favorite nodes sorted alphabetically by long name. Updated reactively from
@@ -173,7 +182,15 @@ class MeshtasticCarScreen(carContext: CarContext) :
             .map { db -> CarScreenDataBuilder.sortFavorites(db.values) }
             .distinctUntilChanged()
 
-        // All three data sources feed a single combined collector so that each batch of
+        val localStatsFlow = combine(
+            nodeRepository.ourNodeInfo,
+            nodeRepository.localStats,
+            nodeRepository.nodeDBbyNum,
+        ) { ourNode, stats, nodeDb ->
+            CarScreenDataBuilder.buildLocalStats(ourNode, stats, nodeDb.values)
+        }.distinctUntilChanged()
+
+        // All data sources feed a single combined collector so that each batch of
         // repository changes produces exactly one invalidate() call, avoiding unnecessary
         // template rebuilds and staying well within the host's update-rate budget.
         scope.launch {
@@ -181,11 +198,15 @@ class MeshtasticCarScreen(carContext: CarContext) :
                 serviceRepository.connectionState,
                 favoritesFlow,
                 contactsFlow,
-            ) { connState, favs, ctcts -> Triple(connState, favs, ctcts) }
-                .collect { (connState, favs, ctcts) ->
-                    connectionState = connState
-                    favorites = favs
-                    contacts = ctcts
+                localStatsFlow,
+            ) { connState, favs, ctcts, stats ->
+                CombinedState(connState, favs, ctcts, stats)
+            }
+                .collect { state ->
+                    connectionState = state.connectionState
+                    favorites = state.favorites
+                    contacts = state.contacts
+                    localStats = state.localStats
                     isLoading = false
                     invalidate()
                 }
@@ -267,11 +288,19 @@ class MeshtasticCarScreen(carContext: CarContext) :
 
     // ---- Individual template builders ----
 
-    private fun buildStatusTemplate(): ListTemplate =
-        ListTemplate.Builder()
+    /**
+     * Builds the Status tab: connection state + local device stats mirroring the home-screen
+     * Local Stats widget (battery, channel/air utilization, node counts, uptime, traffic).
+     */
+    private fun buildStatusTemplate(): ListTemplate {
+        val items = ItemList.Builder()
+        items.addItem(buildStatusRow())
+        buildLocalStatsRows().forEach { items.addItem(it) }
+        return ListTemplate.Builder()
             .setTitle(carContext.getString(R.string.auto_tab_status))
-            .setSingleList(ItemList.Builder().addItem(buildStatusRow()).build())
+            .setSingleList(items.build())
             .build()
+    }
 
     /**
      * Builds the Favorites tab: one row per starred node, mirroring the key status info shown
@@ -314,6 +343,11 @@ class MeshtasticCarScreen(carContext: CarContext) :
         var remaining = listContentLimit
         items.addItem(buildStatusRow())
         remaining--
+        val statsRows = buildLocalStatsRows()
+        statsRows.take(remaining).forEach { row ->
+            items.addItem(row)
+            remaining--
+        }
         // Give each section at most half the remaining space so neither dominates.
         val halfRemaining = remaining / 2
         favorites.take(halfRemaining).forEach { node ->
@@ -342,6 +376,70 @@ class MeshtasticCarScreen(carContext: CarContext) :
             .addTextIfNotEmpty(deviceName)
             .setBrowsable(false)
             .build()
+    }
+
+    /**
+     * Builds rows for local device statistics — the same key metrics the home-screen widget
+     * surfaces: battery, channel/air utilization, online nodes, uptime, and packet traffic.
+     *
+     * Only shown when connected ([CarLocalStats.hasBattery] is a proxy for "device metrics
+     * received"). Returns an empty list when disconnected.
+     */
+    @Suppress("MagicNumber")
+    private fun buildLocalStatsRows(): List<Row> {
+        val s = localStats
+        if (!s.hasBattery && s.totalNodes == 0) return emptyList()
+        val rows = mutableListOf<Row>()
+
+        if (s.hasBattery) {
+            val batteryValue = if (s.batteryLevel > 100) {
+                carContext.getString(R.string.auto_stats_powered)
+            } else {
+                "${s.batteryLevel}%"
+            }
+            rows += Row.Builder()
+                .setTitle(carContext.getString(R.string.auto_stats_battery, batteryValue))
+                .addText(
+                    carContext.getString(
+                        R.string.auto_stats_channel_util,
+                        "%.1f%%".format(s.channelUtilization),
+                        "%.1f%%".format(s.airUtilization),
+                    ),
+                )
+                .setBrowsable(false)
+                .build()
+        }
+
+        rows += Row.Builder()
+            .setTitle(carContext.getString(R.string.auto_stats_nodes, s.onlineNodes, s.totalNodes))
+            .addTextIfNotEmpty(
+                if (s.uptimeSeconds > 0) {
+                    carContext.getString(
+                        R.string.auto_stats_uptime,
+                        formatUptime(s.uptimeSeconds),
+                    )
+                } else {
+                    ""
+                },
+            )
+            .setBrowsable(false)
+            .build()
+
+        if (s.numPacketsTx > 0 || s.numPacketsRx > 0) {
+            rows += Row.Builder()
+                .setTitle(
+                    carContext.getString(
+                        R.string.auto_stats_traffic,
+                        s.numPacketsTx,
+                        s.numPacketsRx,
+                        s.numRxDupe,
+                    ),
+                )
+                .setBrowsable(false)
+                .build()
+        }
+
+        return rows
     }
 
     /**
@@ -427,6 +525,13 @@ class MeshtasticCarScreen(carContext: CarContext) :
         }
         return ListTemplate.Builder().setTitle(title).setSingleList(listBuilder.build()).build()
     }
+
+    private data class CombinedState(
+        val connectionState: ConnectionState,
+        val favorites: List<Node>,
+        val contacts: List<CarContact>,
+        val localStats: CarLocalStats,
+    )
 
     companion object {
         private const val TAB_STATUS = "status"
