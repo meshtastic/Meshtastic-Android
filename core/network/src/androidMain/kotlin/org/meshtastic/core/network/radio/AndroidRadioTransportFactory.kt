@@ -23,7 +23,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
-import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
@@ -40,7 +39,6 @@ import org.meshtastic.core.repository.RadioTransportFactory
 @Suppress("LongParameterList")
 class AndroidRadioTransportFactory(
     private val context: Context,
-    private val buildConfigProvider: BuildConfigProvider,
     private val usbRepository: UsbRepository,
     private val usbManager: UsbManager,
     scanner: BleScanner,
@@ -52,7 +50,7 @@ class AndroidRadioTransportFactory(
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
 
     override fun isMockTransport(): Boolean =
-        buildConfigProvider.isDebug || Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
+        Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
 
     override fun isPlatformAddressValid(address: String): Boolean {
         val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) } ?: return false
