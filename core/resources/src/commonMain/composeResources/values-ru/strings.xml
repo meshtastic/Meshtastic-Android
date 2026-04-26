@@ -114,10 +114,10 @@
     <string name="label_short_turbo">Малая дальность - Турбо</string>
     <string name="label_short_fast">Малая дальность - Быстро</string>
     <string name="label_short_slow">Малая дальность - Медленно</string>
-    <string name="label_lite_fast">Легкий - быстро</string>
-    <string name="label_lite_slow">Легкий - медленно</string>
-    <string name="label_narrow_fast">Узкий - быстро</string>
-    <string name="label_narrow_slow">Узкий - медленно</string>
+    <string name="label_lite_fast">Легкий - Быстро</string>
+    <string name="label_lite_slow">Легкий - Медленно</string>
+    <string name="label_narrow_fast">Узкий - Быстро</string>
+    <string name="label_narrow_slow">Узкий - Медленно</string>
     <string name="config_network_wifi_enabled_summary">Включение WiFi отключит Bluetooth-подключение к приложению.</string>
     <string name="config_network_eth_enabled_summary">Включение Ethernet отключит Bluetooth-соединение с приложением. TCP-соединения не доступны на устройствах Apple.</string>
     <string name="config_network_udp_enabled_summary">Включить вещание пакетов через UDP в локальной сети.</string>
@@ -132,7 +132,7 @@
     <string name="config_security_admin_key">Открытый ключ узла администратора, имеющего право на управление данным узлом отсылкой административных сообщений.</string>
     <string name="config_security_is_managed">Устройство управляется сетевым администратором, пользователь не может изменять настройки устройства.</string>
     <string name="config_security_serial_enabled">Последовательная консоль через Stream API.</string>
-    <string name="config_security_debug_log_api_enabled">Вывод журнала отладки  по последовательному каналу, просматривайте и выгружайте журналы устройства с измененным местоположением по Bluetooth.</string>
+    <string name="config_security_debug_log_api_enabled">Вывод журнала отладки по последовательному каналу, просматривайте и выгружайте журналы устройства с измененным местоположением по Bluetooth.</string>
     <!-- Position Config -->
     <string name="position_packet">Пакет позиции</string>
     <string name="broadcast_interval">Период рассылки</string>
@@ -140,7 +140,7 @@
     <string name="minimum_interval">Умный интервал</string>
     <string name="minimum_distance">Умное расстояние</string>
     <string name="device_gps">GPS устройства</string>
-    <string name="fixed_position">Фиксированнык координаты</string>
+    <string name="fixed_position">Фиксированная позиция</string>
     <string name="altitude">Высота</string>
     <string name="update_interval">Интервал опроса GPS</string>
     <string name="advanced_device_gps">Расширенное GPS устройство</string>
@@ -154,7 +154,7 @@
     <string name="qr_code">QR-код</string>
     <string name="unknown_username">Неизвестный пользователь</string>
     <string name="send">Отправить</string>
-    <string name="you">В</string>
+    <string name="you">Вы</string>
     <string name="analytics_okay">Разрешить аналитику и отчеты о сбоях.</string>
     <string name="accept">Принять</string>
     <string name="cancel">Отмена</string>
@@ -438,7 +438,7 @@
     <string name="load_15_min">Загрузка 15 мин</string>
     <string name="load_1_min_description">Средняя нагрузка системы за 1 минуту</string>
     <string name="load_5_min_description">Средняя нагрузка системы за 5 минут</string>
-    <string name="load_15_min_description">Средняя нагрузка системы за 15 минуту</string>
+    <string name="load_15_min_description">Среднее значение нагрузки системы за 15 минут</string>
     <string name="free_memory_description">Доступная оперативная память в байтах</string>
     <string name="one_hour_short">1Ч</string>
     <string name="twenty_four_hours">24ч</string>
