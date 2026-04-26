@@ -805,7 +805,7 @@
     <string name="request_pax_metrics">Показники Pax</string>
     <string name="request_metadata">Метадані</string>
     <string name="refresh_metadata">Оновити метаданні</string>
-    <string name="session_active">Сессія активна</string>
+    <string name="session_active">Сесія активна</string>
     <string name="retry">Повторити</string>
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
@@ -981,7 +981,7 @@
     <string name="unset">Невстановлене - 0</string>
     <plurals name="relays">
         <item quantity="one">Пройшло через %1$d вузол</item>
-        <item quantity="few">Пройшло через %1$d вузлів</item>
+        <item quantity="few">Пройшло через %1$d вузли</item>
         <item quantity="many">Пройшло через %1$d вузлів</item>
         <item quantity="other">Пройшло через %1$d вузли</item>
     </plurals>
@@ -1046,6 +1046,18 @@
     <string name="back">Назад</string>
     <string name="interval_unset">Скинути</string>
     <string name="interval_always_on">Завжди увімк.</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">%1$d секунда</item>
+        <item quantity="few">%1$d секунд</item>
+        <item quantity="many">%1$d секунд</item>
+        <item quantity="other">%1$d секунд</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">%1$d хвилина</item>
+        <item quantity="few">%1$d хвилин</item>
+        <item quantity="many">%1$d хвилин</item>
+        <item quantity="other">%1$d хвилин</item>
+    </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d година</item>
         <item quantity="few">%1$d години</item>

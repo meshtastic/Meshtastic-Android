@@ -338,15 +338,16 @@ interface PacketDao {
     )
     suspend fun findPacketBySfppHash(hash: ByteString): Packet?
 
+    // Fetches all DataPackets for the current node, ordered by time.
+    // Callers should filter by status in Kotlin (avoids SQLite json_extract dependency).
     @Query(
         """
     SELECT data FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-      AND json_extract(data, '${"$"}.status') = 'QUEUED'
     ORDER BY received_time ASC
     """,
     )
-    suspend fun getQueuedPackets(): List<DataPacket>
+    suspend fun getAllDataPackets(): List<DataPacket>
 
     @Query(
         """

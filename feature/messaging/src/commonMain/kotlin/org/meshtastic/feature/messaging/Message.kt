@@ -52,6 +52,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -458,7 +464,18 @@ private fun MessageInput(
     val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
 
     OutlinedTextField(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+        modifier =
+        modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).onKeyEvent { keyEvent ->
+            val isEnterNoShift = keyEvent.key == Key.Enter && !keyEvent.isShiftPressed
+            if (isEnterNoShift) {
+                if (keyEvent.type == KeyEventType.KeyUp && canSend) {
+                    onSendMessage()
+                }
+                true // consume both KeyDown and KeyUp to prevent newline insertion
+            } else {
+                false
+            }
+        },
         state = textFieldState,
         lineLimits = TextFieldLineLimits.MultiLine(1, MAX_LINES),
         label = { Text(stringResource(Res.string.message_input_label)) },
