@@ -19,7 +19,6 @@ package org.meshtastic.desktop.ui
 import org.meshtastic.core.navigation.ConnectionsRoute
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.FirmwareRoute
-import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -43,7 +42,7 @@ class DesktopTopLevelDestinationParityTest {
             setOf(
                 ContactsRoute.ContactsGraph::class,
                 NodesRoute.NodesGraph::class,
-                MapRoute.Map::class,
+                SettingsRoute.Position::class,
                 SettingsRoute.SettingsGraph::class,
                 ConnectionsRoute.ConnectionsGraph::class,
             )

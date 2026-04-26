@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,7 +66,9 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit) {
     val filterEnabled by viewModel.filterEnabled.collectAsStateWithLifecycle()
     val filterWords by viewModel.filterWords.collectAsStateWithLifecycle()
-    var newWord by remember { mutableStateOf("") }
+    val keywordMonitors by viewModel.keywordMonitors.collectAsStateWithLifecycle()
+    var newFilterWord by remember { mutableStateOf("") }
+    var newKeyword by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -87,11 +90,11 @@ fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit)
             item { FilterEnableCard(filterEnabled) { viewModel.setFilterEnabled(it) } }
             item {
                 FilterWordsInputCard(
-                    newWord = newWord,
-                    onNewWordChange = { newWord = it },
+                    newWord = newFilterWord,
+                    onNewWordChange = { newFilterWord = it },
                     onAddWord = {
-                        viewModel.addFilterWord(newWord)
-                        newWord = ""
+                        viewModel.addFilterWord(newFilterWord)
+                        newFilterWord = ""
                     },
                 )
             }
@@ -107,6 +110,86 @@ fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit)
             }
             items(filterWords, key = { it }) { word ->
                 FilterWordItem(word = word, onRemove = { viewModel.removeFilterWord(word) })
+            }
+
+            item {
+                KeywordMonitorsInputCard(
+                    newKeyword = newKeyword,
+                    onNewKeywordChange = { newKeyword = it },
+                    onAddKeyword = {
+                        viewModel.addKeywordMonitor(newKeyword)
+                        newKeyword = ""
+                    },
+                )
+            }
+            if (keywordMonitors.isEmpty()) {
+                item {
+                    Text(
+                        "Geen zoekwoorden ingesteld",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 8.dp),
+                    )
+                }
+            }
+            items(keywordMonitors, key = { it }) { keyword ->
+                KeywordMonitorItem(keyword = keyword, onRemove = { viewModel.removeKeywordMonitor(keyword) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun KeywordMonitorsInputCard(
+    newKeyword: String,
+    onNewKeywordChange: (String) -> Unit,
+    onAddKeyword: () -> Unit,
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Keyword Monitor (LongFast)", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Voeg woorden toe die je wilt monitoren op kanaal 0. Je krijgt een speciale melding met geluid.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = newKeyword,
+                    onValueChange = onNewKeywordChange,
+                    modifier = Modifier.weight(1f),
+                    label = { Text("Woord monitoren...") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { onAddKeyword() }),
+                )
+                IconButton(onClick = onAddKeyword) {
+                    Icon(MeshtasticIcons.Add, contentDescription = stringResource(Res.string.add))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun KeywordMonitorItem(keyword: String, onRemove: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = keyword, style = MaterialTheme.typography.bodyLarge, color = Color(0xFFFF8800))
+                Text(
+                    text = "Speciale melding geactiveerd",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = onRemove) {
+                Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
             }
         }
     }

@@ -152,6 +152,10 @@ interface UiPrefs {
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)
+
+    val keywordMonitors: StateFlow<Set<String>>
+
+    fun setKeywordMonitors(keywords: Set<String>)
 }
 
 /** Reactive interface for notification preferences. */

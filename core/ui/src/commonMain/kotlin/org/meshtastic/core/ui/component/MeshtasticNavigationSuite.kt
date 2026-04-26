@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -226,10 +227,16 @@ private fun NavigationIconContent(
                 },
             ) {
                 Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
+                    val tint =
+                        when {
+                            isSelectedState && destination == TopLevelDestination.Location -> Color(0xFFFF8800)
+                            isSelectedState -> colorScheme.primary
+                            else -> LocalContentColor.current
+                        }
                     Icon(
                         imageVector = vectorResource(destination.icon),
                         contentDescription = stringResource(destination.label),
-                        tint = if (isSelectedState) colorScheme.primary else LocalContentColor.current,
+                        tint = tint,
                     )
                 }
             }

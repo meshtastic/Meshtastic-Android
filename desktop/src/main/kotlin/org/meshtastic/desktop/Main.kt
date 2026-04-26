@@ -366,7 +366,7 @@ private fun handleKeyboardShortcut(
             true
         }
         Key.Three -> {
-            multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
+            multiBackstack.navigateTopLevel(TopLevelDestination.Location.route)
             true
         }
         Key.Four -> {

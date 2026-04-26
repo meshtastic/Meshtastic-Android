@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.atomicfu.atomic
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
@@ -186,6 +187,13 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[booleanPreferencesKey(provideLocationKey(nodeNum))] = provide } }
     }
 
+    override val keywordMonitors: StateFlow<Set<String>> =
+        dataStore.data.map { it[KEY_KEYWORD_MONITORS] ?: setOf("lamp aan") }.stateIn(scope, SharingStarted.Eagerly, setOf("lamp aan"))
+
+    override fun setKeywordMonitors(keywords: Set<String>) {
+        scope.launch { dataStore.edit { it[KEY_KEYWORD_MONITORS] = keywords } }
+    }
+
     private fun provideLocationKey(nodeNum: Int) = "provide-location-$nodeNum"
 
     companion object {
@@ -208,5 +216,6 @@ class UiPrefsImpl(
         val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")
         val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
         val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
+        val KEY_KEYWORD_MONITORS = stringSetPreferencesKey("keyword-monitors")
     }
 }

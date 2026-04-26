@@ -20,7 +20,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_forum
-import org.meshtastic.core.resources.ic_map
+import org.meshtastic.core.resources.ic_location_on
 import org.meshtastic.core.resources.ic_nodes
 import org.meshtastic.core.resources.ic_settings
 import org.meshtastic.core.resources.ic_wifi
@@ -31,7 +31,7 @@ val TopLevelDestination.icon: DrawableResource
         when (this) {
             TopLevelDestination.Conversations -> Res.drawable.ic_forum
             TopLevelDestination.Nodes -> Res.drawable.ic_nodes
-            TopLevelDestination.Map -> Res.drawable.ic_map
+            TopLevelDestination.Location -> Res.drawable.ic_location_on
             TopLevelDestination.Settings -> Res.drawable.ic_settings
             TopLevelDestination.Connections -> Res.drawable.ic_wifi
         }

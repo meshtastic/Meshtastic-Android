@@ -53,6 +53,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
 import org.meshtastic.core.resources.error_duty_cycle
@@ -96,6 +97,7 @@ class MeshDataHandlerImpl(
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
+    private val uiPrefs: UiPrefs,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
 
@@ -240,6 +242,24 @@ class MeshDataHandlerImpl(
         if (decoded.reply_id != 0 && decoded.emoji != 0) {
             rememberReaction(packet)
         } else {
+            // Monitor for dynamic keywords on channel 0 (LongFast)
+            val text = dataPacket.text?.lowercase()
+            if (text != null && dataPacket.channel == 0) {
+                val keywords = uiPrefs.keywordMonitors.value
+                if (keywords.any { text.contains(it.lowercase()) }) {
+                    Logger.i { "Keyword trigger detected on channel 0: $text" }
+                    scope.handledLaunch {
+                        notificationManager.dispatch(
+                            Notification(
+                                title = "Keyword Trigger!",
+                                message = "Gevonden op LongFast: ${dataPacket.text}",
+                                category = Notification.Category.Message, // No more loud alert
+                                isSilent = true, // Remove the alarm sound
+                            ),
+                        )
+                    }
+                }
+            }
             rememberDataPacket(dataPacket, myNodeNum)
         }
     }

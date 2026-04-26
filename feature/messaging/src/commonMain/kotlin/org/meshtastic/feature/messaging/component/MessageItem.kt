@@ -54,6 +54,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Message
@@ -63,6 +64,7 @@ import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_message_from
 import org.meshtastic.core.resources.filter_message_label
+import org.meshtastic.core.resources.ic_crown
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.NodeChip
@@ -179,6 +181,9 @@ fun MessageItem(
 
     val containsBel = message.text.contains('\u0007')
     val contrastLevel = LocalContrastLevel.current
+    val uiPrefs = org.koin.compose.koinInject<org.meshtastic.core.repository.UiPrefs>()
+    val monitors by uiPrefs.keywordMonitors.collectAsStateWithLifecycle()
+    val isMonitored = monitors.any { message.text.lowercase().contains(it.lowercase()) }
 
     val nodeColor = Color(if (message.fromLocal) ourNode.colors.second else node.colors.second)
     val alpha =
@@ -329,6 +334,14 @@ fun MessageItem(
                     }
                     if (containsBel) {
                         Text(text = "\uD83D\uDD14", modifier = Modifier.padding(start = 4.dp))
+                    }
+                    if (isMonitored) {
+                        Icon(
+                            imageVector = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_crown),
+                            contentDescription = "Monitored",
+                            tint = Color(0xFFFFD700), // Gold color
+                            modifier = Modifier.size(18.dp).padding(start = 4.dp)
+                        )
                     }
                     if (message.filtered) {
                         Text(

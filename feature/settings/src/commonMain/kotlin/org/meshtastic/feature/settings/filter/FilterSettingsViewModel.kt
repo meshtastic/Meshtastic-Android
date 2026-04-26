@@ -23,9 +23,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
+import org.meshtastic.core.repository.UiPrefs
 
 @KoinViewModel
-class FilterSettingsViewModel(private val filterPrefs: FilterPrefs, private val messageFilter: MessageFilter) :
+class FilterSettingsViewModel(
+    private val filterPrefs: FilterPrefs,
+    private val uiPrefs: UiPrefs,
+    private val messageFilter: MessageFilter,
+) :
     ViewModel() {
 
     private val _filterEnabled = MutableStateFlow(filterPrefs.filterEnabled.value)
@@ -33,6 +38,9 @@ class FilterSettingsViewModel(private val filterPrefs: FilterPrefs, private val 
 
     private val _filterWords = MutableStateFlow(filterPrefs.filterWords.value.toList().sorted())
     val filterWords: StateFlow<List<String>> = _filterWords.asStateFlow()
+
+    private val _keywordMonitors = MutableStateFlow(uiPrefs.keywordMonitors.value.toList().sorted())
+    val keywordMonitors: StateFlow<List<String>> = _keywordMonitors.asStateFlow()
 
     fun setFilterEnabled(enabled: Boolean) {
         filterPrefs.setFilterEnabled(enabled)
@@ -56,6 +64,24 @@ class FilterSettingsViewModel(private val filterPrefs: FilterPrefs, private val 
             filterPrefs.setFilterWords(current)
             _filterWords.value = current.toList().sorted()
             messageFilter.rebuildPatterns()
+        }
+    }
+
+    fun addKeywordMonitor(word: String) {
+        if (word.isBlank()) return
+        val trimmed = word.trim()
+        val current = uiPrefs.keywordMonitors.value.toMutableSet()
+        if (current.add(trimmed)) {
+            uiPrefs.setKeywordMonitors(current)
+            _keywordMonitors.value = current.toList().sorted()
+        }
+    }
+
+    fun removeKeywordMonitor(word: String) {
+        val current = uiPrefs.keywordMonitors.value.toMutableSet()
+        if (current.remove(word)) {
+            uiPrefs.setKeywordMonitors(current)
+            _keywordMonitors.value = current.toList().sorted()
         }
     }
 }

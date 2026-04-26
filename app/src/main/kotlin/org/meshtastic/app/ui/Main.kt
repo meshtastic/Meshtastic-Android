@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
@@ -64,11 +63,6 @@ fun MainScreen() {
         }
     val multiBackstack = rememberMultiBackstack(initialTab)
     val backStack = multiBackstack.activeBackStack
-    val destinations = remember {
-        TopLevelDestination.entries.filter {
-            if (it == TopLevelDestination.Map) BuildConfig.MAPS_ENABLED else true
-        }
-    }
 
     AndroidAppVersionCheck(viewModel)
 
@@ -77,7 +71,6 @@ fun MainScreen() {
             multiBackstack = multiBackstack,
             uiViewModel = viewModel,
             modifier = Modifier.fillMaxSize(),
-            destinations = destinations,
         ) {
             val provider =
                 entryProvider<NavKey> {
