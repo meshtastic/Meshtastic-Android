@@ -142,6 +142,72 @@ jobs:
             --draft=false \
             --prerelease=${{ inputs.channel != 'production' }}
 
+      - name: Stamp CHANGELOG.md for release
+        if: ${{ inputs.channel == 'production' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+          VERSION: ${{ inputs.base_version }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+
+          # Checkout CHANGELOG.md from main (we're on a tag checkout)
+          git fetch origin main
+          git checkout -b "changelog/v${VERSION}" origin/main
+
+          # Move the [Unreleased] content into a versioned section
+          python3 -c "
+          import sys
+          version, date = sys.argv[1], sys.argv[2]
+          with open('CHANGELOG.md', 'r') as f:
+              content = f.read()
+
+          us = '<!-- UNRELEASED_START -->'
+          ue = '<!-- UNRELEASED_END -->'
+          rs = '<!-- RELEASED_START -->'
+
+          start = content.find(us)
+          end = content.find(ue)
+          rstart = content.find(rs)
+
+          if start == -1 or end == -1 or rstart == -1:
+              print('Markers not found in CHANGELOG.md')
+              sys.exit(1)
+
+          # Extract unreleased content (between markers, excluding the ## [Unreleased] header and 'Changes since' line)
+          unreleased = content[start + len(us):end].strip()
+          lines = unreleased.split('\n')
+          # Skip the header and the 'Changes since' reference line
+          body_lines = []
+          for line in lines:
+              if line.startswith('## [Unreleased]'):
+                  continue
+              if line.startswith('Changes since'):
+                  continue
+              body_lines.append(line)
+          body = '\n'.join(body_lines).strip()
+
+          # Build versioned entry
+          versioned = f'## [{version}] - {date}\n\n{body}'
+
+          # Reset unreleased section
+          fresh_unreleased = '## [Unreleased]\n\n*No changes yet.*'
+
+          # Replace unreleased with fresh, insert versioned before RELEASED_START
+          new_content = content[:start + len(us)] + '\n' + fresh_unreleased + '\n' + content[end:rstart + len(rs)] + '\n\n' + versioned + '\n' + content[rstart + len(rs):]
+
+          with open('CHANGELOG.md', 'w') as f:
+              f.write(new_content)
+          " "$VERSION" "$DATE"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --cached --quiet || {
+            git commit -m "docs: release CHANGELOG.md for v${VERSION} [skip ci]"
+            git push origin "changelog/v${VERSION}":main
+          }
+
       - name: Notify Discord
         if: ${{ inputs.channel != 'internal' }}
         env:

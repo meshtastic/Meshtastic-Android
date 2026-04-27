@@ -2,7 +2,7 @@ name: PR Triage (Models)
 
 on:
   pull_request_target:
-    types: [opened]
+    types: [opened, edited]
 
 permissions:
   pull-requests: write
@@ -27,7 +27,7 @@ jobs:
         with:
           script: |
             const skipLabels = new Set(['automation', 'release']);
-            const typeLabels = new Set(['bugfix', 'enhancement', 'dependencies', 'repo', 'refactor']);
+            const typeLabels = new Set(['bugfix', 'enhancement', 'dependencies', 'repo', 'refactor', 'chore', 'ci', 'build', 'testing', 'documentation']);
             const prLabels = context.payload.pull_request.labels.map(l => l.name);
 
             const shouldSkipAll = prLabels.some(l => skipLabels.has(l));
@@ -105,15 +105,26 @@ jobs:
           prompt: |
             Classify this pull request for the Meshtastic Android app into exactly one category.
 
-            Return exactly one of: bugfix, enhancement, refactor
+            Return exactly one of: bugfix, enhancement, refactor, chore, ci, build, testing, documentation
 
-            Use bugfix if it fixes a bug, crash, or incorrect behavior.
-            Use enhancement if it adds a new feature, improves performance, or adds new functionality.
-            Use refactor if it restructures code without changing behavior, cleans up code, or improves architecture.
+            Label definitions:
+            - bugfix: Fixes a bug, crash, or incorrect behavior
+            - enhancement: Adds a new feature, improves UX, adds new functionality, or improves performance
+            - refactor: Restructures code without changing behavior, cleans up code, or improves architecture
+            - chore: Routine maintenance (dependency updates, config tweaks, version bumps) that doesn't change app behavior
+            - ci: Changes to CI/CD workflows, GitHub Actions, or automation scripts
+            - build: Changes to build system, Gradle config, build-logic, or compilation settings
+            - testing: Adds or modifies tests without changing production code
+            - documentation: Documentation-only changes (README, CHANGELOG, code comments, KDoc)
 
             Title: ${{ env.PR_TITLE }}
             Body: ${{ env.PR_BODY }}
-          system-prompt: You classify pull requests into categories. Be conservative and pick the most appropriate single label.
+          system-prompt: >
+            You classify pull requests into categories for changelog generation.
+            Pick the single most specific label. Prefer ci/build/chore/testing/documentation
+            over refactor when the change clearly fits those narrower categories.
+            Only use bugfix for actual bug fixes, not for CI fixes or build fixes.
+            Only use enhancement for user-facing features, not for internal improvements.
           model: openai/gpt-4o-mini
 
       - name: Apply type label
@@ -125,9 +136,14 @@ jobs:
           script: |
             const label = (process.env.TYPE_LABEL || '').trim().toLowerCase();
             const labelMeta = {
-              'bugfix': { color: 'd73a4a', description: 'Bug fix' },
-              'enhancement': { color: 'a2eeef', description: 'New feature or enhancement' },
-              'refactor': { color: 'c5def5', description: 'Code restructuring without behavior change' },
+              'bugfix':        { color: 'd73a4a', description: 'Bug fix' },
+              'enhancement':   { color: 'a2eeef', description: 'New feature or enhancement' },
+              'refactor':      { color: 'c5def5', description: 'Code restructuring without behavior change' },
+              'chore':         { color: 'ededed', description: 'Routine maintenance' },
+              'ci':            { color: 'bfd4f2', description: 'CI/CD and automation changes' },
+              'build':         { color: 'bfd4f2', description: 'Build system changes' },
+              'testing':       { color: 'f9d0c4', description: 'Test additions or modifications' },
+              'documentation': { color: '0075ca', description: 'Documentation changes' },
             };
             const meta = labelMeta[label];
             if (!meta) return;

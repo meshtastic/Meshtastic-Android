@@ -1,0 +1,104 @@
+name: Update Changelog
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'CHANGELOG.md'
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: changelog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Determine last production tag
+        id: last_tag
+        run: |
+          # Find the latest production tag (vX.Y.Z without pre-release suffix)
+          TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+          echo "Found last production tag: ${TAG:-none}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes via GitHub API
+        if: steps.last_tag.outputs.tag != ''
+        id: notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.last_tag.outputs.tag }}
+        run: |
+          # Use GitHub's native release notes generator (same engine as generate_release_notes)
+          NOTES=$(gh api repos/${{ github.repository }}/releases/generate-notes \
+            -f tag_name="unreleased" \
+            -f target_commitish="${{ github.sha }}" \
+            -f previous_tag_name="$TAG" \
+            --jq '.body')
+
+          # Strip GitHub comment headers and the "What's Changed" heading
+          NOTES=$(echo "$NOTES" | sed '/^<!-- .* -->/d' | sed '/^## What'\''s Changed$/d')
+          # Strip the trailing "Full Changelog" link
+          NOTES=$(echo "$NOTES" | sed '/^\*\*Full Changelog\*\*/d')
+          # Strip leading and trailing blank lines
+          NOTES=$(echo "$NOTES" | sed '/./,$!d' | sed -e :a -e '/^\n*$/{$d;N;ba}')
+
+          # Write to file for next step (avoids shell quoting issues)
+          echo "$NOTES" > /tmp/unreleased-notes.md
+
+      - name: Update CHANGELOG.md
+        if: steps.last_tag.outputs.tag != ''
+        env:
+          TAG: ${{ steps.last_tag.outputs.tag }}
+        run: |
+          NOTES=$(cat /tmp/unreleased-notes.md)
+
+          # Build the new unreleased section
+          UNRELEASED=$(cat <<SECTION
+          ## [Unreleased]
+
+          Changes since [\`${TAG}\`](https://github.com/${{ github.repository }}/releases/tag/${TAG}):
+
+          ${NOTES}
+          SECTION
+          )
+
+          # Replace content between UNRELEASED markers
+          python3 -c "
+          import sys
+          start_marker = '<!-- UNRELEASED_START -->'
+          end_marker = '<!-- UNRELEASED_END -->'
+          section = sys.argv[1]
+          with open('CHANGELOG.md', 'r') as f:
+              content = f.read()
+          start = content.find(start_marker)
+          end = content.find(end_marker)
+          if start == -1 or end == -1:
+              print('Markers not found in CHANGELOG.md')
+              sys.exit(1)
+          new_content = content[:start + len(start_marker)] + '\n' + section + '\n' + content[end:]
+          with open('CHANGELOG.md', 'w') as f:
+              f.write(new_content)
+          " "$UNRELEASED"
+
+      - name: Commit and push
+        if: steps.last_tag.outputs.tag != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --cached --quiet || {
+            git commit -m "docs: update CHANGELOG.md [skip ci]"
+            git push origin main
+          }
