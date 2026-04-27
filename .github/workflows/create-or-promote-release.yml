@@ -28,7 +28,8 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
+  statuses: write
   id-token: write
   attestations: write
 
