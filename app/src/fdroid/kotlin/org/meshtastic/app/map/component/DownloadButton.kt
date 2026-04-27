@@ -58,8 +58,3 @@ fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
     }
 }
 
-// @Preview(showBackground = true)
-// @Composable
-// private fun DownloadButtonPreview() {
-//    DownloadButton(true, onClick = {})
-// }
