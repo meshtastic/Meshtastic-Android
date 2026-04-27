@@ -9,6 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* fix(ci): skip macOS signing when secrets are missing (#5263) by @James Rich in [`4a29d3ce7`](https://github.com/meshtastic/Meshtastic-Android/commit/4a29d3ce7c7697aacb9a3dfc6bfb4ebf6e3a5b05)
+
+### Internal (v2.7.14-internal.73)
+Changes since [`v2.7.14-closed.17`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-closed.17):
+
+* docs: update CHANGELOG.md (#5262) by @github-actions[bot] in [`fbca32539`](https://github.com/meshtastic/Meshtastic-Android/commit/fbca325390c307e4f3ec34246a3b7b32c4c88f67)
 * fix(ci): grant promote.yml required permissions in release dispatch (#5261) by @James Rich in [`0e8c75e4d`](https://github.com/meshtastic/Meshtastic-Android/commit/0e8c75e4d8f5f8956cca73351314197311a5781d)
 * docs: update CHANGELOG.md (#5260) by @github-actions[bot] in [`e97b44acb`](https://github.com/meshtastic/Meshtastic-Android/commit/e97b44acb9b9d13acc13039b2eba89549535ae81)
 * feat(desktop): native OS notifications via libnotify/osascript/PowerShell (#5253) by @James Rich in [`b60f29d77`](https://github.com/meshtastic/Meshtastic-Android/commit/b60f29d7725f6989e2b5d8943a3698acfed58ce7)
@@ -22,10 +28,6 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(ci): use JetBrains JDK for desktop release builds (#5251) by @James Rich in [`a47f116d8`](https://github.com/meshtastic/Meshtastic-Android/commit/a47f116d89f715a4ddea466a13be77d6865a073a)
 * chore: project-wide cruft cleanup and dead code removal (#5249) by @James Rich in [`247f34221`](https://github.com/meshtastic/Meshtastic-Android/commit/247f342210a91a406e97bdab146051107d5c5230)
 * chore(deps): update datadog.gradle to v1.26.0 (#5248) by @renovate[bot] in [`79331bcc7`](https://github.com/meshtastic/Meshtastic-Android/commit/79331bcc77ab260aff22e899a898fde8829305cf)
-
-### Internal (v2.7.14-internal.72)
-Changes since [`v2.7.14-closed.17`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-closed.17):
-
 * fix: remove slashes from strings.xml by @James Rich in [`0f2730d86`](https://github.com/meshtastic/Meshtastic-Android/commit/0f2730d86d1a4647469abe9fb5577494170c57ca)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5247) by @James Rich in [`d4eadee50`](https://github.com/meshtastic/Meshtastic-Android/commit/d4eadee500c39e2e09f352a385ee7f3b2bd1a79f)
 * feat(messaging): send message on Enter keypress (#5246) by @James Rich in [`534b4fde2`](https://github.com/meshtastic/Meshtastic-Android/commit/534b4fde2475c9ba77acdd74f095521888f05f90)
