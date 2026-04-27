@@ -331,8 +331,11 @@ dependencies {
     implementation(libs.koin.annotations)
     implementation(libs.kotlinx.collections.immutable)
 
+    implementation(libs.jna)
+
     testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.koin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(kotlin("test"))
 }
 

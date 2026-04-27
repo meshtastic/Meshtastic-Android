@@ -40,6 +40,12 @@
 -dontwarn sun.misc.Unsafe
 -dontwarn java.lang.invoke.**
 
+# ---- JNA (Java Native Access) — used by LinuxNotificationSender for libnotify ---
+# JNA uses reflection to bind native methods; keep its core and callback classes.
+-keep class com.sun.jna.** { *; }
+-keep class com.sun.jna.ptr.** { *; }
+-dontwarn com.sun.jna.**
+
 # ---- jSerialComm Android stubs (cross-platform serial library) --------------
 # jSerialComm bundles Android shims that reference android.* classes; harmless
 # on JVM/desktop but ProGuard fails the build on unresolved program classes

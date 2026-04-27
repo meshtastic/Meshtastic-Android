@@ -263,6 +263,7 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 test-retry-gradlePlugin = { module = "org.gradle:test-retry-gradle-plugin", version.ref = "testRetry" }
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
+jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
 
 [plugins]
 # Android
