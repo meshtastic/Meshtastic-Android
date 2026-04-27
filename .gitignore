@@ -15,7 +15,6 @@
 .externalNativeBuild
 .cxx
 /app/release
-/buildSrc/build
 **/debug/**
 **/release/**
 
@@ -56,3 +55,7 @@ firebase-debug.log
 .agent_plans/
 .agent_refs/
 .agent_artifacts/
+
+# Local library development clones
+/coil/
+/kable/
