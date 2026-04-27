@@ -97,6 +97,7 @@ import org.meshtastic.core.ui.icon.ChatBubbleOutline
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.FilterListOff
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -300,6 +301,7 @@ fun MessageTopBar(
     showFiltered: Boolean = false,
     onToggleShowFiltered: () -> Unit = {},
     onNavigateToFilterSettings: () -> Unit = {},
+    onExportMessages: () -> Unit = {},
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -332,6 +334,7 @@ fun MessageTopBar(
             showFiltered = showFiltered,
             onToggleShowFiltered = onToggleShowFiltered,
             onNavigateToFilterSettings = onNavigateToFilterSettings,
+            onExportMessages = onExportMessages,
         )
     },
 )
@@ -349,6 +352,7 @@ private fun MessageTopBarActions(
     showFiltered: Boolean,
     onToggleShowFiltered: () -> Unit,
     onNavigateToFilterSettings: () -> Unit,
+    onExportMessages: () -> Unit,
 ) {
     if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
         NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
@@ -370,6 +374,7 @@ private fun MessageTopBarActions(
             showFiltered = showFiltered,
             onToggleShowFiltered = onToggleShowFiltered,
             onNavigateToFilterSettings = onNavigateToFilterSettings,
+            onExportMessages = onExportMessages,
         )
     }
 }
@@ -387,6 +392,7 @@ private fun OverFlowMenu(
     showFiltered: Boolean,
     onToggleShowFiltered: () -> Unit,
     onNavigateToFilterSettings: () -> Unit,
+    onExportMessages: () -> Unit,
 ) {
     if (expanded) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
@@ -397,8 +403,21 @@ private fun OverFlowMenu(
             }
             FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
             FilterSettingsMenuItem(onDismiss, onNavigateToFilterSettings)
+            ExportMessagesMenuItem(onDismiss, onExportMessages)
         }
     }
+}
+
+@Composable
+private fun ExportMessagesMenuItem(onDismiss: () -> Unit, onExport: () -> Unit) {
+    DropdownMenuItem(
+        text = { Text("Exporteer gesprekken (.csv)") },
+        onClick = {
+            onDismiss()
+            onExport()
+        },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.FileDownload, contentDescription = "Export") },
+    )
 }
 
 @Composable

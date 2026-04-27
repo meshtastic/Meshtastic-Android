@@ -95,6 +95,12 @@ import org.meshtastic.feature.messaging.component.QuickChatRow
 import org.meshtastic.feature.messaging.component.ReplySnippet
 import org.meshtastic.feature.messaging.component.ScrollToBottomFab
 
+@Composable
+expect fun MessageExportHandler(
+    ourNode: Node?,
+    onExport: (org.meshtastic.core.common.util.CommonUri) -> Unit
+): () -> Unit
+
 private const val ROUNDED_CORNER_PERCENT = 100
 private const val MAX_LINES = 3
 
@@ -180,6 +186,8 @@ fun MessageScreen(
     val hasUnreadMessages by viewModel.hasUnreadMessages.collectAsStateWithLifecycle()
     val unreadCount by viewModel.unreadCount.collectAsStateWithLifecycle()
     val firstUnreadMessageUuid by viewModel.firstUnreadMessageUuid.collectAsStateWithLifecycle()
+
+    val onExportClick = MessageExportHandler(ourNode = ourNode) { viewModel.saveDataCsv(it) }
 
     var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
 
@@ -331,6 +339,7 @@ fun MessageScreen(
                     showFiltered = showFiltered,
                     onToggleShowFiltered = viewModel::toggleShowFiltered,
                     onNavigateToFilterSettings = navigateToFilterSettings,
+                    onExportMessages = onExportClick,
                 )
             }
         },

@@ -268,39 +268,6 @@ class MeshDataHandlerImpl(
                                 ),
                             )
 
-                            // Email Gateway action: email | recipient | subject | content
-                            if (text.startsWith("email |")) {
-                                val emailParts = dataPacket.text?.split('|')?.map { it.trim() }
-                                if (emailParts != null && emailParts.size >= 4) {
-                                    val recipient = emailParts[1]
-                                    val subject = emailParts[2]
-                                    val content = emailParts[3]
-                                    
-                                    Logger.i { "Email request received for $recipient" }
-                                    scope.launch {
-                                        val db = org.meshtastic.core.database.DatabaseProvider.db
-                                        db?.emailQueueDao()?.insert(
-                                            org.meshtastic.core.database.entity.EmailQueueEntity(
-                                                recipient = recipient,
-                                                subject = subject,
-                                                content = content,
-                                                timestamp = org.meshtastic.core.common.util.nowMillis,
-                                                fromNode = dataPacket.from?.toIntOrNull() ?: 0
-                                            )
-                                        )
-
-                                        notificationManager.dispatch(
-                                            Notification(
-                                                title = "Nieuwe Email Wachtrij",
-                                                message = "Email voor $recipient staat klaar.",
-                                                category = Notification.Category.Message,
-                                                isSilent = true
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-
                             // Auto-reply action if configured
                             if (!replyText.isNullOrBlank()) {
                                 Logger.i { "Sending auto-reply: $replyText" }
@@ -315,6 +282,57 @@ class MeshDataHandlerImpl(
                                 radioController.value.sendMessage(replyPacket)
                             }
                         }
+                    }
+                }
+
+                // Email Gateway detection
+                val rawText = dataPacket.text ?: ""
+                val emailParts = rawText.split('|').map { it.trim() }
+                var recipient: String? = null
+                var subject: String? = null
+                var content: String? = null
+
+                if (text.startsWith("email |") && emailParts.size >= 4) {
+                    recipient = emailParts[1]
+                    subject = emailParts[2]
+                    content = emailParts[3]
+                } else if (emailParts.size >= 3 && emailParts[0].contains("@")) {
+                    // Support format: recipient | subject | content
+                    recipient = emailParts[0]
+                    subject = emailParts[1]
+                    content = emailParts[2]
+                } else if (rawText.contains("@") && rawText.contains(" ")) {
+                    // Support space-based format if it looks like an email: "user@mail.com subject content"
+                    val spaceParts = rawText.split(' ', limit = 3)
+                    if (spaceParts.size >= 3 && spaceParts[0].contains("@")) {
+                        recipient = spaceParts[0]
+                        subject = spaceParts[1]
+                        content = spaceParts[2]
+                    }
+                }
+
+                if (recipient != null && subject != null && content != null) {
+                    Logger.i { "Email request detected for $recipient" }
+                    scope.launch {
+                        val db = org.meshtastic.core.database.DatabaseProvider.db
+                        db?.emailQueueDao()?.insert(
+                            org.meshtastic.core.database.entity.EmailQueueEntity(
+                                recipient = recipient,
+                                subject = subject,
+                                content = content,
+                                timestamp = org.meshtastic.core.common.util.nowMillis,
+                                fromNode = dataPacket.from?.toIntOrNull() ?: 0
+                            )
+                        )
+
+                        notificationManager.dispatch(
+                            Notification(
+                                title = "Nieuwe Email Wachtrij",
+                                message = "Email voor $recipient staat klaar.",
+                                category = Notification.Category.Message,
+                                isSilent = true
+                            )
+                        )
                     }
                 }
             }

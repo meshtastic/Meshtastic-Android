@@ -47,7 +47,9 @@ import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
@@ -66,6 +68,8 @@ class MessageViewModel(
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val notificationManager: NotificationManager,
     private val sendMessageUseCase: SendMessageUseCase,
+    private val exportDataUseCase: ExportDataUseCase,
+    private val fileService: FileService,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
@@ -234,4 +238,13 @@ class MessageViewModel(
             val unreadCount = packetRepository.getUnreadCount(contact)
             if (unreadCount == 0) notificationManager.cancel(contact.hashCode())
         }
+
+    fun saveDataCsv(uri: org.meshtastic.core.common.util.CommonUri) {
+        val myNum = ourNodeInfo.value?.num ?: return
+        safeLaunch(tag = "saveDataCsv") {
+            fileService.write(uri) { sink ->
+                exportDataUseCase(sink, myNum)
+            }
+        }
+    }
 }
