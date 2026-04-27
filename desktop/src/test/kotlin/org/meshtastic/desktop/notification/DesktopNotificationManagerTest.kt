@@ -110,6 +110,8 @@ class DesktopNotificationManagerTest {
                 fallback = manager.fallbackNotifications.first()
             }
 
+        // Give the collector coroutine time to subscribe before dispatching
+        Thread.sleep(SUBSCRIBE_WAIT_MS)
         manager.dispatch(Notification(title = "Fallback", message = "Test"))
 
         // Block the test thread briefly to let the IO dispatcher process
@@ -139,5 +141,6 @@ class DesktopNotificationManagerTest {
 
     companion object {
         private const val ASYNC_WAIT_MS = 300L
+        private const val SUBSCRIBE_WAIT_MS = 100L
     }
 }

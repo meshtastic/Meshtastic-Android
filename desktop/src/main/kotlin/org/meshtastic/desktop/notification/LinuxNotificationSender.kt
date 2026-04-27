@@ -91,7 +91,10 @@ private object NotifyUrgency {
  * Requires `libnotify` (typically `libnotify4` or `libnotify.so.4`) to be installed on the system. Falls back
  * gracefully if the library cannot be loaded.
  */
-class LinuxNotificationSender(private val appName: String = "Meshtastic") : NativeNotificationSender {
+class LinuxNotificationSender(
+    private val appName: String = "Meshtastic",
+    private val desktopEntry: String = appName.lowercase(),
+) : NativeNotificationSender {
 
     private val lib: LibNotify?
     private val glib: GLib?
@@ -170,6 +173,12 @@ class LinuxNotificationSender(private val appName: String = "Meshtastic") : Nati
                 Notification.Category.Service -> "device"
             }
         libnotify.notify_notification_set_category(ptr, category)
+
+        // desktop-entry hint associates notifications with the app's .desktop file,
+        // enabling proper icon resolution and notification grouping by the daemon.
+        glib?.let { g ->
+            libnotify.notify_notification_set_hint(ptr, "desktop-entry", g.g_variant_new_string(desktopEntry))
+        }
 
         if (notification.isSilent) {
             glib?.let { g ->
