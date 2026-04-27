@@ -67,11 +67,12 @@ class FilterSettingsViewModel(
         }
     }
 
-    fun addKeywordMonitor(word: String) {
+    fun addKeywordMonitor(word: String, reply: String = "") {
         if (word.isBlank()) return
-        val trimmed = word.trim()
+        val trimmedWord = word.trim()
+        val entry = if (reply.isBlank()) trimmedWord else "$trimmedWord|$reply"
         val current = uiPrefs.keywordMonitors.value.toMutableSet()
-        if (current.add(trimmed)) {
+        if (current.add(entry)) {
             uiPrefs.setKeywordMonitors(current)
             _keywordMonitors.value = current.toList().sorted()
         }

@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
@@ -98,6 +99,7 @@ class MeshDataHandlerImpl(
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
     private val uiPrefs: UiPrefs,
+    private val radioController: Lazy<org.meshtastic.core.model.RadioController>,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
 
@@ -244,19 +246,42 @@ class MeshDataHandlerImpl(
         } else {
             // Monitor for dynamic keywords on channel 0 (LongFast)
             val text = dataPacket.text?.lowercase()
-            if (text != null && dataPacket.channel == 0) {
-                val keywords = uiPrefs.keywordMonitors.value
-                if (keywords.any { text.contains(it.lowercase()) }) {
-                    Logger.i { "Keyword trigger detected on channel 0: $text" }
-                    scope.handledLaunch {
-                        notificationManager.dispatch(
-                            Notification(
-                                title = "Keyword Trigger!",
-                                message = "Gevonden op LongFast: ${dataPacket.text}",
-                                category = Notification.Category.Message, // No more loud alert
-                                isSilent = true, // Remove the alarm sound
-                            ),
-                        )
+            val fromUs = myNodeNum == packet.from
+            if (text != null && dataPacket.channel == 0 && !fromUs) {
+                val keywordMap = uiPrefs.keywordMonitors.value.associate {
+                    val parts = it.split('|', limit = 2)
+                    parts[0].lowercase() to parts.getOrNull(1)
+                }
+
+                keywordMap.forEach { (keyword, replyText) ->
+                    if (text.contains(keyword)) {
+                        Logger.i { "Keyword trigger detected on channel 0: $text (keyword: $keyword)" }
+
+                        // UI Notification (Silent)
+                        scope.handledLaunch {
+                            notificationManager.dispatch(
+                                Notification(
+                                    title = "Keyword: $keyword",
+                                    message = "Bericht: ${dataPacket.text}",
+                                    category = Notification.Category.Message,
+                                    isSilent = true,
+                                ),
+                            )
+
+                            // Auto-reply action if configured
+                            if (!replyText.isNullOrBlank()) {
+                                Logger.i { "Sending auto-reply: $replyText" }
+                                val replyPacket =
+                                    DataPacket(
+                                        to = DataPacket.ID_BROADCAST, // Send as broadcast to channel
+                                        bytes = replyText.encodeUtf8(),
+                                        dataType = PortNum.TEXT_MESSAGE_APP.value,
+                                        channel = dataPacket.channel,
+                                        replyId = dataPacket.id,
+                                    )
+                                radioController.value.sendMessage(replyPacket)
+                            }
+                        }
                     }
                 }
             }

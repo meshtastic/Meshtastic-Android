@@ -188,7 +188,7 @@ class UiPrefsImpl(
     }
 
     override val keywordMonitors: StateFlow<Set<String>> =
-        dataStore.data.map { it[KEY_KEYWORD_MONITORS] ?: setOf("lamp aan") }.stateIn(scope, SharingStarted.Eagerly, setOf("lamp aan"))
+        dataStore.data.map { it[KEY_KEYWORD_MONITORS] ?: setOf("lamp aan|") }.stateIn(scope, SharingStarted.Eagerly, setOf("lamp aan|"))
 
     override fun setKeywordMonitors(keywords: Set<String>) {
         scope.launch { dataStore.edit { it[KEY_KEYWORD_MONITORS] = keywords } }

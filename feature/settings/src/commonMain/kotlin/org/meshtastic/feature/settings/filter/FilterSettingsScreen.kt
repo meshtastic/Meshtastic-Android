@@ -69,6 +69,7 @@ fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit)
     val keywordMonitors by viewModel.keywordMonitors.collectAsStateWithLifecycle()
     var newFilterWord by remember { mutableStateOf("") }
     var newKeyword by remember { mutableStateOf("") }
+    var autoReplyText by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -115,10 +116,13 @@ fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit)
             item {
                 KeywordMonitorsInputCard(
                     newKeyword = newKeyword,
+                    autoReplyText = autoReplyText,
                     onNewKeywordChange = { newKeyword = it },
+                    onAutoReplyChange = { autoReplyText = it },
                     onAddKeyword = {
-                        viewModel.addKeywordMonitor(newKeyword)
+                        viewModel.addKeywordMonitor(newKeyword, autoReplyText)
                         newKeyword = ""
+                        autoReplyText = ""
                     },
                 )
             }
@@ -142,30 +146,40 @@ fun FilterSettingsScreen(viewModel: FilterSettingsViewModel, onBack: () -> Unit)
 @Composable
 private fun KeywordMonitorsInputCard(
     newKeyword: String,
+    autoReplyText: String,
     onNewKeywordChange: (String) -> Unit,
+    onAutoReplyChange: (String) -> Unit,
     onAddKeyword: () -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Keyword Monitor (LongFast)", style = MaterialTheme.typography.titleMedium)
             Text(
-                "Voeg woorden toe die je wilt monitoren op kanaal 0. Je krijgt een speciale melding met geluid.",
+                "Monitor woorden op kanaal 0. Optioneel: stel een automatisch antwoord in.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 8.dp),
             )
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = newKeyword,
                     onValueChange = onNewKeywordChange,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     label = { Text("Woord monitoren...") },
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = autoReplyText,
+                    onValueChange = onAutoReplyChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Automatisch antwoord (optioneel)") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { onAddKeyword() }),
                 )
-                IconButton(onClick = onAddKeyword) {
+                IconButton(onClick = onAddKeyword, modifier = Modifier.align(Alignment.End)) {
                     Icon(MeshtasticIcons.Add, contentDescription = stringResource(Res.string.add))
+                    Text("Toevoegen", modifier = Modifier.padding(start = 4.dp))
                 }
             }
         }
@@ -174,19 +188,25 @@ private fun KeywordMonitorsInputCard(
 
 @Composable
 private fun KeywordMonitorItem(keyword: String, onRemove: () -> Unit) {
+    val parts = keyword.split('|', limit = 2)
+    val word = parts[0]
+    val reply = parts.getOrNull(1)
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = keyword, style = MaterialTheme.typography.bodyLarge, color = Color(0xFFFF8800))
-                Text(
-                    text = "Speciale melding geactiveerd",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Text(text = word, style = MaterialTheme.typography.bodyLarge, color = Color(0xFFFF8800))
+                if (!reply.isNullOrBlank()) {
+                    Text(
+                        text = "Antwoord: $reply",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
             }
             IconButton(onClick = onRemove) {
                 Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
