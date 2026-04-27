@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* feat(desktop): native OS notifications via libnotify/osascript/PowerShell (#5253) by @James Rich in [`b60f29d77`](https://github.com/meshtastic/Meshtastic-Android/commit/b60f29d7725f6989e2b5d8943a3698acfed58ce7)
+* docs: update CHANGELOG.md (#5258) by @github-actions[bot] in [`3174493ca`](https://github.com/meshtastic/Meshtastic-Android/commit/3174493ca616bc43dbe56a330b80a2574599b6c7)
 * feat(ci): segmented changelog with channel dedup and production squash (#5259) by @James Rich in [`e45135241`](https://github.com/meshtastic/Meshtastic-Android/commit/e451352412a46abb16777d9d036db01fb7963e4c)
 * fix(ci): align release.yml labels with actual repo labels (#5257) by @James Rich in [`bfb51d00c`](https://github.com/meshtastic/Meshtastic-Android/commit/bfb51d00cf1a8487e0a1df8ef3390b6d60c81c87)
 * feat(desktop): ship-readiness metadata & CI scaffolding (#5255) by @James Rich in [`ff3b77748`](https://github.com/meshtastic/Meshtastic-Android/commit/ff3b77748b57369028da4eb121aba783d5156cb1)
