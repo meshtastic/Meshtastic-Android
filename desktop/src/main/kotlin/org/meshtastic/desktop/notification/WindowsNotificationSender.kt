@@ -66,8 +66,9 @@ class WindowsNotificationSender(private val appName: String = "Meshtastic") : Na
             append("\$xml.LoadXml([string]::Format(\$template, ")
             append("[System.Security.SecurityElement]::Escape(\$title), ")
             append("[System.Security.SecurityElement]::Escape(\$msg))); ")
+            val safeAppName = appName.replace("'", "''")
             append("\$notifier = [Windows.UI.Notifications.ToastNotificationManager]::")
-            append("CreateToastNotifier('$appName'); ")
+            append("CreateToastNotifier('$safeAppName'); ")
             append("\$toast = [Windows.UI.Notifications.ToastNotification]::new(\$xml); ")
             append("\$notifier.Show(\$toast)")
         }

@@ -45,6 +45,12 @@ private interface LibNotify : Library {
     fun notify_uninit()
 }
 
+/** Minimal GLib GObject binding for releasing native objects allocated by libnotify. */
+@Suppress("FunctionNaming", "FunctionParameterNaming", "ktlint:standard:function-naming")
+private interface GObject : Library {
+    fun g_object_unref(obj: Pointer)
+}
+
 /** libnotify urgency levels matching `NotifyUrgency` enum. */
 private object NotifyUrgency {
     const val LOW = 0
@@ -63,20 +69,30 @@ private object NotifyUrgency {
  */
 class LinuxNotificationSender(private val appName: String = "Meshtastic") : NativeNotificationSender {
 
-    private val lib: LibNotify? =
+    private val lib: LibNotify?
+    private val gobject: GObject?
+
+    init {
+        var loadedLib: LibNotify? = null
+        var loadedGObject: GObject? = null
         try {
-            val loaded = Native.load("notify", LibNotify::class.java) as LibNotify
-            if (loaded.notify_init(appName)) {
+            loadedLib = Native.load("notify", LibNotify::class.java) as LibNotify
+            loadedGObject = Native.load("gobject-2.0", GObject::class.java) as GObject
+            if (loadedLib.notify_init(appName)) {
                 Logger.i { "libnotify initialized for '$appName'" }
-                loaded
             } else {
                 Logger.w { "notify_init('$appName') returned false" }
-                null
+                loadedLib = null
+                loadedGObject = null
             }
         } catch (e: UnsatisfiedLinkError) {
             Logger.w(e) { "libnotify not available — native Linux notifications disabled" }
-            null
+            loadedLib = null
+            loadedGObject = null
         }
+        lib = loadedLib
+        gobject = loadedGObject
+    }
 
     /** Whether libnotify was successfully loaded and initialized. */
     val isAvailable: Boolean
@@ -119,10 +135,14 @@ class LinuxNotificationSender(private val appName: String = "Meshtastic") : Nati
             libnotify.notify_notification_set_hint_string(ptr, "suppress-sound", "true")
         }
 
-        val shown = libnotify.notify_notification_show(ptr, null)
-        if (!shown) {
-            Logger.w { "notify_notification_show returned false for: ${notification.title}" }
+        return try {
+            val shown = libnotify.notify_notification_show(ptr, null)
+            if (!shown) {
+                Logger.w { "notify_notification_show returned false for: ${notification.title}" }
+            }
+            shown
+        } finally {
+            gobject?.g_object_unref(ptr)
         }
-        return shown
     }
 }

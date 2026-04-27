@@ -80,4 +80,14 @@ class WindowsNotificationSenderTest {
         val script = cmd[cmd.indexOf("-Command") + 1]
         assertTrue(script.contains("[System.Security.SecurityElement]::Escape"), "Expected XML escaping in: $script")
     }
+
+    @Test
+    fun `appName with single quotes is escaped in script`() {
+        val evilSender = WindowsNotificationSender(appName = "Mesh'Evil")
+        val notification = Notification(title = "Test", message = "Test")
+        val cmd = evilSender.buildCommand(notification)
+        val script = cmd[cmd.indexOf("-Command") + 1]
+        // Single quotes should be doubled in PowerShell single-quoted strings
+        assertTrue(script.contains("Mesh''Evil"), "Expected doubled quote in: $script")
+    }
 }
