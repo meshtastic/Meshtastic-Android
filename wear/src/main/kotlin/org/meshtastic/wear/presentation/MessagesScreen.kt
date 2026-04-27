@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material3.Button
 import androidx.wear.compose.material3.ButtonDefaults
@@ -52,7 +51,6 @@ import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.WearableMessage
-import org.meshtastic.wear.presentation.components.ConversationRow
 import org.meshtastic.wear.presentation.components.SectionHeader
 import org.meshtastic.wear.presentation.components.UnreadBadge
 

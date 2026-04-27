@@ -128,6 +128,7 @@ configure<ApplicationExtension> {
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
 
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     dependenciesInfo {
@@ -136,8 +137,6 @@ configure<ApplicationExtension> {
         // Disables dependency metadata when building Android App Bundles (for Google Play)
         includeInBundle = false
     }
-
-    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
     val disableSplits =
         project.gradle.startParameter.taskNames.any {

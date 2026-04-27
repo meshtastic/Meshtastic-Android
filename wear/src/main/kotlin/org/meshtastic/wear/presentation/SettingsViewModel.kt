@@ -68,15 +68,11 @@ class SettingsViewModel(
     private val radioPrefs: RadioPrefs,
     private val transportFactory: RadioTransportFactory,
     private val watchPrefs: WatchPrefs,
-    application: android.app.Application,
+    private val application: android.app.Application,
 ) : ViewModel() {
 
-    private val context = application.applicationContext
     private val _isScanning = MutableStateFlow(false)
-    val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
-
     private val _isPhoneLinked = MutableStateFlow(false)
-    val isPhoneLinked: StateFlow<Boolean> = _isPhoneLinked.asStateFlow()
 
     val highContrastModeEnabled = watchPrefs.highContrastModeEnabled
 
@@ -93,7 +89,7 @@ class SettingsViewModel(
     private fun checkPhoneLink() {
         viewModelScope.launch {
             try {
-                val nodes = com.google.android.gms.wearable.Wearable.getNodeClient(context).connectedNodes.await()
+                val nodes = Wearable.getNodeClient(application).connectedNodes.await()
                 _isPhoneLinked.value = nodes.isNotEmpty()
             } catch (e: Exception) {
                 Logger.e(e) { "Failed to check phone link" }
@@ -195,9 +191,9 @@ class SettingsViewModel(
     fun requestSync() {
         viewModelScope.launch {
             try {
-                val nodes = Wearable.getNodeClient(context).connectedNodes.await()
+                val nodes = Wearable.getNodeClient(application).connectedNodes.await()
                 nodes.forEach { node ->
-                    Wearable.getMessageClient(context).sendMessage(node.id, "/request_sync", null).await()
+                    Wearable.getMessageClient(application).sendMessage(node.id, "/request_sync", null).await()
                 }
                 Logger.d { "Sync request sent to ${nodes.size} nodes" }
             } catch (e: Exception) {

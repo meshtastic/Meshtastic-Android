@@ -64,15 +64,19 @@
             <intent-filter>
                 <!-- listeners receive events that match the action and data filters -->
                 <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/nodes" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/messages" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/channels" />
+                <data android:scheme="wear" />
+                <data android:host="*" />
+                <data android:pathPrefix="/nodes" />
+                <data android:pathPrefix="/messages" />
+                <data android:pathPrefix="/channels" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/nodes" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/messages" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/channels" />
+                <data android:scheme="wear" />
+                <data android:host="*" />
+                <data android:pathPrefix="/nodes" />
+                <data android:pathPrefix="/messages" />
+                <data android:pathPrefix="/channels" />
             </intent-filter>
         </service>
     </application>

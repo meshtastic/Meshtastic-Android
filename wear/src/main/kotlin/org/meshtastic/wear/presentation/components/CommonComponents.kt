@@ -135,29 +135,6 @@ fun PulsingDot(color: Color, sizeDp: Int) {
 }
 
 @Composable
-fun ConversationRow(title: String, subtitle: String, unread: Int, onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 3.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = COLOR_SURFACE1),
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(title, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = COLOR_TEXT_PRIMARY)
-                Text(
-                    text = subtitle,
-                    fontSize = 10.sp,
-                    color = COLOR_TEXT_SECONDARY,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            if (unread > 0) UnreadBadge(unread)
-        }
-    }
-}
-
-@Composable
 fun SectionHeader(title: String) {
     Text(
         text = title,

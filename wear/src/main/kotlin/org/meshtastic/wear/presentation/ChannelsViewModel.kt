@@ -23,6 +23,6 @@ import org.meshtastic.core.model.WearableChannel
 import org.meshtastic.wear.presentation.model.WearableChannelRepository
 
 @KoinViewModel
-class ChannelsViewModel(private val repository: WearableChannelRepository) : ViewModel() {
+class ChannelsViewModel(repository: WearableChannelRepository) : ViewModel() {
     val channels: StateFlow<List<WearableChannel>> = repository.syncedChannels
 }

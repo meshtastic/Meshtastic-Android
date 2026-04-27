@@ -23,6 +23,6 @@ import org.meshtastic.core.model.WearableMessage
 import org.meshtastic.wear.presentation.model.WearableMessageRepository
 
 @KoinViewModel
-class MessagesViewModel(private val repository: WearableMessageRepository) : ViewModel() {
+class MessagesViewModel(repository: WearableMessageRepository) : ViewModel() {
     val messages: StateFlow<List<WearableMessage>> = repository.syncedMessages
 }

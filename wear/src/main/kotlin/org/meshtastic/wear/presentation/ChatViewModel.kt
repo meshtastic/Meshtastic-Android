@@ -35,7 +35,7 @@ import org.meshtastic.wear.presentation.model.WearableMessageRepository
 @KoinViewModel
 class ChatViewModel(
     private val repository: WearableMessageRepository,
-    application: Application,
+    private val application: Application,
 ) : ViewModel() {
     private val messageClient by lazy { Wearable.getMessageClient(application) }
     private val nodeClient by lazy { Wearable.getNodeClient(application) }

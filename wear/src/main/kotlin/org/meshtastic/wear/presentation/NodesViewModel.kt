@@ -26,8 +26,8 @@ import org.meshtastic.wear.presentation.model.WearableNodeRepository
 
 @KoinViewModel
 class NodesViewModel(
-    private val repository: WearableNodeRepository,
-    private val radioController: RadioController,
+    repository: WearableNodeRepository,
+    radioController: RadioController,
 ) : ViewModel() {
     val nodes: StateFlow<List<WearableNode>> = repository.syncedNodes
 
