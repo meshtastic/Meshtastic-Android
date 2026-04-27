@@ -26,6 +26,9 @@ changelog:
       labels:
         - enhancement
         - feature
+    - title: 🖥️ Desktop
+      labels:
+        - desktop
     - title: 🛠️ Fixes
       labels:
         - bug
