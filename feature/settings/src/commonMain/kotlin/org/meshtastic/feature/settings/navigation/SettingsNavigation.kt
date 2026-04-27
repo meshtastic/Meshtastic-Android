@@ -26,6 +26,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -36,6 +37,8 @@ import org.meshtastic.feature.settings.ModuleConfigurationScreen
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.debugging.DebugViewModel
+import org.meshtastic.feature.settings.email.EmailQueueScreen
+import org.meshtastic.feature.settings.email.EmailQueueViewModel
 import org.meshtastic.feature.settings.filter.FilterSettingsScreen
 import org.meshtastic.feature.settings.filter.FilterSettingsViewModel
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseScreen
@@ -224,6 +227,27 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     entry<SettingsRoute.FilterSettings> {
         val viewModel: FilterSettingsViewModel = koinViewModel()
         FilterSettingsScreen(viewModel = viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
+
+    entry<SettingsRoute.EmailQueue> {
+        val viewModel: EmailQueueViewModel = koinViewModel()
+        val context = ContextServices.app!!
+        EmailQueueScreen(
+            viewModel = viewModel,
+            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
+            onSendEmail = { email ->
+                val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    this.type = "message/rfc822"
+                    this.putExtra(android.content.Intent.EXTRA_EMAIL, arrayOf(email.recipient))
+                    this.putExtra(android.content.Intent.EXTRA_SUBJECT, email.subject)
+                    this.putExtra(android.content.Intent.EXTRA_TEXT, email.content)
+                    this.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(android.content.Intent.createChooser(intent, "Kies een Email App").apply {
+                    this.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                })
+            }
+        )
     }
 }
 

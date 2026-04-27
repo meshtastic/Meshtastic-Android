@@ -178,6 +178,8 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object FilterSettings : SettingsRoute
 
+    @Serializable data object EmailQueue : SettingsRoute
+
     // endregion
 }
 

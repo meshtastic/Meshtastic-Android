@@ -28,4 +28,8 @@ interface DatabaseProvider {
 
     /** Execute [block] against the current database, returning `null` if no database is available. */
     suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T?
+
+    companion object {
+        var db: MeshtasticDatabase? = null
+    }
 }

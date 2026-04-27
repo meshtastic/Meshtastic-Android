@@ -45,6 +45,8 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.di)
             implementation(projects.core.takserver)
+            implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.androidx.room.runtime)
 
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.aboutlibraries.compose.m3)

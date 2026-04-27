@@ -132,6 +132,7 @@ open class DatabaseManager(
         // collectors, causing "Connection pool is closed" crashes.
         _currentDb.value = db
         _currentAddress.value = address
+        DatabaseProvider.db = db
         markLastUsed(dbName)
         // Also mark the previous DB as used "just now" so LRU has an accurate, recent timestamp
         previousDbName?.let { markLastUsed(it) }

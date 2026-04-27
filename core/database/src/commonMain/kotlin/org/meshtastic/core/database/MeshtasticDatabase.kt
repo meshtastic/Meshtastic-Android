@@ -25,6 +25,7 @@ import androidx.room3.TypeConverters
 import androidx.room3.migration.AutoMigrationSpec
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
+import org.meshtastic.core.database.dao.EmailQueueDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.dao.NodeInfoDao
@@ -33,6 +34,7 @@ import org.meshtastic.core.database.dao.QuickChatActionDao
 import org.meshtastic.core.database.dao.TracerouteNodePositionDao
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
+import org.meshtastic.core.database.entity.EmailQueueEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
@@ -57,6 +59,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         DeviceHardwareEntity::class,
         FirmwareReleaseEntity::class,
         TracerouteNodePositionEntity::class,
+        EmailQueueEntity::class,
     ],
     autoMigrations =
     [
@@ -95,8 +98,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 35, to = 36),
         AutoMigration(from = 36, to = 37),
         AutoMigration(from = 37, to = 38),
+        AutoMigration(from = 38, to = 39),
     ],
-    version = 38,
+    version = 39,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -116,6 +120,8 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun firmwareReleaseDao(): FirmwareReleaseDao
 
     abstract fun tracerouteNodePositionDao(): TracerouteNodePositionDao
+
+    abstract fun emailQueueDao(): EmailQueueDao
 
     companion object {
         /** Configures a [RoomDatabase.Builder] with standard settings for this project. */
