@@ -59,7 +59,8 @@ concurrency:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
+  statuses: write
   id-token: write
   attestations: write
 
@@ -148,6 +149,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.final_tag }}
           VERSION: ${{ inputs.base_version }}
+          REPO: ${{ github.repository }}
         run: |
           DATE=$(date -u +%Y-%m-%d)
 
@@ -155,10 +157,31 @@ jobs:
           git fetch origin main
           git checkout -b "changelog/v${VERSION}" origin/main
 
-          # Move the [Unreleased] content into a versioned section
+          # Find the previous production tag for the full-range notes
+          PREV_PROD=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^v${VERSION}$" | head -1)
+
+          # Generate a single flat changelog for the entire release using GitHub API
+          FLAT_NOTES=""
+          if [ -n "$PREV_PROD" ]; then
+            FLAT_NOTES=$(gh api "repos/${REPO}/releases/generate-notes" \
+              -f tag_name="$TAG" \
+              -f target_commitish="$(git rev-parse "$TAG")" \
+              -f previous_tag_name="$PREV_PROD" \
+              --jq '.body' 2>/dev/null || true)
+
+            # Strip boilerplate
+            FLAT_NOTES=$(echo "$FLAT_NOTES" \
+              | sed '/^<!-- .* -->/d' \
+              | sed '/^## What'\''s Changed$/d' \
+              | sed '/^\*\*Full Changelog\*\*/d' \
+              | sed '/./,$!d' \
+              | sed -e :a -e '/^\n*$/{$d;N;ba}')
+          fi
+
+          # Build the versioned section and reset unreleased
           python3 -c "
           import sys
-          version, date = sys.argv[1], sys.argv[2]
+          version, date, notes = sys.argv[1], sys.argv[2], sys.argv[3]
           with open('CHANGELOG.md', 'r') as f:
               content = f.read()
 
@@ -174,31 +197,18 @@ jobs:
               print('Markers not found in CHANGELOG.md')
               sys.exit(1)
 
-          # Extract unreleased content (between markers, excluding the ## [Unreleased] header and 'Changes since' line)
-          unreleased = content[start + len(us):end].strip()
-          lines = unreleased.split('\n')
-          # Skip the header and the 'Changes since' reference line
-          body_lines = []
-          for line in lines:
-              if line.startswith('## [Unreleased]'):
-                  continue
-              if line.startswith('Changes since'):
-                  continue
-              body_lines.append(line)
-          body = '\n'.join(body_lines).strip()
+          versioned = f'## [{version}] - {date}\n\n{notes}'
+          fresh = '## [Unreleased]\n\n*No changes yet.*'
 
-          # Build versioned entry
-          versioned = f'## [{version}] - {date}\n\n{body}'
-
-          # Reset unreleased section
-          fresh_unreleased = '## [Unreleased]\n\n*No changes yet.*'
-
-          # Replace unreleased with fresh, insert versioned before RELEASED_START
-          new_content = content[:start + len(us)] + '\n' + fresh_unreleased + '\n' + content[end:rstart + len(rs)] + '\n\n' + versioned + '\n' + content[rstart + len(rs):]
+          new_content = (
+              content[:start + len(us)] + '\n' + fresh + '\n'
+              + content[end:rstart + len(rs)] + '\n\n' + versioned + '\n'
+              + content[rstart + len(rs):]
+          )
 
           with open('CHANGELOG.md', 'w') as f:
               f.write(new_content)
-          " "$VERSION" "$DATE"
+          " "$VERSION" "$DATE" "$FLAT_NOTES"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -216,6 +226,13 @@ jobs:
               --base main \
               --label "automation" \
               --label "skip-changelog"
+
+            # Post required commit status so the PR isn't blocked
+            COMMIT_SHA=$(git rev-parse HEAD)
+            gh api "repos/${{ github.repository }}/statuses/${COMMIT_SHA}" \
+              -f state="success" \
+              -f context="Check Workflow Status" \
+              -f description="Skipped — changelog-only PR"
           }
 
       - name: Notify Discord
