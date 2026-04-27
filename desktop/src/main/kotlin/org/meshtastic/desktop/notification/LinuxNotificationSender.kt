@@ -20,6 +20,8 @@ import co.touchlab.kermit.Logger
 import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Pointer
+import com.sun.jna.Structure
+import com.sun.jna.ptr.PointerByReference
 import org.meshtastic.core.repository.Notification
 
 /**
@@ -38,17 +40,39 @@ private interface LibNotify : Library {
 
     fun notify_notification_set_category(notification: Pointer, category: String)
 
-    fun notify_notification_set_hint_string(notification: Pointer, key: String, value: String)
+    fun notify_notification_set_hint(notification: Pointer, key: String, value: Pointer?)
 
-    fun notify_notification_show(notification: Pointer, error: Pointer?): Boolean
+    fun notify_notification_show(notification: Pointer, error: PointerByReference?): Boolean
 
     fun notify_uninit()
 }
 
-/** Minimal GLib GObject binding for releasing native objects allocated by libnotify. */
+/** Minimal GLib bindings for GVariant creation and GObject ref-counting. */
 @Suppress("FunctionNaming", "FunctionParameterNaming", "ktlint:standard:function-naming")
-private interface GObject : Library {
+private interface GLib : Library {
     fun g_object_unref(obj: Pointer)
+
+    fun g_variant_new_boolean(value: Boolean): Pointer
+
+    fun g_variant_new_string(string: String): Pointer
+}
+
+/** JNA mapping of GLib's `GError` struct for extracting error diagnostics from libnotify. */
+@Suppress("MagicNumber")
+@Structure.FieldOrder("domain", "code", "message")
+class GErrorStruct(p: Pointer?) : Structure(p) {
+    @JvmField var domain: Int = 0
+
+    @JvmField var code: Int = 0
+
+    @JvmField var message: Pointer? = null
+
+    init {
+        if (p != null) read()
+    }
+
+    val errorMessage: String
+        get() = message?.getString(0) ?: "unknown error"
 }
 
 /** libnotify urgency levels matching `NotifyUrgency` enum. */
@@ -70,28 +94,28 @@ private object NotifyUrgency {
 class LinuxNotificationSender(private val appName: String = "Meshtastic") : NativeNotificationSender {
 
     private val lib: LibNotify?
-    private val gobject: GObject?
+    private val glib: GLib?
 
     init {
         var loadedLib: LibNotify? = null
-        var loadedGObject: GObject? = null
+        var loadedGLib: GLib? = null
         try {
             loadedLib = Native.load("notify", LibNotify::class.java) as LibNotify
-            loadedGObject = Native.load("gobject-2.0", GObject::class.java) as GObject
+            loadedGLib = Native.load("gobject-2.0", GLib::class.java) as GLib
             if (loadedLib.notify_init(appName)) {
                 Logger.i { "libnotify initialized for '$appName'" }
             } else {
                 Logger.w { "notify_init('$appName') returned false" }
                 loadedLib = null
-                loadedGObject = null
+                loadedGLib = null
             }
         } catch (e: UnsatisfiedLinkError) {
             Logger.w(e) { "libnotify not available — native Linux notifications disabled" }
             loadedLib = null
-            loadedGObject = null
+            loadedGLib = null
         }
         lib = loadedLib
-        gobject = loadedGObject
+        glib = loadedGLib
     }
 
     /** Whether libnotify was successfully loaded and initialized. */
@@ -113,6 +137,22 @@ class LinuxNotificationSender(private val appName: String = "Meshtastic") : Nati
                     return false
                 }
 
+        applyMetadata(libnotify, ptr, notification)
+
+        val errorRef = PointerByReference()
+        return try {
+            val shown = libnotify.notify_notification_show(ptr, errorRef)
+            if (!shown) {
+                val errMsg = errorRef.value?.let { GErrorStruct(it).errorMessage } ?: "unknown"
+                Logger.w { "notify_notification_show failed for '${notification.title}': $errMsg" }
+            }
+            shown
+        } finally {
+            glib?.g_object_unref(ptr)
+        }
+    }
+
+    private fun applyMetadata(libnotify: LibNotify, ptr: Pointer, notification: Notification) {
         val urgency =
             when (notification.type) {
                 Notification.Type.Error -> NotifyUrgency.CRITICAL
@@ -132,17 +172,9 @@ class LinuxNotificationSender(private val appName: String = "Meshtastic") : Nati
         libnotify.notify_notification_set_category(ptr, category)
 
         if (notification.isSilent) {
-            libnotify.notify_notification_set_hint_string(ptr, "suppress-sound", "true")
-        }
-
-        return try {
-            val shown = libnotify.notify_notification_show(ptr, null)
-            if (!shown) {
-                Logger.w { "notify_notification_show returned false for: ${notification.title}" }
+            glib?.let { g ->
+                libnotify.notify_notification_set_hint(ptr, "suppress-sound", g.g_variant_new_boolean(true))
             }
-            shown
-        } finally {
-            gobject?.g_object_unref(ptr)
         }
     }
 }
