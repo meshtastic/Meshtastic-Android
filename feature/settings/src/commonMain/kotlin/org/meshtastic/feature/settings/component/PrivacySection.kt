@@ -24,7 +24,10 @@ import org.meshtastic.core.resources.analytics_okay
 import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.location_disabled
 import org.meshtastic.core.resources.provide_location_to_mesh
+import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -43,6 +46,7 @@ fun PrivacySection(
     onToggleLocation: (Boolean) -> Unit,
     homoglyphEnabled: Boolean,
     onToggleHomoglyph: () -> Unit,
+    onNavigateToWatch: () -> Unit,
     startProvideLocation: () -> Unit,
     stopProvideLocation: () -> Unit,
 ) {
@@ -87,5 +91,11 @@ fun PrivacySection(
         )
 
         HomoglyphSetting(homoglyphEncodingEnabled = homoglyphEnabled, onToggle = onToggleHomoglyph)
+
+        ListItem(
+            text = "Watch",
+            leadingIcon = MeshtasticIcons.AppSettingsAlt,
+            onClick = onNavigateToWatch,
+        )
     }
 }

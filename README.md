@@ -60,8 +60,8 @@ You can generate the documentation locally to preview your changes.
 
 ### Modern Android Development (MAD)
 The app follows modern Android development practices, built on top of a shared Kotlin Multiplatform (KMP) Core:
-- **KMP Modules:** Business logic (`core:domain`), data sources (`core:data`, `core:database`, `core:datastore`), and communications (`core:network`, `core:ble`) are entirely platform-agnostic, targeting Android and Compose Desktop.
-- **UI:** JetBrains Compose Multiplatform (Material 3) using Compose Multiplatform resources.
+- **KMP Modules:** Business logic (`core:domain`), data sources (`core:data`, `core:database`, `core:datastore`), and communications (`core:network`, `core:ble`) are entirely platform-agnostic, targeting Android, Desktop, and WearOS.
+- **UI:** JetBrains Compose Multiplatform (Material 3) for Android/Desktop, and native WearOS Compose for the watch app.
 - **State Management:** Unidirectional Data Flow (UDF) with ViewModels, Coroutines, and Flow.
 - **Dependency Injection:** Koin with Koin Annotations (K2 Compiler Plugin).
 - **Navigation:** JetBrains Navigation 3 (Multiplatform routing with RESTful deep linking).

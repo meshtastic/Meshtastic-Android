@@ -48,6 +48,7 @@ include(
     ":feature:wifi-provision",
     ":feature:widget",
     ":desktop",
+    ":wear",
 )
 rootProject.name = "MeshtasticAndroid"
 

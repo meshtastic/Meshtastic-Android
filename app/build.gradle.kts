@@ -263,6 +263,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.play.services.wearable)
     implementation(libs.koin.android)
     implementation(libs.koin.compose.viewmodel)
     implementation(libs.koin.androidx.workmanager)

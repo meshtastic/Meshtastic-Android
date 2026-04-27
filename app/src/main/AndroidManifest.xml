@@ -172,6 +172,17 @@
         </service>
 
         <service
+            android:name="org.meshtastic.core.service.PhoneWearableListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/request_sync" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/send_message" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/open_on_phone" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"
             android:exported="false">

@@ -195,6 +195,7 @@ fun SettingsScreen(
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security?.is_managed ?: false,
+                excludedModulesUnlocked = excludedModulesUnlocked,
                 isOtaCapable = isOtaCapable,
                 onRouteClick = { route ->
                     val navRoute =
@@ -233,6 +234,7 @@ fun SettingsScreen(
                     onToggleLocation = { settingsViewModel.setProvideLocation(it) },
                     homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
                     onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+                    onNavigateToWatch = { onNavigate(SettingsRoute.Watch) },
                     startProvideLocation = { settingsViewModel.startProvidingLocation() },
                     stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
                 )

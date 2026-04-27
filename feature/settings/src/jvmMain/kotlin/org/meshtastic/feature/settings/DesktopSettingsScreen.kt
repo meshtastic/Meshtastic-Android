@@ -73,6 +73,7 @@ import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.HomoglyphSetting
 import org.meshtastic.feature.settings.component.NotificationSection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
+import org.meshtastic.feature.settings.component.PrivacySection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
@@ -152,6 +153,7 @@ fun DesktopSettingsScreen(
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security?.is_managed ?: false,
+                excludedModulesUnlocked = excludedModulesUnlocked,
                 isOtaCapable = isOtaCapable,
                 onRouteClick = { route ->
                     val navRoute =
@@ -173,6 +175,19 @@ fun DesktopSettingsScreen(
 
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
+                PrivacySection(
+                    analyticsAvailable = true,
+                    analyticsEnabled = true, // Analytics not yet tracked on Desktop
+                    onToggleAnalytics = {},
+                    provideLocation = false, // Location not yet tracked on Desktop
+                    onToggleLocation = {},
+                    homoglyphEnabled = homoglyphEnabled,
+                    onToggleHomoglyph = { radioConfigViewModel.toggleHomoglyphCharactersEncodingEnabled() },
+                    onNavigateToWatch = { onNavigate(SettingsRoute.Watch) },
+                    startProvideLocation = {},
+                    stopProvideLocation = {},
+                )
+
                 ExpressiveSection(title = stringResource(Res.string.app_settings)) {
                     ListItem(
                         text = stringResource(Res.string.theme),

@@ -34,6 +34,8 @@ import org.meshtastic.feature.settings.AdministrationScreen
 import org.meshtastic.feature.settings.DeviceConfigurationScreen
 import org.meshtastic.feature.settings.ModuleConfigurationScreen
 import org.meshtastic.feature.settings.SettingsViewModel
+import org.meshtastic.feature.settings.WatchConfigurationScreen
+import org.meshtastic.feature.settings.WatchViewModel
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.debugging.DebugViewModel
 import org.meshtastic.feature.settings.filter.FilterSettingsScreen
@@ -135,33 +137,49 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         CleanNodeDatabaseScreen(viewModel = viewModel)
     }
 
-    ConfigRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class, backStack) { viewModel ->
-            LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
-            when (routeInfo) {
-                ConfigRoute.USER ->
-                    UserConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.CHANNELS ->
-                    ChannelConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.DEVICE ->
-                    DeviceConfigScreenCommon(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.POSITION ->
-                    PositionConfigScreenCommon(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.POWER ->
-                    PowerConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.NETWORK ->
-                    NetworkConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.DISPLAY ->
-                    DisplayConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.LORA ->
-                    LoRaConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.BLUETOOTH ->
-                    BluetoothConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-                ConfigRoute.SECURITY ->
-                    SecurityConfigScreenCommon(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+    entry<SettingsRoute.Watch> {
+        WatchConfigurationScreen(
+            viewModel = koinViewModel<WatchViewModel>(),
+            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
+        )
+    }
+
+    ConfigRoute.entries
+        .filter { it != ConfigRoute.WATCH }
+        .forEach { routeInfo ->
+            configComposable(routeInfo.route::class, backStack) { viewModel ->
+                LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+                when (routeInfo) {
+                    ConfigRoute.USER ->
+                        UserConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    ConfigRoute.CHANNELS ->
+                        ChannelConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    ConfigRoute.DEVICE ->
+                        DeviceConfigScreenCommon(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    ConfigRoute.POSITION ->
+                        PositionConfigScreenCommon(
+                            viewModel,
+                            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
+                        )
+                    ConfigRoute.POWER ->
+                        PowerConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    ConfigRoute.NETWORK ->
+                        NetworkConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    ConfigRoute.DISPLAY ->
+                        DisplayConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    ConfigRoute.LORA ->
+                        LoRaConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    ConfigRoute.BLUETOOTH ->
+                        BluetoothConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    ConfigRoute.SECURITY ->
+                        SecurityConfigScreenCommon(
+                            viewModel,
+                            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
+                        )
+                    ConfigRoute.WATCH -> {}
+                }
             }
         }
-    }
 
     ModuleRoute.entries.forEach { routeInfo ->
         configComposable(routeInfo.route::class, backStack) { viewModel ->
