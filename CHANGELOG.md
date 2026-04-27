@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* fix(ci): grant promote.yml required permissions in release dispatch (#5261) by @James Rich in [`0e8c75e4d`](https://github.com/meshtastic/Meshtastic-Android/commit/0e8c75e4d8f5f8956cca73351314197311a5781d)
+* docs: update CHANGELOG.md (#5260) by @github-actions[bot] in [`e97b44acb`](https://github.com/meshtastic/Meshtastic-Android/commit/e97b44acb9b9d13acc13039b2eba89549535ae81)
 * feat(desktop): native OS notifications via libnotify/osascript/PowerShell (#5253) by @James Rich in [`b60f29d77`](https://github.com/meshtastic/Meshtastic-Android/commit/b60f29d7725f6989e2b5d8943a3698acfed58ce7)
 * docs: update CHANGELOG.md (#5258) by @github-actions[bot] in [`3174493ca`](https://github.com/meshtastic/Meshtastic-Android/commit/3174493ca616bc43dbe56a330b80a2574599b6c7)
 * feat(ci): segmented changelog with channel dedup and production squash (#5259) by @James Rich in [`e45135241`](https://github.com/meshtastic/Meshtastic-Android/commit/e451352412a46abb16777d9d036db01fb7963e4c)
