@@ -258,7 +258,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
+        os: [macos-latest, windows-latest, ubuntu-22.04, ubuntu-22.04-arm]
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -285,7 +285,10 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           APPIMAGE_EXTRACT_AND_RUN: 1
-        run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS -PaboutLibraries.release=true --no-daemon
+        # Quote the -P flag: PowerShell on Windows interprets the dot in
+        # `-PaboutLibraries.release=true` as member access on `-PaboutLibraries`,
+        # splitting the token and feeding `.release=true` to Gradle as a task name.
+        run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS '-PaboutLibraries.release=true' --no-daemon
 
       - name: List Desktop Binaries
         if: runner.os == 'Linux'

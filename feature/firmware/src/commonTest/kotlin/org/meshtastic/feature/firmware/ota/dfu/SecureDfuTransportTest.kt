@@ -21,7 +21,7 @@ package org.meshtastic.feature.firmware.ota.dfu
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnection
@@ -632,10 +632,10 @@ class SecureDfuTransportTest {
         override val device: BleDevice?
             get() = delegate.device
 
-        override val deviceFlow: SharedFlow<BleDevice?>
+        override val deviceFlow: StateFlow<BleDevice?>
             get() = delegate.deviceFlow
 
-        override val connectionState: SharedFlow<BleConnectionState>
+        override val connectionState: StateFlow<BleConnectionState>
             get() = delegate.connectionState
 
         override suspend fun connect(device: BleDevice) = delegate.connect(device)

@@ -70,6 +70,9 @@ internal object NymeaBleConstants {
     /** Maximum time to wait for a command response. */
     val RESPONSE_TIMEOUT = 15.seconds
 
+    /** Timeout for optional GetConnection metadata lookup after a successful connect command. */
+    val CONNECTION_INFO_TIMEOUT = 2.seconds
+
     /** Settle time after subscribing to notifications before sending commands. */
     val SUBSCRIPTION_SETTLE = 300.milliseconds
     // endregion
@@ -87,6 +90,9 @@ internal object NymeaBleConstants {
 
     /** Trigger a fresh WiFi scan. */
     const val CMD_SCAN = 4
+
+    /** Request current connection details (includes IP address if connected). */
+    const val CMD_GET_CONNECTION = 5
     // endregion
 
     // region Response error codes

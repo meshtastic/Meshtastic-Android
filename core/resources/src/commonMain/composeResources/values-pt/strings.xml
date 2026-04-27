@@ -514,6 +514,7 @@
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="connect">Ligar</string>
+    <string name="wifi_provision_success_username">Utilizador</string>
     <string name="desktop_notification_title">Nome do nó de alternativo</string>
     <string name="filter_icon">Filtrar</string>
 </resources>

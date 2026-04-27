@@ -114,8 +114,8 @@ class ScannerViewModelTest {
     }
 
     @Test
-    fun `errorText reflects connectionProgress`() = runTest {
-        viewModel.errorText.test {
+    fun `connectionProgressText reflects connectionProgress`() = runTest {
+        viewModel.connectionProgressText.test {
             assertEquals("", awaitItem())
             serviceRepository.setConnectionProgress("Connecting...")
             assertEquals("Connecting...", awaitItem())

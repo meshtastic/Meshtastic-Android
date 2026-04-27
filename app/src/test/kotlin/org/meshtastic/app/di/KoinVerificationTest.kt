@@ -30,6 +30,8 @@ import org.koin.test.verify.definition
 import org.koin.test.verify.injectedParameters
 import org.koin.test.verify.verify
 import org.meshtastic.app.map.MapViewModel
+import org.meshtastic.core.ble.BleLogFormat
+import org.meshtastic.core.ble.BleLogLevel
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.feature.node.metrics.MetricsViewModel
 import kotlin.test.Test
@@ -53,6 +55,11 @@ class KoinVerificationTest {
                     NodeIdLookup::class,
                     HttpClient::class,
                     HttpClientEngine::class,
+                    // BleLoggingConfig is a data class assembled by a factory function. Koin Verify
+                    // still introspects its constructor params, so the wrapping enums need to be
+                    // declared as known types even though they're never resolved from the graph.
+                    BleLogLevel::class,
+                    BleLogFormat::class,
                 ),
                 injections =
                 injectedParameters(

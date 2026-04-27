@@ -111,8 +111,6 @@ internal fun MessageListPaged(
     showStatusDialog?.let { message ->
         MessageStatusDialog(
             message = message,
-            nodes = state.nodes,
-            ourNode = state.ourNode,
             resendOption = message.status?.equals(MessageStatus.ERROR) ?: false,
             onResend = {
                 handlers.onDeleteMessages(listOf(message.uuid))
@@ -133,8 +131,6 @@ internal fun MessageListPaged(
                 handlers.onSendReaction(reaction.emoji, reaction.replyId)
                 showReactionDialog = null
             },
-            nodes = state.nodes,
-            ourNode = state.ourNode,
         )
     }
 

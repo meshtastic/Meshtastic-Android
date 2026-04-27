@@ -164,7 +164,7 @@ abstract class CommonPacketDaoTest {
                 ),
             )
         packetDao.insert(queuedPacket)
-        val queued = packetDao.getQueuedPackets()
+        val queued = packetDao.getAllDataPackets().filter { it.status == MessageStatus.QUEUED }
         assertNotNull(queued)
         assertEquals(1, queued.size)
         assertEquals("Queued", queued.first().text)

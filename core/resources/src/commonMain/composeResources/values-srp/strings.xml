@@ -408,6 +408,7 @@
     <string name="security_icon_help_dismiss">Отпусти</string>
     <string name="delete_messages_title">Обриши поруке?</string>
     <string name="message_input_label">Порука</string>
+    <string name="nodes_empty_disconnected_title">Нема повезаних уређаја</string>
     <string name="settings">подешавања</string>
     <string name="map_type_satellite">Сателит</string>
     <string name="map_type_hybrid">Хибридни</string>
@@ -430,5 +431,6 @@
     <string name="bluetooth_permission">Блутут</string>
     <string name="powered">Напајано</string>
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_username">Корисничко име</string>
     <string name="filter_icon">Филтер</string>
 </resources>

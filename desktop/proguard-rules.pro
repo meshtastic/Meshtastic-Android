@@ -1,71 +1,64 @@
 # ============================================================================
 # Meshtastic Desktop — ProGuard rules for release minification
 # ============================================================================
-# Open-source project: we rely on tree-shaking (unused code removal) for size
-# reduction. Obfuscation is disabled in build.gradle.kts (obfuscate.set(false)).
+# Open-source: obfuscation is OFF (build.gradle.kts: obfuscate.set(false)).
+# Tree-shaking still runs.
 #
-# Cross-platform library rules (Koin, kotlinx-serialization, Wire, Room,
-# Ktor, Coil, Kable, Kermit, Okio, DataStore, Paging, Lifecycle, Navigation 3,
-# AboutLibraries, Markdown, QRCode, CMP resources, core model) live in
-# config/proguard/shared-rules.pro and are wired in by this module's
-# build.gradle.kts. This file holds only desktop/JVM-specific rules.
+# Two rule sources are merged into the ProGuard run:
+#   1. JetBrains' bundled `default-compose-desktop-rules.pro` (auto-injected
+#      by the compose.desktop Gradle plugin).
+#   2. Cross-platform project keeps in config/proguard/shared-rules.pro,
+#      which inlines every dependency consumer rule we need on desktop —
+#      compose-jb's standalone ProGuard task does NOT auto-discover
+#      `META-INF/proguard/*.pro` consumer rules from dependency jars (only
+#      R8 on Android does — https://github.com/Guardsquare/proguard/issues/423).
+#
+# This file only holds desktop/JVM-specific rules that aren't covered above.
 # ============================================================================
 
-# ---- General ----------------------------------------------------------------
-
-# Suppress notes about duplicate resource files (common in fat JARs)
--dontnote **
-
-# Disable ProGuard optimization passes. Tree-shaking (unused code removal) still
-# runs — only method-body rewrites and call-site transformations are suppressed.
-#
-# Why: CMP 1.11 ships consumer rules with -assumenosideeffects on
-# Composer.<clinit>() and ComposerImpl.<clinit>(), plus -assumevalues on
-# ComposeRuntimeFlags and ComposeStackTraceMode. These optimization directives
-# let the optimizer rewrite *call sites* (class-init triggers, flag reads) even
-# when the target classes are preserved by -keep rules. The result is that the
-# Compose recomposer/frame-clock/animation state machines silently freeze on
-# their first frame in release builds. -dontoptimize is the only directive that
-# disables processing of -assumenosideeffects/-assumevalues. The desktop compose
-# build sets optimize.set(true), so this applies here as well as to R8. See #5146.
--dontoptimize
-
-# Do not parse/rewrite Kotlin metadata during shrinking/optimization.
-# ProGuard's KotlinShrinker cannot handle the metadata produced by Compose
-# Multiplatform 1.11.x + Kotlin 2.3.x, causing a NullPointerException.
-# Since we disable obfuscation (class names remain stable), metadata references
-# stay valid and do not need rewriting. The annotations themselves are preserved
-# by -keepattributes *Annotation*.
-#
-# NOTE: -dontprocesskotlinmetadata is a ProGuard-only directive; R8 does not
-# recognize it, which is why it lives in the desktop-only file.
+# ---- ProGuard 7.7 + Kotlin 2.3 metadata workaround --------------------------
+# ProGuard 7.7's KotlinShrinker NPEs on metadata produced by CMP 1.11 +
+# Kotlin 2.3.x. Because we don't obfuscate, class names stay stable and
+# metadata references remain valid without rewriting. Annotations themselves
+# are preserved by `-keepattributes *Annotation*` in shared-rules.pro.
+# (R8-only directive equivalent does not exist; this is ProGuard-only.)
 -dontprocesskotlinmetadata
 
+# ---- Disable optimizer (CMP 1.11 -assumenosideeffects defense) --------------
+# See shared-rules.pro for full rationale. Even though build.gradle.kts sets
+# `optimize.set(true)` so compose-jb wires the optimization step, this rule
+# turns it into a no-op — keeping CMP's `-assumenosideeffects` directives from
+# rewriting Composer call sites and freezing the runtime. See #5146.
+-dontoptimize
+
 # ---- Entry point ------------------------------------------------------------
-
--keep class org.meshtastic.desktop.MainKt { *; }
-
-# ---- Ktor Java engine (desktop-only; Android uses OkHttp) -------------------
-# io.ktor.client.engine.java ships consumer rules; the shared
-# HttpClientEngineFactory ServiceLoader keep in shared-rules.pro covers the
-# reflective discovery path.
-
-# ---- Meshtastic desktop host shell ------------------------------------------
-
-# Keep all desktop module classes (thin host shell — not worth tree-shaking)
+# Keep the desktop host shell (thin module — not worth tree-shaking).
 -keep class org.meshtastic.desktop.** { *; }
 
 # ---- JVM runtime suppression ------------------------------------------------
-
 -dontwarn java.lang.reflect.**
 -dontwarn sun.misc.Unsafe
 -dontwarn java.lang.invoke.**
 
-# ---- jSerialComm (cross-platform serial library with Android stubs) ---------
-
+# ---- jSerialComm Android stubs (cross-platform serial library) --------------
+# jSerialComm bundles Android shims that reference android.* classes; harmless
+# on JVM/desktop but ProGuard fails the build on unresolved program classes
+# unless suppressed.
 -dontwarn com.fazecast.jSerialComm.android.**
 
-# ---- Kotlin stdlib atomics (Kotlin 2.3+ intrinsics, not on JDK 17) ----------
+# Wire ships AndroidMessage in its common runtime; on desktop classpath there is
+# no android.os.Parcelable. We never use AndroidMessage on desktop.
+-dontwarn com.squareup.wire.AndroidMessage
+-dontwarn com.squareup.wire.AndroidMessage$*
+-dontwarn android.os.Parcelable
+-dontwarn android.os.Parcelable$*
 
+# Vico's ColorScale* classes call into skia-shader bridges that aren't on the
+# desktop ProGuard classpath. Vico ships no consumer rules.
+-dontwarn com.patrykandpatrick.vico.compose.cartesian.ColorScaleShader
+-dontwarn com.patrykandpatrick.vico.compose.cartesian.layer.ColorScaleAreaFill
+-dontwarn com.patrykandpatrick.vico.compose.cartesian.layer.ColorScaleLineFill
+
+# ---- Kotlin 2.3+ stdlib intrinsics not present on JDK 17 --------------------
 -dontwarn kotlin.concurrent.atomics.**
 -dontwarn kotlin.uuid.UuidV7Generator

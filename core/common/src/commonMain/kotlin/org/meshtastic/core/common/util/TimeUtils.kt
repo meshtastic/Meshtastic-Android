@@ -38,6 +38,3 @@ val systemTimeZone: TimeZone
 
 /** Converts these milliseconds to an [Instant]. */
 fun Long.toInstant(): Instant = Instant.fromEpochMilliseconds(this)
-
-/** Converts these seconds to an [Instant]. */
-fun Int.secondsToInstant(): Instant = Instant.fromEpochSeconds(this.toLong())

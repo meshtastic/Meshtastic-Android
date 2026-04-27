@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.model.util.getShortDateTime
@@ -195,8 +194,6 @@ internal fun ReactionDialog(
     onDismiss: () -> Unit = {},
     myId: String? = null,
     onResend: (Reaction) -> Unit = {},
-    nodes: List<Node> = emptyList(),
-    ourNode: Node? = null,
 ) = BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
     val groupedEmojis = reactions.groupBy { it.emoji }
     var selectedEmoji by remember { mutableStateOf<String?>(null) }
@@ -217,11 +214,6 @@ internal fun ReactionDialog(
                 MessageStatus.UNKNOWN -> Res.string.message_status_unknown
             }
 
-        val relayNodeName =
-            reaction.relayNode?.let { relayNodeId ->
-                Node.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
-            }
-
         DeliveryInfo(
             title = title,
             text = text,
@@ -231,7 +223,6 @@ internal fun ReactionDialog(
                 showStatusDialog = null
             },
             onDismiss = { showStatusDialog = null },
-            relayNodeName = relayNodeName,
             relays = reaction.relays,
         )
     }

@@ -90,6 +90,7 @@ class WifiProvisionViewModelTest {
         assertTrue(state.networks.isEmpty())
         assertNull(state.error)
         assertNull(state.deviceName)
+        assertNull(state.ipAddress)
         assertEquals(ProvisionStatus.Idle, state.provisionStatus)
     }
 
@@ -233,12 +234,13 @@ class WifiProvisionViewModelTest {
         advanceUntilIdle()
 
         // Now provision — enqueue success response
-        emitNymeaResponse("""{"c":1,"r":0}""")
+        emitNymeaResponse("""{"c":1,"r":0,"p":{"i":"10.10.10.61"}}""")
         viewModel.provisionWifi("Net", "password123")
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertEquals(Phase.Connected, state.phase)
+        assertEquals("10.10.10.61", state.ipAddress)
         assertEquals(ProvisionStatus.Success, state.provisionStatus)
     }
 
@@ -305,6 +307,7 @@ class WifiProvisionViewModelTest {
         assertEquals(Phase.Idle, state.phase)
         assertTrue(state.networks.isEmpty())
         assertNull(state.deviceName)
+        assertNull(state.ipAddress)
         assertEquals(ProvisionStatus.Idle, state.provisionStatus)
     }
 

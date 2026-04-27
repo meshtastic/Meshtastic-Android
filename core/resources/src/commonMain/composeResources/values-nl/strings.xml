@@ -415,5 +415,6 @@
     <string name="tak_team_blue">Blauw</string>
     <string name="tak_team_green">Groen</string>
     <string name="connect">Verbinding maken</string>
+    <string name="wifi_provision_success_username">Gebruikersnaam</string>
     <string name="filter_icon">Filter</string>
 </resources>

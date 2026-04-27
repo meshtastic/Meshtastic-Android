@@ -539,6 +539,8 @@
     <string name="tak_team_blue">파랑</string>
     <string name="tak_team_green">초록</string>
     <string name="connect">연결</string>
+    <string name="wifi_provision_success_ip_address">IP 주소</string>
+    <string name="wifi_provision_success_username">사용자명</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">필터</string>
 </resources>

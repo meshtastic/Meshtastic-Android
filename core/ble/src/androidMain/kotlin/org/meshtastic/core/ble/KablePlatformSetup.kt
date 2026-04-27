@@ -43,15 +43,21 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
 
     threadingStrategy = sharedThreadingStrategy
 
+    // We intentionally keep Kable's defaults for `transport` (Le) and `phy` (Le1M).
+    // Meshtastic radios (nRF52, ESP32-S3, RP2040+nRF) advertise BLE-only and don't support
+    // the LE 2M PHY in any first-party firmware, so changing these would be a regression risk
+    // with no upside. If a future hardware revision exposes 2M PHY, override `phy = Phy.Le2M`
+    // here after confirming the firmware advertises it.
+
     onServicesDiscovered {
         try {
             // Android defaults to 23 bytes MTU. Meshtastic packets can be 512 bytes.
             // Requesting the max MTU is critical for preventing dropped packets and stalls.
             @Suppress("MagicNumber")
             val negotiatedMtu = requestMtu(512)
-            Logger.i { "Negotiated MTU: $negotiatedMtu" }
+            Logger.i { "[${device.address}] Negotiated MTU: $negotiatedMtu" }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.w(e) { "Failed to request MTU" }
+            Logger.w(e) { "[${device.address}] Failed to request MTU" }
         }
     }
 }

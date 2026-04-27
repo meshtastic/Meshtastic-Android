@@ -139,8 +139,8 @@ configure<ApplicationExtension> {
     }
 
     val disableSplits =
-        project.gradle.startParameter.taskNames.any {
-            it.contains("bundle", ignoreCase = true) || it.contains("google", ignoreCase = true)
+        project.gradle.startParameter.taskNames.any { name ->
+            name.contains("bundle", ignoreCase = true) || name.contains("google", ignoreCase = true)
         }
 
     // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid

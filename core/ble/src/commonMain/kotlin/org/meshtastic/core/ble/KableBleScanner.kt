@@ -17,7 +17,6 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Scanner
-import com.juul.kable.logs.Logging
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.withTimeoutOrNull
@@ -26,13 +25,10 @@ import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
 @Single
-class KableBleScanner : BleScanner {
+class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
         val scanner = Scanner {
-            logging {
-                engine = KermitLogEngine
-                level = Logging.Level.Events
-            }
+            logging { applyConfig(loggingConfig) }
             // Use separate match blocks so each filter is evaluated independently (OR semantics).
             // Combining address and service UUID in a single match{} creates an AND filter which
             // silently drops results on OEM stacks (Samsung, Xiaomi) when the device uses a

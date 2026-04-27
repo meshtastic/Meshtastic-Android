@@ -99,6 +99,12 @@ val generateBuildConfig =
 
 sourceSets.main { kotlin.srcDir(generateBuildConfig.map { buildConfigOutputDir }) }
 
+// ── ProGuard configuration ───────────────────────────────────────────────────
+// compose-jb's standalone ProGuard 7.7 task does NOT auto-include
+// `META-INF/proguard/*.pro` consumer rules from dependency jars (only R8 on
+// Android does). We therefore inline every keep rule we need into the two
+// static .pro files referenced below.
+
 kotlin {
     jvmToolchain {
         languageVersion.set(JavaLanguageVersion.of(21))

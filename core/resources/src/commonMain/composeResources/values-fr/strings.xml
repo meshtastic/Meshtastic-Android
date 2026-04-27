@@ -783,6 +783,7 @@
     <string name="request_host_metrics">Métriques de l’hôte</string>
     <string name="request_pax_metrics">Métriques de Pax</string>
     <string name="request_metadata">Métadonnées</string>
+    <string name="retry">Réessayer</string>
     <string name="actions">Actions</string>
     <string name="firmware">Micrologiciel</string>
     <string name="use_12h_format">Utiliser le format horaire 12h</string>
@@ -893,7 +894,10 @@
     <string name="firmware_edition">Version du micrologiciel</string>
     <string name="recent_network_devices">Périphériques réseaux récents</string>
     <string name="discovered_network_devices">Appareils réseau découverts</string>
+    <string name="scanning_network">Recherche…</string>
+    <string name="scanning_bluetooth">Recherche…</string>
     <string name="bluetooth_available_devices">Périphériques Bluetooth disponibles</string>
+    <string name="nodes_empty_disconnected_title">Aucun appareil connecté</string>
     <string name="get_started">Commencer</string>
     <string name="intro_welcome">Bienvenue sur</string>
     <string name="stay_connected_anywhere">Restez connecté n'importe où</string>
@@ -1210,6 +1214,9 @@
     <string name="wifi_provision_ssid_placeholder">Saisir ou sélectionnez un réseau</string>
     <string name="wifi_provision_status_applied">WiFi configuré avec succès !</string>
     <string name="wifi_provision_status_failed">Impossible d'appliquer la configuration WiFi</string>
+    <string name="wifi_provision_success_ip_address">Adresse IP</string>
+    <string name="wifi_provision_success_username">Nom d'utilisateur</string>
+    <string name="wifi_provision_success_done">Terminé</string>
     <string name="desktop_tray_tooltip">Meshtastic application de bureau</string>
     <string name="desktop_tray_show">Afficher Meshtastic</string>
     <string name="desktop_tray_quit">Quitter</string>

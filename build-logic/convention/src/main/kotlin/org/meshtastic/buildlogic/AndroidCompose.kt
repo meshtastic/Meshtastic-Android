@@ -32,27 +32,28 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
         exclude(mapOf("group" to "androidx.compose", "module" to "compose-bom"))
     }
 
-    // CMP publishes these core AndroidX groups at the CMP version tag.
-    // Material, Material3, and Adaptive follow separate AndroidX version numbers
-    // and must NOT be included here (see CMP release notes for the mapping table).
-    val cmpVersion = libs.version("compose-multiplatform")
+    // CMP publishes these core AndroidX groups at an AndroidX version tag that
+    // tracks (but does not equal) the CMP version. The exact mapping lives in
+    // the CMP release notes; we mirror it via the `androidx-compose-bom-aligned`
+    // version ref in libs.versions.toml. Material, Material3, and Adaptive follow
+    // separate AndroidX version numbers and must NOT be included here.
+    val androidxComposeVersion = libs.version("androidx-compose-bom-aligned")
     val cmpAlignedGroups = setOf(
         "androidx.compose.animation",
         "androidx.compose.foundation",
         "androidx.compose.runtime",
         "androidx.compose.ui",
     )
-
-    // The BOM exclusion above strips versions from transitive material deps
-    // (e.g. maps-compose-widgets, datadog). Pin the material group to the
-    // AndroidX version that matches this CMP release.
+    // The BOM exclusion above strips the version from `androidx.compose.material:material`
+    // requested by maps-compose-widgets (google flavor). Pin only that artifact — the
+    // group also contains `material-ripple`, which CMP publishes at the bom-aligned
+    // version and must not be force-downgraded.
     val materialVersion = libs.version("androidx-compose-material")
-
     configurations.configureEach {
         resolutionStrategy.eachDependency {
             if (requested.group in cmpAlignedGroups) {
-                useVersion(cmpVersion)
-            } else if (requested.group == "androidx.compose.material") {
+                useVersion(androidxComposeVersion)
+            } else if (requested.group == "androidx.compose.material" && requested.name == "material") {
                 useVersion(materialVersion)
             }
         }
