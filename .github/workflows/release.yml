@@ -294,7 +294,7 @@ jobs:
           ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
           APPIMAGE_EXTRACT_AND_RUN: 1
-          SIGN_MACOS: ${{ runner.os == 'macOS' && 'true' || 'false' }}
+          SIGN_MACOS: ${{ runner.os == 'macOS' && secrets.APPLE_SIGNING_IDENTITY != '' && 'true' || 'false' }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
