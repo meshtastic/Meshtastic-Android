@@ -300,6 +300,8 @@ class FakeWatchPrefs : WatchPrefs {
     override val syncNodesEnabled = MutableStateFlow(false)
     override val syncMessagesEnabled = MutableStateFlow(false)
     override val mirrorNotificationsEnabled = MutableStateFlow(false)
+    override val highContrastModeEnabled = MutableStateFlow(false)
+    override val syncRequest = MutableStateFlow(0L)
 
     override fun setPushToWatchEnabled(enabled: Boolean) {
         pushToWatchEnabled.value = enabled
@@ -315,6 +317,14 @@ class FakeWatchPrefs : WatchPrefs {
 
     override fun setMirrorNotificationsEnabled(enabled: Boolean) {
         mirrorNotificationsEnabled.value = enabled
+    }
+
+    override fun setHighContrastModeEnabled(enabled: Boolean) {
+        highContrastModeEnabled.value = enabled
+    }
+
+    override fun requestSync() {
+        syncRequest.value++
     }
 }
 

@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.WatchPrefs
 
@@ -79,7 +80,7 @@ class WatchPrefsImpl(
         dataStore.data.map { it[KEY_SYNC_REQUEST] ?: 0L }.stateIn(scope, SharingStarted.Eagerly, 0L)
 
     override fun requestSync() {
-        scope.launch { dataStore.edit { prefs -> prefs[KEY_SYNC_REQUEST] = System.currentTimeMillis() } }
+        scope.launch { dataStore.edit { prefs -> prefs[KEY_SYNC_REQUEST] = nowMillis } }
     }
 
     companion object {
