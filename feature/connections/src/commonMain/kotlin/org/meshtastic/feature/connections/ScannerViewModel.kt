@@ -89,14 +89,6 @@ open class ScannerViewModel(
      */
     val connectionProgressText: StateFlow<String?> = _connectionProgressText.asStateFlow()
 
-    /**
-     * Back-compat alias for [connectionProgressText]. Kept so existing screens/tests don't need a synchronised rename
-     * in the same commit.
-     */
-    @Deprecated("Use connectionProgressText", ReplaceWith("connectionProgressText"))
-    val errorText: StateFlow<String?>
-        get() = connectionProgressText
-
     // ── BLE scanning ──────────────────────────────────────────────────────────────────────────
     private val _isBleScanning = MutableStateFlow(false)
     val isBleScanning: StateFlow<Boolean> = _isBleScanning.asStateFlow()

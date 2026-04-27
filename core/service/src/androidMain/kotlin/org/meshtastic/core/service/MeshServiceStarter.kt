@@ -27,11 +27,6 @@ import org.meshtastic.core.service.worker.ServiceKeepAliveWorker
 
 // / Helper function to start running our service
 fun MeshService.Companion.startService(context: Context) {
-    // Bind to our service using the same mechanism an external client would use (for testing coverage)
-    // The following would work for us, but not external users:
-    // val intent = Intent(this, MeshService::class.java)
-    // intent.action = IMeshService::class.java.name
-
     // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
     // listening for the bluetooth packets arriving from the radio. And when they arrive forward them
     // to Signal or whatever.

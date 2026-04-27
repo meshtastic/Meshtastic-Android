@@ -46,7 +46,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -584,28 +583,12 @@ fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
 // region ── MessageStatusDialog ──
 
 @Composable
-fun MessageStatusDialog(
-    message: Message,
-    nodes: List<Node>,
-    ourNode: Node?,
-    resendOption: Boolean,
-    onResend: () -> Unit,
-    onDismiss: () -> Unit,
-) {
+fun MessageStatusDialog(message: Message, resendOption: Boolean, onResend: () -> Unit, onDismiss: () -> Unit) {
     val (title, text) = message.getStatusStringRes()
-    val relayNodeName by
-        remember(message.relayNode, nodes, ourNode) {
-            derivedStateOf {
-                message.relayNode?.let { relayNodeId ->
-                    Node.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
-                }
-            }
-        }
     DeliveryInfo(
         title = title,
         resendOption = resendOption,
         text = text,
-        relayNodeName = relayNodeName,
         relays = message.relays,
         onConfirm = onResend,
         onDismiss = onDismiss,

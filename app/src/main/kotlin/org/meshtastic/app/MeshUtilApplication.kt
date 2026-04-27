@@ -137,11 +137,3 @@ open class MeshUtilApplication :
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(get()).build()
 }
-
-fun logAssert(executeReliableWrite: Boolean) {
-    if (!executeReliableWrite) {
-        val ex = AssertionError("Assertion failed")
-        Logger.e(ex) { "logAssert" }
-        throw ex
-    }
-}

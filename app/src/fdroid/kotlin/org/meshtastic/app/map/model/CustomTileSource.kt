@@ -22,7 +22,6 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.util.MapTileIndex
 
-@Suppress("UnusedPrivateProperty")
 class CustomTileSource {
 
     companion object {
@@ -102,62 +101,6 @@ class CustomTileSource {
                             mImageFilenameEnding
                         )
             }
-        private val USGS_HYDRO_CACHE =
-            object :
-                OnlineTileSourceBase(
-                    "USGS Hydro Cache",
-                    0,
-                    18,
-                    256,
-                    "",
-                    arrayOf("https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/"),
-                    "USGS",
-                    TileSourcePolicy(
-                        2,
-                        TileSourcePolicy.FLAG_NO_PREVENTIVE or
-                            TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL or
-                            TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED,
-                    ),
-                ) {
-                override fun getTileURLString(pMapTileIndex: Long): String = baseUrl +
-                    (
-                        MapTileIndex.getZoom(pMapTileIndex).toString() +
-                            "/" +
-                            MapTileIndex.getY(pMapTileIndex) +
-                            "/" +
-                            MapTileIndex.getX(pMapTileIndex) +
-                            mImageFilenameEnding
-                        )
-            }
-        private val USGS_SHADED_RELIEF =
-            object :
-                OnlineTileSourceBase(
-                    "USGS Shaded Relief Only",
-                    0,
-                    18,
-                    256,
-                    "",
-                    arrayOf(
-                        "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer/tile/",
-                    ),
-                    "USGS",
-                    TileSourcePolicy(
-                        2,
-                        TileSourcePolicy.FLAG_NO_PREVENTIVE or
-                            TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL or
-                            TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED,
-                    ),
-                ) {
-                override fun getTileURLString(pMapTileIndex: Long): String = baseUrl +
-                    (
-                        MapTileIndex.getZoom(pMapTileIndex).toString() +
-                            "/" +
-                            MapTileIndex.getY(pMapTileIndex) +
-                            "/" +
-                            MapTileIndex.getX(pMapTileIndex) +
-                            mImageFilenameEnding
-                        )
-            }
 
         /** WMS TILE SERVER More research is required to get this to function correctly with overlays */
         val NOAA_RADAR_WMS =
@@ -180,7 +123,6 @@ class CustomTileSource {
         private val USGS_TOPO: OnlineTileSourceBase = TileSourceFactory.USGS_TOPO
         private val OPEN_TOPO: OnlineTileSourceBase = TileSourceFactory.OpenTopo
         private val USGS_SAT: OnlineTileSourceBase = TileSourceFactory.USGS_SAT
-        private val SEAMAP: OnlineTileSourceBase = TileSourceFactory.OPEN_SEAMAP
         val DEFAULT_TILE_SOURCE: OnlineTileSourceBase = TileSourceFactory.DEFAULT_TILE_SOURCE
 
         /** Source for each available [ITileSource] and their display names. */

@@ -176,7 +176,7 @@ fun EditWaypointDialog(
                         label = { Text(stringResource(Res.string.description)) },
                         keyboardOptions =
                         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = { /* Handle next/done focus */ }),
+                        keyboardActions = KeyboardActions(onDone = {}),
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2,
                         maxLines = 3,

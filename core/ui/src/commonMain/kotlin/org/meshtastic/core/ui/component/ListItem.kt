@@ -115,7 +115,6 @@ fun SwitchListItem(
  *
  * @see [LinkedCoordinatesItem] for example usage
  */
-@Suppress("UnusedParameter")
 @Composable
 fun BasicListItem(
     text: String,
