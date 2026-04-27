@@ -35,13 +35,11 @@ import org.meshtastic.core.resources.relays
 import org.meshtastic.core.resources.resend
 import org.meshtastic.core.ui.component.MeshtasticDialog
 
-@Suppress("UnusedParameter")
 @Composable
 fun DeliveryInfo(
     title: StringResource,
     resendOption: Boolean,
     text: StringResource? = null,
-    relayNodeName: String? = null,
     relays: Int = 0,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
