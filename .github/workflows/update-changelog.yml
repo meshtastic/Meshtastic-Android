@@ -9,7 +9,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
 
 concurrency:
   group: changelog-${{ github.ref }}
@@ -59,6 +59,7 @@ jobs:
 
       - name: Update CHANGELOG.md
         if: steps.last_tag.outputs.tag != ''
+        id: update
         env:
           TAG: ${{ steps.last_tag.outputs.tag }}
         run: |
@@ -92,13 +93,40 @@ jobs:
               f.write(new_content)
           " "$UNRELEASED"
 
-      - name: Commit and push
-        if: steps.last_tag.outputs.tag != ''
+          # Check if there are actual changes
+          if git diff --quiet CHANGELOG.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update changelog PR
+        if: steps.last_tag.outputs.tag != '' && steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          BRANCH="automation/update-changelog"
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Force-update the automation branch
+          git checkout -B "$BRANCH"
           git add CHANGELOG.md
-          git diff --cached --quiet || {
-            git commit -m "docs: update CHANGELOG.md [skip ci]"
-            git push origin main
-          }
+          git commit -m "docs: update CHANGELOG.md"
+          git push origin "$BRANCH" --force
+
+          # Create or update the PR
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number -q '.[0].number')
+          if [ -n "$EXISTING_PR" ]; then
+            echo "Updated existing PR #$EXISTING_PR"
+          else
+            gh pr create \
+              --title "docs: update CHANGELOG.md" \
+              --body "Automated changelog update from push to main." \
+              --head "$BRANCH" \
+              --base main \
+              --label "automation" \
+              --label "skip-changelog"
+            echo "Created new changelog PR"
+          fi
