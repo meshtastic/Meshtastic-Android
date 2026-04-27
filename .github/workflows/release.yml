@@ -274,7 +274,6 @@ jobs:
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
         with:
-          jdk_distribution: 'jetbrains'
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: 'false'
 
