@@ -353,14 +353,18 @@ private fun DisplaySection(highContrastMode: Boolean, onHighContrastModeChange: 
             colors = SwitchButtonDefaults.switchButtonColors(uncheckedContainerColor = COLOR_SURFACE2),
             label = {
                 Text(
-                    text = "High Contrast",
+                    text = "Alternate colors",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = COLOR_TEXT_PRIMARY,
                 )
             },
             secondaryLabel = {
-                Text("Pure black background", fontSize = 9.sp, color = COLOR_TEXT_SECONDARY)
+                Text(
+                    text = if (highContrastMode) "Grey theme enabled" else "OLED mode enabled",
+                    fontSize = 9.sp,
+                    color = COLOR_TEXT_SECONDARY
+                )
             }
         )
     }

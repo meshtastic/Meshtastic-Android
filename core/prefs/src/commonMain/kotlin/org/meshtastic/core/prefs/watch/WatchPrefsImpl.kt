@@ -70,7 +70,7 @@ class WatchPrefsImpl(
     }
 
     override val highContrastModeEnabled: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_HIGH_CONTRAST_MODE] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+        dataStore.data.map { it[KEY_HIGH_CONTRAST_MODE] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setHighContrastModeEnabled(enabled: Boolean) {
         scope.launch { dataStore.edit { prefs -> prefs[KEY_HIGH_CONTRAST_MODE] = enabled } }
