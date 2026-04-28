@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update org.meshtastic:mqtt-client to v0.3.0 (#5272) by @renovate[bot] in [`54339c6fa`](https://github.com/meshtastic/Meshtastic-Android/commit/54339c6fa134eb6d51b1ebbd1d7d40e1f24623b4)
+* chore(deps): update gradle to v9.5.0 (#5270) by @renovate[bot] in [`ef33f6a76`](https://github.com/meshtastic/Meshtastic-Android/commit/ef33f6a76a3fbde69666c1629135c4f382837318)
+* docs: update CHANGELOG.md (#5269) by @github-actions[bot] in [`c2022c3ea`](https://github.com/meshtastic/Meshtastic-Android/commit/c2022c3eac1f1c278f07fcc9ad4e5ba9b576acb9)
 * fix(fdroid): restore reproducible builds for aboutlibraries (#5268) by @James Rich in [`1beaf3126`](https://github.com/meshtastic/Meshtastic-Android/commit/1beaf312640ab6e9b5d10307840f33e78873492e)
 * docs: update CHANGELOG.md (#5266) by @github-actions[bot] in [`76882b442`](https://github.com/meshtastic/Meshtastic-Android/commit/76882b4425c44935b7749aa36e0b899e605f5471)
 * feat(auto): enable Android Auto messaging notifications (#5265) by @Michael Riddle in [`5483f4a6e`](https://github.com/meshtastic/Meshtastic-Android/commit/5483f4a6e8b05c7124d73754633a5d4aa92860bd)
