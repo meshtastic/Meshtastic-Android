@@ -129,6 +129,11 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
 
+        <!-- Android Auto: surface MessagingStyle notifications on the car's head unit -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
