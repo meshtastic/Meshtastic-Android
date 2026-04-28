@@ -91,12 +91,16 @@ jobs:
         run: ./gradlew graphUpdate
         continue-on-error: true
 
+      - name: Update AboutLibraries metadata
+        run: ./gradlew :app:exportLibraryDefinitions
+        continue-on-error: true
+
       - name: Create Pull Request if changes occurred
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           commit-message: |
-            chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+            chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Licenses)
 
             Automated updates for:
             - Firmware releases list
@@ -104,7 +108,8 @@ jobs:
             - Crowdin source string uploads
             - Crowdin translation downloads
             - Module dependency graphs
-          title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)'
+            - AboutLibraries license metadata
+          title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Licenses)'
           body: |
             This PR includes automated updates from the scheduled workflow:
 
@@ -113,6 +118,7 @@ jobs:
             - Source strings were uploaded to Crowdin.
             - Latest translations were downloaded from Crowdin (if available).
             - Updated module dependency graphs in README.md files (if changed).
+            - Updated `aboutlibraries.json` license metadata (if dependencies changed).
 
             Please review the changes.
           branch: 'scheduled-updates'
@@ -121,6 +127,7 @@ jobs:
           add-paths: |
             app/src/main/assets/firmware_releases.json
             app/src/main/assets/device_hardware.json
+            app/src/main/resources/aboutlibraries.json
             fastlane/metadata/android/**
             **/strings.xml
             **/README.md
