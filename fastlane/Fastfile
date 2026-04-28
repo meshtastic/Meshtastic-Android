@@ -39,7 +39,8 @@ platform :android do
       properties: {
         "android.injected.version.name" => ENV['VERSION_NAME'],
         "android.injected.version.code" => ENV['VERSION_CODE'],
-        "aboutLibraries.release" => "true"
+        # Intentionally omit aboutLibraries.release — fdroid builds must use
+        # offlineMode so the output matches F-Droid's reproducible rebuild.
       }
     )
   end
