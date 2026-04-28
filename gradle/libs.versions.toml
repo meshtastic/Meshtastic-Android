@@ -81,7 +81,7 @@ spotless = "8.4.0"
 wire = "6.2.0"
 vico = "3.2.0-next.2"
 kable = "0.42.0"
-mqttastic = "0.2.0"
+mqttastic = "0.3.0"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 
