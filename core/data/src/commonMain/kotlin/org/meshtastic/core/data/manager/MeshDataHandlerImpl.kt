@@ -57,6 +57,8 @@ import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
+import org.meshtastic.core.resources.email_notification_new_message
+import org.meshtastic.core.resources.email_notification_new_title
 import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.unknown_username
@@ -99,6 +101,7 @@ class MeshDataHandlerImpl(
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
     private val uiPrefs: UiPrefs,
+    private val workerManager: org.meshtastic.core.repository.MeshWorkerManager,
     private val radioController: Lazy<org.meshtastic.core.model.RadioController>,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
@@ -327,12 +330,13 @@ class MeshDataHandlerImpl(
 
                         notificationManager.dispatch(
                             Notification(
-                                title = "Nieuwe Email Wachtrij",
-                                message = "Email voor $recipient staat klaar.",
+                                title = getStringSuspend(Res.string.email_notification_new_title),
+                                message = getStringSuspend(Res.string.email_notification_new_message, recipient),
                                 category = Notification.Category.Message,
                                 isSilent = true
                             )
                         )
+                        workerManager.enqueueEmailWorker()
                     }
                 }
             }

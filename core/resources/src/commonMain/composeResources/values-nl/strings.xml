@@ -417,4 +417,22 @@
     <string name="connect">Verbinding maken</string>
     <string name="wifi_provision_success_username">Gebruikersnaam</string>
     <string name="filter_icon">Filter</string>
+
+    <!-- Email -->
+    <string name="email_queue_title">Email Wachtrij</string>
+    <string name="email_queue_empty">Geen emails in de wachtrij</string>
+    <string name="email_to">Aan: %1$s</string>
+    <string name="email_subject">Onderwerp: %1$s</string>
+    <string name="email_send">Verstuur</string>
+    <string name="email_settings_title">Email Instellingen</string>
+    <string name="email_enabled">Email gateway inschakelen</string>
+    <string name="email_smtp_host">SMTP Host</string>
+    <string name="email_smtp_port">SMTP Poort</string>
+    <string name="email_smtp_user">SMTP Gebruiker</string>
+    <string name="email_smtp_password">SMTP Wachtwoord</string>
+    <string name="email_smtp_auth">Authenticatie vereist</string>
+    <string name="email_smtp_starttls">StartTLS gebruiken</string>
+    <string name="email_test_button">Test Email</string>
+    <string name="email_notification_new_title">Nieuwe Email Wachtrij</string>
+    <string name="email_notification_new_message">Email voor %1$s staat klaar.</string>
 </resources>

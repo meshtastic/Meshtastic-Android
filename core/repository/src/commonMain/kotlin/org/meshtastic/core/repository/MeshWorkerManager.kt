@@ -20,4 +20,13 @@ package org.meshtastic.core.repository
 interface MeshWorkerManager {
     /** Enqueues a worker to send a specific packet. */
     fun enqueueSendMessage(packetId: Int)
+
+    /** Enqueues a worker to send queued emails. */
+    fun enqueueEmailWorker()
+
+    /** Schedules a periodic worker to send queued emails. */
+    fun schedulePeriodicEmailWorker()
+
+    /** Cancels the periodic email worker. */
+    fun cancelPeriodicEmailWorker()
 }

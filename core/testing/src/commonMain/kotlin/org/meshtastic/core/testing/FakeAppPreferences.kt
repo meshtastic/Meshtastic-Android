@@ -290,6 +290,7 @@ class FakeAppPreferences : AppPreferences {
     override val radio = FakeRadioPrefs()
     override val mesh = FakeMeshPrefs()
     override val tak = FakeTakPrefs()
+    override val email = FakeEmailPrefs()
 }
 
 class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
@@ -298,4 +299,27 @@ class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
     override fun setTakServerEnabled(enabled: Boolean) {
         isTakServerEnabled.value = enabled
     }
+}
+
+class FakeEmailPrefs : org.meshtastic.core.repository.EmailPrefs {
+    override val emailEnabled = MutableStateFlow(false)
+    override fun setEmailEnabled(enabled: Boolean) { emailEnabled.value = enabled }
+
+    override val smtpHost = MutableStateFlow("")
+    override fun setSmtpHost(host: String) { smtpHost.value = host }
+
+    override val smtpPort = MutableStateFlow(587)
+    override fun setSmtpPort(port: Int) { smtpPort.value = port }
+
+    override val smtpUser = MutableStateFlow("")
+    override fun setSmtpUser(user: String) { smtpUser.value = user }
+
+    override val smtpPassword = MutableStateFlow("")
+    override fun setSmtpPassword(password: String) { smtpPassword.value = password }
+
+    override val smtpAuth = MutableStateFlow(true)
+    override fun setSmtpAuth(auth: Boolean) { smtpAuth.value = auth }
+
+    override val smtpStartTls = MutableStateFlow(true)
+    override fun setSmtpStartTls(startTls: Boolean) { smtpStartTls.value = startTls }
 }

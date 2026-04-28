@@ -178,6 +178,13 @@ configure<ApplicationExtension> {
     bundle { language { enableSplit = false } }
 
     testOptions { unitTests { isIncludeAndroidResources = true } }
+
+    packaging {
+        resources {
+            excludes += "META-INF/NOTICE.md"
+            excludes += "META-INF/LICENSE.md"
+        }
+    }
 }
 
 secrets {

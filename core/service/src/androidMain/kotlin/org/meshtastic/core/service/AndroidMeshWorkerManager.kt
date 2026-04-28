@@ -18,11 +18,15 @@ package org.meshtastic.core.service
 
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.MeshWorkerManager
+import org.meshtastic.core.service.worker.EmailWorker
 import org.meshtastic.core.service.worker.SendMessageWorker
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaDuration
 
 @Single
 class AndroidMeshWorkerManager(private val workManager: WorkManager) : MeshWorkerManager {
@@ -37,5 +41,27 @@ class AndroidMeshWorkerManager(private val workManager: WorkManager) : MeshWorke
             ExistingWorkPolicy.REPLACE,
             workRequest,
         )
+    }
+
+    override fun enqueueEmailWorker() {
+        val workRequest = OneTimeWorkRequestBuilder<EmailWorker>().build()
+        workManager.enqueueUniqueWork(
+            EmailWorker.WORK_NAME,
+            ExistingWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+    override fun schedulePeriodicEmailWorker() {
+        val workRequest = PeriodicWorkRequestBuilder<EmailWorker>(15.minutes.toJavaDuration()).build()
+        workManager.enqueueUniquePeriodicWork(
+            EmailWorker.WORK_NAME + "_periodic",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            workRequest
+        )
+    }
+
+    override fun cancelPeriodicEmailWorker() {
+        workManager.cancelUniqueWork(EmailWorker.WORK_NAME + "_periodic")
     }
 }

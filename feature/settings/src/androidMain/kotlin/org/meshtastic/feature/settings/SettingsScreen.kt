@@ -45,6 +45,7 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
+import org.meshtastic.core.resources.email_queue_title
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.import_configuration
@@ -260,7 +261,7 @@ fun SettingsScreen(
                         onNavigate(SettingsRoute.FilterSettings)
                     }
                     ListItem(
-                        text = "Email Wachtrij",
+                        text = stringResource(Res.string.email_queue_title),
                         leadingIcon = MeshtasticIcons.Send,
                     ) {
                         onNavigate(SettingsRoute.EmailQueue)

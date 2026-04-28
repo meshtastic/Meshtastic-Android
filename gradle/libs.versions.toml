@@ -84,6 +84,7 @@ kable = "0.42.0"
 mqttastic = "0.2.0"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
+jakarta-mail = "1.6.7"
 
 [libraries]
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
@@ -263,6 +264,8 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 test-retry-gradlePlugin = { module = "org.gradle:test-retry-gradle-plugin", version.ref = "testRetry" }
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
+jakarta-mail = { module = "com.sun.mail:android-mail", version.ref = "jakarta-mail" }
+jakarta-activation = { module = "com.sun.mail:android-activation", version.ref = "jakarta-mail" }
 
 [plugins]
 # Android

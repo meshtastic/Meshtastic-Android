@@ -1339,4 +1339,22 @@
     <string name="action_react_with_emoji">React with emoji</string>
     <string name="action_select_device">Select device</string>
     <string name="action_select_network">Select network</string>
+
+    <!-- Email -->
+    <string name="email_queue_title">Email Queue</string>
+    <string name="email_queue_empty">No emails in queue</string>
+    <string name="email_to">To: %1$s</string>
+    <string name="email_subject">Subject: %1$s</string>
+    <string name="email_send">Send</string>
+    <string name="email_settings_title">Email Settings</string>
+    <string name="email_enabled">Enable Email Gateway</string>
+    <string name="email_smtp_host">SMTP Host</string>
+    <string name="email_smtp_port">SMTP Port</string>
+    <string name="email_smtp_user">SMTP User</string>
+    <string name="email_smtp_password">SMTP Password</string>
+    <string name="email_smtp_auth">Authentication required</string>
+    <string name="email_smtp_starttls">Use StartTLS</string>
+    <string name="email_test_button">Test Email</string>
+    <string name="email_notification_new_title">New Email Queue</string>
+    <string name="email_notification_new_message">Email for %1$s is ready.</string>
 </resources>

@@ -15,34 +15,42 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.EmailQueueEntity
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.delete
-import org.meshtastic.core.resources.send
+import org.meshtastic.core.resources.*
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Send
+import org.meshtastic.core.ui.icon.Settings
 
 @Composable
-fun EmailQueueScreen(viewModel: EmailQueueViewModel, onBack: () -> Unit, onSendEmail: (EmailQueueEntity) -> Unit) {
+fun EmailQueueScreen(
+    viewModel: EmailQueueViewModel,
+    onBack: () -> Unit,
+    onSendEmail: (EmailQueueEntity) -> Unit,
+    onSettings: () -> Unit
+) {
     val emails by viewModel.unsentEmails.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             MainAppBar(
-                title = "Email Wachtrij",
+                title = stringResource(Res.string.email_queue_title),
                 canNavigateUp = true,
                 onNavigateUp = onBack,
                 ourNode = null,
                 showNodeChip = false,
-                actions = {},
+                actions = {
+                    IconButton(onClick = onSettings) {
+                        Icon(MeshtasticIcons.Settings, contentDescription = stringResource(Res.string.settings))
+                    }
+                },
                 onClickChip = {},
             )
         },
     ) { paddingValues ->
         if (emails.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                Text("Geen emails in de wachtrij", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(Res.string.email_queue_empty), style = MaterialTheme.typography.bodyLarge)
             }
         } else {
             LazyColumn(
@@ -65,8 +73,8 @@ fun EmailQueueScreen(viewModel: EmailQueueViewModel, onBack: () -> Unit, onSendE
 private fun EmailItem(email: EmailQueueEntity, onSend: () -> Unit, onDelete: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Aan: ${email.recipient}", style = MaterialTheme.typography.titleMedium)
-            Text(text = "Onderwerp: ${email.subject}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = stringResource(Res.string.email_to, email.recipient), style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(Res.string.email_subject, email.subject), style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = email.content, style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.height(12.dp))
@@ -75,9 +83,9 @@ private fun EmailItem(email: EmailQueueEntity, onSend: () -> Unit, onDelete: () 
                     Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
                 }
                 Button(onClick = onSend) {
-                    Icon(MeshtasticIcons.Send, contentDescription = stringResource(Res.string.send))
+                    Icon(MeshtasticIcons.Send, contentDescription = stringResource(Res.string.email_send))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Verstuur")
+                    Text(stringResource(Res.string.email_send))
                 }
             }
         }

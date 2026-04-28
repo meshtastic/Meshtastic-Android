@@ -146,4 +146,13 @@ class CorePrefsAndroidModule {
             scope = CoroutineScope(dispatchers.io + SupervisorJob()),
             produceFile = { context.preferencesDataStoreFile("filter_ds") },
         )
+
+    @Single
+    @Named("EmailDataStore")
+    fun provideEmailDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            migrations = listOf(SharedPreferencesMigration(context, "email-prefs")),
+            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
+            produceFile = { context.preferencesDataStoreFile("email_ds") },
+        )
 }

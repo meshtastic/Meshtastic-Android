@@ -43,6 +43,7 @@ kotlin {
             implementation(projects.core.proto)
             implementation(projects.core.takserver)
 
+            implementation(libs.androidx.room.runtime)
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
@@ -55,6 +56,8 @@ kotlin {
             implementation(libs.androidx.work.runtime.ktx)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.workmanager)
+            implementation(libs.jakarta.mail)
+            implementation(libs.jakarta.activation)
         }
 
         val androidHostTest by getting {

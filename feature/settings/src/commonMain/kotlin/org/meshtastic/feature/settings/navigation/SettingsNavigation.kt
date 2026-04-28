@@ -39,6 +39,7 @@ import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.debugging.DebugViewModel
 import org.meshtastic.feature.settings.email.EmailQueueScreen
 import org.meshtastic.feature.settings.email.EmailQueueViewModel
+import org.meshtastic.feature.settings.email.EmailSettingsScreen
 import org.meshtastic.feature.settings.filter.FilterSettingsScreen
 import org.meshtastic.feature.settings.filter.FilterSettingsViewModel
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseScreen
@@ -246,7 +247,16 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
                 context.startActivity(android.content.Intent.createChooser(intent, "Kies een Email App").apply {
                     this.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                 })
-            }
+            },
+            onSettings = dropUnlessResumed { backStack.add(SettingsRoute.EmailSettings) }
+        )
+    }
+
+    entry<SettingsRoute.EmailSettings> {
+        val viewModel: EmailQueueViewModel = koinViewModel()
+        EmailSettingsScreen(
+            viewModel = viewModel,
+            onBack = dropUnlessResumed { backStack.removeLastOrNull() }
         )
     }
 }
