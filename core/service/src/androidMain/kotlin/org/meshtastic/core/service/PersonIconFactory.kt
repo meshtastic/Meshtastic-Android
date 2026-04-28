@@ -22,11 +22,11 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 
 /**
- * Renders a circular avatar with a single uppercase initial — used for [androidx.core.app.Person]
- * icons in MessagingStyle notifications and for conversation shortcut avatars.
+ * Renders a circular avatar with a single uppercase initial — used for [androidx.core.app.Person] icons in
+ * MessagingStyle notifications and for conversation shortcut avatars.
  *
- * Shared by [MeshServiceNotificationsImpl] and [ConversationShortcutManager] to keep the avatar
- * appearance consistent across the notification shade and the launcher / Android Auto.
+ * Shared by [MeshServiceNotificationsImpl] and [ConversationShortcutManager] to keep the avatar appearance consistent
+ * across the notification shade and the launcher / Android Auto.
  */
 internal object PersonIconFactory {
 
