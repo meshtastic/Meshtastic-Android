@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* fix(fdroid): restore reproducible builds for aboutlibraries (#5268) by @James Rich in [`1beaf3126`](https://github.com/meshtastic/Meshtastic-Android/commit/1beaf312640ab6e9b5d10307840f33e78873492e)
+* docs: update CHANGELOG.md (#5266) by @github-actions[bot] in [`76882b442`](https://github.com/meshtastic/Meshtastic-Android/commit/76882b4425c44935b7749aa36e0b899e605f5471)
 * feat(auto): enable Android Auto messaging notifications (#5265) by @Michael Riddle in [`5483f4a6e`](https://github.com/meshtastic/Meshtastic-Android/commit/5483f4a6e8b05c7124d73754633a5d4aa92860bd)
 
 ### Open Beta (v2.7.14-open.1)
