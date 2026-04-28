@@ -53,6 +53,14 @@ on:
         required: false
       INTERNAL_BUILDS_HOST_PAT:
         required: false
+      APPLE_SIGNING_IDENTITY:
+        required: false
+      APPLE_ID:
+        required: false
+      APPLE_APP_SPECIFIC_PASSWORD:
+        required: false
+      APPLE_TEAM_ID:
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.tag_name }}
@@ -284,7 +292,13 @@ jobs:
       - name: Package Native Distributions
         env:
           ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
           APPIMAGE_EXTRACT_AND_RUN: 1
+          SIGN_MACOS: ${{ runner.os == 'macOS' && secrets.APPLE_SIGNING_IDENTITY != '' && 'true' || 'false' }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         # Quote the -P flag: PowerShell on Windows interprets the dot in
         # `-PaboutLibraries.release=true` as member access on `-PaboutLibraries`,
         # splitting the token and feeding `.release=true` to Gradle as a task name.
@@ -308,6 +322,18 @@ jobs:
             desktop/build/compose/binaries/main-release/*/*.AppImage
           retention-days: 1
           if-no-files-found: ignore
+
+      - name: Attest Desktop artifact provenance
+        if: success()
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            desktop/build/compose/binaries/main-release/*/*.dmg
+            desktop/build/compose/binaries/main-release/*/*.msi
+            desktop/build/compose/binaries/main-release/*/*.exe
+            desktop/build/compose/binaries/main-release/*/*.deb
+            desktop/build/compose/binaries/main-release/*/*.rpm
+            desktop/build/compose/binaries/main-release/*/*.AppImage
 
   github-release:
     if: ${{ !cancelled() && !failure() }}

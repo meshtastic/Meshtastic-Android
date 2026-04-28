@@ -29,7 +29,7 @@ jobs:
           script: |
             // Extract labels from the payload directly to avoid extra API calls
             const latestLabels = context.payload.pull_request.labels.map(label => label.name);
-            const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release', 'refactor'];
+            const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release', 'refactor', 'desktop', 'chore', 'ci', 'build', 'testing', 'documentation'];
             console.log('Labels from payload:', latestLabels);
             const hasRequiredLabel = latestLabels.some(label => requiredLabels.includes(label));
             if (!hasRequiredLabel) {

@@ -213,7 +213,7 @@ private fun ApplicationScope.MeshtasticDesktopApp(
     val windowState = rememberWindowState()
 
     LaunchedEffect(Unit) {
-        notificationManager.notifications.collect { notification -> trayState.sendNotification(notification) }
+        notificationManager.fallbackNotifications.collect { notification -> trayState.sendNotification(notification) }
     }
 
     WindowBoundsManager(desktopPrefs, windowState) { isWindowReady = true }

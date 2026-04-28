@@ -1,0 +1,294 @@
+name: Update Changelog
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'CHANGELOG.md'
+
+permissions:
+  contents: write
+  pull-requests: write
+  statuses: write
+
+concurrency:
+  group: changelog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Discover channel tags
+        id: tags
+        run: |
+          # Find the latest production tag (vX.Y.Z)
+          PROD=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+          echo "prod=${PROD:-}" >> "$GITHUB_OUTPUT"
+
+          if [ -z "$PROD" ]; then
+            echo "No production tag found. Skipping."
+            exit 0
+          fi
+
+          # Find the latest tag for each channel
+          INTERNAL=$(git tag --list 'v*-internal.*' --sort=-v:refname | head -1)
+          CLOSED=$(git tag --list 'v*-closed.*' --sort=-v:refname | head -1)
+          OPEN=$(git tag --list 'v*-open.*' --sort=-v:refname | head -1)
+
+          # Deduplicate: if multiple channel tags point to the same SHA,
+          # keep only the highest channel (open > closed > internal).
+          # This happens when a build is promoted between channels.
+          PROD_SHA=$(git rev-parse "$PROD" 2>/dev/null)
+          INTERNAL_SHA=$([ -n "$INTERNAL" ] && git rev-parse "$INTERNAL" 2>/dev/null || echo "")
+          CLOSED_SHA=$([ -n "$CLOSED" ] && git rev-parse "$CLOSED" 2>/dev/null || echo "")
+          OPEN_SHA=$([ -n "$OPEN" ] && git rev-parse "$OPEN" 2>/dev/null || echo "")
+
+          # Open subsumes closed and internal at the same SHA
+          if [ -n "$OPEN_SHA" ]; then
+            [ "$CLOSED_SHA" = "$OPEN_SHA" ] && CLOSED="" && CLOSED_SHA=""
+            [ "$INTERNAL_SHA" = "$OPEN_SHA" ] && INTERNAL="" && INTERNAL_SHA=""
+          fi
+          # Closed subsumes internal at the same SHA
+          if [ -n "$CLOSED_SHA" ]; then
+            [ "$INTERNAL_SHA" = "$CLOSED_SHA" ] && INTERNAL="" && INTERNAL_SHA=""
+          fi
+          # Drop any channel tag that points to the production SHA
+          [ "$INTERNAL_SHA" = "$PROD_SHA" ] && INTERNAL="" && INTERNAL_SHA=""
+          [ "$CLOSED_SHA" = "$PROD_SHA" ] && CLOSED="" && CLOSED_SHA=""
+          [ "$OPEN_SHA" = "$PROD_SHA" ] && OPEN="" && OPEN_SHA=""
+
+          echo "internal=${INTERNAL:-}" >> "$GITHUB_OUTPUT"
+          echo "closed=${CLOSED:-}" >> "$GITHUB_OUTPUT"
+          echo "open=${OPEN:-}" >> "$GITHUB_OUTPUT"
+
+          echo "Tags after dedup: prod=$PROD internal=$INTERNAL closed=$CLOSED open=$OPEN"
+
+      - name: Generate segmented changelog
+        if: steps.tags.outputs.prod != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.sha }}
+          PROD_TAG: ${{ steps.tags.outputs.prod }}
+          INTERNAL_TAG: ${{ steps.tags.outputs.internal }}
+          CLOSED_TAG: ${{ steps.tags.outputs.closed }}
+          OPEN_TAG: ${{ steps.tags.outputs.open }}
+        run: |
+          # Helper: generate notes using GitHub API (only works when previous_tag is a release tag)
+          generate_notes_api() {
+            local target_sha="$1" previous_tag="$2"
+            local body
+            body=$(gh api "repos/${REPO}/releases/generate-notes" \
+              -f tag_name="unreleased" \
+              -f target_commitish="$target_sha" \
+              -f previous_tag_name="$previous_tag" \
+              --jq '.body' 2>/dev/null) || return 1
+
+            echo "$body" \
+              | sed '/^<!-- .* -->/d' \
+              | sed '/^## What'\''s Changed$/d' \
+              | sed '/^\*\*Full Changelog\*\*/d' \
+              | sed '/^## New Contributors$/,$ { /^## New Contributors$/! { /^\*/!d; }; }' \
+              | sed '/./,$!d' \
+              | sed -e :a -e '/^\n*$/{$d;N;ba}'
+          }
+
+          # Helper: generate notes using git log (works between any two refs)
+          generate_notes_git() {
+            local from_ref="$1" to_ref="$2"
+            git log --no-merges --format="* %s by @%an in [\`%h\`](https://github.com/${REPO}/commit/%H)" "$from_ref".."$to_ref" 2>/dev/null || true
+          }
+
+          # Helper: demote ### headings to #### for nesting under channel sections
+          demote_headings() {
+            sed 's/^### /#### /g'
+          }
+
+          # Extract New Contributors from the full range (prod -> HEAD)
+          FULL_NOTES=$(gh api "repos/${REPO}/releases/generate-notes" \
+            -f tag_name="unreleased" \
+            -f target_commitish="$HEAD_SHA" \
+            -f previous_tag_name="$PROD_TAG" \
+            --jq '.body' 2>/dev/null) || true
+
+          CONTRIBUTORS=""
+          if echo "$FULL_NOTES" | grep -q '## New Contributors'; then
+            CONTRIBUTORS=$(echo "$FULL_NOTES" | sed -n '/^## New Contributors$/,$ p')
+          fi
+
+          # === Build ordered segment chain by commit ancestry ===
+          # Collect surviving channel tags with their labels and SHAs
+          declare -a TAG_LABELS=()
+          declare -a TAG_NAMES=()
+          declare -a TAG_SHAS=()
+
+          for LABEL_TAG in "Internal:$INTERNAL_TAG" "Closed Beta:$CLOSED_TAG" "Open Beta:$OPEN_TAG"; do
+            LABEL="${LABEL_TAG%%:*}"
+            TAG="${LABEL_TAG#*:}"
+            if [ -n "$TAG" ]; then
+              TAG_LABELS+=("$LABEL")
+              TAG_NAMES+=("$TAG")
+              TAG_SHAS+=("$(git rev-parse "$TAG")")
+            fi
+          done
+
+          # Sort by topological order (oldest ancestor first) using git merge-base
+          # Bubble sort is fine for <=3 elements
+          N=${#TAG_SHAS[@]}
+          for ((i=0; i<N; i++)); do
+            for ((j=i+1; j<N; j++)); do
+              # If TAG_SHAS[j] is an ancestor of TAG_SHAS[i], swap (ancestor goes first)
+              if git merge-base --is-ancestor "${TAG_SHAS[$j]}" "${TAG_SHAS[$i]}" 2>/dev/null; then
+                TMP_L="${TAG_LABELS[$i]}"; TAG_LABELS[$i]="${TAG_LABELS[$j]}"; TAG_LABELS[$j]="$TMP_L"
+                TMP_N="${TAG_NAMES[$i]}"; TAG_NAMES[$i]="${TAG_NAMES[$j]}"; TAG_NAMES[$j]="$TMP_N"
+                TMP_S="${TAG_SHAS[$i]}"; TAG_SHAS[$i]="${TAG_SHAS[$j]}"; TAG_SHAS[$j]="$TMP_S"
+              fi
+            done
+          done
+
+          echo "Ordered chain: prod=${PROD_TAG}"
+          for ((i=0; i<N; i++)); do
+            echo "  -> ${TAG_LABELS[$i]} (${TAG_NAMES[$i]}) @ ${TAG_SHAS[$i]:0:12}"
+          done
+          echo "  -> HEAD @ ${HEAD_SHA:0:12}"
+
+          # === Generate segments (oldest to newest, each relative to its predecessor) ===
+          SECTIONS=""
+          PREV_REF="$PROD_TAG"
+          PREV_IS_PROD=true
+
+          for ((i=0; i<N; i++)); do
+            LABEL="${TAG_LABELS[$i]}"
+            TAG="${TAG_NAMES[$i]}"
+            SHA="${TAG_SHAS[$i]}"
+
+            # Use GitHub API when previous ref is a production tag, git log otherwise
+            if [ "$PREV_IS_PROD" = true ]; then
+              NOTES=$(generate_notes_api "$SHA" "$PREV_REF" | demote_headings)
+            else
+              NOTES=$(generate_notes_git "$PREV_REF" "$SHA")
+            fi
+
+            if [ -n "$NOTES" ]; then
+              SECTION=$(cat <<SECTION
+          ### ${LABEL} (${TAG})
+          Changes since [\`${PREV_REF}\`](https://github.com/${REPO}/releases/tag/${PREV_REF}):
+
+          ${NOTES}
+          SECTION
+              )
+              # Prepend (we want newest-first in final output)
+              if [ -n "$SECTIONS" ]; then
+                SECTIONS="${SECTION}
+
+          ${SECTIONS}"
+              else
+                SECTIONS="$SECTION"
+              fi
+            fi
+
+            PREV_REF="$TAG"
+            PREV_IS_PROD=false
+          done
+
+          # === Unreleased segment (HEAD -> newest tag) ===
+          UNRELEASED_SECTION=""
+          LATEST_TAG="${TAG_NAMES[$((N-1))]:-$PROD_TAG}"
+          if [ "$HEAD_SHA" != "$(git rev-parse "$LATEST_TAG" 2>/dev/null)" ]; then
+            UNRELEASED_COMMITS=$(generate_notes_git "$LATEST_TAG" "$HEAD_SHA")
+            if [ -n "$UNRELEASED_COMMITS" ]; then
+              UNRELEASED_SECTION=$(cat <<SECTION
+          ### Unreleased (not yet in any build)
+
+          ${UNRELEASED_COMMITS}
+          SECTION
+              )
+            fi
+          fi
+
+          # Assemble the full unreleased section (newest first)
+          {
+            echo "## [Unreleased]"
+            echo ""
+            [ -n "$UNRELEASED_SECTION" ] && echo "$UNRELEASED_SECTION" && echo ""
+            [ -n "$SECTIONS" ] && echo "$SECTIONS" && echo ""
+            [ -n "$CONTRIBUTORS" ] && echo "$CONTRIBUTORS"
+          } > /tmp/unreleased-section.md
+
+      - name: Update CHANGELOG.md
+        if: steps.tags.outputs.prod != ''
+        id: update
+        run: |
+          SECTION=$(cat /tmp/unreleased-section.md)
+
+          python3 -c "
+          import sys
+          start_marker = '<!-- UNRELEASED_START -->'
+          end_marker = '<!-- UNRELEASED_END -->'
+          section = sys.argv[1]
+          with open('CHANGELOG.md', 'r') as f:
+              content = f.read()
+          start = content.find(start_marker)
+          end = content.find(end_marker)
+          if start == -1 or end == -1:
+              print('Markers not found in CHANGELOG.md')
+              sys.exit(1)
+          new_content = content[:start + len(start_marker)] + '\n' + section + '\n' + content[end:]
+          with open('CHANGELOG.md', 'w') as f:
+              f.write(new_content)
+          " "$SECTION"
+
+          if git diff --quiet CHANGELOG.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update changelog PR
+        if: steps.tags.outputs.prod != '' && steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH="automation/update-changelog"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Force-update the automation branch
+          git checkout -B "$BRANCH"
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md"
+          git push origin "$BRANCH" --force
+
+          # Create or update the PR
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --state open --json number -q '.[0].number')
+          if [ -n "$EXISTING_PR" ]; then
+            echo "Updated existing PR #$EXISTING_PR"
+          else
+            gh pr create \
+              --title "docs: update CHANGELOG.md" \
+              --body "Automated changelog update from push to main." \
+              --head "$BRANCH" \
+              --base main \
+              --label "automation" \
+              --label "skip-changelog"
+            echo "Created new changelog PR"
+          fi
+
+          # Post the required "Check Workflow Status" commit status so the PR
+          # isn't blocked. PRs from GITHUB_TOKEN don't trigger pull_request
+          # workflows, so the normal CI never runs. CHANGELOG-only PRs don't
+          # need CI checks.
+          COMMIT_SHA=$(git rev-parse HEAD)
+          gh api "repos/${{ github.repository }}/statuses/${COMMIT_SHA}" \
+            -f state="success" \
+            -f context="Check Workflow Status" \
+            -f description="Skipped — changelog-only PR"

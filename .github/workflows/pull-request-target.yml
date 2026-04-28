@@ -21,22 +21,48 @@ jobs:
       with:
         script: |
           const branch = context.payload.pull_request.head.ref;
+          const title = context.payload.pull_request.title || '';
           const labels = new Set();
 
-          // enhancement: branch contains feat
-          if (/feat/i.test(branch)) labels.add('enhancement');
+          // Match branch prefix (e.g. feat/..., fix/..., chore-something)
+          // Also parse conventional-commit-style PR titles as a fallback
+          const branchPrefix = branch.split(/[\/\-_]/)[0].toLowerCase();
+          const titlePrefix = (title.match(/^(\w+)[\(:]/) || [])[1]?.toLowerCase();
 
-          // bugfix: branch starts with fix or bug
-          if (/^(fix|bug)/i.test(branch)) labels.add('bugfix');
+          const prefix = branchPrefix || titlePrefix;
 
-          // refactor: branch starts with refactor
-          if (/^refactor/i.test(branch)) labels.add('refactor');
+          // Map prefixes to changelog-aligned labels
+          const prefixMap = {
+            'feat':     'enhancement',
+            'feature':  'enhancement',
+            'fix':      'bugfix',
+            'bug':      'bugfix',
+            'bugfix':   'bugfix',
+            'hotfix':   'bugfix',
+            'refactor': 'refactor',
+            'chore':    'chore',
+            'build':    'build',
+            'ci':       'ci',
+            'test':     'testing',
+            'tests':    'testing',
+            'docs':     'documentation',
+            'doc':      'documentation',
+            'perf':     'enhancement',
+            'style':    'refactor',
+            'repo':     'repo',
+            'release':  'release',
+          };
 
-          // repo: branch contains repo or ci
-          if (/repo|ci/i.test(branch)) {
-            labels.add('repo');
-          } else {
-            // Also label 'repo' if .github files were changed (needs one API call)
+          // Label from branch prefix
+          if (prefixMap[branchPrefix]) labels.add(prefixMap[branchPrefix]);
+
+          // Label from PR title prefix (if different from branch)
+          if (titlePrefix && prefixMap[titlePrefix] && !labels.has(prefixMap[titlePrefix])) {
+            labels.add(prefixMap[titlePrefix]);
+          }
+
+          // Also label 'repo' if .github/ or build-logic/ files were changed
+          if (!labels.has('repo') && !labels.has('ci') && !labels.has('build')) {
             try {
               const files = await github.paginate(
                 github.rest.pulls.listFiles,
@@ -44,6 +70,7 @@ jobs:
                 (res) => res.data.map(f => f.filename)
               );
               if (files.some(f => f.startsWith('.github/'))) labels.add('repo');
+              if (files.some(f => f.startsWith('build-logic/'))) labels.add('build');
             } catch (e) {
               core.warning(`Could not list PR files (rate limited?): ${e.message}`);
             }

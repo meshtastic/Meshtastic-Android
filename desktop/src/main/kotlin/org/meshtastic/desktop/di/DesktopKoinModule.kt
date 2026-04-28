@@ -61,6 +61,11 @@ import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.desktop.DesktopNotificationManager
 import org.meshtastic.desktop.notification.DesktopMeshServiceNotifications
+import org.meshtastic.desktop.notification.DesktopOS
+import org.meshtastic.desktop.notification.LinuxNotificationSender
+import org.meshtastic.desktop.notification.MacOSNotificationSender
+import org.meshtastic.desktop.notification.NativeNotificationSender
+import org.meshtastic.desktop.notification.WindowsNotificationSender
 import org.meshtastic.desktop.radio.DesktopMessageQueue
 import org.meshtastic.desktop.radio.DesktopRadioTransportFactory
 import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
@@ -165,7 +170,14 @@ private fun desktopPlatformStubsModule() = module {
             locationManager = get(),
         )
     }
-    single { DesktopNotificationManager(prefs = get()) }
+    single<NativeNotificationSender> {
+        when (DesktopOS.current()) {
+            DesktopOS.Linux -> LinuxNotificationSender()
+            DesktopOS.MacOS -> MacOSNotificationSender()
+            DesktopOS.Windows -> WindowsNotificationSender()
+        }
+    }
+    single { DesktopNotificationManager(prefs = get(), nativeSender = get()) }
     single<NotificationManager> { get<DesktopNotificationManager>() }
     single<MeshServiceNotifications> { DesktopMeshServiceNotifications(notificationManager = get()) }
     single<PlatformAnalytics> { NoopPlatformAnalytics() }

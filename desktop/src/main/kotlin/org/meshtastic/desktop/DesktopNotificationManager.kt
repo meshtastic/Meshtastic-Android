@@ -17,32 +17,50 @@
 package org.meshtastic.desktop
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
+import org.meshtastic.desktop.notification.NativeNotificationSender
 import androidx.compose.ui.window.Notification as ComposeNotification
 
 /**
- * Desktop notification manager that bridges domain [Notification] objects to Compose Desktop tray notifications.
+ * Desktop notification manager that dispatches domain [Notification] objects to native OS notifications.
  *
- * Notifications are emitted via [notifications] and collected by the tray composable in [Main.kt]. Respects user
- * preferences for message, node-event, and low-battery categories.
+ * Uses platform-specific [NativeNotificationSender] implementations (notify-send on Linux, osascript on macOS,
+ * PowerShell toast on Windows) for proper native look-and-feel. Falls back to Compose Desktop tray notifications (via
+ * [fallbackNotifications]) when the native sender is unavailable or fails.
+ *
+ * All native sends are dispatched on a background scope to avoid blocking callers.
  *
  * Registered manually in `desktopPlatformStubsModule` -- do **not** add `@Single` to avoid double-registration with the
  * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
  */
-class DesktopNotificationManager(private val prefs: NotificationPrefs) : NotificationManager {
+class DesktopNotificationManager(
+    private val prefs: NotificationPrefs,
+    private val nativeSender: NativeNotificationSender,
+) : NotificationManager {
+
+    @Suppress("InjectDispatcher")
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     init {
-        Logger.i { "DesktopNotificationManager initialized" }
+        Logger.i { "DesktopNotificationManager initialized (native sender: ${nativeSender::class.simpleName})" }
     }
 
-    private val _notifications = MutableSharedFlow<ComposeNotification>(extraBufferCapacity = 10)
+    private val _fallbackNotifications = MutableSharedFlow<ComposeNotification>(extraBufferCapacity = 10)
 
-    /** Flow of Compose [ComposeNotification] objects to be forwarded to [TrayState.sendNotification]. */
-    val notifications: SharedFlow<ComposeNotification> = _notifications.asSharedFlow()
+    /**
+     * Fallback flow of Compose [ComposeNotification] objects, emitted only when the native sender fails. Collected by
+     * the tray composable in Main.kt as a last resort.
+     */
+    val fallbackNotifications: SharedFlow<ComposeNotification> = _fallbackNotifications.asSharedFlow()
 
     override fun dispatch(notification: Notification) {
         val enabled =
@@ -55,9 +73,18 @@ class DesktopNotificationManager(private val prefs: NotificationPrefs) : Notific
             }
 
         Logger.d { "DesktopNotificationManager dispatch: category=${notification.category}, enabled=$enabled" }
-
         if (!enabled) return
 
+        scope.launch {
+            val success = nativeSender.send(notification)
+            if (!success) {
+                Logger.w { "Native notification failed, falling back to tray: ${notification.title}" }
+                emitFallback(notification)
+            }
+        }
+    }
+
+    private fun emitFallback(notification: Notification) {
         val composeType =
             when (notification.type) {
                 Notification.Type.None -> ComposeNotification.Type.None
@@ -65,16 +92,16 @@ class DesktopNotificationManager(private val prefs: NotificationPrefs) : Notific
                 Notification.Type.Warning -> ComposeNotification.Type.Warning
                 Notification.Type.Error -> ComposeNotification.Type.Error
             }
-
-        val success = _notifications.tryEmit(ComposeNotification(notification.title, notification.message, composeType))
-        Logger.d { "DesktopNotificationManager emit: success=$success, title=${notification.title}" }
+        _fallbackNotifications.tryEmit(ComposeNotification(notification.title, notification.message, composeType))
     }
 
     override fun cancel(id: Int) {
-        // Desktop tray notifications cannot be cancelled once sent via TrayState.
+        // Native OS notifications are fire-and-forget; cancel is best-effort.
+        Logger.d { "cancel($id) — not supported by current native senders" }
     }
 
     override fun cancelAll() {
-        // Desktop tray notifications cannot be cleared once sent via TrayState.
+        // Native OS notifications are fire-and-forget; cancelAll is best-effort.
+        Logger.d { "cancelAll() — not supported by current native senders" }
     }
 }
