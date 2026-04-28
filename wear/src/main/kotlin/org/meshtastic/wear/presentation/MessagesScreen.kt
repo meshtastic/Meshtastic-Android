@@ -65,7 +65,8 @@ fun MessagesRootScreen(
     val listState = rememberTransformingLazyColumnState()
     
     val threads = remember(messages) {
-        messages.sortedByDescending { it.timestamp }
+        messages.filter { it.timestamp > 0 }
+            .sortedByDescending { it.timestamp }
             .distinctBy { it.contactKey }
     }
 

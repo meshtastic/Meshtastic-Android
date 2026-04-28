@@ -40,6 +40,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.WearableChannel
 import org.meshtastic.core.model.WearableMessage
 import org.meshtastic.core.model.WearableNode
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -80,19 +81,22 @@ class WearableSyncService(
     fun forceSync(nodeId: String? = null) {
         Logger.d { "Manual sync requested${if (nodeId != null) " for node $nodeId" else ""}" }
         scope.launch {
-            val nodes = nodeRepository.nodeDBbyNum.value
-            val wearableNodes = nodes.values.map { node ->
-                WearableNode(
-                    num = node.num,
-                    name = node.user.long_name,
-                    shortName = node.user.short_name,
-                    online = node.isOnline,
-                    battery = node.batteryLevel,
-                    snr = node.snr.takeIf { it != Float.MAX_VALUE },
-                    lastSeen = node.lastHeard.toLong() * 1000,
-                    favorite = node.isFavorite,
-                )
-            }
+            val myNodeNum = nodeRepository.ourNodeInfo.value?.num ?: 0
+            val nodesMap = nodeRepository.nodeDBbyNum.value
+            val wearableNodes = nodesMap.values
+                .filter { it.num != myNodeNum }
+                .map { node ->
+                    WearableNode(
+                        num = node.num,
+                        name = node.user.long_name,
+                        shortName = node.user.short_name,
+                        online = node.isOnline,
+                        battery = node.batteryLevel,
+                        snr = node.snr.takeIf { it != Float.MAX_VALUE },
+                        lastSeen = node.lastHeard.toLong() * 1000,
+                        favorite = node.isFavorite,
+                    )
+                }
             syncNodes(wearableNodes, nodeId)
 
             val channelSet = radioConfigRepository.channelSetFlow.first()
@@ -105,30 +109,59 @@ class WearableSyncService(
             syncChannels(wearableChannels, nodeId)
 
             val contacts = packetRepository.getContacts().first()
-            val nodesMap = nodeRepository.nodeDBbyNum.value
             val allWearableMessages = mutableListOf<WearableMessage>()
+
+            // 1. Placeholders
+            nodesMap.values
+                .filter { it.num != myNodeNum }
+                .forEach { node ->
+                    val contactKey = DataPacket.nodeNumToDefaultId(node.num)
+                    allWearableMessages.add(
+                        WearableMessage(
+                            uuid = node.num.toLong(),
+                            contactKey = contactKey,
+                            senderName = node.user.long_name,
+                            senderShortName = node.user.short_name,
+                            text = "No messages yet",
+                            isMe = false,
+                            timestamp = 0L,
+                            address = contactKey,
+                            channelIndex = 0,
+                            status = MessageStatus.RECEIVED
+                        )
+                    )
+                }
             
-            // Sync history for top 15 contacts to find duplicates
-            contacts.keys.take(15).forEach { contactKey ->
+            // 2. Real messages
+            contacts.keys.take(20).forEach { contactKey ->
                 val channelIndex = contactKey[0].digitToIntOrNull()
                 val isBroadcast = contactKey.endsWith(DataPacket.ID_BROADCAST)
                 val normalizedKey = normalizeKey(contactKey)
+                
+                if (!isBroadcast && DataPacket.idToDefaultNodeNum(normalizedKey) == myNodeNum) {
+                    return@forEach
+                }
 
-                val threadName = if (isBroadcast && channelIndex != null) {
-                    wearableChannels.getOrNull(channelIndex)?.name ?: "Channel $channelIndex"
-                } else null
+                val threadInfo = if (isBroadcast && channelIndex != null) {
+                    val name = wearableChannels.getOrNull(channelIndex)?.name ?: "Channel $channelIndex"
+                    name to name.take(2).uppercase()
+                } else {
+                    // For DMs, use the contact's name as the thread title
+                    val contactNode = nodesMap[DataPacket.idToDefaultNodeNum(normalizedKey)]
+                    (contactNode?.user?.long_name ?: normalizedKey) to (contactNode?.user?.short_name ?: "??")
+                }
 
                 packetRepository.getMessagesFrom(
                     contact = contactKey, 
                     limit = 10, 
-                    getNode = { id -> nodesMap[DataPacket.idToDefaultNodeNum(id)] ?: nodeRepository.getNode(id ?: "") }
+                    getNode = { id -> nodesMap[DataPacket.idToDefaultNodeNum(id) ?: 0] ?: nodeRepository.getNode(id ?: "") }
                 ).first().forEach { msg ->
                     allWearableMessages.add(
                         WearableMessage(
                             uuid = msg.uuid,
                             contactKey = normalizedKey,
-                            senderName = threadName ?: msg.node.user.long_name,
-                            senderShortName = msg.node.user.short_name,
+                            senderName = threadInfo.first,
+                            senderShortName = threadInfo.second,
                             text = msg.text,
                             isMe = msg.fromLocal,
                             timestamp = msg.receivedTime,
@@ -139,7 +172,12 @@ class WearableSyncService(
                     )
                 }
             }
-            syncMessages(allWearableMessages.sortedByDescending { it.timestamp }, nodeId)
+            
+            val finalMessages = allWearableMessages
+                .sortedByDescending { it.timestamp }
+                .distinctBy { it.contactKey }
+            
+            syncMessages(finalMessages, nodeId)
         }
     }
 
@@ -153,78 +191,45 @@ class WearableSyncService(
         combine(
             watchPrefs.pushToWatchEnabled,
             watchPrefs.syncNodesEnabled,
-            nodeRepository.nodeDBbyNum
-        ) { push, sync, nodes ->
+            nodeRepository.nodeDBbyNum,
+            nodeRepository.ourNodeInfo
+        ) { push, sync, nodes, ourInfo ->
             if (push && sync) {
-                val wearableNodes = nodes.values.map { node ->
-                    WearableNode(
-                        num = node.num,
-                        name = node.user.long_name,
-                        shortName = node.user.short_name,
-                        online = node.isOnline,
-                        battery = node.batteryLevel,
-                        snr = node.snr.takeIf { it != Float.MAX_VALUE },
-                        lastSeen = node.lastHeard.toLong() * 1000,
-                        favorite = node.isFavorite,
-                    )
-                }
+                val myNodeNum = ourInfo?.num ?: 0
+                val wearableNodes = nodes.values
+                    .filter { it.num != myNodeNum }
+                    .map { node ->
+                        WearableNode(
+                            num = node.num,
+                            name = node.user.long_name,
+                            shortName = node.user.short_name,
+                            online = node.isOnline,
+                            battery = node.batteryLevel,
+                            snr = node.snr.takeIf { it != Float.MAX_VALUE },
+                            lastSeen = node.lastHeard.toLong() * 1000,
+                            favorite = node.isFavorite,
+                        )
+                    }
                 syncNodes(wearableNodes)
             }
         }.launchIn(scope)
 
         // Sync messages and channels when enabled
-        combine(
-            watchPrefs.pushToWatchEnabled,
-            watchPrefs.syncMessagesEnabled,
-            packetRepository.getContacts(),
-            nodeRepository.nodeDBbyNum,
-            radioConfigRepository.channelSetFlow
-        ) { push, sync, contacts, nodes, channelSet ->
-            if (push && sync) {
-                val loraConfig = channelSet.lora_config ?: LoRaConfig()
-                val wearableChannels = channelSet.settings.mapIndexed { index, settings ->
-                    val channel = Channel(settings, loraConfig)
-                    val contactKey = "$index${DataPacket.ID_BROADCAST}"
-                    WearableChannel(index = index, name = channel.name, contactKey = contactKey)
-                }
-                syncChannels(wearableChannels)
+        watchPrefs.pushToWatchEnabled
+            .onEach { if (it) forceSync() }
+            .launchIn(scope)
 
-                val allWearableMessages = mutableListOf<WearableMessage>()
-                contacts.keys.take(15).forEach { contactKey ->
-                    val channelIndex = contactKey[0].digitToIntOrNull()
-                    val isBroadcast = contactKey.endsWith(DataPacket.ID_BROADCAST)
-                    val normalizedKey = normalizeKey(contactKey)
+        watchPrefs.syncMessagesEnabled
+            .onEach { if (it) forceSync() }
+            .launchIn(scope)
 
-                    val threadName = if (isBroadcast && channelIndex != null) {
-                        wearableChannels.getOrNull(channelIndex)?.name ?: "Channel $channelIndex"
-                    } else null
-
-                    packetRepository.getMessagesFrom(
-                        contact = contactKey, 
-                        limit = 10, 
-                        getNode = { id ->
-                            nodes[DataPacket.idToDefaultNodeNum(id)] ?: nodeRepository.getNode(id ?: "")
-                        }
-                    ).first().forEach { msg ->
-                        allWearableMessages.add(
-                            WearableMessage(
-                                uuid = msg.uuid,
-                                contactKey = normalizedKey,
-                                senderName = threadName ?: msg.node.user.long_name,
-                                senderShortName = msg.node.user.short_name,
-                                text = msg.text,
-                                isMe = msg.fromLocal,
-                                timestamp = msg.receivedTime,
-                                address = if (isBroadcast) null else normalizedKey,
-                                channelIndex = channelIndex ?: 0,
-                                status = msg.status ?: MessageStatus.RECEIVED
-                            )
-                        )
-                    }
-                }
-                syncMessages(allWearableMessages.sortedByDescending { it.timestamp })
-            }
-        }.launchIn(scope)
+        nodeRepository.nodeDBbyNum
+            .onEach { forceSync() }
+            .launchIn(scope)
+            
+        packetRepository.getContacts()
+            .onEach { forceSync() }
+            .launchIn(scope)
     }
 
     companion object {
