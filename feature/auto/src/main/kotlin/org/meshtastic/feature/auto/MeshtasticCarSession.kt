@@ -18,6 +18,7 @@ package org.meshtastic.feature.auto
 
 import android.content.Intent
 import androidx.car.app.Screen
+import androidx.car.app.ScreenManager
 import androidx.car.app.Session
 
 /** Android Auto session that hosts the [MeshtasticCarScreen] root screen. */
@@ -31,15 +32,15 @@ class MeshtasticCarSession : Session() {
 
     /**
      * Called by the Android Auto host when the session is re-activated from an existing
-     * [MessagingStyle][androidx.core.app.NotificationCompat.MessagingStyle] notification tap or a
-     * launcher shortcut. Switches the root screen to the Messages tab.
+     * [MessagingStyle][androidx.core.app.NotificationCompat.MessagingStyle] notification tap or a launcher shortcut.
+     * Switches the root screen to the Messages tab.
      *
-     * The deep-link URI (`meshtastic://meshtastic/messages/<contactKey>`) carries the originating
-     * contact key, but `androidx.car.app.model.ListTemplate` does not currently expose a
-     * programmatic scroll API, so we cannot focus a specific conversation row.
+     * The deep-link URI (`meshtastic://meshtastic/messages/<contactKey>`) carries the originating contact key, but
+     * `androidx.car.app.model.ListTemplate` does not currently expose a programmatic scroll API, so we cannot focus a
+     * specific conversation row.
      */
     override fun onNewIntent(intent: Intent) {
-        val screen = screenManager.top as? MeshtasticCarScreen ?: return
+        val screen = carContext.getCarService(ScreenManager::class.java).top as? MeshtasticCarScreen ?: return
         applyIntent(intent, screen)
     }
 

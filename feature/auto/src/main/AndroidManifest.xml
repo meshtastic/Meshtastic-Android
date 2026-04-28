@@ -17,6 +17,16 @@
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+      This app is an Android Auto (phone-projection) messaging app — it is NOT designed
+      to run standalone on Android Automotive OS (AAOS). Declaring the automotive hardware
+      feature as not required prevents the APK from being offered on AAOS devices.
+      (Play Console device-targeting should also exclude AAOS form factors.)
+    -->
+    <uses-feature
+        android:name="android.hardware.type.automotive"
+        android:required="false" />
+
     <!-- Android Auto Car App Service for browsable messaging UI -->
     <application>
         <service
@@ -29,13 +39,13 @@
             </intent-filter>
         </service>
 
-        <!-- Car API level 1 is sufficient for MessagingStyle notification projection and
-             ListTemplate. The browsable TabTemplate UI requires Car API 6; the screen
-             detects the host's level at runtime and falls back to a ListTemplate on
-             older hosts so the app remains usable on all vehicles. -->
+        <!-- Car API 7 is the minimum for ConversationItem, which is required for the
+             MESSAGING category's templated experience. Hosts running older API levels
+             still receive the MessagingStyle notification-based experience; only the
+             browsable template UI requires API 7. -->
         <meta-data
             android:name="androidx.car.app.minCarApiLevel"
-            android:value="1" />
+            android:value="7" />
     </application>
 
 </manifest>

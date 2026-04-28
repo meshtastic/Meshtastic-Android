@@ -19,10 +19,13 @@ package org.meshtastic.feature.auto
 /**
  * Lightweight projection of a conversation used exclusively within [MeshtasticCarScreen].
  *
- * [isBroadcast] and [channelIndex] drive ordering (channels before DMs, channels sorted by
- * index). [lastMessageTime] drives DM ordering (most-recent first).
- * [lastMessageText] mirrors `ContactsViewModel.contactList`'s `lastMessageText` — received
- * DMs are prefixed with the sender's short name, matching `ContactItem`'s ChatMetadata display.
+ * [isBroadcast] and [channelIndex] drive ordering (channels before DMs, channels sorted by index). [lastMessageTime]
+ * drives DM ordering (most-recent first). [lastMessageText] mirrors `ContactsViewModel.contactList`'s `lastMessageText`
+ * — received DMs are prefixed with the sender's short name, matching `ContactItem`'s ChatMetadata display.
+ *
+ * The `lastMessageRawText`, `lastMessageSenderName`, and `lastMessageFromSelf` fields carry the decomposed message data
+ * needed to construct a [CarMessage] for [ConversationItem] — the structured body and sender info that the host uses
+ * for TTS readout and reply attribution.
  */
 internal data class CarContact(
     val contactKey: String,
@@ -32,4 +35,7 @@ internal data class CarContact(
     val channelIndex: Int,
     val lastMessageTime: Long?,
     val lastMessageText: String?,
+    val lastMessageRawText: String?,
+    val lastMessageSenderName: String?,
+    val lastMessageFromSelf: Boolean,
 )

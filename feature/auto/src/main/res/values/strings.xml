@@ -23,7 +23,6 @@
 
     <!-- Template titles / loading / empty states -->
     <string name="auto_loading">Loading\u2026</string>
-    <string name="auto_fallback_title">Meshtastic</string>
     <string name="auto_no_favorites">No favorite nodes</string>
     <string name="auto_no_conversations">No conversations</string>
     <string name="auto_no_messages">No messages yet</string>

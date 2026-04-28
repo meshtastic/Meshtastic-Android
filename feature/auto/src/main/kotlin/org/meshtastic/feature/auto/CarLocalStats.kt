@@ -19,8 +19,8 @@ package org.meshtastic.feature.auto
 /**
  * Snapshot of local device statistics displayed in the Status tab.
  *
- * Mirrors the key metrics shown by [org.meshtastic.feature.widget.LocalStatsWidget]:
- * battery, channel/air utilization, node counts, uptime, and traffic counters.
+ * Mirrors the key metrics shown by [org.meshtastic.feature.widget.LocalStatsWidget]: battery, channel/air utilization,
+ * node counts, uptime, and traffic counters.
  */
 internal data class CarLocalStats(
     val batteryLevel: Int = 0,

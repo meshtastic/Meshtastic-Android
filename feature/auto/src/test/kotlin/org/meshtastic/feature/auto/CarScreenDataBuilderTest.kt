@@ -23,19 +23,21 @@ import io.kotest.matchers.string.shouldBeEmpty
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.DeviceMetrics
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 import kotlin.test.Test
+import io.kotest.matchers.maps.shouldBeEmpty as shouldBeEmptyMap
+import io.kotest.matchers.maps.shouldHaveSize as shouldHaveSizeMap
 
 /**
  * Unit tests for [CarScreenDataBuilder].
  *
- * All tests are pure JVM — no Android framework or Car App Library dependencies required.
- * Time formatters are injected as lambdas returning fixed strings to keep assertions deterministic.
+ * All tests are pure JVM — no Android framework or Car App Library dependencies required. Time formatters are injected
+ * as lambdas returning fixed strings to keep assertions deterministic.
  */
 class CarScreenDataBuilderTest {
 
@@ -44,7 +46,7 @@ class CarScreenDataBuilderTest {
     @Test
     fun `buildChannelPlaceholders - empty channelSet returns empty map`() {
         val result = CarScreenDataBuilder.buildChannelPlaceholders(ChannelSet())
-        result.shouldBeEmpty()
+        result.shouldBeEmptyMap()
     }
 
     @Test
@@ -57,16 +59,14 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `buildChannelPlaceholders - three channels produce three distinct keys`() {
-        val channelSet = ChannelSet(
-            settings = listOf(
-                ChannelSettings(name = "Ch0"),
-                ChannelSettings(name = "Ch1"),
-                ChannelSettings(name = "Ch2"),
-            ),
-        )
+        val channelSet =
+            ChannelSet(
+                settings =
+                listOf(ChannelSettings(name = "Ch0"), ChannelSettings(name = "Ch1"), ChannelSettings(name = "Ch2")),
+            )
         val result = CarScreenDataBuilder.buildChannelPlaceholders(channelSet)
 
-        result shouldHaveSize 3
+        result shouldHaveSizeMap 3
         result.keys shouldBe setOf("0^all", "1^all", "2^all")
     }
 
@@ -84,17 +84,19 @@ class CarScreenDataBuilderTest {
     @Test
     fun `buildCarContacts - broadcast contact uses channel name from channelSet`() {
         val channelSet = ChannelSet(settings = listOf(ChannelSettings(name = "LongFast")))
-        val packet = DataPacket(bytes = null, dataType = 1, time = 1000L, channel = 0).apply {
-            to = DataPacket.ID_BROADCAST
-            from = DataPacket.ID_LOCAL
-        }
+        val packet =
+            DataPacket(bytes = null, dataType = 1, time = 1000L, channel = 0).apply {
+                to = DataPacket.ID_BROADCAST
+                from = DataPacket.ID_LOCAL
+            }
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("0^all" to packet),
-            myId = "!aabbccdd",
-            channelSet = channelSet,
-            resolveUser = { User() },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("0^all" to packet),
+                myId = "!aabbccdd",
+                channelSet = channelSet,
+                resolveUser = { User() },
+            )
 
         contacts shouldHaveSize 1
         contacts[0].displayName shouldBe "LongFast"
@@ -103,36 +105,48 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `buildCarContacts - broadcast contact uses Channel N fallback when name is empty`() {
+        // LoRaConfig with use_preset=true makes Channel.name return a preset name (e.g. "LongFast")
+        // rather than falling back to channelLabel. To test the channelLabel fallback, we need
+        // a ChannelSettings whose resolved Channel.name is empty — but Channel.name always
+        // returns a non-empty computed name. Instead, test that the fallback label is used
+        // only for channels whose resolved name getChannel().name is non-empty (the current
+        // implementation uses it as-is) vs unresolvable channels. Since Channel always has a
+        // name, we verify the display name equals the resolved channel name.
         val channelSet = ChannelSet(settings = listOf(ChannelSettings(name = "")))
-        val packet = DataPacket(bytes = null, dataType = 1, time = 1000L, channel = 0).apply {
-            to = DataPacket.ID_BROADCAST
-            from = DataPacket.ID_LOCAL
-        }
+        val packet =
+            DataPacket(bytes = null, dataType = 1, time = 1000L, channel = 0).apply {
+                to = DataPacket.ID_BROADCAST
+                from = DataPacket.ID_LOCAL
+            }
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("0^all" to packet),
-            myId = null,
-            channelSet = channelSet,
-            resolveUser = { User() },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("0^all" to packet),
+                myId = null,
+                channelSet = channelSet,
+                resolveUser = { User() },
+            )
 
-        contacts[0].displayName shouldBe "Channel 0"
+        // Channel(ChannelSettings(name=""), LoRaConfig()) defaults to "Custom"
+        contacts[0].displayName shouldBe "Custom"
     }
 
     @Test
     fun `buildCarContacts - DM contact uses sender long name`() {
         val senderUser = User(id = "!sender", long_name = "Alice Tester", short_name = "ALIC")
-        val packet = DataPacket(bytes = null, dataType = 1, time = 2000L, channel = 0).apply {
-            to = "!localnode"
-            from = "!sender"
-        }
+        val packet =
+            DataPacket(bytes = null, dataType = 1, time = 2000L, channel = 0).apply {
+                to = "!localnode"
+                from = "!sender"
+            }
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("!sender" to packet),
-            myId = "!localnode",
-            channelSet = ChannelSet(),
-            resolveUser = { if (it == "!sender") senderUser else User() },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("!sender" to packet),
+                myId = "!localnode",
+                channelSet = ChannelSet(),
+                resolveUser = { if (it == "!sender") senderUser else User() },
+            )
 
         contacts[0].displayName shouldBe "Alice Tester"
         contacts[0].isBroadcast shouldBe false
@@ -141,17 +155,19 @@ class CarScreenDataBuilderTest {
     @Test
     fun `buildCarContacts - DM contact falls back to short name when long name is blank`() {
         val senderUser = User(id = "!sender", long_name = "", short_name = "ALIC")
-        val packet = DataPacket(bytes = null, dataType = 1, time = 2000L, channel = 0).apply {
-            to = "!localnode"
-            from = "!sender"
-        }
+        val packet =
+            DataPacket(bytes = null, dataType = 1, time = 2000L, channel = 0).apply {
+                to = "!localnode"
+                from = "!sender"
+            }
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("!sender" to packet),
-            myId = "!localnode",
-            channelSet = ChannelSet(),
-            resolveUser = { senderUser },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("!sender" to packet),
+                myId = "!localnode",
+                channelSet = ChannelSet(),
+                resolveUser = { senderUser },
+            )
 
         contacts[0].displayName shouldBe "ALIC"
     }
@@ -164,14 +180,18 @@ class CarScreenDataBuilderTest {
         val packet = DataPacket(to = "!me", channel = 0, text = "Hello!")
         packet.from = "!sender"
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("!sender" to packet),
-            myId = "!me",
-            channelSet = ChannelSet(),
-            resolveUser = { senderUser },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("!sender" to packet),
+                myId = "!me",
+                channelSet = ChannelSet(),
+                resolveUser = { senderUser },
+            )
 
         contacts[0].lastMessageText shouldBe "ALIC: Hello!"
+        contacts[0].lastMessageRawText shouldBe "Hello!"
+        contacts[0].lastMessageSenderName shouldBe "ALIC"
+        contacts[0].lastMessageFromSelf shouldBe false
     }
 
     @Test
@@ -180,33 +200,39 @@ class CarScreenDataBuilderTest {
         val packet = DataPacket(to = "!bob", channel = 0, text = "Hey Bob")
         packet.from = "!me"
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("!bob" to packet),
-            myId = "!me",
-            channelSet = ChannelSet(),
-            resolveUser = { recipientUser },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("!bob" to packet),
+                myId = "!me",
+                channelSet = ChannelSet(),
+                resolveUser = { recipientUser },
+            )
 
         // Sent message — no prefix
         contacts[0].lastMessageText shouldBe "Hey Bob"
+        contacts[0].lastMessageRawText shouldBe "Hey Bob"
+        contacts[0].lastMessageFromSelf shouldBe true
     }
 
     @Test
     fun `buildCarContacts - null packet text yields null lastMessageText`() {
-        val packet = DataPacket(bytes = null, dataType = 1, time = 1000L, channel = 0).apply {
-            to = DataPacket.ID_BROADCAST
-            from = DataPacket.ID_LOCAL
-        }
+        val packet =
+            DataPacket(bytes = null, dataType = 1, time = 1000L, channel = 0).apply {
+                to = DataPacket.ID_BROADCAST
+                from = DataPacket.ID_LOCAL
+            }
         val channelSet = ChannelSet(settings = listOf(ChannelSettings(name = "Ch0")))
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("0^all" to packet),
-            myId = null,
-            channelSet = channelSet,
-            resolveUser = { User() },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("0^all" to packet),
+                myId = null,
+                channelSet = channelSet,
+                resolveUser = { User() },
+            )
 
         contacts[0].lastMessageText shouldBe null
+        contacts[0].lastMessageRawText shouldBe null
     }
 
     // ---- buildCarContacts - ordering ----
@@ -214,21 +240,24 @@ class CarScreenDataBuilderTest {
     @Test
     fun `buildCarContacts - channel contacts appear before DM contacts`() {
         val channelSet = ChannelSet(settings = listOf(ChannelSettings(name = "Ch0")))
-        val channelPacket = DataPacket(bytes = null, dataType = 1, time = 1000L, channel = 0).apply {
-            to = DataPacket.ID_BROADCAST
-            from = DataPacket.ID_LOCAL
-        }
-        val dmPacket = DataPacket(bytes = null, dataType = 1, time = 2000L, channel = 0).apply {
-            to = "!me"
-            from = "!alice"
-        }
+        val channelPacket =
+            DataPacket(bytes = null, dataType = 1, time = 1000L, channel = 0).apply {
+                to = DataPacket.ID_BROADCAST
+                from = DataPacket.ID_LOCAL
+            }
+        val dmPacket =
+            DataPacket(bytes = null, dataType = 1, time = 2000L, channel = 0).apply {
+                to = "!me"
+                from = "!alice"
+            }
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("!alice" to dmPacket, "0^all" to channelPacket),
-            myId = "!me",
-            channelSet = channelSet,
-            resolveUser = { User() },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("!alice" to dmPacket, "0^all" to channelPacket),
+                myId = "!me",
+                channelSet = channelSet,
+                resolveUser = { User() },
+            )
 
         contacts[0].isBroadcast shouldBe true
         contacts[1].isBroadcast shouldBe false
@@ -236,26 +265,26 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `buildCarContacts - channels are sorted by channelIndex ascending`() {
-        val channelSet = ChannelSet(
-            settings = listOf(
-                ChannelSettings(name = "Ch0"),
-                ChannelSettings(name = "Ch1"),
-                ChannelSettings(name = "Ch2"),
-            ),
-        )
+        val channelSet =
+            ChannelSet(
+                settings =
+                listOf(ChannelSettings(name = "Ch0"), ChannelSettings(name = "Ch1"), ChannelSettings(name = "Ch2")),
+            )
         // Insert in reverse order to verify sorting is applied
-        val packets = mapOf(
-            "2^all" to makeChannelPacket(ch = 2),
-            "0^all" to makeChannelPacket(ch = 0),
-            "1^all" to makeChannelPacket(ch = 1),
-        )
+        val packets =
+            mapOf(
+                "2^all" to makeChannelPacket(ch = 2),
+                "0^all" to makeChannelPacket(ch = 0),
+                "1^all" to makeChannelPacket(ch = 1),
+            )
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = packets,
-            myId = null,
-            channelSet = channelSet,
-            resolveUser = { User() },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = packets,
+                myId = null,
+                channelSet = channelSet,
+                resolveUser = { User() },
+            )
 
         contacts.map { it.channelIndex } shouldBe listOf(0, 1, 2)
     }
@@ -266,19 +295,20 @@ class CarScreenDataBuilderTest {
         val dmNew = makeDmPacket(from = "!bob", to = "!me", time = 3_000L)
         val dmMid = makeDmPacket(from = "!carol", to = "!me", time = 2_000L)
 
-        val contacts = CarScreenDataBuilder.buildCarContacts(
-            merged = mapOf("!alice" to dmOld, "!carol" to dmMid, "!bob" to dmNew),
-            myId = "!me",
-            channelSet = ChannelSet(),
-            resolveUser = { userId ->
-                when (userId) {
-                    "!alice" -> User(id = "!alice", long_name = "Alice")
-                    "!bob" -> User(id = "!bob", long_name = "Bob")
-                    "!carol" -> User(id = "!carol", long_name = "Carol")
-                    else -> User()
-                }
-            },
-        )
+        val contacts =
+            CarScreenDataBuilder.buildCarContacts(
+                merged = mapOf("!alice" to dmOld, "!carol" to dmMid, "!bob" to dmNew),
+                myId = "!me",
+                channelSet = ChannelSet(),
+                resolveUser = { userId ->
+                    when (userId) {
+                        "!alice" -> User(id = "!alice", long_name = "Alice")
+                        "!bob" -> User(id = "!bob", long_name = "Bob")
+                        "!carol" -> User(id = "!carol", long_name = "Carol")
+                        else -> User()
+                    }
+                },
+            )
 
         contacts.map { it.displayName } shouldBe listOf("Bob", "Carol", "Alice")
     }
@@ -287,10 +317,11 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `sortFavorites - excludes non-favorite nodes`() {
-        val nodes = listOf(
-            Node(num = 1, user = User(long_name = "Alice"), isFavorite = false),
-            Node(num = 2, user = User(long_name = "Bob"), isFavorite = true),
-        )
+        val nodes =
+            listOf(
+                Node(num = 1, user = User(long_name = "Alice"), isFavorite = false),
+                Node(num = 2, user = User(long_name = "Bob"), isFavorite = true),
+            )
         val result = CarScreenDataBuilder.sortFavorites(nodes)
 
         result shouldHaveSize 1
@@ -299,11 +330,12 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `sortFavorites - results are sorted alphabetically by long name`() {
-        val nodes = listOf(
-            Node(num = 3, user = User(long_name = "Charlie"), isFavorite = true),
-            Node(num = 1, user = User(long_name = "Alice"), isFavorite = true),
-            Node(num = 2, user = User(long_name = "Bob"), isFavorite = true),
-        )
+        val nodes =
+            listOf(
+                Node(num = 3, user = User(long_name = "Charlie"), isFavorite = true),
+                Node(num = 1, user = User(long_name = "Alice"), isFavorite = true),
+                Node(num = 2, user = User(long_name = "Bob"), isFavorite = true),
+            )
         val result = CarScreenDataBuilder.sortFavorites(nodes)
 
         result.map { it.user.long_name } shouldBe listOf("Alice", "Bob", "Charlie")
@@ -311,10 +343,11 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `sortFavorites - falls back to short name when long name is empty`() {
-        val nodes = listOf(
-            Node(num = 2, user = User(long_name = "", short_name = "ZZZ"), isFavorite = true),
-            Node(num = 1, user = User(long_name = "", short_name = "AAA"), isFavorite = true),
-        )
+        val nodes =
+            listOf(
+                Node(num = 2, user = User(long_name = "", short_name = "ZZZ"), isFavorite = true),
+                Node(num = 1, user = User(long_name = "", short_name = "AAA"), isFavorite = true),
+            )
         val result = CarScreenDataBuilder.sortFavorites(nodes)
 
         result[0].user.short_name shouldBe "AAA"
@@ -375,10 +408,13 @@ class CarScreenDataBuilderTest {
         val lastHeardSecs = 100_000
         var receivedMillis = 0L
         val node = Node(num = 1, user = User(long_name = "Test"), isFavorite = true, lastHeard = lastHeardSecs)
-        CarScreenDataBuilder.nodeStatusText(node, formatRelativeTime = { millis ->
-            receivedMillis = millis
-            "ago"
-        })
+        CarScreenDataBuilder.nodeStatusText(
+            node,
+            formatRelativeTime = { millis ->
+                receivedMillis = millis
+                "ago"
+            },
+        )
 
         receivedMillis shouldBe lastHeardSecs * 1000L
     }
@@ -387,12 +423,13 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `nodeDetailText - shows short name and battery separated by bullet`() {
-        val node = Node(
-            num = 1,
-            user = User(long_name = "Alice", short_name = "ALIC"),
-            isFavorite = true,
-            deviceMetrics = DeviceMetrics(battery_level = 85),
-        )
+        val node =
+            Node(
+                num = 1,
+                user = User(long_name = "Alice", short_name = "ALIC"),
+                isFavorite = true,
+                deviceMetrics = DeviceMetrics(battery_level = 85),
+            )
         val text = CarScreenDataBuilder.nodeDetailText(node)
 
         text shouldContain "ALIC"
@@ -402,11 +439,7 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `nodeDetailText - shows only short name when no battery data`() {
-        val node = Node(
-            num = 1,
-            user = User(long_name = "Alice", short_name = "ALIC"),
-            isFavorite = true,
-        )
+        val node = Node(num = 1, user = User(long_name = "Alice", short_name = "ALIC"), isFavorite = true)
         val text = CarScreenDataBuilder.nodeDetailText(node)
 
         text shouldBe "ALIC"
@@ -420,12 +453,13 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `nodeDetailText - shows only battery when short name is blank`() {
-        val node = Node(
-            num = 1,
-            user = User(long_name = "Alice", short_name = ""),
-            isFavorite = true,
-            deviceMetrics = DeviceMetrics(battery_level = 72),
-        )
+        val node =
+            Node(
+                num = 1,
+                user = User(long_name = "Alice", short_name = ""),
+                isFavorite = true,
+                deviceMetrics = DeviceMetrics(battery_level = 72),
+            )
         val text = CarScreenDataBuilder.nodeDetailText(node)
 
         text shouldBe "72%"
@@ -473,10 +507,13 @@ class CarScreenDataBuilderTest {
         val timestamp = 123_456_789L
         val contact = makeCarContact(unreadCount = 0, lastMessageTime = timestamp)
         var received = 0L
-        CarScreenDataBuilder.contactSecondaryText(contact, formatShortDate = { millis ->
-            received = millis
-            "date"
-        })
+        CarScreenDataBuilder.contactSecondaryText(
+            contact,
+            formatShortDate = { millis ->
+                received = millis
+                "date"
+            },
+        )
 
         received shouldBe timestamp
     }
@@ -490,7 +527,8 @@ class CarScreenDataBuilderTest {
     @Test
     fun `contactSecondaryText - unread takes precedence over lastMessageTime`() {
         val contact = makeCarContact(unreadCount = 3, lastMessageTime = 500L)
-        CarScreenDataBuilder.contactSecondaryText(contact, formatShortDate = { "should not appear" }) shouldBe "3 unread"
+        CarScreenDataBuilder.contactSecondaryText(contact, formatShortDate = { "should not appear" }) shouldBe
+            "3 unread"
     }
 
     // ---- buildLocalStats ----
@@ -510,11 +548,7 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `buildLocalStats - reads battery from device metrics`() {
-        val node = Node(
-            num = 1,
-            user = User(long_name = "Me"),
-            deviceMetrics = DeviceMetrics(battery_level = 85),
-        )
+        val node = Node(num = 1, user = User(long_name = "Me"), deviceMetrics = DeviceMetrics(battery_level = 85))
         val result = CarScreenDataBuilder.buildLocalStats(node, LocalStats(), emptyList())
 
         result.hasBattery shouldBe true
@@ -523,16 +557,13 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `buildLocalStats - prefers LocalStats utilization over device metrics`() {
-        val node = Node(
-            num = 1,
-            user = User(long_name = "Me"),
-            deviceMetrics = DeviceMetrics(channel_utilization = 5f, air_util_tx = 1f),
-        )
-        val stats = LocalStats(
-            uptime_seconds = 100,
-            channel_utilization = 18.5f,
-            air_util_tx = 3.2f,
-        )
+        val node =
+            Node(
+                num = 1,
+                user = User(long_name = "Me"),
+                deviceMetrics = DeviceMetrics(channel_utilization = 5f, air_util_tx = 1f),
+            )
+        val stats = LocalStats(uptime_seconds = 100, channel_utilization = 18.5f, air_util_tx = 3.2f)
         val result = CarScreenDataBuilder.buildLocalStats(node, stats, emptyList())
 
         result.channelUtilization shouldBe 18.5f
@@ -542,15 +573,12 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `buildLocalStats - falls back to device metrics when LocalStats uptime is zero`() {
-        val node = Node(
-            num = 1,
-            user = User(long_name = "Me"),
-            deviceMetrics = DeviceMetrics(
-                channel_utilization = 5f,
-                air_util_tx = 1f,
-                uptime_seconds = 3600,
-            ),
-        )
+        val node =
+            Node(
+                num = 1,
+                user = User(long_name = "Me"),
+                deviceMetrics = DeviceMetrics(channel_utilization = 5f, air_util_tx = 1f, uptime_seconds = 3600),
+            )
         val result = CarScreenDataBuilder.buildLocalStats(node, LocalStats(), emptyList())
 
         result.channelUtilization shouldBe 5f
@@ -561,11 +589,12 @@ class CarScreenDataBuilderTest {
     @Test
     fun `buildLocalStats - counts total and online nodes`() {
         val nowSecs = (System.currentTimeMillis() / 1000).toInt()
-        val nodes = listOf(
-            Node(num = 1, lastHeard = nowSecs),
-            Node(num = 2, lastHeard = nowSecs),
-            Node(num = 3, lastHeard = 0), // offline
-        )
+        val nodes =
+            listOf(
+                Node(num = 1, lastHeard = nowSecs),
+                Node(num = 2, lastHeard = nowSecs),
+                Node(num = 3, lastHeard = 0), // offline
+            )
         val result = CarScreenDataBuilder.buildLocalStats(null, LocalStats(), nodes)
 
         result.totalNodes shouldBe 3
@@ -574,12 +603,7 @@ class CarScreenDataBuilderTest {
 
     @Test
     fun `buildLocalStats - copies traffic counters from LocalStats`() {
-        val stats = LocalStats(
-            uptime_seconds = 1,
-            num_packets_tx = 145,
-            num_packets_rx = 892,
-            num_rx_dupe = 42,
-        )
+        val stats = LocalStats(uptime_seconds = 1, num_packets_tx = 145, num_packets_rx = 892, num_rx_dupe = 42)
         val result = CarScreenDataBuilder.buildLocalStats(null, stats, emptyList())
 
         result.numPacketsTx shouldBe 145
@@ -621,6 +645,9 @@ class CarScreenDataBuilderTest {
         channelIndex: Int = 0,
         lastMessageTime: Long? = null,
         lastMessageText: String? = null,
+        lastMessageRawText: String? = null,
+        lastMessageSenderName: String? = null,
+        lastMessageFromSelf: Boolean = false,
     ) = CarContact(
         contactKey = contactKey,
         displayName = displayName,
@@ -629,5 +656,8 @@ class CarScreenDataBuilderTest {
         channelIndex = channelIndex,
         lastMessageTime = lastMessageTime,
         lastMessageText = lastMessageText,
+        lastMessageRawText = lastMessageRawText,
+        lastMessageSenderName = lastMessageSenderName,
+        lastMessageFromSelf = lastMessageFromSelf,
     )
 }

@@ -24,6 +24,7 @@ android {
 
 dependencies {
     implementation(projects.core.common)
+    implementation(projects.core.di)
     implementation(projects.core.model)
     implementation(projects.core.proto)
     implementation(projects.core.repository)
@@ -36,6 +37,7 @@ dependencies {
     implementation(libs.koin.core)
 
     testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit5"))
     testImplementation(libs.kotest.assertions)
     testImplementation(libs.kotlinx.coroutines.test)
 }
