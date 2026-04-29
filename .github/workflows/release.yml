@@ -116,7 +116,6 @@ jobs:
   release-google:
     runs-on: ubuntu-24.04
     needs: [prepare-build-info]
-    environment: Release
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -201,7 +200,6 @@ jobs:
   release-fdroid:
     runs-on: ubuntu-24.04
     needs: [prepare-build-info]
-    environment: Release
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -262,7 +260,6 @@ jobs:
     if: ${{ inputs.build_desktop }}
     runs-on: ${{ matrix.os }}
     needs: [prepare-build-info]
-    environment: Release
     strategy:
       fail-fast: false
       matrix:
