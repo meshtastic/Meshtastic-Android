@@ -9,6 +9,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update core/proto/src/main/proto digest to 10a1689 (#5276) by @renovate[bot] in [`4afcc1e2e`](https://github.com/meshtastic/Meshtastic-Android/commit/4afcc1e2e81445cb173062ee8398d5776dac0f51)
+* chore(deps): update fastlane to v2.233.1 (#5280) by @renovate[bot] in [`3e003ba0a`](https://github.com/meshtastic/Meshtastic-Android/commit/3e003ba0af437026b60b031a2001e9608faf547a)
+* fix: Resolve top Crashlytics issues for 29320633 beta release (#5278) by @James Rich in [`e0c1934d9`](https://github.com/meshtastic/Meshtastic-Android/commit/e0c1934d9648599f3f7c40c7a4842bb42eb74bc6)
+
+### Internal (v2.7.14-internal.74)
+Changes since [`v2.7.14-open.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.1):
+
+* docs: update CHANGELOG.md (#5271) by @github-actions[bot] in [`a24f786ec`](https://github.com/meshtastic/Meshtastic-Android/commit/a24f786ec454c3c864666ecd5e1fda599ee6b7e0)
 * chore(deps): update org.meshtastic:mqtt-client to v0.3.0 (#5272) by @renovate[bot] in [`54339c6fa`](https://github.com/meshtastic/Meshtastic-Android/commit/54339c6fa134eb6d51b1ebbd1d7d40e1f24623b4)
 * chore(deps): update gradle to v9.5.0 (#5270) by @renovate[bot] in [`ef33f6a76`](https://github.com/meshtastic/Meshtastic-Android/commit/ef33f6a76a3fbde69666c1629135c4f382837318)
 * docs: update CHANGELOG.md (#5269) by @github-actions[bot] in [`c2022c3ea`](https://github.com/meshtastic/Meshtastic-Android/commit/c2022c3eac1f1c278f07fcc9ad4e5ba9b576acb9)
