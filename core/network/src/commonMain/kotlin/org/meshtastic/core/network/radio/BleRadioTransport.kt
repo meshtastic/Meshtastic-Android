@@ -356,6 +356,9 @@ class BleRadioTransport(
                 // materially speeds up the initial config drain and any bulk fromRadio reads.
                 if (bleConnection.requestHighConnectionPriority()) {
                     Logger.d { "[$address] Requested high BLE connection priority" }
+                    // Wait for the connection parameter update to succeed before starting the heavy traffic
+                    // in onConnect(). Otherwise, the Android BLE stack may disconnect with GATT 147.
+                    delay(1.seconds)
                 }
 
                 this@BleRadioTransport.callback.onConnect()

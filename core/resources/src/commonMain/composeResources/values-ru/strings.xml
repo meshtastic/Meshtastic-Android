@@ -318,7 +318,7 @@
     <string name="direct_message">Прямое сообщение</string>
     <string name="nodedb_reset">Очистка списка нод сети</string>
     <string name="delivery_confirmed">Доставка подтверждена</string>
-    <string name="delivery_confirmed_reboot_warning">Ваше устройство может отключиться и перезагрузиться во время применении настроек.</string>
+    <string name="delivery_confirmed_reboot_warning">Ваше устройство может отключиться и перезагрузиться во время применения настроек.</string>
     <string name="error">Ошибка</string>
     <string name="unknown_error">Неизвестная ошибка</string>
     <string name="ignore">Игнорировать</string>
