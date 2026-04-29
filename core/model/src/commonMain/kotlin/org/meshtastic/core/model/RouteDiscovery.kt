@@ -66,8 +66,13 @@ private fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): S
             List(nodesList.size - 1) { -128 }
         }
             .map { snr ->
-                val str = if (snr == -128) "?" else "${snr / 4f}"
-                "⇊ $str dB"
+                val str = when (snr) {
+                    -128 -> "? dB"
+                    -127 -> "MQTT"
+                    127 -> "UDP"
+                    else -> "${snr / 4f} dB"
+                }
+                "⇊ $str"
             }
 
     return nodesList
