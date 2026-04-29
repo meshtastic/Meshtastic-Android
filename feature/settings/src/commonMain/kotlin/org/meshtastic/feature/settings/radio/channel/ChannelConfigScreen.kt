@@ -137,6 +137,27 @@ private fun ChannelConfigScreen(
 
     var showEditChannelDialog: Int? by rememberSaveable { mutableStateOf(null) }
     var showChannelLegendDialog by rememberSaveable { mutableStateOf(false) }
+    var showExitConfirmation by rememberSaveable { mutableStateOf(false) }
+
+    val handleBack = {
+        if (isEditing) {
+            showExitConfirmation = true
+        } else {
+            onBack()
+        }
+    }
+
+    org.meshtastic.core.ui.util.PlatformBackHandler(enabled = isEditing) { showExitConfirmation = true }
+
+    if (showExitConfirmation) {
+        org.meshtastic.core.ui.component.UnsavedChangesDialog(
+            onDiscard = {
+                showExitConfirmation = false
+                onBack()
+            },
+            onStay = { showExitConfirmation = false },
+        )
+    }
 
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
@@ -164,7 +185,7 @@ private fun ChannelConfigScreen(
             MainAppBar(
                 title = title,
                 canNavigateUp = true,
-                onNavigateUp = onBack,
+                onNavigateUp = handleBack,
                 ourNode = null,
                 showNodeChip = false,
                 actions = {},

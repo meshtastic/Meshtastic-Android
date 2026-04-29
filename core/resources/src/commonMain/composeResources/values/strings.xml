@@ -182,6 +182,8 @@
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="discard_changes">Discard</string>
+    <string name="unsaved_changes_message">You have unsaved changes. Are you sure you want to discard them?</string>
+    <string name="stay">Stay</string>
     <string name="save_changes">Save</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
     <string name="report">Report</string>

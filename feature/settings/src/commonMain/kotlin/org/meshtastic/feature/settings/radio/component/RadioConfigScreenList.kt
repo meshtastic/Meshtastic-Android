@@ -31,6 +31,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -41,6 +45,8 @@ import org.meshtastic.core.resources.discard_changes
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.core.ui.component.UnsavedChangesDialog
+import org.meshtastic.core.ui.util.PlatformBackHandler
 import org.meshtastic.feature.settings.radio.ResponseState
 
 @Suppress("LongMethod")
@@ -60,14 +66,38 @@ fun <T : Message<T, *>> RadioConfigScreenList(
     content: LazyListScope.() -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val isEditing = configState.isDirty || additionalDirtyCheck()
+    var showExitConfirmation by rememberSaveable { mutableStateOf(false) }
+
+    val handleBack = {
+        if (isEditing) {
+            showExitConfirmation = true
+        } else {
+            onBack()
+        }
+    }
+
+    PlatformBackHandler(enabled = isEditing) { showExitConfirmation = true }
 
     Box(modifier = modifier) {
+        if (showExitConfirmation) {
+            UnsavedChangesDialog(
+                onDiscard = {
+                    showExitConfirmation = false
+                    configState.reset()
+                    onDiscard()
+                    onBack()
+                },
+                onStay = { showExitConfirmation = false },
+            )
+        }
+
         Scaffold(
             topBar = {
                 MainAppBar(
                     title = title,
                     canNavigateUp = true,
-                    onNavigateUp = onBack,
+                    onNavigateUp = handleBack,
                     ourNode = null,
                     showNodeChip = false,
                     actions = actions,
@@ -75,7 +105,7 @@ fun <T : Message<T, *>> RadioConfigScreenList(
                 )
             },
         ) { innerPadding ->
-            val showFooterButtons = configState.isDirty || additionalDirtyCheck()
+            val showFooterButtons = isEditing
 
             LazyColumn(
                 modifier = Modifier.padding(innerPadding).fillMaxSize(),
