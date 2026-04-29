@@ -99,7 +99,7 @@ object LanguageUtils {
         return languageTags.associateWith { languageTag ->
             when (languageTag) {
                 SYSTEM_DEFAULT -> stringResource(Res.string.preferences_system_default)
-                "fr-HT" -> stringResource(Res.string.fr_HT)
+                "ht" -> stringResource(Res.string.fr_HT)
                 "pt-BR" -> stringResource(Res.string.pt_BR)
                 "zh-CN" -> stringResource(Res.string.zh_CN)
                 "zh-TW" -> stringResource(Res.string.zh_TW)
