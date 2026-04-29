@@ -97,6 +97,7 @@ open class ScannerViewModel(
     val bleAutoScan: StateFlow<Boolean> = uiPrefs.bleAutoScan
 
     private val scannedBleDevices = MutableStateFlow<Map<String, BleDevice>>(emptyMap())
+    private val discoveryOrder = MutableStateFlow<List<String>>(emptyList())
     private var scanJob: Job? = null
 
     // ── Network scanning (NSD gating) ─────────────────────────────────────────────────────────
@@ -156,37 +157,36 @@ open class ScannerViewModel(
     /**
      * Combined bonded + scanned BLE devices for the UI.
      *
-     * Sorted by signal strength — scanned devices with a known RSSI appear first in descending order (strongest signal
-     * at the top), followed by bonded-only devices without a scan RSSI, sorted by name.
+     * Sorted for stability to prevent "shifting" as advertisements arrive: bonded devices always appear first (sorted
+     * by name), followed by unbonded scanned devices in the order they were first discovered. RSSI updates are
+     * reflected on the cards but do not trigger a re-sort.
      */
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        combine(discoveredDevicesFlow, scannedBleDevices) { discovered, scannedMap ->
+        combine(discoveredDevicesFlow, scannedBleDevices, discoveryOrder) { discovered, scannedMap, order ->
             val bonded = discovered.bleDevices.filterIsInstance<DeviceListEntry.Ble>()
             val bondedAddresses = bonded.mapTo(mutableSetOf()) { it.address }
 
             // Scanned-but-not-bonded devices are explicitly flagged unbonded so the UI routes through
             // requestBonding() — which on Android triggers createBond() for the pairing dialog before connecting.
+            // Preserves discovery order to prevent items jumping around during the scan burst.
             val unbondedScanned =
-                scannedMap.values
-                    .asSequence()
-                    .filter { it.address !in bondedAddresses }
-                    .map { DeviceListEntry.Ble(device = it, bonded = false) }
+                order
+                    .filter { it !in bondedAddresses }
+                    .mapNotNull { address ->
+                        scannedMap[address]?.let { DeviceListEntry.Ble(device = it, bonded = false) }
+                    }
 
-            // For bonded devices, attach the latest scan RSSI (if we've seen an advertisement this session) so they
-            // sort alongside unbonded entries by signal strength.
-            val bondedWithRssi =
-                bonded.asSequence().map { entry ->
-                    val scanned = scannedMap[entry.address]
-                    if (scanned != null && scanned.rssi != null) entry.copy(device = scanned) else entry
-                }
+            // For bonded devices, attach the latest scan RSSI (if we've seen an advertisement this session) so the
+            // UI can show the signal indicator, but keep them sorted by name for stability.
+            val bondedForUi =
+                bonded
+                    .map { entry ->
+                        val scanned = scannedMap[entry.address]
+                        if (scanned != null && scanned.rssi != null) entry.copy(device = scanned) else entry
+                    }
+                    .sortedBy { it.name }
 
-            (bondedWithRssi + unbondedScanned)
-                .sortedWith(
-                    compareByDescending<DeviceListEntry.Ble> { it.device.rssi != null }
-                        .thenByDescending { it.device.rssi ?: Int.MIN_VALUE }
-                        .thenBy { it.name },
-                )
-                .toList()
+            bondedForUi + unbondedScanned
         }
             .flowOn(dispatchers.default)
             .distinctUntilChanged()
@@ -220,7 +220,6 @@ open class ScannerViewModel(
         if (_isBleScanning.value || bleScanner == null) return
 
         _isBleScanning.value = true
-        scannedBleDevices.value = emptyMap()
 
         scanJob =
             safeLaunch(tag = "startBleScan") {
@@ -239,6 +238,9 @@ open class ScannerViewModel(
                                     current + (device.address to device)
                                 }
                             }
+                            if (device.address !in discoveryOrder.value) {
+                                discoveryOrder.update { it + device.address }
+                            }
                         }
                 } finally {
                     _isBleScanning.value = false
@@ -250,8 +252,6 @@ open class ScannerViewModel(
         scanJob?.cancel()
         scanJob = null
         _isBleScanning.value = false
-        // Drop cached advertisements so stale RSSI values don't linger in the UI after the scan ends.
-        scannedBleDevices.value = emptyMap()
     }
 
     /** Convenience command: start scanning if idle, stop otherwise. Persists the resulting state to prefs. */
@@ -307,6 +307,7 @@ open class ScannerViewModel(
      */
     fun onSelected(entry: DeviceListEntry): Boolean {
         radioPrefs.setDevName(entry.name)
+        addRecentAddress(entry.fullAddress, entry.name)
         return when (entry) {
             is DeviceListEntry.Ble -> {
                 if (entry.bonded) {
@@ -327,10 +328,7 @@ open class ScannerViewModel(
                 }
             }
             is DeviceListEntry.Tcp -> {
-                safeLaunch(tag = "onSelectedTcp") {
-                    addRecentAddress(entry.fullAddress, entry.name)
-                    changeDeviceAddress(entry.fullAddress)
-                }
+                safeLaunch(tag = "onSelectedTcp") { changeDeviceAddress(entry.fullAddress) }
                 true
             }
             is DeviceListEntry.Mock -> {
