@@ -69,6 +69,7 @@ import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
+import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
@@ -180,6 +181,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
+    @Suppress("LongMethod")
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
         CompositionLocalProvider(
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
@@ -208,6 +210,10 @@ class MainActivity : ComponentActivity() {
                         onMappableCountChanged = onMappableCountChanged,
                         modifier = modifier,
                     )
+                },
+            LocalDiscoveryMapProvider provides
+                { userLat, userLon, nodes, modifier ->
+                    org.meshtastic.app.map.discovery.DiscoveryMap(userLat, userLon, nodes, modifier)
                 },
             LocalNodeMapScreenProvider provides
                 { destNum, onNavigateUp ->

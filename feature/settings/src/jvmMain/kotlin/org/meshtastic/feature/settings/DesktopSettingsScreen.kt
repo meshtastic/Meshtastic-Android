@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.DatabaseConstants
+import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
@@ -66,6 +67,7 @@ import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.component.ContrastPickerDialog
@@ -216,6 +218,12 @@ fun DesktopSettingsScreen(
                         onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
                         summary = stringResource(Res.string.device_db_cache_limit_summary),
                     )
+                }
+
+                ExpressiveSection(title = "Local Mesh Discovery") {
+                    ListItem(text = "Local Mesh Discovery", leadingIcon = MeshtasticIcons.PermScanWifi) {
+                        onNavigate(DiscoveryRoute.DiscoveryGraph)
+                    }
                 }
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {

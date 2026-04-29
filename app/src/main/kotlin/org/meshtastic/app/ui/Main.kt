@@ -43,6 +43,7 @@ import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
+import org.meshtastic.feature.discovery.navigation.discoveryGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
@@ -87,6 +88,7 @@ fun MainScreen() {
                     mapGraph(backStack)
                     channelsGraph(backStack)
                     connectionsGraph(backStack)
+                    discoveryGraph(backStack)
                     settingsGraph(backStack)
                     firmwareGraph(backStack)
                     wifiProvisionGraph(backStack)

@@ -194,3 +194,18 @@ sealed interface WifiProvisionRoute : Route {
 
     @Serializable data class WifiProvision(val address: String? = null) : WifiProvisionRoute
 }
+
+@Serializable
+sealed interface DiscoveryRoute : Route {
+    @Serializable data object DiscoveryGraph : DiscoveryRoute, Graph
+
+    @Serializable data object DiscoveryScan : DiscoveryRoute
+
+    @Serializable data class DiscoverySummary(val sessionId: Long) : DiscoveryRoute
+
+    @Serializable data object DiscoveryHistory : DiscoveryRoute
+
+    @Serializable data class DiscoveryHistoryDetail(val sessionId: Long) : DiscoveryRoute
+
+    @Serializable data class DiscoveryMap(val sessionId: Long) : DiscoveryRoute
+}

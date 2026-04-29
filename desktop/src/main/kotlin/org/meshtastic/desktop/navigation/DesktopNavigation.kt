@@ -23,6 +23,7 @@ import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
+import org.meshtastic.feature.discovery.navigation.discoveryGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
@@ -54,5 +55,6 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(
     settingsGraph(backStack)
     channelsGraph(backStack)
     connectionsGraph(backStack)
+    discoveryGraph(backStack)
     wifiProvisionGraph(backStack)
 }
