@@ -47,6 +47,7 @@ import org.meshtastic.core.service.di.CoreServiceModule
 import org.meshtastic.core.takserver.di.CoreTakServerModule
 import org.meshtastic.core.ui.di.CoreUiModule
 import org.meshtastic.feature.connections.di.FeatureConnectionsModule
+import org.meshtastic.feature.discovery.di.FeatureDiscoveryModule
 import org.meshtastic.feature.docs.di.FeatureDocsModule
 import org.meshtastic.feature.firmware.di.FeatureFirmwareModule
 import org.meshtastic.feature.intro.di.FeatureIntroModule
@@ -86,6 +87,7 @@ import org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule
         FeatureConnectionsModule::class,
         FeatureMapModule::class,
         FeatureSettingsModule::class,
+        FeatureDiscoveryModule::class,
         FeatureDocsModule::class,
         FeatureFirmwareModule::class,
         FeatureIntroModule::class,

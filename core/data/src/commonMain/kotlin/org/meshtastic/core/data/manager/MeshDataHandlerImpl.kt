@@ -37,6 +37,7 @@ import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
+import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MessageFilter
@@ -96,6 +97,7 @@ class MeshDataHandlerImpl(
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
+    private val collectorRegistry: DiscoveryPacketCollectorRegistry,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
 
@@ -118,6 +120,13 @@ class MeshDataHandlerImpl(
             serviceBroadcasts.broadcastReceivedData(dataPacket)
         }
         analytics.track("num_data_receive", DataPair("num_data_receive", 1))
+
+        // Forward to discovery scan collector if active
+        collectorRegistry.collector?.let { collector ->
+            if (collector.isActive) {
+                scope.handledLaunch { collector.onPacketReceived(packet, dataPacket) }
+            }
+        }
     }
 
     private fun handleDataPacket(
