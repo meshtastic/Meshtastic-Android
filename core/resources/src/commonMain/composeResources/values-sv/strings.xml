@@ -315,6 +315,8 @@
     <string name="currently">Nuvarande:</string>
     <string name="mute_status_always">Alltid tystad</string>
     <string name="mute_status_unmuted">Inte tystad</string>
+    <string name="mute_status_muted_for_days">Tystad i %1$d dagar och %2$s timmar</string>
+    <string name="mute_status_muted_for_hours">Tystad i %1$s timmar</string>
     <string name="mute_add">Tysta aviseringar i '%1$s'?</string>
     <string name="mute_remove">Aktivera aviseringar i '%1$s'?</string>
     <string name="replace">Ersätt</string>
@@ -392,11 +394,17 @@
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
     <string name="channel_3">Kanal 3</string>
+    <string name="channel_4">Kanal 4</string>
+    <string name="channel_5">Kanal 5</string>
+    <string name="channel_6">Kanal 6</string>
+    <string name="channel_7">Kanal 7</string>
+    <string name="channel_8">Kanal 8</string>
     <string name="current">Ström</string>
     <string name="voltage">Spänning</string>
     <string name="are_you_sure">Är du säker?</string>
     <string name="router_role_confirmation_text"><![CDATA[Jag har läst <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> och blogginlägget om <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
     <string name="i_know_what_i_m_doing">Jag vet vad jag håller på med.</string>
+    <string name="low_battery_message">Noden %1$s har ett lågt batteri (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Avisering vid låg batterinivå</string>
     <string name="low_battery_title">Lågt batteri: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Meddelanden om lågt batteri (favoritnoder)</string>
@@ -944,6 +952,7 @@
     <string name="all_time">Alla</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Konfiguration</string>
+    <string name="updated">Uppdaterad</string>
     <!-- Network Map Layers -->
     <string name="tak_team_red">Rött</string>
     <string name="tak_team_blue">Blått</string>
@@ -956,5 +965,6 @@
     <string name="wifi_provision_success_done">Klart</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filter</string>
+    <string name="action_delete_message">Ta bort meddelande</string>
     <string name="action_select_device">Välj enhet</string>
 </resources>

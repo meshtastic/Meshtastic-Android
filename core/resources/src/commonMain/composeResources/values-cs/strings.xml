@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
     <string name="node_filter_title">Filtrovat podle</string>
@@ -313,6 +314,8 @@
     <string name="mute_always">Vždy</string>
     <string name="mute_status_always">Trvale ztlumeno</string>
     <string name="mute_status_unmuted">Neztlumeno</string>
+    <string name="mute_status_muted_for_days">Ztlumeno na %1$d dní, %2$s hodiny</string>
+    <string name="mute_status_muted_for_hours">Ztlumeno na %1$s hodin</string>
     <string name="mute_add">Ztlumit oznámení pro '%1$s'?</string>
     <string name="mute_remove">Zrušit ztlumení oznámení pro '%1$s'?</string>
     <string name="replace">Nahradit</string>
@@ -322,6 +325,7 @@
     <string name="battery">Baterie</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Teplota</string>
@@ -1020,10 +1024,12 @@
     <string name="wifi_provision_scanning_wifi">Vyhledávání…</string>
     <string name="wifi_provision_no_networks">Žádná síť nebyla nalezena</string>
     <string name="wifi_provision_scan_failed">Nepodařilo se prohledat WiFi sítě: %1$s</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_success_ip_address">IP adresa</string>
     <string name="wifi_provision_success_username">Uživatelské jméno</string>
     <string name="wifi_provision_success_done">Hotovo</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filtr</string>
+    <string name="action_delete_message">Smazat zprávu</string>
     <string name="action_react_with_emoji">Reagovat s emoji</string>
 </resources>

@@ -292,11 +292,17 @@
     <string name="channel_1">Kanál 1</string>
     <string name="channel_2">Kanál 2</string>
     <string name="channel_3">Kanál 3</string>
+    <string name="channel_4">Kanál 4</string>
+    <string name="channel_5">Kanál 5</string>
+    <string name="channel_6">Kanál 6</string>
+    <string name="channel_7">Kanál 7</string>
+    <string name="channel_8">Kanál 8</string>
     <string name="current">Prúd</string>
     <string name="voltage">Napätie</string>
     <string name="are_you_sure">Si si istý?</string>
     <string name="router_role_confirmation_text"><![CDATA[Prečítal som si <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Dokumentáciu o úlohách zariadení</a> a blog o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Výberaní správnej úlohy pre zariadenie </a>.]]></string>
     <string name="i_know_what_i_m_doing">Viem čo robím.</string>
+    <string name="low_battery_message">Uzol %1$s má slabú batériu (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Upozornenia o slabej batérii</string>
     <string name="low_battery_title">Slabá batéria: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornenia o slabej batérii (obľúbene uzle)</string>
@@ -426,7 +432,9 @@
     <string name="tak_team_red">Červená</string>
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>
+    <string name="wifi_provision_success_ip_address">IP adresa</string>
     <string name="wifi_provision_success_username">Používateľské meno</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filter</string>
+    <string name="action_delete_message">Vymazať správu</string>
 </resources>

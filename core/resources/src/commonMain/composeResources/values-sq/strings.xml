@@ -216,5 +216,7 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_ip_address">Adresa IP</string>
     <string name="filter_icon">Filtrimi</string>
+    <string name="action_delete_message">Fshini mesazhin</string>
 </resources>

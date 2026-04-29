@@ -242,5 +242,7 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_ip_address">IP naslov</string>
     <string name="filter_icon">Filter</string>
+    <string name="action_delete_message">Izbriši sporočilo</string>
 </resources>

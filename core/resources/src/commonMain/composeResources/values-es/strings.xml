@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">(No se ha podido obtener el nombre) Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="node_filter_title">Filtrar por</string>
@@ -284,6 +285,8 @@
     <string name="currently">Actualmente:</string>
     <string name="mute_status_always">Siempre silenciado</string>
     <string name="mute_status_unmuted">No silenciado</string>
+    <string name="mute_status_muted_for_days">Silenciado por %1$d días, %2$s horas</string>
+    <string name="mute_status_muted_for_hours">Silenciado por %1$s horas</string>
     <string name="replace">Reemplazar</string>
     <string name="wifi_qr_code_scan">Escanear código QR WiFi</string>
     <string name="wifi_qr_code_error">Formato de código QR de credencial wifi inválido</string>
@@ -345,11 +348,17 @@ Rango de Valores 0 - 500.</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
     <string name="channel_3">Canal 3</string>
+    <string name="channel_4">Canal 4</string>
+    <string name="channel_5">Canal 5</string>
+    <string name="channel_6">Canal 6</string>
+    <string name="channel_7">Canal 7</string>
+    <string name="channel_8">Canal 8</string>
     <string name="current">Intensidad</string>
     <string name="voltage">Tensión</string>
     <string name="are_you_sure">¿Estás seguro?</string>
     <string name="router_role_confirmation_text"><![CDATA[He leído la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Documentación para los Roles de los dispositivos</a> y el blog sobre <a href="http://meshtastic.org/blog/choosing-the-right-device-role">como elegir el correcto rol</a>.]]></string>
     <string name="i_know_what_i_m_doing">Sé lo que estoy haciendo</string>
+    <string name="low_battery_message">El nodo %1$s tiene poca batería (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Notificaciones de batería baja</string>
     <string name="low_battery_title">Batería baja: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificaciones de batería baja (nodos favoritos)</string>
@@ -843,4 +852,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="wifi_provision_success_done">Hecho</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filtro</string>
+    <string name="action_delete_message">Deseas eliminar el mensaje</string>
 </resources>

@@ -237,5 +237,7 @@
     <!-- Message Filter -->
     <!-- Network Map Layers -->
     <string name="tak_team_red">Raudona</string>
+    <string name="wifi_provision_success_ip_address">IP adresas</string>
     <string name="filter_icon">Filtras</string>
+    <string name="action_delete_message">Ištrinti pranešimą</string>
 </resources>
