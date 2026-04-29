@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2026 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      This app is an Android Auto (phone-projection) messaging app — it is NOT designed
+      to run standalone on Android Automotive OS (AAOS). Declaring the automotive hardware
+      feature as not required prevents the APK from being offered on AAOS devices.
+      (Play Console device-targeting should also exclude AAOS form factors.)
+    -->
+    <uses-feature
+        android:name="android.hardware.type.automotive"
+        android:required="false" />
+
+    <!-- Android Auto Car App Service for browsable messaging UI -->
+    <application>
+        <service
+            android:name="org.meshtastic.feature.auto.MeshtasticCarAppService"
+            android:exported="true"
+            android:permission="androidx.car.app.CarAppService">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.MESSAGING" />
+            </intent-filter>
+        </service>
+
+        <!-- Car API 7 is the minimum for ConversationItem, which is required for the
+             MESSAGING category's templated experience. Hosts running older API levels
+             still receive the MessagingStyle notification-based experience; only the
+             browsable template UI requires API 7. -->
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="7" />
+    </application>
+
+</manifest>

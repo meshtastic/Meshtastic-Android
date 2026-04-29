@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2026 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <!-- Tab titles -->
+    <string name="auto_tab_status">Status</string>
+    <string name="auto_tab_favorites">Favorites</string>
+    <string name="auto_tab_messages">Messages</string>
+
+    <!-- Template titles / loading / empty states -->
+    <string name="auto_loading">Loading\u2026</string>
+    <string name="auto_no_favorites">No favorite nodes</string>
+    <string name="auto_no_conversations">No conversations</string>
+    <string name="auto_no_messages">No messages yet</string>
+
+    <!-- Connection status -->
+    <string name="auto_status_connected">Connected</string>
+    <string name="auto_status_disconnected">Disconnected</string>
+    <string name="auto_status_sleeping">Device Sleeping</string>
+    <string name="auto_status_connecting">Connecting\u2026</string>
+
+    <!-- Node reachability (used in the Favorites tab rows) -->
+    <string name="auto_node_online">Online</string>
+    <string name="auto_node_offline">Offline</string>
+    <!-- Leading space + bullet + space is intentional — appended directly after Online/Offline -->
+    <string name="auto_node_direct"> · Direct</string>
+    <!-- %d is replaced with the hop count at runtime -->
+    <string name="auto_node_hops"> · %d hops</string>
+
+    <!-- Messages tab -->
+    <!-- %d is replaced with the unread-message count at runtime -->
+    <string name="auto_unread_count">%d unread</string>
+    <!-- %d is replaced with the channel index at runtime -->
+    <string name="auto_channel_number">Channel %d</string>
+
+    <!-- Local stats (Status tab) -->
+    <string name="auto_stats_battery">Battery: %1$s</string>
+    <string name="auto_stats_powered">Powered</string>
+    <string name="auto_stats_channel_util">Ch Util: %1$s · Air Util: %2$s</string>
+    <string name="auto_stats_nodes">Nodes: %1$d/%2$d online</string>
+    <string name="auto_stats_uptime">Uptime: %1$s</string>
+    <string name="auto_stats_traffic">TX: %1$d · RX: %2$d · Dupe: %3$d</string>
+
+    <!-- Generic fallback label when a node has no name -->
+    <string name="auto_unknown">Unknown</string>
+</resources>

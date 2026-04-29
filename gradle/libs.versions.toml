@@ -8,6 +8,7 @@ accompanist = "0.37.3"
 
 # androidx
 datastore = "1.2.1"
+car-app = "1.7.0"
 glance = "1.2.0-rc01"
 lifecycle = "2.10.0"
 jetbrains-lifecycle = "2.11.0-alpha03"
@@ -100,6 +101,7 @@ androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version = "1.6.0" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.18.0" }
+androidx-car-app = { module = "androidx.car.app:app", version.ref = "car-app" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0-rc01" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }

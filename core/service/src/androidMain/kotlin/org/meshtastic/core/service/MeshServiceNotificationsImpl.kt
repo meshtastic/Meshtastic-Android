@@ -24,16 +24,14 @@ import android.app.TaskStackBuilder
 import android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
 import android.content.Context
 import android.content.Intent
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
+import androidx.core.content.LocusIdCompat
 import androidx.core.content.getSystemService
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.flow.first
@@ -109,6 +107,7 @@ class MeshServiceNotificationsImpl(
     private val context: Context,
     private val packetRepository: Lazy<PacketRepository>,
     private val nodeRepository: Lazy<NodeRepository>,
+    private val shortcutManager: Lazy<ConversationShortcutManager>,
 ) : MeshServiceNotifications {
 
     private val notificationManager = context.getSystemService<NotificationManager>()!!
@@ -117,12 +116,9 @@ class MeshServiceNotificationsImpl(
         const val MAX_BATTERY_LEVEL = 100
         private val NOTIFICATION_LIGHT_COLOR = Color.BLUE
         private const val MAX_HISTORY_MESSAGES = 10
-        private const val MIN_CONTEXT_MESSAGES = 3
         private const val SNIPPET_LENGTH = 30
         private const val GROUP_KEY_MESSAGES = "com.geeksville.mesh.GROUP_MESSAGES"
         private const val SUMMARY_ID = 1
-        private const val PERSON_ICON_SIZE = 128
-        private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
         private const val STATS_UPDATE_MINUTES = 15
         private val STATS_UPDATE_INTERVAL = STATS_UPDATE_MINUTES.minutes
         private const val BULLET = "• "
@@ -424,14 +420,8 @@ class MeshServiceNotificationsImpl(
                 .first()
 
         val unread = history.filter { !it.read }
-        val displayHistory =
-            if (unread.size < MIN_CONTEXT_MESSAGES) {
-                history.take(MIN_CONTEXT_MESSAGES).reversed()
-            } else {
-                unread.take(MAX_HISTORY_MESSAGES).reversed()
-            }
-
-        if (displayHistory.isEmpty()) return
+        if (unread.isEmpty()) return
+        val displayHistory = unread.take(MAX_HISTORY_MESSAGES).reversed()
 
         val notification =
             createConversationNotification(
@@ -445,20 +435,23 @@ class MeshServiceNotificationsImpl(
         showGroupSummary()
     }
 
+    private fun buildMePerson(): Person {
+        val ourNode = nodeRepository.value.ourNodeInfo.value
+        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
+        return Person.Builder()
+            .setName(meName)
+            .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
+            .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
+            .build()
+    }
+
     private fun showGroupSummary() {
         val activeNotifications =
             notificationManager.activeNotifications.filter {
                 it.id != SUMMARY_ID && it.notification.group == GROUP_KEY_MESSAGES
             }
 
-        val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
-        val me =
-            Person.Builder()
-                .setName(meName)
-                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
-                .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
-                .build()
+        val me = buildMePerson()
 
         val messagingStyle =
             NotificationCompat.MessagingStyle(me)
@@ -512,7 +505,53 @@ class MeshServiceNotificationsImpl(
         notificationManager.notify(clientNotification.toString().hashCode(), notification)
     }
 
-    override fun cancelMessageNotification(contactKey: String) = notificationManager.cancel(contactKey.hashCode())
+    override fun cancelMessageNotification(contactKey: String) {
+        notificationManager.cancel(contactKey.hashCode())
+        // Always drop the group summary — reading notificationManager.activeNotifications right
+        // after cancel() races with NotificationManagerService, so we can't reliably count what's
+        // left. The next incoming message re-builds the summary via showGroupSummary().
+        notificationManager.cancel(SUMMARY_ID)
+    }
+
+    override suspend fun markConversationRead(contactKey: String) {
+        packetRepository.value.clearUnreadCount(contactKey, nowMillis)
+        cancelMessageNotification(contactKey)
+    }
+
+    override suspend fun appendOutgoingMessage(contactKey: String, text: String) {
+        if (text.isEmpty()) return
+        val ourNode = nodeRepository.value.ourNodeInfo.value
+        val history =
+            packetRepository.value
+                .getMessagesFrom(contactKey, includeFiltered = false) { nodeId ->
+                    if (nodeId == DataPacket.ID_LOCAL) {
+                        ourNode ?: nodeRepository.value.getNode(nodeId)
+                    } else {
+                        nodeRepository.value.getNode(nodeId ?: "")
+                    }
+                }
+                .first()
+
+        // For the brief outgoing-reply confirmation we don't gate on unread state — the
+        // user just sent something and Android Auto needs to reflect that in the
+        // MessagingStyle notification regardless of whether other unread messages remain.
+        // We still cap the displayed history so the notification stays compact.
+        val displayHistory = history.take(MAX_HISTORY_MESSAGES).reversed()
+
+        val dest = if (contactKey.isNotEmpty()) contactKey.substring(1) else contactKey
+        val isBroadcast = dest == DataPacket.ID_BROADCAST
+
+        val notification =
+            createConversationNotification(
+                contactKey = contactKey,
+                isBroadcast = isBroadcast,
+                channelName = null,
+                history = displayHistory,
+                isSilent = true,
+                extraOutgoingMessage = text,
+            )
+        notificationManager.notify(contactKey.hashCode(), notification)
+    }
 
     override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(node.num)
 
@@ -555,6 +594,7 @@ class MeshServiceNotificationsImpl(
         channelName: String?,
         history: List<Message>,
         isSilent: Boolean = false,
+        extraOutgoingMessage: String? = null,
     ): Notification {
         val type = if (isBroadcast) NotificationType.BroadcastMessage else NotificationType.DirectMessage
         val builder = commonBuilder(type, createOpenMessageIntent(contactKey))
@@ -563,14 +603,7 @@ class MeshServiceNotificationsImpl(
             builder.setSilent(true)
         }
 
-        val ourNode = nodeRepository.value.ourNodeInfo.value
-        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
-        val me =
-            Person.Builder()
-                .setName(meName)
-                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
-                .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
-                .build()
+        val me = buildMePerson()
 
         val style =
             NotificationCompat.MessagingStyle(me)
@@ -615,13 +648,20 @@ class MeshServiceNotificationsImpl(
                 )
             }
         }
+        if (!extraOutgoingMessage.isNullOrEmpty()) {
+            style.addMessage(extraOutgoingMessage, nowMillis, me)
+        }
         val lastMessage = history.last()
+
+        ensureShortcutForNotification(contactKey, isBroadcast, channelName, lastMessage)
 
         builder
             .setCategory(Notification.CATEGORY_MESSAGE)
             .setAutoCancel(true)
             .setStyle(style)
             .setGroup(GROUP_KEY_MESSAGES)
+            .setShortcutId(contactKey)
+            .setLocusId(LocusIdCompat(contactKey))
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setWhen(lastMessage.receivedTime)
             .setShowWhen(true)
@@ -770,6 +810,43 @@ class MeshServiceNotificationsImpl(
         }
     }
 
+    private fun ensureShortcutForNotification(
+        contactKey: String,
+        isBroadcast: Boolean,
+        channelName: String?,
+        lastMessage: Message,
+    ) {
+        val contactNode =
+            if (isBroadcast) {
+                null
+            } else {
+                // contactKey format: "${channel}${nodeId}"; the remote contact is the node keyed by nodeId,
+                // which is stable regardless of whether the latest message in history is incoming or outgoing.
+                val nodeId = contactKey.drop(1)
+                nodeRepository.value.getNode(nodeId)
+            }
+        val person =
+            if (isBroadcast) {
+                Person.Builder().setName(channelName ?: contactKey).setKey(contactKey).build()
+            } else {
+                val node = contactNode ?: lastMessage.node
+                Person.Builder()
+                    .setName(node.user.long_name)
+                    .setKey(node.user.id)
+                    .setIcon(createPersonIcon(node.user.short_name, node.colors.second, node.colors.first))
+                    .build()
+            }
+        val label =
+            when {
+                isBroadcast -> channelName ?: contactKey
+                else -> {
+                    val node = contactNode ?: lastMessage.node
+                    node.user.long_name.ifEmpty { node.user.short_name }
+                }
+            }
+        shortcutManager.value.ensureConversationShortcut(contactKey, person, label)
+    }
+
     private fun createReplyAction(contactKey: String): NotificationCompat.Action {
         val replyLabel = getString(Res.string.reply)
         val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(replyLabel).build()
@@ -789,6 +866,9 @@ class MeshServiceNotificationsImpl(
 
         return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, replyLabel, replyPendingIntent)
             .addRemoteInput(remoteInput)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_REPLY)
+            .setShowsUserInterface(false)
+            .setAllowGeneratedReplies(true)
             .build()
     }
 
@@ -807,7 +887,10 @@ class MeshServiceNotificationsImpl(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
-        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent).build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_MARK_AS_READ)
+            .setShowsUserInterface(false)
+            .build()
     }
 
     private fun createReactionAction(
@@ -834,7 +917,10 @@ class MeshServiceNotificationsImpl(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
 
-        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_add, label, pendingIntent).build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_add, label, pendingIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_NONE)
+            .setShowsUserInterface(false)
+            .build()
     }
 
     private fun commonBuilder(
@@ -850,32 +936,8 @@ class MeshServiceNotificationsImpl(
             .setContentIntent(contentIntent ?: openAppIntent)
     }
 
-    private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat {
-        val bitmap = createBitmap(PERSON_ICON_SIZE, PERSON_ICON_SIZE)
-        val canvas = Canvas(bitmap)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-        // Draw background circle
-        paint.color = backgroundColor
-        canvas.drawCircle(PERSON_ICON_SIZE / 2f, PERSON_ICON_SIZE / 2f, PERSON_ICON_SIZE / 2f, paint)
-
-        // Draw initials
-        paint.color = foregroundColor
-        paint.textSize = PERSON_ICON_SIZE * PERSON_ICON_TEXT_SIZE_RATIO
-        paint.textAlign = Paint.Align.CENTER
-        val initial =
-            if (name.isNotEmpty()) {
-                val codePoint = name.codePointAt(0)
-                String(Character.toChars(codePoint)).uppercase()
-            } else {
-                "?"
-            }
-        val xPos = canvas.width / 2f
-        val yPos = (canvas.height / 2f - (paint.descent() + paint.ascent()) / 2f)
-        canvas.drawText(initial, xPos, yPos, paint)
-
-        return IconCompat.createWithBitmap(bitmap)
-    }
+    private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat =
+        PersonIconFactory.create(name, backgroundColor, foregroundColor)
 
     // endregion
 

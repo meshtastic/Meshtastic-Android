@@ -31,7 +31,7 @@ import org.meshtastic.proto.User
  * A test double for [RadioController] that provides a no-op implementation and tracks calls for assertions in tests.
  */
 @Suppress("TooManyFunctions", "EmptyFunctionBlock")
-class FakeRadioController :
+open class FakeRadioController :
     BaseFake(),
     RadioController {
 

@@ -67,6 +67,20 @@ interface MeshServiceNotifications {
 
     fun cancelMessageNotification(contactKey: String)
 
+    /**
+     * Marks the conversation for [contactKey] as read: clears its unread count in the packet repository and cancels the
+     * posted message notification (and the group summary). Intended for use by notification action receivers (reply,
+     * mark-as-read, reaction) to keep behavior consistent.
+     */
+    suspend fun markConversationRead(contactKey: String)
+
+    /**
+     * Appends an outgoing [text] message attributed to the local user to the currently posted conversation notification
+     * for [contactKey]. Used so that assistants such as Android Auto can briefly observe the reply in the
+     * MessagingStyle history before the notification is cancelled. No-op when there is nothing to update.
+     */
+    suspend fun appendOutgoingMessage(contactKey: String, text: String)
+
     fun cancelLowBatteryNotification(node: Node)
 
     fun clearClientNotification(notification: ClientNotification)

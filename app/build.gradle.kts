@@ -235,6 +235,7 @@ dependencies {
     implementation(projects.feature.settings)
     implementation(projects.feature.firmware)
     implementation(projects.feature.wifiProvision)
+    implementation(projects.feature.auto)
     implementation(projects.feature.widget)
 
     implementation(libs.jetbrains.compose.material3.adaptive)

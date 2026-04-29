@@ -34,6 +34,14 @@
 # for auditing. Inspect this file after a release build to see what libraries inject.
 -printconfiguration build/outputs/mapping/r8-merged-config.txt
 
+# ---- Android Auto / Car App Library -----------------------------------------
+
+# MeshtasticCarAppService and MeshtasticCarSession are instantiated by class name
+# by the Android Auto host. Keep both classes (and their no-arg constructors) so
+# release builds aren't broken by R8 tree-shaking.
+-keep class org.meshtastic.feature.auto.MeshtasticCarAppService { <init>(); }
+-keep class org.meshtastic.feature.auto.MeshtasticCarSession { <init>(); }
+
 # ---- Networking (transitive references from Ktor on Android) ----------------
 
 -dontwarn org.conscrypt.**
