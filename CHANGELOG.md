@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Licenses) (#5298) by @James Rich in [`9d64dd697`](https://github.com/meshtastic/Meshtastic-Android/commit/9d64dd697e105f73d26f6b90a3ee3943c2f9a4aa)
+* docs: update CHANGELOG.md (#5300) by @github-actions[bot] in [`e62805b98`](https://github.com/meshtastic/Meshtastic-Android/commit/e62805b984d741acbc3a31c26947ca1cf10207c3)
 * revert: replace extra newline on traceroute route strings by @James Rich in [`7f578906f`](https://github.com/meshtastic/Meshtastic-Android/commit/7f578906fa5fb5e9cce8e2809ba5cd1276a91d9a)
 * chore(deps): update ruby to v4 (#5299) by @renovate[bot] in [`f0fbfaf51`](https://github.com/meshtastic/Meshtastic-Android/commit/f0fbfaf516a34429fddc9256aa65dc2dd8c9c17c)
 * docs: update CHANGELOG.md (#5297) by @github-actions[bot] in [`ffe10093f`](https://github.com/meshtastic/Meshtastic-Android/commit/ffe10093f71898b109fb2c2ab3786613f60c20b1)
