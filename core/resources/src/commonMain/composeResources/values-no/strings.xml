@@ -238,5 +238,7 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_ip_address">IP-adresse</string>
     <string name="filter_icon">Filter</string>
+    <string name="action_delete_message">Slett meldingen</string>
 </resources>

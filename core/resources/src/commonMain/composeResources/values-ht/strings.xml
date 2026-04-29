@@ -215,5 +215,7 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_ip_address">Adrès IP</string>
     <string name="filter_icon">Filtre</string>
+    <string name="action_delete_message">Efase mesaj la</string>
 </resources>

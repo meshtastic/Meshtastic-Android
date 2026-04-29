@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Фільтраваць</string>
     <string name="desc_node_filter_clear">скінуць фільтр</string>
     <string name="node_filter_title">Фільтраваць па</string>
@@ -116,6 +117,7 @@
     <string name="direct_message">Прыватнае паведамленне</string>
     <string name="error">Памылка</string>
     <string name="ignore">Ігнараваць</string>
+    <string name="close">Закрыть</string>
     <string name="add">Дадаць</string>
     <string name="edit">Змяніць</string>
     <string name="remove">Прыбраць</string>
@@ -136,9 +138,15 @@
     <string name="twenty_four_hours">24г</string>
     <string name="one_week">1тыд</string>
     <string name="two_weeks">2тыд</string>
+    <string name="copy">Копировать</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>
+    <string name="channel_4">Канал 4</string>
+    <string name="channel_5">Канал 5</string>
+    <string name="channel_6">Канал 6</string>
+    <string name="channel_7">Канал 7</string>
+    <string name="channel_8">Канал 8</string>
     <string name="current">3</string>
     <string name="i_know_what_i_m_doing">Я ведаю, што я раблю.</string>
     <string name="udp_enabled">Уключана</string>
@@ -179,6 +187,7 @@
     <string name="server">Сервер</string>
     <string name="distance">Адлегласць</string>
     <string name="lux">Люкс</string>
+    <string name="hardware">Устройства</string>
     <string name="speed">Хуткасць</string>
     <string name="retry">Паспрабаваць яшчэ раз</string>
     <string name="firmware">Прашыўка</string>
@@ -218,10 +227,12 @@
     <!-- Message Filter -->
     <string name="all_time">Усе</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_feature_config">Конфигурация</string>
     <!-- Network Map Layers -->
     <string name="tak_team_red">Чырвоны</string>
     <string name="tak_team_blue">Сіні</string>
     <string name="tak_team_green">Зялёны</string>
+    <string name="wifi_provision_success_ip_address">IP-адрас</string>
     <string name="wifi_provision_success_username">Імя карыстальніка</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Фільтраваць</string>

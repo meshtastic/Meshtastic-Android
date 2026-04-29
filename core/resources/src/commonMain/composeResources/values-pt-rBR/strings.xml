@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">limpar filtro de dispositivos</string>
     <string name="node_filter_include_unknown">Incluir desconhecido</string>
@@ -264,11 +265,17 @@
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
     <string name="channel_3">Canal 3</string>
+    <string name="channel_4">Canal 4</string>
+    <string name="channel_5">Canal 5</string>
+    <string name="channel_6">Canal 6</string>
+    <string name="channel_7">Canal 7</string>
+    <string name="channel_8">Canal 8</string>
     <string name="current">Atual</string>
     <string name="voltage">Voltagem</string>
     <string name="are_you_sure">Você tem certeza?</string>
     <string name="router_role_confirmation_text"><![CDATA[Eu li a documentação <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">do papel do dispositivo</a> e o post do ‘blog’ sobre <a href="http://meshtastic.org/‘blog’/choosing-the-right-device-role">Escolha do papel correto do dispositivo </a>.]]></string>
     <string name="i_know_what_i_m_doing">Eu sei o que estou fazendo.</string>
+    <string name="low_battery_message">O nó %1$s está com bateria fraca (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Notificações de bateria fraca</string>
     <string name="low_battery_title">Bateria fraca: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificações de bateria fraca (nós favoritos)</string>
@@ -664,8 +671,10 @@
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="done">Concluído</string>
+    <string name="wifi_provision_success_ip_address">Endereço IP</string>
     <string name="wifi_provision_success_username">Nome de usuário</string>
     <string name="wifi_provision_success_done">Concluído</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filtro</string>
+    <string name="action_delete_message">Excluir %1$s mensagem</string>
 </resources>

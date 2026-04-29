@@ -282,11 +282,17 @@
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>
+    <string name="channel_4">Канал 4</string>
+    <string name="channel_5">Канал 5</string>
+    <string name="channel_6">Канал 6</string>
+    <string name="channel_7">Канал 7</string>
+    <string name="channel_8">Канал 8</string>
     <string name="current">Струја</string>
     <string name="voltage">Напон</string>
     <string name="are_you_sure">Да ли сте сигурни?</string>
     <string name="router_role_confirmation_text"><![CDATA[Прочитао сам <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Документацију улога уређаја</a> и објаву на блогу <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Одабир праве улоге за уређај</a>.]]></string>
     <string name="i_know_what_i_m_doing">Знам шта радим.</string>
+    <string name="low_battery_message">Чвор %1$s има низак ниво батерије (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>
     <string name="low_battery_title">Низак ниво батерије: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Нотификације о ниском нивоу батерије (омиљени чворови)</string>
@@ -431,6 +437,8 @@
     <string name="bluetooth_permission">Блутут</string>
     <string name="powered">Напајано</string>
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_ip_address">IP адреса</string>
     <string name="wifi_provision_success_username">Корисничко име</string>
     <string name="filter_icon">Филтер</string>
+    <string name="action_delete_message">Обриши поруку</string>
 </resources>

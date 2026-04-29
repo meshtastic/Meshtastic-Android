@@ -131,4 +131,6 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_ip_address">IP Tala</string>
+    <string name="action_delete_message">Eyða skilaboðum</string>
 </resources>

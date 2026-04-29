@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s%s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">elimina filtro nodi</string>
     <string name="node_filter_title">Filtra per</string>
@@ -329,6 +330,8 @@
     <string name="currently">Attualmente:</string>
     <string name="mute_status_always">Sempre mutato</string>
     <string name="mute_status_unmuted">Non mutato</string>
+    <string name="mute_status_muted_for_days">Mutato per %1$d giorni, %2$s ore</string>
+    <string name="mute_status_muted_for_hours">Mutato per %1$s ore</string>
     <string name="mute_add">Silenziare le notifiche per '%1$s'?</string>
     <string name="mute_remove">Ripristinare le notifiche per '%1$s'?</string>
     <string name="replace">Sostituisci</string>
@@ -407,11 +410,17 @@
     <string name="channel_1">Canale 1</string>
     <string name="channel_2">Canale 2</string>
     <string name="channel_3">Canale 3</string>
+    <string name="channel_4">Canale 4</string>
+    <string name="channel_5">Canale 5</string>
+    <string name="channel_6">Canale 6</string>
+    <string name="channel_7">Canale 7</string>
+    <string name="channel_8">Canale 8</string>
     <string name="current">Attuale</string>
     <string name="voltage">Tensione</string>
     <string name="are_you_sure">Sei sicuro?</string>
     <string name="router_role_confirmation_text"><![CDATA[Ho letto la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentazione sui ruoli dei dispositivi </a> e il post del blog su <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> Scegliere il ruolo giusto del dispositivo </a>.]]></string>
     <string name="i_know_what_i_m_doing">So cosa sto facendo.</string>
+    <string name="low_battery_message">Il nodo %1$s ha la batteria quasi scarica (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Notifica di batteria scarica</string>
     <string name="low_battery_title">Poca energia rimanente nella batteria: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifiche batteria scarica (nodi preferiti)</string>
@@ -955,6 +964,7 @@
     <string name="all_time">Tutti</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Configurazione</string>
+    <string name="updated">Aggiornato</string>
     <!-- Network Map Layers -->
     <string name="tak_team_red">Rosso</string>
     <string name="tak_team_blue">Blu</string>
@@ -968,4 +978,5 @@
     <string name="wifi_provision_success_done">Fatto</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filtro</string>
+    <string name="action_delete_message">Eliminare il messaggio</string>
 </resources>
