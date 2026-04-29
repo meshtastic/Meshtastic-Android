@@ -42,6 +42,7 @@ class FakeBleDevice(
     override val address: String,
     override val name: String? = "Fake Device",
     initialState: BleConnectionState = BleConnectionState.Disconnected(),
+    override val rssi: Int? = null,
 ) : BaseFake(),
     BleDevice {
     private val _state = mutableStateFlow(initialState)
