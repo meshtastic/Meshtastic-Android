@@ -19,6 +19,7 @@ package org.meshtastic.core.ui.component
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.internal
@@ -46,5 +47,5 @@ fun TransportIcon(transport: Int, viaMqtt: Boolean, modifier: Modifier = Modifie
                 MeshtasticIcons.Device to stringResource(Res.string.internal)
             else -> return
         }
-    Icon(icon, contentDescription = description, modifier = modifier)
+    Icon(icon, contentDescription = description, modifier = modifier, tint = Color.White)
 }
