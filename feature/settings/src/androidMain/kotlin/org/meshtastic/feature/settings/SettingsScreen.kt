@@ -40,6 +40,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
+import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
@@ -56,6 +57,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
@@ -244,6 +246,12 @@ fun SettingsScreen(
                     onShowThemePicker = { showThemePickerDialog = true },
                     onShowContrastPicker = { showContrastPickerDialog = true },
                 )
+
+                ExpressiveSection(title = "Local Mesh Discovery") {
+                    ListItem(text = "Local Mesh Discovery", leadingIcon = MeshtasticIcons.PermScanWifi) {
+                        onNavigate(DiscoveryRoute.DiscoveryGraph)
+                    }
+                }
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {

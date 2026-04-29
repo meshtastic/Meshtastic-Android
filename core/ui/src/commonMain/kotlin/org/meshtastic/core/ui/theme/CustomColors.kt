@@ -113,6 +113,14 @@ object StatusColors {
             }
 }
 
+@Suppress("MagicNumber")
+object DiscoveryMapColors {
+    val DirectNode = Color(0xFF4CAF50)
+    val MeshNode = Color(0xFF2196F3)
+    val UserPosition = Color(0xFFFF9800)
+    val DirectLine = Color(0x804CAF50)
+}
+
 object MessageItemColors {
     val Red = Color(0x4DFF0000)
 }
