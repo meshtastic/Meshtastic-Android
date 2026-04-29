@@ -444,8 +444,8 @@
     <string name="traceroute_map_no_data">This traceroute does not have any mappable nodes yet.</string>
     <string name="traceroute_showing_nodes">Showing %1$d/%2$d nodes</string>
     <string name="traceroute_duration">Duration: %1$s s</string>
-    <string name="traceroute_route_towards_dest">Route traced toward destination:\n</string>
-    <string name="traceroute_route_back_to_us">Route traced back to us:\n</string>
+    <string name="traceroute_route_towards_dest">Route traced toward destination:\n\n</string>
+    <string name="traceroute_route_back_to_us">Route traced back to us:\n\n</string>
     <string name="traceroute_forward_hops">Forward Hops</string>
     <string name="traceroute_return_hops">Return Hops</string>
     <string name="traceroute_round_trip">Round Trip</string>
