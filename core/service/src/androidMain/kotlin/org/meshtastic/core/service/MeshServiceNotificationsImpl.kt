@@ -51,6 +51,7 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.R.raw
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
@@ -111,7 +112,8 @@ class MeshServiceNotificationsImpl(
     private val nodeRepository: Lazy<NodeRepository>,
 ) : MeshServiceNotifications {
 
-    private val notificationManager = context.getSystemService<NotificationManager>()!!
+    private val notificationManager =
+        checkNotNull(context.getSystemService<NotificationManager>()) { "NotificationManager not found" }
 
     companion object {
         const val MAX_BATTERY_LEVEL = 100
@@ -418,7 +420,7 @@ class MeshServiceNotificationsImpl(
                     if (nodeId == DataPacket.ID_LOCAL) {
                         ourNode ?: nodeRepository.value.getNode(nodeId)
                     } else {
-                        nodeRepository.value.getNode(nodeId ?: "")
+                        nodeRepository.value.getNode(nodeId.orEmpty())
                     }
                 }
                 .first()
@@ -480,7 +482,7 @@ class MeshServiceNotificationsImpl(
 
         val summaryNotification =
             commonBuilder(NotificationType.DirectMessage)
-                .setSmallIcon(context.applicationInfo.icon)
+                .setSmallIcon(drawable.meshtastic_ic_notification)
                 .setStyle(messagingStyle)
                 .setGroup(GROUP_KEY_MESSAGES)
                 .setGroupSummary(true)
@@ -841,7 +843,7 @@ class MeshServiceNotificationsImpl(
         type: NotificationType,
         contentIntent: PendingIntent? = null,
     ): NotificationCompat.Builder {
-        val smallIcon = context.applicationInfo.icon
+        val smallIcon = drawable.meshtastic_ic_notification
 
         return NotificationCompat.Builder(context, type.channelId)
             .setSmallIcon(smallIcon)
