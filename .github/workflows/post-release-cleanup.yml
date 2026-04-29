@@ -19,7 +19,6 @@ permissions:
 jobs:
   cleanup_prereleases:
     runs-on: ubuntu-24.04-arm
-    environment: Release
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
