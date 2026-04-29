@@ -25,6 +25,7 @@ import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
@@ -35,6 +36,7 @@ class NeighborInfoHandlerImpl(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
+    private val nodeRepository: NodeRepository,
 ) : NeighborInfoHandler {
 
     private val startTimes = atomic(persistentMapOf<Int, Long>())
@@ -66,12 +68,13 @@ class NeighborInfoHandlerImpl(
 
         val neighbors =
             ni.neighbors.joinToString("\n") { n ->
-                val node = nodeManager.nodeDBbyNodeNum[n.node_id]
-                val name = node?.let { "${it.user.long_name} (${it.user.short_name})" } ?: "Unknown"
+                val user = nodeRepository.getUser(n.node_id)
+                val name = "${user.long_name} (${user.short_name})"
                 "• $name (SNR: ${n.snr})"
             }
 
-        val formatted = "Neighbors of ${nodeManager.nodeDBbyNodeNum[from]?.user?.long_name ?: "Unknown"}:\n$neighbors"
+        val fromUser = nodeRepository.getUser(from)
+        val formatted = "Neighbors of ${fromUser.long_name}:\n$neighbors"
 
         val responseText =
             if (start != null) {
