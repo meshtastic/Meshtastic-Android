@@ -130,6 +130,7 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
             is TAKConnectionEvent.Message -> {
                 onMessage?.invoke(event.cotMessage)
             }
+
             is TAKConnectionEvent.Disconnected -> {
                 serverScope?.launch {
                     connectionsMutex.withLock {
@@ -138,6 +139,7 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
                     }
                 }
             }
+
             is TAKConnectionEvent.Error -> {
                 Logger.w(event.error) { "TAK client connection error: $connectionId" }
                 serverScope?.launch {
@@ -147,9 +149,11 @@ class TAKServer(private val dispatchers: CoroutineDispatchers, private val port:
                     }
                 }
             }
+
             is TAKConnectionEvent.Connected -> {
                 /* no-op: logged by TAKClientConnection.start() */
             }
+
             is TAKConnectionEvent.ClientInfoUpdated -> {
                 /* no-op: TAKClientConnection tracks updated info locally */
             }

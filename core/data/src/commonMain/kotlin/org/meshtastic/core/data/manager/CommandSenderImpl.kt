@@ -111,7 +111,9 @@ class CommandSenderImpl(
 
         return when {
             myNum == toNum -> 0
+
             myNode?.hasPKC == true && destNode?.hasPKC == true -> DataPacket.PKC_CHANNEL_INDEX
+
             else ->
                 channelSet.value.settings
                     .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
@@ -373,6 +375,7 @@ class CommandSenderImpl(
 
     fun resolveNodeNum(toId: String): Int = when (toId) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
+
         else -> {
             val numericNum =
                 if (toId.startsWith(NODE_ID_PREFIX)) {

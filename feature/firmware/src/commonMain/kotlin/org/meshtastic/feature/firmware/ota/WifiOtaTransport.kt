@@ -92,6 +92,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
             val response = readResponse(ERASING_TIMEOUT_MS)
             when (val parsed = OtaResponse.parse(response)) {
                 is OtaResponse.Ok -> handshakeComplete = true
+
                 is OtaResponse.Erasing -> {
                     Logger.i { "WiFi OTA: Device erasing flash..." }
                     onHandshakeStatus(OtaHandshakeStatus.Erasing)
@@ -150,7 +151,10 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
                 val finalResponse = readResponse(VERIFICATION_TIMEOUT_MS)
                 when (val parsed = OtaResponse.parse(finalResponse)) {
                     is OtaResponse.Ok -> finalHandshakeComplete = true
-                    is OtaResponse.Ack -> {} // Ignore late ACKs
+
+                    is OtaResponse.Ack -> {}
+
+                    // Ignore late ACKs
                     is OtaResponse.Error -> {
                         if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
                             throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")

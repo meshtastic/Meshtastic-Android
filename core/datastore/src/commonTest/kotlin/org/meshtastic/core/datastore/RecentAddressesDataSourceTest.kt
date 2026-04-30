@@ -275,9 +275,11 @@ private class LegacyParsingHarness(private val rawJson: String) {
                             null
                         }
                     }
+
                     is JsonPrimitive -> {
                         item.contentOrNull?.let { RecentAddress(address = it, name = "Meshtastic") }
                     }
+
                     is JsonArray -> null
                 }
             },

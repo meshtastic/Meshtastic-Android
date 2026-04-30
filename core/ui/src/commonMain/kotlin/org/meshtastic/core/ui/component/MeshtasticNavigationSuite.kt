@@ -148,6 +148,7 @@ private fun handleNavigation(
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                 }
             }
+
             TopLevelDestination.Conversations -> {
                 val onConversationsList =
                     currentKey is ContactsRoute.ContactsGraph || currentKey is ContactsRoute.Contacts
@@ -157,6 +158,7 @@ private fun handleNavigation(
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                 }
             }
+
             else -> {
                 if (currentKey != destination.route) {
                     multiBackstack.navigateTopLevel(destination.route)

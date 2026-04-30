@@ -54,7 +54,9 @@ class Utf8ByteLengthFilter(private val maxBytes: Int) : InputFilter {
         var keepBytes = maxBytes - destByteCount
         return when {
             keepBytes <= 0 -> ""
+
             keepBytes >= srcByteCount -> null
+
             else -> {
                 for (i in start until end) {
                     val c = source[i]

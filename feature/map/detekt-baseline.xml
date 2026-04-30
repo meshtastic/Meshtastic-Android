@@ -2,6 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ModifierMissing:Main.kt:@Composable fun MainScreen</ID>
+    <ID>ComposableParamOrder:MapScreen.kt:@Composable fun MapScreen</ID>
   </CurrentIssues>
 </SmellBaseline>

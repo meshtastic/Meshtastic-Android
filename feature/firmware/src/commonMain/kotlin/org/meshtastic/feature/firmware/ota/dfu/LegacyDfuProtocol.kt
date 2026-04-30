@@ -129,6 +129,7 @@ internal sealed class LegacyDfuResponse {
                         Failure(requestOpcode, status)
                     }
                 }
+
                 LegacyDfuOpcode.PACKET_RECEIPT -> {
                     if (data.size < 5) return Unknown(data)
                     val bytes =
@@ -138,6 +139,7 @@ internal sealed class LegacyDfuResponse {
                             ((data[4].toLong() and 0xFF) shl 24)
                     PacketReceipt(bytes)
                 }
+
                 else -> Unknown(data)
             }
         }

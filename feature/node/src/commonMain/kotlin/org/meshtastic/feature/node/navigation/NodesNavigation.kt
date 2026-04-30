@@ -156,20 +156,28 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         when (routeInfo.routeClass) {
             NodeDetailRoute.DeviceMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.DeviceMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.PositionLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.PositionLog>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.EnvironmentMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.EnvironmentMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.SignalMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.SignalMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.PowerMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.PowerMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.HostMetricsLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.HostMetricsLog>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.PaxMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.PaxMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.NeighborInfoLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.NeighborInfoLog>(backStack, routeInfo) { it.destNum }
+
             else -> Unit
         }
     }

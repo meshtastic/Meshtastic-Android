@@ -318,6 +318,7 @@ open class ScannerViewModel(
                     false
                 }
             }
+
             is DeviceListEntry.Usb -> {
                 if (entry.bonded) {
                     changeDeviceAddress(entry.fullAddress)
@@ -327,10 +328,12 @@ open class ScannerViewModel(
                     false
                 }
             }
+
             is DeviceListEntry.Tcp -> {
                 safeLaunch(tag = "onSelectedTcp") { changeDeviceAddress(entry.fullAddress) }
                 true
             }
+
             is DeviceListEntry.Mock -> {
                 changeDeviceAddress(entry.fullAddress)
                 true

@@ -26,10 +26,16 @@ enum class DeviceType {
     companion object {
         fun fromAddress(address: String): DeviceType? = when (address.firstOrNull()) {
             'x' -> BLE
+
             's' -> USB
+
             't' -> TCP
-            'm' -> USB // Treat mock as USB for UI purposes
+
+            'm' -> USB
+
+            // Treat mock as USB for UI purposes
             'n' -> null
+
             else -> null
         }
     }

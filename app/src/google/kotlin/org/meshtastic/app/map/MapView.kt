@@ -1015,6 +1015,7 @@ private fun offsetPolyline(
         headingPoints.mapIndexed { index, _ ->
             when (index) {
                 0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
+
                 headingPoints.lastIndex ->
                     SphericalUtil.computeHeading(
                         headingPoints[headingPoints.lastIndex - 1],
@@ -1049,6 +1050,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
             try {
                 when (layerItem.layerType) {
                     LayerType.KML -> KmlLayer(map, inputStream, context)
+
                     LayerType.GEOJSON ->
                         GeoJsonLayer(map, JSONObject(inputStream.bufferedReader().use { it.readText() }))
                 }

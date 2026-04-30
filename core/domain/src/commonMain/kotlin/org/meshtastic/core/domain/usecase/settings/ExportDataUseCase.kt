@@ -110,7 +110,9 @@ constructor(
                                 "<${decoded?.portnum}>"
 
                             decoded != null -> decoded.payload.utf8().replace("\"", "\"\"")
+
                             encrypted != null -> "${encrypted.size} encrypted bytes"
+
                             else -> ""
                         }
 

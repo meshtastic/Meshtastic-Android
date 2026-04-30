@@ -330,10 +330,17 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
             val value = it.value
             when (value) {
                 is Double -> bundle.putDouble(it.name, value)
-                is Int -> bundle.putLong(it.name, value.toLong()) // Firebase expects Long for integer values in bundles
+
+                is Int -> bundle.putLong(it.name, value.toLong())
+
+                // Firebase expects Long for integer values in bundles
                 is Long -> bundle.putLong(it.name, value)
+
                 is Float -> bundle.putDouble(it.name, value.toDouble())
-                is String -> bundle.putString(it.name, value) // Explicitly handle String
+
+                is String -> bundle.putString(it.name, value)
+
+                // Explicitly handle String
                 else -> bundle.putString(it.name, value.toString()) // Fallback for other types
             }
             KermitLogger.withTag(TAG).d { "Analytics: track $event (${it.name} : $value)" }

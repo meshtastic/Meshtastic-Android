@@ -101,7 +101,9 @@ fun DeviceListItem(
                 }
 
             is DeviceListEntry.Usb -> MeshtasticIcons.Usb
+
             is DeviceListEntry.Tcp -> MeshtasticIcons.Wifi
+
             is DeviceListEntry.Mock -> MeshtasticIcons.Add
         }
 

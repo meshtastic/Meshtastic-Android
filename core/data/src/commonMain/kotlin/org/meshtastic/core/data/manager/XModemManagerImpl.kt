@@ -84,11 +84,14 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
             XModem.Control.SOH,
             XModem.Control.STX,
             -> handleDataBlock(packet)
+
             XModem.Control.EOT -> handleEot()
+
             XModem.Control.CAN -> {
                 Logger.w { "XModem: CAN received — transfer cancelled" }
                 reset()
             }
+
             else -> Logger.w { "XModem: unexpected control byte ${packet.control}, ignoring" }
         }
     }
@@ -110,11 +113,13 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
                 Logger.d { "XModem: block $seq OK, total=${blocks.size} blocks" }
                 sendControl(XModem.Control.ACK)
             }
+
             // Duplicate: sender did not receive our previous ACK; re-ACK without buffering again.
             (expectedSeq - 1 + MAX_SEQ_PLUS_ONE) % MAX_SEQ_PLUS_ONE -> {
                 Logger.d { "XModem: duplicate block $seq — re-ACK" }
                 sendControl(XModem.Control.ACK)
             }
+
             else -> {
                 Logger.w { "XModem: unexpected seq $seq (expected $expectedSeq) — NAK" }
                 sendControl(XModem.Control.NAK)

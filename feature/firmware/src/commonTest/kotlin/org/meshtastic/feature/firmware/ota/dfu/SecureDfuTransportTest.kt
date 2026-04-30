@@ -677,16 +677,22 @@ class SecureDfuTransportTest {
 
             return when (opcode) {
                 DfuOpcode.SET_PRN -> buildDfuSuccess(DfuOpcode.SET_PRN)
+
                 DfuOpcode.SELECT -> buildSelectResponse(maxObjectSize, selectOffset, selectCrc)
+
                 DfuOpcode.CREATE -> buildDfuSuccess(DfuOpcode.CREATE)
+
                 DfuOpcode.CALCULATE_CHECKSUM -> {
                     val crc =
                         firmwareData?.let { DfuCrc32.calculate(it, length = minOf(accumulatedPacketBytes, it.size)) }
                             ?: totalCrc
                     buildChecksumResponse(accumulatedPacketBytes, crc)
                 }
+
                 DfuOpcode.EXECUTE -> buildDfuSuccess(DfuOpcode.EXECUTE)
+
                 DfuOpcode.ABORT -> buildDfuSuccess(DfuOpcode.ABORT)
+
                 else -> null
             }
         }

@@ -53,9 +53,8 @@ class FakeMeshLogRepository :
 
     override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = logsFlow
 
-    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> = logsFlow.map {
-        it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum }
-    }
+    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> =
+        logsFlow.map { it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum } }
 
     override fun getMeshPacketsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshPacket>> = MutableStateFlow(emptyList())
 

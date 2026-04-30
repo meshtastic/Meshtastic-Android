@@ -122,10 +122,18 @@ fun MaterialBluetoothSignalInfo(rssi: Int, modifier: Modifier = Modifier) {
 
 @Suppress("MagicNumber")
 private fun getBluetoothSignalBars(rssi: Int): Int = when {
-    rssi > -60 -> 4 // Excellent
-    rssi > -70 -> 3 // Good
-    rssi > -80 -> 2 // Fair
-    rssi > -90 -> 1 // Weak
+    rssi > -60 -> 4
+
+    // Excellent
+    rssi > -70 -> 3
+
+    // Good
+    rssi > -80 -> 2
+
+    // Fair
+    rssi > -90 -> 1
+
+    // Weak
     else -> 0 // Poor/No Signal
 }
 

@@ -206,11 +206,8 @@ private fun determineSecurityState(
     isMqttEnabled: Boolean,
 ): SecurityState = when {
     !isLowEntropyKey -> SecurityState.SECURE
-
     isMqttEnabled && isPreciseLocation -> SecurityState.INSECURE_PRECISE_MQTT_WARNING
-
     isPreciseLocation -> SecurityState.INSECURE_PRECISE_ONLY
-
     else -> SecurityState.INSECURE_NO_PRECISE
 }
 

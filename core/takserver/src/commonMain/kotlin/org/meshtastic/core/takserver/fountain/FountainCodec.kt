@@ -117,7 +117,9 @@ internal class JavaRandom(seed: Long) {
 
     fun nextInt(bound: Int): Int = when {
         bound <= 0 -> 0
+
         (bound and -bound) == bound -> ((bound.toLong() * next(31).toLong()) shr 31).toInt()
+
         else -> {
             var bits: Int
             var valResult: Int

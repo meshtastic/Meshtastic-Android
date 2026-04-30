@@ -106,6 +106,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                 }
+
                 is okio.ByteString -> {
                     EditBase64Preference(
                         title = "${index + 1}/$maxCount",
@@ -119,6 +120,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                 }
+
                 is RemoteHardwarePin -> {
                     EditTextPreference(
                         title = stringResource(Res.string.gpio_pin),

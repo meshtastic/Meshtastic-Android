@@ -427,9 +427,11 @@ class MapViewModel(
                                             "kml",
                                             "kmz",
                                             -> LayerType.KML
+
                                             "geojson",
                                             "json",
                                             -> LayerType.GEOJSON
+
                                             else -> null
                                         }
 

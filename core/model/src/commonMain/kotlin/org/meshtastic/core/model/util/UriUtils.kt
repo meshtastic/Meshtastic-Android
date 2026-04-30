@@ -45,10 +45,12 @@ fun handleMeshtasticUri(
             onChannel(uri)
             true
         }
+
         segments.any { it.equals("v", ignoreCase = true) } -> {
             onContact(uri)
             true
         }
+
         else -> false
     }
 }

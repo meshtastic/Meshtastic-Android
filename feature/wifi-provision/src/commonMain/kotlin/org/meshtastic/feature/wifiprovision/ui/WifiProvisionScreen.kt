@@ -171,7 +171,9 @@ fun WifiProvisionScreen(
             when (error) {
                 is WifiProvisionError.ConnectFailed ->
                     stringResource(Res.string.wifi_provision_connect_failed, error.detail)
+
                 is WifiProvisionError.ScanFailed -> stringResource(Res.string.wifi_provision_scan_failed, error.detail)
+
                 is WifiProvisionError.ProvisionFailed -> error.detail
             }
         }
@@ -205,13 +207,16 @@ fun WifiProvisionScreen(
             Crossfade(targetState = screenKey(uiState), label = "wifi_provision") { key ->
                 when (key) {
                     ScreenKey.ConnectingBle -> ScanningBleContent()
+
                     ScreenKey.DeviceFound ->
                         DeviceFoundContent(
                             deviceName = uiState.deviceName,
                             onProceed = viewModel::scanNetworks,
                             onCancel = onNavigateUp,
                         )
+
                     ScreenKey.LoadingNetworks -> ScanningNetworksContent()
+
                     ScreenKey.Connected ->
                         ConnectedContent(
                             networks = uiState.networks,
@@ -247,8 +252,11 @@ private fun screenKey(state: WifiProvisionUiState): ScreenKey = when (state.phas
     Phase.Idle,
     Phase.ConnectingBle,
     -> ScreenKey.ConnectingBle
+
     Phase.DeviceFound -> ScreenKey.DeviceFound
+
     Phase.LoadingNetworks -> if (state.networks.isEmpty()) ScreenKey.LoadingNetworks else ScreenKey.Connected
+
     Phase.Connected,
     Phase.Provisioning,
     -> ScreenKey.Connected

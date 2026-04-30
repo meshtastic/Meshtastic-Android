@@ -103,7 +103,9 @@ class MockRadioTransport(
         when {
             data != null && data.portnum == PortNum.ADMIN_APP ->
                 handleAdminPacket(pr, AdminMessage.ADAPTER.decode(data.payload))
+
             packet != null && packet.want_ack == true -> sendFakeAck(pr)
+
             else -> Logger.i { "Ignoring data sent to mock transport $pr" }
         }
     }

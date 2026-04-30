@@ -453,8 +453,10 @@ class LegacyDfuTransport(
                             "got 0x${response.requestOpcode.toUByte().toString(16).padStart(2, '0')}",
                     )
                 }
+
             is LegacyDfuResponse.Failure ->
                 throw LegacyDfuException.ProtocolError(response.requestOpcode, response.status)
+
             else ->
                 throw DfuException.TransferFailed(
                     "Unexpected Legacy DFU response for opcode 0x${expectedOpcode.toUByte().toString(16)}: $response",

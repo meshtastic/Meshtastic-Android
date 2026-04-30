@@ -99,10 +99,15 @@ object LanguageUtils {
         return languageTags.associateWith { languageTag ->
             when (languageTag) {
                 SYSTEM_DEFAULT -> stringResource(Res.string.preferences_system_default)
+
                 "ht" -> stringResource(Res.string.fr_HT)
+
                 "pt-BR" -> stringResource(Res.string.pt_BR)
+
                 "zh-CN" -> stringResource(Res.string.zh_CN)
+
                 "zh-TW" -> stringResource(Res.string.zh_TW)
+
                 else -> {
                     Locale.forLanguageTag(languageTag).let { locale ->
                         locale.getDisplayLanguage(locale).replaceFirstChar { char ->

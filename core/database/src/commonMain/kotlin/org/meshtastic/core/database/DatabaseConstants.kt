@@ -51,7 +51,9 @@ fun buildDbName(address: String?): String = if (address.isNullOrBlank()) {
 
 fun anonymizeAddress(address: String?): String = when {
     address == null -> "null"
+
     address.length <= DatabaseConstants.ADDRESS_ANON_SHORT_LEN -> address
+
     else ->
         address.take(DatabaseConstants.ADDRESS_ANON_EDGE_LEN) +
             "…" +

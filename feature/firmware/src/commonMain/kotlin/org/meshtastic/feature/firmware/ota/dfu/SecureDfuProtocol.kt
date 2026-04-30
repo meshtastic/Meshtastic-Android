@@ -185,10 +185,12 @@ internal sealed class DfuResponse {
                         crc32 = data.readIntLe(11),
                     )
                 }
+
                 DfuOpcode.CALCULATE_CHECKSUM -> {
                     if (data.size < 11) return Failure(opcode, DfuResultCode.INVALID_PARAMETER)
                     ChecksumResult(offset = data.readIntLe(3), crc32 = data.readIntLe(7))
                 }
+
                 else -> Success(opcode)
             }
         }

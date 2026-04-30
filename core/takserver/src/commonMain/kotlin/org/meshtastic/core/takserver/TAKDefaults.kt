@@ -40,6 +40,7 @@ internal fun Team?.toTakTeamName(): String = when (this) {
     null,
     Team.Unspecifed_Color,
     -> DEFAULT_TAK_TEAM_NAME
+
     else -> name.replace('_', ' ')
 }
 
@@ -47,9 +48,13 @@ internal fun MemberRole?.toTakRoleName(): String = when (this) {
     null,
     MemberRole.Unspecifed,
     -> DEFAULT_TAK_ROLE_NAME
+
     MemberRole.TeamMember -> DEFAULT_TAK_ROLE_NAME
+
     MemberRole.TeamLead -> "Team Lead"
+
     MemberRole.ForwardObserver -> "Forward Observer"
+
     else -> name
 }
 

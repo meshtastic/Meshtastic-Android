@@ -86,6 +86,7 @@ class BleReconnectPolicy(
                 evaluateFailure()
             }
         }
+
         is Outcome.Failed -> {
             consecutiveFailures++
             Logger.w { "Connection failed (consecutive failures: $consecutiveFailures)" }
@@ -128,15 +129,18 @@ class BleReconnectPolicy(
 
             when (val action = processOutcome(outcome)) {
                 is Action.Continue -> continue
+
                 is Action.Retry -> {
                     Logger.d { "Retrying in ${action.backoff} (failure #$consecutiveFailures)" }
                     delay(action.backoff)
                 }
+
                 is Action.SignalTransient -> {
                     onTransientDisconnect(lastError)
                     Logger.d { "Retrying in ${action.backoff} (failure #$consecutiveFailures)" }
                     delay(action.backoff)
                 }
+
                 is Action.GiveUp -> {
                     Logger.e { "Giving up after $consecutiveFailures consecutive failures" }
                     onPermanentDisconnect(lastError)

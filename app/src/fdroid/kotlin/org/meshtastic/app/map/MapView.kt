@@ -658,9 +658,11 @@ fun MapView(
                         scope.launch { context.showToast(Res.string.calculating) }
                         showCurrentCacheInfo = true
                     }
+
                     CacheManagerOption.DownloadRegion -> map.generateBoxOverlay()
 
                     CacheManagerOption.ClearTiles -> showPurgeTileSourceDialog = true
+
                     CacheManagerOption.Cancel -> Unit
                 }
                 showCacheManagerDialog = false

@@ -116,7 +116,9 @@ class TelemetryPacketHandlerImpl(
                         }
                     }
                 }
+
                 environment != null -> nextNode = nextNode.copy(environmentMetrics = environment)
+
                 power != null -> nextNode = nextNode.copy(powerMetrics = power)
             }
 
@@ -140,6 +142,7 @@ class TelemetryPacketHandlerImpl(
             }
 
             batteryLevel == BATTERY_PERCENT_LOW_THRESHOLD -> shouldDisplay = true
+
             batteryLevel.mod(BATTERY_PERCENT_LOW_DIVISOR) == 0 && !isRemote -> shouldDisplay = true
 
             isRemote -> shouldDisplay = true

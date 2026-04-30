@@ -508,7 +508,9 @@ interface PacketDao {
                     val newIndex =
                         when {
                             pskMatches.isEmpty() -> null
+
                             pskMatches.size == 1 -> pskMatches.first().first
+
                             else -> {
                                 // Multiple matches with same PSK. Disambiguate by Name.
                                 val nameMatches = pskMatches.filter { it.second.name == oldChannel.name }

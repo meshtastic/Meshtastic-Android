@@ -258,14 +258,18 @@ private fun MqttStatusRow(state: MqttConnectionState) {
         when (state) {
             is MqttConnectionState.Inactive ->
                 stringResource(Res.string.mqtt_status_inactive) to MaterialTheme.colorScheme.outline
+
             is MqttConnectionState.Disconnected -> {
                 val text =
                     state.reason?.let { stringResource(Res.string.mqtt_status_disconnected_with_reason, it) }
                         ?: stringResource(Res.string.mqtt_status_disconnected)
                 text to MaterialTheme.colorScheme.error
             }
+
             is MqttConnectionState.Connecting -> stringResource(Res.string.mqtt_status_connecting) to AmberColor
+
             is MqttConnectionState.Connected -> stringResource(Res.string.mqtt_status_connected) to GreenColor
+
             is MqttConnectionState.Reconnecting -> {
                 val err = state.lastError
                 val text =
@@ -352,25 +356,33 @@ private fun MqttProbeRow(enabled: Boolean, status: MqttProbeStatus?, onTestClick
 @Composable
 private fun MqttProbeStatus?.toLabel(): Pair<String, Color>? = when (this) {
     null -> null
+
     is MqttProbeStatus.Probing ->
         stringResource(Res.string.mqtt_probe_running) to MaterialTheme.colorScheme.onSurfaceVariant
+
     is MqttProbeStatus.Success -> {
         val text =
             serverInfo?.let { stringResource(Res.string.mqtt_probe_success_with_info, it) }
                 ?: stringResource(Res.string.mqtt_probe_success)
         text to GreenColor
     }
+
     is MqttProbeStatus.Rejected ->
         stringResource(Res.string.mqtt_probe_rejected, reason ?: reasonCode.toString()) to
             MaterialTheme.colorScheme.error
+
     is MqttProbeStatus.DnsFailure ->
         stringResource(Res.string.mqtt_probe_dns_failure) to MaterialTheme.colorScheme.error
+
     is MqttProbeStatus.TcpFailure ->
         stringResource(Res.string.mqtt_probe_tcp_failure) to MaterialTheme.colorScheme.error
+
     is MqttProbeStatus.TlsFailure ->
         stringResource(Res.string.mqtt_probe_tls_failure) to MaterialTheme.colorScheme.error
+
     is MqttProbeStatus.Timeout ->
         stringResource(Res.string.mqtt_probe_timeout, timeoutMs.toInt()) to MaterialTheme.colorScheme.error
+
     is MqttProbeStatus.Other ->
         stringResource(Res.string.mqtt_probe_other_failure) to MaterialTheme.colorScheme.error
 }

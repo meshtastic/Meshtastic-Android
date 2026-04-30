@@ -65,10 +65,12 @@ class AndroidCompassHeadingProvider(private val context: Context) : CompassHeadi
                         Sensor.TYPE_ROTATION_VECTOR -> {
                             SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
                         }
+
                         Sensor.TYPE_ACCELEROMETER -> {
                             System.arraycopy(event.values, 0, accelValues, 0, accelValues.size)
                             hasAccel = true
                         }
+
                         Sensor.TYPE_MAGNETIC_FIELD -> {
                             System.arraycopy(event.values, 0, magnetValues, 0, magnetValues.size)
                             hasMagnet = true

@@ -103,8 +103,11 @@ class ConnectionsViewModel(
             when (state) {
                 is ConnectionState.Connected ->
                     if (unset) ConnectionStatus.MUST_SET_REGION else ConnectionStatus.CONNECTED
+
                 ConnectionState.Connecting -> ConnectionStatus.CONNECTING
+
                 ConnectionState.Disconnected -> ConnectionStatus.NOT_CONNECTED
+
                 ConnectionState.DeviceSleep -> ConnectionStatus.CONNECTED_SLEEPING
             }
         }

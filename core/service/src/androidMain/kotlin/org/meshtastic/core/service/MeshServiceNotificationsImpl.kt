@@ -312,8 +312,11 @@ class MeshServiceNotificationsImpl(
             when (state) {
                 is ConnectionState.Connected ->
                     getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
+
                 is ConnectionState.Disconnected -> getString(Res.string.disconnected)
+
                 is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
+
                 is ConnectionState.Connecting -> getString(Res.string.connecting)
             }
 

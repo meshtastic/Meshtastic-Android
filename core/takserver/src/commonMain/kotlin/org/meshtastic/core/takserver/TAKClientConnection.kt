@@ -152,10 +152,12 @@ class TAKClientConnection(
                     handleProtocolControl(cotMessage.type, xmlString)
                     return
                 }
+
                 cotMessage.type == "t-x-c-t" || cotMessage.uid == "ping" -> {
                     sendPong()
                     return
                 }
+
                 else -> {
                     cotMessage.contact?.let { contact ->
                         val updatedClientInfo =

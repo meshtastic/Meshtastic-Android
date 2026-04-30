@@ -27,8 +27,11 @@ import com.juul.kable.State
  */
 fun State.toBleConnectionState(hasStartedConnecting: Boolean): BleConnectionState? = when (this) {
     is State.Connecting -> BleConnectionState.Connecting
+
     is State.Connected -> BleConnectionState.Connected
+
     is State.Disconnecting -> BleConnectionState.Disconnecting
+
     is State.Disconnected ->
         if (hasStartedConnecting) BleConnectionState.Disconnected(status.toDisconnectReason()) else null
 }
@@ -41,17 +44,26 @@ fun State.toBleConnectionState(hasStartedConnecting: Boolean): BleConnectionStat
  */
 fun State.Disconnected.Status?.toDisconnectReason(): DisconnectReason = when (this) {
     null -> DisconnectReason.Unknown
+
     State.Disconnected.Status.CentralDisconnected -> DisconnectReason.LocalDisconnect
+
     State.Disconnected.Status.PeripheralDisconnected -> DisconnectReason.RemoteDisconnect
+
     State.Disconnected.Status.Failed,
     State.Disconnected.Status.L2CapFailure,
     -> DisconnectReason.ConnectionFailed
+
     State.Disconnected.Status.Timeout,
     State.Disconnected.Status.LinkManagerProtocolTimeout,
     -> DisconnectReason.Timeout
+
     State.Disconnected.Status.Cancelled -> DisconnectReason.Cancelled
+
     State.Disconnected.Status.EncryptionTimedOut -> DisconnectReason.EncryptionFailed
+
     State.Disconnected.Status.ConnectionLimitReached -> DisconnectReason.ConnectionFailed
+
     State.Disconnected.Status.UnknownDevice -> DisconnectReason.ConnectionFailed
+
     is State.Disconnected.Status.Unknown -> DisconnectReason.PlatformSpecific(status)
 }

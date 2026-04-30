@@ -51,6 +51,7 @@ sealed class UiText {
     @Composable
     fun asString(): String = when (this) {
         is DynamicString -> value
+
         is Resource -> {
             val resolvedArgs =
                 args.map { arg ->
@@ -68,6 +69,7 @@ sealed class UiText {
     /** Resolves the string in a suspend context. Useful for non-composable code like snackbars. */
     suspend fun resolve(): String = when (this) {
         is DynamicString -> value
+
         is Resource -> {
             val resolvedArgs =
                 args.map { arg ->

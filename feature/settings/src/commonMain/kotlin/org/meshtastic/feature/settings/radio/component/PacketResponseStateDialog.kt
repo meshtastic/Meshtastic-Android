@@ -79,12 +79,15 @@ fun <T> PacketResponseStateDialog(
                     is ResponseState.Loading -> {
                         LoadingContent(state = state, onComplete = onComplete)
                     }
+
                     is ResponseState.Success -> {
                         SuccessContent()
                     }
+
                     is ResponseState.Error -> {
                         ErrorContent(state = state)
                     }
+
                     ResponseState.Empty -> {}
                 }
             }

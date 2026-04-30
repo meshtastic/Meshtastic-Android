@@ -33,6 +33,14 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
     basePath.set(rootDir)
     failOnSeverity.set(FailOnSeverity.Error)
 
+    // Use per-module baseline files to suppress pre-existing violations introduced by the
+    // detekt 2.0 upgrade. New violations will still be caught. Remove baselines incrementally
+    // as modules are cleaned up.
+    val baselineFile = project.file("detekt-baseline.xml")
+    if (baselineFile.exists()) {
+        baseline.set(baselineFile)
+    }
+
     // Default sources
     source.setFrom(
         files(

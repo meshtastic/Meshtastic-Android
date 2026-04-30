@@ -185,7 +185,9 @@ class FirmwareUpdateViewModel(
                                     }
 
                                     radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
+
                                     radioPrefs.isTcp() -> FirmwareUpdateMethod.Wifi
+
                                     else -> FirmwareUpdateMethod.Unknown
                                 }
                             _state.value =

@@ -66,6 +66,7 @@ fun ConnectionActionButton(
             ) {
                 content()
             }
+
         ConnectionActionButtonStyle.Tonal ->
             FilledTonalButton(
                 onClick = onClick,
@@ -75,6 +76,7 @@ fun ConnectionActionButton(
             ) {
                 content()
             }
+
         ConnectionActionButtonStyle.Outlined ->
             OutlinedButton(
                 onClick = onClick,
@@ -84,6 +86,7 @@ fun ConnectionActionButton(
             ) {
                 content()
             }
+
         ConnectionActionButtonStyle.Text ->
             TextButton(
                 onClick = onClick,

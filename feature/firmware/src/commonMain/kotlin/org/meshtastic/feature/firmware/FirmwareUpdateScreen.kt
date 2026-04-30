@@ -315,12 +315,14 @@ private fun FirmwareUpdateContent(
                 ProgressContent(state.progressState, onCancel = actions.onCancel, isUpdating = true)
 
             is FirmwareUpdateState.Verifying -> VerifyingState()
+
             is FirmwareUpdateState.VerificationFailed ->
                 VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
 
             is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
 
             is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
+
             is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
         }
     }

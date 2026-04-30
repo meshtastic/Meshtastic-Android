@@ -381,7 +381,9 @@ private fun MuteNotificationsDialog(
                                         stringResource(Res.string.mute_status_unmuted)
                                     }
                                 }
+
                                 settings.muteUntil == Long.MAX_VALUE -> stringResource(Res.string.mute_status_always)
+
                                 else -> stringResource(Res.string.mute_status_unmuted)
                             }
                         Text(

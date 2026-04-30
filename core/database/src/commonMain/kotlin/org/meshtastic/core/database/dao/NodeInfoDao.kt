@@ -122,8 +122,11 @@ interface NodeInfoDao {
                     incomingKey
                 }
             }
+
             existingHasKey -> existingKey
+
             incomingNode.user.is_licensed -> ByteString.EMPTY
+
             else -> existingKey
         }
     }

@@ -157,11 +157,13 @@ class MQTTRepositoryImpl(
                 }
                 when {
                     result.isSuccess -> return@launch
+
                     result.exceptionOrNull() is MqttException.ConnectionRejected -> {
                         Logger.e(result.exceptionOrNull()) { "MQTT connection rejected (unrecoverable), stopping" }
                         close(result.exceptionOrNull()!!)
                         return@launch
                     }
+
                     else -> {
                         Logger.e(result.exceptionOrNull()) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
                         delay(reconnectDelay)

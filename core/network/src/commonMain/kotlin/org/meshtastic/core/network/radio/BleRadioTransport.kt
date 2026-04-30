@@ -483,9 +483,11 @@ class BleRadioTransport(
         val msg =
             when (this) {
                 is RadioNotConnectedException -> this.message ?: "Device not found"
+
                 is NoSuchElementException,
                 is IllegalArgumentException,
                 -> "Required characteristic missing"
+
                 else -> this.message ?: this::class.simpleName ?: "Unknown"
             }
         return false to msg

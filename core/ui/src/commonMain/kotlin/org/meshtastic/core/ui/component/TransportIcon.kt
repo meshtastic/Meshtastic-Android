@@ -39,12 +39,16 @@ fun TransportIcon(transport: Int, viaMqtt: Boolean, modifier: Modifier = Modifie
         when {
             viaMqtt || transport == MeshPacket.TransportMechanism.TRANSPORT_MQTT.value ->
                 MeshtasticIcons.MqttConnected to stringResource(Res.string.via_mqtt)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_MULTICAST_UDP.value ->
                 MeshtasticIcons.Udp to stringResource(Res.string.via_udp)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_API.value ->
                 MeshtasticIcons.Api to stringResource(Res.string.via_api)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_INTERNAL.value ->
                 MeshtasticIcons.Device to stringResource(Res.string.internal)
+
             else -> return
         }
     Icon(icon, contentDescription = description, modifier = modifier, tint = Color.White)

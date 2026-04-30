@@ -357,6 +357,7 @@ private fun EmojiGrid(
             when (item) {
                 is GridItem.Header ->
                     item(span = { GridItemSpan(maxLineSpan) }, key = item.key) { SectionHeader(title = item.title) }
+
                 is GridItem.EmojiCell ->
                     item(key = item.key) {
                         EmojiCellWithSkinTone(

@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>Kdoc:TcpDiscoveryHelpers.kt:/** * Shared helpers for TCP device discovery logic used by both [CommonGetDiscoveredDevicesUseCase] and the * Android-specific variant. */</ID>
+  </CurrentIssues>
 </SmellBaseline>

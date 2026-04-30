@@ -351,32 +351,39 @@ private fun handleKeyboardShortcut(
             exitApplication()
             true
         }
+
         Key.Comma -> {
             if (TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())) {
                 multiBackstack.navigateTopLevel(TopLevelDestination.Settings.route)
             }
             true
         }
+
         Key.One -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Conversations.route)
             true
         }
+
         Key.Two -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Nodes.route)
             true
         }
+
         Key.Three -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
             true
         }
+
         Key.Four -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Connections.route)
             true
         }
+
         Key.Slash -> {
             backStack.add(SettingsRoute.About)
             true
         }
+
         else -> false
     }
 }

@@ -133,6 +133,7 @@ class SecureDfuHandler(
                     when (protocol) {
                         DfuProtocolKind.LEGACY ->
                             LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+
                         DfuProtocolKind.SECURE ->
                             SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
                     }

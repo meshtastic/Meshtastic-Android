@@ -85,8 +85,11 @@ private fun getTint(connectionState: ConnectionState): Color = when (connectionS
 fun getIconPair(connectionState: ConnectionState, deviceType: DeviceType? = null): Pair<ImageVector, ImageVector?> =
     when (connectionState) {
         ConnectionState.Disconnected -> MeshtasticIcons.NoDevice to null
+
         ConnectionState.DeviceSleep -> MeshtasticIcons.Device to MeshtasticIcons.DeviceSleep
+
         ConnectionState.Connecting -> MeshtasticIcons.Device to MeshtasticIcons.Reconnecting
+
         else ->
             MeshtasticIcons.Device to
                 when (deviceType) {

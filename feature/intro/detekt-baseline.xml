@@ -1,5 +1,8 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>ComposableParamOrder:PermissionScreenLayout.kt:@Composable internal fun PermissionScreenLayout</ID>
+    <ID>ParameterNaming:WelcomeScreen.kt:onGetStarted: () -> Unit</ID>
+  </CurrentIssues>
 </SmellBaseline>

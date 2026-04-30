@@ -191,7 +191,9 @@ class DeviceHardwareRepositoryImpl(
 
     private fun disambiguate(entities: List<DeviceHardwareEntity>, target: String?): DeviceHardwareEntity? = when {
         entities.isEmpty() -> null
+
         target == null -> entities.first()
+
         else -> {
             entities.find { it.platformioTarget == target }
                 ?: entities.find { it.platformioTarget.equals(target, ignoreCase = true) }

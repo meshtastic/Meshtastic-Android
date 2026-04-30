@@ -95,9 +95,13 @@ enum class ConfigRoute(
     companion object {
         private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
             when {
-                metadata == null -> true // Include all routes if metadata is null
+                metadata == null -> true
+
+                // Include all routes if metadata is null
                 it == BLUETOOTH -> metadata.hasBluetooth == true
+
                 it == NETWORK -> metadata.hasWifi == true || metadata.hasEthernet == true
+
                 else -> true // Include all other routes by default
             }
         }

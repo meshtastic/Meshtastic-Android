@@ -86,18 +86,22 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
                 id = NotificationChannels.MESSAGES,
                 importance = SystemNotificationManager.IMPORTANCE_HIGH,
             )
+
         Notification.Category.NodeEvent ->
             ChannelConfig(
                 id = NotificationChannels.NEW_NODES,
                 importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
             )
+
         Notification.Category.Battery ->
             ChannelConfig(
                 id = NotificationChannels.LOW_BATTERY,
                 importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
             )
+
         Notification.Category.Alert ->
             ChannelConfig(id = NotificationChannels.ALERTS, importance = SystemNotificationManager.IMPORTANCE_HIGH)
+
         Notification.Category.Service ->
             ChannelConfig(id = NotificationChannels.SERVICE, importance = SystemNotificationManager.IMPORTANCE_MIN)
     }

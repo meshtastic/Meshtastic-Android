@@ -36,6 +36,7 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem {
                 "us",
                 "uk",
                 -> MeasurementSystem.IMPERIAL
+
                 else -> MeasurementSystem.METRIC
             }
         } catch (@Suppress("TooGenericExceptionCaught") ignored: Exception) {
@@ -55,6 +56,7 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem {
             "MM",
             "GB",
             -> MeasurementSystem.IMPERIAL
+
             else -> MeasurementSystem.METRIC
         }
     }

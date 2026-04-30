@@ -250,8 +250,11 @@ fun MessageScreen(
                     is MessageScreenEvent.NodeDetails -> navigateToNodeDetails(event.node.num)
 
                     is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
+
                     is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
+
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
+
                     is MessageScreenEvent.CopyToClipboard -> {
                         coroutineScope.launch { clipboardManager.setClipEntry(createClipEntry(event.text, event.text)) }
                         selectedMessageIds.value = emptySet()
@@ -297,7 +300,9 @@ fun MessageScreen(
                             }
 
                             MessageMenuAction.Delete -> showDeleteDialog = true
+
                             MessageMenuAction.Dismiss -> selectedMessageIds.value = emptySet()
+
                             MessageMenuAction.SelectAll -> {
                                 // Note: Select All is disabled with pagination since we don't have
                                 // access to the full message list. This would need to be reworked

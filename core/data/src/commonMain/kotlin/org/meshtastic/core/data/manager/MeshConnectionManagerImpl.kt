@@ -154,9 +154,12 @@ class MeshConnectionManagerImpl(
         val effectiveState =
             when (newState) {
                 is ConnectionState.Connected -> ConnectionState.Connected
+
                 is ConnectionState.DeviceSleep ->
                     if (lsEnabled) ConnectionState.DeviceSleep else ConnectionState.Disconnected
+
                 is ConnectionState.Connecting -> ConnectionState.Connecting
+
                 is ConnectionState.Disconnected -> ConnectionState.Disconnected
             }
         onConnectionChanged(effectiveState)

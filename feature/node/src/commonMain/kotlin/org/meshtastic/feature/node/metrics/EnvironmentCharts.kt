@@ -256,6 +256,7 @@ fun EnvironmentMetricsChart(
                     Environment.RADIATION,
                     Environment.WIND_SPEED,
                     -> CartesianLayerRangeProvider.auto()
+
                     else -> null
                 }
             val lineStyle =

@@ -94,12 +94,15 @@ object CommonCharts {
         when {
             dataSpanSeconds <= TimeConstants.ONE_HOUR.inWholeSeconds ->
                 DateFormatter.formatTimeWithSeconds(timestampMillis)
+
             dataSpanSeconds <= 2.days.inWholeSeconds -> DateFormatter.formatTime(timestampMillis)
+
             dataSpanSeconds <= 14.days.inWholeSeconds -> {
                 val dateStr = DateFormatter.formatDate(timestampMillis)
                 val timeStr = DateFormatter.formatTime(timestampMillis)
                 "$dateStr\n$timeStr"
             }
+
             else -> DateFormatter.formatDate(timestampMillis)
         }
     }

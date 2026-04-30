@@ -2,30 +2,112 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
-    <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$fun setResponseStateLoading(route: Enum&lt;*>)</ID>
-    <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
-    <ID>LongMethod:SerialConfigItemList.kt$@Composable fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>MagicNumber:Debug.kt$3</ID>
-    <ID>MagicNumber:DebugViewModel.kt$DebugViewModel$16</ID>
-    <ID>MagicNumber:DebugViewModel.kt$DebugViewModel$8</ID>
-    <ID>MagicNumber:EditChannelDialog.kt$16</ID>
-    <ID>MagicNumber:EditChannelDialog.kt$32</ID>
-    <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.CHANNEL_URL$3</ID>
-    <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.CONFIG$4</ID>
-    <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.FIXED_POSITION$6</ID>
-    <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.MODULE_CONFIG$5</ID>
-    <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
-    <ID>TooGenericExceptionCaught:DebugViewModel.kt$DebugViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:RadioConfigViewModel.kt$RadioConfigViewModel$ex: Exception</ID>
-    <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
-    <ID>UnusedPrivateProperty:RadioConfigViewModel.kt$RadioConfigViewModel$private val locationRepository: LocationRepository</ID>
+    <ID>ComposableParamOrder:ChannelConfigScreen.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun ChannelConfigScreen</ID>
+    <ID>ComposableParamOrder:ChannelScreen.kt:@Composable @Suppress("LongMethod") fun ChannelScreen</ID>
+    <ID>ComposableParamOrder:Debug.kt:@Composable private fun DecodedPayloadBlock</ID>
+    <ID>ComposableParamOrder:DebugSearch.kt:@Composable fun DebugSearchState</ID>
+    <ID>ComposableParamOrder:DebugSearch.kt:@Composable fun DebugSearchStateWithViewModel</ID>
+    <ID>ComposableParamOrder:ExternalNotificationConfigScreen.kt:@Suppress("LongMethod", "TooGenericExceptionCaught") @Composable fun ExternalNotificationConfigScreenCommon</ID>
+    <ID>ComposableParamOrder:NodeActionButton.kt:@Composable fun NodeActionButton</ID>
+    <ID>ComposableParamOrder:WarningDialog.kt:@Composable fun WarningDialog</ID>
+    <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
+    <ID>LambdaParameterEventTrailing:NodeActionButton.kt:onClick: () -> Unit</ID>
+    <ID>LambdaParameterInRestartableEffect:PacketResponseStateDialog.kt:onBack: () -> Unit = {}</ID>
+    <ID>LambdaParameterInRestartableEffect:PacketResponseStateDialog.kt:onDismiss: () -> Unit = {}</ID>
+    <ID>LambdaParameterInRestartableEffect:PrivacySection.kt:startProvideLocation: () -> Unit</ID>
+    <ID>LambdaParameterInRestartableEffect:PrivacySection.kt:stopProvideLocation: () -> Unit</ID>
+    <ID>LambdaParameterInRestartableEffect:TakPermissionUtil.kt:onPermissionResult: (Boolean) -> Unit</ID>
+    <ID>LongMethod:AudioConfigItemList.kt:@Composable fun AudioConfigScreen</ID>
+    <ID>LongMethod:DetectionSensorConfigItemList.kt:@Composable fun DetectionSensorConfigScreen</ID>
+    <ID>LongMethod:LoRaConfigItemList.kt:@Composable fun LoRaConfigScreen</ID>
+    <ID>LongMethod:PowerConfigItemList.kt:@Composable fun PowerConfigScreen</ID>
+    <ID>LongMethod:RadioConfigViewModel.kt:RadioConfigViewModel$fun setResponseStateLoading</ID>
+    <ID>LongMethod:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
+    <ID>LongMethod:SerialConfigItemList.kt:@Composable fun SerialConfigScreen</ID>
+    <ID>LongMethod:StoreForwardConfigItemList.kt:@Composable fun StoreForwardConfigScreen</ID>
+    <ID>LongMethod:TelemetryConfigItemList.kt:@Composable fun TelemetryConfigScreen</ID>
+    <ID>LongMethod:UserConfigItemList.kt:@Composable fun UserConfigScreen</ID>
+    <ID>MagicNumber:Debug.kt:3</ID>
+    <ID>MagicNumber:DebugViewModel.kt:DebugViewModel$16</ID>
+    <ID>MagicNumber:DebugViewModel.kt:DebugViewModel$8</ID>
+    <ID>MagicNumber:EditChannelDialog.kt:16</ID>
+    <ID>MagicNumber:EditChannelDialog.kt:32</ID>
+    <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.CHANNEL_URL$3</ID>
+    <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.CONFIG$4</ID>
+    <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.FIXED_POSITION$6</ID>
+    <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.MODULE_CONFIG$5</ID>
+    <ID>ModifierClickableOrder:ChannelScreen.kt:clickable(onClick = onClick)</ID>
+    <ID>ModifierMissing:AboutScreen.kt:@Composable fun AboutScreen</ID>
+    <ID>ModifierMissing:AdministrationScreen.kt:@Composable fun AdministrationScreen</ID>
+    <ID>ModifierMissing:AmbientLightingConfigItemList.kt:@Composable fun AmbientLightingConfigScreen</ID>
+    <ID>ModifierMissing:AppInfoSection.kt:@Composable fun AppInfoSection</ID>
+    <ID>ModifierMissing:AppearanceSection.kt:@Composable fun AppearanceSection</ID>
+    <ID>ModifierMissing:AudioConfigItemList.kt:@Composable fun AudioConfigScreen</ID>
+    <ID>ModifierMissing:BluetoothConfigItemList.kt:@Composable fun BluetoothConfigScreen</ID>
+    <ID>ModifierMissing:CannedMessageConfigItemList.kt:@Suppress("DEPRECATION", "LongMethod") @Composable fun CannedMessageConfigScreen</ID>
+    <ID>ModifierMissing:ChannelConfigScreen.kt:@Composable fun ChannelConfigScreen</ID>
+    <ID>ModifierMissing:ChannelScreen.kt:@Composable @Suppress("LongMethod") fun ChannelScreen</ID>
+    <ID>ModifierMissing:CleanNodeDatabaseScreen.kt:@Composable fun CleanNodeDatabaseScreen</ID>
+    <ID>ModifierMissing:ContrastPickerDialog.kt:@Composable fun ContrastPickerDialog</ID>
+    <ID>ModifierMissing:Debug.kt:@Suppress("LongMethod") @Composable fun DebugScreen</ID>
+    <ID>ModifierMissing:DesktopSettingsScreen.kt:@Suppress("LongMethod") @Composable fun DesktopSettingsScreen</ID>
+    <ID>ModifierMissing:DetectionSensorConfigItemList.kt:@Composable fun DetectionSensorConfigScreen</ID>
+    <ID>ModifierMissing:DeviceConfigScreen.kt:@Suppress("DEPRECATION", "LongMethod") @Composable fun DeviceConfigScreenCommon</ID>
+    <ID>ModifierMissing:DeviceConfigurationScreen.kt:@Composable fun DeviceConfigurationScreen</ID>
+    <ID>ModifierMissing:DisplayConfigItemList.kt:@Suppress("DEPRECATION", "LongMethod") @Composable fun DisplayConfigScreen</ID>
+    <ID>ModifierMissing:ExternalNotificationConfigScreen.android.kt:@Suppress("TooGenericExceptionCaught") @Composable actual fun RingtoneTrailingIcon</ID>
+    <ID>ModifierMissing:FilterSettingsScreen.kt:@Composable fun FilterSettingsScreen</ID>
+    <ID>ModifierMissing:LoRaConfigItemList.kt:@Composable fun LoRaConfigScreen</ID>
+    <ID>ModifierMissing:MQTTConfigItemList.kt:@Composable fun MQTTConfigScreen</ID>
+    <ID>ModifierMissing:MapReportingPreference.kt:@Suppress("LongMethod") @Composable fun MapReportingPreference</ID>
+    <ID>ModifierMissing:ModuleConfigurationScreen.kt:@Composable fun ModuleConfigurationScreen</ID>
+    <ID>ModifierMissing:NeighborInfoConfigItemList.kt:@Composable fun NeighborInfoConfigScreen</ID>
+    <ID>ModifierMissing:NetworkConfigItemList.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun NetworkConfigScreen</ID>
+    <ID>ModifierMissing:PacketResponseStateDialog.kt:@Composable fun &lt;T> PacketResponseStateDialog</ID>
+    <ID>ModifierMissing:PaxcounterConfigItemList.kt:@Composable fun PaxcounterConfigScreen</ID>
+    <ID>ModifierMissing:PersistenceSection.kt:@Composable fun PersistenceSection</ID>
+    <ID>ModifierMissing:PositionConfigScreen.android.kt:@Composable actual fun DeviceLocationButton</ID>
+    <ID>ModifierMissing:PositionConfigScreen.kt:@Composable @Suppress("LongMethod", "CyclomaticComplexMethod") fun PositionConfigScreenCommon</ID>
+    <ID>ModifierMissing:PowerConfigItemList.kt:@Composable fun PowerConfigScreen</ID>
+    <ID>ModifierMissing:RadioConfig.kt:@Composable fun RadioConfigItemList</ID>
+    <ID>ModifierMissing:RangeTestConfigItemList.kt:@Composable fun RangeTestConfigScreen</ID>
+    <ID>ModifierMissing:RemoteHardwareConfigItemList.kt:@Composable fun RemoteHardwareConfigScreen</ID>
+    <ID>ModifierMissing:SecurityConfigScreen.android.kt:@Composable actual fun ExportSecurityConfigButton</ID>
+    <ID>ModifierMissing:SecurityConfigScreen.kt:@Composable @Suppress("LongMethod") fun SecurityConfigScreenCommon</ID>
+    <ID>ModifierMissing:SerialConfigItemList.kt:@Composable fun SerialConfigScreen</ID>
+    <ID>ModifierMissing:SettingsScreen.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun SettingsScreen</ID>
+    <ID>ModifierMissing:StatusMessageConfigItemList.kt:@Composable fun StatusMessageConfigScreen</ID>
+    <ID>ModifierMissing:StoreForwardConfigItemList.kt:@Composable fun StoreForwardConfigScreen</ID>
+    <ID>ModifierMissing:TAKConfigItemList.kt:@Composable fun TAKConfigScreen</ID>
+    <ID>ModifierMissing:TelemetryConfigItemList.kt:@Composable fun TelemetryConfigScreen</ID>
+    <ID>ModifierMissing:ThemePickerDialog.kt:@Composable fun ThemePickerDialog</ID>
+    <ID>ModifierMissing:TrafficManagementConfigItemList.kt:@Suppress("LongMethod") @Composable fun TrafficManagementConfigScreen</ID>
+    <ID>ModifierMissing:UserConfigItemList.kt:@Composable fun UserConfigScreen</ID>
+    <ID>MultipleEmitters:MQTTConfigItemList.kt:@Composable private fun MqttAddressAndProbe</ID>
+    <ID>MultipleEmitters:PacketResponseStateDialog.kt:@Composable private fun ErrorContent</ID>
+    <ID>MultipleEmitters:PacketResponseStateDialog.kt:@Composable private fun SuccessContent</ID>
+    <ID>MultipleEmitters:SecurityConfigScreen.android.kt:@Composable actual fun ExportSecurityConfigButton</ID>
+    <ID>MutableStateAutoboxing:DesktopSettingsScreen.kt:mutableStateOf(0)</ID>
+    <ID>ParameterNaming:ChannelConfigScreen.kt:onPositiveClicked: (List&lt;ChannelSettings>) -> Unit</ID>
+    <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onCheckedChanged: (Boolean) -> Unit</ID>
+    <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onDaysChanged: (Float) -> Unit</ID>
+    <ID>ParameterNaming:ExternalNotificationConfigScreen.android.kt:onRingtoneImported: (String) -> Unit</ID>
+    <ID>ParameterNaming:ExternalNotificationConfigScreen.jvm.kt:onRingtoneImported: (String) -> Unit</ID>
+    <ID>ParameterNaming:ExternalNotificationConfigScreen.kt:onRingtoneImported: (String) -> Unit</ID>
+    <ID>ParameterNaming:MapReportingPreference.kt:onMapReportingEnabledChanged: (Boolean) -> Unit = {}</ID>
+    <ID>ParameterNaming:MapReportingPreference.kt:onPositionPrecisionChanged: (Int) -> Unit = {}</ID>
+    <ID>ParameterNaming:MapReportingPreference.kt:onPublishIntervalSecsChanged: (Int) -> Unit = {}</ID>
+    <ID>ParameterNaming:MapReportingPreference.kt:onShouldReportLocationChanged: (Boolean) -> Unit = {}</ID>
+    <ID>ParameterNaming:PositionConfigScreen.android.kt:onLocationReceived: (Position) -> Unit</ID>
+    <ID>ParameterNaming:PositionConfigScreen.jvm.kt:onLocationReceived: (Position) -> Unit</ID>
+    <ID>ParameterNaming:PositionConfigScreen.kt:onLocationReceived: (Position) -> Unit</ID>
+    <ID>ReturnCount:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
+    <ID>TooGenericExceptionCaught:DebugViewModel.kt:DebugViewModel$e: Exception</ID>
+    <ID>TooManyFunctions:RadioConfigViewModel.kt:RadioConfigViewModel : ViewModel</ID>
+    <ID>ViewModelForwarding:AdministrationScreen.kt:AdminRouteItems(viewModel = viewModel, enabled = enabled, state = state, destNode = destNode)</ID>
+    <ID>ViewModelForwarding:Debug.kt:DebugLogSettings(viewModel = viewModel)</ID>
+    <ID>ViewModelForwarding:Debug.kt:DebugSearchStateWithViewModel( viewModel = viewModel, modifier = Modifier.graphicsLayer(alpha = animatedAlpha), searchState = searchState, filterTexts = filterTexts, presetFilters = viewModel.presetFilters, logs = logs, filterMode = filterMode, onFilterModeChange = { filterMode = it }, onExportLogs = { val format = LocalDateTime.Format { year() monthNumber() day() char('_') hour() minute() second() } val timestamp = fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format) val fileName = "meshtastic_debug_$timestamp.txt" exportLogsLauncher(fileName) }, )</ID>
+    <ID>ViewModelForwarding:PositionConfigScreen.kt:DeviceLocationButton( viewModel = viewModel, enabled = state.connected, onLocationReceived = { locationInput = it }, )</ID>
+    <ID>ViewModelForwarding:SecurityConfigScreen.kt:ExportSecurityConfigButton( viewModel = viewModel, enabled = state.connected, securityConfig = securityConfig, )</ID>
   </CurrentIssues>
 </SmellBaseline>

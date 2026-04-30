@@ -101,12 +101,19 @@ data class Message(
         val text =
             when (status) {
                 MessageStatus.RECEIVED -> Res.string.delivery_confirmed
+
                 MessageStatus.QUEUED -> Res.string.message_status_queued
+
                 MessageStatus.ENROUTE -> Res.string.message_status_enroute
+
                 MessageStatus.SFPP_ROUTING -> Res.string.message_status_sfpp_routing
+
                 MessageStatus.SFPP_CONFIRMED -> Res.string.message_status_sfpp_confirmed
+
                 MessageStatus.DELIVERED -> Res.string.message_status_delivered
+
                 MessageStatus.ERROR -> getStringResFrom(routingError)
+
                 MessageStatus.UNKNOWN,
                 null,
                 -> Res.string.message_status_unknown

@@ -255,14 +255,20 @@ data class NodeInfo(
     @Suppress("MagicNumber")
     fun distanceStr(o: NodeInfo?, prefUnits: Int = 0) = distance(o)?.let { dist ->
         when {
-            dist == 0 -> null // same point
+            dist == 0 -> null
+
+            // same point
             prefUnits == Config.DisplayConfig.DisplayUnits.METRIC.value && dist < 1000 -> "$dist m"
+
             prefUnits == Config.DisplayConfig.DisplayUnits.METRIC.value && dist >= 1000 ->
                 "${(dist / 100).toDouble() / 10.0} km"
+
             prefUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL.value && dist < 1609 ->
                 "${(dist.toDouble() * 3.281).toInt()} ft"
+
             prefUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL.value && dist >= 1609 ->
                 "${(dist / 160.9).toInt() / 10.0} mi"
+
             else -> null
         }
     }

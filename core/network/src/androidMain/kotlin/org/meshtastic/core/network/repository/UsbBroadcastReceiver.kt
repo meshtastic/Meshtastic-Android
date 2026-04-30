@@ -47,6 +47,7 @@ class UsbBroadcastReceiver(private val usbRepository: UsbRepository) : Broadcast
                 Logger.d { "USB device '$deviceName' was detached" }
                 usbRepository.refreshState()
             }
+
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
                 Logger.d { "USB device '$deviceName' was attached" }
                 usbRepository.refreshState()

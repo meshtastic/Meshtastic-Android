@@ -59,13 +59,21 @@ object DeepLinkRouter {
             "messages",
             "quickchat",
             -> routeContacts(uri, pathSegments)
+
             "connections" -> listOf(ConnectionsRoute.ConnectionsGraph)
+
             "map" -> routeMap(uri, pathSegments)
+
             "nodes" -> routeNodes(uri, pathSegments)
+
             "settings" -> routeSettings(pathSegments)
+
             "channels" -> listOf(ChannelsRoute.ChannelsGraph)
+
             "firmware" -> routeFirmware(pathSegments)
+
             "wifi-provision" -> routeWifiProvision(uri)
+
             else -> {
                 Logger.w { "Unrecognized deep link segment: $firstSegment" }
                 null
@@ -80,9 +88,11 @@ object DeepLinkRouter {
                 val message = uri.getQueryParameter("message") ?: ""
                 listOf(ContactsRoute.ContactsGraph, ContactsRoute.Share(message))
             }
+
             "quickchat" -> {
                 listOf(ContactsRoute.ContactsGraph, ContactsRoute.QuickChat)
             }
+
             "messages" -> {
                 val contactKey = if (segments.size > 1) segments[1] else uri.getQueryParameter("contactKey") ?: ""
                 val message = uri.getQueryParameter("message") ?: ""
@@ -95,6 +105,7 @@ object DeepLinkRouter {
                     listOf(ContactsRoute.ContactsGraph)
                 }
             }
+
             else -> listOf(ContactsRoute.ContactsGraph)
         }
     }

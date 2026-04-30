@@ -62,11 +62,13 @@ class AndroidRadioTransportFactory(
             InterfaceId.NOP,
             InterfaceId.TCP,
             -> true
+
             InterfaceId.SERIAL -> {
                 val deviceMap = usbRepository.serialDevices.value
                 val driver = deviceMap[rest] ?: deviceMap.values.firstOrNull()
                 driver != null && usbManager.hasPermission(driver.device)
             }
+
             InterfaceId.BLUETOOTH -> true // Handled by base class
         }
     }
@@ -77,6 +79,7 @@ class AndroidRadioTransportFactory(
 
         return when (interfaceId) {
             InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+
             InterfaceId.TCP ->
                 TcpRadioTransport(
                     callback = service,
@@ -84,6 +87,7 @@ class AndroidRadioTransportFactory(
                     dispatchers = dispatchers,
                     address = rest,
                 )
+
             InterfaceId.SERIAL ->
                 SerialRadioTransport(
                     callback = service,
@@ -91,9 +95,11 @@ class AndroidRadioTransportFactory(
                     usbRepository = usbRepository,
                     address = rest,
                 )
+
             InterfaceId.NOP,
             null,
             -> NopRadioTransport(rest)
+
             InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
         }
     }

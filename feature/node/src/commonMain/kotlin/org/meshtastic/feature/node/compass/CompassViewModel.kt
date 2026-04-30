@@ -215,9 +215,12 @@ class CompassViewModel(
         val dop: Float? =
             when {
                 pdop > 0 -> pdop / HUNDRED
+
                 hdop > 0 && vdop > 0 ->
                     sqrt((hdop / HUNDRED).toDouble().pow(2.0) + (vdop / HUNDRED).toDouble().pow(2.0)).toFloat()
+
                 hdop > 0 -> hdop / HUNDRED
+
                 else -> null
             }
 

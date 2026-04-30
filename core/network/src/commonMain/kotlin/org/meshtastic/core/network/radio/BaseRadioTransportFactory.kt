@@ -45,6 +45,7 @@ abstract class BaseRadioTransportFactory(
             InterfaceId.MOCK.id,
             '!',
             -> true
+
             else -> isPlatformAddressValid(address)
         }
     }
@@ -67,6 +68,7 @@ abstract class BaseRadioTransportFactory(
                         address = bleAddress,
                     )
                 }
+
                 else -> createPlatformTransport(address, service)
             }
         transport.start()

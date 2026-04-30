@@ -83,7 +83,9 @@ open class ProcessRadioResponseUseCase {
         return when {
             parsed.error_reason != Routing.Error.NONE ->
                 RadioResponseResult.Error(UiText.Resource(getStringResFrom(parsed.error_reason?.value ?: 0)))
+
             packet.from == destNum -> RadioResponseResult.Success
+
             else -> null
         }
     }
