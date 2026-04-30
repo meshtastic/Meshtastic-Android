@@ -20,7 +20,6 @@ package org.meshtastic.feature.discovery
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -34,12 +33,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -74,6 +75,8 @@ class DiscoveryScanEngine(
     private val collectorRegistry: DiscoveryPacketCollectorRegistry,
     private val discoveryDao: DiscoveryDao,
     private val aiProvider: DiscoverySummaryAiProvider,
+    private val applicationScope: ApplicationCoroutineScope,
+    private val dispatchers: CoroutineDispatchers,
 ) : DiscoveryPacketCollector {
 
     // region Public state
@@ -94,7 +97,7 @@ class DiscoveryScanEngine(
     private val mutex = Mutex()
     private var scanScope: CoroutineScope? = null
     private var dwellJob: Job? = null
-    private var homePreset: ChannelOption? = null
+    private var originalLoRaConfig: Config.LoRaConfig? = null
     private var sessionId: Long = 0
 
     /** Nodes collected for the current preset dwell. Keyed by nodeNum. */
@@ -105,6 +108,7 @@ class DiscoveryScanEngine(
 
     private var currentPresetName: String = ""
     private var totalDwellSeconds: Long = 0
+    private var lastLocalStats: org.meshtastic.proto.LocalStats? = null
 
     // endregion
 
@@ -146,11 +150,16 @@ class DiscoveryScanEngine(
                 return
             }
 
-            // Capture the current LoRa preset as "home"
-            homePreset =
-                radioConfigRepository.localConfigFlow.first().lora?.modem_preset?.let { modemPreset ->
-                    ChannelOption.entries.firstOrNull { it.modemPreset == modemPreset }
-                } ?: ChannelOption.DEFAULT
+            // Capture the entire original LoRa config to restore it accurately later
+            val initialLoraConfig = radioConfigRepository.localConfigFlow.first().lora
+            originalLoRaConfig = initialLoraConfig
+
+            val homePresetStr =
+                if (initialLoraConfig?.use_preset == true) {
+                    ChannelOption.from(initialLoraConfig.modem_preset)?.name ?: ChannelOption.DEFAULT.name
+                } else {
+                    "CUSTOM"
+                }
 
             val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
             val myPosition = myNodeNum?.let { nodeRepository.nodeDBbyNum.value[it]?.position }
@@ -162,7 +171,7 @@ class DiscoveryScanEngine(
                 DiscoverySessionEntity(
                     timestamp = nowMillis,
                     presetsScanned = presets.joinToString(",") { it.name },
-                    homePreset = homePreset?.name ?: ChannelOption.DEFAULT.name,
+                    homePreset = homePresetStr,
                     completionStatus = "in_progress",
                     userLatitude = latDouble,
                     userLongitude = lonDouble,
@@ -179,7 +188,7 @@ class DiscoveryScanEngine(
             totalDwellSeconds = dwellDurationSeconds
 
             // Launch scan coroutine
-            val scope = CoroutineScope(ioDispatcher + SupervisorJob())
+            val scope = CoroutineScope(dispatchers.io + SupervisorJob())
             scanScope = scope
             scope.launch { runScanLoop(presets, dwellDurationSeconds) }
         }
@@ -197,7 +206,7 @@ class DiscoveryScanEngine(
         _scanState.value = DiscoveryScanState.Idle
 
         // Restore home preset in the background so we don't block the UI with the connection wait
-        CoroutineScope(Dispatchers.Default).launch { restoreHomePreset() }
+        applicationScope.launch { restoreHomePreset() }
     }
 
     /** Resets engine state after the UI has acknowledged completion. */
@@ -210,7 +219,6 @@ class DiscoveryScanEngine(
 
     // region DiscoveryPacketCollector
 
-    @Suppress("CyclomaticComplexMethod", "ComplexCondition")
     override suspend fun onPacketReceived(meshPacket: MeshPacket, dataPacket: DataPacket) {
         if (_scanState.value !is DiscoveryScanState.Dwell) return
         val fromNum = meshPacket.from.toLong()
@@ -228,27 +236,26 @@ class DiscoveryScanEngine(
                 PortNum.POSITION_APP -> handlePosition(meshPacket, node)
                 PortNum.TELEMETRY_APP -> handleTelemetry(meshPacket, node, fromNum)
                 PortNum.NEIGHBORINFO_APP -> handleNeighborInfo(meshPacket)
-                else -> {
-                    /* Other portnums don't need special handling */
-                }
+                else -> Unit
             }
 
-            // Ensure all nodes in the collection have names and position if available in the NodeDB
-            collectedNodes.values.forEach { n ->
-                val dbNode = nodeRepository.nodeDBbyNum.value[n.nodeNum.toInt()]
-                if (dbNode != null) {
-                    if (n.shortName == null || n.longName == null) {
-                        n.shortName = dbNode.user.short_name.ifBlank { null }
-                        n.longName = dbNode.user.long_name.ifBlank { null }
-                    }
-                    if (n.latitude == null || n.longitude == null || (n.latitude == 0.0 && n.longitude == 0.0)) {
-                        val dbLat = dbNode.position.latitude_i
-                        val dbLon = dbNode.position.longitude_i
-                        if (dbLat != null && dbLat != 0) n.latitude = dbLat.toDouble() / POSITION_DIVISOR
-                        if (dbLon != null && dbLon != 0) n.longitude = dbLon.toDouble() / POSITION_DIVISOR
-                    }
-                }
-            }
+            // Enrich the sending node from the local NodeDB (names/position fallback)
+            enrichNodeFromDb(node)
+        }
+    }
+
+    /** Backfills name and position from the local NodeDB when not yet received over-the-air. */
+    private fun enrichNodeFromDb(node: CollectedNodeData) {
+        val dbNode = nodeRepository.nodeDBbyNum.value[node.nodeNum.toInt()] ?: return
+        if (node.shortName == null || node.longName == null) {
+            node.shortName = dbNode.user.short_name.ifBlank { null }
+            node.longName = dbNode.user.long_name.ifBlank { null }
+        }
+        if (!hasValidCoordinates(node.latitude, node.longitude)) {
+            val dbLat = dbNode.position.latitude_i
+            val dbLon = dbNode.position.longitude_i
+            if (dbLat != null && dbLat != 0) node.latitude = dbLat.toDouble() / POSITION_DIVISOR
+            if (dbLon != null && dbLon != 0) node.longitude = dbLon.toDouble() / POSITION_DIVISOR
         }
     }
 
@@ -265,6 +272,7 @@ class DiscoveryScanEngine(
             mutex.withLock {
                 collectedNodes.clear()
                 deviceMetricsLog.clear()
+                lastLocalStats = null
             }
             totalDwellSeconds = dwellDurationSeconds
 
@@ -274,22 +282,14 @@ class DiscoveryScanEngine(
 
             // Wait for reconnection
             _scanState.value = DiscoveryScanState.Reconnecting(preset.name)
-            val reconnected = waitForConnection()
-            if (!reconnected) {
-                cancelScanInternal()
-                restoreHomePreset()
-                finalizeSession("paused")
-                _scanState.value = DiscoveryScanState.Idle
+            if (!waitForConnection()) {
+                pauseAndAbort()
                 return
             }
 
             // Dwell
-            val dwellCompleted = runDwell(preset.name, dwellDurationSeconds)
-            if (!dwellCompleted) {
-                cancelScanInternal()
-                restoreHomePreset()
-                finalizeSession("paused")
-                _scanState.value = DiscoveryScanState.Idle
+            if (!runDwell(preset.name, dwellDurationSeconds)) {
+                pauseAndAbort()
                 return
             }
             if (!isActive) return
@@ -304,6 +304,14 @@ class DiscoveryScanEngine(
         generateAiSummaries()
         finalizeSession("complete")
         _scanState.value = DiscoveryScanState.Complete
+    }
+
+    /** Common cleanup path when a scan step fails mid-loop. */
+    private suspend fun pauseAndAbort() {
+        cancelScanInternal()
+        restoreHomePreset()
+        finalizeSession("paused")
+        _scanState.value = DiscoveryScanState.Idle
     }
 
     private suspend fun shiftPreset(preset: ChannelOption) {
@@ -376,6 +384,10 @@ class DiscoveryScanEngine(
             )
         }
 
+        if (telemetry.local_stats != null) {
+            lastLocalStats = telemetry.local_stats
+        }
+
         if (telemetry.environment_metrics != null) {
             node.sensorPacketCount++
         }
@@ -425,56 +437,95 @@ class DiscoveryScanEngine(
         if (sessionId == 0L) return
         mutex.withLock {
             if (collectedNodes.isEmpty()) {
-                // Persist a zero-result entry so the preset appears in reports
-                val emptyResult =
-                    DiscoveryPresetResultEntity(
-                        sessionId = sessionId,
-                        presetName = currentPresetName,
-                        dwellDurationSeconds = totalDwellSeconds,
-                    )
-                discoveryDao.insertPresetResult(emptyResult)
+                persistEmptyPresetResult()
                 return
             }
 
-            val (avgChannelUtil, avgAirUtil) = computeAverageMetrics()
-            val directCount = collectedNodes.values.count { it.neighborType == "direct" }
-            val meshCount = collectedNodes.values.count { it.neighborType == "mesh" }
-
-            val presetResult =
-                DiscoveryPresetResultEntity(
-                    sessionId = sessionId,
-                    presetName = currentPresetName,
-                    dwellDurationSeconds = totalDwellSeconds,
-                    uniqueNodes = collectedNodes.size,
-                    directNeighborCount = directCount,
-                    meshNeighborCount = meshCount,
-                    messageCount = collectedNodes.values.sumOf { it.messageCount },
-                    sensorPacketCount = collectedNodes.values.sumOf { it.sensorPacketCount },
-                    avgChannelUtilization = avgChannelUtil,
-                    avgAirtimeRate = avgAirUtil,
-                )
-            val presetResultId = discoveryDao.insertPresetResult(presetResult)
-
-            val nodeEntities =
-                collectedNodes.values.map { data ->
-                    DiscoveredNodeEntity(
-                        presetResultId = presetResultId,
-                        nodeNum = data.nodeNum,
-                        shortName = data.shortName,
-                        longName = data.longName,
-                        neighborType = data.neighborType,
-                        latitude = data.latitude,
-                        longitude = data.longitude,
-                        hopCount = data.hopCount,
-                        snr = data.snr,
-                        rssi = data.rssi,
-                        messageCount = data.messageCount,
-                        sensorPacketCount = data.sensorPacketCount,
-                    )
-                }
-            discoveryDao.insertDiscoveredNodes(nodeEntities)
+            val presetResultId = persistPresetResult()
+            persistDiscoveredNodes(presetResultId)
         }
     }
+
+    private suspend fun persistEmptyPresetResult() {
+        val emptyResult =
+            DiscoveryPresetResultEntity(
+                sessionId = sessionId,
+                presetName = currentPresetName,
+                dwellDurationSeconds = totalDwellSeconds,
+            )
+        discoveryDao.insertPresetResult(emptyResult)
+    }
+
+    private suspend fun persistPresetResult(): Long {
+        val (avgChannelUtil, avgAirUtil) = computeAverageMetrics()
+        val directCount = collectedNodes.values.count { it.neighborType == "direct" }
+        val meshCount = collectedNodes.values.count { it.neighborType == "mesh" }
+
+        val presetResult =
+            DiscoveryPresetResultEntity(
+                sessionId = sessionId,
+                presetName = currentPresetName,
+                dwellDurationSeconds = totalDwellSeconds,
+                uniqueNodes = collectedNodes.size,
+                directNeighborCount = directCount,
+                meshNeighborCount = meshCount,
+                messageCount = collectedNodes.values.sumOf { it.messageCount },
+                sensorPacketCount = collectedNodes.values.sumOf { it.sensorPacketCount },
+                avgChannelUtilization = avgChannelUtil,
+                avgAirtimeRate = avgAirUtil,
+                numPacketsTx = lastLocalStats?.num_packets_tx ?: 0,
+                numPacketsRx = lastLocalStats?.num_packets_rx ?: 0,
+                numPacketsRxBad = lastLocalStats?.num_packets_rx_bad ?: 0,
+                numRxDupe = lastLocalStats?.num_rx_dupe ?: 0,
+                numTxRelay = lastLocalStats?.num_tx_relay ?: 0,
+                numTxRelayCanceled = lastLocalStats?.num_tx_relay_canceled ?: 0,
+                numOnlineNodes = lastLocalStats?.num_online_nodes ?: 0,
+                numTotalNodes = lastLocalStats?.num_total_nodes ?: 0,
+                uptimeSeconds = lastLocalStats?.uptime_seconds ?: 0,
+            )
+        return discoveryDao.insertPresetResult(presetResult)
+    }
+
+    private suspend fun persistDiscoveredNodes(presetResultId: Long) {
+        val session = discoveryDao.getSession(sessionId)
+        val userLat = session?.userLatitude ?: 0.0
+        val userLon = session?.userLongitude ?: 0.0
+
+        val nodeEntities = collectedNodes.values.map { data -> data.toEntity(presetResultId, userLat, userLon) }
+        discoveryDao.insertDiscoveredNodes(nodeEntities)
+    }
+
+    private fun CollectedNodeData.toEntity(
+        presetResultId: Long,
+        userLat: Double,
+        userLon: Double,
+    ): DiscoveredNodeEntity {
+        val distance =
+            if (hasValidCoordinates(latitude, longitude) && hasValidCoordinates(userLat, userLon)) {
+                latLongToMeter(userLat, userLon, latitude!!, longitude!!)
+            } else {
+                null
+            }
+        return DiscoveredNodeEntity(
+            presetResultId = presetResultId,
+            nodeNum = nodeNum,
+            shortName = shortName,
+            longName = longName,
+            neighborType = neighborType,
+            latitude = latitude,
+            longitude = longitude,
+            distanceFromUser = distance,
+            hopCount = hopCount,
+            snr = snr,
+            rssi = rssi,
+            messageCount = messageCount,
+            sensorPacketCount = sensorPacketCount,
+        )
+    }
+
+    /** Returns true if both [lat] and [lon] are non-null and non-zero (i.e. a valid GPS fix). */
+    private fun hasValidCoordinates(lat: Double?, lon: Double?): Boolean =
+        lat != null && lon != null && lat != 0.0 && lon != 0.0
 
     /**
      * Computes average channel utilization and airtime from DeviceMetrics, applying the 2-packet rule (only nodes with
@@ -485,8 +536,25 @@ class DiscoveryScanEngine(
         if (qualifiedEntries.isEmpty()) return 0.0 to 0.0
 
         val avgChannel = qualifiedEntries.map { entries -> entries.map { it.channelUtil }.average() }.average()
-        val avgAir = qualifiedEntries.map { entries -> entries.map { it.airUtilTx }.average() }.average()
-        return avgChannel to avgAir
+
+        // Compute Airtime Rate as (delta air_util_tx / elapsed_time_hours) to match Apple spec FR-008
+        val avgAirRate =
+            qualifiedEntries
+                .mapNotNull { entries ->
+                    val first = entries.first()
+                    val last = entries.last()
+                    val deltaAir = last.airUtilTx - first.airUtilTx
+                    val deltaTimeMs = last.timestamp - first.timestamp
+                    if (deltaTimeMs > 0) {
+                        deltaAir / (deltaTimeMs / 3600000.0)
+                    } else {
+                        null
+                    }
+                }
+                .average()
+                .takeIf { !it.isNaN() } ?: 0.0
+
+        return avgChannel to avgAirRate
     }
 
     private suspend fun finalizeSession(status: String) {
@@ -497,6 +565,7 @@ class DiscoveryScanEngine(
         val totalDwell = presetResults.sumOf { it.dwellDurationSeconds }
         val totalMsgs = presetResults.sumOf { it.messageCount }
         val totalSensor = presetResults.sumOf { it.sensorPacketCount }
+        val maxDistance = discoveryDao.getMaxDistance(sessionId) ?: 0.0
         val avgChanUtil =
             presetResults
                 .filter { it.uniqueNodes > 0 }
@@ -509,6 +578,7 @@ class DiscoveryScanEngine(
                 totalDwellSeconds = totalDwell,
                 totalMessages = totalMsgs,
                 totalSensorPackets = totalSensor,
+                furthestNodeDistance = maxDistance,
                 avgChannelUtilization = avgChanUtil,
                 completionStatus = status,
             ),
@@ -521,8 +591,12 @@ class DiscoveryScanEngine(
     // region Home preset restoration
 
     private suspend fun restoreHomePreset() {
-        val preset = homePreset ?: return
-        shiftPreset(preset)
+        val config = originalLoRaConfig ?: return
+        val fullConfig = Config(lora = config)
+        radioController.setLocalConfig(fullConfig)
+        Logger.i { "DiscoveryScanEngine: restored original LoRa config" }
+        // The firmware often restarts the radio or reboots after a LoRa config change.
+        delay(3000)
         // Wait briefly for reconnection after restoring
         waitForConnection()
     }

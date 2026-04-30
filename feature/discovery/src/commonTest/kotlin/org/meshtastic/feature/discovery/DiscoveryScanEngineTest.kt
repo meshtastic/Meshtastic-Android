@@ -18,6 +18,7 @@
 
 package org.meshtastic.feature.discovery
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -141,6 +142,12 @@ private class FakeDiscoveryDao : DiscoveryDao {
 
     override suspend fun getUniqueNodeCount(sessionId: Long): Int = getUniqueNodeNums(sessionId).size
 
+    override suspend fun getMaxDistance(sessionId: Long): Double? = presetResults.values
+        .filter { it.sessionId == sessionId }
+        .flatMap { pr -> discoveredNodes.values.filter { it.presetResultId == pr.id } }
+        .mapNotNull { it.distanceFromUser }
+        .maxOrNull()
+
     override suspend fun getSessionWithResults(sessionId: Long): DiscoverySessionEntity? = sessions[sessionId]
 }
 
@@ -171,7 +178,9 @@ class DiscoveryScanEngineTest {
     private val radioConfigRepository =
         FakeRadioConfigRepository().apply {
             setLocalConfigDirect(
-                LocalConfig(lora = Config.LoRaConfig(modem_preset = ChannelOption.LONG_FAST.modemPreset)),
+                LocalConfig(
+                    lora = Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
+                ),
             )
         }
     private val collectorRegistry = FakeCollectorRegistry()
@@ -206,7 +215,7 @@ class DiscoveryScanEngineTest {
      */
     @Suppress("MagicNumber")
     private fun awaitScanLoopInit() {
-        Thread.sleep(500)
+        Thread.sleep(5000)
     }
 
     // region Helper factories
@@ -348,11 +357,17 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun packetCollectionPopulatesNodeData() = runTest {
-        nodeRepository.setMyNodeInfo(createMyNodeInfo())
+        val myNodeNum = 1000
+        nodeRepository.setMyNodeInfo(createMyNodeInfo(myNodeNum))
+        nodeRepository.setNodes(listOf(createNodeWithPosition(num = myNodeNum, latI = 377749000, lonI = -1224194000)))
 
         engine.startScan(testPresets, dwellDurationSeconds = 60)
         assertScanActive()
-        awaitScanLoopInit()
+
+        // Wait for Dwell state
+        while (engine.scanState.value !is DiscoveryScanState.Dwell) {
+            delay(100)
+        }
 
         // Simulate receiving a position packet
         val meshPacket =
@@ -386,7 +401,11 @@ class DiscoveryScanEngineTest {
 
         engine.startScan(testPresets, dwellDurationSeconds = 60)
         assertScanActive()
-        awaitScanLoopInit()
+
+        // Wait for Dwell state and ensure sessionId is set
+        while (engine.scanState.value !is DiscoveryScanState.Dwell || engine.currentSession.value == null) {
+            delay(100)
+        }
 
         // Send a telemetry packet with local_stats
         val localStats =
@@ -411,18 +430,18 @@ class DiscoveryScanEngineTest {
 
         // The preset result should have RF health fields from local_stats
         val presetResults = discoveryDao.presetResults.values.toList()
-        assertTrue(presetResults.isNotEmpty())
+        assertTrue(presetResults.isNotEmpty(), "Expected a preset result")
 
         val result = presetResults.first()
-        assertEquals(100, result.numPacketsTx)
-        assertEquals(200, result.numPacketsRx)
-        assertEquals(5, result.numPacketsRxBad)
-        assertEquals(10, result.numRxDupe)
-        assertEquals(15, result.numTxRelay)
-        assertEquals(2, result.numTxRelayCanceled)
-        assertEquals(3, result.numOnlineNodes)
-        assertEquals(10, result.numTotalNodes)
-        assertEquals(3600, result.uptimeSeconds)
+        assertEquals(100, result.numPacketsTx, "numPacketsTx should be 100")
+        assertEquals(200, result.numPacketsRx, "numPacketsRx should be 200")
+        assertEquals(5, result.numPacketsRxBad, "numPacketsRxBad should be 5")
+        assertEquals(10, result.numRxDupe, "numRxDupe should be 10")
+        assertEquals(15, result.numTxRelay, "numTxRelay should be 15")
+        assertEquals(2, result.numTxRelayCanceled, "numTxRelayCanceled should be 2")
+        assertEquals(3, result.numOnlineNodes, "numOnlineNodes should be 3")
+        assertEquals(10, result.numTotalNodes, "numTotalNodes should be 10")
+        assertEquals(3600, result.uptimeSeconds, "uptimeSeconds should be 3600")
 
         // Packet success/failure rates should be computed
         // success = (200 - 5) / 200 * 100 = 97.5
@@ -457,7 +476,11 @@ class DiscoveryScanEngineTest {
 
         engine.startScan(testPresets, dwellDurationSeconds = 60)
         assertScanActive()
-        awaitScanLoopInit()
+
+        // Wait for Dwell state
+        while (engine.scanState.value !is DiscoveryScanState.Dwell) {
+            delay(100)
+        }
 
         // Discovered node at Oakland (37.8044, -122.2712) — roughly 15 km away
         val meshPacket = createPositionMeshPacket(from = 54321, latI = 378044000, lonI = -1222712000)

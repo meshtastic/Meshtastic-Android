@@ -100,6 +100,15 @@ interface DiscoveryDao {
     )
     suspend fun getUniqueNodeCount(sessionId: Long): Int
 
+    @Query(
+        """
+        SELECT MAX(distance_from_user) FROM discovered_node dn
+        INNER JOIN discovery_preset_result dpr ON dn.preset_result_id = dpr.id
+        WHERE dpr.session_id = :sessionId
+        """,
+    )
+    suspend fun getMaxDistance(sessionId: Long): Double?
+
     @Transaction
     @Query("SELECT * FROM discovery_session WHERE id = :sessionId")
     suspend fun getSessionWithResults(sessionId: Long): DiscoverySessionEntity?
