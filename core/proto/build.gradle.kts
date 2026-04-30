@@ -27,7 +27,12 @@ kotlin {
     // Override minSdk for ATAK compatibility (standard is 26)
     android { minSdk = 21 }
 
-    sourceSets { commonMain.dependencies { api(libs.wire.runtime) } }
+    sourceSets {
+        commonMain {
+            dependencies { api(libs.wire.runtime) }
+            kotlin.srcDir(layout.buildDirectory.dir("generated/source/wire-metadata"))
+        }
+    }
 }
 
 wire {
@@ -45,6 +50,15 @@ wire {
         // Codebase is already written to use the nullable properties (e.g. packet.decoded vs
         // packet.payload_variant.decoded).
         boxOneOfsMinSize = 5000
+    }
+    // Emit a static ConfigFieldMetadataRegistry from (meshtastic.config_field) annotations.
+    // Fully automatic — annotating new proto fields requires no changes here or in the handler.
+    // Only modify the handler if ConfigFieldMetadata gains new sub-fields.
+    custom {
+        schemaHandlerFactoryClass =
+            "org.meshtastic.buildlogic.proto.FieldMetadataSchemaHandlerFactory"
+        out = layout.buildDirectory.dir("generated/source/wire-metadata").get().asFile.path
+        exclusive = false
     }
     root("meshtastic.*")
     prune("meshtastic.MeshPacket#delayed")

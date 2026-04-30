@@ -167,6 +167,7 @@ maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets"
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode-scanning" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
+wire-schema = { module = "com.squareup.wire:wire-schema", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcode-kotlin" }
 
