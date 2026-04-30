@@ -58,12 +58,7 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
         testOptions.unitTests.isReturnDefaultValues = true
 
         // Exclude duplicate META-INF license files shipped by JUnit Platform JARs
-        packaging.resources.excludes.addAll(
-            listOf(
-                "META-INF/LICENSE.md",
-                "META-INF/LICENSE-notice.md",
-            ),
-        )
+        packaging.resources.excludes.addAll(listOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md"))
     }
 
     configureMokkery()
@@ -168,26 +163,24 @@ internal fun Project.configureKmpTestDependencies() {
             // module's build script calls `withHostTest { }`, which runs *after* the
             // convention plugin's `apply`.  Using `matching + configureEach` defers
             // configuration until the source set actually materialises.
-            matching { it.name == "androidHostTest" }.configureEach {
-                dependencies {
-                    // kotlin.test auto-selects kotlin-test-junit because testAndroidHostTest
-                    // does NOT use useJUnitPlatform() (see configureTestOptions).
-                    // No explicit kotlin("test") or kotlin("test-junit") override needed —
-                    // adding them would conflict with auto-selection and break resource merging.
-                    implementation(libs.library("kotest-assertions"))
-                    implementation(libs.library("kotest-property"))
-                    implementation(libs.library("turbine"))
-                    implementation(libs.library("robolectric"))
-                    implementation(libs.library("androidx-test-core"))
+            matching { it.name == "androidHostTest" }
+                .configureEach {
+                    dependencies {
+                        // kotlin.test auto-selects kotlin-test-junit because testAndroidHostTest
+                        // does NOT use useJUnitPlatform() (see configureTestOptions).
+                        // No explicit kotlin("test") or kotlin("test-junit") override needed —
+                        // adding them would conflict with auto-selection and break resource merging.
+                        implementation(libs.library("kotest-assertions"))
+                        implementation(libs.library("kotest-property"))
+                        implementation(libs.library("turbine"))
+                        implementation(libs.library("robolectric"))
+                        implementation(libs.library("androidx-test-core"))
+                    }
                 }
-            }
 
             // Configure jvmTest lazily for the same reason.
-            matching { it.name == "jvmTest" }.configureEach {
-                dependencies {
-                    implementation(libs.library("kotest-runner-junit6"))
-                }
-            }
+            matching { it.name == "jvmTest" }
+                .configureEach { dependencies { implementation(libs.library("kotest-runner-junit6")) } }
         }
     }
 }
@@ -201,14 +194,15 @@ internal fun Project.configureKotlinJvm() {
 private val PUBLISHED_MODULES = setOf("api", "model", "proto")
 
 /** Compiler args shared across all Kotlin targets (JVM, Android, iOS, etc.). */
-private val SHARED_COMPILER_ARGS = listOf(
-    "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-    "-opt-in=kotlin.time.ExperimentalTime",
-    "-Xexpect-actual-classes",
-    "-Xcontext-parameters",
-    "-Xannotation-default-target=param-property",
-    "-Xskip-prerelease-check",
-)
+private val SHARED_COMPILER_ARGS =
+    listOf(
+        "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+        "-opt-in=kotlin.time.ExperimentalTime",
+        "-Xexpect-actual-classes",
+        "-Xcontext-parameters",
+        "-Xannotation-default-target=param-property",
+        "-Xskip-prerelease-check",
+    )
 
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
@@ -216,7 +210,8 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
 
     extensions.configure<T> {
         val javaVersion = if (isPublishedModule) 17 else 21
-        // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older environments),
+        // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older
+        // environments),
         // and Java 21 for the rest of the app.
         jvmToolchain(javaVersion)
 
@@ -240,17 +235,31 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         }
     }
 
-    val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
+    // For non-KMP modules (pure Android or JVM), configure compiler args via KotlinCompile tasks.
+    // KMP modules already configure args via targets.compilations above — skip to avoid duplication.
+    if (T::class != KotlinMultiplatformExtension::class) {
+        val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
 
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
-            allWarningsAsErrors.set(warningsAsErrors)
-            if (!isPublishedModule) {
-                freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+        tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions {
+                jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
+                allWarningsAsErrors.set(warningsAsErrors)
+                if (!isPublishedModule) {
+                    freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+                }
+                freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
+                freeCompilerArgs.add("-jvm-default=no-compatibility")
             }
-            freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
-            freeCompilerArgs.add("-jvm-default=no-compatibility")
+        }
+    } else {
+        // KMP: still set warningsAsErrors and JVM target on JVM compile tasks (supplements target-level config)
+        val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
+
+        tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions {
+                jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
+                allWarningsAsErrors.set(warningsAsErrors)
+            }
         }
     }
 }
