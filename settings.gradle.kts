@@ -57,9 +57,9 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     includeBuild("build-logic")
     repositories {
+        gradlePluginPortal()
         google()
         mavenCentral()
-        gradlePluginPortal()
         maven { url = uri("https://jitpack.io") }
     }
 }

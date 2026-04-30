@@ -17,19 +17,22 @@
 
 package org.meshtastic.buildlogic
 
-import io.gitlab.arturbosch.detekt.Detekt
-import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.extensions.DetektExtension
+import dev.detekt.gradle.extensions.FailOnSeverity
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.withType
 
 internal fun Project.configureDetekt(extension: DetektExtension) = extension.apply {
-    toolVersion = libs.version("detekt")
+    toolVersion.set(libs.version("detekt"))
     config.setFrom("$rootDir/config/detekt/detekt.yml")
-    buildUponDefaultConfig = true
-    allRules = false
-    parallel = true
-    
+    buildUponDefaultConfig.set(true)
+    allRules.set(false)
+    parallel.set(true)
+    basePath.set(rootDir)
+    failOnSeverity.set(FailOnSeverity.Error)
+
     // Default sources
     source.setFrom(
         files(
@@ -41,23 +44,28 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
         ),
     )
 
-    tasks.named<Detekt>("detekt") {
+    tasks.withType<Detekt>().configureEach {
         val isCi = project.findProperty("ci") == "true"
         reports {
-            xml.required.set(true)
-            // In CI, only generate xml and sarif (needed for GitHub reporting).
-            // Skip html, txt, md to save processing time.
-            html.required.set(!isCi)
-            txt.required.set(!isCi)
-            sarif.required.set(true)
-            md.required.set(!isCi)
+            checkstyle {
+                required.set(true)
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.xml"))
+            }
+            sarif {
+                required.set(true)
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.sarif"))
+            }
+            // In CI, only generate checkstyle and sarif (needed for GitHub reporting).
+            // Skip html and markdown to save processing time.
+            html {
+                required.set(!isCi)
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.html"))
+            }
+            markdown {
+                required.set(!isCi)
+                outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.md"))
+            }
         }
-        // Use project-specific build directory for reports to avoid conflicts
-        reports.xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.xml"))
-        reports.html.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.html"))
-        reports.txt.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.txt"))
-        reports.sarif.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.sarif"))
-        reports.md.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.md"))
     }
     dependencies {
         "detektPlugins"(libs.library("detekt-formatting"))
