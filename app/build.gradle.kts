@@ -18,7 +18,6 @@
 import com.android.build.api.dsl.ApplicationExtension
 import org.meshtastic.buildlogic.configProperties
 import org.meshtastic.buildlogic.resolveVersionInfo
-import java.io.FileInputStream
 import java.util.Properties
 
 val versionInfo = resolveVersionInfo()
@@ -38,7 +37,7 @@ val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 
 if (keystorePropertiesFile.exists()) {
-    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
 configure<ApplicationExtension> {
@@ -62,7 +61,6 @@ configure<ApplicationExtension> {
         // We have to list all translated languages here,
         // because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        @Suppress("UnstableApiUsage")
         val ci = project.findProperty("ci")?.toString()?.toBoolean() ?: false
         if (ci) {
             println("CI build detected - limiting locale filters for faster packaging")
@@ -114,29 +112,28 @@ configure<ApplicationExtension> {
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
 
-        // Disable ABI splits for bundle builds or when explicitly requested via Gradle property.
-        // Usage: ./gradlew :app:bundleGoogleRelease -Pmeshtastic.disableAbiSplits=true
-        val disableSplits =
-            providers.gradleProperty("meshtastic.disableAbiSplits").map { it.toBoolean() }.getOrElse(false)
-
-        // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid
-        splits {
-            abi {
-                isEnable = !disableSplits
-                reset()
-                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-                isUniversalApk = true
-            }
-        }
-
-        dependenciesInfo {
-            // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
-            includeInApk = false
-            // Disables dependency metadata when building Android App Bundles (for Google Play)
-            includeInBundle = false
-        }
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Disable ABI splits for bundle builds or when explicitly requested via Gradle property.
+    // Usage: ./gradlew :app:bundleGoogleRelease -Pmeshtastic.disableAbiSplits=true
+    val disableSplits = providers.gradleProperty("meshtastic.disableAbiSplits").map { it.toBoolean() }.getOrElse(false)
+
+    // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid
+    splits {
+        abi {
+            isEnable = !disableSplits
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles (for Google Play)
+        includeInBundle = false
     }
 
     // Configure existing product flavors (defined by convention plugin)
