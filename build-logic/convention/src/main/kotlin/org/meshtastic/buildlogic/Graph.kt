@@ -95,7 +95,7 @@ internal enum class PluginType(val id: String, val ref: String, val style: Strin
 }
 
 /** Optimized and Isolated Projects compatible graph configuration. */
-internal fun Project.configureGraphTasks() {
+fun Project.configureGraphTasks() {
     if (!buildFile.exists()) return
 
     val supportedConfigurations =

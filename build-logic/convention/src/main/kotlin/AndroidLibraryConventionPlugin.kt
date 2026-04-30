@@ -21,6 +21,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKotlinAndroid
 import org.meshtastic.buildlogic.configureTestOptions
 import org.meshtastic.buildlogic.disableUnnecessaryAndroidTests
@@ -55,6 +56,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 disableUnnecessaryAndroidTests(target)
             }
             configureTestOptions()
+            configureGraphTasks()
         }
     }
 }

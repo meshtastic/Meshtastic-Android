@@ -18,6 +18,7 @@
 import dev.detekt.gradle.Detekt
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.resolveVersionInfo
 
 plugins {
@@ -30,6 +31,8 @@ plugins {
     id("meshtastic.kover")
     id("meshtastic.aboutlibraries")
 }
+
+configureGraphTasks()
 
 // ── Version resolution (shared with app/build.gradle.kts via build-logic) ────
 val versionInfo = resolveVersionInfo()

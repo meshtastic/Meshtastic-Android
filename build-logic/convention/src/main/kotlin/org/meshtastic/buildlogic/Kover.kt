@@ -58,11 +58,14 @@ fun Project.configureKover() {
 }
 
 /**
- * Configure Kover aggregation in a way that is compatible with Gradle Isolated Projects. Instead of blindly adding all
- * subprojects, we only add those that have the Kover plugin applied.
+ * Configure Kover aggregation for the root project.
+ *
+ * Accepts an explicit list of subproject paths to avoid `subprojects {}` iteration,
+ * which is incompatible with Gradle Isolated Projects. The list should match the
+ * modules declared in `settings.gradle.kts`.
  */
-fun Project.configureKoverAggregation() {
-    subprojects.forEach { subproject ->
-        subproject.pluginManager.withPlugin("org.jetbrains.kotlinx.kover") { dependencies.add("kover", subproject) }
+fun Project.configureKoverAggregation(subprojectPaths: List<String>) {
+    subprojectPaths.forEach { path ->
+        dependencies.add("kover", project(path))
     }
 }

@@ -18,6 +18,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.meshtastic.buildlogic.configureAndroidMarketplaceFallback
+import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKmpTestDependencies
 import org.meshtastic.buildlogic.configureKotlinMultiplatform
 import org.meshtastic.buildlogic.configureTestOptions
@@ -40,6 +41,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             configureKotlinMultiplatform()
             configureKmpTestDependencies()
             configureTestOptions()
+            configureGraphTasks()
             configureAndroidMarketplaceFallback()
         }
     }
