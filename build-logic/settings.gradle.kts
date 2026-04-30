@@ -29,8 +29,9 @@ pluginManagement {
     }
 }
 
+// Version mirrored in libs.versions.toml for Renovate tracking.
 plugins {
-    id("com.gradle.develocity") version("4.4.1")
+    id("com.gradle.develocity") version "4.4.1"
 }
 
 dependencyResolutionManagement {
