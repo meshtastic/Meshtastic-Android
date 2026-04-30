@@ -47,7 +47,7 @@ fun DwellProgressIndicator(
         }
     val minutes = remainingSeconds / SECONDS_PER_MINUTE
     val seconds = remainingSeconds % SECONDS_PER_MINUTE
-    val timeText = "%02d:%02d".format(minutes, seconds)
+    val timeText = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
 
     Column(verticalArrangement = Arrangement.spacedBy(CONTENT_PADDING), modifier = modifier.fillMaxWidth()) {
         Text(text = "Dwelling on $presetName", style = MaterialTheme.typography.titleSmall)

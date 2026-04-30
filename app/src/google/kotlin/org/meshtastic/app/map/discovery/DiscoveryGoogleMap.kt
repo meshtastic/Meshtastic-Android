@@ -38,6 +38,9 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Person
+import org.meshtastic.core.ui.icon.Temperature
 
 private const val DEFAULT_ZOOM = 12f
 private const val BOUNDS_PADDING_PX = 100
@@ -115,9 +118,9 @@ fun DiscoveryGoogleMap(
                 }
             val nodeIcon =
                 if (node.isSensorNode) {
-                    org.meshtastic.core.ui.icon.MeshtasticIcons.Temperature
+                    MeshtasticIcons.Temperature
                 } else {
-                    org.meshtastic.core.ui.icon.MeshtasticIcons.Person
+                    MeshtasticIcons.Person
                 }
             MarkerComposable(
                 state = rememberUpdatedMarkerState(position = nodeLatLng),
