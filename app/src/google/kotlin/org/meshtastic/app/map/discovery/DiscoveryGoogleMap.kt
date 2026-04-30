@@ -36,11 +36,11 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import org.meshtastic.core.ui.util.DiscoveryMapNode
-import org.meshtastic.core.ui.util.DiscoveryNeighborType
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.core.ui.util.DiscoveryMapNode
+import org.meshtastic.core.ui.util.DiscoveryNeighborType
 
 private const val DEFAULT_ZOOM = 12f
 private const val BOUNDS_PADDING_PX = 100
