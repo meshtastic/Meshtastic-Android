@@ -33,7 +33,7 @@ plugins {
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories {
         // Only enable mavenLocal for local JitPack testing; never in CI.
         if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
@@ -56,8 +56,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "MeshtasticAndroid"
 
-// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 // Shared Develocity and Build Cache configuration
 apply(from = "gradle/develocity.settings.gradle")
