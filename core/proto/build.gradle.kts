@@ -18,10 +18,8 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.wire)
-    `maven-publish`
+    id("meshtastic.publishing")
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
     // Override minSdk for ATAK compatibility (standard is 26)

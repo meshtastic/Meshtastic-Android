@@ -16,10 +16,8 @@
  */
 plugins {
     alias(libs.plugins.meshtastic.android.library)
-    `maven-publish`
+    id("meshtastic.publishing")
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 configure<com.android.build.api.dsl.LibraryExtension> {
     namespace = "org.meshtastic.core.api"

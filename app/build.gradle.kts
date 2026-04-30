@@ -16,14 +16,12 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.mikepenz.aboutlibraries.plugin.DuplicateMode
-import com.mikepenz.aboutlibraries.plugin.DuplicateRule
-import org.meshtastic.buildlogic.GitVersionValueSource
 import org.meshtastic.buildlogic.configProperties
+import org.meshtastic.buildlogic.resolveVersionInfo
 import java.io.FileInputStream
 import java.util.Properties
 
-val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
+val versionInfo = resolveVersionInfo()
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
@@ -32,7 +30,7 @@ plugins {
     id("meshtastic.koin")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets)
-    alias(libs.plugins.aboutlibraries)
+    id("meshtastic.aboutlibraries")
     id("dev.mokkery")
 }
 
@@ -57,22 +55,10 @@ configure<ApplicationExtension> {
     defaultConfig {
         applicationId = configProperties.getProperty("APPLICATION_ID")
 
-        val vcOffset = configProperties.getProperty("VERSION_CODE_OFFSET")?.toInt() ?: 0
-        println("Version code offset: $vcOffset")
-        versionCode =
-            (
-                project.findProperty("android.injected.version.code")?.toString()?.toInt()
-                    ?: System.getenv("VERSION_CODE")?.toInt()
-                    ?: (gitVersionProvider.get().toInt() + vcOffset)
-                )
-        versionName =
-            (
-                project.findProperty("android.injected.version.name")?.toString()
-                    ?: System.getenv("VERSION_NAME")
-                    ?: configProperties.getProperty("VERSION_NAME_BASE")
-                )
-        buildConfigField("String", "MIN_FW_VERSION", "\"${configProperties.getProperty("MIN_FW_VERSION")}\"")
-        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${configProperties.getProperty("ABS_MIN_FW_VERSION")}\"")
+        versionCode = versionInfo.versionCode
+        versionName = versionInfo.versionName
+        buildConfigField("String", "MIN_FW_VERSION", "\"${versionInfo.minFwVersion}\"")
+        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${versionInfo.absMinFwVersion}\"")
         // We have to list all translated languages here,
         // because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
@@ -128,10 +114,10 @@ configure<ApplicationExtension> {
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
 
+        // Disable ABI splits for bundle builds or when explicitly requested via Gradle property.
+        // Usage: ./gradlew :app:bundleGoogleRelease -Pmeshtastic.disableAbiSplits=true
         val disableSplits =
-            project.gradle.startParameter.taskNames.any {
-                it.contains("bundle", ignoreCase = true) || it.contains("google", ignoreCase = true)
-            }
+            providers.gradleProperty("meshtastic.disableAbiSplits").map { it.toBoolean() }.getOrElse(false)
 
         // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid
         splits {
@@ -199,12 +185,6 @@ androidComponents {
             }
         }
     }
-}
-
-project.afterEvaluate {
-    logger.lifecycle(
-        "Version code is set to: ${extensions.getByType<ApplicationExtension>().defaultConfig.versionCode}",
-    )
 }
 
 dependencies {
@@ -305,34 +285,3 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.glance.appwidget)
 }
-
-aboutLibraries {
-    // Run offline by default to avoid burning GitHub API calls on every build.
-    // Release builds pass -PaboutLibraries.release=true to fetch full license text + funding info.
-    val isReleaseBuild = providers.gradleProperty("aboutLibraries.release").map { it.toBoolean() }.getOrElse(false)
-    val ghToken = providers.environmentVariable("GITHUB_TOKEN")
-
-    offlineMode = !isReleaseBuild
-
-    collect {
-        fetchRemoteLicense = isReleaseBuild && ghToken.isPresent
-        fetchRemoteFunding = isReleaseBuild && ghToken.isPresent
-        if (ghToken.isPresent) {
-            gitHubApiToken = ghToken.get()
-        }
-    }
-    export {
-        excludeFields = listOf("generated")
-        outputFile = file("src/main/resources/aboutlibraries.json")
-    }
-    library {
-        duplicationMode = DuplicateMode.MERGE
-        duplicationRule = DuplicateRule.SIMPLE
-    }
-}
-
-// Ensure aboutlibraries.json is always up-to-date during the build.
-// This is required since AboutLibraries v11+ no longer auto-exports.
-tasks
-    .matching { it.name.startsWith("process") && it.name.endsWith("Resources") }
-    .configureEach { dependsOn("exportLibraryDefinitions") }

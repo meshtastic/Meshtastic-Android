@@ -56,6 +56,7 @@ dependencies {
     compileOnly(libs.androidx.room.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
     compileOnly(libs.test.retry.gradlePlugin)
+    compileOnly(libs.aboutlibraries.gradlePlugin)
 
     detektPlugins(libs.detekt.formatting)
 }
@@ -184,6 +185,16 @@ gradlePlugin {
         register("root") {
             id = "meshtastic.root"
             implementationClass = "RootConventionPlugin"
+        }
+
+        register("publishing") {
+            id = "meshtastic.publishing"
+            implementationClass = "PublishingConventionPlugin"
+        }
+
+        register("aboutLibraries") {
+            id = "meshtastic.aboutlibraries"
+            implementationClass = "AboutLibrariesConventionPlugin"
         }
     }
 }

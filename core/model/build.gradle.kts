@@ -20,10 +20,8 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.kmp.jvm.android")
-    `maven-publish`
+    id("meshtastic.publishing")
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
     jvm()
