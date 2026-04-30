@@ -60,12 +60,9 @@ fun Project.configureKover() {
 /**
  * Configure Kover aggregation for the root project.
  *
- * Accepts an explicit list of subproject paths to avoid `subprojects {}` iteration,
- * which is incompatible with Gradle Isolated Projects. The list should match the
- * modules declared in `settings.gradle.kts`.
+ * Accepts an explicit list of subproject paths to avoid `subprojects {}` iteration, which is incompatible with Gradle
+ * Isolated Projects. The list should match the modules declared in `settings.gradle.kts`.
  */
 fun Project.configureKoverAggregation(subprojectPaths: List<String>) {
-    subprojectPaths.forEach { path ->
-        dependencies.add("kover", project(path))
-    }
+    subprojectPaths.forEach { path -> dependencies.add("kover", project(path)) }
 }

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -29,9 +28,7 @@ class DokkaConventionPlugin : Plugin<Project> {
             apply(plugin = "org.jetbrains.dokka")
 
             // Ensure the Android documentation plugin is available in all modules for better Android support
-            dependencies {
-                add("dokkaPlugin", libs.library("dokka-android-documentation-plugin"))
-            }
+            dependencies { add("dokkaPlugin", libs.library("dokka-android-documentation-plugin")) }
 
             configureDokka()
         }

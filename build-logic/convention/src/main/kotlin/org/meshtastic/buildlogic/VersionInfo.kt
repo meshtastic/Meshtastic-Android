@@ -14,15 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.buildlogic
 
 import org.gradle.api.Project
 
 /**
- * Shared version metadata resolved from config.properties, environment variables,
- * Gradle properties, and git commit count. Used by both the Android app and Desktop
- * host shells to avoid duplicating resolution logic.
+ * Shared version metadata resolved from config.properties, environment variables, Gradle properties, and git commit
+ * count. Used by both the Android app and Desktop host shells to avoid duplicating resolution logic.
  */
 data class VersionInfo(
     val versionCode: Int,

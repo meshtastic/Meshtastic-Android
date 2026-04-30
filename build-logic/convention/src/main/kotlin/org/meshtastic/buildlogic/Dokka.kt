@@ -61,9 +61,8 @@ fun Project.configureDokka() {
 /**
  * Configure Dokka aggregation for the root project.
  *
- * Accepts an explicit list of subproject paths to avoid `subprojects {}` iteration,
- * which is incompatible with Gradle Isolated Projects. The list should match the
- * modules declared in `settings.gradle.kts`.
+ * Accepts an explicit list of subproject paths to avoid `subprojects {}` iteration, which is incompatible with Gradle
+ * Isolated Projects. The list should match the modules declared in `settings.gradle.kts`.
  */
 fun Project.configureDokkaAggregation(subprojectPaths: List<String>) {
     extensions.configure<DokkaExtension> {
@@ -74,7 +73,5 @@ fun Project.configureDokkaAggregation(subprojectPaths: List<String>) {
     // Add each subproject as a Dokka dependency using declared paths rather than
     // iterating live subproject objects. This avoids cross-project configuration
     // access and is compatible with Gradle Isolated Projects.
-    subprojectPaths.forEach { path ->
-        dependencies.add("dokka", project(path))
-    }
+    subprojectPaths.forEach { path -> dependencies.add("dokka", project(path)) }
 }

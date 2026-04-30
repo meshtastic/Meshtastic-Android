@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -32,13 +31,15 @@ class KmpLibraryComposeConventionPlugin : Plugin<Project> {
             apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
 
             extensions.configure<KotlinMultiplatformExtension> {
-                sourceSets.matching { it.name == "commonMain" }.configureEach {
-                    dependencies {
-                        implementation(libs.library("compose-multiplatform-runtime"))
-                        // API because consuming modules will usually need the resource types
-                        api(libs.library("compose-multiplatform-resources"))
+                sourceSets
+                    .matching { it.name == "commonMain" }
+                    .configureEach {
+                        dependencies {
+                            implementation(libs.library("compose-multiplatform-runtime"))
+                            // API because consuming modules will usually need the resource types
+                            api(libs.library("compose-multiplatform-resources"))
+                        }
                     }
-                }
             }
             configureComposeCompiler()
         }

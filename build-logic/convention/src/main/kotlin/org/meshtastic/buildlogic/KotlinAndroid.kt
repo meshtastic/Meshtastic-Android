@@ -104,12 +104,12 @@ internal fun Project.configureKotlinMultiplatform() {
     tasks.configureEach {
         val taskName = name.lowercase()
         if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
-            if (
-                taskName.startsWith("link") && taskName.contains("test") ||
-                taskName == "iosarm64test" ||
-                taskName == "iossimulatorarm64test" ||
-                taskName.endsWith("testbinaries")
-            ) {
+            val isDisabledIosTask =
+                (taskName.startsWith("link") && taskName.contains("test")) ||
+                    taskName == "iosarm64test" ||
+                    taskName == "iossimulatorarm64test" ||
+                    taskName.endsWith("testbinaries")
+            if (isDisabledIosTask) {
                 enabled = false
             }
         }
@@ -205,15 +205,17 @@ private val SHARED_COMPILER_ARGS =
         "-Xbackend-threads=0",
     )
 
+private const val PUBLISHED_MODULE_JDK = 17
+private const val APP_JDK = 21
+
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
     val isPublishedModule = project.name in PUBLISHED_MODULES
 
     extensions.configure<T> {
-        val javaVersion = if (isPublishedModule) 17 else 21
         // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older
-        // environments),
-        // and Java 21 for the rest of the app.
+        // environments), and Java 21 for the rest of the app.
+        val javaVersion = if (isPublishedModule) PUBLISHED_MODULE_JDK else APP_JDK
         jvmToolchain(javaVersion)
 
         if (this is KotlinMultiplatformExtension) {

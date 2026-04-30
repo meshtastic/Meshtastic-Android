@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import com.mikepenz.aboutlibraries.plugin.AboutLibrariesExtension
 import com.mikepenz.aboutlibraries.plugin.DuplicateMode
 import com.mikepenz.aboutlibraries.plugin.DuplicateRule
@@ -30,6 +29,9 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
             pluginManager.apply(libs.plugin("aboutlibraries").get().pluginId)
 
             extensions.configure<AboutLibrariesExtension> {
+                // aboutLibraries.release=true is only passed for google builds (see Fastfile).
+                // For fdroid/reproducible builds, offlineMode=true ensures no network calls
+                // and deterministic output. See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
                 val isReleaseBuild =
                     providers.gradleProperty("aboutLibraries.release").map { it.toBoolean() }.getOrElse(false)
                 val ghToken = providers.environmentVariable("GITHUB_TOKEN")
@@ -55,8 +57,15 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
 
             // Ensure aboutlibraries.json is always up-to-date during the build.
             // This is required since AboutLibraries v11+ no longer auto-exports.
+            // For fdroid builds, skip re-export to preserve reproducible builds (RB) —
+            // the committed aboutlibraries.json is used as-is.
+            // See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
             tasks
-                .matching { it.name.startsWith("process") && it.name.endsWith("Resources") }
+                .matching {
+                    it.name.startsWith("process") &&
+                        it.name.endsWith("Resources") &&
+                        !it.name.contains("Fdroid", ignoreCase = true)
+                }
                 .configureEach { dependsOn("exportLibraryDefinitions") }
         }
     }

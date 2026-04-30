@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MatchingDeclarationName")
+
 package org.meshtastic.buildlogic
 
 import org.gradle.api.DefaultTask
@@ -134,9 +136,13 @@ fun Project.configureGraphTasks() {
                             pluginManager.hasPlugin("meshtastic.android.application") ||
                                 pluginManager.hasPlugin("meshtastic.android.application.compose") ->
                                 PluginType.AndroidApplication
+
                             targetProjectPath.startsWith(":desktop") -> PluginType.ComposeDesktopApplication
+
                             pluginManager.hasPlugin("meshtastic.kmp.feature") -> PluginType.KmpFeature
+
                             targetProjectPath.startsWith(":feature:") -> PluginType.AndroidFeature
+
                             else -> PluginType.entries.firstOrNull { pluginManager.hasPlugin(it.id) } ?: Unknown
                         }
                     projectPlugins[targetProjectPath] = type

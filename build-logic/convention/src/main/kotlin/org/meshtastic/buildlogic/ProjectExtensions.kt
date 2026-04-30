@@ -33,6 +33,9 @@ import org.gradle.testretry.TestRetryTaskExtension
 import java.io.FileInputStream
 import java.util.Properties
 
+private const val MAX_TEST_RETRIES = 2
+private const val MAX_TEST_FAILURES = 10
+
 val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
@@ -117,8 +120,8 @@ internal fun Project.configureTestOptions() {
     pluginManager.withPlugin("org.gradle.test-retry") {
         tasks.withType<Test>().configureEach {
             extensions.configure<TestRetryTaskExtension> {
-                maxRetries.set(2)
-                maxFailures.set(10)
+                maxRetries.set(MAX_TEST_RETRIES)
+                maxFailures.set(MAX_TEST_FAILURES)
                 failOnPassedAfterRetry.set(false)
             }
         }

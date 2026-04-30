@@ -136,6 +136,16 @@ configure<ApplicationExtension> {
         includeInBundle = false
     }
 
+    packaging {
+        jniLibs {
+            // Keep debug symbols in native libraries so reproducible builds don't depend
+            // on the exact NDK version used for stripping. This avoids RB failures when
+            // IzzyOnDroid/F-Droid rebuilds use a different NDK than our CI.
+            // See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
+            keepDebugSymbols.add("**/*.so")
+        }
+    }
+
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
