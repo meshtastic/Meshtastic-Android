@@ -235,30 +235,21 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         }
     }
 
-    // For non-KMP modules (pure Android or JVM), configure compiler args via KotlinCompile tasks.
-    // KMP modules already configure args via targets.compilations above — skip to avoid duplication.
-    if (T::class != KotlinMultiplatformExtension::class) {
-        val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
+    val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
 
-        tasks.withType<KotlinCompile>().configureEach {
-            compilerOptions {
-                jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
-                allWarningsAsErrors.set(warningsAsErrors)
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
+            allWarningsAsErrors.set(warningsAsErrors)
+
+            // For non-KMP modules, configure compiler args here since they don't use targets.compilations.
+            // KMP modules already set these via the targets block above — only jvmTarget/warnings needed here.
+            if (T::class != KotlinMultiplatformExtension::class) {
                 if (!isPublishedModule) {
                     freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
                 }
                 freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
                 freeCompilerArgs.add("-jvm-default=no-compatibility")
-            }
-        }
-    } else {
-        // KMP: still set warningsAsErrors and JVM target on JVM compile tasks (supplements target-level config)
-        val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map { it.toBoolean() }.getOrElse(false)
-
-        tasks.withType<KotlinCompile>().configureEach {
-            compilerOptions {
-                jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
-                allWarningsAsErrors.set(warningsAsErrors)
             }
         }
     }

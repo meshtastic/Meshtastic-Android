@@ -15,6 +15,64 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+pluginManagement {
+    includeBuild("build-logic")
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
+    id("com.gradle.develocity") version("4.4.1")
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
+}
+
+@Suppress("UnstableApiUsage")
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        // Only enable mavenLocal for local JitPack testing; never in CI.
+        if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        maven {
+            url = uri("https://jitpack.io")
+            content {
+                includeGroupByRegex("com\\.github\\..*")
+            }
+        }
+    }
+}
+
+rootProject.name = "MeshtasticAndroid"
+
+// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+// Shared Develocity and Build Cache configuration
+apply(from = "gradle/develocity.settings.gradle")
+
+@Suppress("UnstableApiUsage")
+toolchainManagement {
+    jvm {
+        javaRepositories {
+            repository("foojay") {
+                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver::class.java)
+            }
+        }
+    }
+}
+
 include(
     ":app",
     ":core:api",
@@ -49,54 +107,3 @@ include(
     ":feature:widget",
     ":desktop",
 )
-rootProject.name = "MeshtasticAndroid"
-
-// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
-pluginManagement {
-    includeBuild("build-logic")
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-    }
-}
-
-@Suppress("UnstableApiUsage")
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        // Only enable mavenLocal for local JitPack testing; never in CI.
-        if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
-        google()
-        mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
-            content {
-                includeGroupByRegex("com\\.github\\..*")
-            }
-        }
-    }
-}
-
-plugins {
-    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-    id("com.gradle.develocity") version("4.4.1")
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
-}
-
-// Shared Develocity and Build Cache configuration
-apply(from = "gradle/develocity.settings.gradle")
-
-@Suppress("UnstableApiUsage")
-toolchainManagement {
-    jvm {
-        javaRepositories {
-            repository("foojay") {
-                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver::class.java)
-            }
-        }
-    }
-}

@@ -49,7 +49,7 @@ dependencies {
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
     compileOnly(libs.google.services.gradlePlugin)
     compileOnly(libs.koin.gradlePlugin)
-    implementation(libs.kover.gradlePlugin)
+    compileOnly(libs.kover.gradlePlugin)
     implementation(libs.mokkery.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
