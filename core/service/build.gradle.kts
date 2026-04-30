@@ -21,7 +21,6 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.service"
         androidResources.enable = false

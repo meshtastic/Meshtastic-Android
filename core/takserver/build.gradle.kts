@@ -23,7 +23,6 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.takserver"
         androidResources.enable = false

@@ -19,7 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     id("meshtastic.kmp.jvm.android")
-    alias(libs.plugins.meshtastic.koin)
+    id("meshtastic.koin")
 }
 
 kotlin {

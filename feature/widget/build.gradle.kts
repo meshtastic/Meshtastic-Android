@@ -18,7 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
-    alias(libs.plugins.meshtastic.koin)
+    id("meshtastic.koin")
 }
 
 android {

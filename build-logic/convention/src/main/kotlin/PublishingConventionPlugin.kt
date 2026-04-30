@@ -30,24 +30,24 @@ class PublishingConventionPlugin : Plugin<Project> {
 
             if (version == "unspecified") {
                 version =
-                    System.getenv("VERSION")
-                        ?: System.getenv("VERSION_NAME")
+                    providers.environmentVariable("VERSION").orNull
+                        ?: providers.environmentVariable("VERSION_NAME").orNull
                         ?: configProperties.getProperty("VERSION_NAME_BASE")
                         ?: "0.0.0-SNAPSHOT"
             }
 
-            val githubActor = System.getenv("GITHUB_ACTOR")
-            val githubToken = System.getenv("GITHUB_TOKEN")
+            val githubActor = providers.environmentVariable("GITHUB_ACTOR")
+            val githubToken = providers.environmentVariable("GITHUB_TOKEN")
 
-            if (!githubActor.isNullOrEmpty() && !githubToken.isNullOrEmpty()) {
+            if (githubActor.isPresent && githubToken.isPresent) {
                 extensions.configure<PublishingExtension> {
                     repositories {
                         maven {
                             name = "GitHubPackages"
                             url = uri("https://maven.pkg.github.com/meshtastic/Meshtastic-Android")
                             credentials {
-                                username = githubActor
-                                password = githubToken
+                                username = githubActor.get()
+                                password = githubToken.get()
                             }
                         }
                     }

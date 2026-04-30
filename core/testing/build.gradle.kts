@@ -18,7 +18,6 @@
 plugins { alias(libs.plugins.meshtastic.kmp.library) }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.testing"
         androidResources.enable = false

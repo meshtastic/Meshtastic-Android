@@ -25,7 +25,6 @@ plugins {
 kotlin {
     jvm()
 
-    @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = false
         withHostTest { isIncludeAndroidResources = true }

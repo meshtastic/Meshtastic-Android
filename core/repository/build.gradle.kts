@@ -17,11 +17,10 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.meshtastic.koin)
+    id("meshtastic.koin")
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = false
         withHostTest {}
