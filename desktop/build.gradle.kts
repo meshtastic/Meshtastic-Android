@@ -36,7 +36,7 @@ configureGraphTasks()
 
 // ── Version resolution (shared with app/build.gradle.kts via build-logic) ────
 val versionInfo = resolveVersionInfo()
-val resolvedIsDebug: Boolean = project.findProperty("desktop.release")?.toString()?.toBoolean()?.not() ?: true
+val resolvedIsDebug: Boolean = providers.gradleProperty("desktop.release").map { !it.toBoolean() }.getOrElse(true)
 
 // ── Generate DesktopBuildConfig ──────────────────────────────────────────────
 // Mirrors AGP's BuildConfig for Android so the desktop runtime has access to the
@@ -108,12 +108,15 @@ tasks.withType<Detekt>().configureEach { exclude("**/generated/**") }
 compose.desktop {
     application {
         mainClass = "org.meshtastic.desktop.MainKt"
-        jvmArgs(
-            "-Xmx2G",
-            "-Dapple.awt.application.name=Meshtastic Desktop",
-            "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
-            "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
-        )
+
+        val desktopJvmArgs =
+            listOf(
+                "-Xmx2G",
+                "-Dapple.awt.application.name=Meshtastic Desktop",
+                "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
+                "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
+            )
+        jvmArgs(*desktopJvmArgs.toTypedArray())
 
         buildTypes.release.proguard {
             isEnabled.set(true)
@@ -141,12 +144,7 @@ compose.desktop {
 
             // Default JVM arguments for the packaged application
             // Increase max heap size to prevent OOM issues on complex maps/data
-            jvmArgs(
-                "-Xmx2G",
-                "-Dapple.awt.application.name=Meshtastic Desktop",
-                "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
-                "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
-            )
+            jvmArgs(*desktopJvmArgs.toTypedArray())
 
             // App Icon & OS Specific Configurations
             macOS {
@@ -184,16 +182,16 @@ compose.desktop {
                 //   APPLE_ID                    – Apple ID email used for notarization
                 //   APPLE_APP_SPECIFIC_PASSWORD – App-specific password from appleid.apple.com
                 //   APPLE_TEAM_ID               – 10-character Apple Developer Team ID
-                val signMacOs = System.getenv("SIGN_MACOS")?.toBoolean() ?: false
+                val signMacOs = providers.environmentVariable("SIGN_MACOS").map { it.toBoolean() }.getOrElse(false)
                 if (signMacOs) {
                     signing {
                         sign.set(true)
-                        identity.set(System.getenv("APPLE_SIGNING_IDENTITY"))
+                        identity.set(providers.environmentVariable("APPLE_SIGNING_IDENTITY"))
                     }
                     notarization {
-                        appleID.set(System.getenv("APPLE_ID"))
-                        password.set(System.getenv("APPLE_APP_SPECIFIC_PASSWORD"))
-                        teamID.set(System.getenv("APPLE_TEAM_ID"))
+                        appleID.set(providers.environmentVariable("APPLE_ID"))
+                        password.set(providers.environmentVariable("APPLE_APP_SPECIFIC_PASSWORD"))
+                        teamID.set(providers.environmentVariable("APPLE_TEAM_ID"))
                     }
                 }
             }
@@ -217,7 +215,7 @@ compose.desktop {
 
             // Define target formats based on the current host OS to avoid configuration errors
             // (e.g., trying to configure Linux AppImage notarization on macOS).
-            val currentOs = System.getProperty("os.name").lowercase()
+            val currentOs = providers.systemProperty("os.name").get().lowercase()
             when {
                 currentOs.contains("mac") -> targetFormats(TargetFormat.Dmg)
                 currentOs.contains("win") -> targetFormats(TargetFormat.Msi, TargetFormat.Exe)

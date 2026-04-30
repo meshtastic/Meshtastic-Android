@@ -22,8 +22,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
     android {
         namespace = "org.meshtastic.feature.settings"
         androidResources.enable = false
@@ -58,7 +56,7 @@ kotlin {
         }
 
         commonTest.dependencies {
-            implementation(project(":core:datastore"))
+            implementation(projects.core.datastore)
             implementation(libs.compose.multiplatform.ui.test)
         }
 

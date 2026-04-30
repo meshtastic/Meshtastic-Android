@@ -61,9 +61,9 @@ configure<ApplicationExtension> {
         // We have to list all translated languages here,
         // because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        val ci = project.findProperty("ci")?.toString()?.toBoolean() ?: false
+        val ci = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
         if (ci) {
-            println("CI build detected - limiting locale filters for faster packaging")
+            logger.lifecycle("CI build detected - limiting locale filters for faster packaging")
             androidResources.localeFilters.addAll(listOf("en"))
         } else {
             androidResources.localeFilters.addAll(
@@ -169,7 +169,7 @@ secrets {
 
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
-        variant.flavorName?.let { flavor -> variant.applicationId = "com.geeksville.mesh.$flavor.debug" }
+        variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
     }
 
     onVariants(selector().withBuildType("release")) { variant ->
@@ -177,7 +177,8 @@ androidComponents {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
             val minifyTaskName = "minify${variantNameCapped}WithR8"
             val uploadTaskName = "uploadMapping$variantNameCapped"
-            if (project.tasks.findByName(uploadTaskName) != null && project.tasks.findByName(minifyTaskName) != null) {
+            // Use tasks.names to check existence without eagerly realizing tasks
+            if (tasks.names.contains(uploadTaskName) && tasks.names.contains(minifyTaskName)) {
                 tasks.named(minifyTaskName).configure { finalizedBy(uploadTaskName) }
             }
         }

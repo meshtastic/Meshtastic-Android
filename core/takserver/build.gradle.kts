@@ -51,8 +51,6 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        jvmAndroidMain.dependencies {}
-
         commonTest.dependencies {
             implementation(projects.core.testing)
             implementation(libs.kotlinx.coroutines.test)
