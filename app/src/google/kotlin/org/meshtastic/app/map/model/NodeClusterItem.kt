@@ -53,6 +53,6 @@ data class NodeClusterItem(
                 18 to 91.182212,
                 19 to 45.58554,
             )
-        return precisionMap[this.node.position.precision_bits ?: 0]
+        return precisionMap[this.node.position.precision_bits]
     }
 }

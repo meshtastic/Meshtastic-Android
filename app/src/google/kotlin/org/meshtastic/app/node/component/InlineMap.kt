@@ -68,7 +68,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             ),
             cameraPositionState = cameraState,
         ) {
-            val precisionMeters = precisionBitsToMeters(node.position.precision_bits ?: 0)
+            val precisionMeters = precisionBitsToMeters(node.position.precision_bits)
             val latLng = LatLng(node.latitude, node.longitude)
             if (precisionMeters > 0) {
                 Circle(

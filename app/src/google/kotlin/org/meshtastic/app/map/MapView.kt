@@ -625,16 +625,16 @@ fun MapView(
                     onSendClicked = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
-                            finalWp = finalWp.copy(id = mapViewModel.generatePacketId() ?: 0)
+                            finalWp = finalWp.copy(id = mapViewModel.generatePacketId())
                         }
-                        if ((updatedWp.icon ?: 0) == 0) {
+                        if (updatedWp.icon == 0) {
                             finalWp = finalWp.copy(icon = 0x1F4CD)
                         }
                         mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },
                     onDeleteClicked = { wpToDelete ->
-                        if ((wpToDelete.locked_to ?: 0) == 0 && isConnected && wpToDelete.id != 0) {
+                        if (wpToDelete.locked_to == 0 && isConnected && wpToDelete.id != 0) {
                             mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1))
                         }
                         mapViewModel.deleteWaypoint(wpToDelete.id)
@@ -959,7 +959,6 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
         when (displayUnits) {
             DisplayUnits.METRIC -> "%.1f Km/h".format(speedInMps.mpsToKmph())
             DisplayUnits.IMPERIAL -> "%.1f mph".format(speedInMps.mpsToMph())
-            else -> mpsText
         }
     } else {
         mpsText
