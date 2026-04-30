@@ -202,6 +202,7 @@ private val SHARED_COMPILER_ARGS =
         "-Xcontext-parameters",
         "-Xannotation-default-target=param-property",
         "-Xskip-prerelease-check",
+        "-Xbackend-threads=0",
     )
 
 /** Configure base Kotlin options */

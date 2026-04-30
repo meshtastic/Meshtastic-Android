@@ -21,6 +21,7 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 
 internal fun Project.configureComposeCompiler() {
     extensions.configure<ComposeCompilerGradlePluginExtension> {
@@ -39,5 +40,6 @@ internal fun Project.configureComposeCompiler() {
         stabilityConfigurationFiles.add(
             isolated.rootProject.projectDirectory.file("compose_compiler_config.conf"),
         )
+        featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
     }
 }
