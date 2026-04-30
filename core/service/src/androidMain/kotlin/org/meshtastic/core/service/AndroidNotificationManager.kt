@@ -24,6 +24,7 @@ import androidx.core.content.getSystemService
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_alerts_notifications
@@ -36,7 +37,8 @@ import android.app.NotificationManager as SystemNotificationManager
 @Single
 class AndroidNotificationManager(private val context: Context) : NotificationManager {
 
-    private val notificationManager = context.getSystemService<SystemNotificationManager>()!!
+    private val notificationManager =
+        checkNotNull(context.getSystemService<SystemNotificationManager>()) { "NotificationManager not found" }
 
     private data class ChannelConfig(val id: String, val importance: Int)
 
@@ -106,7 +108,7 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
             NotificationCompat.Builder(context, notification.category.channelConfig().id)
                 .setContentTitle(notification.title)
                 .setContentText(notification.message)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(drawable.meshtastic_ic_notification)
                 .setAutoCancel(true)
                 .setSilent(notification.isSilent)
 

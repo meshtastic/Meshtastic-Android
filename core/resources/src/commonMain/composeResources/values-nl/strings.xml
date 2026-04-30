@@ -234,6 +234,11 @@
     <string name="channel_1">Kanaal 1</string>
     <string name="channel_2">Kanaal 2</string>
     <string name="channel_3">Kanaal 3</string>
+    <string name="channel_4">Kanaal 4</string>
+    <string name="channel_5">Kanaal 5</string>
+    <string name="channel_6">Kanaal 6</string>
+    <string name="channel_7">Kanaal 7</string>
+    <string name="channel_8">Kanaal 8</string>
     <string name="current">Huidige</string>
     <string name="voltage">Spanning</string>
     <string name="are_you_sure">Weet u het zeker?</string>
@@ -415,6 +420,8 @@
     <string name="tak_team_blue">Blauw</string>
     <string name="tak_team_green">Groen</string>
     <string name="connect">Verbinding maken</string>
+    <string name="wifi_provision_success_ip_address">IP-adres</string>
     <string name="wifi_provision_success_username">Gebruikersnaam</string>
     <string name="filter_icon">Filter</string>
+    <string name="action_delete_message">Bericht verwijderen</string>
 </resources>

@@ -116,7 +116,6 @@ jobs:
   release-google:
     runs-on: ubuntu-24.04
     needs: [prepare-build-info]
-    environment: Release
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -158,7 +157,7 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.9'
+          ruby-version: '4.0.3'
           bundler-cache: true
 
       - name: Build and Deploy Google Play to Internal Track with Fastlane
@@ -201,7 +200,6 @@ jobs:
   release-fdroid:
     runs-on: ubuntu-24.04
     needs: [prepare-build-info]
-    environment: Release
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -232,7 +230,7 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.9'
+          ruby-version: '4.0.3'
           bundler-cache: true
 
       - name: Build F-Droid with Fastlane
@@ -262,7 +260,6 @@ jobs:
     if: ${{ inputs.build_desktop }}
     runs-on: ${{ matrix.os }}
     needs: [prepare-build-info]
-    environment: Release
     strategy:
       fail-fast: false
       matrix:

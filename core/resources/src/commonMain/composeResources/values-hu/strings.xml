@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">állomás filter törlése</string>
     <string name="node_filter_title">Szűrés</string>
@@ -297,6 +298,8 @@
     <string name="currently">Jelenleg:</string>
     <string name="mute_status_always">Mindig némítva</string>
     <string name="mute_status_unmuted">Nincs némítva</string>
+    <string name="mute_status_muted_for_days">Némítva ennyi ideig: %1$d nap, %2$s óra</string>
+    <string name="mute_status_muted_for_hours">Némítva: %1$s óra</string>
     <string name="replace">Csere</string>
     <string name="wifi_qr_code_scan">WiFi QR kód szkennelése</string>
     <string name="wifi_qr_code_error">Érvénytelen WiFi-hitelesítő QR-kód formátum</string>
@@ -361,11 +364,17 @@
     <string name="channel_1">1. csatorna</string>
     <string name="channel_2">2. csatorna</string>
     <string name="channel_3">3. csatorna</string>
+    <string name="channel_4">4. csatorna</string>
+    <string name="channel_5">5. csatorna</string>
+    <string name="channel_6">6. csatorna</string>
+    <string name="channel_7">7. csatorna</string>
+    <string name="channel_8">8. csatorna</string>
     <string name="current">Áramerősség</string>
     <string name="voltage">Feszültség</string>
     <string name="are_you_sure">Biztos vagy benne?</string>
     <string name="router_role_confirmation_text"><![CDATA[Elolvastam a <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Eszközszerep-dokumentációt</a> és a <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Megfelelő eszközszerep kiválasztása</a> című blogbejegyzést.]]></string>
     <string name="i_know_what_i_m_doing">Tudom, mit csinálok.</string>
+    <string name="low_battery_message">A %1$s csomópont akkumulátora alacsony (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Alacsony töltöttség értesítések</string>
     <string name="low_battery_title">Alacsony töltöttség: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Alacsony töltöttségű értesítések (kedvenc csomópontok)</string>
@@ -849,7 +858,9 @@
     <string name="tak_team_blue">Kék</string>
     <string name="tak_team_green">Zöld</string>
     <string name="connect">Csatlakozás</string>
+    <string name="wifi_provision_success_ip_address">IP cím</string>
     <string name="wifi_provision_success_username">Felhasználónév</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filter</string>
+    <string name="action_delete_message">Töröljem az üzenetet</string>
 </resources>

@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">絞り込み</string>
     <string name="desc_node_filter_clear">ノードフィルターをクリアします</string>
     <string name="node_filter_title">絞り込み</string>
@@ -307,11 +308,17 @@
     <string name="channel_1">チャンネル 1</string>
     <string name="channel_2">チャンネル 2</string>
     <string name="channel_3">チャンネル 3</string>
+    <string name="channel_4">チャンネル 4</string>
+    <string name="channel_5">チャンネル 5</string>
+    <string name="channel_6">チャンネル 6</string>
+    <string name="channel_7">チャンネル 7</string>
+    <string name="channel_8">チャンネル 8</string>
     <string name="current">電流</string>
     <string name="voltage">電圧</string>
     <string name="are_you_sure">よろしいですか？</string>
     <string name="router_role_confirmation_text"><![CDATA[私はすでに<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">デバイスロールドキュメント</a>と <a href="http://meshtastic.org/blog/choosing-the-right-device-role> 正しいデバイスのロールを選択</a>についてのブログ記事を読んでいます。]]></string>
     <string name="i_know_what_i_m_doing">はい、了承します</string>
+    <string name="low_battery_message">ノード %1$s のバッテリー残量が少なくなっています (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">バッテリー残量低下通知</string>
     <string name="low_battery_title">バッテリー低残量: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">バッテリー残量低下通知 (お気に入りノード)</string>
@@ -580,6 +587,16 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">更新失敗</string>
     <string name="interval_unset">削除</string>
+    <string name="interval_always_on">常時オン</string>
+    <plurals name="plurals_seconds">
+        <item quantity="other">%1$d 秒</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="other">%1$d 分</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="other">%1$d 時間</item>
+    </plurals>
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="filter_disable_for_contact">フィルタを無効にする</string>
@@ -603,6 +620,7 @@
     <string name="bluetooth_feature_config">設定</string>
     <string name="bluetooth_feature_config_description">デバイスの設定とチャンネルをワイヤレスで管理します。</string>
     <string name="map_style_selection">マップスタイルの選択</string>
+    <string name="local_stats_battery">バッテリー：%1$d%</string>
     <string name="local_stats_uptime">稼働時間： %1$s</string>
     <string name="local_stats_traffic">トラフィック: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">リレー： %1$d (キャンセル済み: %2$d)</string>
@@ -651,6 +669,7 @@
     <string name="traffic_management_config">トラフィック管理設定</string>
     <string name="traffic_management_enabled">モジュール有効</string>
     <string name="connect">接続</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_success_username">ユーザー名</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">絞り込み</string>

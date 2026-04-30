@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">筛选器csvfganw</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_title">筛选条件</string>
@@ -333,6 +334,8 @@
     <string name="currently">当前:</string>
     <string name="mute_status_always">始终静音</string>
     <string name="mute_status_unmuted">非静音</string>
+    <string name="mute_status_muted_for_days">%1$d 天静音， %2$s 小时</string>
+    <string name="mute_status_muted_for_hours">%1$s 小时静音</string>
     <string name="mute_add">是否静音通知 '%1$s？</string>
     <string name="mute_remove">是否静音通知 '%1$s？</string>
     <string name="replace">替换</string>
@@ -342,6 +345,8 @@
     <string name="battery">电池</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">温度</string>
@@ -414,11 +419,17 @@
     <string name="channel_1">频道 1</string>
     <string name="channel_2">频道 2</string>
     <string name="channel_3">频道 3</string>
+    <string name="channel_4">频道 4</string>
+    <string name="channel_5">频道 5</string>
+    <string name="channel_6">频道 6</string>
+    <string name="channel_7">频道 7</string>
+    <string name="channel_8">频道 8</string>
     <string name="current">电流</string>
     <string name="voltage">电压</string>
     <string name="are_you_sure">你确定吗？</string>
     <string name="router_role_confirmation_text"><![CDATA[我已经阅读 <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">设备角色文档</a> 以及关于 <a href="http://meshtastic.org/blog/choosing-the-right-device-role">选择正确设备角色</a>的博客文章。]]></string>
     <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
+    <string name="low_battery_message">节点 %1$s 电量低(%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">低电量通知</string>
     <string name="low_battery_title">电池电量低: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低电量通知 (收藏节点)</string>
@@ -1053,6 +1064,7 @@
     <string name="bluetooth_feature_config">配置</string>
     <string name="bluetooth_feature_config_description">无线的方式来管理您的设备设置和频道</string>
     <string name="map_style_selection">地图样式选择</string>
+    <string name="local_stats_battery">电量: %1$d%</string>
     <string name="local_stats_nodes">节点： %1$d 在线 / %2$d 总计</string>
     <string name="local_stats_uptime">运行时间： %1$s</string>
     <string name="local_stats_traffic">流量：TX %1$d / RX %2$d (D： %3$d)</string>
@@ -1118,6 +1130,7 @@
     <string name="note">备注</string>
     <string name="connect">连接</string>
     <string name="done">完成</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_success_ip_address">IP 地址</string>
     <string name="wifi_provision_success_username">用户名称</string>
     <string name="wifi_provision_success_done">完成</string>

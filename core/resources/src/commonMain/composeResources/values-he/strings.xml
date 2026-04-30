@@ -149,4 +149,5 @@
     <!-- Message Filter -->
     <!-- Network Map Layers -->
     <string name="filter_icon">פילטר</string>
+    <string name="action_delete_message">מחק הודעה</string>
 </resources>

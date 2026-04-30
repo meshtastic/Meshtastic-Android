@@ -58,7 +58,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -71,7 +70,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
@@ -288,15 +286,17 @@ private fun EmojiGrid(
     onEmojiSelected: (String) -> Unit,
 ) {
     val gridState = rememberLazyGridState()
-    val scope = rememberCoroutineScope()
     val hasRecents = recentEmojis.isNotEmpty()
     val tabOffset = if (hasRecents) 1 else 0
 
     val gridItems: List<GridItem> = remember(searchQuery, recentEmojis) { buildGridItems(searchQuery, recentEmojis) }
+    var animationTargetIndex by remember { mutableStateOf<Int?>(null) }
 
     // Scroll to category when tab changes
     LaunchedEffect(selectedCategoryIndex) {
         if (searchQuery.isNotBlank()) return@LaunchedEffect
+        if (selectedCategoryIndex == animationTargetIndex) return@LaunchedEffect
+
         val targetKey =
             if (hasRecents && selectedCategoryIndex == 0) {
                 RECENTS_HEADER_KEY
@@ -311,7 +311,12 @@ private fun EmojiGrid(
         targetKey?.let { key ->
             val itemIndex = gridItems.indexOfFirst { it is GridItem.Header && it.key == key }
             if (itemIndex >= 0) {
-                scope.launch { gridState.animateScrollToItem(itemIndex) }
+                try {
+                    animationTargetIndex = selectedCategoryIndex
+                    gridState.animateScrollToItem(itemIndex)
+                } finally {
+                    animationTargetIndex = null
+                }
             }
         }
     }
@@ -321,6 +326,7 @@ private fun EmojiGrid(
         if (searchQuery.isNotBlank()) return@LaunchedEffect
         snapshotFlow { gridState.firstVisibleItemIndex }
             .collect { firstVisible ->
+                if (animationTargetIndex != null) return@collect
                 for (i in firstVisible downTo 0) {
                     val item = gridItems.getOrNull(i)
                     if (item is GridItem.Header) {

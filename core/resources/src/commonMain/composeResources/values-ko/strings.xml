@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">필터</string>
     <string name="desc_node_filter_clear">노드 필터 지우기</string>
     <string name="node_filter_title">필터</string>
@@ -247,11 +248,17 @@
     <string name="channel_1">채널 1</string>
     <string name="channel_2">채널 2</string>
     <string name="channel_3">채널 3</string>
+    <string name="channel_4">채널 4</string>
+    <string name="channel_5">채널 5</string>
+    <string name="channel_6">채널 6</string>
+    <string name="channel_7">채널 7</string>
+    <string name="channel_8">채널 8</string>
     <string name="current">전류</string>
     <string name="voltage">전압</string>
     <string name="are_you_sure">확실합니까?</string>
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a>과 <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a> 에 대한 블로그 게시물을 읽었습니다.]]></string>
     <string name="i_know_what_i_m_doing">뭘하는지 알고 있습니다</string>
+    <string name="low_battery_message">%1$s 노드의 배터리가 낮습니다. (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">배터리 부족 알림</string>
     <string name="low_battery_title">배터리  부족: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">배터리 부족 알림 (즐겨찾기 노드)</string>

@@ -52,6 +52,7 @@ fun PreferenceFooter(
                 shapes = ButtonDefaults.shapesFor(mediumHeight),
                 modifier = Modifier.height(mediumHeight).weight(1f),
                 colors = ButtonDefaults.filledTonalButtonColors(),
+                enabled = enabled,
                 onClick = onNegativeClicked,
             ) {
                 Text(text = negativeText, style = ButtonDefaults.textStyleFor(mediumHeight))
@@ -63,7 +64,8 @@ fun PreferenceFooter(
                 shapes = ButtonDefaults.shapesFor(mediumHeight),
                 modifier = Modifier.height(mediumHeight).weight(1f),
                 colors = ButtonDefaults.buttonColors(),
-                onClick = { if (enabled) onPositiveClicked() },
+                enabled = enabled,
+                onClick = onPositiveClicked,
             ) {
                 Text(text = positiveText, style = ButtonDefaults.textStyleFor(mediumHeight))
             }

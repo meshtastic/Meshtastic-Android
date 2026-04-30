@@ -27,11 +27,11 @@ import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
@@ -89,7 +89,7 @@ import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModel()
 
     private val usbRepository: UsbRepository by inject()

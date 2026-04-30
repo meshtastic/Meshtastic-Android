@@ -17,6 +17,7 @@
 package org.meshtastic.core.ble
 
 import co.touchlab.kermit.Logger
+import com.juul.kable.NotConnectedException
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.State
@@ -259,6 +260,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val loggingC
     private suspend fun safeClosePeripheral(tag: String) {
         try {
             peripheral?.disconnect()
+        } catch (_: NotConnectedException) {
+            // Silence "Disconnect requested" which Kable throws if already disconnected.
+            // This is a common non-fatal reported in Crashlytics that is safe to ignore here.
         } catch (e: Exception) {
             Logger.w(e) { "[$tag] Failed to disconnect peripheral" }
         }

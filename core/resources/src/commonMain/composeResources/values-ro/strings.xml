@@ -355,6 +355,8 @@
     <string name="battery">Baterie</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
+    <string name="device_metrics_percent_value">%1$s:%2$s%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s:%2$s</string>
     <string name="temperature">Temp</string>
@@ -1171,8 +1173,10 @@
     <string name="wifi_provision_ssid_placeholder">Introdu sau selecteaza o retea</string>
     <string name="wifi_provision_status_applied">WiFi configurat cu succes!</string>
     <string name="wifi_provision_status_failed">Nu s-a reușit aplicarea configurației Wi-Fi</string>
+    <string name="wifi_provision_success_ip_address">Adresa IP</string>
     <string name="wifi_provision_success_username">Nume de utilizator</string>
     <string name="wifi_provision_success_done">Gata</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filtru</string>
+    <string name="action_delete_message">Ștergeți mesajul</string>
 </resources>

@@ -530,8 +530,8 @@ private fun ContactListContentInternal(
     val visiblePlaceholders = rememberVisiblePlaceholders(contacts, channelPlaceholders)
 
     LazyColumn(state = listState, modifier = modifier.fillMaxSize()) {
-        contactListPlaceholdersItems(
-            placeholders = visiblePlaceholders,
+        contactListPagedItems(
+            contacts = contacts,
             selectedList = selectedList,
             activeContactKey = activeContactKey,
             onClick = onClick,
@@ -541,8 +541,8 @@ private fun ContactListContentInternal(
             haptic = haptic,
         )
 
-        contactListPagedItems(
-            contacts = contacts,
+        contactListPlaceholdersItems(
+            placeholders = visiblePlaceholders,
             selectedList = selectedList,
             activeContactKey = activeContactKey,
             onClick = onClick,

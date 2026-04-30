@@ -159,9 +159,24 @@ class MeshService : Service() {
                 0
             }
 
+        startForegroundSafely(notification, foregroundServiceType)
+
+        return if (!wantForeground) {
+            Logger.i { "Stopping mesh service because no device is selected" }
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            START_NOT_STICKY
+        } else {
+            START_STICKY
+        }
+    }
+
+    private fun startForegroundSafely(notification: android.app.Notification, foregroundServiceType: Int) {
         @Suppress("TooGenericExceptionCaught")
         try {
             ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, foregroundServiceType)
+        } catch (ex: android.app.ForegroundServiceStartNotAllowedException) {
+            Logger.e(ex) { "ForegroundServiceStartNotAllowedException: OS restricted background start." }
         } catch (ex: SecurityException) {
             // On Android 14+ starting a location FGS from the background can fail with SecurityException
             // if the app is not in an allowed state. Retry without the location type if that was requested.
@@ -177,6 +192,8 @@ class MeshService : Service() {
                 }
                 try {
                     ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, connectedDeviceOnly)
+                } catch (retryEx: android.app.ForegroundServiceStartNotAllowedException) {
+                    Logger.e(retryEx) { "ForegroundServiceStartNotAllowedException on retry." }
                 } catch (retryEx: Exception) {
                     Logger.e(retryEx) { "Failed to start foreground service even after retry" }
                 }
@@ -185,16 +202,6 @@ class MeshService : Service() {
             }
         } catch (ex: Exception) {
             Logger.e(ex) { "Error starting foreground service" }
-            return START_NOT_STICKY
-        }
-
-        return if (!wantForeground) {
-            Logger.i { "Stopping mesh service because no device is selected" }
-            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            stopSelf()
-            START_NOT_STICKY
-        } else {
-            START_STICKY
         }
     }
 

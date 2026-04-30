@@ -51,7 +51,6 @@ import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.DeviceMetadata
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 
@@ -143,24 +142,34 @@ class NodeRepositoryImpl(
     /** Returns the [User] info for a given [nodeNum]. */
     override fun getUser(nodeNum: Int): User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
 
+    private val last4 = 4
+
     /** Returns the [User] info for a given [userId]. Falls back to a generic user if not found. */
-    override fun getUser(userId: String): User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
-        ?: User(
-            id = userId,
-            long_name =
+    override fun getUser(userId: String): User {
+        val found = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
+        if (found != null && found.long_name.isNotBlank() && found.short_name.isNotBlank()) {
+            return found
+        }
+
+        val fallbackId = userId.takeLast(last4)
+        val defaultLong =
             if (userId == DataPacket.ID_LOCAL) {
-                ourNodeInfo.value?.user?.long_name ?: "Local"
+                ourNodeInfo.value?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
-                "Meshtastic ${userId.takeLast(n = 4)}"
-            },
-            short_name =
+                "Meshtastic $fallbackId"
+            }
+        val defaultShort =
             if (userId == DataPacket.ID_LOCAL) {
-                ourNodeInfo.value?.user?.short_name ?: "Local"
+                ourNodeInfo.value?.user?.short_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
-                userId.takeLast(n = 4)
-            },
-            hw_model = HardwareModel.UNSET,
-        )
+                fallbackId
+            }
+
+        return found?.copy(
+            long_name = found.long_name.takeIf { it.isNotBlank() } ?: defaultLong,
+            short_name = found.short_name.takeIf { it.isNotBlank() } ?: defaultShort,
+        ) ?: User(id = userId, long_name = defaultLong, short_name = defaultShort)
+    }
 
     /** Returns a flow of nodes filtered and sorted according to the parameters. */
     override fun getNodes(

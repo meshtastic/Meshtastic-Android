@@ -227,5 +227,7 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_ip_address">Seoladh IP</string>
     <string name="filter_icon">Scagaire</string>
+    <string name="action_delete_message">Ar mhaith leat teachtaireacht a scriosadh</string>
 </resources>

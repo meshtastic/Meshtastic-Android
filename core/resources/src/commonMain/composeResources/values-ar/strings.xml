@@ -135,6 +135,11 @@
     <string name="channel_1">القناة 1</string>
     <string name="channel_2">القناة 2</string>
     <string name="channel_3">القناة 3</string>
+    <string name="channel_4">القناة 4</string>
+    <string name="channel_5">القناة 5</string>
+    <string name="channel_6">القناة 6</string>
+    <string name="channel_7">القناة 7</string>
+    <string name="channel_8">القناة 8</string>
     <string name="current">الحالي</string>
     <string name="voltage">شدة التيار</string>
     <string name="are_you_sure">هل أنت متيقِّن؟</string>
@@ -174,5 +179,6 @@
     <!-- Message Filter -->
     <string name="bluetooth_permission">إعدادات بلوتوث</string>
     <!-- Network Map Layers -->
+    <string name="wifi_provision_success_ip_address">عنوان الـ IP</string>
     <string name="filter_icon">عربي</string>
 </resources>

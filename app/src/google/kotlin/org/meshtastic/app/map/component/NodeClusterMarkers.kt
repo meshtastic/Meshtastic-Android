@@ -17,7 +17,7 @@
 package org.meshtastic.app.map.component
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -49,11 +49,13 @@ fun NodeClusterMarkers(
     val savedStateRegistryOwner = LocalSavedStateRegistryOwner.current
 
     // Workaround for https://github.com/googlemaps/android-maps-compose/issues/858
+    // and https://github.com/googlemaps/android-maps-compose/issues/875
     // The maps clustering library creates an internal ComposeView to snapshot markers.
     // If that view is not attached to the hierarchy (which it often isn't during rendering),
     // it fails to find the Lifecycle and SavedState owners. We propagate them to the root view
     // so the internal snapshot view can find them when walking up the tree.
-    LaunchedEffect(view, lifecycleOwner, savedStateRegistryOwner) {
+    // We do this in a SideEffect to ensure it happens before or during composition of children.
+    SideEffect {
         val root = view.rootView
         if (root.findViewTreeLifecycleOwner() == null) {
             root.setViewTreeLifecycleOwner(lifecycleOwner)

@@ -18,6 +18,7 @@
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
+    <string name="fallback_node_name">Meshtastic %1$s</string>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
     <string name="node_filter_title">Filtrovat podle</string>
@@ -37,6 +38,7 @@
     <string name="via_mqtt">přes MQTT</string>
     <string name="node_sort_via_favorite">Oblíbené</string>
     <string name="node_filter_show_ignored">Zobrazit jen ignorované uzly</string>
+    <string name="node_filter_exclude_mqtt">Vyloučit MQTT</string>
     <string name="unrecognized">Neznámý</string>
     <string name="message_status_enroute">Čeká na potvrzení</string>
     <string name="message_status_queued">Ve frontě k odeslání</string>
@@ -105,6 +107,7 @@
     <string name="config_position_gps_update_interval_summary">Jak často má zařízení zjišťovat polohu pomocí GPS (při intervalu kratším než 10 s zůstává GPS trvale zapnutá).</string>
     <string name="config_position_flags_summary">Volitelná pole, která se mají zahrnout při sestavování polohových zpráv. Čím více polí je zahrnuto, tím větší bude zpráva – to vede k delší době vysílání a vyššímu riziku ztráty paketů.</string>
     <string name="config_power_is_power_saving_summary">Uvede zařízení do co nejhlubšího spánku. U rolí tracker a sensor to zahrnuje i vypnutí LoRa rádia. Nepoužívejte toto nastavení, pokud chcete zařízení používat s mobilní aplikací nebo pokud vaše zařízení nemá uživatelské tlačítko.</string>
+    <string name="config_security_public_key">Je generován z vašeho soukromého klíče a odesílán ostatním uzlům v mesh síti, aby mohly vypočítat sdílený tajný klíč.</string>
     <string name="config_security_private_key">Slouží k vytvoření sdíleného klíče se vzdáleným zařízením.</string>
     <string name="config_security_admin_key">Veřejný klíč oprávněný k odesílání administrátorských zpráv tomuto uzlu.</string>
     <string name="config_security_is_managed">Toto zařízení spravuje správce mesh sítě, uživatel nemůže měnit žádná jeho nastavení.</string>
@@ -194,6 +197,7 @@
     <string name="search_emoji">Hledat emoji...</string>
     <string name="channel_label">Kanál</string>
     <string name="a11y_label_value">%1$s: %2$s</string>
+    <string name="a11y_message_from">Zpráva od %1$s: %2$s</string>
     <string name="message_delivery_status">Stav doručení zprávy</string>
     <string name="new_messages_below">Nové zprávy</string>
     <string name="meshtastic_messages_notifications">Upozornění na přímou zprávu</string>
@@ -310,6 +314,8 @@
     <string name="mute_always">Vždy</string>
     <string name="mute_status_always">Trvale ztlumeno</string>
     <string name="mute_status_unmuted">Neztlumeno</string>
+    <string name="mute_status_muted_for_days">Ztlumeno na %1$d dní, %2$s hodiny</string>
+    <string name="mute_status_muted_for_hours">Ztlumeno na %1$s hodin</string>
     <string name="mute_add">Ztlumit oznámení pro '%1$s'?</string>
     <string name="mute_remove">Zrušit ztlumení oznámení pro '%1$s'?</string>
     <string name="replace">Nahradit</string>
@@ -319,6 +325,7 @@
     <string name="battery">Baterie</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
+    <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Teplota</string>
@@ -334,6 +341,7 @@
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
     <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování.</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
+    <string name="encryption_error_text">Veřejný klíč neodpovídá uloženému klíči. Můžete uzel odebrat a nechat jej znovu vyměnit klíče, ale může to znamenat bezpečnostní problém. Kontaktujte uživatele jiným důvěryhodným kanálem a ověřte, zda ke změně klíče došlo v důsledku továrního resetu nebo jiné úmyslné akce.</string>
     <string name="userinfo">Informace o uživateli</string>
     <string name="meshtastic_new_nodes_notifications">Oznámení o nových uzlech</string>
     <string name="snr">SNR</string>
@@ -369,6 +377,9 @@
     <string name="traceroute_duration">Doba trvání: %1$s s</string>
     <string name="traceroute_route_towards_dest">Trasa směrem k cíli:\n\n</string>
     <string name="traceroute_route_back_to_us">Trasa zpět k nám:\n\n</string>
+    <string name="traceroute_forward_hops">Skoky k cíli</string>
+    <string name="traceroute_return_hops">Skoky zpět</string>
+    <string name="traceroute_round_trip">Doba odezvy</string>
     <string name="one_hour_short">1H</string>
     <string name="twenty_four_hours">24H</string>
     <string name="one_week">1T</string>
@@ -388,11 +399,17 @@
     <string name="channel_1">Kanál 1</string>
     <string name="channel_2">Kanál 2</string>
     <string name="channel_3">Kanál 3</string>
+    <string name="channel_4">Kanál 4</string>
+    <string name="channel_5">Kanál 5</string>
+    <string name="channel_6">Kanál 6</string>
+    <string name="channel_7">Kanál 7</string>
+    <string name="channel_8">Kanál 8</string>
     <string name="current">Proud</string>
     <string name="voltage">Napětí</string>
     <string name="are_you_sure">Jste si jistý?</string>
     <string name="router_role_confirmation_text"><![CDATA[Přečetl jsem si <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">dokumentaci o rolích zařízení</a> a blogový příspěvek o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">výběru správné role zařízení</a>.]]></string>
     <string name="i_know_what_i_m_doing">Vím co dělám.</string>
+    <string name="low_battery_message">Uzel %1$s má nízký stav baterie (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Upozornění na nízký stav baterie</string>
     <string name="low_battery_title">Nízký stav baterie: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornění na nízký stav baterie (oblíbené uzly)</string>
@@ -545,10 +562,12 @@
     <string name="neighbor_info_enabled">Informace o sousedech povoleny</string>
     <string name="update_interval_seconds">Interval aktualizace (v sekundách)</string>
     <string name="transmit_over_lora">Přenos přes LoRa</string>
+    <string name="wifi_config">Nastavení WiFi</string>
     <string name="enabled">Povoleno</string>
     <string name="wifi_enabled">WiFi povoleno</string>
     <string name="ssid">SSID</string>
     <string name="psk">PSK</string>
+    <string name="ethernet_config">Nastavení Ethernetu</string>
     <string name="ethernet_enabled">Ethernet povolen</string>
     <string name="ntp_server">NTP server</string>
     <string name="rsyslog_server">rsyslog server</string>
@@ -667,6 +686,11 @@
     <string name="request_air_quality_metrics">Metriky kvality ovzduší</string>
     <string name="request_power_metrics">Metriky napájení</string>
     <string name="request_metadata">Metadata</string>
+    <string name="refresh_metadata">Obnovit metadata</string>
+    <string name="establishing_session">Vytvoření vzdálené relace…</string>
+    <string name="session_active">Relace aktivní</string>
+    <string name="connect_radio_for_remote_admin">Připojte se k rádiu pro správu vzdálených uzlů.</string>
+    <string name="remote_admin_unreachable">Nelze se připojit k uzlu — zkuste to znovu nebo se přesuňte blíže.</string>
     <string name="retry">Zkusit znovu</string>
     <string name="actions">Akce</string>
     <string name="firmware">Firmware</string>
@@ -753,7 +777,18 @@
     <string name="firmware_edition">Firmware edice</string>
     <string name="recent_network_devices">Nedávná síťová zařízení</string>
     <string name="discovered_network_devices">Nalezená síťová zařízení</string>
+    <string name="scan_network_devices">Vyhledat síťová zařízení</string>
+    <string name="scanning_network">Vyhledávání…</string>
+    <string name="scan_bluetooth_devices">Vyhledat Bluetooth zařízení</string>
+    <string name="scanning_bluetooth">Vyhledávání…</string>
     <string name="bluetooth_available_devices">Dostupná Bluetooth zařízení</string>
+    <string name="add_network_device_manually">Přidat zařízení ručně…</string>
+    <string name="no_devices_found">Zařízení nenalezena</string>
+    <string name="no_bluetooth_devices_seen">Nebyla nalezena žádná zařízení Bluetooth</string>
+    <string name="no_network_devices_seen">Nenalezena žádná síťová zařízení</string>
+    <string name="no_network_devices_hint">Ujistěte se, že jste připojeni ke stejné síti jako zařízení.</string>
+    <string name="no_usb_devices_seen">Nenalezena žádná USB zařízení</string>
+    <string name="no_usb_devices_hint">Připojte zařízení přes sériové rozhraní nebo USB.</string>
     <string name="nodes_empty_disconnected_title">Není připojeno žádné zařízení</string>
     <string name="get_started">Začněte hned</string>
     <string name="intro_welcome">Vítejte v</string>
@@ -896,7 +931,7 @@
     <string name="firmware_update_uploading">Nahrávám firmware...</string>
     <string name="firmware_update_erasing">Mazání...</string>
     <string name="back">Zpět</string>
-    <string name="interval_unset">Zrušit nastavení</string>
+    <string name="interval_unset">Žádné nastavení</string>
     <string name="interval_always_on">Vždy zapnuto</string>
     <plurals name="plurals_seconds">
         <item quantity="one">%1$d sekunda</item>
@@ -962,10 +997,12 @@
     <string name="bluetooth_feature_discovery_description">Najděte a identifikujte zařízení Meshtastic ve svém okolí.</string>
     <string name="bluetooth_feature_config">Nastavení</string>
     <string name="bluetooth_feature_config_description">Bezdrátová správa nastavení a kanálů zařízení.</string>
+    <string name="local_stats_battery">Baterie: %1$d%</string>
     <string name="local_stats_nodes">Uzly: %1$d online / %2$d celkem</string>
     <string name="local_stats_uptime">Doba provozu: %1$s</string>
     <string name="local_stats_traffic">Provoz: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
+    <string name="local_stats_noise">Šum %1$d dBm</string>
     <string name="local_stats_bad">Poškozené %1$d</string>
     <string name="local_stats_heap_value">%1$d/%2$d</string>
     <string name="local_stats_updated_at">%1$s</string>
@@ -981,9 +1018,18 @@
     <string name="device_theme_language">Vzhled: %1$s, Jazyk: %2$s</string>
     <string name="connect">Připojit</string>
     <string name="done">Hotovo</string>
+    <string name="wifi_provision_scanning_ble">Vyhledávání zařízení…</string>
+    <string name="wifi_provision_device_found_detail">Připraveno prohledávat WiFi sítě.</string>
+    <string name="wifi_provision_scan_networks">Vyhledat sítě</string>
+    <string name="wifi_provision_scanning_wifi">Vyhledávání…</string>
+    <string name="wifi_provision_no_networks">Žádná síť nebyla nalezena</string>
+    <string name="wifi_provision_scan_failed">Nepodařilo se prohledat WiFi sítě: %1$s</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
+    <string name="wifi_provision_success_ip_address">IP adresa</string>
     <string name="wifi_provision_success_username">Uživatelské jméno</string>
     <string name="wifi_provision_success_done">Hotovo</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filtr</string>
+    <string name="action_delete_message">Smazat zprávu</string>
     <string name="action_react_with_emoji">Reagovat s emoji</string>
 </resources>

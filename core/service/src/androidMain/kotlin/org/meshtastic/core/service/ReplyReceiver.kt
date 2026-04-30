@@ -58,8 +58,8 @@ class ReplyReceiver :
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
 
         if (remoteInput != null) {
-            val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
-            val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString() ?: ""
+            val contactKey = intent.getStringExtra(CONTACT_KEY).orEmpty()
+            val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString().orEmpty()
 
             val pendingResult = goAsync()
             scope.launch {

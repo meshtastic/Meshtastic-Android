@@ -149,7 +149,10 @@ fun SettingsScreen(
 
     var showLanguagePickerDialog by rememberSaveable { mutableStateOf(false) }
     if (showLanguagePickerDialog) {
-        LanguagePickerDialog { showLanguagePickerDialog = false }
+        LanguagePickerDialog(
+            onDismiss = { showLanguagePickerDialog = false },
+            onSelect = { languageTag -> settingsViewModel.setLocale(languageTag) },
+        )
     }
 
     var showThemePickerDialog by rememberSaveable { mutableStateOf(false) }
@@ -282,7 +285,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun LanguagePickerDialog(onDismiss: () -> Unit) {
+private fun LanguagePickerDialog(onDismiss: () -> Unit, onSelect: (String) -> Unit) {
     MeshtasticDialog(
         title = stringResource(Res.string.preferences_language),
         onDismiss = onDismiss,
@@ -291,6 +294,7 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
                 languageMap().forEach { (languageTag, languageName) ->
                     ListItem(text = languageName, trailingIcon = null) {
                         LanguageUtils.setAppLocale(languageTag)
+                        onSelect(languageTag)
                         onDismiss()
                     }
                 }

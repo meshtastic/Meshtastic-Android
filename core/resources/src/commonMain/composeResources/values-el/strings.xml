@@ -144,6 +144,11 @@
     <string name="channel_1">Κανάλι 1</string>
     <string name="channel_2">Κανάλι 2</string>
     <string name="channel_3">Κανάλι 3</string>
+    <string name="channel_4">Κανάλι 4</string>
+    <string name="channel_5">Κανάλι 5</string>
+    <string name="channel_6">Κανάλι 6</string>
+    <string name="channel_7">Κανάλι 7</string>
+    <string name="channel_8">Κανάλι 8</string>
     <string name="voltage">Τάση</string>
     <string name="i_know_what_i_m_doing">Ξέρω τι κάνω.</string>
     <string name="user">Χρήστης</string>
@@ -203,6 +208,7 @@
     <string name="tak_team_red">Κόκκινο</string>
     <string name="tak_team_blue">Μπλε</string>
     <string name="tak_team_green">Πράσινο</string>
+    <string name="wifi_provision_success_ip_address">IP διεύθυνση</string>
     <string name="wifi_provision_success_username">Όνομα χρήστη</string>
     <string name="filter_icon">Φίλτρο</string>
 </resources>

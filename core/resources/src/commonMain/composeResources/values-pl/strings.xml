@@ -311,6 +311,8 @@
     <string name="currently">Obecnie:</string>
     <string name="mute_status_always">Zawsze wyciszony</string>
     <string name="mute_status_unmuted">Nie wyciszony</string>
+    <string name="mute_status_muted_for_days">Wyciszono na %1$d dni, %2$s godzin</string>
+    <string name="mute_status_muted_for_hours">Wyciszono na %1$s godzin</string>
     <string name="mute_add">Wyciszyć powiadomienia dla '%1$s'?</string>
     <string name="mute_remove">Wyłączyć wyciszenie powiadomień dla '%1$s'?</string>
     <string name="replace">Zastąp</string>
@@ -384,11 +386,17 @@
     <string name="channel_1">Kanał 1</string>
     <string name="channel_2">Kanał 2</string>
     <string name="channel_3">Kanał 3</string>
+    <string name="channel_4">Kanał 4</string>
+    <string name="channel_5">Kanał 5</string>
+    <string name="channel_6">Kanał 6</string>
+    <string name="channel_7">Kanał 7</string>
+    <string name="channel_8">Kanał 8</string>
     <string name="current">Natężenie</string>
     <string name="voltage">Napięcie</string>
     <string name="are_you_sure">Czy jesteś pewien?</string>
     <string name="router_role_confirmation_text"><![CDATA[Przeczytałem <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Dokumentacja roli urządzenia</a> oraz post na blogu o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Wybranie odpowiedniej roli urządzenia</a>.]]></string>
     <string name="i_know_what_i_m_doing">Wiem, co robię.</string>
+    <string name="low_battery_message">Węzeł %1$s ma niski poziom baterii (%2$d%)</string>
     <string name="meshtastic_low_battery_notifications">Powiadomienia o niskim poziomie baterii</string>
     <string name="low_battery_title">Niski poziom baterii: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Powiadomienia o niskim poziomie baterii (ulubione węzły)</string>
@@ -686,6 +694,7 @@
     <string name="firmware_update_currently_installed">Aktualnie zainstalowano: %1$s</string>
     <string name="firmware_update_stable">Stabilna</string>
     <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_downloading_percent">Pobieranie firmware... %1$d%</string>
     <string name="firmware_update_error">Błąd: %1$s</string>
     <string name="firmware_update_retry">Ponów próbę</string>
     <string name="firmware_update_success">Aktualizacja zakończona sukcesem!</string>
@@ -751,9 +760,11 @@
     <string name="traffic_management_enabled">Moduł Włączony</string>
     <string name="connect">Połącz</string>
     <string name="done">Wykonano</string>
+    <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_success_ip_address">Adres IP</string>
     <string name="wifi_provision_success_username">Nazwa użytkownika</string>
     <string name="wifi_provision_success_done">Wykonano</string>
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="filter_icon">Filtr</string>
+    <string name="action_delete_message">Usunąć wiadomość</string>
 </resources>
