@@ -56,7 +56,6 @@ dependencies {
     compileOnly(libs.androidx.room.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
     compileOnly(libs.test.retry.gradlePlugin)
-    implementation(libs.wire.schema)
 
     detektPlugins(libs.detekt.formatting)
 }

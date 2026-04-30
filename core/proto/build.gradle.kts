@@ -30,7 +30,6 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies { api(libs.wire.runtime) }
-            kotlin.srcDir(layout.buildDirectory.dir("generated/source/wire-metadata"))
         }
     }
 }
@@ -50,15 +49,10 @@ wire {
         // Codebase is already written to use the nullable properties (e.g. packet.decoded vs
         // packet.payload_variant.decoded).
         boxOneOfsMinSize = 5000
-    }
-    // Emit a static ConfigFieldMetadataRegistry from (meshtastic.config_field) annotations.
-    // Fully automatic — annotating new proto fields requires no changes here or in the handler.
-    // Only modify the handler if ConfigFieldMetadata gains new sub-fields.
-    custom {
-        schemaHandlerFactoryClass =
-            "org.meshtastic.buildlogic.proto.FieldMetadataSchemaHandlerFactory"
-        out = layout.buildDirectory.dir("generated/source/wire-metadata").get().asFile.path
-        exclusive = false
+
+        // Emit Kotlin annotations from scalar proto field options (e.g. diy_only).
+        // Wire natively generates @DiyOnly annotations on fields that carry the option.
+        emitAppliedOptions = true
     }
     root("meshtastic.*")
     prune("meshtastic.MeshPacket#delayed")
