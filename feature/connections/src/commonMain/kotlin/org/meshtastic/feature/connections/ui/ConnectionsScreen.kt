@@ -141,13 +141,14 @@ fun ConnectionsScreen(
     //
     // Keys include bleAutoScan/networkAutoScan so the effect re-fires once DataStore delivers the persisted `true`
     // value (initial composition sees `false` from the Eagerly-seeded StateFlow before the disk read completes).
-    DisposableEffect(bleAutoScan, networkAutoScan, localNetworkPermissionGranted) {
+    DisposableEffect(bleAutoScan) {
         if (bleAutoScan) scanModel.startBleScan()
+        onDispose { scanModel.stopBleScan() }
+    }
+
+    DisposableEffect(networkAutoScan, localNetworkPermissionGranted) {
         if (networkAutoScan && localNetworkPermissionGranted) scanModel.startNetworkScan()
-        onDispose {
-            scanModel.stopBleScan()
-            scanModel.stopNetworkScan()
-        }
+        onDispose { scanModel.stopNetworkScan() }
     }
 
     /* Animate waiting for the configurations */
