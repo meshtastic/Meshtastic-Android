@@ -182,6 +182,8 @@ class BleRadioTransport(
                         }
                     }
                 if (d != null) return d
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.v(e) { "[$address] Scan attempt failed or timed out" }
             }
@@ -243,6 +245,8 @@ class BleRadioTransport(
             try {
                 bluetoothRepository.bond(device)
                 Logger.i { "[$address] Bonding successful" }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
             }
@@ -301,6 +305,8 @@ class BleRadioTransport(
                 val rssi = retryBleOperation(tag = address) { device.readRssi() }
                 Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Failed to read initial connection RSSI" }
         }

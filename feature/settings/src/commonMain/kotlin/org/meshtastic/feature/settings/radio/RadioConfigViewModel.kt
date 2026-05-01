@@ -35,6 +35,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -165,7 +166,7 @@ open class RadioConfigViewModel(
         probeJob =
             viewModelScope.launch {
                 val result =
-                    runCatching { mqttManager.probe(address, tlsEnabled, username, password) }
+                    safeCatching { mqttManager.probe(address, tlsEnabled, username, password) }
                         .getOrElse { e ->
                             Logger.w(e) { "MQTT probe threw" }
                             MqttProbeStatus.Other(message = e.message)

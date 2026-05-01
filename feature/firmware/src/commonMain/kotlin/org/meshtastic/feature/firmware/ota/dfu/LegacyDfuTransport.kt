@@ -142,7 +142,7 @@ class LegacyDfuTransport(
             // Best-effort DFU Version read — gate out unsupported old bootloaders (SDK ≤ 6).
             val versionChar = service.characteristic(LEGACY_DFU_VERSION_UUID)
             val version =
-                runCatching { service.read(versionChar) }
+                safeCatching { service.read(versionChar) }
                     .map { bytes ->
                         if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
                     }
