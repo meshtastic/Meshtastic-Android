@@ -1348,13 +1348,9 @@
     <string name="email_send">Send</string>
     <string name="email_settings_title">Email Settings</string>
     <string name="email_enabled">Enable Email Gateway</string>
-    <string name="email_smtp_host">SMTP Host</string>
-    <string name="email_smtp_port">SMTP Port</string>
-    <string name="email_smtp_user">SMTP User</string>
-    <string name="email_smtp_password">SMTP Password</string>
-    <string name="email_smtp_auth">Authentication required</string>
-    <string name="email_smtp_starttls">Use StartTLS</string>
-    <string name="email_test_button">Test Email</string>
-    <string name="email_notification_new_title">New Email Queue</string>
-    <string name="email_notification_new_message">Email for %1$s is ready.</string>
+
+    <!-- TV / Cast -->
+    <string name="tv_dashboard_title">TV Dashboard</string>
+    <string name="tv_connect_button">Connect to TV (Smart View / Cast)</string>
+    <string name="tv_dashboard_desc">Display Meshtastic data on your TV. Use the button below to start screen mirroring or casting.</string>
 </resources>

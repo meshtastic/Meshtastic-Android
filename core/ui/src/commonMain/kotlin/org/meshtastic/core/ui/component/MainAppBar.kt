@@ -87,6 +87,7 @@ fun MainAppBar(
             { Icon(imageVector = vectorResource(Res.drawable.ic_meshtastic), contentDescription = null) }
         },
         actions = {
+            CastButton()
             TopBarActions(ourNode = ourNode, showNodeChip = showNodeChip, actions = actions, onClickChip = onClickChip)
         },
     )

@@ -27,13 +27,20 @@ import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.fragment.app.FragmentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.mediarouter.media.MediaRouteSelector
+import androidx.mediarouter.media.MediaRouter
+import androidx.mediarouter.media.MediaControlIntent
+import com.google.android.gms.cast.CastMediaControlIntent
+import com.google.android.gms.cast.framework.CastContext
+import com.google.android.gms.cast.framework.CastSession
+import com.google.android.gms.cast.framework.SessionManagerListener
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -52,6 +59,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import org.meshtastic.app.cast.TvDashboardPresentation
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -72,7 +80,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import org.meshtastic.feature.intro.IntroViewModel
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     private val model: UIViewModel by viewModel()
 
     private val usbRepository: UsbRepository by inject()
@@ -83,6 +91,78 @@ class MainActivity : ComponentActivity() {
      */
     internal val meshServiceClient: MeshServiceClient by inject { parametersOf(this) }
 
+    private var castContext: CastContext? = null
+    private var castSession: CastSession? = null
+    
+    private var mediaRouter: MediaRouter? = null
+    private var presentation: android.app.Presentation? = null
+
+    private val mediaRouterCallback = object : MediaRouter.Callback() {
+        override fun onRouteSelected(router: MediaRouter, route: MediaRouter.RouteInfo) {
+            Logger.d { "Cast: Route selected: ${route.name}" }
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            updatePresentation(route)
+        }
+
+        override fun onRouteUnselected(router: MediaRouter, route: MediaRouter.RouteInfo) {
+            Logger.d { "Cast: Route unselected: ${route.name}" }
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            updatePresentation(null)
+        }
+
+        override fun onRoutePresentationDisplayChanged(router: MediaRouter, route: MediaRouter.RouteInfo) {
+            Logger.d { "Cast: Presentation display changed for ${route.name}. Display: ${route.presentationDisplay}" }
+            updatePresentation(route)
+        }
+    }
+
+    private fun updatePresentation(route: MediaRouter.RouteInfo?) {
+        val display = route?.presentationDisplay
+        Logger.d { "Cast: updatePresentation with display: $display" }
+        if (display != null) {
+            if (presentation == null || presentation?.display != display) {
+                Logger.i { "Cast: Showing TvDashboardPresentation on display ${display.displayId}" }
+                presentation?.dismiss()
+                presentation = TvDashboardPresentation(this, display)
+                try {
+                    presentation?.show()
+                } catch (e: WindowManager.InvalidDisplayException) {
+                    Logger.e(e) { "Cast: Failed to show presentation" }
+                    presentation = null
+                }
+            }
+        } else {
+            if (presentation != null) {
+                Logger.i { "Cast: Dismissing presentation" }
+                presentation?.dismiss()
+                presentation = null
+            }
+        }
+    }
+
+    private val sessionManagerListener = object : SessionManagerListener<CastSession> {
+        override fun onSessionStarted(session: CastSession, sessionId: String) {
+            castSession = session
+            invalidateOptionsMenu()
+        }
+
+        override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
+            castSession = session
+            invalidateOptionsMenu()
+        }
+
+        override fun onSessionEnded(session: CastSession, error: Int) {
+            castSession = null
+        }
+
+        override fun onSessionStarting(session: CastSession) {}
+        override fun onSessionStartFailed(session: CastSession, error: Int) {}
+        override fun onSessionEnding(session: CastSession) {}
+        override fun onSessionResuming(session: CastSession, sessionId: String) {}
+        override fun onSessionResumeFailed(session: CastSession, error: Int) {}
+        override fun onSessionSuspended(session: CastSession, reason: Int) {}
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
@@ -90,6 +170,14 @@ class MainActivity : ComponentActivity() {
         meshServiceClient.hashCode()
 
         super.onCreate(savedInstanceState)
+        
+        mediaRouter = MediaRouter.getInstance(this)
+
+        try {
+            castContext = CastContext.getSharedInstance(this)
+        } catch (e: Exception) {
+            Logger.e(e) { "Failed to get CastContext" }
+        }
 
         enableEdgeToEdge()
 
@@ -154,12 +242,40 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Belt-and-suspenders for the Android 12+ attach-intent quirk: if the activity is
+        castContext?.sessionManager?.addSessionManagerListener(sessionManagerListener, CastSession::class.java)
+        castSession = castContext?.sessionManager?.currentCastSession
+        
+        val selector = MediaRouteSelector.Builder()
+            .addControlCategory(MediaControlIntent.CATEGORY_LIVE_VIDEO)
+            .build()
+        mediaRouter?.addCallback(selector, mediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+        
+        // Belt-and-suspenders for the Android 12+ attach-intent quirk
         // resumed while a USB device is already attached (e.g. process restart, returning
         // from another app), the manifest-declared attach intent may have already fired
         // before UsbRepository was constructed. Re-poll deviceList here so the UI reflects
         // reality without requiring the user to physically replug.
         usbRepository.refreshState()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // If we are currently casting, we don't want to remove the callback yet
+        // as it might kill the presentation when the screen turns off.
+        if (presentation == null) {
+            mediaRouter?.removeCallback(mediaRouterCallback)
+        }
+        castContext?.sessionManager?.removeSessionManagerListener(sessionManagerListener, CastSession::class.java)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // We only dismiss if the activity is truly being destroyed or finished
+        if (isFinishing) {
+            presentation?.dismiss()
+            presentation = null
+            mediaRouter?.removeCallback(mediaRouterCallback)
+        }
     }
 
     @Composable

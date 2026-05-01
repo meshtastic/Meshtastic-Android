@@ -280,6 +280,8 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.play.services.cast.framework)
+    implementation(libs.androidx.mediarouter)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)

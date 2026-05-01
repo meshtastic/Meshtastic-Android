@@ -71,9 +71,6 @@ open class MeshUtilApplication :
         // Schedule periodic MeshLog cleanup
         scheduleMeshLogCleanup()
 
-        // Schedule periodic Email worker if enabled
-        scheduleEmailWorker()
-
         // Generate and publish widget preview for Android 15+ widget picker
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             applicationScope.launch {
@@ -135,16 +132,6 @@ open class MeshUtilApplication :
                 ExistingPeriodicWorkPolicy.UPDATE,
                 cleanupRequest,
             )
-    }
-
-    private fun scheduleEmailWorker() {
-        applicationScope.launch {
-            val emailPrefs: org.meshtastic.core.repository.EmailPrefs = get()
-            if (emailPrefs.emailEnabled.first()) {
-                val workerManager: org.meshtastic.core.repository.MeshWorkerManager = get()
-                workerManager.schedulePeriodicEmailWorker()
-            }
-        }
     }
 
     override val workManagerConfiguration: Configuration

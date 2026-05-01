@@ -64,7 +64,11 @@ kotlin {
 
         val jvmAndroidMain by getting { dependencies { implementation(libs.compose.multiplatform.ui.tooling) } }
 
-        androidMain.dependencies { implementation(libs.androidx.activity.compose) }
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.mediarouter)
+            implementation(libs.play.services.cast.framework)
+        }
 
         commonTest.dependencies {
             implementation(projects.core.testing)

@@ -17,6 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     id("meshtastic.koin")
 }
 
@@ -45,6 +46,8 @@ kotlin {
 
             implementation(libs.androidx.room.runtime)
             implementation(libs.jetbrains.lifecycle.runtime)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kermit)
@@ -56,8 +59,6 @@ kotlin {
             implementation(libs.androidx.work.runtime.ktx)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.workmanager)
-            implementation(libs.jakarta.mail)
-            implementation(libs.jakarta.activation)
         }
 
         val androidHostTest by getting {

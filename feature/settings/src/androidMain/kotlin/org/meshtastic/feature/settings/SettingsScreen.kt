@@ -25,7 +25,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,22 +45,16 @@ import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.bottom_nav_settings
-import org.meshtastic.core.resources.email_queue_title
-import org.meshtastic.core.resources.export_configuration
-import org.meshtastic.core.resources.filter_settings
-import org.meshtastic.core.resources.import_configuration
-import org.meshtastic.core.resources.preferences_language
-import org.meshtastic.core.resources.remotely_administrating
-import org.meshtastic.core.resources.wifi_devices
+import org.meshtastic.core.resources.*
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Send
+import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.core.ui.icon.Wifi
+import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
 import org.meshtastic.feature.settings.component.ContrastPickerDialog
@@ -265,6 +261,36 @@ fun SettingsScreen(
                         leadingIcon = MeshtasticIcons.Send,
                     ) {
                         onNavigate(SettingsRoute.EmailQueue)
+                    }
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.tv_dashboard_title)) {
+                    Text(
+                        text = stringResource(Res.string.tv_dashboard_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    ListItem(
+                        text = stringResource(Res.string.tv_connect_button),
+                        leadingIcon = MeshtasticIcons.Settings,
+                    ) {
+                        val intent = Intent("android.settings.CAST_SETTINGS")
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        try {
+                            org.meshtastic.core.common.ContextServices.app.startActivity(intent)
+                        } catch (e: Exception) {
+                            // Fallback for Samsung specifically
+                            val samsungIntent = Intent("android.settings.WIFI_DISPLAY_SETTINGS")
+                            samsungIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            try {
+                                org.meshtastic.core.common.ContextServices.app.startActivity(samsungIntent)
+                            } catch (e2: Exception) {
+                                // Generic settings if both fail
+                                val genericIntent = Intent(android.provider.Settings.ACTION_CAST_SETTINGS)
+                                genericIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                org.meshtastic.core.common.ContextServices.app.startActivity(genericIntent)
+                            }
+                        }
                     }
                 }
 

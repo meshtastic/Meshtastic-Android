@@ -277,6 +277,25 @@ class FakeMeshPrefs : MeshPrefs {
     }
 }
 
+class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
+    override val isTakServerEnabled = MutableStateFlow(false)
+
+    override fun setTakServerEnabled(enabled: Boolean) {
+        isTakServerEnabled.value = enabled
+    }
+}
+
+class FakeDiscordPrefs : org.meshtastic.core.repository.DiscordPrefs {
+    override val discordEnabled = MutableStateFlow(false)
+    override fun setDiscordEnabled(enabled: Boolean) { discordEnabled.value = enabled }
+
+    override val webhookUrl = MutableStateFlow("")
+    override fun setWebhookUrl(url: String) { webhookUrl.value = url }
+
+    override val botName = MutableStateFlow("Meshtastic Bot")
+    override fun setBotName(name: String) { botName.value = name }
+}
+
 class FakeAppPreferences : AppPreferences {
     override val analytics = FakeAnalyticsPrefs()
     override val homoglyph = FakeHomoglyphPrefs()
@@ -290,36 +309,5 @@ class FakeAppPreferences : AppPreferences {
     override val radio = FakeRadioPrefs()
     override val mesh = FakeMeshPrefs()
     override val tak = FakeTakPrefs()
-    override val email = FakeEmailPrefs()
-}
-
-class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
-    override val isTakServerEnabled = MutableStateFlow(false)
-
-    override fun setTakServerEnabled(enabled: Boolean) {
-        isTakServerEnabled.value = enabled
-    }
-}
-
-class FakeEmailPrefs : org.meshtastic.core.repository.EmailPrefs {
-    override val emailEnabled = MutableStateFlow(false)
-    override fun setEmailEnabled(enabled: Boolean) { emailEnabled.value = enabled }
-
-    override val smtpHost = MutableStateFlow("")
-    override fun setSmtpHost(host: String) { smtpHost.value = host }
-
-    override val smtpPort = MutableStateFlow(587)
-    override fun setSmtpPort(port: Int) { smtpPort.value = port }
-
-    override val smtpUser = MutableStateFlow("")
-    override fun setSmtpUser(user: String) { smtpUser.value = user }
-
-    override val smtpPassword = MutableStateFlow("")
-    override fun setSmtpPassword(password: String) { smtpPassword.value = password }
-
-    override val smtpAuth = MutableStateFlow(true)
-    override fun setSmtpAuth(auth: Boolean) { smtpAuth.value = auth }
-
-    override val smtpStartTls = MutableStateFlow(true)
-    override fun setSmtpStartTls(startTls: Boolean) { smtpStartTls.value = startTls }
+    override val discord = FakeDiscordPrefs()
 }

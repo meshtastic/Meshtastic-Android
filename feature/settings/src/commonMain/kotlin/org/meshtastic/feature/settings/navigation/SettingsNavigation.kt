@@ -232,21 +232,15 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
 
     entry<SettingsRoute.EmailQueue> {
         val viewModel: EmailQueueViewModel = koinViewModel()
-        val context = ContextServices.app!!
         EmailQueueScreen(
             viewModel = viewModel,
             onBack = dropUnlessResumed { backStack.removeLastOrNull() },
             onSendEmail = { email ->
-                val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                    this.type = "message/rfc822"
-                    this.putExtra(android.content.Intent.EXTRA_EMAIL, arrayOf(email.recipient))
-                    this.putExtra(android.content.Intent.EXTRA_SUBJECT, email.subject)
-                    this.putExtra(android.content.Intent.EXTRA_TEXT, email.content)
-                    this.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(android.content.Intent.createChooser(intent, "Kies een Email App").apply {
-                    this.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                })
+                org.meshtastic.core.common.util.sendEmailIntent(
+                    recipient = email.recipient,
+                    subject = email.subject,
+                    content = email.content
+                )
             },
             onSettings = dropUnlessResumed { backStack.add(SettingsRoute.EmailSettings) }
         )

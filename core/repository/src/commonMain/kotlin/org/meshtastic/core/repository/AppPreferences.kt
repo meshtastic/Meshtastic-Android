@@ -254,28 +254,10 @@ interface TakPrefs {
     fun setTakServerEnabled(enabled: Boolean)
 }
 
-/** Reactive interface for email settings. */
+/** Reactive interface for Email gateway settings. */
 interface EmailPrefs {
     val emailEnabled: StateFlow<Boolean>
     fun setEmailEnabled(enabled: Boolean)
-
-    val smtpHost: StateFlow<String>
-    fun setSmtpHost(host: String)
-
-    val smtpPort: StateFlow<Int>
-    fun setSmtpPort(port: Int)
-
-    val smtpUser: StateFlow<String>
-    fun setSmtpUser(user: String)
-
-    val smtpPassword: StateFlow<String>
-    fun setSmtpPassword(password: String)
-
-    val smtpAuth: StateFlow<Boolean>
-    fun setSmtpAuth(auth: Boolean)
-
-    val smtpStartTls: StateFlow<Boolean>
-    fun setSmtpStartTls(startTls: Boolean)
 }
 
 /** Consolidated interface for all application preferences. */

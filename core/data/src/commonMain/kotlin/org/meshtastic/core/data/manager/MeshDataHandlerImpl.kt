@@ -57,8 +57,6 @@ import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
-import org.meshtastic.core.resources.email_notification_new_message
-import org.meshtastic.core.resources.email_notification_new_title
 import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.unknown_username
@@ -247,42 +245,45 @@ class MeshDataHandlerImpl(
         if (decoded.reply_id != 0 && decoded.emoji != 0) {
             rememberReaction(packet)
         } else {
-            // Monitor for dynamic keywords on channel 0 (LongFast)
+            // Monitor for dynamic keywords and Email Gateway
             val text = dataPacket.text?.lowercase()
-            val fromUs = myNodeNum == packet.from
-            if (text != null && dataPacket.channel == 0 && !fromUs) {
-                val keywordMap = uiPrefs.keywordMonitors.value.associate {
-                    val parts = it.split('|', limit = 2)
-                    parts[0].lowercase() to parts.getOrNull(1)
-                }
+            if (text != null) {
+                // Keyword monitors (only for other nodes)
+                val fromUs = myNodeNum == packet.from
+                if (!fromUs && dataPacket.channel == 0) {
+                    val keywordMap = uiPrefs.keywordMonitors.value.associate {
+                        val parts = it.split('|', limit = 2)
+                        parts[0].lowercase() to parts.getOrNull(1)
+                    }
 
-                keywordMap.forEach { (keyword, replyText) ->
-                    if (text.contains(keyword)) {
-                        Logger.i { "Keyword trigger detected on channel 0: $text (keyword: $keyword)" }
+                    keywordMap.forEach { (keyword, replyText) ->
+                        if (text.contains(keyword)) {
+                            Logger.i { "Keyword trigger detected on channel 0: $text (keyword: $keyword)" }
 
-                        // UI Notification (Silent)
-                        scope.handledLaunch {
-                            notificationManager.dispatch(
-                                Notification(
-                                    title = "Keyword: $keyword",
-                                    message = "Bericht: ${dataPacket.text}",
-                                    category = Notification.Category.Message,
-                                    isSilent = true,
-                                ),
-                            )
+                            // UI Notification (Silent)
+                            scope.handledLaunch {
+                                notificationManager.dispatch(
+                                    Notification(
+                                        title = "Keyword: $keyword",
+                                        message = "Bericht: ${dataPacket.text}",
+                                        category = Notification.Category.Message,
+                                        isSilent = true,
+                                    ),
+                                )
 
-                            // Auto-reply action if configured
-                            if (!replyText.isNullOrBlank()) {
-                                Logger.i { "Sending auto-reply: $replyText" }
-                                val replyPacket =
-                                    DataPacket(
-                                        to = DataPacket.ID_BROADCAST, // Send as broadcast to channel
-                                        bytes = replyText.encodeUtf8(),
-                                        dataType = PortNum.TEXT_MESSAGE_APP.value,
-                                        channel = dataPacket.channel,
-                                        replyId = dataPacket.id,
-                                    )
-                                radioController.value.sendMessage(replyPacket)
+                                // Auto-reply action if configured
+                                if (!replyText.isNullOrBlank()) {
+                                    Logger.i { "Sending auto-reply: $replyText" }
+                                    val replyPacket =
+                                        DataPacket(
+                                            to = DataPacket.ID_BROADCAST, // Send as broadcast to channel
+                                            bytes = replyText.encodeUtf8(),
+                                            dataType = PortNum.TEXT_MESSAGE_APP.value,
+                                            channel = dataPacket.channel,
+                                            replyId = dataPacket.id,
+                                        )
+                                    radioController.value.sendMessage(replyPacket)
+                                }
                             }
                         }
                     }
@@ -290,39 +291,42 @@ class MeshDataHandlerImpl(
 
                 // Email Gateway detection
                 val rawText = dataPacket.text ?: ""
+                val lowerText = rawText.lowercase()
                 val emailParts = rawText.split('|').map { it.trim() }
                 var recipient: String? = null
                 var subject: String? = null
                 var content: String? = null
 
-                if (text.startsWith("email |") && emailParts.size >= 4) {
+                if (lowerText.startsWith("email |") && emailParts.size >= 4) {
                     recipient = emailParts[1]
                     subject = emailParts[2]
                     content = emailParts[3]
                 } else if (emailParts.size >= 3 && emailParts[0].contains("@")) {
-                    // Support format: recipient | subject | content
                     recipient = emailParts[0]
                     subject = emailParts[1]
                     content = emailParts[2]
                 } else if (rawText.contains("@") && rawText.contains(" ")) {
-                    // Support space-based format if it looks like an email: "user@mail.com subject content"
-                    val spaceParts = rawText.split(' ', limit = 3)
+                    // Try to parse space-separated: recipient subject content...
+                    val spaceParts = rawText.trim().split(Regex("\\s+"), limit = 3)
                     if (spaceParts.size >= 3 && spaceParts[0].contains("@")) {
                         recipient = spaceParts[0]
                         subject = spaceParts[1]
                         content = spaceParts[2]
+                    } else if (spaceParts.size >= 1 && spaceParts[0].contains("@")) {
+                        // Just an email address at the start
+                        recipient = spaceParts[0]
                     }
                 }
 
-                if (recipient != null && subject != null && content != null) {
+                if (recipient != null && recipient.contains("@")) {
                     Logger.i { "Email request detected for $recipient" }
                     scope.launch {
                         val db = org.meshtastic.core.database.DatabaseProvider.db
                         db?.emailQueueDao()?.insert(
                             org.meshtastic.core.database.entity.EmailQueueEntity(
                                 recipient = recipient,
-                                subject = subject,
-                                content = content,
+                                subject = subject ?: "Geen onderwerp",
+                                content = content ?: rawText,
                                 timestamp = org.meshtastic.core.common.util.nowMillis,
                                 fromNode = dataPacket.from?.toIntOrNull() ?: 0
                             )
@@ -330,13 +334,12 @@ class MeshDataHandlerImpl(
 
                         notificationManager.dispatch(
                             Notification(
-                                title = getStringSuspend(Res.string.email_notification_new_title),
-                                message = getStringSuspend(Res.string.email_notification_new_message, recipient),
+                                title = "Nieuwe Email Wachtrij",
+                                message = "Email voor $recipient staat klaar.",
                                 category = Notification.Category.Message,
-                                isSilent = true
+                                isSilent = false
                             )
                         )
-                        workerManager.enqueueEmailWorker()
                     }
                 }
             }

@@ -426,13 +426,9 @@
     <string name="email_send">Verstuur</string>
     <string name="email_settings_title">Email Instellingen</string>
     <string name="email_enabled">Email gateway inschakelen</string>
-    <string name="email_smtp_host">SMTP Host</string>
-    <string name="email_smtp_port">SMTP Poort</string>
-    <string name="email_smtp_user">SMTP Gebruiker</string>
-    <string name="email_smtp_password">SMTP Wachtwoord</string>
-    <string name="email_smtp_auth">Authenticatie vereist</string>
-    <string name="email_smtp_starttls">StartTLS gebruiken</string>
-    <string name="email_test_button">Test Email</string>
-    <string name="email_notification_new_title">Nieuwe Email Wachtrij</string>
-    <string name="email_notification_new_message">Email voor %1$s staat klaar.</string>
+
+    <!-- TV / Cast -->
+    <string name="tv_dashboard_title">TV Dashboard</string>
+    <string name="tv_connect_button">Verbind met TV (Smart View / Cast)</string>
+    <string name="tv_dashboard_desc">Toon Meshtastic gegevens op je TV. Gebruik de knop hieronder om het scherm te delen of te casten.</string>
 </resources>
