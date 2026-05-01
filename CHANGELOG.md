@@ -9,6 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update core/proto/src/main/proto digest to 1d6f1a7 (#5309) by @renovate[bot] in [`70a26f0de`](https://github.com/meshtastic/Meshtastic-Android/commit/70a26f0def3de7bce229048d00a534d38a5be3d9)
+* refactor(coroutines): migrate to kotlinx-coroutines 1.11.0-rc02 (#5312) by @James Rich in [`e198f52de`](https://github.com/meshtastic/Meshtastic-Android/commit/e198f52de5ee5dd257e6524f4c159e0afe722a08)
+* refactor(build): build-logic cleanup, CC safety, and detekt 2.0 upgrade (#5311) by @James Rich in [`282229090`](https://github.com/meshtastic/Meshtastic-Android/commit/28222909086b842a14b05a897275703b19acaffe)
+* docs: update CHANGELOG.md (#5308) by @github-actions[bot] in [`a7f3ef699`](https://github.com/meshtastic/Meshtastic-Android/commit/a7f3ef699e9fa591df5d1630a7f4441670180c46)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Licenses) (#5306) by @James Rich in [`08c3f676b`](https://github.com/meshtastic/Meshtastic-Android/commit/08c3f676be5ad79edf3b397d5207e0aa08cafc1d)
 
 ### Open Beta (v2.7.14-open.2)
