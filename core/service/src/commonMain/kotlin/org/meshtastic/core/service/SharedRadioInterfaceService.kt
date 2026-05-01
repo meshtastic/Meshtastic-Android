@@ -30,9 +30,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -109,10 +108,10 @@ class SharedRadioInterfaceService(
 
     private val _meshActivity =
         MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    override val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
+    override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()
 
     private val _connectionError = MutableSharedFlow<String>(extraBufferCapacity = 64)
-    override val connectionError: SharedFlow<String> = _connectionError.asSharedFlow()
+    override val connectionError: Flow<String> = _connectionError.asFlow()
 
     override val serviceScope: CoroutineScope
         get() = _serviceScope

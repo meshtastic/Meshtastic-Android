@@ -23,7 +23,7 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,7 +78,7 @@ class ServiceBroadcastsTest {
         override val errorMessage = MutableStateFlow<String?>(null)
         override val connectionProgress = MutableStateFlow<String?>(null)
         private val meshPackets = MutableSharedFlow<MeshPacket>()
-        override val meshPacketFlow: SharedFlow<MeshPacket> = meshPackets
+        override val meshPacketFlow: Flow<MeshPacket> = meshPackets.asFlow()
         override val tracerouteResponse = MutableStateFlow<TracerouteResponse?>(null)
         override val neighborInfoResponse = MutableStateFlow<String?>(null)
         private val serviceActions = MutableSharedFlow<ServiceAction>()

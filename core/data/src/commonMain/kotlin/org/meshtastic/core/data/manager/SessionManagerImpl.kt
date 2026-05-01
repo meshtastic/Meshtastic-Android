@@ -24,8 +24,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
@@ -59,7 +58,7 @@ class SessionManagerImpl(private val clock: Clock) : SessionManager {
     private val entries = atomic<PersistentMap<Int, SessionEntry>>(persistentMapOf())
 
     private val refreshFlow = MutableSharedFlow<Int>(extraBufferCapacity = REFRESH_BUFFER)
-    override val sessionRefreshFlow: SharedFlow<Int> = refreshFlow.asSharedFlow()
+    override val sessionRefreshFlow: Flow<Int> = refreshFlow.asFlow()
 
     override fun recordSession(srcNodeNum: Int, passkey: ByteString) {
         if (passkey.size == 0) return

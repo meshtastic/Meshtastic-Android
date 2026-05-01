@@ -25,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -74,8 +75,8 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override fun isMockTransport(): Boolean = false
 
     override val receivedData = MutableSharedFlow<ByteArray>()
-    override val meshActivity = MutableSharedFlow<MeshActivity>()
-    override val connectionError = MutableSharedFlow<String>()
+    override val meshActivity: Flow<MeshActivity> = MutableSharedFlow<MeshActivity>().asFlow()
+    override val connectionError: Flow<String> = MutableSharedFlow<String>().asFlow()
 
     override fun sendToRadio(bytes: ByteArray) {
         logWarn("NoopRadioInterfaceService.sendToRadio(${bytes.size} bytes)")

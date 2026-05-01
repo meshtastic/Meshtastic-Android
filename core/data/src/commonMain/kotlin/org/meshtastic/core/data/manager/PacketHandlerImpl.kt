@@ -20,8 +20,10 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.asDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -260,7 +262,7 @@ class PacketHandlerImpl(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    private suspend fun sendPacket(packet: MeshPacket): CompletableDeferred<Boolean> {
+    private suspend fun sendPacket(packet: MeshPacket): Deferred<Boolean> {
         // Reuse a deferred pre-registered by sendToRadioAndAwait, or create a new one.
         val deferred = responseMutex.withLock { queueResponse.getOrPut(packet.id) { CompletableDeferred() } }
         try {
@@ -275,7 +277,9 @@ class PacketHandlerImpl(
             Logger.e(ex) { "sendToRadio error: ${ex.message}" }
             deferred.complete(false)
         }
-        return deferred
+        // Return a read-only Deferred view (kotlinx.coroutines 1.11+) so callers can only await,
+        // not complete/cancel the underlying CompletableDeferred.
+        return deferred.asDeferred()
     }
 
     private fun insertMeshLog(packetToSave: MeshLog) {

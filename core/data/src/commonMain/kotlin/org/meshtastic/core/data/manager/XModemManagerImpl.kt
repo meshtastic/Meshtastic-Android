@@ -19,7 +19,7 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.PacketHandler
@@ -48,7 +48,7 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
             extraBufferCapacity = 4,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
-    override val fileTransferFlow = _fileTransferFlow.asSharedFlow()
+    override val fileTransferFlow = _fileTransferFlow.asFlow()
 
     // --- mutable state ---
     // Thread-safety contract: [handleIncomingXModem] is called sequentially from

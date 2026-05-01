@@ -18,7 +18,6 @@ package org.meshtastic.core.repository
 
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.ServiceAction
@@ -121,9 +120,11 @@ interface ServiceRepository {
     /**
      * Flow of all raw [MeshPacket] objects received from the mesh.
      *
-     * Subscribing to this flow allows components to react to any incoming traffic.
+     * Subscribing to this flow allows components to react to any incoming traffic. The underlying implementation is a
+     * hot [SharedFlow], but consumers should treat this as a cold [Flow] — the hot semantics are an implementation
+     * detail hidden via [SharedFlow.asFlow] (kotlinx.coroutines 1.11+).
      */
-    val meshPacketFlow: SharedFlow<MeshPacket>
+    val meshPacketFlow: Flow<MeshPacket>
 
     /**
      * Emits a mesh packet into the flow.

@@ -22,8 +22,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.ServiceAction
@@ -88,8 +88,8 @@ open class ServiceRepositoryImpl : ServiceRepository {
     }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 64)
-    override val meshPacketFlow: SharedFlow<MeshPacket>
-        get() = _meshPacketFlow
+    override val meshPacketFlow: Flow<MeshPacket>
+        get() = _meshPacketFlow.asFlow()
 
     override suspend fun emitMeshPacket(packet: MeshPacket) {
         _meshPacketFlow.emit(packet)

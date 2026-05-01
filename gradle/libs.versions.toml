@@ -19,7 +19,7 @@ koin-plugin = "1.0.0-RC2"
 
 # Kotlin
 kotlin = "2.3.21"
-kotlinx-coroutines-android = "1.10.2"
+kotlinx-coroutines-android = "1.11.0-rc02"
 kotlinx-datetime = "0.7.1"
 kotlinx-serialization = "1.11.0"
 ktlint = "1.7.1"

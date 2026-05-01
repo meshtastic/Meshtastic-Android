@@ -17,7 +17,6 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import okio.ByteString
 import org.meshtastic.core.model.SessionStatus
 
@@ -49,9 +48,10 @@ interface SessionManager {
      * Used by `EnsureRemoteAdminSessionUseCase` to await a session refresh from a specific node without polling.
      *
      * Backed by a `MutableSharedFlow` with no replay; subscribers must subscribe **before** dispatching the request
-     * that triggers the refresh.
+     * that triggers the refresh. Exposed as a cold [Flow] via [SharedFlow.asFlow] (kotlinx.coroutines 1.11+) to hide
+     * hot-flow implementation details from consumers.
      */
-    val sessionRefreshFlow: SharedFlow<Int>
+    val sessionRefreshFlow: Flow<Int>
 
     /**
      * Cold per-node [SessionStatus] flow. Emits the current status synchronously on subscription and re-emits whenever

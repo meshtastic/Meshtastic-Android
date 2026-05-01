@@ -33,11 +33,11 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
@@ -135,7 +135,7 @@ class MapViewModel(
     val theme: StateFlow<Int> = uiPrefs.theme
 
     private val _errorFlow = MutableSharedFlow<String>()
-    val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()
+    val errorFlow: Flow<String> = _errorFlow.asFlow()
 
     val customTileProviderConfigs: StateFlow<List<CustomTileProviderConfig>> =
         customTileProviderRepository.getCustomTileProviders().stateInWhileSubscribed(initialValue = emptyList())
