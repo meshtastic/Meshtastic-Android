@@ -164,6 +164,10 @@ interface NotificationPrefs {
 
     fun setNodeEventsEnabled(enabled: Boolean)
 
+    val nodeEventsAutoDisabledForEvent: StateFlow<Boolean>
+
+    fun setNodeEventsAutoDisabledForEvent(disabled: Boolean)
+
     val lowBatteryEnabled: StateFlow<Boolean>
 
     fun setLowBatteryEnabled(enabled: Boolean)

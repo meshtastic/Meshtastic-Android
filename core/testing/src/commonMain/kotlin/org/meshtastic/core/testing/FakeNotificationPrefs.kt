@@ -32,6 +32,12 @@ class FakeNotificationPrefs : NotificationPrefs {
         nodeEventsEnabled.value = enabled
     }
 
+    override val nodeEventsAutoDisabledForEvent = MutableStateFlow(false)
+
+    override fun setNodeEventsAutoDisabledForEvent(disabled: Boolean) {
+        nodeEventsAutoDisabledForEvent.value = disabled
+    }
+
     override val lowBatteryEnabled = MutableStateFlow(true)
 
     override fun setLowBatteryEnabled(enabled: Boolean) {

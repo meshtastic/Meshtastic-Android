@@ -22,6 +22,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
@@ -55,6 +56,12 @@ interface NodeManager : NodeIdLookup {
 
     /** Sets the local node number. */
     fun setMyNodeNum(num: Int?)
+
+    /** The firmware edition reported by the connected device. */
+    val firmwareEdition: StateFlow<FirmwareEdition?>
+
+    /** Sets the firmware edition of the connected device. */
+    fun setFirmwareEdition(edition: FirmwareEdition?)
 
     /** Loads the cached node database from the repository. */
     fun loadCachedNodeDB()

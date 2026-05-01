@@ -45,6 +45,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
@@ -89,6 +90,12 @@ class NodeManagerImpl(
         myNodeNum.value = num
     }
 
+    override val firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)
+
+    override fun setFirmwareEdition(edition: FirmwareEdition?) {
+        firmwareEdition.value = edition
+    }
+
     companion object {
         private const val TIME_MS_TO_S = 1000L
     }
@@ -112,6 +119,7 @@ class NodeManagerImpl(
         isNodeDbReady.value = false
         allowNodeDbWrites.value = false
         myNodeNum.value = null
+        firmwareEdition.value = null
     }
 
     override fun getMyNodeInfo(): MyNodeInfo? {
