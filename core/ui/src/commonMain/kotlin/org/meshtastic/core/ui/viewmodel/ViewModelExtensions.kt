@@ -129,7 +129,8 @@ fun safeLaunch(
 }
 
 /**
- * Creates and returns a [MutableSharedFlow] intended for one-shot error events. Expose as `Flow` via [asFlow] in the
- * ViewModel (hiding hot-flow semantics), and collect in the UI to show snackbars or toasts.
+ * Creates and returns a [MutableSharedFlow] intended for one-shot error events. Expose as `Flow` via
+ * [kotlinx.coroutines.flow.asFlow] in the ViewModel (hiding hot-flow semantics), and collect in the UI to show
+ * snackbars or toasts.
  */
 fun errorEventFlow(): MutableSharedFlow<UiText> = MutableSharedFlow(extraBufferCapacity = 1)

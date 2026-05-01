@@ -120,9 +120,9 @@ interface ServiceRepository {
     /**
      * Flow of all raw [MeshPacket] objects received from the mesh.
      *
-     * Subscribing to this flow allows components to react to any incoming traffic. The underlying implementation is a
-     * hot [SharedFlow], but consumers should treat this as a cold [Flow] — the hot semantics are an implementation
-     * detail hidden via [SharedFlow.asFlow] (kotlinx.coroutines 1.11+).
+     * Subscribing to this flow allows components to react to any incoming traffic. The underlying implementation may be
+     * backed by a hot shared flow, but this API intentionally exposes only the [Flow] interface. That implementation
+     * detail is hidden via [kotlinx.coroutines.flow.SharedFlow.asFlow] (kotlinx.coroutines 1.11+).
      */
     val meshPacketFlow: Flow<MeshPacket>
 

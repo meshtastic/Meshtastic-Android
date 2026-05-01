@@ -48,8 +48,8 @@ interface SessionManager {
      * Used by `EnsureRemoteAdminSessionUseCase` to await a session refresh from a specific node without polling.
      *
      * Backed by a `MutableSharedFlow` with no replay; subscribers must subscribe **before** dispatching the request
-     * that triggers the refresh. Exposed as a cold [Flow] via [SharedFlow.asFlow] (kotlinx.coroutines 1.11+) to hide
-     * hot-flow implementation details from consumers.
+     * that triggers the refresh. Exposed as a [Flow] via [kotlinx.coroutines.flow.SharedFlow.asFlow]
+     * (kotlinx.coroutines 1.11+) to hide the `SharedFlow` API from consumers while preserving hot-stream semantics.
      */
     val sessionRefreshFlow: Flow<Int>
 

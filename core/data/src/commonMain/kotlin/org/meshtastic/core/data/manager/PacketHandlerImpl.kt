@@ -277,8 +277,9 @@ class PacketHandlerImpl(
             Logger.e(ex) { "sendToRadio error: ${ex.message}" }
             deferred.complete(false)
         }
-        // Return a read-only Deferred view (kotlinx.coroutines 1.11+) so callers can only await,
-        // not complete/cancel the underlying CompletableDeferred.
+        // Return a read-only Deferred view (kotlinx.coroutines 1.11+) so callers can await it
+        // without being able to complete the underlying CompletableDeferred; cancellation is
+        // still exposed via Deferred/Job.
         return deferred.asDeferred()
     }
 
