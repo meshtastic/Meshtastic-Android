@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* fix: add meshtastic.disableAbiSplits property to Fastfile (#5320) by @James Rich in [`9f871636b`](https://github.com/meshtastic/Meshtastic-Android/commit/9f871636b9851a5197c7dee9331eabce1c190a75)
+* docs: update CHANGELOG.md (#5317) by @github-actions[bot] in [`344c80f00`](https://github.com/meshtastic/Meshtastic-Android/commit/344c80f0020752967a819dd4fb3fa436f596dbee)
 * fix: add explicit DI binds and ensure scans start after DataStore load (#5319) by @James Rich in [`68a1c578a`](https://github.com/meshtastic/Meshtastic-Android/commit/68a1c578a72294f8dd9317bee5755bd97a5cc19c)
 * ci: add reproducible build verification for F-Droid releases (#5318) by @James Rich in [`56e095a07`](https://github.com/meshtastic/Meshtastic-Android/commit/56e095a076abeb3859b28300be62e106ed82146a)
 * refactor(build): update AboutLibraries generation process for rb (#5316) by @James Rich in [`aa7140070`](https://github.com/meshtastic/Meshtastic-Android/commit/aa71400706094ff432dd5f15aeb8b771afdbad4c)
