@@ -63,7 +63,7 @@ camerax = "1.6.0"
 ktor = "3.4.3"
 
 # Other
-aboutlibraries = "14.0.1"
+aboutlibraries = "14.1.0"
 jserialcomm = "2.11.4"
 coil = "3.4.0"
 datadog-gradle = "1.26.0"
