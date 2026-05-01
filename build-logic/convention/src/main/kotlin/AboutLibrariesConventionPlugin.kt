@@ -63,10 +63,22 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
             tasks
                 .matching {
                     it.name.startsWith("process") &&
-                        it.name.endsWith("Resources") &&
+                        (it.name.endsWith("Resources") || it.name.endsWith("JavaRes")) &&
                         !it.name.contains("Fdroid", ignoreCase = true)
                 }
                 .configureEach { dependsOn("exportLibraryDefinitions") }
+
+            // Gradle 9.5 strict task-dependency validation: fdroid variants read from
+            // src/main/resources/ (where exportLibraryDefinitions writes). Even though
+            // fdroid uses the committed file as-is, we must declare ordering to satisfy
+            // the implicit dependency checker.
+            tasks
+                .matching {
+                    it.name.startsWith("process") &&
+                        it.name.endsWith("JavaRes") &&
+                        it.name.contains("Fdroid", ignoreCase = true)
+                }
+                .configureEach { mustRunAfter("exportLibraryDefinitions") }
         }
     }
 }
