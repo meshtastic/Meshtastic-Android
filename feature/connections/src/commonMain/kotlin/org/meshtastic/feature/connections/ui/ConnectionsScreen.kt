@@ -138,7 +138,10 @@ fun ConnectionsScreen(
     // Auto-start scans on screen entry when the user has previously opted in via the toggle. Stop on exit so we don't
     // drain battery in the background. Network auto-start is additionally gated on the runtime local-network grant so
     // we don't trigger the system picker for users who declined the permission.
-    DisposableEffect(localNetworkPermissionGranted) {
+    //
+    // Keys include bleAutoScan/networkAutoScan so the effect re-fires once DataStore delivers the persisted `true`
+    // value (initial composition sees `false` from the Eagerly-seeded StateFlow before the disk read completes).
+    DisposableEffect(bleAutoScan, networkAutoScan, localNetworkPermissionGranted) {
         if (bleAutoScan) scanModel.startBleScan()
         if (networkAutoScan && localNetworkPermissionGranted) scanModel.startNetworkScan()
         onDispose {

@@ -24,7 +24,7 @@ import org.koin.core.annotation.Single
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
-@Single
+@Single(binds = [BleScanner::class])
 class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
         val scanner = Scanner {

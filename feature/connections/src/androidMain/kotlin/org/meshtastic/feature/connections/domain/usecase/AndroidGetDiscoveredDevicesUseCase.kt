@@ -42,7 +42,7 @@ import org.meshtastic.feature.connections.model.getMeshtasticShortName
 import java.util.Locale
 
 @Suppress("LongParameterList")
-@Single
+@Single(binds = [GetDiscoveredDevicesUseCase::class])
 class AndroidGetDiscoveredDevicesUseCase(
     private val bluetoothRepository: BluetoothRepository,
     private val recentAddressesDataSource: RecentAddressesDataSource,
