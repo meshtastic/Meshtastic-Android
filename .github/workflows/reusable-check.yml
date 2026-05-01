@@ -191,21 +191,35 @@ jobs:
           echo "✅ No proprietary libraries in fdroid APK"
 
           echo "── Step 5: Check for DEPENDENCY_INFO_BLOCK (signing block blob) ──"
-          # 0x504b4453 = "PKDS" — Google's dependency info signing block ID
-          if python3 -c "
+          # Parse the APK Signing Block structure to find the dependency info pair.
+          # Naive byte scans produce false positives in large APKs.
+          if python3 << 'PYEOF'
           import struct, sys
-          with open('$APK', 'rb') as f:
+
+          with open("$APK", "rb") as f:
               data = f.read()
-              # Search for the APK Signing Block magic
-              idx = data.rfind(b'APK Sig Block 42')
-              if idx > 0:
-                  # Scan the signing block for the dependency info ID
-                  block_start = max(0, idx - 65536)
-                  chunk = data[block_start:idx]
-                  if struct.pack('<I', 0x504b4453) in chunk:
-                      print('DEPENDENCY_INFO_BLOCK found')
-                      sys.exit(1)
-          " 2>/dev/null; then
+
+          magic = b"APK Sig Block 42"
+          idx = data.rfind(magic)
+          if idx < 0:
+              sys.exit(0)
+
+          block_size = struct.unpack_from("<Q", data, idx - 8)[0]
+          block_start = idx + 16 - 8 - block_size
+          pos = int(block_start)
+          end = idx - 8
+
+          while pos + 12 <= end:
+              pair_size = struct.unpack_from("<Q", data, pos)[0]
+              pair_id = struct.unpack_from("<I", data, pos + 8)[0]
+              if pair_id == 0x504b4453:
+                  print(f"DEPENDENCY_INFO_BLOCK found (id=0x{pair_id:08x})")
+                  sys.exit(1)
+              pos += 8 + int(pair_size)
+
+          sys.exit(0)
+          PYEOF
+          then
             echo "::error::fdroid APK contains DEPENDENCY_INFO_BLOCK — remove with dependenciesInfo { includeInApk = false }"
             rm -rf "$TMPDIR"
             exit 1
