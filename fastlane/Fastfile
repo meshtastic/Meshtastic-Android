@@ -53,7 +53,8 @@ platform :android do
       properties: {
         "android.injected.version.name" => ENV['VERSION_NAME'],
         "android.injected.version.code" => ENV['VERSION_CODE'],
-        "aboutLibraries.release" => "true"
+        "aboutLibraries.release" => "true",
+        "meshtastic.disableAbiSplits" => "true"
       }
     )
     lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
