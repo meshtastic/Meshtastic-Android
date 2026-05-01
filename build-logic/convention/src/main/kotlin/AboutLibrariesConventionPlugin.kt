@@ -55,30 +55,18 @@ class AboutLibrariesConventionPlugin : Plugin<Project> {
                 }
             }
 
-            // Ensure aboutlibraries.json is always up-to-date during the build.
-            // This is required since AboutLibraries v11+ no longer auto-exports.
-            // For fdroid builds, skip re-export to preserve reproducible builds (RB) —
-            // the committed aboutlibraries.json is used as-is.
+            // Ensure aboutlibraries.json is generated before resource processing.
+            // The file is gitignored and must be generated fresh each build.
+            // offlineMode is already true when aboutLibraries.release is not passed,
+            // ensuring deterministic output for fdroid/reproducible builds.
             // See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
             tasks
                 .matching {
                     it.name.startsWith("process") &&
-                        (it.name.endsWith("Resources") || it.name.endsWith("JavaRes")) &&
-                        !it.name.contains("Fdroid", ignoreCase = true)
+                        (it.name.endsWith("Resources") || it.name.endsWith("JavaRes"))
                 }
                 .configureEach { dependsOn("exportLibraryDefinitions") }
 
-            // Gradle 9.5 strict task-dependency validation: fdroid variants read from
-            // src/main/resources/ (where exportLibraryDefinitions writes). Even though
-            // fdroid uses the committed file as-is, we must declare ordering to satisfy
-            // the implicit dependency checker.
-            tasks
-                .matching {
-                    it.name.startsWith("process") &&
-                        it.name.endsWith("JavaRes") &&
-                        it.name.contains("Fdroid", ignoreCase = true)
-                }
-                .configureEach { mustRunAfter("exportLibraryDefinitions") }
         }
     }
 }
