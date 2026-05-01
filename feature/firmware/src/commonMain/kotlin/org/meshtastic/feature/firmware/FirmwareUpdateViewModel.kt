@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
@@ -127,10 +129,10 @@ class FirmwareUpdateViewModel(
     override fun onCleared() {
         super.onCleared()
         // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
-        // application-wide scope (SupervisorJob + ioDispatcher). NonCancellable keeps cleanup
-        // running even if something tries to cancel it mid-flight.
-        applicationScope.launch(NonCancellable) {
-            tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+        // application-wide scope (SupervisorJob + ioDispatcher). ATOMIC start + NonCancellable
+        // context keeps cleanup running even if something tries to cancel it mid-flight.
+        applicationScope.launch(start = CoroutineStart.ATOMIC) {
+            withContext(NonCancellable) { tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile) }
         }
     }
 
