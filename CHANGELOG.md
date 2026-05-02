@@ -9,11 +9,15 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(deps): update org.meshtastic:mqtt-client to v0.3.2 (#5331) by @renovate[bot] in [`519b9633a`](https://github.com/meshtastic/Meshtastic-Android/commit/519b9633a1c86f7b9d7616cc4a196af8bb4c1f38)
+* chore: Integrate MQTT logging with Kermit and enhance PII sanitization (#5338) by @James Rich in [`1c984d54f`](https://github.com/meshtastic/Meshtastic-Android/commit/1c984d54f492c79035e8d675fbc4e1929fef61fa)
+* chore(deps): update org.meshtastic:mqtt-client to v0.3.3 (#5337) by @renovate[bot] in [`61af98e96`](https://github.com/meshtastic/Meshtastic-Android/commit/61af98e9663439f19d66194cf61e52b55f2f6c5b)
+* chore: optimize AI agent context and implement CI cost controls (#5335) by @James Rich in [`9e396cdec`](https://github.com/meshtastic/Meshtastic-Android/commit/9e396cdeccffae17d4c4392a0107c4f99a9d2b4e)
+* docs: update CHANGELOG.md (#5334) by @github-actions[bot] in [`92b8f0ddf`](https://github.com/meshtastic/Meshtastic-Android/commit/92b8f0ddf5868cf14690396ca03b0bccb48c6693)
 
-### Internal (v2.7.14-internal.79)
+### Closed Beta (v2.7.14-closed.21)
 Changes since [`v2.7.14-open.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.3):
 
+* chore(deps): update org.meshtastic:mqtt-client to v0.3.2 (#5331) by @renovate[bot] in [`519b9633a`](https://github.com/meshtastic/Meshtastic-Android/commit/519b9633a1c86f7b9d7616cc4a196af8bb4c1f38)
 * docs: update CHANGELOG.md (#5332) by @github-actions[bot] in [`20cc302bb`](https://github.com/meshtastic/Meshtastic-Android/commit/20cc302bb3c3f54fee7c82af9d41fcc33f1d3cba)
 * fix(network): resolve empty MQTT address and enforce TLS on default server (#5333) by @James Rich in [`c0b0b9edd`](https://github.com/meshtastic/Meshtastic-Android/commit/c0b0b9edd4377639e50f085a99e074196a108b39)
 * fix(connections): improve BLE scan reliability and UI lifecycle (#5329) by @James Rich in [`5a95201b4`](https://github.com/meshtastic/Meshtastic-Android/commit/5a95201b4e9657978ad8fada219b70ad6f23e6f1)
