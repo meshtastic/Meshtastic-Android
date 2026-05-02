@@ -1,0 +1,13 @@
+# Mark resources as generated to reduce Copilot PR summary costs
+**/src/main/res/**/*.xml linguist-generated=true
+**/composeResources/**/*.xml linguist-generated=true
+**/strings.xml linguist-generated=true
+*.json linguist-generated=true
+
+# Ensure assets are treated as binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.mp3 binary
+*.wav binary
+*.ogg binary

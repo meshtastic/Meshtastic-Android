@@ -64,3 +64,8 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 2. **Reference the Docs:** Cite `AGENTS.md` and project architecture playbooks to justify change requests (e.g., "Per AGENTS.md, `java.io.*` cannot be used in `commonMain`; please migrate to Okio").
 3. **Enforce Build Health:** Remind authors to run `./gradlew test allTests` locally to verify changes, especially since KMP `test` tasks are ambiguous.
 4. **Praise Good Patterns:** Acknowledge correct usage of complex architecture requirements, like proper Navigation 3 scene transitions or elegant `commonMain` helper extractions.
+
+## Git & PR Hygiene Rules
+- **Commit Hygiene:** Squash fixup/polish/review-feedback commits before opening a PR. Each commit should represent a logical, self-contained unit of work — not a back-and-forth conversation.
+- **PR Descriptions:** Keep PR descriptions concise and scannable. State *what changed* and *why*, not a per-commit play-by-play. Use a short summary paragraph followed by a bullet list of changes. Avoid tables, headers-per-commit, or verbose breakdowns. Reference the `meshtastic/firmware` repo PRs for tone and style.
+- **PR Titles:** Use conventional commit format: `feat(scope):`, `fix(scope):`, `refactor(scope):`, `chore(scope):`. Keep titles under ~72 characters.
