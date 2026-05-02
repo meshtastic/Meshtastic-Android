@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* Change default ContrastLevel from STANDARD to MEDIUM (#5325) by @Andrew Smith in [`2914bc6ff`](https://github.com/meshtastic/Meshtastic-Android/commit/2914bc6ff6441d246cba1ddbbc5d010f2da18102)
+* docs: update CHANGELOG.md (#5324) by @github-actions[bot] in [`a6b524d4c`](https://github.com/meshtastic/Meshtastic-Android/commit/a6b524d4c10bc896de3ddadc00582e2a25e6c67b)
 * chore(deps): update aboutlibraries to v14.1.0 (#5322) by @renovate[bot] in [`770fe3f62`](https://github.com/meshtastic/Meshtastic-Android/commit/770fe3f626aafab15c8725bcbf0345958223653f)
 * fix(data): default new-node notifications off for event firmware (#5323) by @James Rich in [`400e0404f`](https://github.com/meshtastic/Meshtastic-Android/commit/400e0404f666c4da122b0361ac4af466f0982c65)
 
@@ -242,6 +244,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @zt64 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5226
 * @riddlemd made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5265
 * @elagin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5284
+* @somenice made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5325
 
 **Full Changelog**: https://github.com/meshtastic/Meshtastic-Android/compare/v2.7.13...unreleased
 <!-- UNRELEASED_END -->
