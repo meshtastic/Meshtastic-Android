@@ -343,7 +343,13 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
                 // Explicitly handle String
                 else -> bundle.putString(it.name, value.toString()) // Fallback for other types
             }
-            KermitLogger.withTag(TAG).d { "Analytics: track $event (${it.name} : $value)" }
+            KermitLogger.withTag(TAG).d {
+                if (BuildConfig.DEBUG) {
+                    "Analytics: track $event (${it.name} : $value)"
+                } else {
+                    "Analytics: track $event (${it.name})"
+                }
+            }
         }
         Firebase.analytics.logEvent(event, bundle)
     }
