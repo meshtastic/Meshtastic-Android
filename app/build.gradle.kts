@@ -128,29 +128,29 @@ configure<ApplicationExtension> {
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
 
+        val disableSplits =
+            project.gradle.startParameter.taskNames.any {
+                it.contains("bundle", ignoreCase = true) || it.contains("google", ignoreCase = true)
+            }
+
+        // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid
+        splits {
+            abi {
+                isEnable = !disableSplits
+                reset()
+                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+                isUniversalApk = true
+            }
+        }
+
+        dependenciesInfo {
+            // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
+            includeInApk = false
+            // Disables dependency metadata when building Android App Bundles (for Google Play)
+            includeInBundle = false
+        }
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    dependenciesInfo {
-        // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
-        includeInApk = false
-        // Disables dependency metadata when building Android App Bundles (for Google Play)
-        includeInBundle = false
-    }
-
-    val disableSplits =
-        project.gradle.startParameter.taskNames.any { name ->
-            name.contains("bundle", ignoreCase = true) || name.contains("google", ignoreCase = true)
-        }
-
-    // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid
-    splits {
-        abi {
-            isEnable = !disableSplits
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = true
-        }
     }
 
     // Configure existing product flavors (defined by convention plugin)
