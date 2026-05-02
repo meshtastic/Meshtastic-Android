@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* fix(network): resolve empty MQTT address and enforce TLS on default server (#5333) by @James Rich in [`c0b0b9edd`](https://github.com/meshtastic/Meshtastic-Android/commit/c0b0b9edd4377639e50f085a99e074196a108b39)
+* fix(connections): improve BLE scan reliability and UI lifecycle (#5329) by @James Rich in [`5a95201b4`](https://github.com/meshtastic/Meshtastic-Android/commit/5a95201b4e9657978ad8fada219b70ad6f23e6f1)
+* docs: update CHANGELOG.md (#5328) by @github-actions[bot] in [`7263dc1f7`](https://github.com/meshtastic/Meshtastic-Android/commit/7263dc1f73bf0789ccbc9327c88736d39ca11532)
 * Change default ContrastLevel from STANDARD to MEDIUM (#5325) by @Andrew Smith in [`2914bc6ff`](https://github.com/meshtastic/Meshtastic-Android/commit/2914bc6ff6441d246cba1ddbbc5d010f2da18102)
 * docs: update CHANGELOG.md (#5324) by @github-actions[bot] in [`a6b524d4c`](https://github.com/meshtastic/Meshtastic-Android/commit/a6b524d4c10bc896de3ddadc00582e2a25e6c67b)
 * chore(deps): update aboutlibraries to v14.1.0 (#5322) by @renovate[bot] in [`770fe3f62`](https://github.com/meshtastic/Meshtastic-Android/commit/770fe3f626aafab15c8725bcbf0345958223653f)
