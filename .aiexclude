@@ -33,4 +33,4 @@ tmp/
 
 # Resources (Indexing non-English strings is a token sink)
 **/values-*/strings.xml
-**/composeResources/**/values*/*.xml
+**/composeResources/**/values-*/*.xml

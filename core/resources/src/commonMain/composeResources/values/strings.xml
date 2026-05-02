@@ -35,7 +35,7 @@
     <!-- ADD -->
     <string name="add">Add</string>
     <string name="add_a_note">Add a private note…</string>
-    <string name="add_channels_description">The following channels were found in the QR code. Select the once you would like to add to your device. Existing channels will be preserved.</string>
+    <string name="add_channels_description">The following channels were found in the QR code. Select the ones you would like to add to your device. Existing channels will be preserved.</string>
     <string name="add_custom_tile_source">Add Network Tile Source</string>
     <string name="add_favorite">Add to favorites</string>
     <string name="add_layer">Add Layer</string>

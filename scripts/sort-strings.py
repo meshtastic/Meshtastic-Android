@@ -8,7 +8,7 @@ import re
 
 def sort_strings(xml_path, index_path):
     print(f"Reading {xml_path}...")
-    with open(xml_path, 'r') as f:
+    with open(xml_path, 'r', encoding='utf-8', newline='\n') as f:
         content = f.read()
 
     # Extract license header
@@ -79,12 +79,12 @@ def sort_strings(xml_path, index_path):
     # Write XML
     xml_str = ET.tostring(new_root, encoding='unicode')
     final_content = header + xml_str + '\n'
-    with open(xml_path, 'w') as f:
+    with open(xml_path, 'w', encoding='utf-8', newline='\n') as f:
         f.write(final_content)
     print(f"Successfully sorted {xml_path}")
 
     # Write Index
-    with open(index_path, 'w') as f:
+    with open(index_path, 'w', encoding='utf-8', newline='\n') as f:
         f.write('\n'.join(index_lines) + '\n')
     print(f"Successfully regenerated {index_path}")
 
