@@ -27,6 +27,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.testing.FakeBleConnection
@@ -37,6 +38,7 @@ import org.meshtastic.core.testing.FakeBluetoothRepository
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleRadioTransportTest {
@@ -167,6 +169,30 @@ class BleRadioTransportTest {
         // the policy must NEVER signal a permanent disconnect on its own. Only explicit close()
         // (verified separately by the service layer) may emit isPermanent = true.
         verify(mode = VerifyMode.not) { service.onDisconnect(isPermanent = true, errorMessage = any()) }
+
+        bleTransport.close()
+    }
+
+    @Test
+    fun `findDevice scans with both service UUID and address`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        scanner.emitDevice(device)
+
+        val bleTransport =
+            BleRadioTransport(
+                scope = this,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.start()
+        advanceTimeBy(3_001)
+
+        assertNotNull(scanner.lastScanServiceUuid, "scan must include serviceUuid")
+        assertEquals(SERVICE_UUID, scanner.lastScanServiceUuid)
+        assertEquals(address, scanner.lastScanAddress)
 
         bleTransport.close()
     }

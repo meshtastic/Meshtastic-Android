@@ -177,10 +177,11 @@ class BleRadioTransport(
             try {
                 val d =
                     withTimeoutOrNull(SCAN_TIMEOUT) {
-                        // Scan by service UUID rather than address. CoreBluetooth (macOS) caches
-                        // peripheral identifiers aggressively and may not re-report a device when
-                        // filtering by address alone, causing findDevice() to time out on Desktop.
-                        scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID).first {
+                        // Pass both service UUID and address so the scanner can apply the most
+                        // efficient platform filter. Android uses address (OS-level HW filter),
+                        // while CoreBluetooth (macOS) needs the service UUID because it caches
+                        // peripheral identifiers and may not re-report by address alone.
+                        scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first {
                             it.address.equals(address, ignoreCase = true)
                         }
                     }

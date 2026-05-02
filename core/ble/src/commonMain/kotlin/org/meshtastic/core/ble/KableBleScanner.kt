@@ -29,11 +29,15 @@ class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner 
     override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
         val scanner = Scanner {
             logging { applyConfig(loggingConfig) }
-            // Use separate match blocks so each filter is evaluated independently (OR semantics).
-            // Combining address and service UUID in a single match{} creates an AND filter which
-            // silently drops results on OEM stacks (Samsung, Xiaomi) when the device uses a
-            // random resolvable private address.
-            if (address != null) {
+            // When both address and serviceUuid are provided, use OR-semantics so the device
+            // is found even if one filter is ineffective on the current platform (e.g.
+            // CoreBluetooth may not re-report a cached identifier via the address filter).
+            if (address != null && serviceUuid != null) {
+                filters {
+                    match { this.address = address }
+                    match { services = listOf(serviceUuid) }
+                }
+            } else if (address != null) {
                 filters { match { this.address = address } }
             } else if (serviceUuid != null) {
                 filters { match { services = listOf(serviceUuid) } }
