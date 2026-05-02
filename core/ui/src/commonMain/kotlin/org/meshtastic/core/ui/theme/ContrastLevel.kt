@@ -32,7 +32,7 @@ enum class ContrastLevel(val value: Int) {
     ;
 
     companion object {
-        fun fromValue(value: Int): ContrastLevel = entries.firstOrNull { it.value == value } ?: STANDARD
+        fun fromValue(value: Int): ContrastLevel = entries.firstOrNull { it.value == value } ?: MEDIUM
     }
 }
 
@@ -41,4 +41,4 @@ enum class ContrastLevel(val value: Int) {
  *
  * Read by components that need to adapt their rendering for accessibility (e.g. message bubbles, signal indicators).
  */
-val LocalContrastLevel = staticCompositionLocalOf { ContrastLevel.STANDARD }
+val LocalContrastLevel = staticCompositionLocalOf { ContrastLevel.MEDIUM }
