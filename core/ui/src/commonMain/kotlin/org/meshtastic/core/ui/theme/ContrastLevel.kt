@@ -41,4 +41,5 @@ enum class ContrastLevel(val value: Int) {
  *
  * Read by components that need to adapt their rendering for accessibility (e.g. message bubbles, signal indicators).
  */
+@Suppress("CompositionLocalAllowlist")
 val LocalContrastLevel = staticCompositionLocalOf { ContrastLevel.MEDIUM }
