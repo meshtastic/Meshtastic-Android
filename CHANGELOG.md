@@ -9,6 +9,12 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update org.meshtastic:mqtt-client to v0.3.2 (#5331) by @renovate[bot] in [`519b9633a`](https://github.com/meshtastic/Meshtastic-Android/commit/519b9633a1c86f7b9d7616cc4a196af8bb4c1f38)
+
+### Internal (v2.7.14-internal.79)
+Changes since [`v2.7.14-open.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.3):
+
+* docs: update CHANGELOG.md (#5332) by @github-actions[bot] in [`20cc302bb`](https://github.com/meshtastic/Meshtastic-Android/commit/20cc302bb3c3f54fee7c82af9d41fcc33f1d3cba)
 * fix(network): resolve empty MQTT address and enforce TLS on default server (#5333) by @James Rich in [`c0b0b9edd`](https://github.com/meshtastic/Meshtastic-Android/commit/c0b0b9edd4377639e50f085a99e074196a108b39)
 * fix(connections): improve BLE scan reliability and UI lifecycle (#5329) by @James Rich in [`5a95201b4`](https://github.com/meshtastic/Meshtastic-Android/commit/5a95201b4e9657978ad8fada219b70ad6f23e6f1)
 * docs: update CHANGELOG.md (#5328) by @github-actions[bot] in [`7263dc1f7`](https://github.com/meshtastic/Meshtastic-Android/commit/7263dc1f73bf0789ccbc9327c88736d39ca11532)
