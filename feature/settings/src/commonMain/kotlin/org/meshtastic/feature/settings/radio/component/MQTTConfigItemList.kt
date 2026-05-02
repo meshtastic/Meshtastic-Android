@@ -318,17 +318,15 @@ private fun MqttAddressAndProbe(
         },
     )
     HorizontalDivider()
+    val defaultAddress = stringResource(Res.string.default_mqtt_address)
     MqttProbeRow(
         enabled = enabled && formState.value.address.isNotBlank(),
         status = probeStatus,
         onTestClick = {
             focusManager.clearFocus()
-            onProbe(
-                formState.value.address,
-                formState.value.tls_enabled,
-                formState.value.username,
-                formState.value.password,
-            )
+            val isDefault = formState.value.address.isEmpty() || formState.value.address.contains(defaultAddress)
+            val effectiveTls = formState.value.tls_enabled || isDefault
+            onProbe(formState.value.address, effectiveTls, formState.value.username, formState.value.password)
         },
     )
 }

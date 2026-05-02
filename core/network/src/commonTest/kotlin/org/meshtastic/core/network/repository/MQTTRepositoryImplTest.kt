@@ -98,6 +98,30 @@ class MQTTRepositoryImplTest {
 
     // endregion
 
+    // region effectiveTlsEnabled — TLS enforcement policy for the public server.
+
+    @Test
+    fun `default server forces TLS even when tlsEnabled is false`() {
+        assertEquals(true, effectiveTlsEnabled("mqtt.meshtastic.org", tlsEnabled = false))
+    }
+
+    @Test
+    fun `default server case-insensitive match forces TLS`() {
+        assertEquals(true, effectiveTlsEnabled("MQTT.MESHTASTIC.ORG", tlsEnabled = false))
+    }
+
+    @Test
+    fun `custom server respects tlsEnabled false`() {
+        assertEquals(false, effectiveTlsEnabled("mqtt.myserver.pt", tlsEnabled = false))
+    }
+
+    @Test
+    fun `custom server respects tlsEnabled true`() {
+        assertEquals(true, effectiveTlsEnabled("mqtt.myserver.pt", tlsEnabled = true))
+    }
+
+    // endregion
+
     // region MqttJsonPayload — keep the existing JSON contract tests.
 
     @Test

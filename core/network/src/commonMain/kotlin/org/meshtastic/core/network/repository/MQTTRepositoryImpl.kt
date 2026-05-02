@@ -100,8 +100,8 @@ class MQTTRepositoryImpl(
 
         val rootTopic = mqttConfig?.root?.ifEmpty { DEFAULT_TOPIC_ROOT } ?: DEFAULT_TOPIC_ROOT
 
-        val rawAddress = mqttConfig?.address ?: DEFAULT_SERVER_ADDRESS
-        val endpoint = resolveEndpoint(rawAddress, mqttConfig?.tls_enabled == true)
+        val rawAddress = mqttConfig?.address?.ifEmpty { DEFAULT_SERVER_ADDRESS } ?: DEFAULT_SERVER_ADDRESS
+        val endpoint = resolveEndpoint(rawAddress, effectiveTlsEnabled(rawAddress, mqttConfig?.tls_enabled == true))
 
         val newClient =
             MqttClient(ownerId) {
@@ -246,3 +246,8 @@ fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if 
     val hostAndPort = if (rawAddress.contains(":")) rawAddress else "$rawAddress:$defaultPort"
     MqttEndpoint.parse("$scheme://$hostAndPort")
 }
+
+private const val DEFAULT_PUBLIC_SERVER = "mqtt.meshtastic.org"
+
+fun effectiveTlsEnabled(address: String, tlsEnabled: Boolean): Boolean =
+    tlsEnabled || address.equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)
