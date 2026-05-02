@@ -177,7 +177,10 @@ class BleRadioTransport(
             try {
                 val d =
                     withTimeoutOrNull(SCAN_TIMEOUT) {
-                        scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first {
+                        // Scan by service UUID rather than address. CoreBluetooth (macOS) caches
+                        // peripheral identifiers aggressively and may not re-report a device when
+                        // filtering by address alone, causing findDevice() to time out on Desktop.
+                        scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID).first {
                             it.address.equals(address, ignoreCase = true)
                         }
                     }

@@ -39,6 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -135,16 +136,13 @@ fun ConnectionsScreen(
             onDenied = { scanModel.stopNetworkScan() },
         )
 
-    // Auto-start scans on screen entry when the user has previously opted in via the toggle. Stop on exit so we don't
-    // drain battery in the background. Network auto-start is additionally gated on the runtime local-network grant so
-    // we don't trigger the system picker for users who declined the permission.
-    //
-    // Keys include bleAutoScan/networkAutoScan so the effect re-fires once DataStore delivers the persisted `true`
-    // value (initial composition sees `false` from the Eagerly-seeded StateFlow before the disk read completes).
-    DisposableEffect(bleAutoScan) {
-        if (bleAutoScan) scanModel.startBleScan()
-        onDispose { scanModel.stopBleScan() }
-    }
+    // Auto-start BLE scan on screen entry when the user has previously opted in. Stop on screen exit to save battery.
+    // We use `Unit` as the key so the effect is stable across recompositions — the toggle button manages scan
+    // start/stop directly and must not be interrupted by this effect re-firing when `bleAutoScan` changes.
+    // A LaunchedEffect watches bleAutoScan separately to handle the DataStore delivering `true` after the initial
+    // `false` (disk read latency), without triggering a dispose/restart cycle that kills an in-progress scan.
+    LaunchedEffect(bleAutoScan) { if (bleAutoScan && !scanModel.isBleScanning.value) scanModel.startBleScan() }
+    DisposableEffect(Unit) { onDispose { scanModel.stopBleScan() } }
 
     DisposableEffect(networkAutoScan, localNetworkPermissionGranted) {
         if (networkAutoScan && localNetworkPermissionGranted) scanModel.startNetworkScan()
