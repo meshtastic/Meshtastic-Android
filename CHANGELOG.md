@@ -9,19 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix: add meshtastic.disableAbiSplits property to Fastfile (#5320) by @James Rich in [`9f871636b`](https://github.com/meshtastic/Meshtastic-Android/commit/9f871636b9851a5197c7dee9331eabce1c190a75)
-* docs: update CHANGELOG.md (#5317) by @github-actions[bot] in [`344c80f00`](https://github.com/meshtastic/Meshtastic-Android/commit/344c80f0020752967a819dd4fb3fa436f596dbee)
-* fix: add explicit DI binds and ensure scans start after DataStore load (#5319) by @James Rich in [`68a1c578a`](https://github.com/meshtastic/Meshtastic-Android/commit/68a1c578a72294f8dd9317bee5755bd97a5cc19c)
-* ci: add reproducible build verification for F-Droid releases (#5318) by @James Rich in [`56e095a07`](https://github.com/meshtastic/Meshtastic-Android/commit/56e095a076abeb3859b28300be62e106ed82146a)
-* refactor(build): update AboutLibraries generation process for rb (#5316) by @James Rich in [`aa7140070`](https://github.com/meshtastic/Meshtastic-Android/commit/aa71400706094ff432dd5f15aeb8b771afdbad4c)
-* docs: update CHANGELOG.md (#5314) by @github-actions[bot] in [`b2b8b873f`](https://github.com/meshtastic/Meshtastic-Android/commit/b2b8b873f18c8c3fc6664fde4f5579fcca0ed5bb)
-* chore(deps): update core/proto/src/main/proto digest to 1d6f1a7 (#5309) by @renovate[bot] in [`70a26f0de`](https://github.com/meshtastic/Meshtastic-Android/commit/70a26f0def3de7bce229048d00a534d38a5be3d9)
-* refactor(coroutines): migrate to kotlinx-coroutines 1.11.0-rc02 (#5312) by @James Rich in [`e198f52de`](https://github.com/meshtastic/Meshtastic-Android/commit/e198f52de5ee5dd257e6524f4c159e0afe722a08)
-* refactor(build): build-logic cleanup, CC safety, and detekt 2.0 upgrade (#5311) by @James Rich in [`282229090`](https://github.com/meshtastic/Meshtastic-Android/commit/28222909086b842a14b05a897275703b19acaffe)
-* docs: update CHANGELOG.md (#5308) by @github-actions[bot] in [`a7f3ef699`](https://github.com/meshtastic/Meshtastic-Android/commit/a7f3ef699e9fa591df5d1630a7f4441670180c46)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs, Licenses) (#5306) by @James Rich in [`08c3f676b`](https://github.com/meshtastic/Meshtastic-Android/commit/08c3f676be5ad79edf3b397d5207e0aa08cafc1d)
+* chore(deps): update aboutlibraries to v14.1.0 (#5322) by @renovate[bot] in [`770fe3f62`](https://github.com/meshtastic/Meshtastic-Android/commit/770fe3f626aafab15c8725bcbf0345958223653f)
+* fix(data): default new-node notifications off for event firmware (#5323) by @James Rich in [`400e0404f`](https://github.com/meshtastic/Meshtastic-Android/commit/400e0404f666c4da122b0361ac4af466f0982c65)
 
-### Open Beta (v2.7.14-open.2)
+### Open Beta (v2.7.14-open.3)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
