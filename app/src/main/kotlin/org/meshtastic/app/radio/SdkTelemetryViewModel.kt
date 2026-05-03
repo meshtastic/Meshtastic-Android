@@ -35,63 +35,62 @@ import org.meshtastic.sdk.NodeId
 /**
  * POC ViewModel that surfaces per-node telemetry from [TelemetryApi.observe].
  *
- * **Gap D verified:** [TelemetryApi.observe] returns a plain [kotlinx.coroutines.flow.Flow]
- * of unsolicited periodic [Telemetry] packets (device metrics, environment metrics, etc.).
- * It does NOT auto-poll — packets arrive only when the radio pushes them.
- * To request an immediate telemetry update, call [requestDeviceMetrics] which issues an RPC.
+ * **Gap D verified:** [TelemetryApi.observe] returns a plain [kotlinx.coroutines.flow.Flow] of unsolicited periodic
+ * [Telemetry] packets (device metrics, environment metrics, etc.). It does NOT auto-poll — packets arrive only when the
+ * radio pushes them. To request an immediate telemetry update, call [requestDeviceMetrics] which issues an RPC.
  *
- * Telemetry fields are nullable (Wire proto) — check per-field before display:
- *   [Telemetry.device_metrics], [Telemetry.environment_metrics],
- *   [Telemetry.air_quality_metrics], [Telemetry.power_metrics]
+ * Telemetry fields are nullable (Wire proto) — check per-field before display: [Telemetry.device_metrics],
+ * [Telemetry.environment_metrics], [Telemetry.air_quality_metrics], [Telemetry.power_metrics]
  *
- * Usage: observe [deviceMetrics] / [environmentMetrics] in a node-detail Composable,
- * call [requestDeviceMetrics] on screen entry to prime the display.
+ * Usage: observe [deviceMetrics] / [environmentMetrics] in a node-detail Composable, call [requestDeviceMetrics] on
+ * screen entry to prime the display.
  */
+@Suppress("MagicNumber")
 @KoinViewModel
-class SdkTelemetryViewModel(
-    private val provider: RadioClientProvider,
-) : ViewModel() {
+class SdkTelemetryViewModel(private val provider: RadioClientProvider) : ViewModel() {
 
     /**
      * Observe all raw [Telemetry] packets for [nodeId].
      *
-     * Re-subscribes automatically when [RadioClientProvider.client] changes (reconnect).
-     * Errors are caught and logged — the flow resets to null rather than crashing.
+     * Re-subscribes automatically when [RadioClientProvider.client] changes (reconnect). Errors are caught and logged —
+     * the flow resets to null rather than crashing.
      */
-    private fun telemetryFor(nodeId: NodeId): StateFlow<Telemetry?> =
-        provider.client
-            .flatMapLatest { c ->
-                if (c == null) flowOf(null)
-                else c.telemetry.observe(nodeId)
+    private fun telemetryFor(nodeId: NodeId): StateFlow<Telemetry?> = provider.client
+        .flatMapLatest { c ->
+            if (c == null) {
+                flowOf(null)
+            } else {
+                c.telemetry
+                    .observe(nodeId)
                     .catch { e ->
                         Logger.e(e) { "[SDK] telemetry.observe(${nodeId.raw}) error" }
                         emit(Telemetry())
                     }
                     .map { it as Telemetry? }
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null) // 5s screen-death buffer
 
     /** Latest telemetry (any type) for the local node (NodeId.LOCAL). */
     val localTelemetry: StateFlow<Telemetry?> = telemetryFor(NodeId.LOCAL)
 
     /**
-     * Request an immediate device-metrics telemetry packet from [nodeId].
-     * The result will be pushed back through [telemetryFor]'s [TelemetryApi.observe] flow.
+     * Request an immediate device-metrics telemetry packet from [nodeId]. The result will be pushed back through
+     * [telemetryFor]'s [TelemetryApi.observe] flow.
      */
     fun requestDeviceMetrics(nodeId: NodeId = NodeId.LOCAL) {
         val client = provider.client.value ?: return
         viewModelScope.launch {
             when (val r = client.telemetry.requestDevice(nodeId)) {
-                is AdminResult.Success ->
-                    Logger.d { "[SDK] requestDeviceMetrics(${nodeId.raw}): ${r.value}" }
+                is AdminResult.Success -> Logger.d { "[SDK] requestDeviceMetrics(${nodeId.raw}): ${r.value}" }
                 else -> Logger.w { "[SDK] requestDeviceMetrics(${nodeId.raw}) failed: $r" }
             }
         }
     }
 
     /**
-     * Build a per-node telemetry StateFlow for a specific node num.
-     * Compose screens can call this once per node-detail screen.
+     * Build a per-node telemetry StateFlow for a specific node num. Compose screens can call this once per node-detail
+     * screen.
      */
     fun observeNode(nodeNum: Int): StateFlow<Telemetry?> = telemetryFor(NodeId(nodeNum))
 }

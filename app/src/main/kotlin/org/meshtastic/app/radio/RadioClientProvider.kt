@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.buildPeripheralForSavedAddress
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.service.SdkClientLifecycle
@@ -40,25 +39,11 @@ import org.meshtastic.sdk.transport.ble.BleTransport
 /**
  * Holds the active [RadioClient] and orchestrates connect/disconnect lifecycle.
  *
- * This is the SDK integration point for the POC. The [RadioClient] is exposed as a [StateFlow]
- * so ViewModels and the service can react to connection changes with `flatMapLatest`.
- *
- * **Thread-safety:** [rebuildAndConnect] is serialized by a [Mutex] so concurrent calls
- * (e.g., radio address change during an active connection attempt) queue safely.
- *
- * **Scope:** The provider owns a long-lived [CoroutineScope] for connection management.
- * It is NOT tied to any screen lifecycle — callers use [WhileSubscribed][kotlinx.coroutines.flow.SharingStarted]
- * on derived StateFlows for screen-scoped work.
- *
- * SDK gap F tracked here: [BleTransport] requires a Kable [Peripheral][com.juul.kable.Peripheral]
- * rather than accepting a MAC address string directly. [buildPeripheralForSavedAddress] bridges
- * that gap on the Android side until the SDK adds a convenience factory.
+ * This is the SDK integration point for the POC. The [RadioClient] is exposed as a [StateFlow] so ViewModels and the
+ * service can react to connection changes with `flatMapLatest`.
  */
 @Single(binds = [SdkClientLifecycle::class])
-class RadioClientProvider(
-    private val context: Context,
-    private val radioPrefs: RadioPrefs,
-) : SdkClientLifecycle {
+class RadioClientProvider(private val context: Context, private val radioPrefs: RadioPrefs) : SdkClientLifecycle {
     private val _client = MutableStateFlow<RadioClient?>(null)
 
     /** Active [RadioClient], or `null` when disconnected or between connections. */
@@ -68,19 +53,21 @@ class RadioClientProvider(
     private val mutex = Mutex()
 
     /**
-     * Tear down the existing client (if any) and build + connect a new one using the
-     * current saved radio address from [RadioPrefs].
+     * Tear down the existing client (if any) and build + connect a new one using the current saved radio address from
+     * [RadioPrefs].
      *
-     * If [RadioPrefs.devAddr] is not a BLE address this call is a no-op (other transport
-     * types will be added in follow-up work).
+     * If [RadioPrefs.devAddr] is not a BLE address this call is a no-op (other transport types will be added in
+     * follow-up work).
      *
      * Callers that cannot suspend should use [rebuildAndConnectAsync].
      */
     suspend fun rebuildAndConnect() = mutex.withLock {
-        val rawAddress = radioPrefs.devAddr.value ?: run {
-            Logger.w { "RadioClientProvider: no saved device address — skipping connect" }
-            return@withLock
-        }
+        val rawAddress =
+            radioPrefs.devAddr.value
+                ?: run {
+                    Logger.w { "RadioClientProvider: no saved device address — skipping connect" }
+                    return@withLock
+                }
 
         // Only BLE is wired for this POC
         val interfaceChar = rawAddress.firstOrNull()
@@ -94,20 +81,17 @@ class RadioClientProvider(
         // Clear first so observers see null during teardown
         val old = _client.value
         _client.value = null
-        old?.let {
-            runCatching { it.disconnect() }.onFailure { e -> Logger.w(e) { "disconnect old client" } }
-        }
+        old?.let { runCatching { it.disconnect() }.onFailure { e -> Logger.w(e) { "disconnect old client" } } }
 
         Logger.i { "RadioClientProvider: building new client for $macAddress" }
 
-        val peripheral = buildPeripheralForSavedAddress(macAddress)
-        val transport = BleTransport(peripheral, macAddress)
-
-        val newClient = RadioClient.Builder()
-            .transport(transport)
-            .storage(SqlDelightStorageProvider(baseDir = context.filesDir.absolutePath))
-            .autoReconnect(AutoReconnectConfig()) // enabled=true; Disabled is SDK default — must opt in
-            .build()
+        val transport = BleTransport(macAddress) { autoConnectIf { true } }
+        val newClient =
+            RadioClient.Builder()
+                .transport(transport)
+                .storage(SqlDelightStorageProvider(baseDir = context.filesDir.absolutePath))
+                .autoReconnect(AutoReconnectConfig()) // enabled=true; Disabled is SDK default — must opt in
+                .build()
 
         _client.value = newClient
         newClient.connect()
@@ -118,8 +102,7 @@ class RadioClientProvider(
     /** Fire-and-forget version of [rebuildAndConnect] for non-suspending call sites. */
     fun rebuildAndConnectAsync() {
         scope.launch {
-            runCatching { rebuildAndConnect() }
-                .onFailure { e -> Logger.e(e) { "RadioClientProvider: connect failed" } }
+            runCatching { rebuildAndConnect() }.onFailure { e -> Logger.e(e) { "RadioClientProvider: connect failed" } }
         }
     }
 

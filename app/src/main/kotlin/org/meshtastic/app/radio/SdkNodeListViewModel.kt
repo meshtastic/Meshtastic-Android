@@ -24,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -39,8 +38,8 @@ import org.meshtastic.sdk.NodeId
 /**
  * Stable, Compose-safe representation of a mesh node.
  *
- * Wire-generated [NodeInfo] is NOT `@Stable`; never pass it directly to Compose. This wrapper
- * holds only the primitive/String fields the node list UI needs.
+ * Wire-generated [NodeInfo] is NOT `@Stable`; never pass it directly to Compose. This wrapper holds only the
+ * primitive/String fields the node list UI needs.
  */
 @Immutable
 data class UiNode(
@@ -67,44 +66,42 @@ private fun NodeInfo.toUiNode() = UiNode(
  * POC ViewModel that drives a node list directly from the SDK's [org.meshtastic.sdk.RadioClient].
  *
  * **Fold pattern:**
- * 1. `flatMapLatest` switches to the new client's `nodes` flow whenever [RadioClientProvider]
- *    replaces the active client.
- * 2. `.catch {}` before `.scan {}` so that a transport error re-emits a safe [NodeChange.Snapshot]
- *    (empty map) rather than terminating the downstream scan accumulator.
- * 3. `.scan {}` folds delta events — [NodeChange.Added], [NodeChange.Updated],
- *    [NodeChange.Removed] — onto the accumulator map. The initial [NodeChange.Snapshot]
- *    is guaranteed by the SDK for every new subscriber; no explicit replay config needed.
+ * 1. `flatMapLatest` switches to the new client's `nodes` flow whenever [RadioClientProvider] replaces the active
+ *    client.
+ * 2. `.catch {}` before `.scan {}` so that a transport error re-emits a safe [NodeChange.Snapshot] (empty map) rather
+ *    than terminating the downstream scan accumulator.
+ * 3. `.scan {}` folds delta events — [NodeChange.Added], [NodeChange.Updated], [NodeChange.Removed] — onto the
+ *    accumulator map. The initial [NodeChange.Snapshot] is guaranteed by the SDK for every new subscriber; no explicit
+ *    replay config needed.
  * 4. `.flowOn(Dispatchers.Default)` keeps folding off the main thread.
- * 5. `.stateIn(WhileSubscribed(5_000))` keeps the upstream alive for 5 s after the last
- *    subscriber (safe across config changes; SDK re-sends a Snapshot for later subscribers).
+ * 5. `.stateIn(WhileSubscribed(5_000))` keeps the upstream alive for 5 s after the last subscriber (safe across config
+ *    changes; SDK re-sends a Snapshot for later subscribers).
  *
- * This ViewModel is registered as a Koin singleton alongside [RadioClientViewModel]. Both are
- * instantiated at [org.meshtastic.app.ui.MainScreen] startup so the node map is warm before any
- * screen subscribes.
+ * This ViewModel is registered as a Koin singleton alongside [RadioClientViewModel]. Both are instantiated at
+ * [org.meshtastic.app.ui.MainScreen] startup so the node map is warm before any screen subscribes.
  */
 @KoinViewModel
-class SdkNodeListViewModel(
-    provider: RadioClientProvider,
-) : ViewModel() {
+class SdkNodeListViewModel(provider: RadioClientProvider) : ViewModel() {
 
-    val nodes: StateFlow<List<UiNode>> = provider.client
-        .flatMapLatest { client ->
-            if (client == null) return@flatMapLatest flowOf(emptyList())
-            client.nodes
-                .catch { e ->
-                    Logger.e(e) { "[SDK] nodes flow error — resetting to empty" }
-                    emit(NodeChange.Snapshot(emptyMap()))
-                }
-                .scan(emptyMap<NodeId, NodeInfo>()) { acc, change ->
-                    when (change) {
-                        is NodeChange.Snapshot -> change.nodes
-                        is NodeChange.Added    -> acc + (NodeId(change.node.num) to change.node)
-                        is NodeChange.Updated  -> acc + (NodeId(change.node.num) to change.node)
-                        is NodeChange.Removed  -> acc - change.nodeId
+    val nodes: StateFlow<List<UiNode>> =
+        provider.client
+            .flatMapLatest { client ->
+                if (client == null) return@flatMapLatest flowOf(emptyList())
+                client.nodes
+                    .catch { e ->
+                        Logger.e(e) { "[SDK] nodes flow error — resetting to empty" }
+                        emit(NodeChange.Snapshot(emptyMap()))
                     }
-                }
-                .map { nodeMap -> nodeMap.values.map(NodeInfo::toUiNode) }
-                .flowOn(Dispatchers.Default)
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+                    .scan(emptyMap<NodeId, NodeInfo>()) { acc, change ->
+                        when (change) {
+                            is NodeChange.Snapshot -> change.nodes
+                            is NodeChange.Added -> acc + (NodeId(change.node.num) to change.node)
+                            is NodeChange.Updated -> acc + (NodeId(change.node.num) to change.node)
+                            is NodeChange.Removed -> acc - change.nodeId
+                        }
+                    }
+                    .map { nodeMap -> nodeMap.values.map(NodeInfo::toUiNode) }
+                    .flowOn(Dispatchers.Default)
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 }

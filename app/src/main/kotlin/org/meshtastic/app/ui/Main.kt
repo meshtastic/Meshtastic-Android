@@ -62,9 +62,7 @@ fun MainScreen() {
     val radioClientViewModel: RadioClientViewModel = koinViewModel()
     // Warm the SDK node list at launch so it's ready before any screen subscribes.
     val sdkNodeListViewModel: SdkNodeListViewModel = koinViewModel()
-    val sdkNodeCount by sdkNodeListViewModel.nodes
-        .map { it.size }
-        .collectAsStateWithLifecycle(initialValue = 0)
+    val sdkNodeCount by sdkNodeListViewModel.nodes.map { it.size }.collectAsStateWithLifecycle(initialValue = 0)
     val sdkLabel by radioClientViewModel.sdkConnectionLabel.collectAsStateWithLifecycle()
     LaunchedEffect(sdkLabel) { Logger.d { sdkLabel } }
     LaunchedEffect(sdkNodeCount) { Logger.d { "SDK nodes: $sdkNodeCount" } }

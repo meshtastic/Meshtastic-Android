@@ -35,39 +35,35 @@ import org.meshtastic.sdk.MeshEvent
 /**
  * POC ViewModel that exposes the SDK [RadioClient] connection lifecycle to the UI.
  *
- * **Connection state:** Uses `flatMapLatest` on the `StateFlow<RadioClient?>` so that any screen
- * collecting [sdkConnectionState] automatically switches to the new client's connection flow when
- * [RadioClientProvider.rebuildAndConnect] replaces the active client.
- * [SharingStarted.WhileSubscribed] with a 5 s timeout keeps the upstream active briefly after the
- * last subscriber leaves (e.g., configuration change) so the next subscriber doesn't miss a fast
- * `Connected` event.
+ * **Connection state:** Uses `flatMapLatest` on the `StateFlow<RadioClient?>` so that any screen collecting
+ * [sdkConnectionState] automatically switches to the new client's connection flow when
+ * [RadioClientProvider.rebuildAndConnect] replaces the active client. [SharingStarted.WhileSubscribed] with a 5 s
+ * timeout keeps the upstream active briefly after the last subscriber leaves (e.g., configuration change) so the next
+ * subscriber doesn't miss a fast `Connected` event.
  *
- * **Events:** Collected with [SharingStarted.Eagerly] so that [MeshEvent]s (device rebooted,
- * storage degraded, security warnings) are never dropped while navigating between screens.
- * The collection is launched in [viewModelScope] which is tied to the application lifecycle via
- * Koin's `@KoinViewModel` singleton scope — not to any individual screen.
+ * **Events:** Collected with [SharingStarted.Eagerly] so that [MeshEvent]s (device rebooted, storage degraded, security
+ * warnings) are never dropped while navigating between screens. The collection is launched in [viewModelScope] which is
+ * tied to the application lifecycle via Koin's `@KoinViewModel` singleton scope — not to any individual screen.
  *
  * SDK gaps surfaced here:
  * - [ConnectionState.Configuring] has no counterpart in the legacy [org.meshtastic.core.model.ConnectionState]
  * - [ConnectionState.Reconnecting] has no counterpart in the legacy model
  */
 @KoinViewModel
-class RadioClientViewModel(
-    private val provider: RadioClientProvider,
-) : ViewModel() {
+class RadioClientViewModel(private val provider: RadioClientProvider) : ViewModel() {
 
     /** Live SDK connection state; `null` if no client is active (no radio configured). */
-    val sdkConnectionState: StateFlow<ConnectionState?> = provider.client
-        .flatMapLatest { client -> client?.connection ?: flowOf(null) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    val sdkConnectionState: StateFlow<ConnectionState?> =
+        provider.client
+            .flatMapLatest { client -> client?.connection ?: flowOf(null) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /**
-     * Human-readable label for the SDK connection state.
-     * Useful as a debug overlay in POC builds to see SDK state alongside the legacy state.
+     * Human-readable label for the SDK connection state. Useful as a debug overlay in POC builds to see SDK state
+     * alongside the legacy state.
      */
-    val sdkConnectionLabel: StateFlow<String> = sdkConnectionState
-        .map { it.toLabel() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "SDK: —")
+    val sdkConnectionLabel: StateFlow<String> =
+        sdkConnectionState.map { it.toLabel() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "SDK: —")
 
     init {
         // Collect events eagerly so none are dropped during navigation.
@@ -76,12 +72,9 @@ class RadioClientViewModel(
             .flatMapLatest { client -> client?.events ?: emptyFlow() }
             .onEach { event ->
                 when (event) {
-                    is MeshEvent.StorageDegraded ->
-                        Logger.w { "[SDK] StorageDegraded: ${event.reason}" }
-                    is MeshEvent.DeviceRebooted ->
-                        Logger.i { "[SDK] DeviceRebooted" }
-                    is MeshEvent.SecurityWarning ->
-                        Logger.w { "[SDK] SecurityWarning: $event" }
+                    is MeshEvent.StorageDegraded -> Logger.w { "[SDK] StorageDegraded: ${event.reason}" }
+                    is MeshEvent.DeviceRebooted -> Logger.i { "[SDK] DeviceRebooted" }
+                    is MeshEvent.SecurityWarning -> Logger.w { "[SDK] SecurityWarning: $event" }
                     else -> Logger.d { "[SDK] Event: $event" }
                 }
             }
@@ -95,11 +88,13 @@ class RadioClientViewModel(
     fun disconnect() = provider.disconnect()
 }
 
+private const val PERCENT = 100
+
 private fun ConnectionState?.toLabel(): String = when (this) {
     null -> "SDK: no client"
     ConnectionState.Disconnected -> "SDK: Disconnected"
-    is ConnectionState.Connecting -> "SDK: Connecting (#${attempt})"
-    is ConnectionState.Configuring -> "SDK: Configuring — ${phase.name} (${(progress * 100).toInt()}%)"
+    is ConnectionState.Connecting -> "SDK: Connecting (#$attempt)"
+    is ConnectionState.Configuring -> "SDK: Configuring — ${phase.name} (${(progress * PERCENT).toInt()}%)"
     ConnectionState.Connected -> "SDK: Connected ✓"
-    is ConnectionState.Reconnecting -> "SDK: Reconnecting (#${attempt}) — $cause"
+    is ConnectionState.Reconnecting -> "SDK: Reconnecting (#$attempt) — $cause"
 }
