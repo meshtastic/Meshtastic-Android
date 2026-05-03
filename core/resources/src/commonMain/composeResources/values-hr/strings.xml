@@ -16,160 +16,211 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="meshtastic_app_name">Meshtastic</string>
-    <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="node_filter_placeholder">Filtriraj</string>
+    <string name="accept">Prihvati</string>
+    <!-- ACTION -->
+    <string name="action_delete_message">Obriši poruku</string>
+    <!-- ADD -->
+    <string name="add">Dodaj</string>
+    <string name="add_network_device">Dodaj</string>
+    <!-- AIR -->
+    <!-- ALERT -->
+    <string name="app_too_old">Potrebna je nadogradnja aplikacije</string>
+    <string name="apply">Potvrdi</string>
+    <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
+    <string name="audio">Zvuk</string>
+    <string name="audio_config">Postavke Zvuka</string>
+    <!-- BLUETOOTH -->
+    <string name="bluetooth_config">Postavke Bluetootha</string>
+    <string name="calculating">Izračunavanje…</string>
+    <string name="cancel">Odustani</string>
+    <string name="cant_change_no_radio">Nije moguće promijeniti kanal jer radio još nije povezan. Molim pokušajte ponovno.</string>
+    <!-- CHANNEL -->
+    <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti</string>
+    <string name="channel_label">Kanal</string>
+    <string name="channel_name">Naziv kanala</string>
+    <string name="choose_theme">Odaberi temu</string>
+    <!-- CLEAN -->
+    <string name="clear">Očisti</string>
+    <string name="close">Zatvori</string>
+    <!-- COMPASS -->
+    <!-- CONFIG -->
+    <string name="connected_sleeping">Povezan na radio, ali je u stanju mirovanja</string>
+    <!-- DEBUG -->
+    <string name="debug_panel">Otklanjanje pogrešaka</string>
+    <string name="default_">Zadano</string>
+    <!-- DELETE -->
+    <string name="delete">Obriši</string>
+    <string name="delete_for_everyone">Izbriši za sve</string>
+    <string name="delete_for_me">Izbriši za mene</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Obriši poruku?</item>
+        <item quantity="few">Obriši %1$s poruke?</item>
+        <item quantity="other">Obriši %1$s poruke?</item>
+    </plurals>
+    <string name="delivery_confirmed">Isporučeno</string>
     <string name="desc_node_filter_clear">očisti filter čvorova</string>
+    <string name="description">Opis</string>
+    <string name="desktop_notification_title">Meshtastic</string>
+    <string name="details">Detalji</string>
+    <!-- DEVICE -->
+    <string name="device_sleeping">Uređaj je u stanju mirovanja</string>
+    <string name="direct_message">Izravna poruka</string>
+    <string name="disconnected">Odspojeno</string>
+    <!-- DISPLAY -->
+    <!-- DISTANCE -->
+    <string name="distance">Udaljenost</string>
+    <string name="edit">Uredi</string>
+    <string name="eight_hours">8 Sati</string>
+    <!-- ENCRYPTION -->
+    <!-- ENVIRONMENT -->
+    <string name="error">Pogreška</string>
+    <string name="error_duty_cycle">Dosegnuto je ograničenje radnog ciklusa. Trenutačno nije moguće poslati poruke, pokušajte ponovno kasnije.</string>
+    <!-- EXPORT -->
+    <string name="factory_reset">Vraćanje na tvorničke postavke</string>
+    <!-- FILTER -->
+    <string name="filter_icon">Filtriraj</string>
+    <!-- FIRMWARE -->
+    <string name="firmware_old">Firmware radija je prestar za komunikaciju s ovom aplikacijom. Za više informacija posjetite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naš vodič za instalaciju firmwarea</a>.</string>
+    <string name="firmware_too_old">Potrebno ažuriranje firmwarea.</string>
+    <string name="firmware_update_failed">Ažuriranje neuspjelo</string>
+    <!-- GPIO -->
+    <!-- IGNORE -->
+    <string name="ignore">Ignoriraj</string>
+    <string name="ignore_add">Dodati '%1$s' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
+    <string name="ignore_remove">Ukloniti '%1$s' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
+    <string name="interval_unset">Nepostavljeno</string>
+    <string name="intro_show">Prikaži uvod</string>
+    <string name="ip_address">IP Adresa:</string>
+    <!-- LABEL -->
+    <!-- LOAD -->
+    <!-- LOCAL -->
+    <string name="location_disabled">Pristup lokaciji je isključen, Vaš Android ne može pružiti lokaciju mesh mreži.</string>
+    <string name="locked">Zaključano</string>
+    <!-- LOG -->
+    <!-- MAP -->
+    <string name="map_cache_info">Kapacitet predmemorije: %1$d MB\nUpotreba predmemorije: %2$d MB</string>
+    <string name="map_cache_manager">Upravitelj predmemorije</string>
+    <string name="map_cache_size">Trenutna veličina predmemorije</string>
+    <string name="map_cache_tiles">%1$d dijelova karte</string>
+    <string name="map_clear_tiles">Ukloni preuzete datoteke</string>
+    <string name="map_download_complete">Preuzimanje je završeno!</string>
+    <string name="map_download_errors">Preuzimanje je završeno s %1$d pogrešaka</string>
+    <string name="map_download_region">Preuzmite regiju</string>
+    <string name="map_offline_manager">Izvanmrežni upravitelj</string>
+    <string name="map_purge_fail">Čišćenje SQL predmemorije nije uspjelo, pogledajte logcat za detalje</string>
+    <string name="map_purge_success">SQL predmemorija očišćena za %1$s</string>
+    <string name="map_select_download_region">Označite regiju za preuzimanje</string>
+    <string name="map_start_download">Pokreni Preuzimanje</string>
+    <string name="map_subDescription">smjer: %1$d° udaljenost: %2$s</string>
+    <string name="map_tile_download_estimate">Procjena preuzimanja:</string>
+    <string name="map_tile_source">Izvor karte</string>
+    <!-- MESHTASTIC -->
+    <string name="meshtastic">Meshtastic</string>
+    <string name="meshtastic_app_name">Meshtastic</string>
+    <string name="meshtastic_service_notifications">Servisne obavijesti</string>
+    <!-- MESSAGE -->
+    <string name="message">Poruka</string>
+    <string name="message_delivery_status">Status isporuke poruke</string>
+    <string name="message_input_label">Poruka</string>
+    <string name="module_settings">Konfiguracija modula</string>
+    <!-- MQTT -->
+    <string name="mqtt_status_disconnected">Odspojeno</string>
+    <string name="must_set_region">Potrebno je postaviti regiju!</string>
+    <string name="must_update">Potrebno je ažurirati ovu aplikaciju putem Play Storea (ili Githuba). Aplikacija je prestara za komunikaciju s ovim firmwerom radija. Pročitajte našu <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciju</a> o ovoj temi.</string>
+    <!-- MUTE -->
+    <string name="mute_1_week">1 tjedan</string>
+    <string name="mute_8_hours">8 sati</string>
+    <string name="mute_always">Uvijek</string>
+    <string name="mute_notifications">Isključi obavijesti</string>
+    <string name="name">Ime</string>
+    <string name="new_channel_rcvd">Primljen je URL novog kanala</string>
+    <!-- NO -->
+    <!-- NODE -->
     <string name="node_filter_include_unknown">Uključujući nepoznate</string>
+    <string name="node_filter_placeholder">Filtriraj</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Udaljenost</string>
     <string name="node_sort_hops_away">Broj skokova</string>
     <string name="node_sort_last_heard">Posljednje čuo</string>
     <string name="node_sort_via_mqtt">putem MQTT</string>
-    <string name="via_mqtt">putem MQTT</string>
-    <string name="routing_error_none">Potvrđeno</string>
-    <string name="routing_error_too_large">Paket je prevelik</string>
-    <string name="routing_error_no_response">Nema odgovora</string>
-    <!-- Position Config -->
-    <string name="channel_name">Naziv kanala</string>
-    <string name="qr_code">QR kod</string>
-    <string name="unknown_username">Nepoznati korisnik</string>
-    <string name="send">Potvrdi</string>
-    <string name="you">Vi</string>
-    <string name="accept">Prihvati</string>
-    <string name="cancel">Odustani</string>
-    <string name="save_changes">Spremi</string>
-    <string name="new_channel_rcvd">Primljen je URL novog kanala</string>
-    <string name="report">Izvješće</string>
-    <string name="location_disabled">Pristup lokaciji je isključen, Vaš Android ne može pružiti lokaciju mesh mreži.</string>
-    <string name="share">Podijeli</string>
-    <string name="disconnected">Odspojeno</string>
-    <string name="device_sleeping">Uređaj je u stanju mirovanja</string>
-    <string name="ip_address">IP Adresa:</string>
-    <string name="not_connected">Nije povezano</string>
-    <string name="connected_sleeping">Povezan na radio, ali je u stanju mirovanja</string>
-    <string name="app_too_old">Potrebna je nadogradnja aplikacije</string>
-    <string name="must_update">Potrebno je ažurirati ovu aplikaciju putem Play Storea (ili Githuba). Aplikacija je prestara za komunikaciju s ovim firmwerom radija. Pročitajte našu <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciju</a> o ovoj temi.</string>
+    <string name="nodedb_reset">Resetiraj NodeDB bazu</string>
+    <!-- NODES -->
     <string name="none">Ništa (onemogućeno)</string>
-    <string name="meshtastic_service_notifications">Servisne obavijesti</string>
-    <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti</string>
-    <string name="debug_panel">Otklanjanje pogrešaka</string>
-    <string name="clear">Očisti</string>
-    <string name="channel_label">Kanal</string>
-    <string name="message_delivery_status">Status isporuke poruke</string>
-    <string name="firmware_too_old">Potrebno ažuriranje firmwarea.</string>
-    <string name="firmware_old">Firmware radija je prestar za komunikaciju s ovom aplikacijom. Za više informacija posjetite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naš vodič za instalaciju firmwarea</a>.</string>
+    <string name="not_connected">Nije povezano</string>
+    <!-- NOTIFICATIONS -->
     <string name="okay">U redu</string>
-    <string name="must_set_region">Potrebno je postaviti regiju!</string>
-    <string name="cant_change_no_radio">Nije moguće promijeniti kanal jer radio još nije povezan. Molim pokušajte ponovno.</string>
-    <string name="reset">Resetiraj</string>
-    <string name="scan">Pretraži</string>
-    <string name="add_network_device">Dodaj</string>
-    <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
-    <string name="reset_to_defaults">Vrati na početne postavke</string>
-    <string name="apply">Potvrdi</string>
-    <string name="theme">Tema</string>
-    <string name="theme_light">Svijetla</string>
-    <string name="theme_dark">Tamna</string>
-    <string name="theme_system">Sistemski zadano</string>
-    <string name="choose_theme">Odaberi temu</string>
-    <string name="provide_location_to_mesh">Navedi lokaciju telefona na mesh mreži</string>
-    <plurals name="delete_messages">
-        <item quantity="one">Obriši poruku?</item>
-        <item quantity="few">Obriši %1$s poruke?</item>
-        <item quantity="other">Obriši %1$s poruke?</item>
-    </plurals>
-    <string name="delete">Obriši</string>
-    <string name="delete_for_everyone">Izbriši za sve</string>
-    <string name="delete_for_me">Izbriši za mene</string>
-    <string name="select_all">Označi sve</string>
-    <string name="map_download_region">Preuzmite regiju</string>
-    <string name="name">Ime</string>
-    <string name="description">Opis</string>
-    <string name="locked">Zaključano</string>
-    <string name="save">Spremi</string>
+    <!-- ONE -->
+    <string name="one_day">24 Sati</string>
+    <!-- OUTPUT -->
+    <!-- PAX -->
+    <!-- POSITION -->
+    <!-- POWER -->
     <string name="preferences_language">Jezik</string>
     <string name="preferences_system_default">Zadana vrijednost sustava</string>
-    <string name="resend">Ponovno pošalji</string>
-    <string name="shutdown">Isključi</string>
-    <string name="reboot">Ponovno pokreni</string>
-    <string name="traceroute">Traceroute</string>
-    <string name="intro_show">Prikaži uvod</string>
-    <string name="message">Poruka</string>
+    <!-- PREVIEW -->
+    <string name="provide_location_to_mesh">Navedi lokaciju telefona na mesh mreži</string>
+    <string name="qr_code">QR kod</string>
+    <!-- QUICK -->
     <string name="quick_chat">Opcije brzog razgovora</string>
-    <string name="quick_chat_new">Novi brzi razgovor</string>
-    <string name="quick_chat_edit">Uredi brzi chat</string>
     <string name="quick_chat_append">Dodaj poruci</string>
+    <string name="quick_chat_edit">Uredi brzi chat</string>
     <string name="quick_chat_instant">Pošalji odmah</string>
-    <string name="factory_reset">Vraćanje na tvorničke postavke</string>
-    <string name="direct_message">Izravna poruka</string>
-    <string name="nodedb_reset">Resetiraj NodeDB bazu</string>
-    <string name="delivery_confirmed">Isporučeno</string>
-    <string name="error">Pogreška</string>
-    <string name="ignore">Ignoriraj</string>
-    <string name="ignore_add">Dodati '%1$s' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
-    <string name="ignore_remove">Ukloniti '%1$s' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
-    <string name="map_select_download_region">Označite regiju za preuzimanje</string>
-    <string name="map_tile_download_estimate">Procjena preuzimanja:</string>
-    <string name="map_start_download">Pokreni Preuzimanje</string>
-    <string name="close">Zatvori</string>
+    <string name="quick_chat_new">Novi brzi razgovor</string>
     <string name="radio_configuration">Konfiguracija uređaja</string>
-    <string name="module_settings">Konfiguracija modula</string>
-    <string name="add">Dodaj</string>
-    <string name="edit">Uredi</string>
-    <string name="calculating">Izračunavanje…</string>
-    <string name="map_offline_manager">Izvanmrežni upravitelj</string>
-    <string name="map_cache_size">Trenutna veličina predmemorije</string>
-    <string name="map_cache_info">Kapacitet predmemorije: %1$d MB\nUpotreba predmemorije: %2$d MB</string>
-    <string name="map_clear_tiles">Ukloni preuzete datoteke</string>
-    <string name="map_tile_source">Izvor karte</string>
-    <string name="map_purge_success">SQL predmemorija očišćena za %1$s</string>
-    <string name="map_purge_fail">Čišćenje SQL predmemorije nije uspjelo, pogledajte logcat za detalje</string>
-    <string name="map_cache_manager">Upravitelj predmemorije</string>
-    <string name="map_download_complete">Preuzimanje je završeno!</string>
-    <string name="map_download_errors">Preuzimanje je završeno s %1$d pogrešaka</string>
-    <string name="map_cache_tiles">%1$d dijelova karte</string>
-    <string name="map_subDescription">smjer: %1$d° udaljenost: %2$s</string>
-    <string name="waypoint_edit">Uredi putnu točku</string>
-    <string name="waypoint_delete">Obriši putnu točku?</string>
-    <string name="waypoint_new">Nova putna točka</string>
-    <string name="waypoint_received">Primljena putna točka: %1$s</string>
-    <string name="error_duty_cycle">Dosegnuto je ograničenje radnog ciklusa. Trenutačno nije moguće poslati poruke, pokušajte ponovno kasnije.</string>
-    <string name="remove">Ukloni</string>
-    <string name="remove_node_text">Ovaj će čvor biti uklonjen s vašeg popisa sve dok vaš čvor ponovno ne primi podatke s njega.</string>
-    <string name="mute_notifications">Isključi obavijesti</string>
-    <string name="mute_8_hours">8 sati</string>
-    <string name="mute_1_week">1 tjedan</string>
-    <string name="mute_always">Uvijek</string>
-    <string name="traceroute_log">Traceroute</string>
-    <string name="audio">Zvuk</string>
-    <string name="audio_config">Postavke Zvuka</string>
-    <string name="bluetooth_config">Postavke Bluetootha</string>
-    <string name="default_">Zadano</string>
-    <string name="details">Detalji</string>
+    <string name="reboot">Ponovno pokreni</string>
+    <!-- REBROADCAST -->
     <string name="red">Crveno</string>
     <string name="region_frequency_plan">Regija</string>
-    <string name="mqtt_status_disconnected">Odspojeno</string>
-    <string name="distance">Udaljenost</string>
-    <string name="meshtastic">Meshtastic</string>
-    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
-    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
-    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
-    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
-    <string name="message_input_label">Poruka</string>
-    <string name="eight_hours">8 Sati</string>
-    <string name="one_day">24 Sati</string>
-    <string name="two_days">48 Sati</string>
-    <!-- Firmware Update -->
-    <string name="firmware_update_failed">Ažuriranje neuspjelo</string>
-    <string name="interval_unset">Nepostavljeno</string>
-    <!-- Compass -->
-    <!-- Message Filter -->
-    <!-- Network Map Layers -->
+    <!-- REMOTE -->
+    <!-- REMOVE -->
+    <string name="remove">Ukloni</string>
+    <string name="remove_node_text">Ovaj će čvor biti uklonjen s vašeg popisa sve dok vaš čvor ponovno ne primi podatke s njega.</string>
+    <string name="report">Izvješće</string>
+    <!-- REQUEST -->
+    <string name="resend">Ponovno pošalji</string>
+    <string name="reset">Resetiraj</string>
+    <string name="reset_to_defaults">Vrati na početne postavke</string>
+    <!-- ROLE -->
+    <!-- ROUTING -->
+    <string name="routing_error_no_response">Nema odgovora</string>
+    <string name="routing_error_none">Potvrđeno</string>
+    <string name="routing_error_too_large">Paket je prevelik</string>
+    <string name="save">Spremi</string>
+    <string name="save_changes">Spremi</string>
+    <!-- SCAN -->
+    <string name="scan">Pretraži</string>
+    <!-- SECURITY -->
+    <string name="select_all">Označi sve</string>
+    <string name="send">Potvrdi</string>
+    <!-- SERIAL -->
+    <!-- SHARE -->
+    <string name="share">Podijeli</string>
+    <!-- SHOW -->
+    <string name="shutdown">Isključi</string>
+    <!-- TAK -->
     <string name="tak_team_red">Crveno</string>
+    <string name="theme">Tema</string>
+    <string name="theme_dark">Tamna</string>
+    <string name="theme_light">Svijetla</string>
+    <string name="theme_system">Sistemski zadano</string>
+    <!-- TRACEROUTE -->
+    <string name="traceroute">Traceroute</string>
+    <string name="traceroute_log">Traceroute</string>
+    <!-- TRAFFIC -->
+    <string name="two_days">48 Sati</string>
+    <!-- UNKNOWN -->
+    <string name="unknown_username">Nepoznati korisnik</string>
+    <!-- URL -->
+    <!-- USE -->
+    <!-- USER -->
+    <string name="via_mqtt">putem MQTT</string>
+    <string name="waypoint_delete">Obriši putnu točku?</string>
+    <string name="waypoint_edit">Uredi putnu točku</string>
+    <string name="waypoint_new">Nova putna točka</string>
+    <string name="waypoint_received">Primljena putna točka: %1$s</string>
+    <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP Adresa</string>
-    <string name="desktop_notification_title">Meshtastic</string>
-    <string name="filter_icon">Filtriraj</string>
-    <string name="action_delete_message">Obriši poruku</string>
+    <!-- WIND -->
+    <string name="you">Vi</string>
 </resources>
