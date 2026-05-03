@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttClient
 import org.meshtastic.mqtt.MqttEndpoint
 import org.meshtastic.mqtt.MqttException
+import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.packet.Subscription
@@ -57,6 +58,7 @@ import kotlin.concurrent.Volatile
 class MQTTRepositoryImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val nodeRepository: NodeRepository,
+    private val buildConfigProvider: org.meshtastic.core.common.BuildConfigProvider,
     dispatchers: CoroutineDispatchers,
 ) : MQTTRepository {
 
@@ -100,8 +102,8 @@ class MQTTRepositoryImpl(
 
         val rootTopic = mqttConfig?.root?.ifEmpty { DEFAULT_TOPIC_ROOT } ?: DEFAULT_TOPIC_ROOT
 
-        val rawAddress = mqttConfig?.address ?: DEFAULT_SERVER_ADDRESS
-        val endpoint = resolveEndpoint(rawAddress, mqttConfig?.tls_enabled == true)
+        val rawAddress = mqttConfig?.address?.ifEmpty { DEFAULT_SERVER_ADDRESS } ?: DEFAULT_SERVER_ADDRESS
+        val endpoint = resolveEndpoint(rawAddress, effectiveTlsEnabled(rawAddress, mqttConfig?.tls_enabled == true))
 
         val newClient =
             MqttClient(ownerId) {
@@ -109,6 +111,11 @@ class MQTTRepositoryImpl(
                 autoReconnect = true
                 username = mqttConfig?.username
                 mqttConfig?.password?.let { password(it) }
+                logger = KermitMqttLogger()
+                // WARN for production: the library emits endpoint addresses and topic strings at
+                // INFO level. WARN messages (reconnect, timeout, retry) contain no PII and are
+                // exactly the signals needed for production diagnostics.
+                logLevel = if (buildConfigProvider.isDebug) MqttLogLevel.DEBUG else MqttLogLevel.WARN
             }
         client = newClient
 
@@ -139,7 +146,27 @@ class MQTTRepositoryImpl(
         launch { newClient.messages.collect { msg -> processMessage(msg) } }
 
         // Forward the client's connection state to the repo-level StateFlow for UI observation.
-        launch { newClient.connectionState.collect { _connectionState.value = it } }
+        // Also emit structured log messages on transitions so reconnect attempt counts and
+        // disconnect reason codes are visible in Crashlytics/Datadog without any PII.
+        launch {
+            newClient.connectionState.collect { state ->
+                _connectionState.value = state
+                when (state) {
+                    ConnectionState.Connecting -> Logger.i { "MQTT connecting" }
+
+                    ConnectionState.Connected -> Logger.i { "MQTT connected" }
+
+                    is ConnectionState.Reconnecting -> {
+                        val errorDetail = state.lastError?.message?.let { ": $it" } ?: ""
+                        Logger.w { "MQTT reconnecting (attempt ${state.attempt}$errorDetail)" }
+                    }
+
+                    is ConnectionState.Disconnected -> {
+                        state.reason?.let { Logger.w { "MQTT disconnected: ${it.message}" } }
+                    }
+                }
+            }
+        }
 
         // Retry the initial connect with exponential backoff. Once established,
         // autoReconnect handles subsequent drops and re-subscribes internally.
@@ -147,7 +174,9 @@ class MQTTRepositoryImpl(
             var reconnectDelay = INITIAL_RECONNECT_DELAY_MS
             while (true) {
                 val result = safeCatching {
-                    Logger.i { "MQTT Connecting to $endpoint" }
+                    Logger.i {
+                        if (buildConfigProvider.isDebug) "MQTT Connecting to $endpoint" else "MQTT Connecting..."
+                    }
                     newClient.connect(endpoint)
                     if (subscriptions.isNotEmpty()) {
                         Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
@@ -157,11 +186,13 @@ class MQTTRepositoryImpl(
                 }
                 when {
                     result.isSuccess -> return@launch
+
                     result.exceptionOrNull() is MqttException.ConnectionRejected -> {
                         Logger.e(result.exceptionOrNull()) { "MQTT connection rejected (unrecoverable), stopping" }
                         close(result.exceptionOrNull()!!)
                         return@launch
                     }
+
                     else -> {
                         Logger.e(result.exceptionOrNull()) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
                         delay(reconnectDelay)
@@ -179,13 +210,11 @@ class MQTTRepositoryImpl(
     private fun ProducerScope<MqttClientProxyMessage>.processMessage(msg: MqttMessage) {
         val topic = msg.topic
         val payload = msg.payload.toByteArray()
-        Logger.d { "MQTT received message on topic $topic (size: ${payload.size} bytes)" }
 
         if (topic.contains("/json/")) {
             try {
                 val jsonStr = payload.decodeToString()
                 json.decodeFromString<MqttJsonPayload>(jsonStr)
-                Logger.d { "MQTT parsed JSON payload successfully" }
                 trySend(MqttClientProxyMessage(topic = topic, text = jsonStr, retained = msg.retain))
             } catch (e: JsonDecodingException) {
                 Logger.e(e) { "Failed to parse MQTT JSON: ${e.shortMessage} (path: ${e.path})" }
@@ -202,10 +231,15 @@ class MQTTRepositoryImpl(
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {
         val currentClient = client
         if (currentClient == null) {
-            Logger.w { "MQTT publish to $topic dropped: client not connected" }
+            Logger.w {
+                if (buildConfigProvider.isDebug) {
+                    "MQTT publish to $topic dropped: client not connected"
+                } else {
+                    "MQTT publish dropped: client not connected"
+                }
+            }
             return
         }
-        Logger.d { "MQTT publishing message to topic $topic (size: ${data.size} bytes, retained: $retained)" }
         scope.launch {
             publishSemaphore.withPermit {
                 safeCatching {
@@ -213,7 +247,15 @@ class MQTTRepositoryImpl(
                         MqttMessage(topic = topic, payload = data, qos = QoS.AT_LEAST_ONCE, retain = retained),
                     )
                 }
-                    .onFailure { e -> Logger.w(e) { "MQTT publish to $topic failed" } }
+                    .onFailure { e ->
+                        Logger.w(e) {
+                            if (buildConfigProvider.isDebug) {
+                                "MQTT publish to $topic failed"
+                            } else {
+                                "MQTT publish (${data.size} bytes) failed"
+                            }
+                        }
+                    }
             }
         }
     }
@@ -244,3 +286,8 @@ fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if 
     val hostAndPort = if (rawAddress.contains(":")) rawAddress else "$rawAddress:$defaultPort"
     MqttEndpoint.parse("$scheme://$hostAndPort")
 }
+
+private const val DEFAULT_PUBLIC_SERVER = "mqtt.meshtastic.org"
+
+fun effectiveTlsEnabled(address: String, tlsEnabled: Boolean): Boolean =
+    tlsEnabled || address.equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)

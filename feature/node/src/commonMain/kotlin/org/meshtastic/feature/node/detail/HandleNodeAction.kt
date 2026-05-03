@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,19 +36,26 @@ internal fun handleNodeAction(
 ) {
     when (action) {
         is NodeDetailAction.Navigate -> onNavigate(action.route)
+
         is NodeDetailAction.TriggerServiceAction -> viewModel.onServiceAction(action.action)
+
         is NodeDetailAction.OpenRemoteAdmin -> viewModel.openRemoteAdmin(action.nodeNum)
+
         is NodeDetailAction.RefreshMetadata -> viewModel.refreshMetadata(action.nodeNum)
+
         is NodeDetailAction.HandleNodeMenuAction -> {
             when (val menuAction = action.action) {
                 is NodeMenuAction.DirectMessage -> {
                     val route = viewModel.getDirectMessageRoute(menuAction.node, uiState.ourNode)
                     navigateToMessages(route)
                 }
+
                 is NodeMenuAction.Remove -> viewModel.handleNodeMenuAction(menuAction, onNavigateUp)
+
                 else -> viewModel.handleNodeMenuAction(menuAction)
             }
         }
+
         else -> {}
     }
 }

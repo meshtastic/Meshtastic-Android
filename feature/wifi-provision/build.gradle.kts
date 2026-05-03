@@ -20,7 +20,6 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.wifiprovision"
         androidResources.enable = false

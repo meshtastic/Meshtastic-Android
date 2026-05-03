@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@ class LegacyDfuTransport(
             // Best-effort DFU Version read — gate out unsupported old bootloaders (SDK ≤ 6).
             val versionChar = service.characteristic(LEGACY_DFU_VERSION_UUID)
             val version =
-                runCatching { service.read(versionChar) }
+                safeCatching { service.read(versionChar) }
                     .map { bytes ->
                         if (bytes.size >= 2) (bytes[0].toInt() and 0xFF) or ((bytes[1].toInt() and 0xFF) shl 8) else -1
                     }
@@ -453,8 +453,10 @@ class LegacyDfuTransport(
                             "got 0x${response.requestOpcode.toUByte().toString(16).padStart(2, '0')}",
                     )
                 }
+
             is LegacyDfuResponse.Failure ->
                 throw LegacyDfuException.ProtocolError(response.requestOpcode, response.status)
+
             else ->
                 throw DfuException.TransferFailed(
                     "Unexpected Legacy DFU response for opcode 0x${expectedOpcode.toUByte().toString(16)}: $response",

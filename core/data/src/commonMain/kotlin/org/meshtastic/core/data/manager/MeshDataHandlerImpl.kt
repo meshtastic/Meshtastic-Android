@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,12 +132,19 @@ class MeshDataHandlerImpl(
         val decoded = packet.decoded ?: return shouldBroadcast
         when (decoded.portnum) {
             PortNum.TEXT_MESSAGE_APP -> handleTextMessage(packet, dataPacket, myNodeNum)
+
             PortNum.NODE_STATUS_APP -> handleNodeStatus(packet, dataPacket, myNodeNum)
+
             PortNum.ALERT_APP -> rememberDataPacket(dataPacket, myNodeNum)
+
             PortNum.WAYPOINT_APP -> handleWaypoint(packet, dataPacket, myNodeNum)
+
             PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum)
+
             PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet)
+
             PortNum.TELEMETRY_APP -> telemetryHandler.handleTelemetry(packet, dataPacket, myNodeNum)
+
             else ->
                 shouldBroadcast =
                     handleSpecializedDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
@@ -160,6 +167,7 @@ class MeshDataHandlerImpl(
                 tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
                 shouldBroadcast = false
             }
+
             PortNum.ROUTING_APP -> {
                 handleRouting(packet, dataPacket)
                 shouldBroadcast = true

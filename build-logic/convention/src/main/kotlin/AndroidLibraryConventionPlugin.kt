@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKotlinAndroid
 import org.meshtastic.buildlogic.configureTestOptions
 import org.meshtastic.buildlogic.disableUnnecessaryAndroidTests
@@ -45,16 +45,11 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     missingDimensionStrategy("marketplace", "google")
                 }
 
-                buildTypes {
-                    getByName("debug") {
-                        enableAndroidTestCoverage = true
-                    }
-                }
+                buildTypes { getByName("debug") { enableAndroidTestCoverage = true } }
             }
-            extensions.configure<LibraryAndroidComponentsExtension> {
-                disableUnnecessaryAndroidTests(target)
-            }
+            extensions.configure<LibraryAndroidComponentsExtension> { disableUnnecessaryAndroidTests(target) }
             configureTestOptions()
+            configureGraphTasks()
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ enum class ContrastLevel(val value: Int) {
     ;
 
     companion object {
-        fun fromValue(value: Int): ContrastLevel = entries.firstOrNull { it.value == value } ?: STANDARD
+        fun fromValue(value: Int): ContrastLevel = entries.firstOrNull { it.value == value } ?: MEDIUM
     }
 }
 
@@ -41,4 +41,5 @@ enum class ContrastLevel(val value: Int) {
  *
  * Read by components that need to adapt their rendering for accessibility (e.g. message bubbles, signal indicators).
  */
-val LocalContrastLevel = staticCompositionLocalOf { ContrastLevel.STANDARD }
+@Suppress("CompositionLocalAllowlist")
+val LocalContrastLevel = staticCompositionLocalOf { ContrastLevel.MEDIUM }

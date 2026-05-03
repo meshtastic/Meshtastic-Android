@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,6 +106,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                 }
+
                 is okio.ByteString -> {
                     EditBase64Preference(
                         title = "${index + 1}/$maxCount",
@@ -119,6 +120,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                 }
+
                 is RemoteHardwarePin -> {
                     EditTextPreference(
                         title = stringResource(Res.string.gpio_pin),

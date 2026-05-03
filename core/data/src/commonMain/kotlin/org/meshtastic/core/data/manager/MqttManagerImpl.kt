@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,18 +100,23 @@ class MqttManagerImpl(
             message.text != null -> {
                 mqttRepository.publish(topic, message.text!!.encodeToByteArray(), retained)
             }
+
             message.data_ != null -> {
                 mqttRepository.publish(topic, message.data_!!.toByteArray(), retained)
             }
+
             else -> {}
         }
     }
 
     private fun ConnectionState.toAppState(): MqttConnectionState = when (this) {
         is ConnectionState.Connecting -> MqttConnectionState.Connecting
+
         is ConnectionState.Connected -> MqttConnectionState.Connected
+
         is ConnectionState.Reconnecting ->
             MqttConnectionState.Reconnecting(attempt = attempt, lastError = lastError?.message)
+
         is ConnectionState.Disconnected ->
             reason?.let { MqttConnectionState.Disconnected(reason = it.message) }
                 ?: MqttConnectionState.Disconnected.Idle
@@ -149,16 +154,22 @@ class MqttManagerImpl(
                     .ifEmpty { null }
             MqttProbeStatus.Success(serverInfo = summary)
         }
+
         is ProbeResult.Rejected ->
             MqttProbeStatus.Rejected(
                 reasonCode = reasonCode.value,
                 reason = message,
                 serverReference = serverReference,
             )
+
         is ProbeResult.DnsFailure -> MqttProbeStatus.DnsFailure(message = cause.message)
+
         is ProbeResult.TcpFailure -> MqttProbeStatus.TcpFailure(message = cause.message)
+
         is ProbeResult.TlsFailure -> MqttProbeStatus.TlsFailure(message = cause.message)
+
         is ProbeResult.Timeout -> MqttProbeStatus.Timeout(timeoutMs = durationMs)
+
         is ProbeResult.Other -> MqttProbeStatus.Other(message = cause.message)
     }
 }

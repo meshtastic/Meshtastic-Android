@@ -56,6 +56,7 @@ class DesktopRadioTransportFactory(
                 address = address.removePrefix(InterfaceId.TCP.id.toString()),
             )
         }
+
         address.startsWith(InterfaceId.SERIAL.id) -> {
             SerialTransport.open(
                 portName = address.removePrefix(InterfaceId.SERIAL.id.toString()),
@@ -64,6 +65,7 @@ class DesktopRadioTransportFactory(
                 dispatchers = dispatchers,
             )
         }
+
         else -> error("Unsupported transport for address: $address")
     }
 }

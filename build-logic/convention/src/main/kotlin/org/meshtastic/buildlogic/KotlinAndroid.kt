@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,12 +58,7 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
         testOptions.unitTests.isReturnDefaultValues = true
 
         // Exclude duplicate META-INF license files shipped by JUnit Platform JARs
-        packaging.resources.excludes.addAll(
-            listOf(
-                "META-INF/LICENSE.md",
-                "META-INF/LICENSE-notice.md",
-            ),
-        )
+        packaging.resources.excludes.addAll(listOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md"))
     }
 
     configureMokkery()
@@ -109,12 +104,12 @@ internal fun Project.configureKotlinMultiplatform() {
     tasks.configureEach {
         val taskName = name.lowercase()
         if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
-            if (
-                taskName.startsWith("link") && taskName.contains("test") ||
-                taskName == "iosarm64test" ||
-                taskName == "iossimulatorarm64test" ||
-                taskName.endsWith("testbinaries")
-            ) {
+            val isDisabledIosTask =
+                (taskName.startsWith("link") && taskName.contains("test")) ||
+                    taskName == "iosarm64test" ||
+                    taskName == "iossimulatorarm64test" ||
+                    taskName.endsWith("testbinaries")
+            if (isDisabledIosTask) {
                 enabled = false
             }
         }
@@ -168,26 +163,24 @@ internal fun Project.configureKmpTestDependencies() {
             // module's build script calls `withHostTest { }`, which runs *after* the
             // convention plugin's `apply`.  Using `matching + configureEach` defers
             // configuration until the source set actually materialises.
-            matching { it.name == "androidHostTest" }.configureEach {
-                dependencies {
-                    // kotlin.test auto-selects kotlin-test-junit because testAndroidHostTest
-                    // does NOT use useJUnitPlatform() (see configureTestOptions).
-                    // No explicit kotlin("test") or kotlin("test-junit") override needed —
-                    // adding them would conflict with auto-selection and break resource merging.
-                    implementation(libs.library("kotest-assertions"))
-                    implementation(libs.library("kotest-property"))
-                    implementation(libs.library("turbine"))
-                    implementation(libs.library("robolectric"))
-                    implementation(libs.library("androidx-test-core"))
+            matching { it.name == "androidHostTest" }
+                .configureEach {
+                    dependencies {
+                        // kotlin.test auto-selects kotlin-test-junit because testAndroidHostTest
+                        // does NOT use useJUnitPlatform() (see configureTestOptions).
+                        // No explicit kotlin("test") or kotlin("test-junit") override needed —
+                        // adding them would conflict with auto-selection and break resource merging.
+                        implementation(libs.library("kotest-assertions"))
+                        implementation(libs.library("kotest-property"))
+                        implementation(libs.library("turbine"))
+                        implementation(libs.library("robolectric"))
+                        implementation(libs.library("androidx-test-core"))
+                    }
                 }
-            }
 
             // Configure jvmTest lazily for the same reason.
-            matching { it.name == "jvmTest" }.configureEach {
-                dependencies {
-                    implementation(libs.library("kotest-runner-junit6"))
-                }
-            }
+            matching { it.name == "jvmTest" }
+                .configureEach { dependencies { implementation(libs.library("kotest-runner-junit6")) } }
         }
     }
 }
@@ -201,23 +194,28 @@ internal fun Project.configureKotlinJvm() {
 private val PUBLISHED_MODULES = setOf("api", "model", "proto")
 
 /** Compiler args shared across all Kotlin targets (JVM, Android, iOS, etc.). */
-private val SHARED_COMPILER_ARGS = listOf(
-    "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-    "-opt-in=kotlin.time.ExperimentalTime",
-    "-Xexpect-actual-classes",
-    "-Xcontext-parameters",
-    "-Xannotation-default-target=param-property",
-    "-Xskip-prerelease-check",
-)
+private val SHARED_COMPILER_ARGS =
+    listOf(
+        "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+        "-opt-in=kotlin.time.ExperimentalTime",
+        "-Xexpect-actual-classes",
+        "-Xcontext-parameters",
+        "-Xannotation-default-target=param-property",
+        "-Xskip-prerelease-check",
+        "-Xbackend-threads=0",
+    )
+
+private const val PUBLISHED_MODULE_JDK = 17
+private const val APP_JDK = 21
 
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
     val isPublishedModule = project.name in PUBLISHED_MODULES
 
     extensions.configure<T> {
-        val javaVersion = if (isPublishedModule) 17 else 21
-        // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older environments),
-        // and Java 21 for the rest of the app.
+        // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older
+        // environments), and Java 21 for the rest of the app.
+        val javaVersion = if (isPublishedModule) PUBLISHED_MODULE_JDK else APP_JDK
         jvmToolchain(javaVersion)
 
         if (this is KotlinMultiplatformExtension) {
@@ -246,11 +244,16 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         compilerOptions {
             jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
             allWarningsAsErrors.set(warningsAsErrors)
-            if (!isPublishedModule) {
-                freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+
+            // For non-KMP modules, configure compiler args here since they don't use targets.compilations.
+            // KMP modules already set these via the targets block above — only jvmTarget/warnings needed here.
+            if (T::class != KotlinMultiplatformExtension::class) {
+                if (!isPublishedModule) {
+                    freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+                }
+                freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
+                freeCompilerArgs.add("-jvm-default=no-compatibility")
             }
-            freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
-            freeCompilerArgs.add("-jvm-default=no-compatibility")
         }
     }
 }

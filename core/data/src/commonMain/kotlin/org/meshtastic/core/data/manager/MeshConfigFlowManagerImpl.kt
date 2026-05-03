@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,14 @@ import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
@@ -54,6 +56,7 @@ class MeshConfigFlowManagerImpl(
     private val analytics: PlatformAnalytics,
     private val commandSender: CommandSender,
     private val heartbeatSender: DataLayerHeartbeatSender,
+    private val notificationPrefs: NotificationPrefs,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigFlowManager {
     private val wantConfigDelay = 100L
@@ -109,6 +112,7 @@ class MeshConfigFlowManagerImpl(
                 }
                 handleConfigOnlyComplete(state)
             }
+
             HandshakeConstants.NODE_INFO_NONCE -> {
                 if (state !is HandshakeState.ReceivingNodeInfo) {
                     Logger.w { "Ignoring Stage 2 config_complete in state=$state" }
@@ -116,6 +120,7 @@ class MeshConfigFlowManagerImpl(
                 }
                 handleNodeInfoComplete(state)
             }
+
             else -> Logger.w { "Config complete id mismatch: $configCompleteId" }
         }
     }
@@ -197,6 +202,8 @@ class MeshConfigFlowManagerImpl(
         // Transition to Stage 1, discarding any stale data from a prior interrupted handshake.
         handshakeState = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
         nodeManager.setMyNodeNum(myInfo.my_node_num)
+        nodeManager.setFirmwareEdition(myInfo.firmware_edition)
+        applyEventFirmwareNotificationDefaults(myInfo.firmware_edition)
 
         // Bump the generation so that a pending clear from a prior (interrupted) handshake
         // will see a stale snapshot and skip its writes, preventing it from wiping config
@@ -265,6 +272,7 @@ class MeshConfigFlowManagerImpl(
                     null,
                     HardwareModel.UNSET,
                     -> null
+
                     else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                 },
                 firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
@@ -284,5 +292,19 @@ class MeshConfigFlowManagerImpl(
     } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
         Logger.e(ex) { "Failed to build MyNodeInfo" }
         null
+    }
+
+    private fun applyEventFirmwareNotificationDefaults(edition: FirmwareEdition) {
+        if (edition != FirmwareEdition.VANILLA) {
+            if (!notificationPrefs.nodeEventsAutoDisabledForEvent.value) {
+                notificationPrefs.setNodeEventsEnabled(false)
+                notificationPrefs.setNodeEventsAutoDisabledForEvent(true)
+            }
+        } else {
+            if (notificationPrefs.nodeEventsAutoDisabledForEvent.value) {
+                notificationPrefs.setNodeEventsEnabled(true)
+                notificationPrefs.setNodeEventsAutoDisabledForEvent(false)
+            }
+        }
     }
 }

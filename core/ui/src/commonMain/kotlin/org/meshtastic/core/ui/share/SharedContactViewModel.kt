@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ class SharedContactViewModel(nodeRepository: NodeRepository, private val service
     val unfilteredNodes: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    fun addSharedContact(sharedContact: SharedContact) = viewModelScope.launch {
-        serviceRepository.onServiceAction(ServiceAction.ImportContact(sharedContact))
-    }
+    fun addSharedContact(sharedContact: SharedContact) =
+        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.ImportContact(sharedContact)) }
 }

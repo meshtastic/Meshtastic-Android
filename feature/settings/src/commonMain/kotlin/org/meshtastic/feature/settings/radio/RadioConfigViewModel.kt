@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -165,7 +166,7 @@ open class RadioConfigViewModel(
         probeJob =
             viewModelScope.launch {
                 val result =
-                    runCatching { mqttManager.probe(address, tlsEnabled, username, password) }
+                    safeCatching { mqttManager.probe(address, tlsEnabled, username, password) }
                         .getOrElse { e ->
                             Logger.w(e) { "MQTT probe threw" }
                             MqttProbeStatus.Other(message = e.message)
@@ -389,6 +390,7 @@ open class RadioConfigViewModel(
                     val packetId = adminActionsUseCase.reboot(destNum)
                     registerRequestId(packetId)
                 }
+
             AdminRoute.SHUTDOWN.name ->
                 with(radioConfigState.value) {
                     if (metadata?.canShutdown != true) {
@@ -407,6 +409,7 @@ open class RadioConfigViewModel(
                     val packetId = adminActionsUseCase.factoryReset(destNum, isLocal)
                     registerRequestId(packetId)
                 }
+
             AdminRoute.NODEDB_RESET.name ->
                 safeLaunch(tag = "nodedbReset") {
                     val isLocal = (destNum == myNodeNum)
@@ -621,6 +624,7 @@ open class RadioConfigViewModel(
                 // (reboot/shutdown/factory_reset) if the metadata preflight failed.
                 return
             }
+
             is RadioResponseResult.Success -> {
                 if (route.isEmpty()) {
                     val data = packet.decoded!!

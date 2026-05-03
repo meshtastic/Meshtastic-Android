@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -404,7 +404,9 @@ class LegacyDfuTransportTest {
             if (data.isEmpty()) return null
             val opcode = data[0]
             return when (opcode) {
-                LegacyDfuOpcode.START_DFU -> null // response comes after image sizes packet write
+                LegacyDfuOpcode.START_DFU -> null
+
+                // response comes after image sizes packet write
                 LegacyDfuOpcode.INIT_DFU_PARAMS -> {
                     if (data.size >= 2 && data[1] == LegacyDfuOpcode.INIT_PARAMS_COMPLETE) {
                         listOf(initResponse())
@@ -412,19 +414,25 @@ class LegacyDfuTransportTest {
                         null
                     }
                 }
+
                 LegacyDfuOpcode.PACKET_RECEIPT_NOTIF_REQ -> null
+
                 LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE -> {
                     firmwareTransferStarted = true
                     null
                 }
+
                 LegacyDfuOpcode.VALIDATE -> listOf(validateResponse())
+
                 LegacyDfuOpcode.ACTIVATE_AND_RESET -> {
                     if (failOnActivateWrite) {
                         throw RuntimeException("Simulated disconnect during ACTIVATE write")
                     }
                     null
                 }
+
                 LegacyDfuOpcode.RESET -> null
+
                 else -> null
             }
         }
@@ -471,6 +479,7 @@ class LegacyDfuTransportTest {
         private fun startResponse(): ByteArray = when (scheme) {
             LegacyResponderScheme.RejectStart ->
                 byteArrayOf(LegacyDfuOpcode.RESPONSE_CODE, LegacyDfuOpcode.START_DFU, LegacyDfuStatus.NOT_SUPPORTED)
+
             else -> success(LegacyDfuOpcode.START_DFU)
         }
 
@@ -481,12 +490,14 @@ class LegacyDfuTransportTest {
                     LegacyDfuOpcode.INIT_DFU_PARAMS,
                     LegacyDfuStatus.OPERATION_FAILED,
                 )
+
             else -> success(LegacyDfuOpcode.INIT_DFU_PARAMS)
         }
 
         private fun validateResponse(): ByteArray = when (scheme) {
             LegacyResponderScheme.RejectValidate ->
                 byteArrayOf(LegacyDfuOpcode.RESPONSE_CODE, LegacyDfuOpcode.VALIDATE, LegacyDfuStatus.CRC_ERROR)
+
             else -> success(LegacyDfuOpcode.VALIDATE)
         }
 

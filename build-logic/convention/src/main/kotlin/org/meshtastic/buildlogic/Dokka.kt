@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,14 +58,20 @@ fun Project.configureDokka() {
     }
 }
 
-/** Configure Dokka aggregation in a way that is compatible with Gradle Isolated Projects. */
-fun Project.configureDokkaAggregation() {
+/**
+ * Configure Dokka aggregation for the root project.
+ *
+ * Accepts an explicit list of subproject paths to avoid `subprojects {}` iteration, which is incompatible with Gradle
+ * Isolated Projects. The list should match the modules declared in `settings.gradle.kts`.
+ */
+fun Project.configureDokkaAggregation(subprojectPaths: List<String>) {
     extensions.configure<DokkaExtension> {
         moduleName.set("Meshtastic App")
         dokkaPublications.configureEach { suppressInheritedMembers.set(true) }
     }
 
-    subprojects.forEach { subproject ->
-        subproject.pluginManager.withPlugin("org.jetbrains.dokka") { dependencies.add("dokka", subproject) }
-    }
+    // Add each subproject as a Dokka dependency using declared paths rather than
+    // iterating live subproject objects. This avoids cross-project configuration
+    // access and is compatible with Gradle Isolated Projects.
+    subprojectPaths.forEach { path -> dependencies.add("dokka", project(path)) }
 }

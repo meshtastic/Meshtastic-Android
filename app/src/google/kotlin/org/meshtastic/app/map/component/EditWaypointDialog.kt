@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ fun EditWaypointDialog(
     var waypointInput by remember { mutableStateOf(waypoint) }
     val title = if (waypoint.id == 0) Res.string.waypoint_new else Res.string.waypoint_edit
     val defaultEmoji = 0x1F4CD // 📍 Round Pushpin
-    val currentEmojiCodepoint = if ((waypointInput.icon ?: 0) == 0) defaultEmoji else waypointInput.icon!!
+    val currentEmojiCodepoint = if (waypointInput.icon == 0) defaultEmoji else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -107,7 +107,7 @@ fun EditWaypointDialog(
     var selectedDateString by remember { mutableStateOf("") }
     var selectedTimeString by remember { mutableStateOf("") }
     var isExpiryEnabled by remember {
-        mutableStateOf((waypointInput.expire ?: 0) != 0 && waypointInput.expire != Int.MAX_VALUE)
+        mutableStateOf(waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE)
     }
 
     val dateFormat = remember { android.text.format.DateFormat.getDateFormat(context) }
@@ -116,7 +116,7 @@ fun EditWaypointDialog(
     timeFormat.timeZone = java.util.TimeZone.getDefault()
 
     LaunchedEffect(waypointInput.expire, isExpiryEnabled) {
-        val expireValue = waypointInput.expire ?: 0
+        val expireValue = waypointInput.expire
         if (isExpiryEnabled) {
             if (expireValue != 0 && expireValue != Int.MAX_VALUE) {
                 val instant = kotlin.time.Instant.fromEpochSeconds(expireValue.toLong())
@@ -150,7 +150,7 @@ fun EditWaypointDialog(
             text = {
                 Column(modifier = modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        value = waypointInput.name ?: "",
+                        value = waypointInput.name,
                         onValueChange = { waypointInput = waypointInput.copy(name = it.take(29)) },
                         label = { Text(stringResource(Res.string.name)) },
                         singleLine = true,
@@ -171,7 +171,7 @@ fun EditWaypointDialog(
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                     OutlinedTextField(
-                        value = waypointInput.description ?: "",
+                        value = waypointInput.description,
                         onValueChange = { waypointInput = waypointInput.copy(description = it.take(99)) },
                         label = { Text(stringResource(Res.string.description)) },
                         keyboardOptions =
@@ -196,7 +196,7 @@ fun EditWaypointDialog(
                             Text(stringResource(Res.string.locked))
                         }
                         Switch(
-                            checked = (waypointInput.locked_to ?: 0) != 0,
+                            checked = waypointInput.locked_to != 0,
                             onCheckedChange = { waypointInput = waypointInput.copy(locked_to = if (it) 1 else 0) },
                         )
                     }
@@ -219,7 +219,7 @@ fun EditWaypointDialog(
                             onCheckedChange = { checked ->
                                 isExpiryEnabled = checked
                                 if (checked) {
-                                    val expireValue = waypointInput.expire ?: 0
+                                    val expireValue = waypointInput.expire
                                     // Default to 8 hours from now if not already set
                                     if (expireValue == 0 || expireValue == Int.MAX_VALUE) {
                                         val futureInstant = kotlin.time.Clock.System.now() + 8.hours
@@ -234,7 +234,7 @@ fun EditWaypointDialog(
 
                     if (isExpiryEnabled) {
                         val currentInstant =
-                            (waypointInput.expire ?: 0).let {
+                            (waypointInput.expire).let {
                                 if (it != 0 && it != Int.MAX_VALUE) {
                                     kotlin.time.Instant.fromEpochSeconds(it.toLong())
                                 } else {
@@ -248,7 +248,7 @@ fun EditWaypointDialog(
                                 context,
                                 { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
                                     val currentLdt =
-                                        (waypointInput.expire ?: 0)
+                                        (waypointInput.expire)
                                             .let {
                                                 if (it != 0 && it != Int.MAX_VALUE) {
                                                     kotlin.time.Instant.fromEpochSeconds(it.toLong())
@@ -283,7 +283,7 @@ fun EditWaypointDialog(
                                 context,
                                 { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
                                     val currentLdt =
-                                        (waypointInput.expire ?: 0)
+                                        (waypointInput.expire)
                                             .let {
                                                 if (it != 0 && it != Int.MAX_VALUE) {
                                                     kotlin.time.Instant.fromEpochSeconds(it.toLong())
@@ -355,10 +355,7 @@ fun EditWaypointDialog(
                     TextButton(onClick = onDismissRequest, modifier = Modifier.padding(end = 8.dp)) {
                         Text(stringResource(Res.string.cancel))
                     }
-                    Button(
-                        onClick = { onSendClicked(waypointInput) },
-                        enabled = (waypointInput.name ?: "").isNotBlank(),
-                    ) {
+                    Button(onClick = { onSendClicked(waypointInput) }, enabled = (waypointInput.name).isNotBlank()) {
                         Text(stringResource(Res.string.send))
                     }
                 }

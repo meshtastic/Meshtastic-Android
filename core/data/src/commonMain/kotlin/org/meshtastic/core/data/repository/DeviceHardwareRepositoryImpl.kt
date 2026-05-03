@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,7 +191,9 @@ class DeviceHardwareRepositoryImpl(
 
     private fun disambiguate(entities: List<DeviceHardwareEntity>, target: String?): DeviceHardwareEntity? = when {
         entities.isEmpty() -> null
+
         target == null -> entities.first()
+
         else -> {
             entities.find { it.platformioTarget == target }
                 ?: entities.find { it.platformioTarget.equals(target, ignoreCase = true) }

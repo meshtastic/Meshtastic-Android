@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -508,7 +508,9 @@ interface PacketDao {
                     val newIndex =
                         when {
                             pskMatches.isEmpty() -> null
+
                             pskMatches.size == 1 -> pskMatches.first().first
+
                             else -> {
                                 // Multiple matches with same PSK. Disambiguate by Name.
                                 val nameMatches = pskMatches.filter { it.second.name == oldChannel.name }

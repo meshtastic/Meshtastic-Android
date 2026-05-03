@@ -49,6 +49,7 @@ class DesktopNotificationManagerTest {
     ) : NotificationPrefs {
         override val messagesEnabled = MutableStateFlow(messages)
         override val nodeEventsEnabled = MutableStateFlow(nodeEvents)
+        override val nodeEventsAutoDisabledForEvent = MutableStateFlow(false)
         override val lowBatteryEnabled = MutableStateFlow(lowBattery)
 
         override fun setMessagesEnabled(enabled: Boolean) {
@@ -57,6 +58,10 @@ class DesktopNotificationManagerTest {
 
         override fun setNodeEventsEnabled(enabled: Boolean) {
             nodeEventsEnabled.value = enabled
+        }
+
+        override fun setNodeEventsAutoDisabledForEvent(disabled: Boolean) {
+            nodeEventsAutoDisabledForEvent.value = disabled
         }
 
         override fun setLowBatteryEnabled(enabled: Boolean) {

@@ -1,0 +1,36 @@
+# Standard AI exclusion list for Cursor, Windsurf, etc.
+# Mirroring .copilotignore for project-wide token discipline
+
+# Build & Generated
+**/build/**
+.gradle/
+.kotlin/
+**/generated/**
+
+# Agent Artifacts
+.agent_artifacts/
+.agent_refs/
+tmp/
+*.log
+
+# Media & Binaries
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.webp
+**/*.svg
+**/*.ico
+**/*.gif
+**/*.mp3
+**/*.wav
+**/*.ogg
+**/*.pdf
+**/*.ttf
+**/*.otf
+**/*.jar
+**/*.aar
+**/*.apk
+
+# Resources (Indexing non-English strings is a token sink)
+**/values-*/strings.xml
+**/composeResources/**/values-*/*.xml

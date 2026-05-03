@@ -48,13 +48,17 @@ fun Throwable.classifyBleException(): BleExceptionInfo? = when (this) {
             gattStatus = status,
             message = "GATT error (status $status): $message",
         )
+
     is NotConnectedException -> BleExceptionInfo(isPermanent = false, message = "Not connected")
+
     is GattRequestRejectedException ->
         BleExceptionInfo(isPermanent = false, message = "GATT request rejected (busy)")
+
     is UnmetRequirementException ->
         // Bluetooth disabled or runtime permission missing. Both can resolve without re-selecting the
         // device (user re-enables BT, or grants permission). Surface as transient so the transport keeps
         // retrying; UI can show a hint based on the message.
         BleExceptionInfo(isPermanent = false, message = message ?: "Bluetooth LE unavailable")
+
     else -> null
 }

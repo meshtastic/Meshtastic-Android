@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,9 +98,13 @@ enum class ConfigRoute(
     companion object {
         private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
             when {
-                metadata == null -> true // Include all routes if metadata is null
+                metadata == null -> true
+
+                // Include all routes if metadata is null
                 it == BLUETOOTH -> metadata.hasBluetooth == true
+
                 it == NETWORK -> metadata.hasWifi == true || metadata.hasEthernet == true
+
                 else -> true // Include all other routes by default
             }
         }

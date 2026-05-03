@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -318,6 +318,7 @@ open class ScannerViewModel(
                     false
                 }
             }
+
             is DeviceListEntry.Usb -> {
                 if (entry.bonded) {
                     changeDeviceAddress(entry.fullAddress)
@@ -327,10 +328,12 @@ open class ScannerViewModel(
                     false
                 }
             }
+
             is DeviceListEntry.Tcp -> {
                 safeLaunch(tag = "onSelectedTcp") { changeDeviceAddress(entry.fullAddress) }
                 true
             }
+
             is DeviceListEntry.Mock -> {
                 changeDeviceAddress(entry.fullAddress)
                 true

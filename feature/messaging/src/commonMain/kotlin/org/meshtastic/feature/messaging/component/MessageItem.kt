@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -199,7 +199,9 @@ fun MessageItem(
                     inSelectionMode && !selected -> MaterialTheme.colorScheme.surfaceContainerLow
                     else -> MaterialTheme.colorScheme.surfaceContainerHigh
                 }
+
             ContrastLevel.MEDIUM -> nodeColor.copy(alpha = (alpha + 0.2f).coerceAtMost(1f))
+
             ContrastLevel.STANDARD -> nodeColor.copy(alpha = alpha)
         }
     val contentColor =
@@ -207,6 +209,7 @@ fun MessageItem(
             ContrastLevel.HIGH,
             ContrastLevel.MEDIUM,
             -> MaterialTheme.colorScheme.onSurface
+
             ContrastLevel.STANDARD -> Color(if (message.fromLocal) ourNode.colors.first else node.colors.first)
         }
     val metadataStyle =
@@ -229,8 +232,10 @@ fun MessageItem(
                 } else {
                     when (contrastLevel) {
                         ContrastLevel.HIGH -> Modifier.border(2.dp, color = nodeColor, shape = messageShape)
+
                         ContrastLevel.MEDIUM ->
                             Modifier.border(1.dp, color = nodeColor.copy(alpha = 0.6f), shape = messageShape)
+
                         ContrastLevel.STANDARD -> Modifier
                     }
                 },
@@ -399,6 +404,7 @@ private fun OriginalMessageSnippet(
                 ContrastLevel.HIGH,
                 ContrastLevel.MEDIUM,
                 -> MaterialTheme.colorScheme.onSurface
+
                 ContrastLevel.STANDARD -> Color(originalMessageNode.colors.first)
             }
         // Rectangle shape — the outer message bubble's Surface clips to its

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -206,11 +206,8 @@ private fun determineSecurityState(
     isMqttEnabled: Boolean,
 ): SecurityState = when {
     !isLowEntropyKey -> SecurityState.SECURE
-
     isMqttEnabled && isPreciseLocation -> SecurityState.INSECURE_PRECISE_MQTT_WARNING
-
     isPreciseLocation -> SecurityState.INSECURE_PRECISE_ONLY
-
     else -> SecurityState.INSECURE_NO_PRECISE
 }
 

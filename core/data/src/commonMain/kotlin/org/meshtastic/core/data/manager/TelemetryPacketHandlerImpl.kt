@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,7 +116,9 @@ class TelemetryPacketHandlerImpl(
                         }
                     }
                 }
+
                 environment != null -> nextNode = nextNode.copy(environmentMetrics = environment)
+
                 power != null -> nextNode = nextNode.copy(powerMetrics = power)
             }
 
@@ -140,6 +142,7 @@ class TelemetryPacketHandlerImpl(
             }
 
             batteryLevel == BATTERY_PERCENT_LOW_THRESHOLD -> shouldDisplay = true
+
             batteryLevel.mod(BATTERY_PERCENT_LOW_DIVISOR) == 0 && !isRemote -> shouldDisplay = true
 
             isRemote -> shouldDisplay = true

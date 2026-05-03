@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,7 +111,9 @@ class CommandSenderImpl(
 
         return when {
             myNum == toNum -> 0
+
             myNode?.hasPKC == true && destNode?.hasPKC == true -> DataPacket.PKC_CHANNEL_INDEX
+
             else ->
                 channelSet.value.settings
                     .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
@@ -373,6 +375,7 @@ class CommandSenderImpl(
 
     fun resolveNodeNum(toId: String): Int = when (toId) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
+
         else -> {
             val numericNum =
                 if (toId.startsWith(NODE_ID_PREFIX)) {

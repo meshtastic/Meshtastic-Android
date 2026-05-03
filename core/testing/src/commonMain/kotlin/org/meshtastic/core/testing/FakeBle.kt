@@ -75,8 +75,16 @@ class FakeBleScanner :
     BleScanner {
     private val foundDevices = mutableSharedFlow<BleDevice>(replay = 10)
 
-    override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
-        emitAll(foundDevices)
+    var lastScanServiceUuid: Uuid? = null
+        private set
+
+    var lastScanAddress: String? = null
+        private set
+
+    override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
+        lastScanServiceUuid = serviceUuid
+        lastScanAddress = address
+        return flow { emitAll(foundDevices) }
     }
 
     fun emitDevice(device: BleDevice) {

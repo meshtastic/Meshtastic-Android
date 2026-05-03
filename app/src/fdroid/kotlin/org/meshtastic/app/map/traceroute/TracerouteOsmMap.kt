@@ -273,6 +273,7 @@ private fun offsetPolyline(
         headingPoints.mapIndexed { index, _ ->
             when (index) {
                 0 -> bearingRad(headingPoints[0], headingPoints[1])
+
                 headingPoints.lastIndex ->
                     bearingRad(headingPoints[headingPoints.lastIndex - 1], headingPoints[headingPoints.lastIndex])
 

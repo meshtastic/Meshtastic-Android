@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.PacketHandler
@@ -48,7 +48,7 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
             extraBufferCapacity = 4,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
-    override val fileTransferFlow = _fileTransferFlow.asSharedFlow()
+    override val fileTransferFlow = _fileTransferFlow.asFlow()
 
     // --- mutable state ---
     // Thread-safety contract: [handleIncomingXModem] is called sequentially from
@@ -84,11 +84,14 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
             XModem.Control.SOH,
             XModem.Control.STX,
             -> handleDataBlock(packet)
+
             XModem.Control.EOT -> handleEot()
+
             XModem.Control.CAN -> {
                 Logger.w { "XModem: CAN received — transfer cancelled" }
                 reset()
             }
+
             else -> Logger.w { "XModem: unexpected control byte ${packet.control}, ignoring" }
         }
     }
@@ -110,11 +113,13 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
                 Logger.d { "XModem: block $seq OK, total=${blocks.size} blocks" }
                 sendControl(XModem.Control.ACK)
             }
+
             // Duplicate: sender did not receive our previous ACK; re-ACK without buffering again.
             (expectedSeq - 1 + MAX_SEQ_PLUS_ONE) % MAX_SEQ_PLUS_ONE -> {
                 Logger.d { "XModem: duplicate block $seq — re-ACK" }
                 sendControl(XModem.Control.ACK)
             }
+
             else -> {
                 Logger.w { "XModem: unexpected seq $seq (expected $expectedSeq) — NAK" }
                 sendControl(XModem.Control.NAK)

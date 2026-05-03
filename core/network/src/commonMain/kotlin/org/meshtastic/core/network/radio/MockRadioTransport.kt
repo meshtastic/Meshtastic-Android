@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +103,9 @@ class MockRadioTransport(
         when {
             data != null && data.portnum == PortNum.ADMIN_APP ->
                 handleAdminPacket(pr, AdminMessage.ADAPTER.decode(data.payload))
+
             packet != null && packet.want_ack == true -> sendFakeAck(pr)
+
             else -> Logger.i { "Ignoring data sent to mock transport $pr" }
         }
     }

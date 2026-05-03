@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -357,6 +357,7 @@ private fun EmojiGrid(
             when (item) {
                 is GridItem.Header ->
                     item(span = { GridItemSpan(maxLineSpan) }, key = item.key) { SectionHeader(title = item.title) }
+
                 is GridItem.EmojiCell ->
                     item(key = item.key) {
                         EmojiCellWithSkinTone(

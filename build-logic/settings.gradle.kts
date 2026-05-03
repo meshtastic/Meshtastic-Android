@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@
 
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         google()
         mavenCentral()
+        gradlePluginPortal()
         maven {
             url = uri("https://jitpack.io")
             content {
@@ -29,13 +29,13 @@ pluginManagement {
     }
 }
 
+// Version mirrored in libs.versions.toml for Renovate tracking.
 plugins {
-    id("com.gradle.develocity") version("4.4.1")
+    id("com.gradle.develocity") version "4.4.1"
 }
 
 dependencyResolutionManagement {
     repositories {
-        gradlePluginPortal()
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -44,6 +44,7 @@ dependencyResolutionManagement {
             }
         }
         mavenCentral()
+        gradlePluginPortal()
         maven {
             url = uri("https://jitpack.io")
             content {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,12 +94,15 @@ object CommonCharts {
         when {
             dataSpanSeconds <= TimeConstants.ONE_HOUR.inWholeSeconds ->
                 DateFormatter.formatTimeWithSeconds(timestampMillis)
+
             dataSpanSeconds <= 2.days.inWholeSeconds -> DateFormatter.formatTime(timestampMillis)
+
             dataSpanSeconds <= 14.days.inWholeSeconds -> {
                 val dateStr = DateFormatter.formatDate(timestampMillis)
                 val timeStr = DateFormatter.formatTime(timestampMillis)
                 "$dateStr\n$timeStr"
             }
+
             else -> DateFormatter.formatDate(timestampMillis)
         }
     }

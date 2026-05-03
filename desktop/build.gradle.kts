@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.mikepenz.aboutlibraries.plugin.DuplicateMode
-import com.mikepenz.aboutlibraries.plugin.DuplicateRule
-import io.gitlab.arturbosch.detekt.Detekt
+import dev.detekt.gradle.Detekt
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.meshtastic.buildlogic.GitVersionValueSource
-import org.meshtastic.buildlogic.configProperties
+import org.meshtastic.buildlogic.configureGraphTasks
+import org.meshtastic.buildlogic.resolveVersionInfo
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -31,26 +29,14 @@ plugins {
     alias(libs.plugins.meshtastic.spotless)
     alias(libs.plugins.meshtastic.koin)
     id("meshtastic.kover")
-    alias(libs.plugins.aboutlibraries)
+    id("meshtastic.aboutlibraries")
 }
 
-// ── Version resolution (mirrors app/build.gradle.kts) ────────────────────────
-val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
+configureGraphTasks()
 
-val vcOffset = configProperties.getProperty("VERSION_CODE_OFFSET")?.toInt() ?: 0
-val resolvedVersionCode: Int =
-    project.findProperty("android.injected.version.code")?.toString()?.toInt()
-        ?: System.getenv("VERSION_CODE")?.toInt()
-        ?: (gitVersionProvider.get().toInt() + vcOffset)
-val resolvedVersionName: String =
-    project.findProperty("android.injected.version.name")?.toString()
-        ?: project.findProperty("appVersionName")?.toString()
-        ?: System.getenv("VERSION_NAME")
-        ?: configProperties.getProperty("VERSION_NAME_BASE")
-        ?: "1.0.0"
-val resolvedIsDebug: Boolean = project.findProperty("desktop.release")?.toString()?.toBoolean()?.not() ?: true
-val resolvedMinFwVersion: String = configProperties.getProperty("MIN_FW_VERSION") ?: ""
-val resolvedAbsMinFwVersion: String = configProperties.getProperty("ABS_MIN_FW_VERSION") ?: ""
+// ── Version resolution (shared with app/build.gradle.kts via build-logic) ────
+val versionInfo = resolveVersionInfo()
+val resolvedIsDebug: Boolean = providers.gradleProperty("desktop.release").map { !it.toBoolean() }.getOrElse(true)
 
 // ── Generate DesktopBuildConfig ──────────────────────────────────────────────
 // Mirrors AGP's BuildConfig for Android so the desktop runtime has access to the
@@ -84,12 +70,12 @@ val generateBuildConfig =
             | * Do not edit — values are derived from config.properties and git at build time.
             | */
             |object DesktopBuildConfig {
-            |    const val VERSION_CODE: Int = $resolvedVersionCode
-            |    const val VERSION_NAME: String = "$resolvedVersionName"
+            |    const val VERSION_CODE: Int = ${versionInfo.versionCode}
+            |    const val VERSION_NAME: String = "${versionInfo.versionName}"
             |    const val IS_DEBUG: Boolean = $resolvedIsDebug
             |    const val APPLICATION_ID: String = "org.meshtastic.desktop"
-            |    const val MIN_FW_VERSION: String = "$resolvedMinFwVersion"
-            |    const val ABS_MIN_FW_VERSION: String = "$resolvedAbsMinFwVersion"
+            |    const val MIN_FW_VERSION: String = "${versionInfo.minFwVersion}"
+            |    const val ABS_MIN_FW_VERSION: String = "${versionInfo.absMinFwVersion}"
             |}
             """
                 .trimMargin(),
@@ -122,12 +108,15 @@ tasks.withType<Detekt>().configureEach { exclude("**/generated/**") }
 compose.desktop {
     application {
         mainClass = "org.meshtastic.desktop.MainKt"
-        jvmArgs(
-            "-Xmx2G",
-            "-Dapple.awt.application.name=Meshtastic Desktop",
-            "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
-            "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
-        )
+
+        val desktopJvmArgs =
+            listOf(
+                "-Xmx2G",
+                "-Dapple.awt.application.name=Meshtastic Desktop",
+                "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
+                "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
+            )
+        jvmArgs(*desktopJvmArgs.toTypedArray())
 
         buildTypes.release.proguard {
             isEnabled.set(true)
@@ -155,12 +144,7 @@ compose.desktop {
 
             // Default JVM arguments for the packaged application
             // Increase max heap size to prevent OOM issues on complex maps/data
-            jvmArgs(
-                "-Xmx2G",
-                "-Dapple.awt.application.name=Meshtastic Desktop",
-                "-Dcom.apple.mrj.application.apple.menu.about.name=Meshtastic Desktop",
-                "-Dcom.apple.bundle.identifier=org.meshtastic.desktop",
-            )
+            jvmArgs(*desktopJvmArgs.toTypedArray())
 
             // App Icon & OS Specific Configurations
             macOS {
@@ -198,16 +182,16 @@ compose.desktop {
                 //   APPLE_ID                    – Apple ID email used for notarization
                 //   APPLE_APP_SPECIFIC_PASSWORD – App-specific password from appleid.apple.com
                 //   APPLE_TEAM_ID               – 10-character Apple Developer Team ID
-                val signMacOs = System.getenv("SIGN_MACOS")?.toBoolean() ?: false
+                val signMacOs = providers.environmentVariable("SIGN_MACOS").map { it.toBoolean() }.getOrElse(false)
                 if (signMacOs) {
                     signing {
                         sign.set(true)
-                        identity.set(System.getenv("APPLE_SIGNING_IDENTITY"))
+                        identity.set(providers.environmentVariable("APPLE_SIGNING_IDENTITY"))
                     }
                     notarization {
-                        appleID.set(System.getenv("APPLE_ID"))
-                        password.set(System.getenv("APPLE_APP_SPECIFIC_PASSWORD"))
-                        teamID.set(System.getenv("APPLE_TEAM_ID"))
+                        appleID.set(providers.environmentVariable("APPLE_ID"))
+                        password.set(providers.environmentVariable("APPLE_APP_SPECIFIC_PASSWORD"))
+                        teamID.set(providers.environmentVariable("APPLE_TEAM_ID"))
                     }
                 }
             }
@@ -231,7 +215,7 @@ compose.desktop {
 
             // Define target formats based on the current host OS to avoid configuration errors
             // (e.g., trying to configure Linux AppImage notarization on macOS).
-            val currentOs = System.getProperty("os.name").lowercase()
+            val currentOs = providers.systemProperty("os.name").get().lowercase()
             when {
                 currentOs.contains("mac") -> targetFormats(TargetFormat.Dmg)
                 currentOs.contains("win") -> targetFormats(TargetFormat.Msi, TargetFormat.Exe)
@@ -240,7 +224,7 @@ compose.desktop {
 
             // Reuse the resolved version from the top of this script (mirrors app/build.gradle.kts).
             // Native installers require strict numeric semantic versions (X.Y.Z) without suffixes.
-            val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(resolvedVersionName)?.value ?: "1.0.0"
+            val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(versionInfo.versionName)?.value ?: "1.0.0"
             packageVersion = sanitizedVersion
 
             description = "Meshtastic Desktop Application"
@@ -338,32 +322,3 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(kotlin("test"))
 }
-
-aboutLibraries {
-    // Run offline by default to avoid burning GitHub API calls on every build.
-    // Release builds pass -PaboutLibraries.release=true to fetch full license text + funding info.
-    val isReleaseBuild = providers.gradleProperty("aboutLibraries.release").map { it.toBoolean() }.getOrElse(false)
-    val ghToken = providers.environmentVariable("GITHUB_TOKEN")
-
-    offlineMode = !isReleaseBuild
-
-    collect {
-        fetchRemoteLicense = isReleaseBuild && ghToken.isPresent
-        fetchRemoteFunding = isReleaseBuild && ghToken.isPresent
-        if (ghToken.isPresent) {
-            gitHubApiToken = ghToken.get()
-        }
-    }
-    export {
-        excludeFields = listOf("generated")
-        outputFile = file("src/main/resources/aboutlibraries.json")
-    }
-    library {
-        duplicationMode = DuplicateMode.MERGE
-        duplicationRule = DuplicateRule.SIMPLE
-    }
-}
-
-// Ensure aboutlibraries.json is always up-to-date during the build.
-// This is required since AboutLibraries v11+ no longer auto-exports.
-tasks.named("processResources") { dependsOn("exportLibraryDefinitions") }

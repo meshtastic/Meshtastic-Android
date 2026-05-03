@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.takserver"
         androidResources.enable = false
@@ -50,8 +49,6 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kermit)
         }
-
-        jvmAndroidMain.dependencies {}
 
         commonTest.dependencies {
             implementation(projects.core.testing)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,9 @@ fun buildDbName(address: String?): String = if (address.isNullOrBlank()) {
 
 fun anonymizeAddress(address: String?): String = when {
     address == null -> "null"
+
     address.length <= DatabaseConstants.ADDRESS_ANON_SHORT_LEN -> address
+
     else ->
         address.take(DatabaseConstants.ADDRESS_ANON_EDGE_LEN) +
             "…" +

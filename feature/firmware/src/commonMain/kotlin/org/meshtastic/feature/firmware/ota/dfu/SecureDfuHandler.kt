@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,6 +133,7 @@ class SecureDfuHandler(
                     when (protocol) {
                         DfuProtocolKind.LEGACY ->
                             LegacyDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
+
                         DfuProtocolKind.SECURE ->
                             SecureDfuTransport(bleScanner, bleConnectionFactory, target, dispatchers.default)
                     }

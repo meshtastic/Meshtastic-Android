@@ -194,6 +194,7 @@ class WifiProvisionViewModel(
                         )
                     }
                 }
+
                 is ProvisionResult.Failure -> {
                     Logger.w { "$TAG: Provision failed: ${result.message}" }
                     _uiState.update {

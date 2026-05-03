@@ -20,11 +20,11 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
@@ -35,7 +35,7 @@ import org.meshtastic.core.model.Node
 interface TAKServerManager {
     val isRunning: StateFlow<Boolean>
     val connectionCount: StateFlow<Int>
-    val inboundMessages: SharedFlow<CoTMessage>
+    val inboundMessages: Flow<CoTMessage>
 
     /** Start the TAK server using [scope]. Port is fixed at [TAKServer] construction time. */
     fun start(scope: CoroutineScope)
@@ -59,7 +59,7 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     override val connectionCount: StateFlow<Int> = takServer.connectionCount
 
     private val _inboundMessages = MutableSharedFlow<CoTMessage>()
-    override val inboundMessages: SharedFlow<CoTMessage> = _inboundMessages.asSharedFlow()
+    override val inboundMessages: Flow<CoTMessage> = _inboundMessages.asFlow()
 
     // Unbounded channel preserves FIFO ordering of inbound CoT messages under load.
     // onMessage is a non-suspend callback, so we trySend (always succeeds for UNLIMITED)

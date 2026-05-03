@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,8 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.wire)
-    `maven-publish`
+    id("meshtastic.publishing")
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
     // Override minSdk for ATAK compatibility (standard is 26)

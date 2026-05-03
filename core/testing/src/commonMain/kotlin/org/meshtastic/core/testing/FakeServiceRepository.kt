@@ -20,8 +20,8 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
@@ -69,7 +69,7 @@ class FakeServiceRepository : ServiceRepository {
     }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()
-    override val meshPacketFlow: SharedFlow<MeshPacket> = _meshPacketFlow
+    override val meshPacketFlow: Flow<MeshPacket> = _meshPacketFlow.asFlow()
 
     override suspend fun emitMeshPacket(packet: MeshPacket) {
         _meshPacketFlow.emit(packet)

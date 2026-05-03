@@ -1,5 +1,36 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>ComposableParamOrder:MessageActions.kt:@Composable internal fun MessageActions</ID>
+    <ID>ComposableParamOrder:MessageItem.kt:@OptIn(ExperimentalMaterial3Api::class) @Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun MessageItem</ID>
+    <ID>ComposableParamOrder:MessageListPaged.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun MessageListPagedContent</ID>
+    <ID>ComposableParamOrder:MessageListPaged.kt:@Suppress("LongParameterList") @Composable private fun RenderPagedChatMessageRow</ID>
+    <ID>ComposableParamOrder:MessageScreenComponents.kt:@Composable fun QuickChatRow</ID>
+    <ID>ComposableParamOrder:QuickChat.kt:@Composable fun QuickChatScreen</ID>
+    <ID>ComposableParamOrder:QuickChat.kt:@Composable private fun OutlinedTextFieldWithCounter</ID>
+    <ID>ComposableParamOrder:Reaction.kt:@Composable internal fun ReactionItem</ID>
+    <ID>LambdaParameterEventTrailing:Message.kt:onSendMessage: () -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:MessageScreenComponents.kt:onClick: (QuickChatAction) -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:QuickChat.kt:onNavigateUp: () -> Unit</ID>
+    <ID>ModifierMissing:Contacts.kt:@Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList") @Composable fun ContactsScreen</ID>
+    <ID>ModifierMissing:DeliveryInfoDialog.kt:@Composable fun DeliveryInfo</ID>
+    <ID>ModifierMissing:Message.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun MessageScreen</ID>
+    <ID>ModifierMissing:MessageActionsBottomSheet.kt:@Suppress("LongMethod") @Composable fun MessageActionsContent</ID>
+    <ID>ModifierMissing:MessageScreenComponents.kt:@Composable fun ReplySnippet</ID>
+    <ID>ModifierMissing:MessageScreenComponents.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun ActionModeTopBar</ID>
+    <ID>ModifierMissing:MessageScreenComponents.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun BoxScope.ScrollToBottomFab</ID>
+    <ID>ModifierMissing:MessageScreenComponents.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun MessageTopBar</ID>
+    <ID>ModifierMissing:Share.kt:@Composable fun ShareScreen</ID>
+    <ID>ModifierNotUsedAtRoot:QuickChat.kt:modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
+    <ID>ParameterNaming:AdaptiveContactsScreen.kt:onClearSharedContactRequested: () -> Unit</ID>
+    <ID>ParameterNaming:Contacts.kt:onClearSharedContactRequested: () -> Unit</ID>
+    <ID>ParameterNaming:Contacts.kt:onDeleteSelected: () -> Unit</ID>
+    <ID>ParameterNaming:Contacts.kt:onMuteSelected: () -> Unit</ID>
+    <ID>ParameterNaming:MessageScreenComponents.kt:onToggleFilteringDisabled: () -> Unit</ID>
+    <ID>ParameterNaming:MessageScreenComponents.kt:onToggleFilteringDisabled: () -> Unit = {}</ID>
+    <ID>ParameterNaming:MessageScreenComponents.kt:onToggleShowFiltered: () -> Unit</ID>
+    <ID>ParameterNaming:MessageScreenComponents.kt:onToggleShowFiltered: () -> Unit = {}</ID>
+    <ID>ViewModelForwarding:AdaptiveContactsScreen.kt:ContactsScreen( onNavigateToShare = { backStack.add(ChannelsRoute.ChannelsGraph) }, sharedContactRequested = sharedContactRequested, requestChannelSet = requestChannelSet, onHandleDeepLink = onHandleDeepLink, onClearSharedContactRequested = onClearSharedContactRequested, onClearRequestChannelUrl = onClearRequestChannelUrl, viewModel = contactsViewModel, onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) }, onNavigateToMessages = { contactKey -> backStack.add(ContactsRoute.Messages(contactKey)) }, onNavigateToNodeDetails = { backStack.add(NodesRoute.NodeDetail(it)) }, scrollToTopEvents = scrollToTopEvents, activeContactKey = null, )</ID>
+  </CurrentIssues>
 </SmellBaseline>

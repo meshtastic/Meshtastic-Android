@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -351,32 +351,39 @@ private fun handleKeyboardShortcut(
             exitApplication()
             true
         }
+
         Key.Comma -> {
             if (TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())) {
                 multiBackstack.navigateTopLevel(TopLevelDestination.Settings.route)
             }
             true
         }
+
         Key.One -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Conversations.route)
             true
         }
+
         Key.Two -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Nodes.route)
             true
         }
+
         Key.Three -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
             true
         }
+
         Key.Four -> {
             multiBackstack.navigateTopLevel(TopLevelDestination.Connections.route)
             true
         }
+
         Key.Slash -> {
             backStack.add(SettingsRoute.About)
             true
         }
+
         else -> false
     }
 }

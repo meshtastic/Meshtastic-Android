@@ -1,35 +1,24 @@
-build:
-  maxIssues: 0
-  excludeCorrectable: false
-  weights:
-    # complexity: 2
-    # LongParameterList: 1
-    # style: 1
-    # comments: 1
-
 config:
   validation: true
   warningsAsErrors: false
   checkExhaustiveness: false
-  # when writing own rules with new properties, exclude the property path e.g.: 'my_rule_set,.*>.*>[my_property]'
-  excludes: ''
+  # when writing own rules with new properties, exclude the property path e.g.: ['my_rule_set', '.*>.*>[my_property]']
+  excludes: []
 
 processors:
   active: true
   exclude:
-    - 'DetektProgressListener'
   # - 'KtFileCountProcessor'
   # - 'PackageCountProcessor'
   # - 'ClassCountProcessor'
   # - 'FunctionCountProcessor'
   # - 'PropertyCountProcessor'
-  # - 'ProjectComplexityProcessor'
+  # - 'ProjectCyclomaticComplexityProcessor'
   # - 'ProjectCognitiveComplexityProcessor'
   # - 'ProjectLLOCProcessor'
   # - 'ProjectCLOCProcessor'
   # - 'ProjectLOCProcessor'
   # - 'ProjectSLOCProcessor'
-  # - 'LicenseHeaderLoaderExtension'
 
 console-reports:
   active: true
@@ -37,28 +26,19 @@ console-reports:
      - 'ProjectStatisticsReport'
      - 'ComplexityReport'
      - 'NotificationReport'
-     - 'FindingsReport'
-     - 'FileBasedFindingsReport'
-  #  - 'LiteFindingsReport'
-
-output-reports:
-  active: true
-  exclude:
-  # - 'TxtOutputReport'
-  # - 'XmlOutputReport'
-  # - 'HtmlOutputReport'
-  # - 'MdOutputReport'
-  # - 'SarifOutputReport'
+     - 'IssuesReport'
+     - 'FileBasedIssuesReport'
+  #  - 'LiteIssuesReport'
 
 comments:
   active: true
   AbsentOrWrongFileLicense:
     active: true
-    licenseTemplateFile: 'license.template'
+    licenseTemplate: '/\*\n \* Copyright \(c\) 20\d{2} Meshtastic LLC\n \*\n \* This program is free software: you can redistribute it and/or modify\n \* it under the terms of the GNU General Public License as published by\n \* the Free Software Foundation, either version 3 of the License, or\n \* \(at your option\) any later version\.\n \*\n \* This program is distributed in the hope that it will be useful,\n \* but WITHOUT ANY WARRANTY; without even the implied warranty of\n \* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\.\s+See the\n \* GNU General Public License for more details\.\n \*\n \* You should have received a copy of the GNU General Public License\n \* along with this program\.\s+If not, see <https://www\.gnu\.org/licenses/>\.\n \*/'
     licenseTemplateIsRegex: true
-  CommentOverPrivateFunction:
+  DocumentationOverPrivateFunction:
     active: false
-  CommentOverPrivateProperty:
+  DocumentationOverPrivateProperty:
     active: false
   DeprecatedBlockTag:
     active: false
@@ -94,22 +74,23 @@ complexity:
   active: true
   CognitiveComplexMethod:
     active: false
-    threshold: 15
+    allowedComplexity: 15
   ComplexCondition:
     active: true
-    threshold: 4
+    allowedConditions: 4
   ComplexInterface:
     active: false
-    threshold: 10
+    allowedDefinitions: 10
     includeStaticDeclarations: false
     includePrivateDeclarations: false
     ignoreOverloaded: false
   CyclomaticComplexMethod:
     active: true
-    threshold: 15
+    allowedComplexity: 15
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
     ignoreNestingFunctions: false
+    ignoreLocalFunctions: false
     nestingFunctions:
       - 'also'
       - 'apply'
@@ -125,31 +106,31 @@ complexity:
     ignoredLabels: []
   LargeClass:
     active: true
-    threshold: 600
+    allowedLines: 600
   LongMethod:
     active: true
-    threshold: 60
+    allowedLines: 60
     ignoreAnnotated: [ 'Preview', 'PreviewLightDark', 'PreviewScreenSizes' ]
   LongParameterList:
     active: true
-    functionThreshold: 12
-    constructorThreshold: 7
+    allowedFunctionParameters: 12
+    allowedConstructorParameters: 7
     ignoreDefaultParameters: true
     ignoreDataClasses: true
     ignoreAnnotatedParameter: []
   MethodOverloading:
     active: false
-    threshold: 6
+    allowedOverloads: 6
   NamedArguments:
     active: false
-    threshold: 3
+    allowedArguments: 3
     ignoreArgumentsMatchingNames: false
   NestedBlockDepth:
     active: true
-    threshold: 4
+    allowedDepth: 4
   NestedScopeFunctions:
     active: false
-    threshold: 1
+    allowedDepth: 1
     functions:
       - 'kotlin.apply'
       - 'kotlin.run'
@@ -161,22 +142,21 @@ complexity:
   StringLiteralDuplication:
     active: false
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
-    threshold: 3
+    allowedDuplications: 3
     ignoreAnnotation: true
-    excludeStringsWithLessThan5Characters: true
+    allowedWithLengthLessThan: 5
     ignoreStringsRegex: '$^'
   TooManyFunctions:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
-    thresholdInFiles: 11
-    thresholdInClasses: 11
-    thresholdInInterfaces: 11
-    thresholdInObjects: 11
-    thresholdInEnums: 11
+    allowedFunctionsPerFile: 11
+    allowedFunctionsPerClass: 11
+    allowedFunctionsPerInterface: 11
+    allowedFunctionsPerObject: 11
+    allowedFunctionsPerEnum: 11
     ignoreDeprecated: false
     ignorePrivate: false
     ignoreOverridden: false
-    ignoreAnnotated: [ 'Preview', 'PreviewLightDark', 'PreviewScreenSizes' ]
     ignoreAnnotatedFunctions: [ 'Preview', 'PreviewLightDark', 'PreviewScreenSizes' ]
 
 coroutines:
@@ -224,7 +204,7 @@ empty-blocks:
     active: true
   EmptyInitBlock:
     active: true
-  EmptyKtFile:
+  EmptyKotlinFile:
     active: true
   EmptySecondaryConstructor:
     active: true
@@ -306,135 +286,96 @@ exceptions:
       - 'RuntimeException'
       - 'Throwable'
 
-formatting:
+ktlint:
   active: true
-  android: false
-  autoCorrect: true
+  code_style: intellij_idea
   AnnotationOnSeparateLine:
     active: false
-    autoCorrect: true
   AnnotationSpacing:
     active: false
-    autoCorrect: true
   ArgumentListWrapping:
     active: false
-    autoCorrect: true
   ChainWrapping:
     active: true
-    autoCorrect: true
   CommentSpacing:
     active: true
-    autoCorrect: true
   EnumEntryNameCase:
     active: false
-    autoCorrect: true
   Filename:
     active: false
   FinalNewline:
     active: true
-    autoCorrect: true
     insertFinalNewLine: true
   ImportOrdering:
     active: false
-    autoCorrect: true
     layout: 'idea'
   Indentation:
     active: false
-    autoCorrect: true
     indentSize: 4
   MaximumLineLength:
     active: false # Use default detekt rule
     maxLineLength: 120
   ModifierOrdering:
     active: true
-    autoCorrect: true
   MultiLineIfElse:
     active: true
-    autoCorrect: true
   NoBlankLineBeforeRbrace:
     active: true
-    autoCorrect: true
   NoConsecutiveBlankLines:
     active: true
-    autoCorrect: true
   NoEmptyClassBody:
     active: true
-    autoCorrect: true
   NoEmptyFirstLineInMethodBlock:
     active: false
-    autoCorrect: true
   NoLineBreakAfterElse:
     active: true
-    autoCorrect: true
   NoLineBreakBeforeAssignment:
     active: true
-    autoCorrect: true
   NoMultipleSpaces:
     active: true
-    autoCorrect: true
   NoSemicolons:
     active: true
-    autoCorrect: true
   NoTrailingSpaces:
     active: true
-    autoCorrect: true
   NoUnitReturn:
     active: true
-    autoCorrect: true
   NoUnusedImports:
     active: true
-    autoCorrect: true
   NoWildcardImports:
     active: true
   PackageName:
     active: true
-    autoCorrect: true
   ParameterListWrapping:
     active: true
-    autoCorrect: true
   SpacingAroundColon:
     active: true
-    autoCorrect: true
   SpacingAroundComma:
     active: true
-    autoCorrect: true
   SpacingAroundCurly:
     active: true
-    autoCorrect: true
   SpacingAroundDot:
     active: true
-    autoCorrect: true
   SpacingAroundDoubleColon:
     active: false
-    autoCorrect: true
   SpacingAroundKeyword:
     active: true
-    autoCorrect: true
   SpacingAroundOperators:
     active: true
-    autoCorrect: true
   SpacingAroundParens:
     active: true
-    autoCorrect: true
   SpacingAroundRangeOperator:
     active: true
-    autoCorrect: true
   SpacingBetweenDeclarationsWithAnnotations:
     active: false
-    autoCorrect: true
   SpacingBetweenDeclarationsWithComments:
     active: false
-    autoCorrect: true
   StringTemplate:
     active: true
-    autoCorrect: true
   TrailingCommaOnCallSite:
     active: false
-    autoCorrect: true
     useTrailingCommaOnCallSite: true
   TrailingCommaOnDeclarationSite:
     active: false
-    autoCorrect: true
     useTrailingCommaOnDeclarationSite: true
 
 naming:
@@ -456,10 +397,10 @@ naming:
   ForbiddenClassName:
     active: false
     forbiddenName: []
-  FunctionMaxLength:
+  FunctionNameMaxLength:
     active: false
     maximumFunctionNameLength: 30
-  FunctionMinLength:
+  FunctionNameMinLength:
     active: false
     minimumFunctionNameLength: 3
   FunctionNaming:
@@ -519,7 +460,7 @@ performance:
     active: true
   CouldBeSequence:
     active: false
-    threshold: 3
+    allowedOperations: 3
   ForEachOnRange:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidHostTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
@@ -637,6 +578,10 @@ potential-bugs:
 
 style:
   active: true
+  AbstractClassCanBeConcreteClass:
+    active: true
+  AbstractClassCanBeInterface:
+    active: true
   AlsoCouldBeApply:
     active: false
   BracesOnIfStatements:
@@ -702,8 +647,6 @@ style:
         value: 'java.lang.annotation.Retention'
       - reason: 'it is a java annotation. Use `kotlin.annotation.Repeatable` instead.'
         value: 'java.lang.annotation.Repeatable'
-      - reason: 'Kotlin does not support @Inherited annotation, see https://youtrack.jetbrains.com/issue/KT-22265'
-        value: 'java.lang.annotation.Inherited'
   ForbiddenComment:
     active: false
     comments:
@@ -716,8 +659,8 @@ style:
     allowedPatterns: ''
   ForbiddenImport:
     active: false
-    imports: []
-    forbiddenPatterns: ''
+    forbiddenImports: []
+    allowedImports: []
   ForbiddenMethodCall:
     active: false
     methods:
@@ -770,7 +713,7 @@ style:
     excludeImportStatements: true
     excludeCommentStatements: false
     excludeRawStrings: true
-  MayBeConst:
+  MayBeConstant:
     active: true
   ModifierOrder:
     active: true
@@ -796,15 +739,13 @@ style:
     active: true
   OptionalUnit:
     active: false
-  PreferToOverPairSyntax:
-    active: false
   ProtectedMemberInFinalClass:
     active: true
   RedundantExplicitType:
     active: false
   RedundantHigherOrderMapUsage:
     active: true
-  RedundantVisibilityModifierRule:
+  RedundantVisibilityModifier:
     active: false
   ReturnCount:
     active: true
@@ -818,7 +759,7 @@ style:
     active: true
   SerialVersionUIDInSerializableClass:
     active: true
-  SpacingBetweenPackageAndImports:
+  SpacingAfterPackageAndImports:
     active: false
   StringShouldBeRawString:
     active: false
@@ -839,10 +780,6 @@ style:
     active: false
     acceptableLength: 4
     allowNonStandardGrouping: false
-  UnnecessaryAbstractClass:
-    active: true
-  UnnecessaryAnnotationUseSiteTarget:
-    active: false
   UnnecessaryApply:
     active: true
   UnnecessaryBackticks:
@@ -860,22 +797,22 @@ style:
   UnnecessaryParentheses:
     active: false
     allowForUnclearPrecedence: false
-  UntilInsteadOfRangeTo:
-    active: false
-  UnusedImports:
+  UnusedImport:
     active: true
   UnusedParameter:
     active: true
     allowedNames: 'ignored|expected'
   UnusedPrivateClass:
     active: true
-  UnusedPrivateMember:
+  UnusedPrivateFunction:
     active: true
     allowedNames: ''
     ignoreAnnotated: [ 'Preview', 'PreviewLightDark', 'PreviewScreenSizes' ]
   UnusedPrivateProperty:
     active: true
     allowedNames: '_|ignored|expected|serialVersionUID'
+  UnusedVariable:
+    active: true
   UseAnyOrNoneInsteadOfFind:
     active: true
   UseArrayLiteralsInAnnotations:

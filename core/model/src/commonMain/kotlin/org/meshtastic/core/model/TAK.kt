@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,19 +78,34 @@ fun getStringResFrom(role: MemberRole): StringResource = when (role) {
 
 @Suppress("CyclomaticComplexMethod", "MagicNumber")
 fun getColorFrom(team: Team): Long = when (team) {
-    Team.Unspecifed_Color -> 0xFF00FFFF // Default to Cyan
+    Team.Unspecifed_Color -> 0xFF00FFFF
+
+    // Default to Cyan
     Team.White -> 0xFFFFFFFF
+
     Team.Yellow -> 0xFFFFFF00
+
     Team.Orange -> 0xFFFFA500
+
     Team.Magenta -> 0xFFFF00FF
+
     Team.Red -> 0xFFFF0000
+
     Team.Maroon -> 0xFF800000
+
     Team.Purple -> 0xFF800080
+
     Team.Dark_Blue -> 0xFF00008B
+
     Team.Blue -> 0xFF0000FF
+
     Team.Cyan -> 0xFF00FFFF
+
     Team.Teal -> 0xFF008080
+
     Team.Green -> 0xFF00FF00
+
     Team.Dark_Green -> 0xFF006400
+
     Team.Brown -> 0xFFA52A2A
 }

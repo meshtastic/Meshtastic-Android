@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -215,9 +215,12 @@ class CompassViewModel(
         val dop: Float? =
             when {
                 pdop > 0 -> pdop / HUNDRED
+
                 hdop > 0 && vdop > 0 ->
                     sqrt((hdop / HUNDRED).toDouble().pow(2.0) + (vdop / HUNDRED).toDouble().pow(2.0)).toFloat()
+
                 hdop > 0 -> hdop / HUNDRED
+
                 else -> null
             }
 

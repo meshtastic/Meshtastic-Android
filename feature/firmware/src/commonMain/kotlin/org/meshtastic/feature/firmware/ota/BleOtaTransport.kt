@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -167,16 +167,19 @@ class BleOtaTransport(
                         handshakeComplete = true
                     }
                 }
+
                 is OtaResponse.Erasing -> {
                     Logger.i { "BLE OTA: Device erasing flash..." }
                     onHandshakeStatus(OtaHandshakeStatus.Erasing)
                 }
+
                 is OtaResponse.Error -> {
                     if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
                         throw OtaProtocolException.HashRejected(sha256Hash)
                     }
                     throw OtaProtocolException.CommandFailed(command, parsed)
                 }
+
                 else -> {
                     Logger.w { "BLE OTA: Unexpected handshake response: $response" }
                 }
@@ -211,6 +214,7 @@ class BleOtaTransport(
 
                 when (val parsed = OtaResponse.parse(response)) {
                     is OtaResponse.Ack -> {}
+
                     is OtaResponse.Ok -> {
                         if (nextSentBytes >= totalBytes && isLastPacketOfChunk) {
                             sentBytes = nextSentBytes
@@ -218,12 +222,14 @@ class BleOtaTransport(
                             return@safeCatching Unit
                         }
                     }
+
                     is OtaResponse.Error -> {
                         if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
                             throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
                         }
                         throw OtaProtocolException.TransferFailed("Transfer failed: ${parsed.message}")
                     }
+
                     else -> throw OtaProtocolException.TransferFailed("Unexpected response: $response")
                 }
             }
@@ -235,12 +241,14 @@ class BleOtaTransport(
         val finalResponse = waitForResponse(VERIFICATION_TIMEOUT)
         when (val parsed = OtaResponse.parse(finalResponse)) {
             is OtaResponse.Ok -> Unit
+
             is OtaResponse.Error -> {
                 if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
                     throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
                 }
                 throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
             }
+
             else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
         }
     }

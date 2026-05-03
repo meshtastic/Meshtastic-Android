@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -625,16 +625,16 @@ fun MapView(
                     onSendClicked = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
-                            finalWp = finalWp.copy(id = mapViewModel.generatePacketId() ?: 0)
+                            finalWp = finalWp.copy(id = mapViewModel.generatePacketId())
                         }
-                        if ((updatedWp.icon ?: 0) == 0) {
+                        if (updatedWp.icon == 0) {
                             finalWp = finalWp.copy(icon = 0x1F4CD)
                         }
                         mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },
                     onDeleteClicked = { wpToDelete ->
-                        if ((wpToDelete.locked_to ?: 0) == 0 && isConnected && wpToDelete.id != 0) {
+                        if (wpToDelete.locked_to == 0 && isConnected && wpToDelete.id != 0) {
                             mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1))
                         }
                         mapViewModel.deleteWaypoint(wpToDelete.id)
@@ -959,7 +959,6 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
         when (displayUnits) {
             DisplayUnits.METRIC -> "%.1f Km/h".format(speedInMps.mpsToKmph())
             DisplayUnits.IMPERIAL -> "%.1f mph".format(speedInMps.mpsToMph())
-            else -> mpsText
         }
     } else {
         mpsText
@@ -1016,6 +1015,7 @@ private fun offsetPolyline(
         headingPoints.mapIndexed { index, _ ->
             when (index) {
                 0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
+
                 headingPoints.lastIndex ->
                     SphericalUtil.computeHeading(
                         headingPoints[headingPoints.lastIndex - 1],
@@ -1050,6 +1050,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
             try {
                 when (layerItem.layerType) {
                     LayerType.KML -> KmlLayer(map, inputStream, context)
+
                     LayerType.GEOJSON ->
                         GeoJsonLayer(map, JSONObject(inputStream.bufferedReader().use { it.readText() }))
                 }

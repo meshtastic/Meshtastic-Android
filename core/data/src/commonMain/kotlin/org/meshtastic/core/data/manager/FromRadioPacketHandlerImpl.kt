@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,23 +72,36 @@ class FromRadioPacketHandlerImpl(
 
         when {
             myInfo != null -> router.value.configFlowManager.handleMyInfo(myInfo)
+
             // deviceuiConfig arrives immediately after my_info (STATE_SEND_UIDATA). It carries
             // the device's display, theme, node-filter, and other UI preferences.
             deviceUIConfig != null -> router.value.configHandler.handleDeviceUIConfig(deviceUIConfig)
+
             metadata != null -> router.value.configFlowManager.handleLocalMetadata(metadata)
+
             nodeInfo != null -> {
                 router.value.configFlowManager.handleNodeInfo(nodeInfo)
                 serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
             }
+
             configCompleteId != null -> router.value.configFlowManager.handleConfigComplete(configCompleteId)
+
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
+
             queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
+
             config != null -> router.value.configHandler.handleDeviceConfig(config)
+
             moduleConfig != null -> router.value.configHandler.handleModuleConfig(moduleConfig)
+
             channel != null -> router.value.configHandler.handleChannel(channel)
+
             fileInfo != null -> router.value.configFlowManager.handleFileInfo(fileInfo)
+
             xmodemPacket != null -> router.value.xmodemManager.handleIncomingXModem(xmodemPacket)
+
             clientNotification != null -> handleClientNotification(clientNotification)
+
             // Firmware rebooted without a transport-level disconnect (common on serial/TCP).
             // Re-handshake immediately rather than waiting for the 30s stall guard.
             proto.rebooted != null -> {
@@ -111,22 +124,27 @@ class FromRadioPacketHandlerImpl(
                         Logger.i { "Key verification inform from ${inform.remote_longname}" }
                         Pair(getStringSuspend(Res.string.key_verification_title), Notification.Type.Info)
                     }
+
                     request != null -> {
                         Logger.i { "Key verification request from ${request.remote_longname}" }
                         Pair(getStringSuspend(Res.string.key_verification_request_title), Notification.Type.Info)
                     }
+
                     verificationFinal != null -> {
                         Logger.i { "Key verification final from ${verificationFinal.remote_longname}" }
                         Pair(getStringSuspend(Res.string.key_verification_final_title), Notification.Type.Info)
                     }
+
                     cn.duplicated_public_key != null -> {
                         Logger.w { "Duplicated public key notification received" }
                         Pair(getStringSuspend(Res.string.duplicated_public_key_title), Notification.Type.Warning)
                     }
+
                     cn.low_entropy_key != null -> {
                         Logger.w { "Low entropy key notification received" }
                         Pair(getStringSuspend(Res.string.low_entropy_key_title), Notification.Type.Warning)
                     }
+
                     else -> Pair(getStringSuspend(Res.string.client_notification), Notification.Type.Info)
                 }
 

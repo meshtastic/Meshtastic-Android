@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -312,8 +312,11 @@ class MeshServiceNotificationsImpl(
             when (state) {
                 is ConnectionState.Connected ->
                     getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
+
                 is ConnectionState.Disconnected -> getString(Res.string.disconnected)
+
                 is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
+
                 is ConnectionState.Connecting -> getString(Res.string.connecting)
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem {
                 "us",
                 "uk",
                 -> MeasurementSystem.IMPERIAL
+
                 else -> MeasurementSystem.METRIC
             }
         } catch (@Suppress("TooGenericExceptionCaught") ignored: Exception) {
@@ -55,6 +56,7 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem {
             "MM",
             "GB",
             -> MeasurementSystem.IMPERIAL
+
             else -> MeasurementSystem.METRIC
         }
     }

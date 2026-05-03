@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,6 +93,7 @@ class StoreForwardPacketHandlerImpl(
         val hash =
             when {
                 sfpp.message_hash.size != 0 -> sfpp.message_hash.toByteArray()
+
                 !isFragment && sfpp.message.size != 0 -> {
                     SfppHasher.computeMessageHash(
                         encryptedPayload = sfpp.message.toByteArray(),
@@ -106,6 +107,7 @@ class StoreForwardPacketHandlerImpl(
                         id = sfpp.encapsulated_id,
                     )
                 }
+
                 else -> null
             } ?: return
 
@@ -152,6 +154,7 @@ class StoreForwardPacketHandlerImpl(
                     )
                 dataHandler.value.rememberDataPacket(u, myNodeNum)
             }
+
             s.history != null -> {
                 val h = s.history!!
                 val text =
@@ -166,10 +169,12 @@ class StoreForwardPacketHandlerImpl(
                 dataHandler.value.rememberDataPacket(u, myNodeNum)
                 historyManager.updateStoreForwardLastRequest("router_history", h.last_request, "Unknown")
             }
+
             s.heartbeat != null -> {
                 val hb = s.heartbeat!!
                 Logger.d { "rxHeartbeat from=${dataPacket.from} period=${hb.period} secondary=${hb.secondary}" }
             }
+
             s.text != null -> {
                 if (s.rr == StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
                     dataPacket.to = DataPacket.ID_BROADCAST
@@ -177,6 +182,7 @@ class StoreForwardPacketHandlerImpl(
                 val u = dataPacket.copy(bytes = s.text, dataType = PortNum.TEXT_MESSAGE_APP.value)
                 dataHandler.value.rememberDataPacket(u, myNodeNum)
             }
+
             else -> {}
         }
     }

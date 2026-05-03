@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,15 +132,22 @@ class NodeDetailViewModel(
         when (action) {
             is NodeMenuAction.Remove ->
                 nodeManagementActions.requestRemoveNode(viewModelScope, action.node, onAfterRemove)
+
             is NodeMenuAction.Ignore -> nodeManagementActions.requestIgnoreNode(viewModelScope, action.node)
+
             is NodeMenuAction.Mute -> nodeManagementActions.requestMuteNode(viewModelScope, action.node)
+
             is NodeMenuAction.Favorite -> nodeManagementActions.requestFavoriteNode(viewModelScope, action.node)
+
             is NodeMenuAction.RequestUserInfo ->
                 nodeRequestActions.requestUserInfo(viewModelScope, action.node.num, action.node.user.long_name)
+
             is NodeMenuAction.RequestNeighborInfo ->
                 nodeRequestActions.requestNeighborInfo(viewModelScope, action.node.num, action.node.user.long_name)
+
             is NodeMenuAction.RequestPosition ->
                 nodeRequestActions.requestPosition(viewModelScope, action.node.num, action.node.user.long_name)
+
             is NodeMenuAction.RequestTelemetry ->
                 nodeRequestActions.requestTelemetry(
                     viewModelScope,
@@ -148,8 +155,10 @@ class NodeDetailViewModel(
                     action.node.user.long_name,
                     action.type,
                 )
+
             is NodeMenuAction.TraceRoute ->
                 nodeRequestActions.requestTraceroute(viewModelScope, action.node.num, action.node.user.long_name)
+
             else -> {}
         }
     }
@@ -169,10 +178,12 @@ class NodeDetailViewModel(
                     EnsureSessionResult.AlreadyActive,
                     EnsureSessionResult.Refreshed,
                     -> _navigationEvents.trySend(SettingsRoute.Settings(destNum))
+
                     EnsureSessionResult.Disconnected ->
                         snackbarManager.showSnackbar(
                             UiText.Resource(Res.string.connect_radio_for_remote_admin).resolve(),
                         )
+
                     EnsureSessionResult.Timeout ->
                         snackbarManager.showSnackbar(UiText.Resource(Res.string.remote_admin_unreachable).resolve())
                 }

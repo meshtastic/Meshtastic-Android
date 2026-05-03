@@ -2,15 +2,108 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>MagicNumber:EditIPv4Preference.kt$0xff</ID>
-    <ID>MagicNumber:EditIPv4Preference.kt$16</ID>
-    <ID>MagicNumber:EditIPv4Preference.kt$24</ID>
-    <ID>MagicNumber:EditIPv4Preference.kt$8</ID>
-    <ID>MagicNumber:EditListPreference.kt$12345</ID>
-    <ID>MagicNumber:EditListPreference.kt$67890</ID>
-    <ID>MagicNumber:LazyColumnDragAndDropDemo.kt$50</ID>
-    <ID>MatchingDeclarationName:LocalTracerouteMapOverlayInsetsProvider.kt$TracerouteMapOverlayInsets</ID>
-    <ID>Wrapping:PlatformUtils.kt${ lat, lon, label -> val encodedLabel = URLEncoder.encode(label, "utf-8") val uri = "geo:0,0?q=$lat,$lon&amp;z=17&amp;label=$encodedLabel".toUri() val intent = Intent(Intent.ACTION_VIEW, uri).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) } try { if (intent.resolveActivity(context.packageManager) != null) { context.startActivity(intent) } } catch (ex: ActivityNotFoundException) { Logger.d { "Failed to open geo intent: $ex" } } }</ID>
-    <ID>Wrapping:PlatformUtils.kt${ url -> try { val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) } context.startActivity(intent) } catch (ex: ActivityNotFoundException) { Logger.d { "Failed to open URL intent: $ex" } } }</ID>
+    <ID>ComposableParamOrder:AlertDialogs.kt:@Composable fun MeshtasticResourceDialog</ID>
+    <ID>ComposableParamOrder:AlertDialogs.kt:@Composable fun MeshtasticTextDialog</ID>
+    <ID>ComposableParamOrder:ConnectionsNavIcon.kt:@Composable fun ConnectionsNavIcon</ID>
+    <ID>ComposableParamOrder:EditBase64Preference.kt:@Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber") @Composable fun EditBase64Preference</ID>
+    <ID>ComposableParamOrder:EditTextPreference.kt:@Composable fun EditTextPreference</ID>
+    <ID>ComposableParamOrder:ElevationInfo.kt:@Composable fun ElevationInfo</ID>
+    <ID>ComposableParamOrder:LastHeardInfo.kt:@Composable fun LastHeardInfo</ID>
+    <ID>ComposableParamOrder:MainAppBar.kt:@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class) @Composable fun MainAppBar</ID>
+    <ID>ComposableParamOrder:MaterialBatteryInfo.kt:@Suppress("MagicNumber", "LongMethod") @Composable fun MaterialBatteryInfo</ID>
+    <ID>ComposableParamOrder:NodeChip.kt:@Composable fun NodeChip</ID>
+    <ID>ComposableParamOrder:NodeKeyStatusIcon.kt:@Composable fun NodeKeyStatusIcon</ID>
+    <ID>ComposableParamOrder:SatelliteCountInfo.kt:@Composable fun SatelliteCountInfo</ID>
+    <ID>ComposableParamOrder:SignalInfo.kt:@Composable fun SignalInfo</ID>
+    <ID>ComposableParamOrder:SwitchPreference.kt:@Composable fun SwitchPreference</ID>
+    <ID>CompositionLocalAllowlist:ContrastLevel.kt:/** * Composition local providing the current [ContrastLevel]. * * Read by components that need to adapt their rendering for accessibility (e.g. message bubbles, signal indicators). */ val LocalContrastLevel = staticCompositionLocalOf { ContrastLevel.STANDARD }</ID>
+    <ID>CompositionLocalAllowlist:LocalAnalyticsIntroProvider.kt:val LocalAnalyticsIntroProvider = compositionLocalOf&lt;@Composable () -> Unit> { {} }</ID>
+    <ID>CompositionLocalAllowlist:LocalBarcodeScannerProvider.kt:val LocalBarcodeScannerProvider = compositionLocalOf&lt;@Composable (onResult: (String?) -> Unit) -> BarcodeScanner> { { object : BarcodeScanner { override fun startScan() { // Default NO-OP } } } }</ID>
+    <ID>CompositionLocalAllowlist:LocalBarcodeScannerProvider.kt:val LocalBarcodeScannerSupported = compositionLocalOf { false }</ID>
+    <ID>CompositionLocalAllowlist:LocalInlineMapProvider.kt:val LocalInlineMapProvider = compositionLocalOf&lt;@Composable (node: Node, modifier: Modifier) -> Unit> { { _, _ -> } }</ID>
+    <ID>CompositionLocalAllowlist:LocalMapMainScreenProvider.kt:/** * Provides the platform-specific Map Main Screen. On Desktop or JVM targets where native maps aren't available yet, it * falls back to a [PlaceholderScreen]. */ @Suppress("Wrapping") val LocalMapMainScreenProvider = compositionLocalOf&lt; @Composable (onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) -> Unit, > { { _, _, _ -> PlaceholderScreen("Map") } }</ID>
+    <ID>CompositionLocalAllowlist:LocalNfcScannerProvider.kt:val LocalNfcScannerProvider = compositionLocalOf&lt;@Composable (onResult: (String?) -> Unit, onNfcDisabled: () -> Unit) -> Unit> { { _, _ -> } }</ID>
+    <ID>CompositionLocalAllowlist:LocalNfcScannerProvider.kt:val LocalNfcScannerSupported = compositionLocalOf { false }</ID>
+    <ID>CompositionLocalAllowlist:LocalNodeMapScreenProvider.kt:/** * Provides the platform-specific Map Screen for a Node (e.g. Google Maps or OSMDroid on Android). On Desktop or JVM * targets where native maps aren't available yet, it falls back to a [PlaceholderScreen]. */ @Suppress("Wrapping") val LocalNodeMapScreenProvider = compositionLocalOf&lt;@Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit> { { destNum, _ -> PlaceholderScreen("Node Map ($destNum)") } }</ID>
+    <ID>CompositionLocalAllowlist:LocalNodeTrackMapProvider.kt:/** * Provides an embeddable position-track map composable that renders a polyline with markers for the given [positions]. * Unlike [LocalNodeMapScreenProvider], this does **not** include a Scaffold or AppBar — it is designed to be embedded * inside another screen layout (e.g. the position-log adaptive layout). * * Supports optional synchronized selection: * - [selectedPositionTime]: the `Position.time` of the currently selected position (or `null` for no selection). When * non-null, the map should visually highlight the corresponding marker and center the camera on it. * - [onPositionSelected]: callback invoked when a position marker is tapped on the map, passing the `Position.time` so * the host can synchronize the card list. * * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen]. */ @Suppress("Wrapping") val LocalNodeTrackMapProvider = compositionLocalOf&lt; @Composable ( destNum: Int, positions: List&lt;Position>, modifier: Modifier, selectedPositionTime: Int?, onPositionSelected: ((Int) -> Unit)?, ) -> Unit, > { { _, _, _, _, _ -> PlaceholderScreen("Position Track Map") } }</ID>
+    <ID>CompositionLocalAllowlist:LocalTracerouteMapOverlayInsetsProvider.kt:val LocalTracerouteMapOverlayInsetsProvider = compositionLocalOf { TracerouteMapOverlayInsets() }</ID>
+    <ID>CompositionLocalAllowlist:LocalTracerouteMapProvider.kt:/** * Provides an embeddable traceroute map composable that renders node markers and forward/return offset polylines for a * traceroute result. Unlike [LocalMapViewProvider], this does **not** include a Scaffold, AppBar, waypoints, location * tracking, custom tiles, or any main-map features — it is designed to be embedded inside `TracerouteMapScreen`'s * scaffold. * * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen]. * * Parameters: * - `tracerouteOverlay`: The overlay with forward/return route node nums. * - `tracerouteNodePositions`: Map of node num to position snapshots for the route nodes. * - `onMappableCountChanged`: Callback with (shown, total) node counts. * - `modifier`: Compose modifier for the map. */ @Suppress("Wrapping") val LocalTracerouteMapProvider = compositionLocalOf&lt; @Composable ( tracerouteOverlay: TracerouteOverlay?, tracerouteNodePositions: Map&lt;Int, Position>, onMappableCountChanged: (Int, Int) -> Unit, modifier: Modifier, ) -> Unit, > { { _, _, _, _ -> PlaceholderScreen("Traceroute Map") } }</ID>
+    <ID>CompositionLocalAllowlist:LocalTracerouteMapScreenProvider.kt:/** * Provides the platform-specific Traceroute Map Screen. On Desktop or JVM targets where native maps aren't available * yet, it falls back to a [PlaceholderScreen]. */ @Suppress("Wrapping") val LocalTracerouteMapScreenProvider = compositionLocalOf&lt;@Composable (destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit) -> Unit> { { _, _, _, _ -> PlaceholderScreen("Traceroute Map") } }</ID>
+    <ID>CompositionLocalAllowlist:MapViewProvider.kt:val LocalMapViewProvider = compositionLocalOf&lt;MapViewProvider?> { null }</ID>
+    <ID>ContentSlotReused:AdaptiveTwoPane.kt:second: @Composable ColumnScope.() -> Unit</ID>
+    <ID>FunctionTypeModifierSpacing:Theme.kt:@Composable()</ID>
+    <ID>LambdaParameterEventTrailing:MainAppBar.kt:onClickChip: (Node) -> Unit</ID>
+    <ID>LambdaParameterInRestartableEffect:EmojiPickerDialog.kt:onCategoryChanged: (Int) -> Unit</ID>
+    <ID>LambdaParameterInRestartableEffect:PlatformUtils.kt:check: () -> Boolean</ID>
+    <ID>LambdaParameterInRestartableEffect:TracerouteAlertHandler.kt:onNavigateToMap: (destinationNodeNum: Int, requestId: Int, logUuid: String?) -> Unit</ID>
+    <ID>MagicNumber:EditIPv4Preference.kt:0xff</ID>
+    <ID>MagicNumber:EditIPv4Preference.kt:16</ID>
+    <ID>MagicNumber:EditIPv4Preference.kt:24</ID>
+    <ID>MagicNumber:EditIPv4Preference.kt:8</ID>
+    <ID>MagicNumber:EditListPreference.kt:12345</ID>
+    <ID>MagicNumber:EditListPreference.kt:67890</ID>
+    <ID>MagicNumber:LazyColumnDragAndDropDemo.kt:50</ID>
+    <ID>MatchingDeclarationName:LocalTracerouteMapOverlayInsetsProvider.kt:TracerouteMapOverlayInsets</ID>
+    <ID>ModifierMissing:AdaptiveTwoPane.kt:@Composable fun AdaptiveTwoPane</ID>
+    <ID>ModifierMissing:ChannelItem.kt:@Composable fun ChannelItem</ID>
+    <ID>ModifierMissing:ChannelSelection.kt:@Composable fun ChannelSelection</ID>
+    <ID>ModifierMissing:EmojiPickerDialog.kt:@Composable fun EmojiPickerDialog</ID>
+    <ID>ModifierMissing:IndoorAirQuality.kt:@Suppress("LongMethod", "UnusedPrivateProperty") @Composable fun IndoorAirQuality</ID>
+    <ID>ModifierMissing:LoraSignalIndicator.kt:@Composable fun LoraSignalIndicator</ID>
+    <ID>ModifierMissing:LoraSignalIndicator.kt:@Composable fun SnrAndRssi</ID>
+    <ID>ModifierMissing:PlaceholderScreen.kt:@Composable fun PlaceholderScreen</ID>
+    <ID>ModifierMissing:PreferenceDivider.kt:@Composable fun PreferenceDivider</ID>
+    <ID>ModifierMissing:SecurityIcon.kt:@Composable fun SecurityIcon</ID>
+    <ID>ModifierMissing:SharedContactDialog.kt:@Composable fun SharedContactDialog</ID>
+    <ID>ModifierMissing:SlidingSelector.kt:@Composable fun OptionLabel</ID>
+    <ID>ModifierMissing:TracerouteAlertHandler.kt:@Composable fun TracerouteAlertHandler</ID>
+    <ID>ModifierNaming:MeshtasticAppShell.kt:hostModifier: Modifier = Modifier</ID>
+    <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt:modifier = modifier.fillMaxWidth().padding(all = 16.dp)</ID>
+    <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt:modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)</ID>
+    <ID>ModifierReused:PreferenceCategory.kt:Card(modifier = modifier.padding(bottom = 8.dp)) { Column( modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally, ) { ProvideTextStyle(MaterialTheme.typography.bodyLarge) { content() } } }</ID>
+    <ID>ModifierReused:PreferenceCategory.kt:Text( text, modifier = modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp, end = 16.dp), style = MaterialTheme.typography.titleLarge, )</ID>
+    <ID>ModifierReused:TextDividerPreference.kt:Card(modifier = modifier.fillMaxWidth()) { Row(modifier = modifier.fillMaxWidth().padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)) } } }</ID>
+    <ID>ModifierReused:TextDividerPreference.kt:Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End))</ID>
+    <ID>ModifierReused:TextDividerPreference.kt:Row(modifier = modifier.fillMaxWidth().padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)) } }</ID>
+    <ID>MultipleEmitters:PreferenceCategory.kt:@Composable fun PreferenceCategory</ID>
+    <ID>MutableStateAutoboxing:EmojiPickerDialog.kt:mutableStateOf(0)</ID>
+    <ID>ParameterNaming:BitwisePreference.kt:onItemSelected: (Int) -> Unit</ID>
+    <ID>ParameterNaming:ChannelSelection.kt:onSelected: (Boolean) -> Unit</ID>
+    <ID>ParameterNaming:DropDownPreference.kt:onItemSelected: (T) -> Unit</ID>
+    <ID>ParameterNaming:EditIPv4Preference.kt:onValueChanged: (Int) -> Unit</ID>
+    <ID>ParameterNaming:EditListPreference.kt:crossinline onValuesChanged: (List&lt;T>) -> Unit</ID>
+    <ID>ParameterNaming:EditPasswordPreference.kt:onValueChanged: (String) -> Unit</ID>
+    <ID>ParameterNaming:EditTextPreference.kt:onValueChanged: (Double) -> Unit</ID>
+    <ID>ParameterNaming:EditTextPreference.kt:onValueChanged: (Float) -> Unit</ID>
+    <ID>ParameterNaming:EditTextPreference.kt:onValueChanged: (Int) -> Unit</ID>
+    <ID>ParameterNaming:EditTextPreference.kt:onValueChanged: (String) -> Unit</ID>
+    <ID>ParameterNaming:EmojiPickerDialog.kt:onCategoryChanged: (Int) -> Unit</ID>
+    <ID>ParameterNaming:EmojiPickerDialog.kt:onCategorySelected: (Int) -> Unit</ID>
+    <ID>ParameterNaming:EmojiPickerDialog.kt:onEmojiSelected: (String) -> Unit</ID>
+    <ID>ParameterNaming:PlatformUtils.kt:onDenied: () -> Unit</ID>
+    <ID>ParameterNaming:PlatformUtils.kt:onDenied: () -> Unit = {}</ID>
+    <ID>ParameterNaming:PlatformUtils.kt:onGranted: () -> Unit</ID>
+    <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (CommonUri) -> Unit</ID>
+    <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (CommonUri?) -> Unit</ID>
+    <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (org.meshtastic.core.common.util.CommonUri) -> Unit</ID>
+    <ID>ParameterNaming:PositionPrecisionPreference.kt:onValueChanged: (Int) -> Unit</ID>
+    <ID>ParameterNaming:PreferenceFooter.kt:onNegativeClicked: () -> Unit = {}</ID>
+    <ID>ParameterNaming:PreferenceFooter.kt:onPositiveClicked: () -> Unit = {}</ID>
+    <ID>ParameterNaming:SlidingSelector.kt:onOptionSelected: (T) -> Unit</ID>
+    <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Composable Content Alert") @Composable fun PreviewComposableAlert</ID>
+    <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "HTML Alert") @Composable fun PreviewHtmlAlert</ID>
+    <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Icon and Text Alert") @Composable fun PreviewIconAlert</ID>
+    <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Multiple Choice Alert") @Composable fun PreviewMultipleChoiceAlert</ID>
+    <ID>PreviewPublic:AlertPreviews.kt:@Preview(showBackground = true, name = "Simple Text Alert") @Composable fun PreviewTextAlert</ID>
+    <ID>PreviewPublic:IndoorAirQuality.kt:@Preview(showBackground = true) @Composable fun IAQScalePreview</ID>
+    <ID>PreviewPublic:LazyColumnDragAndDropDemo.kt:@Preview @Composable fun LazyColumnDragAndDropDemo</ID>
+    <ID>PreviewPublic:MaterialBatteryInfo.kt:@PreviewLightDark @Composable fun MaterialBatteryInfoPreview</ID>
+    <ID>PreviewPublic:SignalInfo.kt:@Composable @Preview(showBackground = true) fun SignalInfoSimplePreview</ID>
+    <ID>PreviewPublic:SignalInfo.kt:@PreviewLightDark @Composable fun SignalInfoPreview</ID>
+    <ID>ViewModelForwarding:MeshtasticAppShell.kt:MeshtasticCommonAppSetup( uiViewModel = uiViewModel, onNavigateToTracerouteMap = { destNum, requestId, logUuid -> multiBackstack.handleDeepLink( listOf( NodesRoute.NodesGraph, NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid), ), ) }, )</ID>
+    <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:FirmwareVersionCheck(viewModel = uiViewModel)</ID>
+    <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:SharedDialogs(uiViewModel = uiViewModel)</ID>
+    <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:TracerouteAlertHandler(uiViewModel = uiViewModel, onNavigateToMap = onNavigateToTracerouteMap)</ID>
+    <ID>ViewModelForwarding:MeshtasticNavigationSuite.kt:NavigationIconContent( destination = destination, isSelected = isSelected, connectionState = connectionState, unreadMessageCount = unreadMessageCount, selectedDevice = selectedDevice, uiViewModel = uiViewModel, )</ID>
   </CurrentIssues>
 </SmellBaseline>

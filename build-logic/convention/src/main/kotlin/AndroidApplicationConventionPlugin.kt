@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKotlinAndroid
 import org.meshtastic.buildlogic.configureTestOptions
 
@@ -61,6 +62,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 buildFeatures { buildConfig = true }
             }
             configureTestOptions()
+            configureGraphTasks()
         }
     }
 }

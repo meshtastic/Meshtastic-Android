@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,10 +99,15 @@ object LanguageUtils {
         return languageTags.associateWith { languageTag ->
             when (languageTag) {
                 SYSTEM_DEFAULT -> stringResource(Res.string.preferences_system_default)
+
                 "ht" -> stringResource(Res.string.fr_HT)
+
                 "pt-BR" -> stringResource(Res.string.pt_BR)
+
                 "zh-CN" -> stringResource(Res.string.zh_CN)
+
                 "zh-TW" -> stringResource(Res.string.zh_TW)
+
                 else -> {
                     Locale.forLanguageTag(languageTag).let { locale ->
                         locale.getDisplayLanguage(locale).replaceFirstChar { char ->

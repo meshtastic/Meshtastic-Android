@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ModifierMissing:WifiProvisionScreen.kt:@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class) @Suppress("LongMethod") @Composable fun WifiProvisionScreen</ID>
+  </CurrentIssues>
+</SmellBaseline>

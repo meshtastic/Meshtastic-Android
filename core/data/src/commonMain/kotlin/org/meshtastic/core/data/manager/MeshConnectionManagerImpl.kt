@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -154,9 +154,12 @@ class MeshConnectionManagerImpl(
         val effectiveState =
             when (newState) {
                 is ConnectionState.Connected -> ConnectionState.Connected
+
                 is ConnectionState.DeviceSleep ->
                     if (lsEnabled) ConnectionState.DeviceSleep else ConnectionState.Disconnected
+
                 is ConnectionState.Connecting -> ConnectionState.Connecting
+
                 is ConnectionState.Disconnected -> ConnectionState.Disconnected
             }
         onConnectionChanged(effectiveState)

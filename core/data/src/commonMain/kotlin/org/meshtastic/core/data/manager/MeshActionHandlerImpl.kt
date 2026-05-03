@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,10 +90,15 @@ class MeshActionHandlerImpl(
             }
             when (action) {
                 is ServiceAction.Favorite -> handleFavorite(action, myNodeNum)
+
                 is ServiceAction.Ignore -> handleIgnore(action, myNodeNum)
+
                 is ServiceAction.Mute -> handleMute(action, myNodeNum)
+
                 is ServiceAction.Reaction -> handleReaction(action, myNodeNum)
+
                 is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
+
                 is ServiceAction.SendContact -> {
                     val accepted =
                         safeCatching {
@@ -102,6 +107,7 @@ class MeshActionHandlerImpl(
                             .getOrDefault(false)
                     action.result.complete(accepted)
                 }
+
                 is ServiceAction.GetDeviceMetadata -> {
                     commandSender.sendAdmin(action.destNum, wantResponse = true) {
                         AdminMessage(get_device_metadata_request = true)
@@ -213,9 +219,11 @@ class MeshActionHandlerImpl(
             val currentPosition =
                 when {
                     provideLocation && position.isValid() -> position
+
                     provideLocation ->
                         nodeManager.nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
                             ?: Position(0.0, 0.0, 0)
+
                     else -> Position(0.0, 0.0, 0)
                 }
             commandSender.requestPosition(destNum, currentPosition)

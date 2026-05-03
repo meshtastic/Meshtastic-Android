@@ -2,11 +2,72 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>MagicNumber:CompassViewModel.kt$CompassViewModel$180.0</ID>
-    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
-    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
-    <ID>MaxLineLength:MetricsViewModel.kt$MetricsViewModel$"$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n"</ID>
-    <ID>TooGenericExceptionCaught:MetricsViewModel.kt$MetricsViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:NodeManagementActions.kt$NodeManagementActions$ex: Exception</ID>
+    <ID>ComposableParamOrder:BaseMetricChart.kt:@Composable @Suppress("LongMethod") fun &lt;T> BaseMetricScreen</ID>
+    <ID>ComposableParamOrder:DeviceMetrics.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun DeviceMetricsChart</ID>
+    <ID>ComposableParamOrder:ElevationInfo.kt:@Composable fun ElevationInfo</ID>
+    <ID>ComposableParamOrder:EnvironmentCharts.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun EnvironmentMetricsChart</ID>
+    <ID>ComposableParamOrder:HostMetricsChart.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable internal fun HostMetricsChart</ID>
+    <ID>ComposableParamOrder:HostMetricsLog.kt:@Composable fun LogLine</ID>
+    <ID>ComposableParamOrder:LastHeardInfo.kt:@Composable fun LastHeardInfo</ID>
+    <ID>ComposableParamOrder:NeighborInfoLog.kt:@OptIn(ExperimentalFoundationApi::class) @Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun NeighborInfoLogScreen</ID>
+    <ID>ComposableParamOrder:NodeDetailScreens.kt:@Composable fun NodeDetailScreen</ID>
+    <ID>ComposableParamOrder:NodeFilterTextField.kt:@Suppress("LongParameterList") @Composable fun NodeFilterTextField</ID>
+    <ID>ComposableParamOrder:NodeItem.kt:@Composable @Suppress("LongMethod") fun NodeItem</ID>
+    <ID>ComposableParamOrder:PaxMetrics.kt:@Suppress("LongMethod") @Composable private fun PaxMetricsChart</ID>
+    <ID>ComposableParamOrder:PowerMetrics.kt:@Suppress("LongMethod") @Composable private fun PowerMetricsChart</ID>
+    <ID>ComposableParamOrder:SatelliteCountInfo.kt:@Composable fun SatelliteCountInfo</ID>
+    <ID>ComposableParamOrder:SignalMetrics.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable private fun SignalMetricsChart</ID>
+    <ID>ComposableParamOrder:TracerouteChart.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable internal fun TracerouteMetricsChart</ID>
+    <ID>ComposableParamOrder:TracerouteLog.kt:@OptIn(ExperimentalFoundationApi::class) @Suppress("LongMethod", "CyclomaticComplexMethod", "UnusedParameter") @Composable fun TracerouteLogScreen</ID>
+    <ID>ComposableParamOrder:TracerouteMapScreen.kt:@Composable private fun TracerouteNodeCount</ID>
+    <ID>ContentSlotReused:BaseMetricChart.kt:chartPart: @Composable (Modifier) -> Unit</ID>
+    <ID>ContentSlotReused:BaseMetricChart.kt:listPart: @Composable (Modifier) -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:DeviceMetrics.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:EnvironmentCharts.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:HostMetricsChart.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:NeighborInfoLog.kt:onNavigateUp: () -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:NodeFilterTextField.kt:onToggleExcludeMqtt: () -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:PaxMetrics.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:PowerMetrics.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:SignalMetrics.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>LambdaParameterEventTrailing:TracerouteChart.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>LambdaParameterInRestartableEffect:NodeDetailScreens.kt:onNavigate: (Route) -> Unit = {}</ID>
+    <ID>MagicNumber:CompassViewModel.kt:CompassViewModel$180.0</ID>
+    <ID>ModifierMissing:BaseMetricChart.kt:@Composable @Suppress("LongMethod") fun &lt;T> BaseMetricScreen</ID>
+    <ID>ModifierMissing:CommonCharts.kt:@Composable fun LegendIndicator</ID>
+    <ID>ModifierMissing:DeviceMetrics.kt:@Suppress("LongMethod") @Composable fun DeviceMetricsScreen</ID>
+    <ID>ModifierMissing:EnvironmentMetrics.kt:@Composable fun EnvironmentMetricsScreen</ID>
+    <ID>ModifierMissing:HostMetricsLog.kt:@OptIn(ExperimentalFoundationApi::class) @Suppress("LongMethod") @Composable fun HostMetricsLogScreen</ID>
+    <ID>ModifierMissing:LinkedCoordinatesItem.kt:@OptIn(ExperimentalFoundationApi::class) @Composable fun LinkedCoordinatesItem</ID>
+    <ID>ModifierMissing:MetricLogComponents.kt:@Composable fun DeleteItem</ID>
+    <ID>ModifierMissing:PaxMetrics.kt:@Composable @Suppress("MagicNumber", "LongMethod") fun PaxMetricsScreen</ID>
+    <ID>ModifierMissing:PaxMetrics.kt:@Composable fun PaxMetricsItem</ID>
+    <ID>ModifierMissing:PositionLogComponents.kt:@Composable @Suppress("LongMethod") fun PositionCard</ID>
+    <ID>ModifierMissing:PositionLogScreens.kt:@Composable fun PositionLogScreen</ID>
+    <ID>ModifierMissing:PowerMetrics.kt:@Suppress("LongMethod") @Composable fun PowerMetricsScreen</ID>
+    <ID>ModifierMissing:SignalMetrics.kt:@Suppress("LongMethod") @Composable fun SignalMetricsScreen</ID>
+    <ID>ModifierNotUsedAtRoot:NeighborInfoLog.kt:modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
+    <ID>ModifierNotUsedAtRoot:TracerouteMapScreen.kt:modifier = modifier.fillMaxSize().padding(paddingValues)</ID>
+    <ID>ModifierWithoutDefault:NodeDetailScreens.kt:modifier: Modifier</ID>
+    <ID>MultipleEmitters:AdministrationSection.kt:@Composable private fun FirmwareVersionItems</ID>
+    <ID>MultipleEmitters:HostMetricsLog.kt:@Composable private fun LoadRow</ID>
+    <ID>MultipleEmitters:PositionSection.kt:@Composable internal fun PositionInlineContent</ID>
+    <ID>MultipleEmitters:PowerMetrics.kt:@Composable @Suppress("CyclomaticComplexMethod") private fun PowerChannelsExtraRows</ID>
+    <ID>MultipleEmitters:TracerouteLog.kt:@Composable private fun TracerouteCardMetrics</ID>
+    <ID>MutableStateAutoboxing:CooldownOutlinedIconButton.kt:mutableStateOf(0f)</ID>
+    <ID>MutableStateAutoboxing:TracerouteMapScreen.kt:mutableStateOf(0)</ID>
+    <ID>ParameterNaming:BaseMetricChart.kt:onPointSelected: ((Double) -> Unit)? = null</ID>
+    <ID>ParameterNaming:DeviceMetrics.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>ParameterNaming:EnvironmentCharts.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>ParameterNaming:HostMetricsChart.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>ParameterNaming:NodeFilterTextField.kt:onToggleShowIgnored: () -> Unit</ID>
+    <ID>ParameterNaming:PaxMetrics.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>ParameterNaming:PowerMetrics.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>ParameterNaming:SignalMetrics.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>ParameterNaming:TimeFrameSelector.kt:onTimeFrameSelected: (TimeFrame) -> Unit</ID>
+    <ID>ParameterNaming:TracerouteChart.kt:onPointSelected: (Double) -> Unit</ID>
+    <ID>TooGenericExceptionCaught:MetricsViewModel.kt:MetricsViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:NodeManagementActions.kt:NodeManagementActions$ex: Exception</ID>
+    <ID>ViewModelForwarding:NodeDetailScreens.kt:NodeDetailScaffold( modifier = modifier, uiState = uiState, viewModel = viewModel, navigateToMessages = navigateToMessages, onNavigate = onNavigate, onNavigateUp = onNavigateUp, compassViewModel = compassViewModel, )</ID>
   </CurrentIssues>
 </SmellBaseline>

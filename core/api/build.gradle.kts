@@ -16,10 +16,8 @@
  */
 plugins {
     alias(libs.plugins.meshtastic.android.library)
-    `maven-publish`
+    id("meshtastic.publishing")
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 configure<com.android.build.api.dsl.LibraryExtension> {
     namespace = "org.meshtastic.core.api"
@@ -37,11 +35,13 @@ configure<com.android.build.api.dsl.LibraryExtension> {
 // doesn't produce @Deprecated annotations on Stub/Proxy override methods.
 tasks.withType<JavaCompile>().configureEach { options.compilerArgs.add("-Xlint:-dep-ann") }
 
-// Map the Android component to a Maven publication
+// Map the Android component to a Maven publication.
+// afterEvaluate is required because AGP registers the "release" component lazily
+// after the android.publishing.singleVariant("release") configuration runs.
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("release") {
+            register<MavenPublication>("release") {
                 from(components["release"])
                 artifactId = "meshtastic-android-api"
             }

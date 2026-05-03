@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -565,8 +565,10 @@ class SecureDfuTransport(
         val response = sendCommand(byteArrayOf(DfuOpcode.SELECT, objectType))
         return when (response) {
             is DfuResponse.SelectResult -> response
+
             is DfuResponse.Failure ->
                 throw DfuException.ProtocolError(DfuOpcode.SELECT, response.resultCode, response.extendedError)
+
             else -> throw DfuException.TransferFailed("Unexpected response to SELECT: $response")
         }
     }
@@ -582,12 +584,14 @@ class SecureDfuTransport(
         val response = sendCommand(byteArrayOf(DfuOpcode.CALCULATE_CHECKSUM))
         return when (response) {
             is DfuResponse.ChecksumResult -> response
+
             is DfuResponse.Failure ->
                 throw DfuException.ProtocolError(
                     DfuOpcode.CALCULATE_CHECKSUM,
                     response.resultCode,
                     response.extendedError,
                 )
+
             else -> throw DfuException.TransferFailed("Unexpected response to CALCULATE_CHECKSUM: $response")
         }
     }
@@ -616,7 +620,9 @@ class SecureDfuTransport(
                             "got 0x${opcode.toUByte().toString(16)}",
                     )
                 }
+
             is DfuResponse.Failure -> throw DfuException.ProtocolError(opcode, resultCode, extendedError)
+
             else ->
                 throw DfuException.TransferFailed(
                     "Unexpected response for opcode 0x${expectedOpcode.toUByte().toString(16)}: $this",

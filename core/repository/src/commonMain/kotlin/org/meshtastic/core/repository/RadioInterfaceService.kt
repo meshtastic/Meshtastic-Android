@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package org.meshtastic.core.repository
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -79,7 +78,7 @@ interface RadioInterfaceService : RadioTransportCallback {
     val receivedData: Flow<ByteArray>
 
     /** Flow of radio activity events. */
-    val meshActivity: SharedFlow<MeshActivity>
+    val meshActivity: Flow<MeshActivity>
 
     /**
      * Drains any bytes currently buffered in [receivedData] without emitting them to collectors.
@@ -112,7 +111,7 @@ interface RadioInterfaceService : RadioTransportCallback {
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String
 
     /** Flow of user-facing connection error messages (e.g. permission failures). */
-    val connectionError: SharedFlow<String>
+    val connectionError: Flow<String>
 
     /** The scope in which interface-related coroutines should run. */
     val serviceScope: CoroutineScope

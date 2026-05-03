@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,11 +90,18 @@ class FakeNodeRepository :
             .let { nodes ->
                 when (sort) {
                     NodeSortOption.ALPHABETICAL -> nodes.sortedBy { it.user.long_name.lowercase() }
+
                     NodeSortOption.LAST_HEARD -> nodes.sortedByDescending { it.lastHeard }
-                    NodeSortOption.DISTANCE -> nodes.sortedBy { it.position.latitude_i } // Simplified
+
+                    NodeSortOption.DISTANCE -> nodes.sortedBy { it.position.latitude_i }
+
+                    // Simplified
                     NodeSortOption.HOPS_AWAY -> nodes.sortedBy { it.hopsAway }
+
                     NodeSortOption.CHANNEL -> nodes.sortedBy { it.channel }
+
                     NodeSortOption.VIA_MQTT -> nodes.sortedBy { if (it.viaMqtt) 0 else 1 }
+
                     NodeSortOption.VIA_FAVORITE -> nodes.sortedBy { if (it.isFavorite) 0 else 1 }
                 }
             }

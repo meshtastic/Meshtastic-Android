@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -371,13 +371,16 @@ private fun RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
     this == null -> {
         stringResource(Res.string.traceroute_no_response) to MeshtasticIcons.PersonOff
     }
+
     route.size <= 2 && route_back.size <= 2 -> {
         stringResource(Res.string.traceroute_direct) to MeshtasticIcons.Group
     }
+
     route.size == route_back.size -> {
         val hops = route.size - 2
         pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Route
     }
+
     else -> {
         val towards = maxOf(0, route.size - 2)
         val back = maxOf(0, route_back.size - 2)

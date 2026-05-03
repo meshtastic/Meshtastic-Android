@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ abstract class BaseRadioTransportFactory(
             InterfaceId.MOCK.id,
             '!',
             -> true
+
             else -> isPlatformAddressValid(address)
         }
     }
@@ -67,6 +68,7 @@ abstract class BaseRadioTransportFactory(
                         address = bleAddress,
                     )
                 }
+
                 else -> createPlatformTransport(address, service)
             }
         transport.start()

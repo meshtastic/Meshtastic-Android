@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,11 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.mikepenz.aboutlibraries.plugin.DuplicateMode
-import com.mikepenz.aboutlibraries.plugin.DuplicateRule
-import org.meshtastic.buildlogic.GitVersionValueSource
 import org.meshtastic.buildlogic.configProperties
-import java.io.FileInputStream
+import org.meshtastic.buildlogic.resolveVersionInfo
 import java.util.Properties
 
-val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
+val versionInfo = resolveVersionInfo()
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
@@ -32,7 +29,7 @@ plugins {
     id("meshtastic.koin")
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets)
-    alias(libs.plugins.aboutlibraries)
+    id("meshtastic.aboutlibraries")
     id("dev.mokkery")
 }
 
@@ -40,7 +37,7 @@ val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 
 if (keystorePropertiesFile.exists()) {
-    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
 configure<ApplicationExtension> {
@@ -57,29 +54,16 @@ configure<ApplicationExtension> {
     defaultConfig {
         applicationId = configProperties.getProperty("APPLICATION_ID")
 
-        val vcOffset = configProperties.getProperty("VERSION_CODE_OFFSET")?.toInt() ?: 0
-        println("Version code offset: $vcOffset")
-        versionCode =
-            (
-                project.findProperty("android.injected.version.code")?.toString()?.toInt()
-                    ?: System.getenv("VERSION_CODE")?.toInt()
-                    ?: (gitVersionProvider.get().toInt() + vcOffset)
-                )
-        versionName =
-            (
-                project.findProperty("android.injected.version.name")?.toString()
-                    ?: System.getenv("VERSION_NAME")
-                    ?: configProperties.getProperty("VERSION_NAME_BASE")
-                )
-        buildConfigField("String", "MIN_FW_VERSION", "\"${configProperties.getProperty("MIN_FW_VERSION")}\"")
-        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${configProperties.getProperty("ABS_MIN_FW_VERSION")}\"")
+        versionCode = versionInfo.versionCode
+        versionName = versionInfo.versionName
+        buildConfigField("String", "MIN_FW_VERSION", "\"${versionInfo.minFwVersion}\"")
+        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${versionInfo.absMinFwVersion}\"")
         // We have to list all translated languages here,
         // because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        @Suppress("UnstableApiUsage")
-        val ci = project.findProperty("ci")?.toString()?.toBoolean() ?: false
+        val ci = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
         if (ci) {
-            println("CI build detected - limiting locale filters for faster packaging")
+            logger.lifecycle("CI build detected - limiting locale filters for faster packaging")
             androidResources.localeFilters.addAll(listOf("en"))
         } else {
             androidResources.localeFilters.addAll(
@@ -128,29 +112,38 @@ configure<ApplicationExtension> {
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
 
-        val disableSplits =
-            project.gradle.startParameter.taskNames.any {
-                it.contains("bundle", ignoreCase = true) || it.contains("google", ignoreCase = true)
-            }
-
-        // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid
-        splits {
-            abi {
-                isEnable = !disableSplits
-                reset()
-                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-                isUniversalApk = true
-            }
-        }
-
-        dependenciesInfo {
-            // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
-            includeInApk = false
-            // Disables dependency metadata when building Android App Bundles (for Google Play)
-            includeInBundle = false
-        }
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Disable ABI splits for bundle builds or when explicitly requested via Gradle property.
+    // Usage: ./gradlew :app:bundleGoogleRelease -Pmeshtastic.disableAbiSplits=true
+    val disableSplits = providers.gradleProperty("meshtastic.disableAbiSplits").map { it.toBoolean() }.getOrElse(false)
+
+    // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid
+    splits {
+        abi {
+            isEnable = !disableSplits
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles (for Google Play)
+        includeInBundle = false
+    }
+
+    packaging {
+        jniLibs {
+            // Keep debug symbols in native libraries so reproducible builds don't depend
+            // on the exact NDK version used for stripping. This avoids RB failures when
+            // IzzyOnDroid/F-Droid rebuilds use a different NDK than our CI.
+            // See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
+            keepDebugSymbols.add("**/*.so")
+        }
     }
 
     // Configure existing product flavors (defined by convention plugin)
@@ -186,7 +179,7 @@ secrets {
 
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
-        variant.flavorName?.let { flavor -> variant.applicationId = "com.geeksville.mesh.$flavor.debug" }
+        variant.flavorName?.let { flavor -> variant.applicationId.set("com.geeksville.mesh.$flavor.debug") }
     }
 
     onVariants(selector().withBuildType("release")) { variant ->
@@ -194,17 +187,12 @@ androidComponents {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
             val minifyTaskName = "minify${variantNameCapped}WithR8"
             val uploadTaskName = "uploadMapping$variantNameCapped"
-            if (project.tasks.findByName(uploadTaskName) != null && project.tasks.findByName(minifyTaskName) != null) {
+            // Use tasks.names to check existence without eagerly realizing tasks
+            if (tasks.names.contains(uploadTaskName) && tasks.names.contains(minifyTaskName)) {
                 tasks.named(minifyTaskName).configure { finalizedBy(uploadTaskName) }
             }
         }
     }
-}
-
-project.afterEvaluate {
-    logger.lifecycle(
-        "Version code is set to: ${extensions.getByType<ApplicationExtension>().defaultConfig.versionCode}",
-    )
 }
 
 dependencies {
@@ -306,34 +294,3 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.androidx.glance.appwidget)
 }
-
-aboutLibraries {
-    // Run offline by default to avoid burning GitHub API calls on every build.
-    // Release builds pass -PaboutLibraries.release=true to fetch full license text + funding info.
-    val isReleaseBuild = providers.gradleProperty("aboutLibraries.release").map { it.toBoolean() }.getOrElse(false)
-    val ghToken = providers.environmentVariable("GITHUB_TOKEN")
-
-    offlineMode = !isReleaseBuild
-
-    collect {
-        fetchRemoteLicense = isReleaseBuild && ghToken.isPresent
-        fetchRemoteFunding = isReleaseBuild && ghToken.isPresent
-        if (ghToken.isPresent) {
-            gitHubApiToken = ghToken.get()
-        }
-    }
-    export {
-        excludeFields = listOf("generated")
-        outputFile = file("src/main/resources/aboutlibraries.json")
-    }
-    library {
-        duplicationMode = DuplicateMode.MERGE
-        duplicationRule = DuplicateRule.SIMPLE
-    }
-}
-
-// Ensure aboutlibraries.json is always up-to-date during the build.
-// This is required since AboutLibraries v11+ no longer auto-exports.
-tasks
-    .matching { it.name.startsWith("process") && it.name.endsWith("Resources") }
-    .configureEach { dependsOn("exportLibraryDefinitions") }

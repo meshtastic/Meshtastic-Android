@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ fun WaypointMarkers(
                 }
             }
 
-            val iconCodePoint = if ((waypoint.icon ?: 0) == 0) PUSHPIN else waypoint.icon!!
+            val iconCodePoint = if (waypoint.icon == 0) PUSHPIN else waypoint.icon
             val emojiText = convertIntToEmoji(iconCodePoint)
             val icon =
                 rememberComposeBitmapDescriptor(iconCodePoint) {
@@ -74,11 +74,11 @@ fun WaypointMarkers(
             Marker(
                 state = markerState,
                 icon = icon,
-                title = (waypoint.name ?: "").replace('\n', ' ').replace('\b', ' '),
-                snippet = (waypoint.description ?: "").replace('\n', ' ').replace('\b', ' '),
+                title = waypoint.name.replace('\n', ' ').replace('\b', ' '),
+                snippet = waypoint.description.replace('\n', ' ').replace('\b', ' '),
                 visible = true,
                 onInfoWindowClick = {
-                    if ((waypoint.locked_to ?: 0) == 0 || waypoint.locked_to == myNodeNum || !isConnected) {
+                    if (waypoint.locked_to == 0 || waypoint.locked_to == myNodeNum || !isConnected) {
                         onEditWaypointRequest(waypoint)
                     } else {
                         scope.launch { context.showToast(Res.string.locked) }

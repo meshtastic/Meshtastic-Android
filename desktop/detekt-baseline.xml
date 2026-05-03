@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LambdaParameterInRestartableEffect:Main.kt:onReady: () -> Unit</ID>
+    <ID>ModifierMissing:DesktopMainScreen.kt:@Composable fun DesktopMainScreen</ID>
+    <ID>ViewModelForwarding:DesktopMainScreen.kt:MeshtasticAppShell( multiBackstack = multiBackstack, uiViewModel = uiViewModel, hostModifier = Modifier.padding(bottom = 24.dp), ) { MeshtasticNavigationSuite( multiBackstack = multiBackstack, uiViewModel = uiViewModel, modifier = Modifier.fillMaxSize(), ) { val provider = entryProvider&lt;NavKey> { desktopNavGraph(backStack, uiViewModel, multiBackstack) } MeshtasticNavDisplay( multiBackstack = multiBackstack, entryProvider = provider, modifier = Modifier.fillMaxSize(), ) } }</ID>
+    <ID>ViewModelForwarding:DesktopMainScreen.kt:MeshtasticNavigationSuite( multiBackstack = multiBackstack, uiViewModel = uiViewModel, modifier = Modifier.fillMaxSize(), ) { val provider = entryProvider&lt;NavKey> { desktopNavGraph(backStack, uiViewModel, multiBackstack) } MeshtasticNavDisplay( multiBackstack = multiBackstack, entryProvider = provider, modifier = Modifier.fillMaxSize(), ) }</ID>
+    <ID>ViewModelForwarding:Main.kt:DesktopMainScreen(uiViewModel, multiBackstack)</ID>
+    <ID>ViewModelForwarding:Main.kt:MeshtasticDesktopApp(uiViewModel, isDarkTheme, contrastLevel)</ID>
+    <ID>ViewModelForwarding:Main.kt:MeshtasticWindow(uiViewModel, isDarkTheme, contrastLevel, appIcon, windowState) { isAppVisible = false }</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
     android {
         namespace = "org.meshtastic.feature.settings"
         androidResources.enable = false
@@ -58,7 +56,7 @@ kotlin {
         }
 
         commonTest.dependencies {
-            implementation(project(":core:datastore"))
+            implementation(projects.core.datastore)
             implementation(libs.compose.multiplatform.ui.test)
         }
 

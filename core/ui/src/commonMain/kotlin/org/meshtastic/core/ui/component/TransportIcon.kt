@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,12 +39,16 @@ fun TransportIcon(transport: Int, viaMqtt: Boolean, modifier: Modifier = Modifie
         when {
             viaMqtt || transport == MeshPacket.TransportMechanism.TRANSPORT_MQTT.value ->
                 MeshtasticIcons.MqttConnected to stringResource(Res.string.via_mqtt)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_MULTICAST_UDP.value ->
                 MeshtasticIcons.Udp to stringResource(Res.string.via_udp)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_API.value ->
                 MeshtasticIcons.Api to stringResource(Res.string.via_api)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_INTERNAL.value ->
                 MeshtasticIcons.Device to stringResource(Res.string.internal)
+
             else -> return
         }
     Icon(icon, contentDescription = description, modifier = modifier, tint = Color.White)

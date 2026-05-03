@@ -2,6 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:ModuleConfigDataSource.kt$ModuleConfigDataSource$suspend fun setLocalModuleConfig(config: ModuleConfig)</ID>
+    <ID>CyclomaticComplexMethod:ModuleConfigDataSource.kt:ModuleConfigDataSource$suspend fun setLocalModuleConfig</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -308,13 +308,17 @@ class DebugViewModel(
     /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
     private fun annotateMeshLogMessage(meshLog: MeshLog): String = when (meshLog.message_type) {
         "LogRecord" -> meshLog.fromRadio.log_record.toString().replace("\\n\"", "\"")
+
         "Packet" -> meshLog.meshPacket?.let { packet -> annotatePacketLog(packet) } ?: meshLog.raw_message
+
         "NodeInfo" ->
             meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }
                 ?: meshLog.raw_message
+
         "MyNodeInfo" ->
             meshLog.myNodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.my_node_num) }
                 ?: meshLog.raw_message
+
         else -> meshLog.raw_message
     }
 
@@ -449,36 +453,48 @@ class DebugViewModel(
                 PortNum.TEXT_MESSAGE_APP.value,
                 PortNum.ALERT_APP.value,
                 -> payload.decodeToString()
+
                 PortNum.POSITION_APP.value ->
                     Position.ADAPTER.decodeOrNull(payload)?.let { Position.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Position"
+
                 PortNum.WAYPOINT_APP.value ->
                     Waypoint.ADAPTER.decodeOrNull(payload)?.let { Waypoint.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Waypoint"
+
                 PortNum.NODEINFO_APP.value ->
                     User.ADAPTER.decodeOrNull(payload)?.let { User.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode User"
+
                 PortNum.TELEMETRY_APP.value ->
                     Telemetry.ADAPTER.decodeOrNull(payload)?.let { Telemetry.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Telemetry"
+
                 PortNum.ROUTING_APP.value ->
                     Routing.ADAPTER.decodeOrNull(payload)?.let { Routing.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Routing"
+
                 PortNum.ADMIN_APP.value ->
                     AdminMessage.ADAPTER.decodeOrNull(payload)?.let { AdminMessage.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode AdminMessage"
+
                 PortNum.PAXCOUNTER_APP.value ->
                     Paxcount.ADAPTER.decodeOrNull(payload)?.let { Paxcount.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Paxcount"
+
                 PortNum.STORE_FORWARD_APP.value ->
                     StoreAndForward.ADAPTER.decodeOrNull(payload)?.let { StoreAndForward.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode StoreAndForward"
+
                 PortNum.STORE_FORWARD_PLUSPLUS_APP.value ->
                     StoreForwardPlusPlus.ADAPTER.decodeOrNull(payload)?.let {
                         StoreForwardPlusPlus.ADAPTER.toReadableString(it)
                     } ?: "Failed to decode StoreForwardPlusPlus"
+
                 PortNum.NEIGHBORINFO_APP.value -> decodeNeighborInfo(payload)
+
                 PortNum.TRACEROUTE_APP.value -> decodeTraceroute(packet, payload)
+
                 else -> payload.joinToString(" ") { it.toHex() }
             }
         } catch (e: Exception) {

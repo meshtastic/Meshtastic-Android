@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,9 @@ import org.gradle.testretry.TestRetryTaskExtension
 import java.io.FileInputStream
 import java.util.Properties
 
+private const val MAX_TEST_RETRIES = 2
+private const val MAX_TEST_FAILURES = 10
+
 val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
@@ -46,11 +49,16 @@ fun VersionCatalog.version(alias: String): String = findVersion(alias).get().req
 
 val Project.configProperties: Properties
     get() {
+        val key = "meshtastic.configProperties"
+        val ext = extensions.extraProperties
+        @Suppress("UNCHECKED_CAST")
+        if (ext.has(key)) return ext.get(key) as Properties
         val properties = Properties()
-        val propertiesFile = rootProject.file("config.properties")
+        val propertiesFile = isolated.rootProject.projectDirectory.file("config.properties").asFile
         if (propertiesFile.exists()) {
             FileInputStream(propertiesFile).use { properties.load(it) }
         }
+        ext.set(key, properties)
         return properties
     }
 
@@ -60,12 +68,12 @@ internal fun Project.configureTestOptions() {
     // useJUnitPlatform() is active.  Add it lazily to all *UnitTestRuntimeClasspath and
     // *TestRuntimeClasspath configurations so all Android and JVM test tasks get it
     // without requiring per-module declarations.
-    configurations.matching {
-        it.name.endsWith("UnitTestRuntimeClasspath") || it.name.endsWith("TestRuntimeClasspath")
-    }.configureEach {
-        val launcher = libs.library("junit-platform-launcher")
-        project.dependencies.add(name, launcher)
-    }
+    configurations
+        .matching { it.name.endsWith("UnitTestRuntimeClasspath") || it.name.endsWith("TestRuntimeClasspath") }
+        .configureEach {
+            val launcher = libs.library("junit-platform-launcher")
+            project.dependencies.add(name, launcher)
+        }
 
     tasks.withType<Test>().configureEach {
         // JUnit 5: activate JUnit Platform — but NOT for androidHostTest (Robolectric) tasks
@@ -78,11 +86,12 @@ internal fun Project.configureTestOptions() {
         // Parallelize unit tests at the Gradle fork level.
         // In CI, use all available processors; locally use half to keep the machine responsive.
         val isCi = project.findProperty("ci") == "true"
-        maxParallelForks = if (isCi) {
-            Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
-        } else {
-            (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-        }
+        maxParallelForks =
+            if (isCi) {
+                Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
+            } else {
+                (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+            }
         maxHeapSize = "2g"
 
         // JUnit Jupiter parallel execution within each Gradle fork.
@@ -105,16 +114,14 @@ internal fun Project.configureTestOptions() {
 
     // Gradle 9+ fails when test sources exist but no test classes are discovered (e.g. all
     // tests are commented out). Disable to avoid breaking builds for modules with WIP tests.
-    tasks.withType<AbstractTestTask>().configureEach {
-        failOnNoDiscoveredTests.set(false)
-    }
+    tasks.withType<AbstractTestTask>().configureEach { failOnNoDiscoveredTests.set(false) }
 
     // Configure test retry if the plugin is applied
     pluginManager.withPlugin("org.gradle.test-retry") {
         tasks.withType<Test>().configureEach {
             extensions.configure<TestRetryTaskExtension> {
-                maxRetries.set(2)
-                maxFailures.set(10)
+                maxRetries.set(MAX_TEST_RETRIES)
+                maxFailures.set(MAX_TEST_FAILURES)
                 failOnPassedAfterRetry.set(false)
             }
         }

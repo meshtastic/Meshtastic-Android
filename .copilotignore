@@ -1,27 +1,54 @@
-# Ignore build artifacts and generated files from Copilot indexing
+# Meshtastic Android - GitHub Copilot Ignore List
 # This saves context window tokens and prevents Copilot from hallucinating off of minified code.
 
-# Build directories
+# ── Build & Generated ─────────────────────────────────────────────────────────
 **/build/**
 .gradle/
-.idea/
-
-# Android generated files
+.kotlin/
 **/generated/**
 .cxx/
 .externalNativeBuild/
 
-# Git history & worktrees
-.git/
-.worktrees/
-
-# Protobuf (Prevents Copilot from suggesting raw protobuf byte buffers)
-core/proto/
-
-# Environment and secrets
+# ── IDE & Environment ─────────────────────────────────────────────────────────
+.idea/
+.run/
+.claude/
+.gemini/
+.jdk
 local.properties
 secrets.properties
 *.jks
+.DS_Store
 
-# Agent References (Prevents pollution of project space with external code)
+# ── Agent Artifacts (Large volumes of logs/images) ───────────────────────────
+.agent_artifacts/
+# Note: .agent_plans/ is NOT ignored to maintain implementation context.
 .agent_refs/
+tmp/
+*.log
+
+# ── Binary Assets & Media ─────────────────────────────────────────────────────
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.webp
+**/*.svg
+**/*.ico
+**/*.gif
+**/*.mp3
+**/*.wav
+**/*.ogg
+**/*.pdf
+**/*.ttf
+**/*.otf
+**/*.jar
+**/*.aar
+**/*.apk
+
+# ── External & Submodules ─────────────────────────────────────────────────────
+core/proto/
+
+# ── Resources ────────────────────────────────────────────────────────────────
+# Ignore translations (reduces churn and indexing tokens)
+**/values-*/strings.xml
+**/composeResources/**/values*/*.xml

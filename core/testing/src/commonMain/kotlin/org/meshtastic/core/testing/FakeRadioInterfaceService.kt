@@ -22,8 +22,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -57,10 +57,10 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     override val receivedData: Flow<ByteArray> = _receivedData.receiveAsFlow()
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
-    override val meshActivity: SharedFlow<MeshActivity> = _meshActivity
+    override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()
 
     private val _connectionError = MutableSharedFlow<String>()
-    override val connectionError: SharedFlow<String> = _connectionError
+    override val connectionError: Flow<String> = _connectionError.asFlow()
 
     val sentToRadio = mutableListOf<ByteArray>()
     var connectCalled = false

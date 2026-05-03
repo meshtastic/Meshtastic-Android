@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,6 +129,7 @@ internal sealed class LegacyDfuResponse {
                         Failure(requestOpcode, status)
                     }
                 }
+
                 LegacyDfuOpcode.PACKET_RECEIPT -> {
                     if (data.size < 5) return Unknown(data)
                     val bytes =
@@ -138,6 +139,7 @@ internal sealed class LegacyDfuResponse {
                             ((data[4].toLong() and 0xFF) shl 24)
                     PacketReceipt(bytes)
                 }
+
                 else -> Unknown(data)
             }
         }

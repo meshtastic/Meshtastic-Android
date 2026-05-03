@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,11 +177,17 @@ class BleRadioTransport(
             try {
                 val d =
                     withTimeoutOrNull(SCAN_TIMEOUT) {
+                        // Pass both service UUID and address so the scanner can apply the most
+                        // efficient platform filter. Android uses address (OS-level HW filter),
+                        // while CoreBluetooth (macOS) needs the service UUID because it caches
+                        // peripheral identifiers and may not re-report by address alone.
                         scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first {
                             it.address.equals(address, ignoreCase = true)
                         }
                     }
                 if (d != null) return d
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.v(e) { "[$address] Scan attempt failed or timed out" }
             }
@@ -243,6 +249,8 @@ class BleRadioTransport(
             try {
                 bluetoothRepository.bond(device)
                 Logger.i { "[$address] Bonding successful" }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
             }
@@ -301,6 +309,8 @@ class BleRadioTransport(
                 val rssi = retryBleOperation(tag = address) { device.readRssi() }
                 Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Failed to read initial connection RSSI" }
         }
@@ -483,9 +493,11 @@ class BleRadioTransport(
         val msg =
             when (this) {
                 is RadioNotConnectedException -> this.message ?: "Device not found"
+
                 is NoSuchElementException,
                 is IllegalArgumentException,
                 -> "Required characteristic missing"
+
                 else -> this.message ?: this::class.simpleName ?: "Unknown"
             }
         return false to msg

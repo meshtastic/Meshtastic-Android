@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,7 +129,8 @@ fun safeLaunch(
 }
 
 /**
- * Creates and returns a [MutableSharedFlow] intended for one-shot error events. Expose as `SharedFlow` via
- * [asSharedFlow] in the ViewModel, and collect in the UI to show snackbars or toasts.
+ * Creates and returns a [MutableSharedFlow] intended for one-shot error events. Expose as `Flow` via
+ * [kotlinx.coroutines.flow.asFlow] in the ViewModel (hiding hot-flow semantics), and collect in the UI to show
+ * snackbars or toasts.
  */
 fun errorEventFlow(): MutableSharedFlow<UiText> = MutableSharedFlow(extraBufferCapacity = 1)

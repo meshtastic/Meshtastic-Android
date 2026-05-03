@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,12 @@ data class NodeClusterItem(
     override fun getSnippet(): String = nodeSnippet
 
     override fun getZIndex(): Float = when {
-        node.num == myNodeNum -> 5.0f // My node is always highest
-        node.isFavorite -> 5.0f // Favorites are equally high priority
+        node.num == myNodeNum -> 5.0f
+
+        // My node is always highest
+        node.isFavorite -> 5.0f
+
+        // Favorites are equally high priority
         else -> 4.0f
     }
 
@@ -53,6 +57,6 @@ data class NodeClusterItem(
                 18 to 91.182212,
                 19 to 45.58554,
             )
-        return precisionMap[this.node.position.precision_bits ?: 0]
+        return precisionMap[this.node.position.precision_bits]
     }
 }

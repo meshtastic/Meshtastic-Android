@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -80,7 +80,7 @@ fun MeshtasticNavigationSuite(
     val unreadMessageCount by uiViewModel.unreadMessageCount.collectAsStateWithLifecycle()
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
-    val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
+    val adaptiveInfo = currentWindowAdaptiveInfoV2()
 
     val currentTabRoute = multiBackstack.currentTabRoute
     val topLevelDestination = TopLevelDestination.fromNavKey(currentTabRoute)
@@ -148,6 +148,7 @@ private fun handleNavigation(
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                 }
             }
+
             TopLevelDestination.Conversations -> {
                 val onConversationsList =
                     currentKey is ContactsRoute.ContactsGraph || currentKey is ContactsRoute.Contacts
@@ -157,6 +158,7 @@ private fun handleNavigation(
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                 }
             }
+
             else -> {
                 if (currentKey != destination.route) {
                     multiBackstack.navigateTopLevel(destination.route)

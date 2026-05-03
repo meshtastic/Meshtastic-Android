@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ import org.meshtastic.feature.connections.model.getMeshtasticShortName
 import java.util.Locale
 
 @Suppress("LongParameterList")
-@Single
+@Single(binds = [GetDiscoveredDevicesUseCase::class])
 class AndroidGetDiscoveredDevicesUseCase(
     private val bluetoothRepository: BluetoothRepository,
     private val recentAddressesDataSource: RecentAddressesDataSource,

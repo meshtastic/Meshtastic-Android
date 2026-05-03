@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,7 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     // Third-party libraries (maps-compose, datadog, etc.) carry a transitive
     // compose-bom whose constraints conflict with CMP-published AndroidX artifacts.
     // Exclude it globally so CMP's own dependency graph wins.
-    configurations.configureEach {
-        exclude(mapOf("group" to "androidx.compose", "module" to "compose-bom"))
-    }
+    configurations.configureEach { exclude(mapOf("group" to "androidx.compose", "module" to "compose-bom")) }
 
     // CMP publishes these core AndroidX groups at an AndroidX version tag that
     // tracks (but does not equal) the CMP version. The exact mapping lives in
@@ -38,12 +36,13 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     // version ref in libs.versions.toml. Material, Material3, and Adaptive follow
     // separate AndroidX version numbers and must NOT be included here.
     val androidxComposeVersion = libs.version("androidx-compose-bom-aligned")
-    val cmpAlignedGroups = setOf(
-        "androidx.compose.animation",
-        "androidx.compose.foundation",
-        "androidx.compose.runtime",
-        "androidx.compose.ui",
-    )
+    val cmpAlignedGroups =
+        setOf(
+            "androidx.compose.animation",
+            "androidx.compose.foundation",
+            "androidx.compose.runtime",
+            "androidx.compose.ui",
+        )
     // The BOM exclusion above strips the version from `androidx.compose.material:material`
     // requested by maps-compose-widgets (google flavor). Pin only that artifact — the
     // group also contains `material-ripple`, which CMP publishes at the bom-aligned

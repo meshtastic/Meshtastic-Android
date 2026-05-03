@@ -30,7 +30,7 @@ import javax.jmdns.JmDNS
 import javax.jmdns.ServiceEvent
 import javax.jmdns.ServiceListener
 
-@Single
+@Single(binds = [ServiceDiscovery::class])
 class JvmServiceDiscovery(private val dispatchers: CoroutineDispatchers) : ServiceDiscovery {
     @Suppress("TooGenericExceptionCaught")
     override val resolvedServices: Flow<List<DiscoveredService>> =

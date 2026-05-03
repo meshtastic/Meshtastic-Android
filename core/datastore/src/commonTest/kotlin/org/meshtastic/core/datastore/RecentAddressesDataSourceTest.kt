@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -275,9 +275,11 @@ private class LegacyParsingHarness(private val rawJson: String) {
                             null
                         }
                     }
+
                     is JsonPrimitive -> {
                         item.contentOrNull?.let { RecentAddress(address = it, name = "Meshtastic") }
                     }
+
                     is JsonArray -> null
                 }
             },
