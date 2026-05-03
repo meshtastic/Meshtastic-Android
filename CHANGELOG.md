@@ -9,25 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore: Integrate MQTT logging with Kermit and enhance PII sanitization (#5338) by @James Rich in [`1c984d54f`](https://github.com/meshtastic/Meshtastic-Android/commit/1c984d54f492c79035e8d675fbc4e1929fef61fa)
-* chore(deps): update org.meshtastic:mqtt-client to v0.3.3 (#5337) by @renovate[bot] in [`61af98e96`](https://github.com/meshtastic/Meshtastic-Android/commit/61af98e9663439f19d66194cf61e52b55f2f6c5b)
-* chore: optimize AI agent context and implement CI cost controls (#5335) by @James Rich in [`9e396cdec`](https://github.com/meshtastic/Meshtastic-Android/commit/9e396cdeccffae17d4c4392a0107c4f99a9d2b4e)
-* docs: update CHANGELOG.md (#5334) by @github-actions[bot] in [`92b8f0ddf`](https://github.com/meshtastic/Meshtastic-Android/commit/92b8f0ddf5868cf14690396ca03b0bccb48c6693)
+* chore(deps): update org.meshtastic:mqtt-client to v0.3.4 (#5343) by @renovate[bot] in [`82562f802`](https://github.com/meshtastic/Meshtastic-Android/commit/82562f802869749ac37a05e3b4503860eea5a62c)
+* chore(deps): update vico to v3.2.0-next.3 (#5341) by @renovate[bot] in [`94540aabb`](https://github.com/meshtastic/Meshtastic-Android/commit/94540aabb102e1c33092b30af2792c4ccd044391)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5339) by @James Rich in [`f1423e4ee`](https://github.com/meshtastic/Meshtastic-Android/commit/f1423e4ee269999c4ab0b5f1431a98c4f961ffb7)
 
-### Closed Beta (v2.7.14-closed.21)
-Changes since [`v2.7.14-open.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.3):
-
-* chore(deps): update org.meshtastic:mqtt-client to v0.3.2 (#5331) by @renovate[bot] in [`519b9633a`](https://github.com/meshtastic/Meshtastic-Android/commit/519b9633a1c86f7b9d7616cc4a196af8bb4c1f38)
-* docs: update CHANGELOG.md (#5332) by @github-actions[bot] in [`20cc302bb`](https://github.com/meshtastic/Meshtastic-Android/commit/20cc302bb3c3f54fee7c82af9d41fcc33f1d3cba)
-* fix(network): resolve empty MQTT address and enforce TLS on default server (#5333) by @James Rich in [`c0b0b9edd`](https://github.com/meshtastic/Meshtastic-Android/commit/c0b0b9edd4377639e50f085a99e074196a108b39)
-* fix(connections): improve BLE scan reliability and UI lifecycle (#5329) by @James Rich in [`5a95201b4`](https://github.com/meshtastic/Meshtastic-Android/commit/5a95201b4e9657978ad8fada219b70ad6f23e6f1)
-* docs: update CHANGELOG.md (#5328) by @github-actions[bot] in [`7263dc1f7`](https://github.com/meshtastic/Meshtastic-Android/commit/7263dc1f73bf0789ccbc9327c88736d39ca11532)
-* Change default ContrastLevel from STANDARD to MEDIUM (#5325) by @Andrew Smith in [`2914bc6ff`](https://github.com/meshtastic/Meshtastic-Android/commit/2914bc6ff6441d246cba1ddbbc5d010f2da18102)
-* docs: update CHANGELOG.md (#5324) by @github-actions[bot] in [`a6b524d4c`](https://github.com/meshtastic/Meshtastic-Android/commit/a6b524d4c10bc896de3ddadc00582e2a25e6c67b)
-* chore(deps): update aboutlibraries to v14.1.0 (#5322) by @renovate[bot] in [`770fe3f62`](https://github.com/meshtastic/Meshtastic-Android/commit/770fe3f626aafab15c8725bcbf0345958223653f)
-* fix(data): default new-node notifications off for event firmware (#5323) by @James Rich in [`400e0404f`](https://github.com/meshtastic/Meshtastic-Android/commit/400e0404f666c4da122b0361ac4af466f0982c65)
-
-### Open Beta (v2.7.14-open.3)
+### Open Beta (v2.7.14-open.4)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -105,6 +91,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: update emoji catalog metadata and improve picker synchronization by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5292
 * fix: update notification icon by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5293
 * feat(connections): connection sorting & conversation empty channel ranking by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5295
+* fix(connections): improve BLE scan reliability and UI lifecycle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5329
 #### 🛠️ Fixes
 * fix(strings): replace plurals by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4596
 * fix: replace fdroid map_style_selection string by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4598
@@ -207,6 +194,8 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: persist language switching and correctly map locales by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5287
 * fix: ensure snackbar respects safe drawing padding over host modifiers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5290
 * fix(ui): align Cancel and Send enabled state by @elagin in https://github.com/meshtastic/Meshtastic-Android/pull/5284
+* fix(data): default new-node notifications off for event firmware by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5323
+* fix(network): resolve empty MQTT address and enforce TLS on default server by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5333
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
@@ -231,6 +220,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * chore(r8): remove redundant keep rules covered by consumer rules by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5172
 * Revert "diag(r8): disable minify for release builds (animation-freeze diagnostic)" by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5176
 * Fix node-details remove action to preserve confirmation flow by @Copilot in https://github.com/meshtastic/Meshtastic-Android/pull/5192
+* Change default ContrastLevel from STANDARD to MEDIUM by @somenice in https://github.com/meshtastic/Meshtastic-Android/pull/5325
 
 ## New Contributors
 * @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607
@@ -244,6 +234,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @zt64 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5226
 * @riddlemd made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5265
 * @elagin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5284
+* @somenice made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5325
 
 ## New Contributors
 * @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607
