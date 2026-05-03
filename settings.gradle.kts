@@ -60,6 +60,20 @@ dependencyResolutionManagement {
 
 rootProject.name = "MeshtasticAndroid"
 
+// meshtastic-sdk composite build — dependency substitution maps published Maven artifacts
+// to the local source projects so SDK changes are reflected in this build immediately.
+includeBuild("../meshtastic-sdk") {
+    dependencySubstitution {
+        substitute(module("org.meshtastic:sdk-proto")).using(project(":proto"))
+        substitute(module("org.meshtastic:sdk-core")).using(project(":core"))
+        substitute(module("org.meshtastic:sdk-transport-ble")).using(project(":transport-ble"))
+        substitute(module("org.meshtastic:sdk-transport-tcp")).using(project(":transport-tcp"))
+        substitute(module("org.meshtastic:sdk-transport-serial")).using(project(":transport-serial"))
+        substitute(module("org.meshtastic:sdk-storage-sqldelight")).using(project(":storage-sqldelight"))
+        substitute(module("org.meshtastic:sdk-testing")).using(project(":testing"))
+    }
+}
+
 // https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 

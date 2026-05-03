@@ -86,6 +86,8 @@ class MeshService : Service() {
 
     private val dispatchers: CoroutineDispatchers by inject()
 
+    private val sdkClientLifecycle: SdkClientLifecycle by inject()
+
     private val serviceJob = Job()
     private val serviceScope by lazy { CoroutineScope(dispatchers.io + serviceJob) }
 
@@ -218,6 +220,7 @@ class MeshService : Service() {
         if (isServiceInitialized) {
             orchestrator.stop()
         }
+        sdkClientLifecycle.disconnect()
         serviceJob.cancel()
         super.onDestroy()
     }

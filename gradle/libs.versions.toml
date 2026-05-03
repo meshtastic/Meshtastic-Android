@@ -17,6 +17,9 @@ room = "3.0.0-alpha04"
 koin = "4.2.1"
 koin-plugin = "1.0.0-RC2"
 
+# meshtastic-sdk
+meshtastic-sdk = "0.1.0-SNAPSHOT"
+
 # Kotlin
 kotlin = "2.3.21"
 kotlinx-coroutines-android = "1.11.0-rc02"
@@ -265,6 +268,15 @@ aboutlibraries-gradlePlugin = { module = "com.mikepenz.aboutlibraries.plugin:abo
 
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
 jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
+
+# Meshtastic SDK (sourced via composite build — no version needed here)
+sdk-core = { module = "org.meshtastic:sdk-core", version.ref = "meshtastic-sdk" }
+sdk-proto = { module = "org.meshtastic:sdk-proto", version.ref = "meshtastic-sdk" }
+sdk-transport-ble = { module = "org.meshtastic:sdk-transport-ble", version.ref = "meshtastic-sdk" }
+sdk-transport-tcp = { module = "org.meshtastic:sdk-transport-tcp", version.ref = "meshtastic-sdk" }
+sdk-transport-serial = { module = "org.meshtastic:sdk-transport-serial", version.ref = "meshtastic-sdk" }
+sdk-storage-sqldelight = { module = "org.meshtastic:sdk-storage-sqldelight", version.ref = "meshtastic-sdk" }
+sdk-testing = { module = "org.meshtastic:sdk-testing", version.ref = "meshtastic-sdk" }
 
 [plugins]
 # Android

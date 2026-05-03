@@ -40,6 +40,7 @@ import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.plugin.module.dsl.startKoin
 import org.meshtastic.app.di.AndroidKoinApp
 import org.meshtastic.core.common.ContextServices
+import org.meshtastic.sdk.storage.sqldelight.AndroidContextHolder
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.service.worker.MeshLogCleanupWorker
@@ -62,6 +63,10 @@ open class MeshUtilApplication :
     override fun onCreate() {
         super.onCreate()
         ContextServices.app = this
+
+        // Must be set before startKoin so SqlDelightStorageProvider (used by RadioClientProvider)
+        // can resolve applicationContext internally.
+        AndroidContextHolder.context = applicationContext
 
         startKoin<AndroidKoinApp> {
             androidContext(this@MeshUtilApplication)

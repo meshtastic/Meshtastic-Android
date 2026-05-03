@@ -225,6 +225,17 @@ dependencies {
     implementation(projects.feature.wifiProvision)
     implementation(projects.feature.widget)
 
+    // Meshtastic SDK (composite build — sourced from ../meshtastic-sdk)
+    implementation(libs.sdk.core)
+    implementation(libs.sdk.proto)
+    implementation(libs.sdk.transport.ble)
+    implementation(libs.sdk.transport.tcp)
+    implementation(libs.sdk.transport.serial)
+    implementation(libs.sdk.storage.sqldelight)
+    // Kable Peripheral type is used directly in RadioClientProvider via BlePeripheralFactory
+    implementation(libs.kable.core)
+    testImplementation(libs.sdk.testing)
+
     implementation(libs.jetbrains.compose.material3.adaptive)
     implementation(libs.jetbrains.compose.material3.adaptive.layout)
     implementation(libs.jetbrains.compose.material3.adaptive.navigation)

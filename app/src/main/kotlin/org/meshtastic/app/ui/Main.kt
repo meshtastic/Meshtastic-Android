@@ -29,8 +29,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.map
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
+import org.meshtastic.app.radio.RadioClientViewModel
+import org.meshtastic.app.radio.SdkNodeListViewModel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
@@ -54,6 +57,17 @@ import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 @Composable
 fun MainScreen() {
     val viewModel: UIViewModel = koinViewModel()
+    // Instantiate the SDK ViewModel so event collection starts at app launch (Eagerly scope).
+    // sdkConnectionLabel logged below for POC visibility; will feed the connection toolbar later.
+    val radioClientViewModel: RadioClientViewModel = koinViewModel()
+    // Warm the SDK node list at launch so it's ready before any screen subscribes.
+    val sdkNodeListViewModel: SdkNodeListViewModel = koinViewModel()
+    val sdkNodeCount by sdkNodeListViewModel.nodes
+        .map { it.size }
+        .collectAsStateWithLifecycle(initialValue = 0)
+    val sdkLabel by radioClientViewModel.sdkConnectionLabel.collectAsStateWithLifecycle()
+    LaunchedEffect(sdkLabel) { Logger.d { sdkLabel } }
+    LaunchedEffect(sdkNodeCount) { Logger.d { "SDK nodes: $sdkNodeCount" } }
     // Land on Connections for first-run / no-device-selected; otherwise on Nodes. Read synchronously
     // from the StateFlow (seeded from persisted prefs) so the initial tab is set in one shot.
     val initialTab =
