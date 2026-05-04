@@ -18,6 +18,7 @@ package org.meshtastic.desktop
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -77,6 +78,7 @@ import org.meshtastic.core.resources.desktop_tray_show
 import org.meshtastic.core.resources.desktop_tray_tooltip
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
@@ -300,9 +302,13 @@ private fun ApplicationScope.MeshtasticWindow(
         state = windowState,
         onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
     ) {
+        val eventEdition by uiViewModel.eventEdition.collectAsState()
+
         CoilImageLoaderSetup()
-        AppTheme(darkTheme = isDarkTheme, contrastLevel = contrastLevel) {
-            DesktopMainScreen(uiViewModel, multiBackstack)
+        CompositionLocalProvider(LocalEventBranding provides eventEdition) {
+            AppTheme(darkTheme = isDarkTheme, contrastLevel = contrastLevel) {
+                DesktopMainScreen(uiViewModel, multiBackstack)
+            }
         }
     }
 }

@@ -35,6 +35,7 @@ import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.model.toEventEdition
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.connect_radio_for_remote_admin
@@ -189,16 +190,18 @@ private fun FirmwareSection(
     SectionCard(title = Res.string.firmware) {
         Column {
             firmwareEdition?.let { edition ->
+                val eventEdition = edition.toEventEdition()
                 val icon =
                     when (edition) {
                         FirmwareEdition.VANILLA -> MeshtasticIcons.Icecream
                         else -> MeshtasticIcons.ForkLeft
                     }
+                val displayName = eventEdition?.name ?: edition.name
 
                 ListItem(
                     text = stringResource(Res.string.firmware_edition),
                     leadingIcon = icon,
-                    supportingText = edition.name,
+                    supportingText = displayName,
                     copyable = true,
                     trailingIcon = null,
                 )
