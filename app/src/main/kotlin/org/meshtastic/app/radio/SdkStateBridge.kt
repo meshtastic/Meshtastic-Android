@@ -23,41 +23,54 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState as AppConnectionState
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
-import org.meshtastic.proto.Position as ProtoPosition
+import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.NodeChange
+import org.meshtastic.sdk.NodeId
 
 /**
- * Bridges SDK reactive flows into the legacy repository layer.
+ * Bridges SDK reactive flows into the legacy repository layer and routes [ServiceAction]s
+ * directly through the SDK, bypassing the old CommandSender/MeshActionHandler pipeline.
  *
  * The SDK owns the transport and all state; this bridge maps SDK emissions into [ServiceRepository]
  * and [NodeManager] so that existing feature-module UI code (which observes those repositories)
  * continues to work without modification.
  *
- * **Lifecycle:** Created as a Koin `@Single`. Automatically subscribes to [RadioClientProvider.client]
- * and starts/stops collection as clients come and go. No explicit lifecycle management needed.
+ * **Node state:** The SDK's [NodeChange] flow provides fully-updated [NodeInfo] instances that
+ * already include position, telemetry, and user changes. No manual packet decoding is needed.
  *
- * **Mapping policy:**
- * - SDK `Connected` → app `Connected`
- * - SDK `Connecting` / `Configuring` → app `Connecting`
- * - SDK `Reconnecting` → app `DeviceSleep` (firmware went to sleep or transport dropped)
- * - SDK `Disconnected` → app `Disconnected`
+ * **Packets:** Raw [MeshPacket]s are forwarded to [ServiceRepository.emitMeshPacket] for
+ * consumers that need them (RadioConfigViewModel admin responses, TAK integration).
+ *
+ * **ServiceActions:** Handled inline via SDK [AdminApi] — eliminates the old
+ * MeshServiceOrchestrator → MeshActionHandler → CommandSender dispatch chain.
+ *
+ * **Lifecycle:** Created as a Koin `@Single`. Automatically subscribes to [RadioClientProvider.client]
+ * and starts/stops collection as clients come and go.
  */
 @Single
+@Suppress("TooManyFunctions")
 class SdkStateBridge(
     private val provider: RadioClientProvider,
     private val serviceRepository: ServiceRepository,
     private val nodeManager: NodeManager,
+    private val packetRepository: Lazy<PacketRepository>,
     private val dispatchers: CoroutineDispatchers,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -68,13 +81,13 @@ class SdkStateBridge(
 
     private fun startBridge() {
 
-        // ── Connection state bridge ─────────────────────────────────────────
+        // ── Connection state ────────────────────────────────────────────────
         provider.client
             .flatMapLatest { client -> client?.connection ?: flowOf(SdkConnectionState.Disconnected) }
             .onEach { sdkState -> serviceRepository.setConnectionState(mapConnectionState(sdkState)) }
             .launchIn(scope)
 
-        // ── Node updates bridge ─────────────────────────────────────────────
+        // ── Node updates (position, telemetry, user all included in NodeInfo) ─
         provider.client
             .flatMapLatest { client -> client?.nodes ?: flowOf() }
             .onEach { change ->
@@ -86,59 +99,26 @@ class SdkStateBridge(
                         }
                         nodeManager.setNodeDbReady(true)
                     }
-                    is NodeChange.Added -> {
-                        nodeManager.installNodeInfo(change.node, withBroadcast = true)
-                    }
-                    is NodeChange.Updated -> {
-                        nodeManager.installNodeInfo(change.node, withBroadcast = true)
-                    }
-                    is NodeChange.Removed -> {
-                        nodeManager.removeByNodenum(change.nodeId.raw)
-                    }
+                    is NodeChange.Added -> nodeManager.installNodeInfo(change.node, withBroadcast = true)
+                    is NodeChange.Updated -> nodeManager.installNodeInfo(change.node, withBroadcast = true)
+                    is NodeChange.Removed -> nodeManager.removeByNodenum(change.nodeId.raw)
                 }
             }
             .launchIn(scope)
 
-        // ── Own node identity bridge ────────────────────────────────────────
+        // ── Own node identity ───────────────────────────────────────────────
         provider.client
             .flatMapLatest { client -> client?.ownNode ?: flowOf(null) }
-            .onEach { ownNode ->
-                if (ownNode != null) {
-                    nodeManager.setMyNodeNum(ownNode.num)
-                }
-            }
+            .onEach { ownNode -> if (ownNode != null) nodeManager.setMyNodeNum(ownNode.num) }
             .launchIn(scope)
 
-        // ── Inbound packet bridge (telemetry, position, user updates) ───────
+        // ── Raw packet forward (for RadioConfigViewModel + TAK) ─────────────
         provider.client
             .flatMapLatest { client -> client?.packets ?: flowOf() }
-            .onEach { packet ->
-                val decoded = packet.decoded ?: return@onEach
-                val fromNum = packet.from
-                val myNodeNum = nodeManager.myNodeNum.value ?: 0
-                val payloadBytes = decoded.payload?.toByteArray() ?: return@onEach
-
-                when (decoded.portnum) {
-                    PortNum.TELEMETRY_APP -> {
-                        runCatching { Telemetry.ADAPTER.decode(payloadBytes) }
-                            .onSuccess { nodeManager.handleReceivedTelemetry(fromNum, it) }
-                    }
-                    PortNum.POSITION_APP -> {
-                        runCatching { ProtoPosition.ADAPTER.decode(payloadBytes) }
-                            .onSuccess { nodeManager.handleReceivedPosition(fromNum, myNodeNum, it, packet.rx_time.toLong()) }
-                    }
-                    PortNum.NODEINFO_APP -> {
-                        runCatching { User.ADAPTER.decode(payloadBytes) }
-                            .onSuccess { nodeManager.handleReceivedUser(fromNum, it, packet.channel) }
-                    }
-                    else -> {
-                        // Other port types are handled directly by feature VMs via SDK flows
-                    }
-                }
-            }
+            .onEach { packet -> serviceRepository.emitMeshPacket(packet) }
             .launchIn(scope)
 
-        // ── Events bridge (notifications, warnings) ─────────────────────────
+        // ── Events (notifications, security, backpressure) ──────────────────
         provider.client
             .flatMapLatest { client -> client?.events ?: flowOf() }
             .onEach { event ->
@@ -149,24 +129,109 @@ class SdkStateBridge(
                             ClientNotification(message = "Device rebooted"),
                         )
                     }
-                    is MeshEvent.SecurityWarning -> {
-                        Logger.w { "[SdkBridge] Security warning: $event" }
-                    }
-                    is MeshEvent.PacketsDropped -> {
-                        Logger.w { "[SdkBridge] Packets dropped: ${event.count} from ${event.flow}" }
-                    }
-                    else -> {
-                        Logger.d { "[SdkBridge] Event: $event" }
-                    }
+                    is MeshEvent.SecurityWarning -> Logger.w { "[SdkBridge] Security warning: $event" }
+                    is MeshEvent.PacketsDropped -> Logger.w { "[SdkBridge] Packets dropped: ${event.count} from ${event.flow}" }
+                    else -> Logger.d { "[SdkBridge] Event: $event" }
                 }
             }
             .launchIn(scope)
 
-        Logger.i { "SdkStateBridge started" }
+        // ── ServiceAction routing (replaces MeshServiceOrchestrator dispatch) ─
+        serviceRepository.serviceAction
+            .onEach { action -> handleServiceAction(action) }
+            .launchIn(scope)
+
+        Logger.i { "SdkStateBridge started — SDK owns transport + ServiceAction dispatch" }
+    }
+
+    // ── ServiceAction handling ───────────────────────────────────────────────
+
+    private suspend fun handleServiceAction(action: ServiceAction) {
+        val client = provider.client.value
+        if (client == null) {
+            Logger.w { "[SdkBridge] ServiceAction ${action::class.simpleName} dropped — no client" }
+            if (action is ServiceAction.SendContact) action.result.complete(false)
+            return
+        }
+
+        when (action) {
+            is ServiceAction.Favorite -> {
+                val node = action.node
+                client.admin.setFavorite(NodeId(node.num), !node.isFavorite)
+                nodeManager.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
+            }
+
+            is ServiceAction.Ignore -> {
+                val node = action.node
+                val newIgnored = !node.isIgnored
+                client.admin.setIgnored(NodeId(node.num), newIgnored)
+                nodeManager.updateNode(node.num) { it.copy(isIgnored = newIgnored) }
+                packetRepository.value.updateFilteredBySender(node.user.id, newIgnored)
+            }
+
+            is ServiceAction.Mute -> {
+                val node = action.node
+                client.admin.toggleMuted(NodeId(node.num))
+                nodeManager.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
+            }
+
+            is ServiceAction.Reaction -> {
+                val channel = action.contactKey[0].digitToInt()
+                val destId = action.contactKey.substring(1)
+                val destNum = DataPacket.idToDefaultNodeNum(destId.removePrefix("!"))
+                    ?: DataPacket.NODENUM_BROADCAST
+                client.send(
+                    MeshPacket(
+                        to = destNum,
+                        channel = channel,
+                        want_ack = true,
+                        decoded = Data(
+                            portnum = PortNum.TEXT_MESSAGE_APP,
+                            payload = action.emoji.encodeToByteArray().toByteString(),
+                            emoji = EMOJI_INDICATOR,
+                            reply_id = action.replyId,
+                        ),
+                    ),
+                )
+            }
+
+            is ServiceAction.ImportContact -> {
+                val verified = action.contact.copy(manually_verified = true)
+                client.admin.addContact(verified)
+                nodeManager.handleReceivedUser(
+                    verified.node_num,
+                    verified.user ?: User(),
+                    manuallyVerified = true,
+                )
+            }
+
+            is ServiceAction.SendContact -> {
+                val result = runCatching { client.admin.addContact(action.contact) }
+                action.result.complete(result.getOrNull() is AdminResult.Success)
+            }
+
+            is ServiceAction.GetDeviceMetadata -> {
+                val payload = AdminMessage.ADAPTER.encode(
+                    AdminMessage(get_device_metadata_request = true),
+                ).toByteString()
+                client.send(
+                    MeshPacket(
+                        to = action.destNum,
+                        want_ack = true,
+                        decoded = Data(
+                            portnum = PortNum.ADMIN_APP,
+                            payload = payload,
+                            want_response = true,
+                        ),
+                    ),
+                )
+            }
+        }
     }
 
     companion object {
-        /** Map SDK connection states to the app's legacy connection states. */
+        private const val EMOJI_INDICATOR = 1
+
         fun mapConnectionState(sdkState: SdkConnectionState): AppConnectionState = when (sdkState) {
             is SdkConnectionState.Disconnected -> AppConnectionState.Disconnected
             is SdkConnectionState.Connecting -> AppConnectionState.Connecting

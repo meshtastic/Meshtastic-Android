@@ -17,25 +17,20 @@
 package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshConnectionManager
-import org.meshtastic.core.repository.MeshMessageProcessor
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
@@ -52,10 +47,7 @@ import org.meshtastic.core.takserver.TAKServerManager
 @Single
 class MeshServiceOrchestrator(
     private val radioInterfaceService: RadioInterfaceService,
-    private val serviceRepository: ServiceRepository,
     private val nodeManager: NodeManager,
-    private val messageProcessor: MeshMessageProcessor,
-    private val router: MeshRouter,
     private val serviceNotifications: MeshServiceNotifications,
     private val takServerManager: TAKServerManager,
     private val takMeshIntegration: TAKMeshIntegration,
@@ -75,8 +67,13 @@ class MeshServiceOrchestrator(
     /**
      * Starts the mesh service components and wires up data flows.
      *
-     * This is the KMP equivalent of `MeshService.onCreate()`. It connects to the radio and wires incoming radio data to
-     * the message processor and service actions to the router's action handler.
+     * With the SDK hard-cutover, the RadioClient (via RadioClientProvider) owns transport and
+     * packet handling. This orchestrator retains responsibility for:
+     * - Per-device database initialization
+     * - TAK server integration lifecycle
+     * - Service notification channels
+     *
+     * ServiceAction dispatch and radio data flows are handled by [SdkStateBridge].
      */
     fun start() {
         if (isRunning) {
@@ -84,14 +81,9 @@ class MeshServiceOrchestrator(
             return
         }
 
-        Logger.i { "Starting mesh service orchestrator" }
+        Logger.i { "Starting mesh service orchestrator (SDK mode)" }
         val newScope = CoroutineScope(SupervisorJob() + dispatchers.default)
         scope = newScope
-
-        // Drop any bytes that piled up in the service's receivedData channel since the last stop(). The channel
-        // outlives the orchestrator's per-start scope, so without this drain a stop/start cycle would replay stale
-        // packets ahead of the fresh session's firmware handshake.
-        radioInterfaceService.resetReceivedBuffer()
 
         serviceNotifications.initChannels()
         connectionManager.updateStatusNotification()
@@ -110,31 +102,14 @@ class MeshServiceOrchestrator(
             .launchIn(newScope)
 
         newScope.handledLaunch {
-            // Ensure the per-device database is active before the radio connects.
-            // On Android this is handled by MeshUtilApplication.init(); on Desktop (and any
-            // future KMP host) the orchestrator is the first entry point, so it must initialize
-            // the database here. Without this, DatabaseManager._currentDb stays null and all
-            // Room writes via withDb() are silently dropped — causing ourNodeInfo to remain null
-            // after the handshake completes.
+            // Ensure the per-device database is active before SDK connects.
             databaseManager.switchActiveDatabase(radioInterfaceService.getDeviceAddress())
-            Logger.i { "Per-device database initialized, connecting radio" }
-            radioInterfaceService.connect()
+            Logger.i { "Per-device database initialized" }
         }
 
-        radioInterfaceService.receivedData
-            .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum.value) }
-            .launchIn(newScope)
-
-        radioInterfaceService.connectionError
-            .onEach { errorMessage -> serviceRepository.setErrorMessage(errorMessage, Severity.Warn) }
-            .launchIn(newScope)
-
-        // Each action is dispatched in its own supervised coroutine so that a failure in one
-        // action (e.g. a timeout in sendAdminAwait) cannot terminate the collector and silently
-        // drop all subsequent service actions for the rest of the session.
-        serviceRepository.serviceAction
-            .onEach { action -> newScope.handledLaunch { router.actionHandler.onServiceAction(action) } }
-            .launchIn(newScope)
+        // NOTE: Radio connection, packet routing, and ServiceAction dispatch are now handled
+        // by RadioClientProvider + SdkStateBridge. The old radioInterfaceService.connect() /
+        // receivedData / serviceAction subscription paths are no longer needed.
 
         nodeManager.loadCachedNodeDB()
     }
@@ -142,21 +117,12 @@ class MeshServiceOrchestrator(
     /**
      * Stops the mesh service components and cancels the coroutine scope.
      *
-     * This is the KMP equivalent of `MeshService.onDestroy()`.
+     * Radio disconnect is handled by [RadioClientProvider.disconnect] / SDK client teardown.
      */
     fun stop() {
         Logger.i { "Stopping mesh service orchestrator" }
-        // Guard stop() so we don't emit a spurious "stopped" log when TAK was never started
         if (takServerManager.isRunning.value) {
             takMeshIntegration.stop()
-        }
-        // Best-effort polite goodbye on service teardown (onDestroy / process shutdown). We launch
-        // on a fresh detached scope — not the orchestrator's per-start scope — so the subsequent
-        // scope.cancel() below doesn't interrupt the short drain delay inside disconnect(). The
-        // coroutine is fire-and-forget; typical runtime is ~100-150ms which comfortably fits
-        // inside Android's onDestroy() grace window.
-        CoroutineScope(SupervisorJob() + dispatchers.default).launch {
-            runCatching { radioInterfaceService.disconnect() }
         }
         scope?.cancel()
         scope = null
