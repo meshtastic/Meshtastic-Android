@@ -444,7 +444,7 @@ class BleRadioTransport(
     /** Closes the connection to the device. */
     override suspend fun close() {
         Logger.i { "[$address] Disconnecting. ${formatSessionStats()}" }
-        connectionScope.cancel("close() called")
+        connectionScope.cancel()
         // GATT cleanup must run under NonCancellable so a cancelled caller cannot skip it,
         // which would leak BluetoothGatt and trigger status 133 on the next reconnect.
         // Using withContext (not runBlocking) keeps the caller's thread free — this is
@@ -459,7 +459,7 @@ class BleRadioTransport(
         // Our own disconnect succeeded — the exception-handler safety net is no longer
         // needed. Cancel the detached cleanup scope so it doesn't outlive us in tests
         // or process lifetime.
-        cleanupScope.cancel("close() called")
+        cleanupScope.cancel()
     }
 
     private fun dispatchPacket(packet: ByteArray) {
