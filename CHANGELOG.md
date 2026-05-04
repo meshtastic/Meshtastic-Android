@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5349) by @James Rich in [`fa3437b14`](https://github.com/meshtastic/Meshtastic-Android/commit/fa3437b14728c545a606527284c429d86cae3956)
+* chore(deps): update org.meshtastic:mqtt-client to v0.3.6 (#5350) by @renovate[bot] in [`fca1fd824`](https://github.com/meshtastic/Meshtastic-Android/commit/fca1fd8248640a1e39c4bb7b4c7f654fc92cca9d)
+* docs: update CHANGELOG.md (#5348) by @github-actions[bot] in [`e70396f55`](https://github.com/meshtastic/Meshtastic-Android/commit/e70396f55f5ccd05abdb11cd2005877a02f212fc)
 * Add Meshtastic design standards as a skill (#5346) by @Copilot in [`f51e04604`](https://github.com/meshtastic/Meshtastic-Android/commit/f51e0460430a2c30c734551caba1f0a110793f97)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5347) by @James Rich in [`26c50258d`](https://github.com/meshtastic/Meshtastic-Android/commit/26c50258dab0f0c352036944320f4c297203fe5b)
 * docs: update CHANGELOG.md (#5345) by @github-actions[bot] in [`7d9f0e968`](https://github.com/meshtastic/Meshtastic-Android/commit/7d9f0e9682d1edf3844b7323e80b7ef818b23709)
