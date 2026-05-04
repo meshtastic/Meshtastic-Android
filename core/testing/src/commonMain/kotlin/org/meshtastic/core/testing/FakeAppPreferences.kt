@@ -84,12 +84,6 @@ class FakeUiPrefs : UiPrefs {
         theme.value = value
     }
 
-    override val contrastLevel = MutableStateFlow(0)
-
-    override fun setContrastLevel(value: Int) {
-        contrastLevel.value = value
-    }
-
     override val locale = MutableStateFlow("en")
 
     override fun setLocale(languageTag: String) {

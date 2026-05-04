@@ -120,7 +120,6 @@ class UIViewModel(
     }
 
     val theme: StateFlow<Int> = uiPrefs.theme
-    val contrastLevel: StateFlow<Int> = uiPrefs.contrastLevel
 
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
 

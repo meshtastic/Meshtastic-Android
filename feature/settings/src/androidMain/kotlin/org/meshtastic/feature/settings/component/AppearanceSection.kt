@@ -28,7 +28,6 @@ import androidx.core.net.toUri
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_settings
-import org.meshtastic.core.resources.contrast
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.theme
 import org.meshtastic.core.ui.component.ListItem
@@ -38,13 +37,9 @@ import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
-/** Section for app appearance settings like language, theme, and contrast. */
+/** Section for app appearance settings like language and theme. */
 @Composable
-fun AppearanceSection(
-    onShowLanguagePicker: () -> Unit,
-    onShowThemePicker: () -> Unit,
-    onShowContrastPicker: () -> Unit,
-) {
+fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () -> Unit) {
     val context = LocalContext.current
     val settingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
@@ -79,19 +74,11 @@ fun AppearanceSection(
         ) {
             onShowThemePicker()
         }
-
-        ListItem(
-            text = stringResource(Res.string.contrast),
-            leadingIcon = MeshtasticIcons.FormatPaint,
-            trailingIcon = null,
-        ) {
-            onShowContrastPicker()
-        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun AppearanceSectionPreview() {
-    AppTheme { AppearanceSection(onShowLanguagePicker = {}, onShowThemePicker = {}, onShowContrastPicker = {}) }
+    AppTheme { AppearanceSection(onShowLanguagePicker = {}, onShowThemePicker = {}) }
 }
