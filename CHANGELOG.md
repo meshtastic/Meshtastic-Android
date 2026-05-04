@@ -9,12 +9,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* feat: event firmware easter egg with ambient branding (#5354) by @James Rich in [`82926fd73`](https://github.com/meshtastic/Meshtastic-Android/commit/82926fd7347c21519d47455649e88c12023ae25e)
-* chore(ble): don't surface ui message when canceling scope (#5352) by @James Rich in [`78ff3f599`](https://github.com/meshtastic/Meshtastic-Android/commit/78ff3f599c7a813dfe2c5cbf92b5febb8fbe7c36)
+* feat: align theme with Design Standards v1.3, remove contrast setting (#5355) by @James Rich in [`2de57a9e8`](https://github.com/meshtastic/Meshtastic-Android/commit/2de57a9e810373f31b62079a62cf9a210a9d419d)
 
-### Internal (v2.7.14-internal.84)
+### Internal (v2.7.14-internal.85)
 Changes since [`v2.7.14-open.6`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.6):
 
+* docs: update CHANGELOG.md (#5353) by @github-actions[bot] in [`1a6774d67`](https://github.com/meshtastic/Meshtastic-Android/commit/1a6774d67c7f509490fc52944be17e8c3c5365d6)
+* feat: event firmware easter egg with ambient branding (#5354) by @James Rich in [`82926fd73`](https://github.com/meshtastic/Meshtastic-Android/commit/82926fd7347c21519d47455649e88c12023ae25e)
+* chore(ble): don't surface ui message when canceling scope (#5352) by @James Rich in [`78ff3f599`](https://github.com/meshtastic/Meshtastic-Android/commit/78ff3f599c7a813dfe2c5cbf92b5febb8fbe7c36)
 * docs: update CHANGELOG.md (#5351) by @github-actions[bot] in [`c9d633f1d`](https://github.com/meshtastic/Meshtastic-Android/commit/c9d633f1d381f478941d388a6cdf0755ae333fa6)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5349) by @James Rich in [`fa3437b14`](https://github.com/meshtastic/Meshtastic-Android/commit/fa3437b14728c545a606527284c429d86cae3956)
 * chore(deps): update org.meshtastic:mqtt-client to v0.3.6 (#5350) by @renovate[bot] in [`fca1fd824`](https://github.com/meshtastic/Meshtastic-Android/commit/fca1fd8248640a1e39c4bb7b4c7f654fc92cca9d)
