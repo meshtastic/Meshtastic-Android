@@ -9,9 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(deps): update org.meshtastic:mqtt-client to v0.3.5 (#5344) by @renovate[bot] in [`08ff14235`](https://github.com/meshtastic/Meshtastic-Android/commit/08ff14235d22c9c5d05ed7f8ad5a2232b03ceffa)
+* Add Meshtastic design standards as a skill (#5346) by @Copilot in [`f51e04604`](https://github.com/meshtastic/Meshtastic-Android/commit/f51e0460430a2c30c734551caba1f0a110793f97)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5347) by @James Rich in [`26c50258d`](https://github.com/meshtastic/Meshtastic-Android/commit/26c50258dab0f0c352036944320f4c297203fe5b)
+* docs: update CHANGELOG.md (#5345) by @github-actions[bot] in [`7d9f0e968`](https://github.com/meshtastic/Meshtastic-Android/commit/7d9f0e9682d1edf3844b7323e80b7ef818b23709)
 
-### Open Beta (v2.7.14-open.5)
+### Open Beta (v2.7.14-open.6)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
