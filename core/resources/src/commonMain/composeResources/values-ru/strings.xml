@@ -35,6 +35,7 @@
     <!-- ADD -->
     <string name="add">Добавить</string>
     <string name="add_a_note">Добавить личную заметку…</string>
+    <string name="add_channels_description">В QR-коде были найдены следующие каналы. Выберите те, которые хотите добавить на свое устройство. Существующие каналы будут сохранены.</string>
     <string name="add_custom_tile_source">Добавить источник сетевых плиток</string>
     <string name="add_favorite">Добавить в избранные</string>
     <string name="add_layer">Добавить слой</string>
@@ -86,6 +87,7 @@
     <string name="audio_config">Настройка звука</string>
     <string name="available_pins">Доступные контакты</string>
     <string name="back">Назад</string>
+    <string name="backup_restore">Резервная копия и восстановление</string>
     <string name="bad">Плохой</string>
     <string name="bandwidth">Ширина канала</string>
     <string name="baro_pressure">Давл</string>
@@ -325,6 +327,7 @@
     <string name="distance_measurements_description">Показать расстояния между вашим телефоном и другими нодами Meshstatic с позициями.</string>
     <string name="dns">Служба доменных имен (DNS)</string>
     <string name="done">Готово</string>
+    <string name="dont_show_again_for_device">Больше не показывать для этого устройства</string>
     <string name="double_tap_as_button_press">Двойное нажатие как кнопка</string>
     <string name="downlink_enabled">Downlink включен</string>
     <string name="downlink_feature_description">Сообщения от публичного интернет шлюза пересылаются в локальную сетку. Из-за политики нулевого хоста, трафик сервера MQTT по умолчанию не будет распространяться дальше, чем это устройство.</string>
@@ -435,10 +438,12 @@
     <string name="firmware_update_node_info_missing">Отсутствует информация о пользователе ноды.</string>
     <string name="firmware_update_not_found_in_release">Не удалось найти в релизе прошивку для %1$s.</string>
     <string name="firmware_update_ota_failed">Ошибка обновления OTA: %1$s</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Для RAK WisBlock RAK4631 используйте фирменный серийный инструмент DFU (например, adafruit-nrfutil dfu serial с предоставленным zip-файлом загрузчика). Простое копирование файла .uf2 не обновит загрузчик.</string>
     <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
     <string name="firmware_update_release_notes">Список изменений</string>
     <string name="firmware_update_retrieval_failed">Не удалось получить файл прошивки.</string>
     <string name="firmware_update_retry">Повторить</string>
+    <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на DFU-носитель вашего устройства.</string>
     <string name="firmware_update_select_file">Выберите локальный файл</string>
     <string name="firmware_update_source_local">Выберите локальный файл</string>
     <string name="firmware_update_stable">Стабильная</string>
@@ -640,6 +645,7 @@
     <string name="map_download_region">Скачать Регион</string>
     <string name="map_filter">Фильтр карты\n</string>
     <string name="map_layer_formats">Слои карты поддерживают форматы .kml, .kmz или GeoJSON.</string>
+    <string name="map_node_popup_details">%1$s&lt;br&gt;Последняя активность: %2$s&lt;br&gt;Последняя позиция: %3$s&lt;br&gt;Заряд: %4$s</string>
     <string name="map_offline_manager">Оффлайн менеджер</string>
     <string name="map_purge_fail">Ошибка очистки кэша SQL, подробности в logcat</string>
     <string name="map_purge_success">Кэш SQL очищен для %1$s</string>
@@ -1012,6 +1018,7 @@
     <string name="role_tracker_desc">Транслирует пакеты местоположения GPS в приоритетном порядке.</string>
     <string name="root_topic">Корневая тема</string>
     <string name="rotary_encoder_1_enabled">Поворотный энкодер #1 включен</string>
+    <string name="router_role_confirmation_text">Я прочитал &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;Документацию по роли устройств&lt;/a&gt; и пост в блоге о &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;Выборе верной роли устройства&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Неверный ключ сессии</string>
     <string name="routing_error_admin_public_key_unauthorized">Публичный ключ не авторизован</string>
@@ -1134,6 +1141,9 @@
     <string name="status_message">Состояние сообщения</string>
     <string name="status_message_config">Настройка состояния сообщений</string>
     <string name="stay_connected_anywhere">Оставайтесь на связи везде</string>
+    <string name="store_forward">Store &amp; Forward</string>
+    <string name="store_forward_config">Настройка Store &amp; Forward</string>
+    <string name="store_forward_enabled">Store &amp; Forward включена</string>
     <string name="subnet">Подсеть</string>
     <string name="super_deep_sleep_duration_seconds">Длительность супер-глубокого сна</string>
     <string name="supported">Поддерживается</string>
