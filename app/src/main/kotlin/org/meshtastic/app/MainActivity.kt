@@ -69,6 +69,7 @@ import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
+import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
@@ -179,9 +180,12 @@ class MainActivity : AppCompatActivity() {
         usbRepository.refreshState()
     }
 
+    @Suppress("LongMethod")
     @Composable
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
+        val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
         CompositionLocalProvider(
+            LocalEventBranding provides eventEdition,
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
             LocalBarcodeScannerSupported provides true,

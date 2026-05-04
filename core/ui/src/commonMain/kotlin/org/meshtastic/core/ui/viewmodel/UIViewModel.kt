@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -38,12 +39,15 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.asDeviceVersion
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.EventEdition
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.model.toEventEdition
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DeepLinkRouter
 import org.meshtastic.core.repository.FirmwareReleaseRepository
@@ -119,6 +123,12 @@ class UIViewModel(
     val contrastLevel: StateFlow<Int> = uiPrefs.contrastLevel
 
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
+
+    val eventEdition: StateFlow<EventEdition?> =
+        combine(firmwareEdition, connectionState) { edition, state ->
+            if (state is ConnectionState.Connected) edition?.toEventEdition() else null
+        }
+            .stateInWhileSubscribed(initialValue = null)
 
     val clientNotification: StateFlow<ClientNotification?> = serviceRepository.clientNotification
 
