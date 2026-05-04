@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.Intent
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.StateFlow
-import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
@@ -40,7 +39,7 @@ import org.meshtastic.proto.User
  * All radio commands are forwarded through [AndroidServiceRepository.meshService]. If the service is not yet bound,
  * commands are silently dropped with a warning log.
  */
-@Single
+// @Single — disabled for SDK hard-cutover POC; SdkRadioControllerImpl provides RadioController instead
 @Suppress("TooManyFunctions")
 class AndroidRadioControllerImpl(
     private val context: Context,

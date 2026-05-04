@@ -1,0 +1,475 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.app.radio
+
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.StateFlow
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+import org.koin.core.annotation.Single
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.MeshLocationManager
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.SharedContact
+import org.meshtastic.proto.User
+import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ChannelIndex
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.RadioClient
+import java.util.concurrent.atomic.AtomicInteger
+
+/**
+ * [RadioController] implementation that delegates all operations through the meshtastic-sdk.
+ *
+ * This replaces [org.meshtastic.core.service.AndroidRadioControllerImpl] in the hard-cutover POC. Feature modules
+ * continue injecting [RadioController] and get SDK-backed behavior without code changes.
+ *
+ * **Command dispatch:** All admin, telemetry, and routing operations go through [RadioClient.admin],
+ * [RadioClient.telemetry], and [RadioClient.routing] respectively.
+ *
+ * **State distribution:** Handled separately by [SdkStateBridge], which feeds SDK flows back into
+ * [ServiceRepository] and [org.meshtastic.core.repository.NodeManager].
+ */
+@Single(binds = [RadioController::class])
+@Suppress("TooManyFunctions", "LongParameterList")
+class SdkRadioControllerImpl(
+    private val provider: RadioClientProvider,
+    private val serviceRepository: ServiceRepository,
+    private val nodeRepository: NodeRepository,
+    private val locationManager: MeshLocationManager,
+) : RadioController {
+
+    private val packetIdCounter = AtomicInteger(1)
+
+    private val client: RadioClient?
+        get() = provider.client.value
+
+    private fun requireClient(): RadioClient {
+        return client ?: run {
+            Logger.w { "SdkRadioControllerImpl: no active RadioClient" }
+            throw IllegalStateException("RadioClient not connected")
+        }
+    }
+
+    // ── Observable state ────────────────────────────────────────────────────
+
+    override val connectionState: StateFlow<ConnectionState>
+        get() = serviceRepository.connectionState
+
+    override val clientNotification: StateFlow<ClientNotification?>
+        get() = serviceRepository.clientNotification
+
+    override fun clearClientNotification() {
+        serviceRepository.clearClientNotification()
+    }
+
+    // ── Messaging ───────────────────────────────────────────────────────────
+
+    override suspend fun sendMessage(packet: DataPacket) {
+        val c = client ?: run {
+            Logger.w { "sendMessage: no client, dropping packet" }
+            return
+        }
+        val destNum = when (packet.to) {
+            null, DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
+            else -> DataPacket.idToDefaultNodeNum(packet.to?.removePrefix("!")) ?: DataPacket.NODENUM_BROADCAST
+        }
+        val meshPacket = MeshPacket(
+            to = destNum,
+            channel = packet.channel,
+            decoded = Data(
+                portnum = PortNum.fromValue(packet.dataType) ?: PortNum.UNKNOWN_APP,
+                payload = packet.bytes ?: ByteString.EMPTY,
+                want_response = false,
+            ),
+        )
+        c.send(meshPacket)
+    }
+
+    // ── Node operations ─────────────────────────────────────────────────────
+
+    override suspend fun favoriteNode(nodeNum: Int) {
+        val c = requireClient()
+        val node = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
+        val currentlyFavorite = node.isFavorite
+        c.admin.setFavorite(NodeId(nodeNum), !currentlyFavorite)
+    }
+
+    override suspend fun sendSharedContact(nodeNum: Int): Boolean {
+        val c = client ?: return false
+        val node = nodeRepository.getNode(DataPacket.nodeNumToDefaultId(nodeNum))
+        val contact = SharedContact(
+            node_num = node.num,
+            user = node.user,
+            manually_verified = node.manuallyVerified,
+        )
+        return when (c.admin.addContact(contact)) {
+            is AdminResult.Success -> true
+            else -> false
+        }
+    }
+
+    // ── Local config ────────────────────────────────────────────────────────
+
+    override suspend fun setLocalConfig(config: Config) {
+        val c = requireClient()
+        c.admin.setConfig(config)
+    }
+
+    override suspend fun setLocalChannel(channel: Channel) {
+        val c = requireClient()
+        c.admin.setChannel(channel)
+    }
+
+    // ── Remote admin (config/owner/channel) ─────────────────────────────────
+
+    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.setOwner(user)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(set_owner = user))
+        }
+    }
+
+    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.setConfig(config)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(set_config = config))
+        }
+    }
+
+    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.setModuleConfig(config)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(set_module_config = config))
+        }
+    }
+
+    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.setChannel(channel)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(set_channel = channel))
+        }
+    }
+
+    override suspend fun setFixedPosition(destNum: Int, position: Position) {
+        val c = requireClient()
+        val protoPos = org.meshtastic.proto.Position(
+            latitude_i = Position.degI(position.latitude),
+            longitude_i = Position.degI(position.longitude),
+            altitude = position.altitude,
+            time = position.time,
+        )
+        if (isLocalNode(destNum)) {
+            c.admin.setFixedPosition(protoPos)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(set_fixed_position = protoPos))
+        }
+    }
+
+    override suspend fun setRingtone(destNum: Int, ringtone: String) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.setRingtone(ringtone)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(set_ringtone_message = ringtone))
+        }
+    }
+
+    override suspend fun setCannedMessages(destNum: Int, messages: String) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.setCannedMessages(messages)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(set_canned_message_module_messages = messages))
+        }
+    }
+
+    // ── Remote admin (getters) ──────────────────────────────────────────────
+
+    override suspend fun getOwner(destNum: Int, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.getOwner()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(get_owner_request = true), wantResponse = true)
+        }
+    }
+
+    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
+        val c = requireClient()
+        val type = AdminMessage.ConfigType.fromValue(configType) ?: return
+        if (isLocalNode(destNum)) {
+            c.admin.getConfig(type)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(get_config_request = type), wantResponse = true)
+        }
+    }
+
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
+        val c = requireClient()
+        val type = AdminMessage.ModuleConfigType.fromValue(moduleConfigType) ?: return
+        if (isLocalNode(destNum)) {
+            c.admin.getModuleConfig(type)
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(get_module_config_request = type), wantResponse = true)
+        }
+    }
+
+    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.getChannel(ChannelIndex(index))
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(get_channel_request = index + 1), wantResponse = true)
+        }
+    }
+
+    override suspend fun getRingtone(destNum: Int, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.getRingtone()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(get_ringtone_request = true), wantResponse = true)
+        }
+    }
+
+    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.getCannedMessages()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(get_canned_message_module_messages_request = true), wantResponse = true)
+        }
+    }
+
+    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.getDeviceConnectionStatus()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(get_device_connection_status_request = true), wantResponse = true)
+        }
+    }
+
+    // ── Lifecycle commands ───────────────────────────────────────────────────
+
+    override suspend fun reboot(destNum: Int, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.reboot()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(reboot_seconds = 0))
+        }
+    }
+
+    override suspend fun rebootToDfu(nodeNum: Int) {
+        val c = requireClient()
+        if (isLocalNode(nodeNum)) {
+            c.admin.enterDfuMode()
+        } else {
+            sendRemoteAdmin(c, nodeNum, AdminMessage(enter_dfu_mode_request = true))
+        }
+    }
+
+    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.rebootOta()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(reboot_ota_seconds = 0))
+        }
+    }
+
+    override suspend fun shutdown(destNum: Int, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.shutdown()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(shutdown_seconds = 0))
+        }
+    }
+
+    override suspend fun factoryReset(destNum: Int, packetId: Int) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.factoryReset()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(factory_reset_config = 1))
+        }
+    }
+
+    override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
+        val c = requireClient()
+        if (isLocalNode(destNum)) {
+            c.admin.nodeDbReset()
+        } else {
+            sendRemoteAdmin(c, destNum, AdminMessage(nodedb_reset = true))
+        }
+    }
+
+    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
+        val c = requireClient()
+        c.admin.removeNode(NodeId(nodeNum))
+    }
+
+    // ── Data requests ───────────────────────────────────────────────────────
+
+    override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
+        val c = client ?: return
+        val posBytes = org.meshtastic.proto.Position(
+            latitude_i = Position.degI(currentPosition.latitude),
+            longitude_i = Position.degI(currentPosition.longitude),
+            altitude = currentPosition.altitude,
+            time = currentPosition.time,
+        ).encode()
+        c.send(
+            portnum = PortNum.POSITION_APP,
+            payload = posBytes,
+            to = NodeId(destNum),
+            wantAck = true,
+        )
+    }
+
+    override suspend fun requestUserInfo(destNum: Int) {
+        val c = client ?: return
+        // Send an empty NODEINFO_APP packet with want_response to request user info
+        c.send(
+            MeshPacket(
+                to = destNum,
+                want_ack = true,
+                decoded = Data(
+                    portnum = PortNum.NODEINFO_APP,
+                    payload = byteArrayOf().toByteString(),
+                    want_response = true,
+                ),
+            ),
+        )
+    }
+
+    override suspend fun requestTraceroute(requestId: Int, destNum: Int) {
+        val c = requireClient()
+        c.routing.traceRoute(NodeId(destNum))
+    }
+
+    override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
+        val c = requireClient()
+        val node = NodeId(destNum)
+        // TelemetryType enum values: 0=DEVICE, 1=ENVIRONMENT, 2=AIR_QUALITY, 3=POWER, 4=LOCAL_STATS, 5=HEALTH
+        when (typeValue) {
+            0 -> c.telemetry.requestDevice(node)
+            1 -> c.telemetry.requestEnvironment(node)
+            2 -> c.telemetry.requestAirQuality(node)
+            3 -> c.telemetry.requestPower(node)
+            4 -> c.telemetry.requestLocalStats()
+            5 -> c.telemetry.requestHealth(node)
+            6 -> c.telemetry.requestHost(node)
+            7 -> c.telemetry.requestTrafficManagement(node)
+            else -> Logger.w { "Unknown telemetry type: $typeValue" }
+        }
+    }
+
+    override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
+        val c = requireClient()
+        c.routing.requestNeighborInfo(NodeId(destNum))
+    }
+
+    // ── Edit settings (transactional) ───────────────────────────────────────
+
+    override suspend fun beginEditSettings(destNum: Int) {
+        val c = client ?: return
+        // Send raw begin_edit_settings admin message for compatibility with the split begin/commit pattern
+        val msg = AdminMessage(begin_edit_settings = true)
+        val target = if (isLocalNode(destNum)) NodeId(c.ownNode.value?.num ?: 0) else NodeId(destNum)
+        sendRemoteAdmin(c, target.raw, msg)
+    }
+
+    override suspend fun commitEditSettings(destNum: Int) {
+        val c = client ?: return
+        val msg = AdminMessage(commit_edit_settings = true)
+        val target = if (isLocalNode(destNum)) NodeId(c.ownNode.value?.num ?: 0) else NodeId(destNum)
+        sendRemoteAdmin(c, target.raw, msg)
+    }
+
+    // ── Utility ─────────────────────────────────────────────────────────────
+
+    override fun getPacketId(): Int = packetIdCounter.getAndIncrement()
+
+    override fun startProvideLocation() {
+        // Location provision is managed at the app level; no-op until bridge wires it
+    }
+
+    override fun stopProvideLocation() {
+        locationManager.stop()
+    }
+
+    override fun setDeviceAddress(address: String) {
+        // Changing device address requires rebuilding the SDK client connection
+        provider.rebuildAndConnectAsync()
+    }
+
+    // ── Private helpers ─────────────────────────────────────────────────────
+
+    private fun isLocalNode(destNum: Int): Boolean {
+        if (destNum == 0) return true
+        val ownNum = client?.ownNode?.value?.num ?: return true
+        return destNum == ownNum
+    }
+
+    /**
+     * Sends a raw admin message to a remote node via the SDK's send path.
+     * Used for remote-admin operations where destNum != local node.
+     */
+    private suspend fun sendRemoteAdmin(
+        c: RadioClient,
+        destNum: Int,
+        adminMsg: AdminMessage,
+        wantResponse: Boolean = false,
+    ) {
+        val payload = AdminMessage.ADAPTER.encode(adminMsg).toByteString()
+        c.send(
+            MeshPacket(
+                to = destNum,
+                want_ack = true,
+                decoded = Data(
+                    portnum = PortNum.ADMIN_APP,
+                    payload = payload,
+                    want_response = wantResponse,
+                ),
+            ),
+        )
+    }
+}

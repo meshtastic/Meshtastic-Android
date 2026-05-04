@@ -46,7 +46,10 @@ import org.meshtastic.sdk.transport.tcp.TcpTransport
  * service can react to connection changes with `flatMapLatest`.
  */
 @Single(binds = [SdkClientLifecycle::class])
-class RadioClientProvider(private val context: Context, private val radioPrefs: RadioPrefs) : SdkClientLifecycle {
+class RadioClientProvider(
+    private val context: Context,
+    private val radioPrefs: RadioPrefs,
+) : SdkClientLifecycle {
     private val _client = MutableStateFlow<RadioClient?>(null)
 
     /** Active [RadioClient], or `null` when disconnected or between connections. */
