@@ -9,11 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(deps): update org.meshtastic:mqtt-client to v0.3.4 (#5343) by @renovate[bot] in [`82562f802`](https://github.com/meshtastic/Meshtastic-Android/commit/82562f802869749ac37a05e3b4503860eea5a62c)
-* chore(deps): update vico to v3.2.0-next.3 (#5341) by @renovate[bot] in [`94540aabb`](https://github.com/meshtastic/Meshtastic-Android/commit/94540aabb102e1c33092b30af2792c4ccd044391)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5339) by @James Rich in [`f1423e4ee`](https://github.com/meshtastic/Meshtastic-Android/commit/f1423e4ee269999c4ab0b5f1431a98c4f961ffb7)
+* chore(deps): update org.meshtastic:mqtt-client to v0.3.5 (#5344) by @renovate[bot] in [`08ff14235`](https://github.com/meshtastic/Meshtastic-Android/commit/08ff14235d22c9c5d05ed7f8ad5a2232b03ceffa)
 
-### Open Beta (v2.7.14-open.4)
+### Open Beta (v2.7.14-open.5)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
