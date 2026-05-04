@@ -68,7 +68,10 @@ All UI must comply with the [Meshtastic Client Design Standards](https://raw.git
 
 ### Accessibility
 
-All foreground/background pairings must meet WCAG AA contrast (4.5:1 minimum). Use `Green 600` (`#3FB86D`) or `Green 700` (`#2D8F52`) for green text on light backgrounds — never the raw accent `#67EA94`, which does not meet contrast requirements on white.
+All foreground/background pairings must meet WCAG AA contrast (4.5:1 minimum).
+
+- **Light mode:** Use `Green 600` (`#3FB86D`) or `Green 700` (`#2D8F52`) for green text on light backgrounds — never the raw accent `#67EA94`, which does not meet contrast requirements on white.
+- **Dark mode:** Use `Green 400` (`#8FF0B2`) or `Green 500` (`#67EA94`) for green text on dark backgrounds (`Neutral 900` or darker) to ensure sufficient contrast.
 
 ### Android App Icons
 
