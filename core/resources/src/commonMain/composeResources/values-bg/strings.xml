@@ -21,9 +21,13 @@
     <string name="accept">Приеми</string>
     <string name="acknowledgements">Благодарности</string>
     <!-- ACTION -->
+    <string name="action_copy_message">Копиране на съобщението</string>
     <string name="action_delete_message">Изтриване на съобщението</string>
     <string name="action_select_device">Изберете устройство</string>
+    <string name="action_select_message">Изберете съобщение</string>
     <string name="action_select_network">Изберете мрежа</string>
+    <string name="action_send_reply">Изпращане на отговор</string>
+    <string name="action_show_message_status">Показване на статуса на съобщението</string>
     <string name="actions">Действия</string>
     <!-- ADD -->
     <string name="add">Добавяне</string>
@@ -119,6 +123,7 @@
     <string name="clean_unknown_nodes">Почистване само на неизвестните възли</string>
     <string name="clear">Изчисти</string>
     <string name="clear_selection">Изчистване на избора</string>
+    <string name="clear_time_zone">Изчистване на часовата зона</string>
     <string name="close">Затвори</string>
     <string name="close_selection">Затваряне на избраните</string>
     <string name="codec_2_enabled">CODEC 2 е активиран</string>
@@ -159,6 +164,7 @@
     <string name="config_security_admin_key">Публичният ключ, оторизиран за изпращане на администраторски съобщения до този възел.</string>
     <string name="config_security_is_managed">Устройството се управлява от mesh администратор, потребителят няма достъп до никоя от настройките на устройството.</string>
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
+    <string name="config_security_public_key">Генерира се от вашия частен ключ и се изпраща до други възли в mesh за да им позволи да изчислят споделен секретен ключ.</string>
     <string name="config_security_serial_enabled">Серийна конзола през Stream API.</string>
     <string name="configure_bluetooth_permissions">Конфигуриране на разрешения за Bluetooth</string>
     <string name="configure_critical_alerts">Конфигуриране на критични предупреждения</string>
@@ -256,6 +262,7 @@
     <string name="distance_measurements_description">Показване на разстоянието между вашия телефон и други възли на Meshtastic с позиции.</string>
     <string name="dns">DNS</string>
     <string name="done">Готово</string>
+    <string name="dont_show_again_for_device">Да не се показва отново за това устройство</string>
     <string name="downlink_enabled">Downlink активиран</string>
     <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
     <string name="download">Изтегляне</string>
@@ -589,14 +596,17 @@
     <string name="next">Напред</string>
     <string name="nfc_disabled">NFC е деактивиран. Моля, активирайте го в системните настройки.</string>
     <!-- NO -->
+    <string name="no_bluetooth_devices_hint">Уверете се, че сте в обхвата на устройството.</string>
     <string name="no_bluetooth_devices_seen">Не се виждат Bluetooth устройства</string>
     <string name="no_device_selected">Няма избрано устройство</string>
     <string name="no_devices_found">Няма намерени устройства</string>
     <string name="no_local_stats">Няма налична статистика</string>
     <string name="no_map_layers_loaded">Няма заредени слоеве на картата.</string>
     <string name="no_network_devices_found">Няма намерени мрежови устройства</string>
+    <string name="no_network_devices_hint">Уверете се, че сте свързани към същата мрежа като устройството.</string>
     <string name="no_network_devices_seen">Не се виждат мрежови устройства</string>
     <string name="no_usb_devices_found">Няма намерени USB устройства</string>
+    <string name="no_usb_devices_hint">Свързване на устройството чрез сериен или USB порт.</string>
     <string name="no_usb_devices_seen">Не се виждат USB устройства</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d онлайн / %2$d показани / %3$d общо)</string>
@@ -623,6 +633,7 @@
     <!-- NODES -->
     <string name="nodes">Възли</string>
     <string name="nodes_at_this_location">Възли на това място</string>
+    <string name="nodes_empty_disconnected_hint">Свържете се с устройство, за да откриете близки възли.</string>
     <string name="nodes_empty_disconnected_title">Няма свързано устройство</string>
     <string name="nodes_empty_searching_hint">Възлите наблизо ще се показват тук, когато бъдат открити.</string>
     <string name="nodes_empty_searching_title">Търсене на възли</string>
