@@ -19,15 +19,12 @@ package org.meshtastic.app.radio
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.proto.Config
@@ -43,15 +40,10 @@ import org.meshtastic.sdk.ConfigBundle
  * **Read path:** [RadioClient.configBundle] is a [StateFlow] cached from the handshake — zero RPCs required. It
  * contains all [Config] and [ModuleConfig] entries as they were at connect time.
  *
- * **Write path:** [editSettings] issues a single-RPC batch write. On success we apply an optimistic local overlay via
- * [_localConfigOverrides] so UI reads see the new value immediately.
+ * **Write path:** [editSettings] issues a single-RPC batch write. The SDK auto-refreshes [configBundle] after a
+ * successful commit (Gap G resolved).
  *
- * **SDK Gap G surfaced:** After a successful [AdminApi.editSettings] write, [RadioClient.configBundle] is NOT
- * automatically refreshed — it still holds the pre-write snapshot. Until the SDK emits a fresh [ConfigBundle] after
- * each write, callers must maintain their own optimistic overlay (as done here). Logged as Gap G for SDK fix.
- *
- * **SDK Gap C surfaced:** [ConfigBundle] has no `channels` field; channels are only available via
- * [org.meshtastic.sdk.AdminApi.listChannels] (8 serial RPCs). Exposed via [loadChannels]. Logged as Gap C.
+ * **Gap C resolved:** [RadioClient.channels] is now a reactive StateFlow seeded from the handshake.
  */
 @KoinViewModel
 class SdkConfigViewModel(private val provider: RadioClientProvider) : ViewModel() {
@@ -62,38 +54,28 @@ class SdkConfigViewModel(private val provider: RadioClientProvider) : ViewModel(
             .flatMapLatest { it?.configBundle ?: flowOf(null) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /**
-     * Optimistic local config overrides applied after successful writes. Keyed by Config type tag (e.g. "device",
-     * "lora"). Merged with [configBundle] in [deviceConfig].
-     *
-     * Gap G: remove this overlay once SDK emits a fresh configBundle after editSettings writes.
-     */
-    private val _localConfigOverrides = MutableStateFlow<Map<String, Config>>(emptyMap())
-    val localConfigOverrides: StateFlow<Map<String, Config>> = _localConfigOverrides.asStateFlow()
-
-    /** Device config — merged with any pending local override. */
+    /** Device config — read directly from SDK configBundle (Gap G resolved, no local overlay needed). */
     val deviceConfig: StateFlow<Config.DeviceConfig?> =
         configBundle
-            .map { bundle ->
-                // Prefer local override if present (Gap G workaround)
-                _localConfigOverrides.value["device"]?.device
-                    ?: bundle?.configs?.firstOrNull { it.device != null }?.device
-            }
+            .map { bundle -> bundle?.configs?.firstOrNull { it.device != null }?.device }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /** LoRa config — merged with any pending local override. */
+    /** LoRa config — read directly from SDK configBundle. */
     val loraConfig: StateFlow<Config.LoRaConfig?> =
         configBundle
-            .map { bundle ->
-                _localConfigOverrides.value["lora"]?.lora ?: bundle?.configs?.firstOrNull { it.lora != null }?.lora
-            }
+            .map { bundle -> bundle?.configs?.firstOrNull { it.lora != null }?.lora }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Reactive channel list from the SDK (Gap C resolved — seeded from handshake, updated on setChannel). */
+    val channels: StateFlow<List<org.meshtastic.proto.Channel>> =
+        provider.client
+            .flatMapLatest { client -> client?.channels?.map { it.orEmpty() } ?: flowOf(emptyList()) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /**
      * Write a config update to the radio via [AdminApi.editSettings].
      *
-     * On success, applies the new config as a local optimistic override so UI sees it immediately (Gap G workaround —
-     * SDK doesn't refresh configBundle after writes).
+     * The SDK automatically refreshes configBundle after a successful commit.
      */
     fun setConfig(config: Config, typeKey: String) {
         val client =
@@ -104,20 +86,12 @@ class SdkConfigViewModel(private val provider: RadioClientProvider) : ViewModel(
                 }
         viewModelScope.launch {
             when (val result = client.admin.editSettings { setConfig(config) }) {
-                is AdminResult.Success -> {
-                    Logger.i { "[SDK] setConfig($typeKey) succeeded" }
-                    _localConfigOverrides.update { it + (typeKey to config) }
-                }
-
+                is AdminResult.Success -> Logger.i { "[SDK] setConfig($typeKey) succeeded" }
                 AdminResult.Timeout -> Logger.w { "[SDK] setConfig($typeKey): Timeout" }
-
                 AdminResult.Unauthorized -> Logger.w { "[SDK] setConfig($typeKey): Unauthorized" }
-
                 AdminResult.SessionKeyExpired ->
                     Logger.w { "[SDK] setConfig($typeKey): SessionKeyExpired — reconnect needed" }
-
                 AdminResult.NodeUnreachable -> Logger.w { "[SDK] setConfig($typeKey): NodeUnreachable" }
-
                 is AdminResult.Failed -> Logger.e { "[SDK] setConfig($typeKey): Failed — ${result.routingError}" }
             }
         }
@@ -129,12 +103,7 @@ class SdkConfigViewModel(private val provider: RadioClientProvider) : ViewModel(
     /** Convenience: update LoRa config. */
     fun setLoraConfig(lora: Config.LoRaConfig) = setConfig(Config(lora = lora), "lora")
 
-    /**
-     * Update owner name on the radio.
-     *
-     * Gap G: `ownNode` StateFlow on RadioClient is not refreshed after setOwner either — same root cause as config
-     * writes.
-     */
+    /** Update owner name on the radio. */
     fun setOwner(longName: String, shortName: String) {
         val client = provider.client.value ?: return
         viewModelScope.launch {
@@ -142,22 +111,6 @@ class SdkConfigViewModel(private val provider: RadioClientProvider) : ViewModel(
                 is AdminResult.Success -> Logger.i { "[SDK] setOwner succeeded" }
                 else -> Logger.w { "[SDK] setOwner failed: $result" }
             }
-        }
-    }
-
-    /**
-     * Load all 8 channels via serial RPCs.
-     *
-     * Gap C: No reactive `client.channels: StateFlow<List<Channel>>` — only 8 serial RPCs via [AdminApi.listChannels].
-     * Callers must re-request on every mount. SDK fix: cache channels from storage during handshake and expose as
-     * StateFlow.
-     */
-    fun loadChannels(onResult: (AdminResult<List<org.meshtastic.proto.Channel>>) -> Unit) {
-        val client = provider.client.value ?: return
-        viewModelScope.launch {
-            val result = client.admin.listChannels()
-            Logger.i { "[SDK] listChannels → $result" }
-            onResult(result)
         }
     }
 

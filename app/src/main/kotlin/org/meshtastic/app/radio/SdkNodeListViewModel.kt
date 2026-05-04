@@ -32,14 +32,18 @@ import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.proto.NodeInfo
+import org.meshtastic.sdk.ConnectionQuality
+import org.meshtastic.sdk.MeshNode
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.SignalQuality
+import org.meshtastic.sdk.toMeshNode
 
 /**
  * Stable, Compose-safe representation of a mesh node.
  *
- * Wire-generated [NodeInfo] is NOT `@Stable`; never pass it directly to Compose. This wrapper holds only the
- * primitive/String fields the node list UI needs.
+ * Wire-generated [NodeInfo] is NOT `@Stable`; never pass it directly to Compose. This wrapper holds the
+ * fields the node list UI needs for display, filtering, and sorting.
  */
 @Immutable
 data class UiNode(
@@ -50,16 +54,45 @@ data class UiNode(
     val hopsAway: Int?,
     val lastHeard: Int,
     val viaMqtt: Boolean,
+    // Enriched fields
+    val isOnline: Boolean,
+    val connectionQuality: ConnectionQuality,
+    val signalQuality: SignalQuality,
+    val batteryLevel: Int?,
+    val voltage: Float?,
+    val channelUtilization: Float?,
+    val airUtilTx: Float?,
+    val latitude: Double?,
+    val longitude: Double?,
+    val altitude: Int?,
+    val isFavorite: Boolean,
+    val isIgnored: Boolean,
+    val isMuted: Boolean,
+    val hwModel: String?,
 )
 
-private fun NodeInfo.toUiNode() = UiNode(
-    num = num,
-    longName = user?.long_name.orEmpty(),
-    shortName = user?.short_name.orEmpty(),
+private fun MeshNode.toUiNode() = UiNode(
+    num = nodeNum,
+    longName = longName ?: "Unknown",
+    shortName = shortName ?: "?",
     snr = snr,
-    hopsAway = hops_away,
-    lastHeard = last_heard,
-    viaMqtt = via_mqtt,
+    hopsAway = hopsAway,
+    lastHeard = lastHeard,
+    viaMqtt = viaMqtt,
+    isOnline = isOnline,
+    connectionQuality = connectionQuality,
+    signalQuality = signalQuality,
+    batteryLevel = batteryLevel,
+    voltage = voltage,
+    channelUtilization = channelUtilization,
+    airUtilTx = airUtilTx,
+    latitude = latitude,
+    longitude = longitude,
+    altitude = altitude,
+    isFavorite = isFavorite,
+    isIgnored = isIgnored,
+    isMuted = isMuted,
+    hwModel = hwModel?.name,
 )
 
 /**
@@ -100,7 +133,10 @@ class SdkNodeListViewModel(provider: RadioClientProvider) : ViewModel() {
                             is NodeChange.Removed -> acc - change.nodeId
                         }
                     }
-                    .map { nodeMap -> nodeMap.values.map(NodeInfo::toUiNode) }
+                    .map { nodeMap ->
+                        val now = (System.currentTimeMillis() / 1000).toInt()
+                        nodeMap.values.map { it.toMeshNode(now).toUiNode() }
+                    }
                     .flowOn(Dispatchers.Default)
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

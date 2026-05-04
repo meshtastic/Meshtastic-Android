@@ -33,8 +33,11 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.service.SdkClientLifecycle
 import org.meshtastic.sdk.AutoReconnectConfig
 import org.meshtastic.sdk.RadioClient
+import org.meshtastic.sdk.RadioTransport
 import org.meshtastic.sdk.storage.sqldelight.SqlDelightStorageProvider
 import org.meshtastic.sdk.transport.ble.BleTransport
+import org.meshtastic.sdk.transport.serial.AndroidSerialPorts
+import org.meshtastic.sdk.transport.tcp.TcpTransport
 
 /**
  * Holds the active [RadioClient] and orchestrates connect/disconnect lifecycle.
@@ -56,10 +59,7 @@ class RadioClientProvider(private val context: Context, private val radioPrefs: 
      * Tear down the existing client (if any) and build + connect a new one using the current saved radio address from
      * [RadioPrefs].
      *
-     * If [RadioPrefs.devAddr] is not a BLE address this call is a no-op (other transport types will be added in
-     * follow-up work).
-     *
-     * Callers that cannot suspend should use [rebuildAndConnectAsync].
+     * Supports BLE (`x` prefix), TCP (`t` prefix, format `tHOST:PORT`), and Serial (`s` prefix, format `sPORTNAME`).
      */
     suspend fun rebuildAndConnect() = mutex.withLock {
         val rawAddress =
@@ -69,23 +69,41 @@ class RadioClientProvider(private val context: Context, private val radioPrefs: 
                     return@withLock
                 }
 
-        // Only BLE is wired for this POC
-        val interfaceChar = rawAddress.firstOrNull()
-        if (InterfaceId.forIdChar(interfaceChar ?: ' ') != InterfaceId.BLUETOOTH) {
-            Logger.w { "RadioClientProvider: non-BLE transport not yet wired ($rawAddress)" }
+        val interfaceChar = rawAddress.firstOrNull() ?: run {
+            Logger.w { "RadioClientProvider: empty address — skipping connect" }
             return@withLock
         }
+        val addressPayload = rawAddress.substring(1) // strip leading interface char
 
-        val macAddress = rawAddress.substring(1) // strip leading 'x'
+        val transport: RadioTransport = when (InterfaceId.forIdChar(interfaceChar)) {
+            InterfaceId.BLUETOOTH -> {
+                Logger.i { "RadioClientProvider: building BLE transport for $addressPayload" }
+                BleTransport(addressPayload) { autoConnectIf { true } }
+            }
+
+            InterfaceId.TCP -> {
+                val (host, port) = parseTcpAddress(addressPayload)
+                Logger.i { "RadioClientProvider: building TCP transport for $host:$port" }
+                TcpTransport(host, port)
+            }
+
+            InterfaceId.SERIAL -> {
+                Logger.i { "RadioClientProvider: building Serial transport for $addressPayload" }
+                AndroidSerialPorts.init(context)
+                AndroidSerialPorts.open(addressPayload)
+            }
+
+            InterfaceId.MOCK, InterfaceId.NOP, null -> {
+                Logger.w { "RadioClientProvider: unsupported transport type '$interfaceChar' ($rawAddress)" }
+                return@withLock
+            }
+        }
 
         // Clear first so observers see null during teardown
         val old = _client.value
         _client.value = null
         old?.let { runCatching { it.disconnect() }.onFailure { e -> Logger.w(e) { "disconnect old client" } } }
 
-        Logger.i { "RadioClientProvider: building new client for $macAddress" }
-
-        val transport = BleTransport(macAddress) { autoConnectIf { true } }
         val newClient =
             RadioClient.Builder()
                 .transport(transport)
@@ -96,7 +114,7 @@ class RadioClientProvider(private val context: Context, private val radioPrefs: 
         _client.value = newClient
         newClient.connect()
 
-        Logger.i { "RadioClientProvider: client connected" }
+        Logger.i { "RadioClientProvider: client connected via ${InterfaceId.forIdChar(interfaceChar)}" }
     }
 
     /** Fire-and-forget version of [rebuildAndConnect] for non-suspending call sites. */
@@ -114,6 +132,18 @@ class RadioClientProvider(private val context: Context, private val radioPrefs: 
                 _client.value = null
                 runCatching { c.disconnect() }.onFailure { e -> Logger.w(e) { "disconnect" } }
             }
+        }
+    }
+
+    companion object {
+        private const val DEFAULT_TCP_PORT = 4403
+
+        /** Parse "host:port" or "host" (uses default port 4403). */
+        private fun parseTcpAddress(payload: String): Pair<String, Int> {
+            val parts = payload.split(":")
+            val host = parts[0]
+            val port = parts.getOrNull(1)?.toIntOrNull() ?: DEFAULT_TCP_PORT
+            return host to port
         }
     }
 }
