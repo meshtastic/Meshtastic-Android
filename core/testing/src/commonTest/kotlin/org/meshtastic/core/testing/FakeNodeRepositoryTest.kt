@@ -85,17 +85,6 @@ class FakeNodeRepositoryTest {
     }
 
     @Test
-    fun `insertMetadata updates node metadata`() = runTest {
-        val nodeNum = 1234
-        repository.upsert(Node(num = nodeNum))
-        val metadata = org.meshtastic.proto.DeviceMetadata(firmware_version = "2.5.0")
-        repository.insertMetadata(nodeNum, metadata)
-
-        val node = repository.nodeDBbyNum.value[nodeNum]
-        assertEquals("2.5.0", node?.metadata?.firmware_version)
-    }
-
-    @Test
     fun `deleteNodes removes multiple nodes`() = runTest {
         repository.setNodes(listOf(Node(num = 1), Node(num = 2), Node(num = 3)))
         repository.deleteNodes(listOf(1, 2))

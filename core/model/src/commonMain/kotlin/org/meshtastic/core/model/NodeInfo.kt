@@ -22,8 +22,6 @@ import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.model.util.onlineTimeThreshold
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel
 
 //
@@ -188,88 +186,3 @@ data class EnvironmentMetrics(
     }
 }
 
-@CommonParcelize
-data class NodeInfo(
-    val num: Int, // This is immutable, and used as a key
-    var user: MeshUser? = null,
-    var position: Position? = null,
-    var snr: Float = Float.MAX_VALUE,
-    var rssi: Int = Int.MAX_VALUE,
-    var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    var deviceMetrics: DeviceMetrics? = null,
-    var channel: Int = 0,
-    var environmentMetrics: EnvironmentMetrics? = null,
-    var hopsAway: Int = 0,
-    var nodeStatus: String? = null,
-) : CommonParcelable {
-
-    @Suppress("MagicNumber")
-    val colors: Pair<Int, Int>
-        get() { // returns foreground and background @ColorInt for each 'num'
-            val r = (num and 0xFF0000) shr 16
-            val g = (num and 0x00FF00) shr 8
-            val b = num and 0x0000FF
-            val brightness = ((r * 0.299) + (g * 0.587) + (b * 0.114)) / 255
-            val foreground = if (brightness > 0.5) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
-            val background = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
-            return foreground to background
-        }
-
-    val batteryLevel
-        get() = deviceMetrics?.batteryLevel
-
-    val voltage
-        get() = deviceMetrics?.voltage
-
-    @Suppress("ImplicitDefaultLocale")
-    val batteryStr
-        get() = if (batteryLevel in 1..100) "$batteryLevel%" else ""
-
-    /** true if the device was heard from recently */
-    val isOnline: Boolean
-        get() {
-            return lastHeard > onlineTimeThreshold()
-        }
-
-    // / return the position if it is valid, else null
-    val validPosition: Position?
-        get() {
-            return position?.takeIf { it.isValid() }
-        }
-
-    // / @return distance in meters to some other node (or null if unknown)
-    fun distance(o: NodeInfo?): Int? {
-        val p = validPosition
-        val op = o?.validPosition
-        return if (p != null && op != null) p.distance(op).toInt() else null
-    }
-
-    // / @return bearing to the other position in degrees
-    fun bearing(o: NodeInfo?): Int? {
-        val p = validPosition
-        val op = o?.validPosition
-        return if (p != null && op != null) p.bearing(op).toInt() else null
-    }
-
-    // / @return a nice human readable string for the distance, or null for unknown
-    @Suppress("MagicNumber")
-    fun distanceStr(o: NodeInfo?, prefUnits: Int = 0) = distance(o)?.let { dist ->
-        when {
-            dist == 0 -> null
-
-            // same point
-            prefUnits == Config.DisplayConfig.DisplayUnits.METRIC.value && dist < 1000 -> "$dist m"
-
-            prefUnits == Config.DisplayConfig.DisplayUnits.METRIC.value && dist >= 1000 ->
-                "${(dist / 100).toDouble() / 10.0} km"
-
-            prefUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL.value && dist < 1609 ->
-                "${(dist.toDouble() * 3.281).toInt()} ft"
-
-            prefUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL.value && dist >= 1609 ->
-                "${(dist / 160.9).toInt() / 10.0} mi"
-
-            else -> null
-        }
-    }
-}

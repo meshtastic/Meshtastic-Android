@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
-import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 
@@ -166,12 +165,4 @@ interface NodeRepository {
      * Used during the initial connection handshake.
      */
     suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>)
-
-    /**
-     * Persists hardware metadata for a node.
-     *
-     * @param nodeNum The node number.
-     * @param metadata The [DeviceMetadata] to save.
-     */
-    fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
 }

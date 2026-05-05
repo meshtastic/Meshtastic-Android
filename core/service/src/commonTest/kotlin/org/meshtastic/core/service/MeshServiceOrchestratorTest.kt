@@ -115,7 +115,6 @@ class MeshServiceOrchestratorTest {
         assertTrue(orchestrator.isRunning)
 
         verify { serviceNotifications.initChannels() }
-        verify { nodeManager.loadCachedNodeDB() }
 
         orchestrator.stop()
         assertFalse(orchestrator.isRunning)
@@ -169,7 +168,6 @@ class MeshServiceOrchestratorTest {
 
         // Components should only be initialized once
         verify(exactly(1)) { serviceNotifications.initChannels() }
-        verify(exactly(1)) { nodeManager.loadCachedNodeDB() }
 
         orchestrator.stop()
         assertFalse(orchestrator.isRunning)

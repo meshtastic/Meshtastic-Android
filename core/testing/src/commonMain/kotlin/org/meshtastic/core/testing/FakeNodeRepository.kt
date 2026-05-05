@@ -24,7 +24,6 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 
@@ -162,11 +161,6 @@ class FakeNodeRepository :
     override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) {
         _myNodeInfo.value = mi
         _nodeDBbyNum.value = nodes.associateBy { it.num }
-    }
-
-    override fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
-        val node = _nodeDBbyNum.value[nodeNum] ?: return
-        _nodeDBbyNum.value = _nodeDBbyNum.value + (nodeNum to node.copy(metadata = metadata))
     }
 
     // --- Helper methods for testing ---

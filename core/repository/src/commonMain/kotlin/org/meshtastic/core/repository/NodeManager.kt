@@ -19,12 +19,8 @@ package org.meshtastic.core.repository
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.NodeIdLookup
-import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
-import org.meshtastic.proto.Paxcount
-import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
@@ -45,12 +41,6 @@ interface NodeManager : NodeIdLookup {
     /** Sets whether the node database is ready. */
     fun setNodeDbReady(ready: Boolean)
 
-    /** Whether node database writes are allowed. */
-    val allowNodeDbWrites: StateFlow<Boolean>
-
-    /** Sets whether node database writes are allowed. */
-    fun setAllowNodeDbWrites(allowed: Boolean)
-
     /** The local node number as a thread-safe [StateFlow]. */
     val myNodeNum: StateFlow<Int?>
 
@@ -63,9 +53,6 @@ interface NodeManager : NodeIdLookup {
     /** Sets the firmware edition of the connected device. */
     fun setFirmwareEdition(edition: FirmwareEdition?)
 
-    /** Loads the cached node database from the repository. */
-    fun loadCachedNodeDB()
-
     /** Clears the in-memory node database. */
     fun clear()
 
@@ -74,9 +61,6 @@ interface NodeManager : NodeIdLookup {
 
     /** Returns the local node ID. */
     fun getMyId(): String
-
-    /** Returns a list of all known nodes. */
-    fun getNodes(): List<NodeInfo>
 
     /** Processes a received user packet. */
     fun handleReceivedUser(fromNum: Int, p: User, channel: Int = 0, manuallyVerified: Boolean = false)
@@ -87,15 +71,6 @@ interface NodeManager : NodeIdLookup {
     /** Processes a received telemetry packet. */
     fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry)
 
-    /** Processes a received paxcounter packet. */
-    fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount)
-
-    /** Processes a received node status message. */
-    fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage)
-
-    /** Updates the status string for a node. */
-    fun updateNodeStatus(nodeNum: Int, status: String?)
-
     /** Updates a node using a transformation function. */
     fun updateNode(nodeNum: Int, withBroadcast: Boolean = true, channel: Int = 0, transform: (Node) -> Node)
 
@@ -104,7 +79,4 @@ interface NodeManager : NodeIdLookup {
 
     /** Installs node information from a ProtoNodeInfo object. */
     fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true)
-
-    /** Inserts hardware metadata for a node. */
-    fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
 }

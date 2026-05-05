@@ -122,8 +122,6 @@ class MeshServiceOrchestrator(
             databaseManager.switchActiveDatabase(radioPrefs.devAddr.value)
             Logger.i { "Per-device database initialized" }
         }
-
-        nodeManager.loadCachedNodeDB()
     }
 
     /**

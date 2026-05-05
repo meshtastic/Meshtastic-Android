@@ -40,12 +40,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.NodeSortOption
-import org.meshtastic.core.model.DeviceMetrics
-import org.meshtastic.core.model.EnvironmentMetrics
-import org.meshtastic.core.model.MeshUser
-import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.NodeManager
@@ -55,12 +50,9 @@ import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.new_node_seen
-import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalStats
-import org.meshtastic.proto.Paxcount
-import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
@@ -235,13 +227,6 @@ class SdkNodeRepositoryImpl(
         }
     }
 
-    override fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
-        _nodeDBbyNum.update { map ->
-            val node = map[nodeNum] ?: return@update map
-            map + (nodeNum to node.copy(metadata = metadata))
-        }
-    }
-
     // ── NodeManager surface ─────────────────────────────────────────────────
 
     override val nodeDBbyNodeNum: Map<Int, Node>
@@ -251,14 +236,9 @@ class SdkNodeRepositoryImpl(
         get() = _nodeDBbyNum.value.values.associateBy { it.user.id }
 
     override val isNodeDbReady = MutableStateFlow(false)
-    override val allowNodeDbWrites = MutableStateFlow(false)
 
     override fun setNodeDbReady(ready: Boolean) {
         isNodeDbReady.value = ready
-    }
-
-    override fun setAllowNodeDbWrites(allowed: Boolean) {
-        allowNodeDbWrites.value = allowed
     }
 
     override val myNodeNum: StateFlow<Int?>
@@ -274,15 +254,9 @@ class SdkNodeRepositoryImpl(
         firmwareEdition.value = edition
     }
 
-    override fun loadCachedNodeDB() {
-        // No-op in SDK mode — the SDK emits a Snapshot NodeChange on connect
-        // which populates the node map directly via installNodeInfo().
-    }
-
     override fun clear() {
         _nodeDBbyNum.value = emptyMap()
         isNodeDbReady.value = false
-        allowNodeDbWrites.value = false
         _myNodeNum.value = null
         firmwareEdition.value = null
     }
@@ -312,9 +286,6 @@ class SdkNodeRepositoryImpl(
         val num = _myNodeNum.value ?: _myNodeInfo.value?.myNodeNum ?: return ""
         return _nodeDBbyNum.value[num]?.user?.id ?: ""
     }
-
-    @Suppress("Deprecated")
-    override fun getNodes(): List<NodeInfo> = _nodeDBbyNum.value.values.map { it.toNodeInfo() }
 
     override fun removeByNodenum(nodeNum: Int) {
         _nodeDBbyNum.update { it - nodeNum }
@@ -401,18 +372,6 @@ class SdkNodeRepositoryImpl(
             val newLastHeard = maxOf(node.lastHeard, telemetryTime)
             nextNode.copy(lastHeard = newLastHeard)
         }
-    }
-
-    override fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount) {
-        updateNode(fromNum) { it.copy(paxcounter = p) }
-    }
-
-    override fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage) {
-        updateNodeStatus(fromNum, s.status)
-    }
-
-    override fun updateNodeStatus(nodeNum: Int, status: String?) {
-        updateNode(nodeNum) { it.copy(nodeStatus = status?.takeIf { s -> s.isNotEmpty() }) }
     }
 
     override fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean) {
@@ -515,40 +474,4 @@ class SdkNodeRepositoryImpl(
         NodeSortOption.VIA_MQTT -> compareByDescending { it.viaMqtt }
         NodeSortOption.VIA_FAVORITE -> compareByDescending { it.isFavorite }
     }
-
-    @Suppress("CyclomaticComplexMethod")
-    private fun Node.toNodeInfo(): NodeInfo = NodeInfo(
-        num = num,
-        user = MeshUser(
-            id = user.id,
-            longName = user.long_name,
-            shortName = user.short_name,
-            hwModel = user.hw_model,
-            role = user.role.value,
-        ),
-        position = Position(
-            latitude = latitude,
-            longitude = longitude,
-            altitude = position.altitude ?: 0,
-            time = position.time,
-            satellitesInView = position.sats_in_view,
-            groundSpeed = position.ground_speed ?: 0,
-            groundTrack = position.ground_track ?: 0,
-            precisionBits = position.precision_bits,
-        ).takeIf { latitude != 0.0 || longitude != 0.0 },
-        snr = snr,
-        rssi = rssi,
-        lastHeard = lastHeard,
-        deviceMetrics = DeviceMetrics(
-            batteryLevel = deviceMetrics.battery_level ?: 0,
-            voltage = deviceMetrics.voltage ?: 0f,
-            channelUtilization = deviceMetrics.channel_utilization ?: 0f,
-            airUtilTx = deviceMetrics.air_util_tx ?: 0f,
-            uptimeSeconds = deviceMetrics.uptime_seconds ?: 0,
-        ),
-        channel = channel,
-        environmentMetrics = EnvironmentMetrics.fromTelemetryProto(environmentMetrics, 0),
-        hopsAway = hopsAway,
-        nodeStatus = nodeStatus,
-    )
 }
