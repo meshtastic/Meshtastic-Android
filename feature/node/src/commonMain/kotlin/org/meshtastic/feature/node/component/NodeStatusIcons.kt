@@ -39,12 +39,14 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.congestion_level
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.mute_always
+import org.meshtastic.core.resources.store_forward_server
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
 import org.meshtastic.core.ui.component.ConnectionsNavIcon
@@ -142,14 +144,15 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState, deviceType: De
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StoreForwardBadge() {
+    val text = stringResource(Res.string.store_forward_server)
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text("Store & Forward server") } },
+        tooltip = { PlainTooltip { Text(text) } },
         state = rememberTooltipState(),
     ) {
         Icon(
             imageVector = MeshtasticIcons.CloudDownload,
-            contentDescription = "Store & Forward server",
+            contentDescription = text,
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.StatusBlue,
         )
@@ -166,14 +169,15 @@ private fun CongestionBadge(level: CongestionLevel) {
             CongestionLevel.CRITICAL -> MaterialTheme.colorScheme.StatusRed
             else -> return
         }
+    val tooltipText = stringResource(Res.string.congestion_level, level.name)
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-        tooltip = { PlainTooltip { Text("Channel: ${level.name}") } },
+        tooltip = { PlainTooltip { Text(tooltipText) } },
         state = rememberTooltipState(),
     ) {
         Icon(
             imageVector = MeshtasticIcons.Warning,
-            contentDescription = "Congestion: ${level.name}",
+            contentDescription = tooltipText,
             modifier = Modifier.size(24.dp),
             tint = color,
         )

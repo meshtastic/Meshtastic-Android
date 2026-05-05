@@ -51,6 +51,7 @@ import org.meshtastic.sdk.TransportIdentity
 import org.meshtastic.sdk.testing.FakeRadioTransport
 import org.meshtastic.sdk.testing.InMemoryStorage
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Clock
@@ -196,6 +197,65 @@ class SdkStateBridgeTest {
         client.disconnect()
     }
 
+    @Test
+    fun `congestion warning updates service repository congestion level`() = runTest {
+        val serviceRepo = FakeServiceRepository()
+        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(emptyMap()))
+        buildBridge(client, FakeNodeRepository(), serviceRepository = serviceRepo)
+
+        client.connect()
+        runCurrent()
+
+        // Inject a telemetry packet with high air utilization to trigger CongestionWarning
+        transport.injectPacket(
+            MeshPacket(
+                from = 0x11111111, // "own node" — triggers congestion from local metrics
+                to = 0,
+                decoded = Data(
+                    portnum = PortNum.TELEMETRY_APP,
+                    payload = org.meshtastic.proto.Telemetry(
+                        device_metrics = org.meshtastic.proto.DeviceMetrics(
+                            air_util_tx = 80f,
+                            channel_utilization = 85f,
+                        ),
+                    ).let { org.meshtastic.proto.Telemetry.ADAPTER.encode(it).toByteString() },
+                ),
+            ),
+        )
+        runCurrent()
+
+        assertEquals(org.meshtastic.sdk.CongestionLevel.CRITICAL, serviceRepo.congestionLevel.value)
+
+        client.disconnect()
+    }
+
+    @Test
+    fun `store forward server list propagates to service repository`() = runTest {
+        val serviceRepo = FakeServiceRepository()
+        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(emptyMap()))
+        buildBridge(client, FakeNodeRepository(), serviceRepository = serviceRepo)
+
+        client.connect()
+        runCurrent()
+
+        // Inject a StoreAndForward heartbeat from a server node to trigger server discovery
+        transport.injectStoreForwardResponse(
+            requestId = 0,
+            message = org.meshtastic.proto.StoreAndForward(
+                rr = org.meshtastic.proto.StoreAndForward.RequestResponse.ROUTER_HEARTBEAT,
+                heartbeat = org.meshtastic.proto.StoreAndForward.Heartbeat(period = 900, secondary = 0),
+            ),
+            fromNode = 0xABCD1234.toInt(),
+        )
+        runCurrent()
+        advanceTimeBy(1.seconds)
+        runCurrent()
+
+        assertTrue(serviceRepo.storeForwardServers.value.contains(0xABCD1234.toInt()))
+
+        client.disconnect()
+    }
+
     private fun TestScope.connectedClient(
         storage: StorageProvider,
         myNodeNum: Int = 0x11111111,
@@ -217,10 +277,11 @@ class SdkStateBridgeTest {
         client: RadioClient,
         nodeRepository: FakeNodeRepository,
         packetRepository: PacketRepository = mock(MockMode.autofill),
+        serviceRepository: FakeServiceRepository = FakeServiceRepository(),
     ): SdkStateBridge =
         SdkStateBridge(
             accessor = TestRadioClientAccessor(client),
-            serviceRepository = FakeServiceRepository(),
+            serviceRepository = serviceRepository,
             nodeRepository = nodeRepository,
             packetRepository = lazyOf(packetRepository),
             locationManager = NoOpLocationManager,

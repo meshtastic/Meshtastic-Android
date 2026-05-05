@@ -19,7 +19,7 @@ package org.meshtastic.core.repository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 
-/** Interface for handling Store & Forward (legacy) and SF++ packets. */
+/** Interface for handling Store & Forward (legacy) packets. */
 interface StoreForwardPacketHandler {
     /**
      * Handles a legacy Store & Forward packet.
@@ -29,11 +29,4 @@ interface StoreForwardPacketHandler {
      * @param myNodeNum The local node number.
      */
     fun handleStoreAndForward(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int)
-
-    /**
-     * Handles a Store Forward++ packet.
-     *
-     * @param packet The received mesh packet.
-     */
-    fun handleStoreForwardPlusPlus(packet: MeshPacket)
 }

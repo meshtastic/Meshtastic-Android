@@ -1144,6 +1144,8 @@
     <string name="store_forward">Store &amp; Forward</string>
     <string name="store_forward_config">Store &amp; Forward Config</string>
     <string name="store_forward_enabled">Store &amp; Forward enabled</string>
+    <string name="store_forward_server">Store &amp; Forward server</string>
+    <string name="congestion_level">Channel: %1$s</string>
     <string name="subnet">Subred</string>
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
     <string name="supported">Supported</string>

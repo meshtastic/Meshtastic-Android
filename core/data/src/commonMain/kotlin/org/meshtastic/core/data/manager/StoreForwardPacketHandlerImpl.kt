@@ -34,7 +34,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Implementation of [StoreForwardPacketHandler] that keeps legacy S&F parsing for backward compatibility.
  *
- * SF++ parsing/status updates are now delegated to the SDK and consumed via [org.meshtastic.core.data.radio.SdkStateBridge].
+ * SF++ parsing/status updates are delegated to the SDK and consumed via [org.meshtastic.core.data.radio.SdkStateBridge].
  */
 @Single
 class StoreForwardPacketHandlerImpl(
@@ -48,10 +48,6 @@ class StoreForwardPacketHandlerImpl(
         val payload = packet.decoded?.payload ?: return
         val u = StoreAndForward.ADAPTER.decode(payload)
         handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
-    }
-
-    override fun handleStoreForwardPlusPlus(packet: MeshPacket) {
-        Logger.d { "SFPP packet received from=${packet.from} (handled by SDK)" }
     }
 
     private fun handleReceivedStoreAndForward(dataPacket: DataPacket, s: StoreAndForward, myNodeNum: Int) {

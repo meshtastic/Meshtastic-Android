@@ -185,28 +185,4 @@ class StoreForwardPacketHandlerImplTest {
         advanceUntilIdle()
         // No crash — falls through to else branch
     }
-
-    // ---------- SF++: delegated to SDK ----------
-
-    @Test
-    fun `handleStoreForwardPlusPlus logs only and leaves repository untouched`() = testScope.runTest {
-        val packet =
-            MeshPacket(
-                from = 999,
-                decoded = Data(
-                    portnum = PortNum.STORE_FORWARD_APP,
-                    payload = "ignored".encodeToByteArray().toByteString(),
-                ),
-            )
-
-        handler.handleStoreForwardPlusPlus(packet)
-        advanceUntilIdle()
-
-        verifySuspend(mode = VerifyMode.exactly(0)) {
-            packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any())
-        }
-        verifySuspend(mode = VerifyMode.exactly(0)) {
-            packetRepository.updateSFPPStatusByHash(any(), any(), any())
-        }
-    }
 }
