@@ -23,6 +23,7 @@ import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshLocationManager
@@ -108,6 +109,7 @@ class SdkRadioController(
             ),
         )
         c.send(meshPacket)
+        serviceRepository.emitMeshActivity(MeshActivity.Send)
     }
 
     // ── Node operations ─────────────────────────────────────────────────────

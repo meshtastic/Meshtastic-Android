@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -138,7 +137,7 @@ class UIViewModel(
     }
 
     /** Emits events for mesh network send/receive activity. */
-    val meshActivity: Flow<MeshActivity> = emptyFlow()
+    val meshActivity: Flow<MeshActivity> = serviceRepository.meshActivityFlow
 
     val currentDeviceAddressFlow: StateFlow<String?> = radioPrefs.devAddr
 

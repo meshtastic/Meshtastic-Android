@@ -20,6 +20,7 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
@@ -127,6 +128,18 @@ interface ServiceRepository {
      * @param packet The received [MeshPacket].
      */
     suspend fun emitMeshPacket(packet: MeshPacket)
+
+    /**
+     * Flow of mesh network send/receive activity events.
+     *
+     * Emits [MeshActivity.Receive] when packets arrive from the mesh,
+     * and [MeshActivity.Send] when packets are sent to the radio.
+     * Used to drive the connection-icon animation in the nav bar.
+     */
+    val meshActivityFlow: Flow<MeshActivity>
+
+    /** Emits a mesh activity event (Send or Receive). */
+    fun emitMeshActivity(activity: MeshActivity)
 
     /** Reactive flow of the most recent traceroute result. */
     val tracerouteResponse: StateFlow<TracerouteResponse?>

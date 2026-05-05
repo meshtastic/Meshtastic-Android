@@ -173,5 +173,5 @@ interface NodeRepository {
      * @param nodeNum The node number.
      * @param metadata The [DeviceMetadata] to save.
      */
-    suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
+    fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
 }

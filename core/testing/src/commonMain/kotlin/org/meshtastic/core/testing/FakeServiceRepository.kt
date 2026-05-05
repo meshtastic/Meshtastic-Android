@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.ServiceRepository
@@ -73,6 +74,13 @@ class FakeServiceRepository : ServiceRepository {
 
     override suspend fun emitMeshPacket(packet: MeshPacket) {
         _meshPacketFlow.emit(packet)
+    }
+
+    private val _meshActivityFlow = MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64)
+    override val meshActivityFlow: Flow<MeshActivity> = _meshActivityFlow.asFlow()
+
+    override fun emitMeshActivity(activity: MeshActivity) {
+        _meshActivityFlow.tryEmit(activity)
     }
 
     private val _tracerouteResponse = MutableStateFlow<TracerouteResponse?>(null)

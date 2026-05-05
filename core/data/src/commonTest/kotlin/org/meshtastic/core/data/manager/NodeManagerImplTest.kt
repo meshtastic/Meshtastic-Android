@@ -21,9 +21,11 @@ import dev.mokkery.mock
 import kotlinx.coroutines.test.TestScope
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.data.repository.SdkNodeRepositoryImpl
+import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
@@ -41,21 +43,23 @@ import org.meshtastic.proto.Position as ProtoPosition
 
 class NodeManagerImplTest {
 
-    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val testScope = TestScope()
 
-    private lateinit var nodeManager: NodeManagerImpl
+    private lateinit var nodeManager: SdkNodeRepositoryImpl
 
     @BeforeTest
     fun setUp() {
-        nodeManager = NodeManagerImpl(nodeRepository, notificationManager, testScope)
+        val dbProvider: DatabaseProvider = mock(MockMode.autofill)
+        val localStatsDataSource: LocalStatsDataSource = mock(MockMode.autofill)
+        nodeManager = SdkNodeRepositoryImpl(localStatsDataSource, dbProvider, notificationManager, testScope)
     }
 
     @Test
     fun `getOrCreateNode creates default user for unknown node`() {
         val nodeNum = 1234
-        val result = nodeManager.getOrCreateNode(nodeNum)
+        nodeManager.updateNode(nodeNum) { it }
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
 
         assertNotNull(result)
         assertEquals(nodeNum, result.num)
@@ -69,7 +73,6 @@ class NodeManagerImplTest {
         val existingUser =
             User(id = "!12345678", long_name = "My Custom Name", short_name = "MCN", hw_model = HardwareModel.TLORA_V2)
 
-        // Setup existing node
         nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
 
         val incomingDefaultUser =
@@ -85,7 +88,6 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedUser updates user if incoming is higher detail`() {
         val nodeNum = 1234
-        // Use a non-UNSET hw_model so isUnknownUser=false (avoids new-node notification + getString)
         val existingUser =
             User(id = "!12345678", long_name = "Old Name", short_name = "ON", hw_model = HardwareModel.TLORA_V2)
 

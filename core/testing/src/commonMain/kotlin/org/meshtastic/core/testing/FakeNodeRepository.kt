@@ -164,7 +164,7 @@ class FakeNodeRepository :
         _nodeDBbyNum.value = nodes.associateBy { it.num }
     }
 
-    override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
+    override fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
         val node = _nodeDBbyNum.value[nodeNum] ?: return
         _nodeDBbyNum.value = _nodeDBbyNum.value + (nodeNum to node.copy(metadata = metadata))
     }

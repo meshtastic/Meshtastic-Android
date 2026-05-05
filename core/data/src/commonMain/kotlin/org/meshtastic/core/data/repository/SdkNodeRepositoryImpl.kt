@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.repository
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,8 +29,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okio.ByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.NodeMetadataEntity
 import org.meshtastic.core.datastore.LocalStatsDataSource
@@ -37,31 +40,51 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.DeviceMetrics
+import org.meshtastic.core.model.EnvironmentMetrics
+import org.meshtastic.core.model.MeshUser
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.Notification
+import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.StatusMessage
+import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
+import org.meshtastic.proto.Position as ProtoPosition
 
 /**
- * SDK-backed [NodeRepository] implementation using in-memory StateFlows.
+ * Unified node repository and manager — single source of truth for all mesh node state.
  *
- * The SDK manages node persistence internally via its SqlDelight storage layer.
- * This repository stores nodes in-memory and is populated by [NodeManager] via the
- * SDK's NodeChange flow (bridged through SdkStateBridge).
+ * Replaces the previous split between `NodeManagerImpl` (write operations, in-memory atomicfu maps)
+ * and `SdkNodeRepositoryImpl` (repository interface, StateFlows). Now uses a single StateFlow
+ * with metadata enrichment on every write.
  *
- * Cold start: nodes are empty until the SDK emits its snapshot from storage (<1s).
+ * The SDK manages node persistence via its SqlDelight storage. This class stores the live node
+ * database in-memory, populated by SdkStateBridge from the SDK's NodeChange flow.
  * Node metadata (favorites, notes, ignored, muted) persists via Room's node_metadata table.
  */
-@Single(binds = [NodeRepository::class])
-@Suppress("TooManyFunctions")
+@Single(binds = [NodeRepository::class, NodeManager::class, NodeIdLookup::class])
+@Suppress("TooManyFunctions", "LongParameterList")
 class SdkNodeRepositoryImpl(
     private val localStatsDataSource: LocalStatsDataSource,
     private val dbManager: DatabaseProvider,
+    private val notificationManager: NotificationManager,
     @Named("ServiceScope") private val scope: CoroutineScope,
-) : NodeRepository {
+) : NodeRepository, NodeManager {
 
     private val _nodeDBbyNum = MutableStateFlow<Map<Int, Node>>(emptyMap())
     private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
@@ -76,6 +99,8 @@ class SdkNodeRepositoryImpl(
                 .collect { list -> _metadataCache.value = list.associateBy { it.num } }
         }
     }
+
+    // ── NodeRepository read surface ─────────────────────────────────────────
 
     override val nodeDBbyNum: StateFlow<Map<Int, Node>> = _nodeDBbyNum
 
@@ -161,21 +186,10 @@ class SdkNodeRepositoryImpl(
             .toList()
     }
 
+    // ── NodeRepository write surface ────────────────────────────────────────
+
     override suspend fun upsert(node: Node) {
-        // Merge persisted metadata with incoming node data
-        val meta = _metadataCache.value[node.num]
-        val enriched = if (meta != null) {
-            node.copy(
-                isFavorite = meta.isFavorite,
-                isIgnored = meta.isIgnored,
-                isMuted = meta.isMuted,
-                notes = meta.notes,
-                manuallyVerified = meta.manuallyVerified,
-            )
-        } else {
-            node
-        }
-        _nodeDBbyNum.update { map -> map + (enriched.num to enriched) }
+        writeNode(node)
     }
 
     override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) {
@@ -221,16 +235,268 @@ class SdkNodeRepositoryImpl(
         }
     }
 
-    override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
+    override fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
         _nodeDBbyNum.update { map ->
             val node = map[nodeNum] ?: return@update map
             map + (nodeNum to node.copy(metadata = metadata))
         }
     }
 
-    /** Called by [NodeManager] to set the local node number for ourNodeInfo/myId derivation. */
-    fun setMyNodeNum(num: Int?) {
+    // ── NodeManager surface ─────────────────────────────────────────────────
+
+    override val nodeDBbyNodeNum: Map<Int, Node>
+        get() = _nodeDBbyNum.value
+
+    override val nodeDBbyID: Map<String, Node>
+        get() = _nodeDBbyNum.value.values.associateBy { it.user.id }
+
+    override val isNodeDbReady = MutableStateFlow(false)
+    override val allowNodeDbWrites = MutableStateFlow(false)
+
+    override fun setNodeDbReady(ready: Boolean) {
+        isNodeDbReady.value = ready
+    }
+
+    override fun setAllowNodeDbWrites(allowed: Boolean) {
+        allowNodeDbWrites.value = allowed
+    }
+
+    override val myNodeNum: StateFlow<Int?>
+        get() = _myNodeNum
+
+    override fun setMyNodeNum(num: Int?) {
         _myNodeNum.value = num
+    }
+
+    override val firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)
+
+    override fun setFirmwareEdition(edition: FirmwareEdition?) {
+        firmwareEdition.value = edition
+    }
+
+    override fun loadCachedNodeDB() {
+        // No-op in SDK mode — the SDK emits a Snapshot NodeChange on connect
+        // which populates the node map directly via installNodeInfo().
+    }
+
+    override fun clear() {
+        _nodeDBbyNum.value = emptyMap()
+        isNodeDbReady.value = false
+        allowNodeDbWrites.value = false
+        _myNodeNum.value = null
+        firmwareEdition.value = null
+    }
+
+    override fun getMyNodeInfo(): MyNodeInfo? {
+        val mi = _myNodeInfo.value ?: return null
+        val myNode = _nodeDBbyNum.value[mi.myNodeNum]
+        return MyNodeInfo(
+            myNodeNum = mi.myNodeNum,
+            hasGPS = (myNode?.position?.latitude_i ?: 0) != 0,
+            model = mi.model ?: myNode?.user?.hw_model?.name,
+            firmwareVersion = mi.firmwareVersion,
+            couldUpdate = mi.couldUpdate,
+            shouldUpdate = mi.shouldUpdate,
+            currentPacketId = mi.currentPacketId,
+            messageTimeoutMsec = mi.messageTimeoutMsec,
+            minAppVersion = mi.minAppVersion,
+            maxChannels = mi.maxChannels,
+            hasWifi = mi.hasWifi,
+            channelUtilization = 0f,
+            airUtilTx = 0f,
+            deviceId = mi.deviceId ?: myNode?.user?.id,
+        )
+    }
+
+    override fun getMyId(): String {
+        val num = _myNodeNum.value ?: _myNodeInfo.value?.myNodeNum ?: return ""
+        return _nodeDBbyNum.value[num]?.user?.id ?: ""
+    }
+
+    @Suppress("Deprecated")
+    override fun getNodes(): List<NodeInfo> = _nodeDBbyNum.value.values.map { it.toNodeInfo() }
+
+    override fun removeByNodenum(nodeNum: Int) {
+        _nodeDBbyNum.update { it - nodeNum }
+    }
+
+    override fun updateNode(nodeNum: Int, withBroadcast: Boolean, channel: Int, transform: (Node) -> Node) {
+        _nodeDBbyNum.update { map ->
+            val current = map[nodeNum] ?: getOrCreateNode(nodeNum, channel)
+            val transformed = transform(current)
+            val enriched = enrichWithMetadata(transformed)
+            map + (nodeNum to enriched)
+        }
+    }
+
+    override fun handleReceivedUser(fromNum: Int, p: User, channel: Int, manuallyVerified: Boolean) {
+        updateNode(fromNum, channel = channel) { node ->
+            val newNode = (node.isUnknownUser && p.hw_model != HardwareModel.UNSET)
+            val shouldPreserve = shouldPreserveExistingUser(node.user, p)
+
+            val next =
+                if (shouldPreserve) {
+                    node.copy(channel = channel, manuallyVerified = manuallyVerified)
+                } else {
+                    val keyMatch = !node.hasPKC || node.user.public_key == p.public_key
+                    val newUser = if (keyMatch) p else p.copy(public_key = ByteString.EMPTY)
+                    node.copy(
+                        user = newUser,
+                        publicKey = newUser.public_key,
+                        channel = channel,
+                        manuallyVerified = manuallyVerified,
+                    )
+                }
+            if (newNode && !shouldPreserve) {
+                scope.handledLaunch {
+                    notificationManager.dispatch(
+                        Notification(
+                            title = getStringSuspend(Res.string.new_node_seen, next.user.short_name),
+                            message = next.user.long_name,
+                            category = Notification.Category.NodeEvent,
+                        ),
+                    )
+                }
+            }
+            next
+        }
+    }
+
+    override fun handleReceivedPosition(fromNum: Int, myNodeNum: Int, p: ProtoPosition, defaultTime: Long) {
+        val isZeroPos = (p.latitude_i ?: 0) == 0 && (p.longitude_i ?: 0) == 0
+        @Suppress("ComplexCondition")
+        if (myNodeNum == fromNum && isZeroPos && p.sats_in_view == 0 && p.time == 0) {
+            Logger.d { "Ignoring empty position update for the local node" }
+            return
+        }
+
+        updateNode(fromNum) { node ->
+            val posTime = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()
+            val newLastHeard = maxOf(node.lastHeard, posTime)
+
+            val newPos =
+                if (isZeroPos) {
+                    p.copy(
+                        time = posTime,
+                        latitude_i = node.position.latitude_i,
+                        longitude_i = node.position.longitude_i,
+                        altitude = p.altitude ?: node.position.altitude,
+                        sats_in_view = p.sats_in_view,
+                    )
+                } else {
+                    p.copy(time = posTime)
+                }
+
+            node.copy(position = newPos, lastHeard = newLastHeard)
+        }
+    }
+
+    override fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry) {
+        updateNode(fromNum) { node ->
+            var nextNode = node
+            telemetry.device_metrics?.let { nextNode = nextNode.copy(deviceMetrics = it) }
+            telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
+            telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
+            val telemetryTime = if (telemetry.time != 0) telemetry.time else node.lastHeard
+            val newLastHeard = maxOf(node.lastHeard, telemetryTime)
+            nextNode.copy(lastHeard = newLastHeard)
+        }
+    }
+
+    override fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount) {
+        updateNode(fromNum) { it.copy(paxcounter = p) }
+    }
+
+    override fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage) {
+        updateNodeStatus(fromNum, s.status)
+    }
+
+    override fun updateNodeStatus(nodeNum: Int, status: String?) {
+        updateNode(nodeNum) { it.copy(nodeStatus = status?.takeIf { s -> s.isNotEmpty() }) }
+    }
+
+    override fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean) {
+        updateNode(info.num) { node ->
+            var next = node
+            val user = info.user
+            if (user != null) {
+                if (shouldPreserveExistingUser(node.user, user)) {
+                    // keep existing names
+                } else {
+                    var newUser =
+                        user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
+                    if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
+                        newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
+                    }
+                    next = next.copy(user = newUser, publicKey = newUser.public_key)
+                }
+            }
+            val position = info.position
+            if (position != null) {
+                next = next.copy(position = position)
+            }
+            next.copy(
+                lastHeard = info.last_heard,
+                deviceMetrics = info.device_metrics ?: next.deviceMetrics,
+                channel = info.channel,
+                viaMqtt = info.via_mqtt,
+                hopsAway = info.hops_away ?: -1,
+                isFavorite = info.is_favorite,
+                isIgnored = info.is_ignored,
+                isMuted = info.is_muted,
+            )
+        }
+    }
+
+    // ── NodeIdLookup ────────────────────────────────────────────────────────
+
+    override fun toNodeID(nodeNum: Int): String = if (nodeNum == DataPacket.NODENUM_BROADCAST) {
+        DataPacket.ID_BROADCAST
+    } else {
+        _nodeDBbyNum.value[nodeNum]?.user?.id ?: DataPacket.nodeNumToDefaultId(nodeNum)
+    }
+
+    // ── Private helpers ─────────────────────────────────────────────────────
+
+    private companion object {
+        private const val TIME_MS_TO_S = 1000L
+    }
+
+    private fun getOrCreateNode(n: Int, channel: Int = 0): Node = _nodeDBbyNum.value[n]
+        ?: run {
+            val userId = DataPacket.nodeNumToDefaultId(n)
+            val defaultUser = User(
+                id = userId,
+                long_name = "Meshtastic ${userId.takeLast(n = 4)}",
+                short_name = userId.takeLast(n = 4),
+                hw_model = HardwareModel.UNSET,
+            )
+            Node(num = n, user = defaultUser, channel = channel)
+        }
+
+    /** Enriches a node with persisted local metadata (favorites, notes, ignore, mute). */
+    private fun enrichWithMetadata(node: Node): Node {
+        val meta = _metadataCache.value[node.num] ?: return node
+        return node.copy(
+            isFavorite = meta.isFavorite,
+            isIgnored = meta.isIgnored,
+            isMuted = meta.isMuted,
+            notes = meta.notes,
+            manuallyVerified = meta.manuallyVerified,
+        )
+    }
+
+    /** Writes a node directly to the map with metadata enrichment. */
+    private fun writeNode(node: Node) {
+        val enriched = enrichWithMetadata(node)
+        _nodeDBbyNum.update { map -> map + (enriched.num to enriched) }
+    }
+
+    private fun shouldPreserveExistingUser(existing: User, incoming: User): Boolean {
+        val isDefaultName = (incoming.long_name).matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+        val isDefaultHwModel = incoming.hw_model == HardwareModel.UNSET
+        val hasExistingUser = (existing.id).isNotEmpty() && existing.hw_model != HardwareModel.UNSET
+        return hasExistingUser && isDefaultName && isDefaultHwModel
     }
 
     /** Ensures a metadata row exists for the given node, creating a default if needed. */
@@ -243,10 +509,46 @@ class SdkNodeRepositoryImpl(
     private fun sortComparator(sort: NodeSortOption): Comparator<Node> = when (sort) {
         NodeSortOption.LAST_HEARD -> compareByDescending { it.lastHeard }
         NodeSortOption.ALPHABETICAL -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.user.long_name }
-        NodeSortOption.DISTANCE -> compareBy { it.hopsAway } // simplified — no GPS-based distance in POC
+        NodeSortOption.DISTANCE -> compareBy { it.hopsAway }
         NodeSortOption.HOPS_AWAY -> compareBy { it.hopsAway }
         NodeSortOption.CHANNEL -> compareBy { it.channel }
         NodeSortOption.VIA_MQTT -> compareByDescending { it.viaMqtt }
         NodeSortOption.VIA_FAVORITE -> compareByDescending { it.isFavorite }
     }
+
+    @Suppress("CyclomaticComplexMethod")
+    private fun Node.toNodeInfo(): NodeInfo = NodeInfo(
+        num = num,
+        user = MeshUser(
+            id = user.id,
+            longName = user.long_name,
+            shortName = user.short_name,
+            hwModel = user.hw_model,
+            role = user.role.value,
+        ),
+        position = Position(
+            latitude = latitude,
+            longitude = longitude,
+            altitude = position.altitude ?: 0,
+            time = position.time,
+            satellitesInView = position.sats_in_view,
+            groundSpeed = position.ground_speed ?: 0,
+            groundTrack = position.ground_track ?: 0,
+            precisionBits = position.precision_bits,
+        ).takeIf { latitude != 0.0 || longitude != 0.0 },
+        snr = snr,
+        rssi = rssi,
+        lastHeard = lastHeard,
+        deviceMetrics = DeviceMetrics(
+            batteryLevel = deviceMetrics.battery_level ?: 0,
+            voltage = deviceMetrics.voltage ?: 0f,
+            channelUtilization = deviceMetrics.channel_utilization ?: 0f,
+            airUtilTx = deviceMetrics.air_util_tx ?: 0f,
+            uptimeSeconds = deviceMetrics.uptime_seconds ?: 0,
+        ),
+        channel = channel,
+        environmentMetrics = EnvironmentMetrics.fromTelemetryProto(environmentMetrics, 0),
+        hopsAway = hopsAway,
+        nodeStatus = nodeStatus,
+    )
 }

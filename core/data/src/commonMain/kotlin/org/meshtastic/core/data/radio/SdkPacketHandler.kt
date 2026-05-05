@@ -22,7 +22,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
@@ -39,6 +41,7 @@ import org.meshtastic.proto.ToRadio
 @Single(binds = [PacketHandler::class])
 class SdkPacketHandler(
     private val accessor: RadioClientAccessor,
+    private val serviceRepository: ServiceRepository,
     private val dispatchers: CoroutineDispatchers,
 ) : PacketHandler {
 
@@ -68,6 +71,7 @@ class SdkPacketHandler(
             return
         }
         client.send(packet)
+        serviceRepository.emitMeshActivity(MeshActivity.Send)
     }
 
     override suspend fun sendToRadioAndAwait(packet: MeshPacket): Boolean {
