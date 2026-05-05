@@ -34,7 +34,6 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.proto.PortNum
 
 /**
  * Android foreground service that hosts the Meshtastic mesh radio connection.
@@ -67,12 +66,6 @@ class MeshService : Service() {
     private var isServiceInitialized = false
 
     companion object {
-        fun actionReceived(portNum: Int): String {
-            val portType = PortNum.fromValue(portNum)
-            val portStr = portType?.toString() ?: portNum.toString()
-            return actionReceived(portStr)
-        }
-
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)
 
         val minDeviceVersion = DeviceVersion(DeviceVersion.MIN_FW_VERSION)
