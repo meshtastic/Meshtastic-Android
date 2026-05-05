@@ -7,14 +7,14 @@
 
 ## Summary
 
-**Completed:** ~93% of the Clean Break migration. AIDL dropped, SDK is sole radio path,
+**Completed:** ~97% of the Clean Break migration. AIDL dropped, SDK is sole radio path,
 transport layer fully deleted, Desktop uses shared SDK bridge, dead infrastructure gone,
-POC ViewModels removed, NodeInfoReadDataSource eliminated.
+POC ViewModels removed, NodeInfoReadDataSource eliminated, Room legacy tables dropped.
 
-**Remaining:** Room table cleanup, optional VM parameter slimming, and test coverage for
+**Remaining:** Optional VM parameter slimming, NodeManager merge, and test coverage for
 new bridge code.
 
-**Net change:** 159 files changed, +3,684 / -15,460 lines (net -11,776 LOC removed)
+**Net change:** 169 files changed, +4,638 / -16,549 lines (net -11,911 LOC removed)
 
 ---
 
@@ -97,15 +97,12 @@ new bridge code.
 
 ## What Remains
 
-### 1. Room Table Cleanup (medium priority — unblocked)
-- Migration 39→40: DROP legacy `nodes`, `my_node` tables
-- Remove old `NodeEntity`, `MyNodeEntity` Room entities + `NodeInfoDao`
-- SDK SqlDelight is already source of truth; Room tables are redundant
-- **No longer blocked:** `NodeInfoReadDataSource` eliminated, `PacketRepositoryImpl`
-  no longer depends on `NodeInfoDao`
-- Remaining internal consumers: `MeshtasticDatabase.nodeInfoDao()` abstract method,
-  `CommonNodeInfoDaoTest`, `CommonPacketDaoTest`, `MigrationTest`
-- Requires: Room schema migration file, entity deletion, DAO deletion, test updates
+### 1. Room Table Cleanup ✅ (completed)
+- Migration 39→40: DROP legacy `nodes`, `my_node`, `metadata` tables
+- Deleted `NodeEntity`, `MyNodeEntity`, `MetadataEntity`, `NodeInfoDao`
+- PacketDao parameterized with `myNodeNum` (34 queries)
+- PacketRepositoryImpl injects NodeRepository for myNodeNum
+- SDK SqlDelight is sole source of truth for all node data
 
 ### 2. VM Parameter Slimming (optional, quality-of-life)
 VMs currently inject SDK-backed adapters (RadioController, NodeRepository, etc.)
