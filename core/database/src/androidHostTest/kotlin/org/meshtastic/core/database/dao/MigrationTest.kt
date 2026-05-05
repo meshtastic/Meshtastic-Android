@@ -29,7 +29,6 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.MeshtasticDatabaseConstructor
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.ChannelSettings
@@ -42,21 +41,8 @@ import kotlin.test.assertEquals
 class MigrationTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var packetDao: PacketDao
-    private lateinit var nodeInfoDao: NodeInfoDao
 
-    private val myNodeInfo: MyNodeEntity =
-        MyNodeEntity(
-            myNodeNum = 42424242,
-            model = null,
-            firmwareVersion = null,
-            couldUpdate = false,
-            shouldUpdate = false,
-            currentPacketId = 1L,
-            messageTimeoutMsec = 5 * 60 * 1000,
-            minAppVersion = 1,
-            maxChannels = 8,
-            hasWifi = false,
-        )
+    private val myNodeNum = 42424242
 
     @Before
     fun createDb(): Unit = runTest {
@@ -67,7 +53,6 @@ class MigrationTest {
                 factory = { MeshtasticDatabaseConstructor.initialize() },
             )
                 .build()
-        nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
         packetDao = database.packetDao()
     }
 
@@ -78,26 +63,20 @@ class MigrationTest {
 
     @Test
     fun testMigrateChannelsByPSK_duplicatePSK() = runTest {
-        // PSK \"AQ==\" is base64 for single byte 0x01
         val pskBytes = byteArrayOf(0x01).toByteString()
 
-        // Create packets for Channel 0
         insertPacket(channel = 0, text = "Message Ch0")
 
-        // Old settings: Channel 0 has PSK_A
         val oldSettings = listOf(ChannelSettings(psk = pskBytes, name = "LongFast"))
 
-        // New settings: Channel 0 has PSK_A, Channel 1 has PSK_A
         val newSettings =
             listOf(
                 ChannelSettings(psk = pskBytes, name = "LongFast"),
                 ChannelSettings(psk = pskBytes, name = "NewChan"),
             )
 
-        // Perform migration
         packetDao.migrateChannelsByPSK(oldSettings, newSettings)
 
-        // Check packet channel
         val p = getFirstPacket()
         assertEquals(0, p.data.channel, "Packet should remain on channel 0")
     }
@@ -130,7 +109,6 @@ class MigrationTest {
 
         val oldSettings = listOf(ChannelSettings(psk = pskA, name = "A1"), ChannelSettings(psk = pskA, name = "A2"))
 
-        // Swap positions but keep names and PSKs
         val newSettings = listOf(ChannelSettings(psk = pskA, name = "A2"), ChannelSettings(psk = pskA, name = "A1"))
 
         packetDao.migrateChannelsByPSK(oldSettings, newSettings)
@@ -148,7 +126,6 @@ class MigrationTest {
 
         val oldSettings = listOf(ChannelSettings(psk = pskA, name = "A"))
 
-        // New settings has two identical channels (same PSK, same Name)
         val newSettings = listOf(ChannelSettings(psk = pskA, name = "A"), ChannelSettings(psk = pskA, name = "A"))
 
         packetDao.migrateChannelsByPSK(oldSettings, newSettings)
@@ -161,7 +138,7 @@ class MigrationTest {
         val packet =
             Packet(
                 uuid = 0L,
-                myNodeNum = 42424242,
+                myNodeNum = myNodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "$channel!broadcast",
                 received_time = nowMillis,
@@ -171,7 +148,7 @@ class MigrationTest {
         packetDao.insert(packet)
     }
 
-    private suspend fun getAllPackets() = packetDao.getAllPackets(PortNum.TEXT_MESSAGE_APP.value).first()
+    private suspend fun getAllPackets() = packetDao.getAllPackets(myNodeNum, PortNum.TEXT_MESSAGE_APP.value).first()
 
     private suspend fun getFirstPacket() = getAllPackets().first()
 }

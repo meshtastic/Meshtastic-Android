@@ -18,10 +18,10 @@ package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.testing.FakeDatabaseProvider
+import org.meshtastic.core.testing.FakeNodeRepository
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,12 +31,13 @@ abstract class CommonPacketRepositoryTest {
     protected lateinit var dbProvider: FakeDatabaseProvider
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
+    private val nodeRepository = FakeNodeRepository()
 
     protected lateinit var repository: PacketRepositoryImpl
 
     fun setupRepo() {
         dbProvider = FakeDatabaseProvider()
-        repository = PacketRepositoryImpl(dbProvider, dispatchers)
+        repository = PacketRepositoryImpl(dbProvider, dispatchers, nodeRepository)
     }
 
     @AfterTest
@@ -49,23 +50,8 @@ abstract class CommonPacketRepositoryTest {
         val myNodeNum = 1
         val contact = "contact"
 
-        // Ensure my_node is present so getMessageCount finds the packet
-        dbProvider.currentDb.value
-            .nodeInfoDao()
-            .setMyNodeInfo(
-                MyNodeEntity(
-                    myNodeNum = myNodeNum,
-                    model = "model",
-                    firmwareVersion = "1.0",
-                    couldUpdate = false,
-                    shouldUpdate = false,
-                    currentPacketId = 0L,
-                    messageTimeoutMsec = 0,
-                    minAppVersion = 0,
-                    maxChannels = 0,
-                    hasWifi = false,
-                ),
-            )
+        // Set the current node number so PacketRepositoryImpl can pass it to queries
+        nodeRepository.setMyNodeInfo(org.meshtastic.core.testing.TestDataFactory.createMyNodeInfo(myNodeNum = myNodeNum))
 
         val packet = DataPacket(to = "0!ffffffff", bytes = okio.ByteString.EMPTY, dataType = 1, id = 123)
 

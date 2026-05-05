@@ -29,7 +29,6 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MeshLogDao
-import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.NodeMetadataDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.dao.QuickChatActionDao
@@ -38,9 +37,6 @@ import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.MeshLog
-import org.meshtastic.core.database.entity.MetadataEntity
-import org.meshtastic.core.database.entity.MyNodeEntity
-import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.NodeMetadataEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.QuickChatAction
@@ -50,15 +46,12 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
 @Database(
     entities =
     [
-        MyNodeEntity::class,
-        NodeEntity::class,
         NodeMetadataEntity::class,
         Packet::class,
         ContactSettings::class,
         MeshLog::class,
         QuickChatAction::class,
         ReactionEntity::class,
-        MetadataEntity::class,
         DeviceHardwareEntity::class,
         FirmwareReleaseEntity::class,
         TracerouteNodePositionEntity::class,
@@ -101,15 +94,15 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 36, to = 37),
         AutoMigration(from = 37, to = 38),
         AutoMigration(from = 38, to = 39, spec = AutoMigration38to39::class),
+        AutoMigration(from = 39, to = 40, spec = AutoMigration39to40::class),
     ],
-    version = 39,
+    version = 40,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
 @TypeConverters(Converters::class)
 @androidx.room3.DaoReturnTypeConverters(androidx.room3.paging.PagingSourceDaoReturnTypeConverter::class)
 abstract class MeshtasticDatabase : RoomDatabase() {
-    abstract fun nodeInfoDao(): NodeInfoDao
 
     abstract fun nodeMetadataDao(): NodeMetadataDao
 
@@ -160,3 +153,9 @@ class AutoMigration38to39 : AutoMigrationSpec {
         )
     }
 }
+
+/** Drops legacy node tables — SDK is now the source of truth for node data. */
+@DeleteTable(tableName = "my_node")
+@DeleteTable(tableName = "nodes")
+@DeleteTable(tableName = "metadata")
+class AutoMigration39to40 : AutoMigrationSpec

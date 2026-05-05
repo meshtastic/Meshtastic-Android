@@ -43,22 +43,22 @@ interface PacketDao {
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = :portNum
     ORDER BY received_time ASC
     """,
     )
-    fun getAllPackets(portNum: Int): Flow<List<Packet>>
+    fun getAllPackets(myNodeNum: Int, portNum: Int): Flow<List<Packet>>
 
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND filtered = 0
     ORDER BY received_time DESC
     """,
     )
-    fun getContactKeys(): Flow<
+    fun getContactKeys(myNodeNum: Int): Flow<
         Map<
             @MapColumn(columnName = "contact_key")
             String,
@@ -72,93 +72,93 @@ interface PacketDao {
     INNER JOIN (
         SELECT contact_key, MAX(received_time) as max_time
         FROM packet
-        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
             AND port_num = 1 AND filtered = 0
         GROUP BY contact_key
     ) latest ON p.contact_key = latest.contact_key AND p.received_time = latest.max_time
-    WHERE (p.myNodeNum = 0 OR p.myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (p.myNodeNum = 0 OR p.myNodeNum = :myNodeNum)
         AND p.port_num = 1 AND p.filtered = 0
     GROUP BY p.contact_key
     ORDER BY p.received_time DESC
     """,
     )
-    fun getContactKeysPaged(): PagingSource<Int, Packet>
+    fun getContactKeysPaged(myNodeNum: Int): PagingSource<Int, Packet>
 
     @Query(
         """
     SELECT COUNT(*) FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact
     """,
     )
-    suspend fun getMessageCount(contact: String): Int
+    suspend fun getMessageCount(myNodeNum: Int, contact: String): Int
 
     @Query(
         """
     SELECT COUNT(*) FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0
     """,
     )
-    suspend fun getUnreadCount(contact: String): Int
+    suspend fun getUnreadCount(myNodeNum: Int, contact: String): Int
 
     @Query(
         """
     SELECT COUNT(*) FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0
     """,
     )
-    fun getUnreadCountFlow(contact: String): Flow<Int>
+    fun getUnreadCountFlow(myNodeNum: Int, contact: String): Flow<Int>
 
     @Query(
         """
     SELECT uuid FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0
     ORDER BY received_time ASC
     LIMIT 1
     """,
     )
-    fun getFirstUnreadMessageUuid(contact: String): Flow<Long?>
+    fun getFirstUnreadMessageUuid(myNodeNum: Int, contact: String): Flow<Long?>
 
     @Query(
         """
     SELECT COUNT(*) > 0 FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0
     """,
     )
-    fun hasUnreadMessages(contact: String): Flow<Boolean>
+    fun hasUnreadMessages(myNodeNum: Int, contact: String): Flow<Boolean>
 
     @Query(
         """
     SELECT COUNT(*) FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND read = 0 AND filtered = 0
     """,
     )
-    fun getUnreadCountTotal(): Flow<Int>
+    fun getUnreadCountTotal(myNodeNum: Int): Flow<Int>
 
     @Query(
         """
     UPDATE packet
     SET read = 1
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0 AND received_time <= :timestamp
     """,
     )
-    suspend fun clearUnreadCount(contact: String, timestamp: Long)
+    suspend fun clearUnreadCount(myNodeNum: Int, contact: String, timestamp: Long)
 
     @Query(
         """
     UPDATE packet
     SET read = 1
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND read = 0 AND filtered = 0
     """,
     )
-    suspend fun clearAllUnreadCounts()
+    suspend fun clearAllUnreadCounts(myNodeNum: Int)
 
     @Upsert suspend fun insert(packet: Packet)
 
@@ -166,56 +166,56 @@ interface PacketDao {
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact
     ORDER BY received_time DESC
     """,
     )
-    fun getMessagesFrom(contact: String): Flow<List<PacketEntity>>
+    fun getMessagesFrom(myNodeNum: Int, contact: String): Flow<List<PacketEntity>>
 
     @Transaction
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact
     ORDER BY received_time DESC
     LIMIT :limit
     """,
     )
-    fun getMessagesFrom(contact: String, limit: Int): Flow<List<PacketEntity>>
+    fun getMessagesFrom(myNodeNum: Int, contact: String, limit: Int): Flow<List<PacketEntity>>
 
     @Transaction
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact
         AND (filtered = 0 OR :includeFiltered = 1)
     ORDER BY received_time DESC
     """,
     )
-    fun getMessagesFrom(contact: String, includeFiltered: Boolean): Flow<List<PacketEntity>>
+    fun getMessagesFrom(myNodeNum: Int, contact: String, includeFiltered: Boolean): Flow<List<PacketEntity>>
 
     @Transaction
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 1 AND contact_key = :contact
     ORDER BY received_time DESC
     """,
     )
-    fun getMessagesFromPaged(contact: String): PagingSource<Int, PacketEntity>
+    fun getMessagesFromPaged(myNodeNum: Int, contact: String): PagingSource<Int, PacketEntity>
 
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND data = :data
     """,
     )
-    suspend fun findDataPacket(data: DataPacket): Packet?
+    suspend fun findDataPacket(myNodeNum: Int, data: DataPacket): Packet?
 
     @Query("DELETE FROM packet WHERE uuid in (:uuidList)")
     suspend fun deletePackets(uuidList: List<Long>)
@@ -223,11 +223,11 @@ interface PacketDao {
     @Query(
         """
     DELETE FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND contact_key IN (:contactList)
     """,
     )
-    suspend fun deleteContacts(contactList: List<String>)
+    suspend fun deleteContacts(myNodeNum: Int, contactList: List<String>)
 
     @Query("DELETE FROM packet WHERE uuid=:uuid")
     suspend fun delete(uuid: Long)
@@ -243,17 +243,17 @@ interface PacketDao {
     @Query(
         """
         DELETE FROM reactions 
-        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND reply_id IN (:packetIds)
         """,
     )
-    suspend fun deleteReactions(packetIds: List<Int>)
+    suspend fun deleteReactions(myNodeNum: Int, packetIds: List<Int>)
 
     @Transaction
-    suspend fun deleteMessages(uuidList: List<Long>) {
+    suspend fun deleteMessages(myNodeNum: Int, uuidList: List<Long>) {
         val packetIds = getPacketIdsFrom(uuidList)
         if (packetIds.isNotEmpty()) {
-            deleteReactions(packetIds)
+            deleteReactions(myNodeNum, packetIds)
         }
         deletePackets(uuidList)
     }
@@ -261,19 +261,19 @@ interface PacketDao {
     @Update suspend fun update(packet: Packet)
 
     @Transaction
-    suspend fun updateMessageStatus(data: DataPacket, m: MessageStatus) {
+    suspend fun updateMessageStatus(myNodeNum: Int, data: DataPacket, m: MessageStatus) {
         val new = data.copy(status = m)
         // Match on key fields that identify the packet, rather than the entire data object
-        findPacketsWithId(data.id)
+        findPacketsWithId(myNodeNum, data.id)
             .find { it.data.id == data.id && it.data.from == data.from && it.data.to == data.to }
             ?.let { update(it.copy(data = new)) }
     }
 
     @Transaction
-    suspend fun updateMessageId(data: DataPacket, id: Int) {
+    suspend fun updateMessageId(myNodeNum: Int, data: DataPacket, id: Int) {
         val new = data.copy(id = id)
         // Match on key fields that identify the packet
-        findPacketsWithId(data.id)
+        findPacketsWithId(myNodeNum, data.id)
             .find { it.data.id == data.id && it.data.from == data.from && it.data.to == data.to }
             ?.let { update(it.copy(data = new, packetId = id)) }
     }
@@ -281,88 +281,88 @@ interface PacketDao {
     @Query(
         """
     SELECT data FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
     ORDER BY received_time ASC
     """,
     )
-    suspend fun getDataPackets(): List<DataPacket>
+    suspend fun getDataPackets(myNodeNum: Int): List<DataPacket>
 
     @Transaction
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND packet_id = :requestId
     ORDER BY received_time DESC
     """,
     )
-    suspend fun getPacketById(requestId: Int): Packet?
+    suspend fun getPacketById(myNodeNum: Int, requestId: Int): Packet?
 
     @Transaction
     @Query(
         """
         SELECT * FROM packet 
         WHERE packet_id = :packetId 
-        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         LIMIT 1
         """,
     )
-    suspend fun getPacketByPacketId(packetId: Int): PacketEntity?
+    suspend fun getPacketByPacketId(myNodeNum: Int, packetId: Int): PacketEntity?
 
     @Transaction
     @Query(
         """
         SELECT * FROM packet
         WHERE packet_id IN (:packetIds)
-        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         """,
     )
-    suspend fun getPacketsByPacketIds(packetIds: List<Int>): List<PacketEntity>
+    suspend fun getPacketsByPacketIds(myNodeNum: Int, packetIds: List<Int>): List<PacketEntity>
 
     @Query(
         """
         SELECT * FROM packet 
         WHERE packet_id = :packetId 
-        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         """,
     )
-    suspend fun findPacketsWithId(packetId: Int): List<Packet>
+    suspend fun findPacketsWithId(myNodeNum: Int, packetId: Int): List<Packet>
 
     @Transaction
     @Query(
         """
         SELECT * FROM packet 
-        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND substr(sfpp_hash, 1, 8) = substr(:hash, 1, 8)
         """,
     )
-    suspend fun findPacketBySfppHash(hash: ByteString): Packet?
+    suspend fun findPacketBySfppHash(myNodeNum: Int, hash: ByteString): Packet?
 
     // Fetches all DataPackets for the current node, ordered by time.
     // Callers should filter by status in Kotlin (avoids SQLite json_extract dependency).
     @Query(
         """
     SELECT data FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
     ORDER BY received_time ASC
     """,
     )
-    suspend fun getAllDataPackets(): List<DataPacket>
+    suspend fun getAllDataPackets(myNodeNum: Int): List<DataPacket>
 
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+    WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND port_num = 8
     ORDER BY received_time ASC
     """,
     )
-    suspend fun getAllWaypoints(): List<Packet>
+    suspend fun getAllWaypoints(myNodeNum: Int): List<Packet>
 
     @Transaction
-    suspend fun deleteWaypoint(id: Int) {
-        val uuidList = getAllWaypoints().filter { it.data.waypoint?.id == id }.map { it.uuid }
-        deleteMessages(uuidList)
+    suspend fun deleteWaypoint(myNodeNum: Int, id: Int) {
+        val uuidList = getAllWaypoints(myNodeNum).filter { it.data.waypoint?.id == id }.map { it.uuid }
+        deleteMessages(myNodeNum, uuidList)
     }
 
     @Query("SELECT * FROM contact_settings")
@@ -407,60 +407,60 @@ interface PacketDao {
         """
         SELECT * FROM reactions 
         WHERE packet_id = :packetId
-        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         """,
     )
-    suspend fun findReactionsWithId(packetId: Int): List<ReactionEntity>
+    suspend fun findReactionsWithId(myNodeNum: Int, packetId: Int): List<ReactionEntity>
 
     @Query(
         """
         SELECT * FROM reactions 
         WHERE packet_id = :packetId 
-        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         LIMIT 1
         """,
     )
-    suspend fun getReactionByPacketId(packetId: Int): ReactionEntity?
+    suspend fun getReactionByPacketId(myNodeNum: Int, packetId: Int): ReactionEntity?
 
     @Transaction
     @Query(
         """
         SELECT * FROM reactions 
-        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
         AND substr(sfpp_hash, 1, 8) = substr(:hash, 1, 8)
         """,
     )
-    suspend fun findReactionBySfppHash(hash: ByteString): ReactionEntity?
+    suspend fun findReactionBySfppHash(myNodeNum: Int, hash: ByteString): ReactionEntity?
 
     @Query(
         """
         SELECT COUNT(*) FROM packet
-        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
             AND port_num = 1 AND contact_key = :contact AND filtered = 1
         """,
     )
-    suspend fun getFilteredCount(contact: String): Int
+    suspend fun getFilteredCount(myNodeNum: Int, contact: String): Int
 
     @Query(
         """
         SELECT COUNT(*) FROM packet
-        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
             AND port_num = 1 AND contact_key = :contact AND filtered = 1
         """,
     )
-    fun getFilteredCountFlow(contact: String): Flow<Int>
+    fun getFilteredCountFlow(myNodeNum: Int, contact: String): Flow<Int>
 
     @Transaction
     @Query(
         """
         SELECT * FROM packet
-        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum)
             AND port_num = 1 AND contact_key = :contact
             AND (filtered = 0 OR :includeFiltered = 1)
         ORDER BY received_time DESC
         """,
     )
-    fun getMessagesFromPaged(contact: String, includeFiltered: Boolean): PagingSource<Int, PacketEntity>
+    fun getMessagesFromPaged(myNodeNum: Int, contact: String, includeFiltered: Boolean): PagingSource<Int, PacketEntity>
 
     @Query("SELECT filtering_disabled FROM contact_settings WHERE contact_key = :contact")
     suspend fun getContactFilteringDisabled(contact: String): Boolean?
@@ -544,7 +544,7 @@ interface PacketDao {
 
     @Suppress("MaxLineLength")
     @Query(
-        "UPDATE packet SET filtered = :filtered WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node)) AND data LIKE :senderIdPattern",
+        "UPDATE packet SET filtered = :filtered WHERE (myNodeNum = 0 OR myNodeNum = :myNodeNum) AND data LIKE :senderIdPattern",
     )
-    suspend fun updateFilteredBySender(senderIdPattern: String, filtered: Boolean)
+    suspend fun updateFilteredBySender(myNodeNum: Int, senderIdPattern: String, filtered: Boolean)
 }

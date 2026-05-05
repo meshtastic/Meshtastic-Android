@@ -21,6 +21,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -46,15 +47,26 @@ import org.meshtastic.core.repository.PacketRepository as SharedPacketRepository
 
 @Suppress("TooManyFunctions", "LongParameterList")
 @Single
-class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val dispatchers: CoroutineDispatchers) :
-    SharedPacketRepository {
+class PacketRepositoryImpl(
+    private val dbManager: DatabaseProvider,
+    private val dispatchers: CoroutineDispatchers,
+    private val nodeRepository: org.meshtastic.core.repository.NodeRepository,
+) : SharedPacketRepository {
 
-    override fun getWaypoints(): Flow<List<DataPacket>> = dbManager.currentDb
-        .flatMapLatest { db -> db.packetDao().getAllWaypointsFlow() }
+    /** Current myNodeNum snapshot — 0 means "no node connected yet" (matches legacy behavior). */
+    private val currentMyNodeNum: Int get() = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
+
+    /** Reactive myNodeNum flow, only re-emits when the number actually changes. */
+    private val myNodeNumFlow: Flow<Int> = nodeRepository.myNodeInfo
+        .map { it?.myNodeNum ?: 0 }
+        .distinctUntilChanged()
+
+    override fun getWaypoints(): Flow<List<DataPacket>> = myNodeNumFlow
+        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getAllWaypointsFlow(num) } }
         .map { list -> list.map { it.data } }
 
-    override fun getContacts(): Flow<Map<String, DataPacket>> = dbManager.currentDb
-        .flatMapLatest { db -> db.packetDao().getContactKeys() }
+    override fun getContacts(): Flow<Map<String, DataPacket>> = myNodeNumFlow
+        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactKeys(num) } }
         .map { map -> map.mapValues { it.value.data } }
 
     override fun getContactsPaged(): Flow<PagingData<DataPacket>> = Pager(
@@ -64,34 +76,34 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
             enablePlaceholders = false,
             initialLoadSize = CONTACTS_PAGE_SIZE,
         ),
-        pagingSourceFactory = { dbManager.currentDb.value.packetDao().getContactKeysPaged() },
+        pagingSourceFactory = { dbManager.currentDb.value.packetDao().getContactKeysPaged(currentMyNodeNum) },
     )
         .flow
         .map { pagingData -> pagingData.map { it.data } }
 
     override suspend fun getMessageCount(contact: String): Int =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getMessageCount(contact) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getMessageCount(currentMyNodeNum, contact) }
 
     override suspend fun getUnreadCount(contact: String): Int =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getUnreadCount(contact) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getUnreadCount(currentMyNodeNum, contact) }
 
-    override fun getUnreadCountFlow(contact: String): Flow<Int> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountFlow(contact) }
+    override fun getUnreadCountFlow(contact: String): Flow<Int> = myNodeNumFlow
+        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountFlow(num, contact) } }
 
-    override fun getFirstUnreadMessageUuid(contact: String): Flow<Long?> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFirstUnreadMessageUuid(contact) }
+    override fun getFirstUnreadMessageUuid(contact: String): Flow<Long?> = myNodeNumFlow
+        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFirstUnreadMessageUuid(num, contact) } }
 
-    override fun hasUnreadMessages(contact: String): Flow<Boolean> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().hasUnreadMessages(contact) }
+    override fun hasUnreadMessages(contact: String): Flow<Boolean> = myNodeNumFlow
+        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().hasUnreadMessages(num, contact) } }
 
-    override fun getUnreadCountTotal(): Flow<Int> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal() }
+    override fun getUnreadCountTotal(): Flow<Int> = myNodeNumFlow
+        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal(num) } }
 
     override suspend fun clearUnreadCount(contact: String, timestamp: Long) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearUnreadCount(currentMyNodeNum, contact, timestamp) }
 
     override suspend fun clearAllUnreadCounts() =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts() }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts(currentMyNodeNum) }
 
     override suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
         withContext(dispatchers.io) {
@@ -110,7 +122,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         }
 
     override suspend fun getQueuedPackets(): List<DataPacket> = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().getAllDataPackets().filter { it.status == MessageStatus.QUEUED }
+        dbManager.currentDb.value.packetDao().getAllDataPackets(currentMyNodeNum).filter { it.status == MessageStatus.QUEUED }
     }
 
     suspend fun insertRoomPacket(packet: RoomPacket) =
@@ -149,11 +161,12 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         getNode: suspend (String?) -> Node,
     ): Flow<List<Message>> = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
+        val num = currentMyNodeNum
         val flow =
             when {
-                limit != null -> dao.getMessagesFrom(contact, limit)
-                !includeFiltered -> dao.getMessagesFrom(contact, includeFiltered = false)
-                else -> dao.getMessagesFrom(contact)
+                limit != null -> dao.getMessagesFrom(num, contact, limit)
+                !includeFiltered -> dao.getMessagesFrom(num, contact, includeFiltered = false)
+                else -> dao.getMessagesFrom(num, contact)
             }
         flow.mapLatest { packets ->
             val cachedGetNode = memoize(getNode)
@@ -176,7 +189,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 enablePlaceholders = false,
                 initialLoadSize = MESSAGES_PAGE_SIZE,
             ),
-            pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contact) },
+            pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(currentMyNodeNum, contact) },
         )
             .flow
             .map { pagingData ->
@@ -205,7 +218,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
             initialLoadSize = MESSAGES_PAGE_SIZE,
         ),
         pagingSourceFactory = {
-            dbManager.currentDb.value.packetDao().getMessagesFromPaged(contactKey, includeFiltered)
+            dbManager.currentDb.value.packetDao().getMessagesFromPaged(currentMyNodeNum, contactKey, includeFiltered)
         },
     )
         .flow
@@ -224,28 +237,29 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         }
 
     override suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateMessageStatus(d, m) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateMessageStatus(currentMyNodeNum, d, m) }
 
     override suspend fun updateMessageId(d: DataPacket, id: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateMessageId(d, id) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateMessageId(currentMyNodeNum, d, id) }
 
     override suspend fun getPacketById(id: Int): DataPacket? =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketById(id)?.data }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketById(currentMyNodeNum, id)?.data }
 
     override suspend fun getPacketByPacketId(packetId: Int): DataPacket? = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId)?.packet?.data
+        dbManager.currentDb.value.packetDao().getPacketByPacketId(currentMyNodeNum, packetId)?.packet?.data
     }
 
     private suspend fun getPacketByPacketIdInternal(packetId: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(currentMyNodeNum, packetId) }
 
     private suspend fun batchGetPacketsByIds(ids: List<Int>): Map<Int, PacketEntity> = if (ids.isEmpty()) {
         emptyMap()
     } else {
         withContext(dispatchers.io) {
             val dao = dbManager.currentDb.value.packetDao()
+            val num = currentMyNodeNum
             ids.chunked(MAX_SQLITE_BIND_PARAMS)
-                .flatMap { dao.getPacketsByPacketIds(it) }
+                .flatMap { dao.getPacketsByPacketIds(num, it) }
                 .associateBy { it.packet.packetId }
         }
     }
@@ -283,8 +297,8 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
 
     override suspend fun update(packet: DataPacket, routingError: Int): Unit = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
-        // Match on key fields that identify the packet, rather than the entire data object
-        dao.findPacketsWithId(packet.id)
+        val num = currentMyNodeNum
+        dao.findPacketsWithId(num, packet.id)
             .find { it.data.id == packet.id && it.data.from == packet.from && it.data.to == packet.to }
             ?.let { existing ->
                 val updated =
@@ -302,28 +316,28 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
 
     override suspend fun updateReaction(reaction: Reaction) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
-        dao.findReactionsWithId(reaction.packetId)
+        dao.findReactionsWithId(currentMyNodeNum, reaction.packetId)
             .find { it.userId == reaction.user.id && it.emoji == reaction.emoji }
             ?.let { dao.update(reaction.toEntity(it.myNodeNum)) } ?: Unit
     }
 
     override suspend fun getReactionByPacketId(packetId: Int): Reaction? = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().getReactionByPacketId(packetId)?.toReaction { null }
+        dbManager.currentDb.value.packetDao().getReactionByPacketId(currentMyNodeNum, packetId)?.toReaction { null }
     }
 
     override suspend fun findPacketsWithId(packetId: Int): List<DataPacket> = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().findPacketsWithId(packetId).map { it.data }
+        dbManager.currentDb.value.packetDao().findPacketsWithId(currentMyNodeNum, packetId).map { it.data }
     }
 
     private suspend fun findPacketsWithIdInternal(packetId: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().findPacketsWithId(packetId) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().findPacketsWithId(currentMyNodeNum, packetId) }
 
     override suspend fun findReactionsWithId(packetId: Int): List<Reaction> = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().findReactionsWithId(packetId).toReaction { null }
+        dbManager.currentDb.value.packetDao().findReactionsWithId(currentMyNodeNum, packetId).toReaction { null }
     }
 
     private suspend fun findReactionsWithIdInternal(packetId: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().findReactionsWithId(packetId) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().findReactionsWithId(currentMyNodeNum, packetId) }
 
     @Suppress("CyclomaticComplexMethod")
     override suspend fun updateSFPPStatus(
@@ -397,8 +411,9 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     override suspend fun updateSFPPStatusByHash(hash: ByteArray, status: MessageStatus, rxTime: Long): Unit =
         withContext(dispatchers.io) {
             val dao = dbManager.currentDb.value.packetDao()
+            val num = currentMyNodeNum
             val hashByteString = hash.toByteString()
-            dao.findPacketBySfppHash(hashByteString)?.let { packet ->
+            dao.findPacketBySfppHash(num, hashByteString)?.let { packet ->
                 // If it's already confirmed, don't downgrade it
                 if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                     return@let
@@ -408,7 +423,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 dao.update(packet.copy(data = updatedData, sfpp_hash = hashByteString, received_time = newTime))
             }
 
-            dao.findReactionBySfppHash(hashByteString)?.let { reaction ->
+            dao.findReactionBySfppHash(num, hashByteString)?.let { reaction ->
                 if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                     return@let
                 }
@@ -419,17 +434,17 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         }
 
     override suspend fun deleteMessages(uuidList: List<Long>) = withContext(dispatchers.io) {
+        val num = currentMyNodeNum
         for (chunk in uuidList.chunked(DELETE_CHUNK_SIZE)) {
-            // Fetch DAO per chunk to avoid holding a stale reference if the active DB switches
-            dbManager.currentDb.value.packetDao().deleteMessages(chunk)
+            dbManager.currentDb.value.packetDao().deleteMessages(num, chunk)
         }
     }
 
     override suspend fun deleteContacts(contactList: List<String>) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteContacts(contactList) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteContacts(currentMyNodeNum, contactList) }
 
     override suspend fun deleteWaypoint(id: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteWaypoint(id) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteWaypoint(currentMyNodeNum, id) }
 
     suspend fun delete(packet: RoomPacket) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().delete(packet) }
@@ -454,11 +469,11 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     suspend fun updateReaction(reaction: RoomReaction) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().update(reaction) }
 
-    override fun getFilteredCountFlow(contactKey: String): Flow<Int> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFilteredCountFlow(contactKey) }
+    override fun getFilteredCountFlow(contactKey: String): Flow<Int> = myNodeNumFlow
+        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFilteredCountFlow(num, contactKey) } }
 
     override suspend fun getFilteredCount(contactKey: String): Int =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getFilteredCount(contactKey) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getFilteredCount(currentMyNodeNum, contactKey) }
 
     override suspend fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) =
         withContext(dispatchers.io) {
@@ -475,11 +490,11 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
 
     override suspend fun updateFilteredBySender(senderId: String, filtered: Boolean) {
         val pattern = "%\"from\":\"${senderId}\"%"
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateFilteredBySender(pattern, filtered) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateFilteredBySender(currentMyNodeNum, pattern, filtered) }
     }
 
-    private fun org.meshtastic.core.database.dao.PacketDao.getAllWaypointsFlow(): Flow<List<RoomPacket>> =
-        getAllPackets(PortNum.WAYPOINT_APP.value)
+    private fun org.meshtastic.core.database.dao.PacketDao.getAllWaypointsFlow(myNodeNum: Int): Flow<List<RoomPacket>> =
+        getAllPackets(myNodeNum, PortNum.WAYPOINT_APP.value)
 
     private fun ContactSettingsEntity.toShared() = ContactSettings(
         contactKey = contact_key,

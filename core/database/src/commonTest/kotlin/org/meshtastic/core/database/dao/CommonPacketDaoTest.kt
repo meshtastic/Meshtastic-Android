@@ -21,7 +21,6 @@ import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.MeshtasticDatabase
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
@@ -37,33 +36,17 @@ import kotlin.test.assertTrue
 
 abstract class CommonPacketDaoTest {
     private lateinit var database: MeshtasticDatabase
-    private lateinit var nodeInfoDao: NodeInfoDao
     private lateinit var packetDao: PacketDao
 
-    private val myNodeInfo: MyNodeEntity =
-        MyNodeEntity(
-            myNodeNum = 42424242,
-            model = null,
-            firmwareVersion = null,
-            couldUpdate = false,
-            shouldUpdate = false,
-            currentPacketId = 1L,
-            messageTimeoutMsec = 5 * 60 * 1000,
-            minAppVersion = 1,
-            maxChannels = 8,
-            hasWifi = false,
-        )
-
-    private val myNodeNum: Int
-        get() = myNodeInfo.myNodeNum
+    private val myNodeNum = 42424242
 
     private val testContactKeys = listOf("0${DataPacket.ID_BROADCAST}", "1!test1234")
 
-    private fun generateTestPackets(myNodeNum: Int) = testContactKeys.flatMap { contactKey ->
+    private fun generateTestPackets(nodeNum: Int) = testContactKeys.flatMap { contactKey ->
         List(SAMPLE_SIZE) {
             Packet(
                 uuid = 0L,
-                myNodeNum = myNodeNum,
+                myNodeNum = nodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = contactKey,
                 received_time = nowMillis + it,
@@ -80,8 +63,6 @@ abstract class CommonPacketDaoTest {
 
     suspend fun createDb() {
         database = getInMemoryDatabaseBuilder().build()
-        nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
-
         packetDao =
             database.packetDao().apply {
                 generateTestPackets(42424243).forEach { insert(it) }
@@ -97,7 +78,7 @@ abstract class CommonPacketDaoTest {
     @Test
     fun testGetMessagesFrom() = runTest {
         val contactKey = testContactKeys.first()
-        val messages = packetDao.getMessagesFrom(contactKey).first()
+        val messages = packetDao.getMessagesFrom(myNodeNum, contactKey).first()
         assertEquals(SAMPLE_SIZE, messages.size)
         assertTrue(messages.all { it.packet.myNodeNum == myNodeNum })
         assertTrue(messages.all { it.packet.contact_key == contactKey })
@@ -106,42 +87,40 @@ abstract class CommonPacketDaoTest {
     @Test
     fun testGetMessageCount() = runTest {
         val contactKey = testContactKeys.first()
-        assertEquals(SAMPLE_SIZE, packetDao.getMessageCount(contactKey))
+        assertEquals(SAMPLE_SIZE, packetDao.getMessageCount(myNodeNum, contactKey))
     }
 
     @Test
     fun testGetUnreadCount() = runTest {
         val contactKey = testContactKeys.first()
-        assertEquals(SAMPLE_SIZE, packetDao.getUnreadCount(contactKey))
+        assertEquals(SAMPLE_SIZE, packetDao.getUnreadCount(myNodeNum, contactKey))
     }
 
     @Test
     fun testClearUnreadCount() = runTest {
         val contactKey = testContactKeys.first()
-        packetDao.clearUnreadCount(contactKey, nowMillis + SAMPLE_SIZE)
-        assertEquals(0, packetDao.getUnreadCount(contactKey))
+        packetDao.clearUnreadCount(myNodeNum, contactKey, nowMillis + SAMPLE_SIZE)
+        assertEquals(0, packetDao.getUnreadCount(myNodeNum, contactKey))
     }
 
     @Test
     fun testClearAllUnreadCounts() = runTest {
-        packetDao.clearAllUnreadCounts()
-        testContactKeys.forEach { assertEquals(0, packetDao.getUnreadCount(it)) }
+        packetDao.clearAllUnreadCounts(myNodeNum)
+        testContactKeys.forEach { assertEquals(0, packetDao.getUnreadCount(myNodeNum, it)) }
     }
 
     @Test
     fun testUpdateMessageStatus() = runTest {
         val contactKey = testContactKeys.first()
-        val messages = packetDao.getMessagesFrom(contactKey).first()
+        val messages = packetDao.getMessagesFrom(myNodeNum, contactKey).first()
         val packet = messages.first().packet.data
-        val originalStatus = packet.status
 
-        // Ensure packet has a valid ID for updating
         val packetWithId = packet.copy(id = 999, from = "!$myNodeNum")
         val updatedRoomPacket = messages.first().packet.copy(data = packetWithId, packetId = 999)
         packetDao.update(updatedRoomPacket)
 
-        packetDao.updateMessageStatus(packetWithId, MessageStatus.DELIVERED)
-        val updatedMessages = packetDao.getMessagesFrom(contactKey).first()
+        packetDao.updateMessageStatus(myNodeNum, packetWithId, MessageStatus.DELIVERED)
+        val updatedMessages = packetDao.getMessagesFrom(myNodeNum, contactKey).first()
         assertEquals(MessageStatus.DELIVERED, updatedMessages.first { it.packet.data.id == 999 }.packet.data.status)
     }
 
@@ -164,7 +143,7 @@ abstract class CommonPacketDaoTest {
                 ),
             )
         packetDao.insert(queuedPacket)
-        val queued = packetDao.getAllDataPackets().filter { it.status == MessageStatus.QUEUED }
+        val queued = packetDao.getAllDataPackets(myNodeNum).filter { it.status == MessageStatus.QUEUED }
         assertNotNull(queued)
         assertEquals(1, queued.size)
         assertEquals("Queued", queued.first().text)
@@ -173,13 +152,13 @@ abstract class CommonPacketDaoTest {
     @Test
     fun testDeleteMessages() = runTest {
         val contactKey = testContactKeys.first()
-        packetDao.deleteContacts(listOf(contactKey))
-        assertEquals(0, packetDao.getMessageCount(contactKey))
+        packetDao.deleteContacts(myNodeNum, listOf(contactKey))
+        assertEquals(0, packetDao.getMessageCount(myNodeNum, contactKey))
     }
 
     @Test
     fun testGetContactKeys() = runTest {
-        val contacts = packetDao.getContactKeys().first()
+        val contacts = packetDao.getContactKeys(myNodeNum).first()
         assertEquals(testContactKeys.size, contacts.size)
         testContactKeys.forEach { assertTrue(contacts.containsKey(it)) }
     }
@@ -202,9 +181,8 @@ abstract class CommonPacketDaoTest {
                 ),
             )
         packetDao.insert(waypointPacket)
-        val waypoints = packetDao.getAllWaypoints()
+        val waypoints = packetDao.getAllWaypoints(myNodeNum)
         assertEquals(1, waypoints.size)
-        // Waypoints aren't text messages, so they don't resolve a string text.
     }
 
     @Test
@@ -221,7 +199,7 @@ abstract class CommonPacketDaoTest {
         val filteredMessages = listOf("Filtered 1")
 
         normalMessages.forEachIndexed { index, text ->
-            val packet =
+            packetDao.insert(
                 Packet(
                     uuid = 0L,
                     myNodeNum = myNodeNum,
@@ -229,19 +207,18 @@ abstract class CommonPacketDaoTest {
                     contact_key = contactKey,
                     received_time = nowMillis + index,
                     read = false,
-                    data =
-                    DataPacket(
+                    data = DataPacket(
                         to = DataPacket.ID_BROADCAST,
                         bytes = text.encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),
                     filtered = false,
-                )
-            packetDao.insert(packet)
+                ),
+            )
         }
 
         filteredMessages.forEachIndexed { index, text ->
-            val packet =
+            packetDao.insert(
                 Packet(
                     uuid = 0L,
                     myNodeNum = myNodeNum,
@@ -249,35 +226,31 @@ abstract class CommonPacketDaoTest {
                     contact_key = contactKey,
                     received_time = nowMillis + normalMessages.size + index,
                     read = true,
-                    data =
-                    DataPacket(
+                    data = DataPacket(
                         to = DataPacket.ID_BROADCAST,
                         bytes = text.encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),
                     filtered = true,
-                )
-            packetDao.insert(packet)
+                ),
+            )
         }
 
-        val allMessages = packetDao.getMessagesFrom(contactKey).first()
+        val allMessages = packetDao.getMessagesFrom(myNodeNum, contactKey).first()
         assertEquals(normalMessages.size + filteredMessages.size, allMessages.size)
 
-        val includingFiltered = packetDao.getMessagesFrom(contactKey, includeFiltered = true).first()
+        val includingFiltered = packetDao.getMessagesFrom(myNodeNum, contactKey, includeFiltered = true).first()
         assertEquals(normalMessages.size + filteredMessages.size, includingFiltered.size)
 
-        val excludingFiltered = packetDao.getMessagesFrom(contactKey, includeFiltered = false).first()
+        val excludingFiltered = packetDao.getMessagesFrom(myNodeNum, contactKey, includeFiltered = false).first()
         assertEquals(normalMessages.size, excludingFiltered.size)
         assertFalse(excludingFiltered.any { it.packet.filtered })
     }
 
     @Test
     fun testGetPacketsByPacketIdsChunked() = runTest {
-        // Regression test for SQLITE_MAX_VARIABLE_NUMBER (999) limit. Inserting >999 packets and
-        // looking them up by id must not throw; callers are expected to chunk, and each chunk
-        // must return the correct rows.
         val totalPackets = 2000
-        val chunkSize = NodeInfoDao.MAX_BIND_PARAMS
+        val chunkSize = MAX_SQLITE_BIND_PARAMS
         val contactKey = "chunk-test"
         val baseTime = nowMillis
         val packetIds = (1..totalPackets).toList()
@@ -291,8 +264,7 @@ abstract class CommonPacketDaoTest {
                     contact_key = contactKey,
                     received_time = baseTime + id,
                     read = false,
-                    data =
-                    DataPacket(
+                    data = DataPacket(
                         to = DataPacket.ID_BROADCAST,
                         bytes = "Chunk $id".encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
@@ -302,12 +274,13 @@ abstract class CommonPacketDaoTest {
             )
         }
 
-        val fetched = packetIds.chunked(chunkSize).flatMap { packetDao.getPacketsByPacketIds(it) }
+        val fetched = packetIds.chunked(chunkSize).flatMap { packetDao.getPacketsByPacketIds(myNodeNum, it) }
         assertEquals(totalPackets, fetched.size)
         assertEquals(packetIds.toSet(), fetched.map { it.packet.packetId }.toSet())
     }
 
     companion object {
         private const val SAMPLE_SIZE = 10
+        private const val MAX_SQLITE_BIND_PARAMS = 999
     }
 }
