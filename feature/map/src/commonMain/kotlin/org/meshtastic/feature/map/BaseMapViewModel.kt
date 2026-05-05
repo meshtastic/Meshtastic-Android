@@ -28,7 +28,7 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.MessageSender
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
@@ -55,7 +55,7 @@ open class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,
     protected val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
-    private val radioController: RadioController,
+    private val radioController: MessageSender,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo

@@ -19,14 +19,10 @@ package org.meshtastic.core.data.di
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
-import org.meshtastic.core.model.util.MeshDataMapper
-import org.meshtastic.core.model.util.NodeIdLookup
 import kotlin.time.Clock
 
 @Module
 @ComponentScan("org.meshtastic.core.data")
 class CoreDataModule {
-    @Single fun provideMeshDataMapper(nodeIdLookup: NodeIdLookup): MeshDataMapper = MeshDataMapper(nodeIdLookup)
-
     @Single fun provideClock(): Clock = Clock.System
 }

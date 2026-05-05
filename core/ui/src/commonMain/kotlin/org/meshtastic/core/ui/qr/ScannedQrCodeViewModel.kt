@@ -18,7 +18,7 @@ package org.meshtastic.core.ui.qr
 
 import androidx.lifecycle.ViewModel
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.DeviceAdmin
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.safeLaunch
@@ -31,7 +31,7 @@ import org.meshtastic.proto.LocalConfig
 @KoinViewModel
 class ScannedQrCodeViewModel(
     private val radioConfigRepository: RadioConfigRepository,
-    private val radioController: RadioController,
+    private val radioController: DeviceAdmin,
 ) : ViewModel() {
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())

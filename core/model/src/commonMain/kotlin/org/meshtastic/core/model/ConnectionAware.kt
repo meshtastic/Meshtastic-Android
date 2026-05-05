@@ -16,8 +16,9 @@
  */
 package org.meshtastic.core.model
 
-/** Focused interface for sending messages over the mesh. */
-interface MessageSender : ConnectionAware {
-    suspend fun sendMessage(packet: DataPacket)
-    fun getPacketId(): Int
+import kotlinx.coroutines.flow.StateFlow
+
+/** Provides read-only access to the app's connection state. */
+interface ConnectionAware {
+    val connectionState: StateFlow<ConnectionState>
 }

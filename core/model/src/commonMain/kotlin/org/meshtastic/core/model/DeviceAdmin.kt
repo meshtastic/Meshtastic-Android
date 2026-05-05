@@ -20,7 +20,7 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 
 /** Focused interface for local device configuration and edit sessions. */
-interface DeviceAdmin {
+interface DeviceAdmin : ConnectionAware {
     suspend fun setLocalConfig(config: Config)
     suspend fun setLocalChannel(channel: Channel)
     suspend fun beginEditSettings(destNum: Int)

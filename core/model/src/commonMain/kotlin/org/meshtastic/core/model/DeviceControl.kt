@@ -17,7 +17,7 @@
 package org.meshtastic.core.model
 
 /** Focused interface for device lifecycle control. */
-interface DeviceControl {
+interface DeviceControl : ConnectionAware {
     suspend fun reboot(destNum: Int, packetId: Int)
     suspend fun rebootToDfu(nodeNum: Int)
     suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?)

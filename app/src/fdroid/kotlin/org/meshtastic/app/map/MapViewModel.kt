@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.MessageSender
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -37,7 +37,7 @@ class MapViewModel(
     mapPrefs: MapPrefs,
     packetRepository: PacketRepository,
     nodeRepository: NodeRepository,
-    radioController: RadioController,
+    radioController: MessageSender,
     radioConfigRepository: RadioConfigRepository,
     buildConfigProvider: BuildConfigProvider,
     savedStateHandle: SavedStateHandle,

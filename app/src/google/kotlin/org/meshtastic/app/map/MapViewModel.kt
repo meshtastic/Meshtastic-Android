@@ -50,7 +50,7 @@ import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.MessageSender
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -89,7 +89,7 @@ class MapViewModel(
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
-    radioController: RadioController,
+    radioController: MessageSender,
     private val customTileProviderRepository: CustomTileProviderRepository,
     uiPrefs: UiPrefs,
     savedStateHandle: SavedStateHandle,

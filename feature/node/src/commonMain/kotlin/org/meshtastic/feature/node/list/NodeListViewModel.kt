@@ -29,7 +29,7 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.DeviceAdmin
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioPrefs
@@ -47,7 +47,7 @@ class NodeListViewModel(
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    private val radioController: RadioController,
+    private val radioController: DeviceAdmin,
     private val radioPrefs: RadioPrefs,
     val nodeManagementActions: NodeManagementActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,

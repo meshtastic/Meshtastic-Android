@@ -26,8 +26,9 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.DataRequester
+import org.meshtastic.core.model.MessageSender
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -48,7 +49,8 @@ import org.meshtastic.core.ui.util.SnackbarManager
 @Single(binds = [NodeRequestActions::class])
 class CommonNodeRequestActions
 constructor(
-    private val radioController: RadioController,
+    private val dataRequester: DataRequester,
+    private val messageSender: MessageSender,
     private val snackbarManager: SnackbarManager,
 ) : NodeRequestActions {
 
@@ -65,7 +67,7 @@ constructor(
     override fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(ioDispatcher) {
             Logger.i { "Requesting UserInfo for '$destNum'" }
-            radioController.requestUserInfo(destNum)
+            dataRequester.requestUserInfo(destNum)
             showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName))
         }
     }
@@ -73,8 +75,8 @@ constructor(
     override fun requestNeighborInfo(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(ioDispatcher) {
             Logger.i { "Requesting NeighborInfo for '$destNum'" }
-            val packetId = radioController.getPacketId()
-            radioController.requestNeighborInfo(packetId, destNum)
+            val packetId = messageSender.getPacketId()
+            dataRequester.requestNeighborInfo(packetId, destNum)
             _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
             showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
         }
@@ -83,7 +85,7 @@ constructor(
     override fun requestPosition(scope: CoroutineScope, destNum: Int, longName: String, position: Position) {
         scope.launch(ioDispatcher) {
             Logger.i { "Requesting position for '$destNum'" }
-            radioController.requestPosition(destNum, position)
+            dataRequester.requestPosition(destNum, position)
             showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.position, longName))
         }
     }
@@ -91,8 +93,8 @@ constructor(
     override fun requestTelemetry(scope: CoroutineScope, destNum: Int, longName: String, type: TelemetryType) {
         scope.launch(ioDispatcher) {
             Logger.i { "Requesting telemetry for '$destNum'" }
-            val packetId = radioController.getPacketId()
-            radioController.requestTelemetry(packetId, destNum, type.ordinal)
+            val packetId = messageSender.getPacketId()
+            dataRequester.requestTelemetry(packetId, destNum, type.ordinal)
 
             val typeRes =
                 when (type) {
@@ -112,8 +114,8 @@ constructor(
     override fun requestTraceroute(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(ioDispatcher) {
             Logger.i { "Requesting traceroute for '$destNum'" }
-            val packetId = radioController.getPacketId()
-            radioController.requestTraceroute(packetId, destNum)
+            val packetId = messageSender.getPacketId()
+            dataRequester.requestTraceroute(packetId, destNum)
             _lastTracerouteTime.value = nowMillis
             showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
         }

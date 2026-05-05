@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.DeviceAdmin
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -37,7 +37,7 @@ import org.meshtastic.proto.LocalConfig
 
 @KoinViewModel
 class ChannelViewModel(
-    private val radioController: RadioController,
+    private val radioController: DeviceAdmin,
     private val radioConfigRepository: RadioConfigRepository,
     private val analytics: PlatformAnalytics,
 ) : ViewModel() {
