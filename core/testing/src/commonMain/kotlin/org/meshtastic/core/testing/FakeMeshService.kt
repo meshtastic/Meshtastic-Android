@@ -26,13 +26,9 @@ class FakeMeshService {
     val nodeRepository = FakeNodeRepository()
     val serviceRepository = FakeServiceRepository()
     val radioController = FakeRadioController()
-    val radioInterfaceService = FakeRadioInterfaceService()
     val notifications = FakeMeshServiceNotifications()
-    val transport = FakeRadioTransport()
     val logRepository = FakeMeshLogRepository()
     val packetRepository = FakePacketRepository()
     val contactRepository = FakeContactRepository()
     val locationRepository = FakeLocationRepository()
-
-    // Add more as they are implemented
 }

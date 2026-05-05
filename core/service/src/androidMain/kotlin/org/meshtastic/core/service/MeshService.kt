@@ -31,7 +31,7 @@ import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.PortNum
@@ -45,7 +45,7 @@ import org.meshtastic.proto.PortNum
  */
 class MeshService : Service() {
 
-    private val radioInterfaceService: RadioInterfaceService by inject()
+    private val radioPrefs: RadioPrefs by inject()
 
     private val notifications: MeshServiceNotifications by inject()
 
@@ -109,7 +109,7 @@ class MeshService : Service() {
             return START_NOT_STICKY
         }
 
-        val a = radioInterfaceService.getDeviceAddress()
+        val a = radioPrefs.devAddr.value
         val wantForeground = a != null && a != "n"
 
         notifications.updateServiceStateNotification(serviceRepository.connectionState.value, null)

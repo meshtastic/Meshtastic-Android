@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -55,7 +56,7 @@ import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
@@ -81,7 +82,7 @@ class UIViewModel(
     private val nodeDB: NodeRepository,
     protected val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
-    radioInterfaceService: RadioInterfaceService,
+    private val radioPrefs: RadioPrefs,
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPrefs: UiPrefs,
@@ -137,9 +138,9 @@ class UIViewModel(
     }
 
     /** Emits events for mesh network send/receive activity. */
-    val meshActivity: Flow<MeshActivity> = radioInterfaceService.meshActivity
+    val meshActivity: Flow<MeshActivity> = emptyFlow()
 
-    val currentDeviceAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
+    val currentDeviceAddressFlow: StateFlow<String?> = radioPrefs.devAddr
 
     private val _scrollToTopEventFlow =
         MutableSharedFlow<ScrollToTopEvent>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)

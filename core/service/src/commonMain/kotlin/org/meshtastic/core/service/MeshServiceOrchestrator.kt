@@ -30,7 +30,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKMeshIntegration
@@ -47,7 +47,7 @@ import org.meshtastic.core.takserver.TAKServerManager
 @Suppress("LongParameterList")
 @Single
 class MeshServiceOrchestrator(
-    private val radioInterfaceService: RadioInterfaceService,
+    private val radioPrefs: RadioPrefs,
     private val nodeManager: NodeManager,
     private val serviceNotifications: MeshServiceNotifications,
     private val takServerManager: TAKServerManager,
@@ -119,7 +119,7 @@ class MeshServiceOrchestrator(
 
         newScope.handledLaunch {
             // Ensure the per-device database is active before SDK connects.
-            databaseManager.switchActiveDatabase(radioInterfaceService.getDeviceAddress())
+            databaseManager.switchActiveDatabase(radioPrefs.devAddr.value)
             Logger.i { "Per-device database initialized" }
         }
 

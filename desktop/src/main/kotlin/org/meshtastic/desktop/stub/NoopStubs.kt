@@ -20,17 +20,11 @@ package org.meshtastic.desktop.stub
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
-import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
@@ -65,22 +59,9 @@ private fun logWarn(message: String) {
 class NoopRadioInterfaceService : RadioInterfaceService {
     override val supportedDeviceTypes: List<DeviceType> = emptyList()
 
-    override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
 
     override fun isMockTransport(): Boolean = false
-
-    override val receivedData = MutableSharedFlow<ByteArray>()
-    override val meshActivity: Flow<MeshActivity> = MutableSharedFlow<MeshActivity>().asFlow()
-    override val connectionError: Flow<String> = MutableSharedFlow<String>().asFlow()
-
-    override fun sendToRadio(bytes: ByteArray) {
-        logWarn("NoopRadioInterfaceService.sendToRadio(${bytes.size} bytes)")
-    }
-
-    override fun resetReceivedBuffer() {
-        // No-op: this stub never buffers bytes.
-    }
 
     override fun connect() {
         logWarn("NoopRadioInterfaceService.connect()")
@@ -95,15 +76,6 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override fun setDeviceAddress(deviceAddr: String?): Boolean = false
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = ""
-
-    override fun onConnect() {}
-
-    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?) {}
-
-    override fun handleFromRadio(bytes: ByteArray) {}
-
-    @Suppress("InjectDispatcher")
-    override val serviceScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 }
 
 // endregion

@@ -32,7 +32,7 @@ import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
@@ -48,7 +48,7 @@ class NodeListViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
-    private val radioInterfaceService: RadioInterfaceService,
+    private val radioPrefs: RadioPrefs,
     val nodeManagementActions: NodeManagementActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
@@ -63,7 +63,7 @@ class NodeListViewModel(
     val connectionState = serviceRepository.connectionState
 
     val deviceType: StateFlow<DeviceType?> =
-        radioInterfaceService.currentDeviceAddressFlow
+        radioPrefs.devAddr
             .map { address -> address?.let { DeviceType.fromAddress(it) } }
             .stateInWhileSubscribed(initialValue = null)
 

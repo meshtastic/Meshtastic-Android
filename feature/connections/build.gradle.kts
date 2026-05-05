@@ -48,5 +48,7 @@ kotlin {
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
+
+        jvmMain.dependencies { implementation(libs.sdk.transport.serial) }
     }
 }

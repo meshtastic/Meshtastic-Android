@@ -33,11 +33,11 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.AppWidgetUpdater
-import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKMeshIntegration
@@ -50,7 +50,7 @@ import kotlin.test.assertTrue
 
 class MeshServiceOrchestratorTest {
 
-    private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
+    private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
     private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
     private val takServerManager: TAKServerManager = mock(MockMode.autofill)
@@ -62,7 +62,7 @@ class MeshServiceOrchestratorTest {
     private val radioController: RadioController = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
-    private val meshConfigHandler: MeshConfigHandler = mock(MockMode.autofill)
+    private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val cotHandler: CoTHandler = mock(MockMode.autofill)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -78,7 +78,7 @@ class MeshServiceOrchestratorTest {
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
         every { takServerManager.isRunning } returns takRunningFlow
         every { takServerManager.inboundMessages } returns MutableSharedFlow()
-        every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
+        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
@@ -88,12 +88,12 @@ class MeshServiceOrchestratorTest {
             radioController = radioController,
             nodeRepository = nodeRepository,
             serviceRepository = serviceRepository,
-            meshConfigHandler = meshConfigHandler,
+            radioConfigRepository = radioConfigRepository,
             cotHandler = cotHandler,
         )
 
         return MeshServiceOrchestrator(
-            radioInterfaceService = radioInterfaceService,
+            radioPrefs = radioPrefs,
             nodeManager = nodeManager,
             serviceNotifications = serviceNotifications,
             takServerManager = takServerManager,
@@ -146,7 +146,7 @@ class MeshServiceOrchestratorTest {
 
     @Test
     fun testStartCallsSwitchActiveDatabase() {
-        every { radioInterfaceService.getDeviceAddress() } returns "tcp:192.168.1.100"
+        every { radioPrefs.devAddr } returns MutableStateFlow("tcp:192.168.1.100")
 
         val orchestrator = createOrchestrator()
         orchestrator.start()

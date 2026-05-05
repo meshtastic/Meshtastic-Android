@@ -20,8 +20,8 @@ import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServer
@@ -46,14 +46,14 @@ class CoreTakServerModule {
         radioController: RadioController,
         nodeRepository: NodeRepository,
         serviceRepository: ServiceRepository,
-        meshConfigHandler: MeshConfigHandler,
+        radioConfigRepository: RadioConfigRepository,
         cotHandler: CoTHandler,
     ): TAKMeshIntegration = TAKMeshIntegration(
         takServerManager,
         radioController,
         nodeRepository,
         serviceRepository,
-        meshConfigHandler,
+        radioConfigRepository,
         cotHandler,
     )
 }

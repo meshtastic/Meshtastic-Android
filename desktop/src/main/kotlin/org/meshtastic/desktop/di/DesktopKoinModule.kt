@@ -53,7 +53,6 @@ import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.service.SdkClientLifecycle
 import org.meshtastic.core.service.ServiceRepositoryImpl
@@ -67,7 +66,6 @@ import org.meshtastic.desktop.notification.NativeNotificationSender
 import org.meshtastic.desktop.notification.WindowsNotificationSender
 import org.meshtastic.desktop.radio.DesktopMessageQueue
 import org.meshtastic.desktop.radio.DesktopRadioClientProvider
-import org.meshtastic.desktop.radio.DesktopRadioTransportFactory
 import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
 import org.meshtastic.desktop.stub.NoopCompassHeadingProvider
 import org.meshtastic.desktop.stub.NoopLocationRepository
@@ -150,14 +148,6 @@ fun desktopModule() = module {
 @Suppress("LongMethod")
 private fun desktopPlatformStubsModule() = module {
     single<ServiceRepository> { ServiceRepositoryImpl() }
-    single<RadioTransportFactory> {
-        DesktopRadioTransportFactory(
-            dispatchers = get(),
-            scanner = get(),
-            bluetoothRepository = get(),
-            connectionFactory = get(),
-        )
-    }
     // SDK-backed RadioClient lifecycle — replaces DirectRadioControllerImpl
     single { DesktopRadioClientProvider(radioPrefs = get()) }
     single<RadioClientAccessor> { get<DesktopRadioClientProvider>() }

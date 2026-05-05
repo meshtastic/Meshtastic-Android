@@ -29,10 +29,11 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.FakeRadioInterfaceService
+import org.meshtastic.core.testing.FakeAppPreferences
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
@@ -46,7 +47,7 @@ class NodeListViewModelTest {
     private lateinit var viewModel: NodeListViewModel
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var radioController: FakeRadioController
-    private lateinit var radioInterfaceService: FakeRadioInterfaceService
+    private val radioPrefs: RadioPrefs = FakeAppPreferences().radio
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val nodeFilterPreferences: NodeFilterPreferences = mock(MockMode.autofill)
@@ -57,7 +58,6 @@ class NodeListViewModelTest {
     fun setUp() {
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
-        radioInterfaceService = FakeRadioInterfaceService()
 
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(org.meshtastic.proto.LocalConfig())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(org.meshtastic.proto.DeviceProfile())
@@ -82,7 +82,7 @@ class NodeListViewModelTest {
         radioConfigRepository = radioConfigRepository,
         serviceRepository = serviceRepository,
         radioController = radioController,
-        radioInterfaceService = radioInterfaceService,
+        radioPrefs = radioPrefs,
         nodeManagementActions = nodeManagementActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,
         nodeFilterPreferences = nodeFilterPreferences,

@@ -29,8 +29,8 @@ import kotlinx.coroutines.launch
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.takserver.TAKPacketConversion.toCoTMessage
 import org.meshtastic.core.takserver.TAKPacketConversion.toTAKPacket
@@ -47,7 +47,7 @@ class TAKMeshIntegration(
     private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
-    private val meshConfigHandler: MeshConfigHandler,
+    private val radioConfigRepository: RadioConfigRepository,
     private val cotHandler: CoTHandler,
 ) {
     @Volatile private var isRunning = false
@@ -92,7 +92,7 @@ class TAKMeshIntegration(
                         .collect {}
                 },
                 scope.launch {
-                    meshConfigHandler.moduleConfig
+                    radioConfigRepository.moduleConfigFlow
                         .map { it.tak }
                         .distinctUntilChanged()
                         .collect { takConfig ->
