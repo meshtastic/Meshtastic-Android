@@ -437,6 +437,25 @@ class SdkRadioController(
         c.routing.requestNeighborInfo(NodeId(destNum))
     }
 
+    override suspend fun requestStoreForwardHistory(since: Int?, serverNodeNum: Int?): Boolean {
+        val c = requireClient()
+        val server = serverNodeNum?.let(::NodeId)
+        return when (val result = c.storeForward.requestHistory(since = since, server = server)) {
+            is AdminResult.Success -> {
+                Logger.i {
+                    "Requested S&F history since=${since ?: 0} server=${serverNodeNum ?: "auto"} pending=${result.value}"
+                }
+                true
+            }
+            else -> {
+                Logger.w {
+                    "S&F history request failed since=${since ?: 0} server=${serverNodeNum ?: "auto"} result=$result"
+                }
+                false
+            }
+        }
+    }
+
     // ── Edit settings (transactional) ───────────────────────────────────────
 
     override suspend fun beginEditSettings(destNum: Int) {

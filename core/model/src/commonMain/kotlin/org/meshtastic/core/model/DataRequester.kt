@@ -23,4 +23,5 @@ interface DataRequester {
     suspend fun requestTraceroute(requestId: Int, destNum: Int)
     suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
     suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
+    suspend fun requestStoreForwardHistory(since: Int? = null, serverNodeNum: Int? = null): Boolean
 }

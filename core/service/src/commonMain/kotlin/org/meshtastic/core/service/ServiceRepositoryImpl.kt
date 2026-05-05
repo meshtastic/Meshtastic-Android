@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshActivity
@@ -32,6 +33,7 @@ import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.CongestionLevel
 
 /**
  * Platform-agnostic implementation of [ServiceRepository].
@@ -50,6 +52,16 @@ open class ServiceRepositoryImpl : ServiceRepository {
 
     override fun setConnectionState(connectionState: ConnectionState) {
         _connectionState.value = connectionState
+        if (connectionState == ConnectionState.Disconnected) {
+            setCongestionLevel(null)
+        }
+    }
+
+    private val _congestionLevel = MutableStateFlow<CongestionLevel?>(null)
+    override val congestionLevel: StateFlow<CongestionLevel?> = _congestionLevel.asStateFlow()
+
+    override fun setCongestionLevel(level: CongestionLevel?) {
+        _congestionLevel.value = level
     }
 
     private val _clientNotification = MutableStateFlow<ClientNotification?>(null)
@@ -63,6 +75,14 @@ open class ServiceRepositoryImpl : ServiceRepository {
 
     override fun clearClientNotification() {
         _clientNotification.value = null
+    }
+
+    private val _storeForwardServers = MutableStateFlow<List<Int>>(emptyList())
+    override val storeForwardServers: StateFlow<List<Int>>
+        get() = _storeForwardServers
+
+    override fun setStoreForwardServers(servers: List<Int>) {
+        _storeForwardServers.value = servers
     }
 
     private val _errorMessage = MutableStateFlow<String?>(null)

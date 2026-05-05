@@ -16,41 +16,10 @@
  */
 package org.meshtastic.core.data.manager
 
-import org.meshtastic.proto.StoreAndForward
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class HistoryManagerImplTest {
-
-    @Test
-    fun `buildStoreForwardHistoryRequest copies positive parameters`() {
-        val request =
-            HistoryManagerImpl.buildStoreForwardHistoryRequest(
-                lastRequest = 42,
-                historyReturnWindow = 15,
-                historyReturnMax = 25,
-            )
-
-        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
-        assertEquals(42, request.history?.last_request)
-        assertEquals(15, request.history?.window)
-        assertEquals(25, request.history?.history_messages)
-    }
-
-    @Test
-    fun `buildStoreForwardHistoryRequest clamps non-positive parameters`() {
-        val request =
-            HistoryManagerImpl.buildStoreForwardHistoryRequest(
-                lastRequest = 0,
-                historyReturnWindow = -1,
-                historyReturnMax = 0,
-            )
-
-        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
-        assertEquals(0, request.history?.last_request)
-        assertEquals(0, request.history?.window)
-        assertEquals(0, request.history?.history_messages)
-    }
 
     @Test
     fun `resolveHistoryRequestParameters uses config values when positive`() {

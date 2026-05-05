@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
@@ -29,7 +30,11 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.sdk.MessageHandle
+import org.meshtastic.sdk.RetryPolicy
+import org.meshtastic.sdk.SendOutcome
 import org.meshtastic.sdk.SendState
+import org.meshtastic.sdk.retryWith
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Tracks in-flight message delivery via SDK [MessageHandle]s.
@@ -43,44 +48,62 @@ class MessageDeliveryTracker(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
     private val activeHandles = mutableMapOf<Int, MessageHandle>()
     private val activeHandlesMutex = Mutex()
+    private val defaultRetryPolicy = RetryPolicy.ExponentialBackoff(maxAttempts = 3, initialDelay = 2.seconds)
 
     /**
      * Begin tracking a [MessageHandle] for the given packet ID.
-     * Observes state transitions and updates message status in the repository.
+     * Observes intermediate state transitions and resolves the terminal status via SDK retries.
      */
-    fun track(packetId: Int, handle: MessageHandle) {
+    fun track(packetId: Int, handle: MessageHandle, policy: RetryPolicy = defaultRetryPolicy) {
         scope.launch {
             activeHandlesMutex.withLock {
                 activeHandles[packetId] = handle
             }
 
             val repository = packetRepository.value
-            handle.state
-                .onEach { state ->
-                    val status = mapSendState(state)
-                    Logger.d { "[DeliveryTracker] Packet $packetId → $status" }
-                    repository.updateMessageStatus(packetId, status)
-                }
-                .first { state ->
-                    val terminal = state.isTerminal()
-                    if (terminal) {
-                        activeHandlesMutex.withLock {
-                            if (activeHandles[packetId] === handle) {
-                                activeHandles.remove(packetId)
-                            }
-                        }
+            val stateObserver = launch {
+                handle.state
+                    .onEach { state ->
+                        val status = mapObservedState(state)
+                        Logger.d { "[DeliveryTracker] Packet $packetId state=$state → $status" }
+                        repository.updateMessageStatus(packetId, status)
                     }
-                    terminal
+                    .first { state -> state.isTerminal() }
+            }
+
+            try {
+                val outcome = handle.retryWith(policy)
+                stateObserver.join()
+                val status = outcome.toMessageStatus()
+                Logger.d { "[DeliveryTracker] Packet $packetId outcome=$outcome → $status" }
+                repository.updateMessageStatus(packetId, status)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Logger.e(e) { "[DeliveryTracker] Packet $packetId retry tracking failed" }
+                repository.updateMessageStatus(packetId, MessageStatus.ERROR)
+            } finally {
+                stateObserver.cancel()
+                activeHandlesMutex.withLock {
+                    if (activeHandles[packetId] === handle) {
+                        activeHandles.remove(packetId)
+                    }
                 }
+            }
         }
     }
 
-    private fun mapSendState(state: SendState): MessageStatus = when (state) {
+    private fun mapObservedState(state: SendState): MessageStatus = when (state) {
         SendState.Queued -> MessageStatus.QUEUED
         SendState.Sent -> MessageStatus.ENROUTE
         SendState.Acked -> MessageStatus.DELIVERED
         SendState.Delivered -> MessageStatus.DELIVERED
-        is SendState.Failed -> MessageStatus.ERROR
+        is SendState.Failed -> MessageStatus.ENROUTE
+    }
+
+    private fun SendOutcome.toMessageStatus(): MessageStatus = when (this) {
+        SendOutcome.Success -> MessageStatus.DELIVERED
+        is SendOutcome.Failure -> MessageStatus.ERROR
     }
 
     private fun SendState.isTerminal(): Boolean =

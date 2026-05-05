@@ -17,40 +17,27 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import okio.ByteString.Companion.toByteString
+import kotlinx.coroutines.CoroutineScope
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshPrefs
-import org.meshtastic.core.repository.PacketHandler
-import org.meshtastic.proto.Data
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
-import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.StoreAndForward
 
 @Single
-class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHandler: PacketHandler) : HistoryManager {
+class HistoryManagerImpl(
+    private val meshPrefs: MeshPrefs,
+    private val radioController: RadioController,
+    @Named("ServiceScope") private val scope: CoroutineScope,
+) : HistoryManager {
 
     companion object {
         private const val HISTORY_TAG = "HistoryReplay"
         private const val DEFAULT_HISTORY_RETURN_WINDOW_MINUTES = 60 * 24
         private const val DEFAULT_HISTORY_RETURN_MAX_MESSAGES = 100
         private const val NO_DEVICE_SELECTED = "No device selected"
-
-        fun buildStoreForwardHistoryRequest(
-            lastRequest: Int,
-            historyReturnWindow: Int,
-            historyReturnMax: Int,
-        ): StoreAndForward {
-            val history =
-                StoreAndForward.History(
-                    last_request = lastRequest.coerceAtLeast(0),
-                    window = historyReturnWindow.coerceAtLeast(0),
-                    history_messages = historyReturnMax.coerceAtLeast(0),
-                )
-            return StoreAndForward(rr = StoreAndForward.RequestResponse.CLIENT_HISTORY, history = history)
-        }
 
         fun resolveHistoryRequestParameters(window: Int, max: Int): Pair<Int, Int> {
             val resolvedWindow = if (window > 0) window else DEFAULT_HISTORY_RETURN_WINDOW_MINUTES
@@ -81,32 +68,26 @@ class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHan
             return
         }
 
-        val lastRequest = meshPrefs.getStoreForwardLastRequest(address).value
+        val lastRequest = meshPrefs.getStoreForwardLastRequest(address).value.takeIf { it > 0 }
         val (window, max) =
             resolveHistoryRequestParameters(
                 storeForwardConfig?.history_return_window ?: 0,
                 storeForwardConfig?.history_return_max ?: 0,
             )
 
-        val request = buildStoreForwardHistoryRequest(lastRequest, window, max)
-
         historyLog(
             "requestHistory trigger=$trigger transport=$transport addr=$address " +
-                "lastRequest=$lastRequest window=$window max=$max",
+                "since=${lastRequest ?: "all"} window=$window max=$max via=sdk",
         )
 
-        safeCatching {
-            packetHandler.sendToRadio(
-                MeshPacket(
-                    from = myNodeNum,
-                    to = myNodeNum,
-                    id = kotlin.random.Random.nextInt(1, Int.MAX_VALUE),
-                    decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = request.encode().toByteString()),
-                    priority = MeshPacket.Priority.BACKGROUND,
-                ),
-            )
+        scope.handledLaunch {
+            val accepted = radioController.requestStoreForwardHistory(since = lastRequest)
+            if (!accepted) {
+                logger.w {
+                    "requestHistory failed trigger=$trigger transport=$transport addr=$address since=${lastRequest ?: "all"}"
+                }
+            }
         }
-            .onFailure { ex -> logger.w(ex) { "requestHistory failed" } }
     }
 
     override fun updateStoreForwardLastRequest(source: String, lastRequest: Int, transport: String) {

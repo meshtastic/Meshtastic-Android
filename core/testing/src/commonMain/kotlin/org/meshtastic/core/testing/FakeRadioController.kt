@@ -47,6 +47,7 @@ class FakeRadioController :
     val sentSharedContacts = mutableListOf<Int>()
     var throwOnSend: Boolean = false
     var lastSetDeviceAddress: String? = null
+    var lastStoreForwardHistoryRequest: Pair<Int?, Int?>? = null
     var beginEditSettingsCalled = false
     var commitEditSettingsCalled = false
     var startProvideLocationCalled = false
@@ -59,6 +60,7 @@ class FakeRadioController :
             sentSharedContacts.clear()
             throwOnSend = false
             lastSetDeviceAddress = null
+            lastStoreForwardHistoryRequest = null
             beginEditSettingsCalled = false
             commitEditSettingsCalled = false
             startProvideLocationCalled = false
@@ -139,6 +141,11 @@ class FakeRadioController :
     override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
 
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
+
+    override suspend fun requestStoreForwardHistory(since: Int?, serverNodeNum: Int?): Boolean {
+        lastStoreForwardHistoryRequest = since to serverNodeNum
+        return true
+    }
 
     override suspend fun beginEditSettings(destNum: Int) {
         beginEditSettingsCalled = true

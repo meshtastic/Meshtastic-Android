@@ -30,6 +30,7 @@ kotlin {
         commonMain.dependencies {
             api(projects.core.model)
             api(projects.core.proto)
+            api(libs.sdk.core)
             implementation(projects.core.common)
             implementation(projects.core.database)
 

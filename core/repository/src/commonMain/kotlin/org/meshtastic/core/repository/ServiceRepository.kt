@@ -25,6 +25,7 @@ import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.sdk.CongestionLevel
 
 /**
  * Interface for managing background service state, connection status, and mesh events.
@@ -54,6 +55,9 @@ interface ServiceRepository {
      */
     val connectionState: StateFlow<ConnectionState>
 
+    /** Current mesh congestion level, null when unknown or disconnected. */
+    val congestionLevel: StateFlow<CongestionLevel?>
+
     /**
      * Updates the canonical app-level connection state.
      *
@@ -63,6 +67,9 @@ interface ServiceRepository {
      * @param connectionState The new [ConnectionState].
      */
     fun setConnectionState(connectionState: ConnectionState)
+
+    /** Sets the current mesh congestion level. */
+    fun setCongestionLevel(level: CongestionLevel?)
 
     /**
      * Reactive flow of high-level client notifications.
@@ -80,6 +87,12 @@ interface ServiceRepository {
 
     /** Clears the current client notification. */
     fun clearClientNotification()
+
+    /** Node numbers for known Store-and-Forward servers discovered by the SDK. */
+    val storeForwardServers: StateFlow<List<Int>>
+
+    /** Updates the known Store-and-Forward server list. */
+    fun setStoreForwardServers(servers: List<Int>)
 
     /**
      * Reactive flow of human-readable error messages.

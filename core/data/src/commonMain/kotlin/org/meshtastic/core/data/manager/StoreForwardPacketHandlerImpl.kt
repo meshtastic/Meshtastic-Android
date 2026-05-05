@@ -37,7 +37,12 @@ import org.meshtastic.proto.StoreAndForward
 import org.meshtastic.proto.StoreForwardPlusPlus
 import kotlin.time.Duration.Companion.milliseconds
 
-/** Implementation of [StoreForwardPacketHandler] that handles both legacy S&F and SF++ packets. */
+/**
+ * Implementation of [StoreForwardPacketHandler] that handles both legacy S&F and SF++ packets.
+ *
+ * Legacy Store-and-Forward discovery/history is now exposed through `RadioClient.storeForward`, but we still keep
+ * this parser for backward compatibility and for SF++ handling that the SDK does not fully replace yet.
+ */
 @Single
 class StoreForwardPacketHandlerImpl(
     private val nodeRepository: NodeRepository,

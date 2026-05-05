@@ -20,9 +20,11 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.toByteString
@@ -50,6 +52,7 @@ import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.StoreForwardEvent
 
 /**
  * Bridges SDK reactive flows into the repository layer and routes [ServiceAction]s
@@ -151,9 +154,60 @@ class SdkStateBridge(
                             ClientNotification(message = "Device rebooted"),
                         )
                     }
+                    is MeshEvent.CongestionWarning -> {
+                        Logger.w {
+                            "[SdkBridge] Congestion warning: level=${event.metrics.level}, airUtil=${event.metrics.airUtilTx}%, channelUtil=${event.metrics.channelUtil}%"
+                        }
+                        serviceRepository.setCongestionLevel(event.metrics.level)
+                    }
                     is MeshEvent.SecurityWarning -> Logger.w { "[SdkBridge] Security warning: $event" }
                     is MeshEvent.PacketsDropped -> Logger.w { "[SdkBridge] Packets dropped: ${event.count} from ${event.flow}" }
                     else -> Logger.d { "[SdkBridge] Event: $event" }
+                }
+            }
+            .launchIn(scope)
+
+        // ── Store-and-Forward (server discovery + replay lifecycle) ───────────
+        accessor.client
+            .flatMapLatest { client ->
+                client?.storeForward?.servers
+                    ?.map { servers -> servers.map { it.raw } }
+                    ?: flowOf(emptyList())
+            }
+            .onEach { servers -> serviceRepository.setStoreForwardServers(servers) }
+            .launchIn(scope)
+
+        accessor.client
+            .flatMapLatest { client -> client?.storeForward?.events ?: emptyFlow() }
+            .onEach { event ->
+                when (event) {
+                    is StoreForwardEvent.ServerDiscovered -> {
+                        Logger.i {
+                            "[SdkBridge] S&F server discovered: ${DataPacket.nodeNumToDefaultId(event.nodeId.raw)}"
+                        }
+                    }
+                    is StoreForwardEvent.ServerLost -> {
+                        Logger.i {
+                            "[SdkBridge] S&F server lost: ${DataPacket.nodeNumToDefaultId(event.nodeId.raw)}"
+                        }
+                    }
+                    is StoreForwardEvent.HistoryReplayStarted -> {
+                        Logger.i {
+                            "[SdkBridge] S&F history replay started from " +
+                                "${DataPacket.nodeNumToDefaultId(event.server.raw)} count=${event.messageCount}"
+                        }
+                    }
+                    is StoreForwardEvent.HistoryReplayComplete -> {
+                        Logger.i {
+                            "[SdkBridge] S&F history replay complete from " +
+                                "${DataPacket.nodeNumToDefaultId(event.server.raw)} delivered=${event.delivered}"
+                        }
+                    }
+                    is StoreForwardEvent.Heartbeat -> {
+                        Logger.d {
+                            "[SdkBridge] S&F heartbeat from ${DataPacket.nodeNumToDefaultId(event.server.raw)}"
+                        }
+                    }
                 }
             }
             .launchIn(scope)
