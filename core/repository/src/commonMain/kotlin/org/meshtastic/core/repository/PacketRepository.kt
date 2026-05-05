@@ -120,6 +120,11 @@ interface PacketRepository {
     /** Updates the transmission status of a packet. */
     suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus)
 
+    /** Updates the transmission status of a packet by its mesh packet ID. */
+    suspend fun updateMessageStatus(packetId: Int, status: MessageStatus) {
+        getPacketByPacketId(packetId)?.let { updateMessageStatus(it, status) }
+    }
+
     /** Updates the identifier of a persisted packet. */
     suspend fun updateMessageId(d: DataPacket, id: Int)
 

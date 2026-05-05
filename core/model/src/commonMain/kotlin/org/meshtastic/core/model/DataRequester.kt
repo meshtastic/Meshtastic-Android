@@ -16,19 +16,11 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.sdk.DeviceVersion as SdkDeviceVersion
-
-/** Provide structured access to parse and compare device version strings */
-data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
-    private val delegate = SdkDeviceVersion(asString)
-
-    val asInt: Int
-        get() = delegate.asInt
-
-    override fun compareTo(other: DeviceVersion): Int = delegate.compareTo(other.delegate)
-
-    companion object {
-        const val MIN_FW_VERSION = "2.5.14"
-        const val ABS_MIN_FW_VERSION = "2.3.15"
-    }
+/** Focused interface for requesting data from nodes. */
+interface DataRequester {
+    suspend fun requestPosition(destNum: Int, currentPosition: Position)
+    suspend fun requestUserInfo(destNum: Int)
+    suspend fun requestTraceroute(requestId: Int, destNum: Int)
+    suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
+    suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
 }

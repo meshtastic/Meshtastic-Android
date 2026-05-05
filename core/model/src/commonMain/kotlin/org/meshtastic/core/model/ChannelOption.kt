@@ -21,16 +21,10 @@ package org.meshtastic.core.model
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
+import org.meshtastic.sdk.channelNameHashDjb2
 import kotlin.math.floor
 
-/** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
-private fun hash(name: String): UInt { // using UInt instead of Long to match RadioInterface.cpp results
-    var hash = 5381u
-    for (c in name) {
-        hash += (hash shl 5) + c.code.toUInt()
-    }
-    return hash
-}
+private fun hash(name: String): UInt = channelNameHashDjb2(name)
 
 private val ModemPreset.bandwidth: Float
     get() {

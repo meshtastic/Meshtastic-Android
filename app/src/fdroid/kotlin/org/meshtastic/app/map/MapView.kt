@@ -431,10 +431,10 @@ fun MapView(
         }
     }
 
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL || (myId != null && id == myId)) {
+    fun getUsername(id: Int) = if (id == DataPacket.LOCAL || id == mapViewModel.myNodeNum) {
         getString(Res.string.you)
     } else {
-        mapViewModel.getUser(id).long_name
+        mapViewModel.getUser(DataPacket.nodeNumToId(id)).long_name
     }
 
     @Suppress("MagicNumber")

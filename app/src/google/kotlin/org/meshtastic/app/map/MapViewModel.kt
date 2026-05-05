@@ -671,7 +671,7 @@ class MapViewModel(
     }
 
     override fun getUser(userId: String?) =
-        nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
+        nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.nodeNumToId(org.meshtastic.core.model.DataPacket.BROADCAST))
 }
 
 enum class LayerType {

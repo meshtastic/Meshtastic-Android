@@ -352,27 +352,22 @@ class PacketRepositoryImpl(
         val dao = dbManager.currentDb.value.packetDao()
         val packets = findPacketsWithIdInternal(packetId)
         val reactions = findReactionsWithIdInternal(packetId)
-        val fromId = DataPacket.nodeNumToDefaultId(from)
+        val fromId = from
+        val fromIdString = DataPacket.nodeNumToId(from)
         val isFromLocalNode = myNodeNum != null && from == myNodeNum
-        val toId =
-            if (to == 0 || to == DataPacket.NODENUM_BROADCAST) {
-                DataPacket.ID_BROADCAST
-            } else {
-                DataPacket.nodeNumToDefaultId(to)
-            }
+        val toNodeNum = if (to == 0 || to == DataPacket.BROADCAST) DataPacket.BROADCAST else to
+        val toId = DataPacket.nodeNumToId(toNodeNum)
 
         val hashByteString = hash.toByteString()
 
         packets.forEach { packet ->
-            // For sent messages, from is stored as ID_LOCAL, but SFPP packet has node number
-            val fromMatches =
-                packet.data.from == fromId || (isFromLocalNode && packet.data.from == DataPacket.ID_LOCAL)
+            val fromMatches = packet.data.from == fromId || (isFromLocalNode && packet.data.from == DataPacket.LOCAL)
             co.touchlab.kermit.Logger.d {
                 "SFPP match check: packetFrom=${packet.data.from} fromId=$fromId " +
                     "isFromLocal=$isFromLocalNode fromMatches=$fromMatches " +
-                    "packetTo=${packet.data.to} toId=$toId toMatches=${packet.data.to == toId}"
+                    "packetTo=${packet.data.to} toId=$toNodeNum toMatches=${packet.data.to == toNodeNum}"
             }
-            if (fromMatches && packet.data.to == toId) {
+            if (fromMatches && packet.data.to == toNodeNum) {
                 // If it's already confirmed, don't downgrade it to routing
                 if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                     return@forEach
@@ -385,8 +380,7 @@ class PacketRepositoryImpl(
 
         reactions.forEach { reaction ->
             val reactionFrom = reaction.userId
-            // For sent reactions, from is stored as ID_LOCAL, but SFPP packet has node number
-            val fromMatches = reactionFrom == fromId || (isFromLocalNode && reactionFrom == DataPacket.ID_LOCAL)
+            val fromMatches = reactionFrom == fromIdString || (isFromLocalNode && reactionFrom == DataPacket.nodeNumToId(DataPacket.LOCAL))
 
             val toMatches = reaction.to == toId
 

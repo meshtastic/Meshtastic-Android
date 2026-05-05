@@ -27,10 +27,12 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState as AppConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.NodeRepository
@@ -102,6 +104,26 @@ class SdkStateBridge(
                     is NodeChange.Added -> nodeRepository.installNodeInfo(change.node, withBroadcast = true)
                     is NodeChange.Updated -> nodeRepository.installNodeInfo(change.node, withBroadcast = true)
                     is NodeChange.Removed -> nodeRepository.removeByNodenum(change.nodeId.raw)
+                    is NodeChange.WentOffline -> {
+                        val nodeNum = change.nodeId.raw
+                        Logger.d {
+                            "[SdkBridge] Node ${DataPacket.nodeNumToDefaultId(nodeNum)} went offline (last heard: ${change.lastHeard})"
+                        }
+                        if (nodeRepository.nodeDBbyNodeNum.containsKey(nodeNum)) {
+                            nodeRepository.updateNode(nodeNum) { node ->
+                                node.copy(lastHeard = minOf(node.lastHeard, change.lastHeard, onlineTimeThreshold()))
+                            }
+                        }
+                    }
+                    is NodeChange.CameOnline -> {
+                        val nodeNum = change.nodeId.raw
+                        Logger.d { "[SdkBridge] Node ${DataPacket.nodeNumToDefaultId(nodeNum)} came online" }
+                        if (nodeRepository.nodeDBbyNodeNum.containsKey(nodeNum)) {
+                            nodeRepository.updateNode(nodeNum) { node ->
+                                node.copy(lastHeard = maxOf(node.lastHeard, nowSeconds.toInt()))
+                            }
+                        }
+                    }
                 }
             }
             .launchIn(scope)
@@ -230,8 +252,7 @@ class SdkStateBridge(
             is ServiceAction.Reaction -> {
                 val channel = action.contactKey[0].digitToInt()
                 val destId = action.contactKey.substring(1)
-                val destNum = DataPacket.idToDefaultNodeNum(destId.removePrefix("!"))
-                    ?: DataPacket.NODENUM_BROADCAST
+                val destNum = runCatching { DataPacket.parseNodeNum(destId) }.getOrDefault(DataPacket.BROADCAST)
                 client.send(
                     MeshPacket(
                         to = destNum,
@@ -288,12 +309,15 @@ class SdkStateBridge(
     companion object {
         private const val EMOJI_INDICATOR = 1
 
-        fun mapConnectionState(sdkState: SdkConnectionState): AppConnectionState = when (sdkState) {
+        private fun mapConnectionState(sdkState: SdkConnectionState): AppConnectionState = when (sdkState) {
             is SdkConnectionState.Disconnected -> AppConnectionState.Disconnected
-            is SdkConnectionState.Connecting -> AppConnectionState.Connecting
-            is SdkConnectionState.Configuring -> AppConnectionState.Connecting
+            is SdkConnectionState.Connecting -> AppConnectionState.Connecting(attempt = sdkState.attempt)
+            is SdkConnectionState.Configuring -> AppConnectionState.Configuring(
+                phase = sdkState.phase.name,
+                progress = sdkState.progress,
+            )
             is SdkConnectionState.Connected -> AppConnectionState.Connected
-            is SdkConnectionState.Reconnecting -> AppConnectionState.DeviceSleep
+            is SdkConnectionState.Reconnecting -> AppConnectionState.Reconnecting(attempt = sdkState.attempt)
         }
     }
 }

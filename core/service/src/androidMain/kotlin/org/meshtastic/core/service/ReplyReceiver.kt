@@ -77,7 +77,7 @@ class ReplyReceiver :
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey.getOrNull(0)?.digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
-        val p = DataPacket(dest, channel ?: 0, str)
+        val p = DataPacket(DataPacket.parseNodeNum(dest), channel ?: 0, str)
         radioController.sendMessage(p)
     }
 }

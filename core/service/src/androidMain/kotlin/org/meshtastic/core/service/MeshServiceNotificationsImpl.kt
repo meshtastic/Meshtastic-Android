@@ -317,7 +317,9 @@ class MeshServiceNotificationsImpl(
 
                 is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
 
-                is ConnectionState.Connecting -> getString(Res.string.connecting)
+                is ConnectionState.Connecting,
+                is ConnectionState.Configuring,
+                is ConnectionState.Reconnecting -> getString(Res.string.connecting)
             }
 
         // Update caches if telemetry is provided
@@ -420,7 +422,7 @@ class MeshServiceNotificationsImpl(
         val history =
             packetRepository.value
                 .getMessagesFrom(contactKey, includeFiltered = false) { nodeId ->
-                    if (nodeId == DataPacket.ID_LOCAL) {
+                    if (nodeId == DataPacket.nodeNumToId(DataPacket.LOCAL)) {
                         ourNode ?: nodeRepository.value.getNode(nodeId)
                     } else {
                         nodeRepository.value.getNode(nodeId.orEmpty())
@@ -461,7 +463,7 @@ class MeshServiceNotificationsImpl(
         val me =
             Person.Builder()
                 .setName(meName)
-                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
+                .setKey(ourNode?.user?.id ?: DataPacket.nodeNumToId(DataPacket.LOCAL))
                 .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
                 .build()
 
@@ -573,7 +575,7 @@ class MeshServiceNotificationsImpl(
         val me =
             Person.Builder()
                 .setName(meName)
-                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
+                .setKey(ourNode?.user?.id ?: DataPacket.nodeNumToId(DataPacket.LOCAL))
                 .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
                 .build()
 

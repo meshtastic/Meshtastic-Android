@@ -53,7 +53,7 @@ abstract class CommonPacketRepositoryTest {
         // Set the current node number so PacketRepositoryImpl can pass it to queries
         nodeRepository.setMyNodeInfo(org.meshtastic.core.testing.TestDataFactory.createMyNodeInfo(myNodeNum = myNodeNum))
 
-        val packet = DataPacket(to = "0!ffffffff", bytes = okio.ByteString.EMPTY, dataType = 1, id = 123)
+        val packet = DataPacket(to = DataPacket.BROADCAST, bytes = okio.ByteString.EMPTY, dataType = 1, id = 123)
 
         repository.savePacket(myNodeNum, contact, packet, 1000L)
 

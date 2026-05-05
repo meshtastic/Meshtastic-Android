@@ -145,7 +145,8 @@ internal fun ReactionRow(
             items(emojiGroups.entries.toList(), key = { it.key }) { entry ->
                 val emoji = entry.key
                 val reactions = entry.value
-                val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
+                val localReaction =
+                    reactions.find { it.user.id == DataPacket.nodeNumToId(DataPacket.LOCAL) || it.user.id == myId }
                 ReactionItem(
                     emoji = emoji,
                     emojiCount = reactions.size,
@@ -231,7 +232,8 @@ internal fun ReactionDialog(
         items(groupedEmojis.entries.toList(), key = { it.key }) { entry ->
             val emoji = entry.key
             val reactions = entry.value
-            val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
+            val localReaction =
+                reactions.find { it.user.id == DataPacket.nodeNumToId(DataPacket.LOCAL) || it.user.id == myId }
             val isSending =
                 localReaction?.status == MessageStatus.QUEUED || localReaction?.status == MessageStatus.ENROUTE
             Text(
@@ -263,7 +265,8 @@ internal fun ReactionDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val isLocal = reaction.user.id == myId || reaction.user.id == DataPacket.ID_LOCAL
+                    val isLocal =
+                        reaction.user.id == myId || reaction.user.id == DataPacket.nodeNumToId(DataPacket.LOCAL)
                     val displayName =
                         if (isLocal) {
                             "${reaction.user.long_name} (${stringResource(Res.string.you)})"

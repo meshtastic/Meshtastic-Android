@@ -344,7 +344,7 @@ private fun RenderPagedChatMessageRow(
                 message.emojis.any { reaction ->
                     (
                         reaction.user.id == ourNode.user.id ||
-                            reaction.user.id == org.meshtastic.core.model.DataPacket.ID_LOCAL
+                            reaction.user.id == org.meshtastic.core.model.DataPacket.nodeNumToId(org.meshtastic.core.model.DataPacket.LOCAL)
                         ) && reaction.emoji == emoji
                 }
             if (!hasReacted) {

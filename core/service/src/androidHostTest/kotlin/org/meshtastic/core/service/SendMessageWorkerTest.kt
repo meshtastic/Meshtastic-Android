@@ -64,9 +64,9 @@ class SendMessageWorkerTest {
     fun `doWork returns success when packet is sent successfully`() = runTest {
         // Arrange
         val packetId = 12345
-        val dataPacket = DataPacket(to = "dest", bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
+        val dataPacket = DataPacket(to = 1234, bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
         everySuspend { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
-        everySuspend { packetRepository.updateMessageStatus(any(), any()) } returns Unit
+        everySuspend { packetRepository.updateMessageStatus(any<DataPacket>(), any<MessageStatus>()) } returns Unit
 
         val worker =
             TestListenableWorkerBuilder<SendMessageWorker>(context)
@@ -96,7 +96,7 @@ class SendMessageWorkerTest {
     fun `doWork returns retry when radio is disconnected`() = runTest {
         // Arrange
         val packetId = 12345
-        val dataPacket = DataPacket(to = "dest", bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
+        val dataPacket = DataPacket(to = 1234, bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
         everySuspend { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
         radioController.setConnectionState(ConnectionState.Disconnected)
 
@@ -121,7 +121,7 @@ class SendMessageWorkerTest {
         // Assert
         assertEquals(ListenableWorker.Result.retry(), result)
         assertEquals(emptyList<DataPacket>(), radioController.sentPackets)
-        verifySuspend(mode = VerifyMode.exactly(0)) { packetRepository.updateMessageStatus(any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { packetRepository.updateMessageStatus(any<DataPacket>(), any<MessageStatus>()) }
     }
 
     @Test
@@ -143,15 +143,15 @@ class SendMessageWorkerTest {
         val result = worker.doWork()
 
         assertEquals(ListenableWorker.Result.failure(), result)
-        verifySuspend(mode = VerifyMode.exactly(0)) { packetRepository.getPacketByPacketId(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { packetRepository.getPacketByPacketId(any<Int>()) }
     }
 
     @Test
     fun `doWork returns retry and marks queued when send throws`() = runTest {
         val packetId = 12345
-        val dataPacket = DataPacket(to = "dest", bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
+        val dataPacket = DataPacket(to = 1234, bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
         everySuspend { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
-        everySuspend { packetRepository.updateMessageStatus(any(), any()) } returns Unit
+        everySuspend { packetRepository.updateMessageStatus(any<DataPacket>(), any<MessageStatus>()) } returns Unit
         radioController.throwOnSend = true
 
         val worker =

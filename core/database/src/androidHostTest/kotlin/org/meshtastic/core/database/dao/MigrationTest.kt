@@ -143,7 +143,7 @@ class MigrationTest {
                 contact_key = "$channel!broadcast",
                 received_time = nowMillis,
                 read = false,
-                data = DataPacket(to = DataPacket.ID_BROADCAST, channel = channel, text = text),
+                data = DataPacket(to = DataPacket.BROADCAST, channel = channel, text = text),
             )
         packetDao.insert(packet)
     }

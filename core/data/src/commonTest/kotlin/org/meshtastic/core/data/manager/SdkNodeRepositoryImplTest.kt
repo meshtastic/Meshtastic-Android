@@ -198,8 +198,8 @@ class SdkNodeRepositoryImplTest {
 
     @Test
     fun `toNodeID returns broadcast ID for broadcast nodeNum`() {
-        val result = nodeRepository.toNodeID(DataPacket.NODENUM_BROADCAST)
-        assertEquals(DataPacket.ID_BROADCAST, result)
+        val result = nodeRepository.toNodeID(DataPacket.BROADCAST)
+        assertEquals(DataPacket.nodeNumToId(DataPacket.BROADCAST), result)
     }
 
     @Test

@@ -86,8 +86,8 @@ class StoreForwardPacketHandlerImplTest {
     private fun makeDataPacket(from: Int): DataPacket = DataPacket(
         id = 1,
         time = 1700000000000L,
-        to = DataPacket.ID_BROADCAST,
-        from = DataPacket.nodeNumToDefaultId(from),
+        to = DataPacket.BROADCAST,
+        from = from,
         bytes = null,
         dataType = PortNum.STORE_FORWARD_APP.value,
     )

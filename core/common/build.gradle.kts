@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.gradle.api.tasks.testing.Test
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.kotlin.parcelize)
@@ -34,6 +37,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.sdk.core)
             api(libs.kotlinx.datetime)
             api(libs.okio)
             api(libs.uri.kmp)
@@ -43,4 +47,12 @@ kotlin {
 
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
+}
+
+tasks.withType<Test>().configureEach {
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        },
+    )
 }

@@ -17,15 +17,24 @@
 package org.meshtastic.core.model
 
 sealed interface ConnectionState {
-    /** We are disconnected from the device, and we should be trying to reconnect. */
+    /** Not connected; should attempt to reconnect. */
     data object Disconnected : ConnectionState
 
-    /** We are currently attempting to connect to the device. */
-    data object Connecting : ConnectionState
+    /** Transport connecting. */
+    data class Connecting(val attempt: Int = 1) : ConnectionState
 
-    /** We are connected to the device and communicating normally. */
+    /** Transport up, handshake in progress. */
+    data class Configuring(val phase: String = "", val progress: Float = 0f) : ConnectionState
+
+    /** Fully connected and operational. */
     data object Connected : ConnectionState
 
-    /** The device is in a light sleep state, and we are waiting for it to wake up and reconnect to us. */
+    /** Connection dropped, attempting automatic reconnect. */
+    data class Reconnecting(val attempt: Int = 1) : ConnectionState
+
+    /** Device in light sleep. */
     data object DeviceSleep : ConnectionState
+
+    /** Whether the connection is usable for sending messages. */
+    val isConnected: Boolean get() = this is Connected
 }

@@ -75,7 +75,9 @@ fun ConnectionsNavIcon(
 
 @Composable
 private fun getTint(connectionState: ConnectionState): Color = when (connectionState) {
-    ConnectionState.Connecting -> colorScheme.StatusOrange
+    is ConnectionState.Connecting,
+    is ConnectionState.Configuring,
+    is ConnectionState.Reconnecting -> colorScheme.StatusOrange
     ConnectionState.Disconnected -> colorScheme.StatusRed
     ConnectionState.DeviceSleep -> colorScheme.StatusYellow
     else -> colorScheme.StatusGreen
@@ -88,7 +90,9 @@ fun getIconPair(connectionState: ConnectionState, deviceType: DeviceType? = null
 
         ConnectionState.DeviceSleep -> MeshtasticIcons.Device to MeshtasticIcons.DeviceSleep
 
-        ConnectionState.Connecting -> MeshtasticIcons.Device to MeshtasticIcons.Reconnecting
+        is ConnectionState.Connecting,
+        is ConnectionState.Configuring,
+        is ConnectionState.Reconnecting -> MeshtasticIcons.Device to MeshtasticIcons.Reconnecting
 
         else ->
             MeshtasticIcons.Device to

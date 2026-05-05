@@ -16,19 +16,13 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.sdk.DeviceVersion as SdkDeviceVersion
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.Config
 
-/** Provide structured access to parse and compare device version strings */
-data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
-    private val delegate = SdkDeviceVersion(asString)
-
-    val asInt: Int
-        get() = delegate.asInt
-
-    override fun compareTo(other: DeviceVersion): Int = delegate.compareTo(other.delegate)
-
-    companion object {
-        const val MIN_FW_VERSION = "2.5.14"
-        const val ABS_MIN_FW_VERSION = "2.3.15"
-    }
+/** Focused interface for local device configuration and edit sessions. */
+interface DeviceAdmin {
+    suspend fun setLocalConfig(config: Config)
+    suspend fun setLocalChannel(channel: Channel)
+    suspend fun beginEditSettings(destNum: Int)
+    suspend fun commitEditSettings(destNum: Int)
 }

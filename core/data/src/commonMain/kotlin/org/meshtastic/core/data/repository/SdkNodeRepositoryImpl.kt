@@ -125,9 +125,9 @@ class SdkNodeRepositoryImpl(
 
     override fun getNode(userId: String): Node =
         _nodeDBbyNum.value.values.find { it.user.id == userId }
-            ?: Node(num = DataPacket.idToDefaultNodeNum(userId) ?: 0, user = getUser(userId))
+            ?: Node(num = runCatching { DataPacket.parseNodeNum(userId) }.getOrDefault(0), user = getUser(userId))
 
-    override fun getUser(nodeNum: Int): User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
+    override fun getUser(nodeNum: Int): User = getUser(DataPacket.nodeNumToId(nodeNum))
 
     private val last4 = 4
 
@@ -138,13 +138,13 @@ class SdkNodeRepositoryImpl(
         }
         val fallbackId = userId.takeLast(last4)
         val defaultLong =
-            if (userId == DataPacket.ID_LOCAL) {
+            if (userId == DataPacket.nodeNumToId(DataPacket.LOCAL)) {
                 ourNodeInfo.value?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
                 "Meshtastic $fallbackId"
             }
         val defaultShort =
-            if (userId == DataPacket.ID_LOCAL) {
+            if (userId == DataPacket.nodeNumToId(DataPacket.LOCAL)) {
                 ourNodeInfo.value?.user?.short_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
                 fallbackId
@@ -408,8 +408,8 @@ class SdkNodeRepositoryImpl(
 
     // ── NodeIdLookup ────────────────────────────────────────────────────────
 
-    override fun toNodeID(nodeNum: Int): String = if (nodeNum == DataPacket.NODENUM_BROADCAST) {
-        DataPacket.ID_BROADCAST
+    override fun toNodeID(nodeNum: Int): String = if (nodeNum == DataPacket.BROADCAST) {
+        DataPacket.nodeNumToId(DataPacket.BROADCAST)
     } else {
         _nodeDBbyNum.value[nodeNum]?.user?.id ?: DataPacket.nodeNumToDefaultId(nodeNum)
     }

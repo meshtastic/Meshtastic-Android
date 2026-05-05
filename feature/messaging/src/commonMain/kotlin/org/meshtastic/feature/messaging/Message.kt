@@ -162,7 +162,7 @@ fun MessageScreen(
     val title =
         remember(nodeId, channelName, viewModel) {
             when (nodeId) {
-                DataPacket.ID_BROADCAST -> channelName
+                DataPacket.nodeNumToId(DataPacket.BROADCAST) -> channelName
                 else -> viewModel.getUser(nodeId).long_name
             }
         }

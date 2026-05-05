@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.gradle.api.tasks.testing.Test
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
@@ -38,6 +41,7 @@ kotlin {
             api(projects.core.common)
             api(projects.core.resources)
 
+            implementation(libs.sdk.core)
             api(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.serialization.json)
             api(libs.kotlinx.datetime)
@@ -71,4 +75,12 @@ publishing {
             artifactId = baseId.replace("model-", "meshtastic-android-model-")
         }
     }
+}
+
+tasks.withType<Test>().configureEach {
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        },
+    )
 }

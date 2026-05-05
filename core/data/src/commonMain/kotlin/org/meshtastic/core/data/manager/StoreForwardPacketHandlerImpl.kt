@@ -97,7 +97,7 @@ class StoreForwardPacketHandlerImpl(
                         encryptedPayload = sfpp.message.toByteArray(),
                         to =
                         if (sfpp.encapsulated_to == 0) {
-                            DataPacket.NODENUM_BROADCAST
+                            DataPacket.BROADCAST
                         } else {
                             sfpp.encapsulated_to
                         },
@@ -174,7 +174,7 @@ class StoreForwardPacketHandlerImpl(
 
             s.text != null -> {
                 if (s.rr == StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
-                    dataPacket.to = DataPacket.ID_BROADCAST
+                    dataPacket.to = DataPacket.BROADCAST
                 }
                 val u = dataPacket.copy(bytes = s.text, dataType = PortNum.TEXT_MESSAGE_APP.value)
                 dataHandler.value.rememberDataPacket(u, myNodeNum)

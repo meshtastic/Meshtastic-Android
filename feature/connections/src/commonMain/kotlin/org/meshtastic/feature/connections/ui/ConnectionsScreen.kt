@@ -198,7 +198,9 @@ fun ConnectionsScreen(
                                     ConnectionUiState.CONNECTED_WITH_NODE
 
                                 connectionState is ConnectionState.Connected ||
-                                    connectionState == ConnectionState.Connecting ||
+                                    connectionState is ConnectionState.Connecting ||
+                                    connectionState is ConnectionState.Configuring ||
+                                    connectionState is ConnectionState.Reconnecting ||
                                     selectedDevice != NO_DEVICE_SELECTED -> ConnectionUiState.CONNECTING
 
                                 else -> ConnectionUiState.NO_DEVICE

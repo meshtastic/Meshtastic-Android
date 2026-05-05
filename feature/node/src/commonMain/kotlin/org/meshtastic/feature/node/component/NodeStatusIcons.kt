@@ -109,7 +109,9 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState, deviceType: De
                     stringResource(
                         when (connectionState) {
                             ConnectionState.Connected -> Res.string.connected
-                            ConnectionState.Connecting -> Res.string.connecting
+                            is ConnectionState.Connecting,
+                            is ConnectionState.Configuring,
+                            is ConnectionState.Reconnecting -> Res.string.connecting
                             ConnectionState.Disconnected -> Res.string.disconnected
                             ConnectionState.DeviceSleep -> Res.string.device_sleeping
                         },

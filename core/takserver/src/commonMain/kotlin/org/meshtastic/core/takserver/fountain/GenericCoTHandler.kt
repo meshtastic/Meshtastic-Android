@@ -93,7 +93,7 @@ class GenericCoTHandler(private val radioController: RadioController, private va
     private suspend fun sendDirect(payload: ByteArray) {
         val dataPacket =
             DataPacket(
-                to = DataPacket.ID_BROADCAST,
+                to = DataPacket.BROADCAST,
                 bytes = payload.toByteString(),
                 dataType = PortNum.ATAK_FORWARDER.value,
             )
@@ -115,7 +115,7 @@ class GenericCoTHandler(private val radioController: RadioController, private va
         for ((index, packetData) in packets.withIndex()) {
             val dataPacket =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = DataPacket.BROADCAST,
                     bytes = packetData.toByteString(),
                     dataType = PortNum.ATAK_FORWARDER.value,
                 )
@@ -191,7 +191,7 @@ class GenericCoTHandler(private val radioController: RadioController, private va
 
         val dataPacket =
             DataPacket(
-                to = toNodeNum.toString(),
+                to = toNodeNum,
                 bytes = ackPacket.toByteString(),
                 dataType = PortNum.ATAK_FORWARDER.value,
             )

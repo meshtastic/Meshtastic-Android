@@ -89,12 +89,17 @@ fun DeviceListItem(
         }
     }
 
+    val isConnecting =
+        connectionState is ConnectionState.Connecting ||
+            connectionState is ConnectionState.Configuring ||
+            connectionState is ConnectionState.Reconnecting
+
     val icon =
         when (device) {
             is DeviceListEntry.Ble ->
                 if (connectionState is ConnectionState.Connected) {
                     MeshtasticIcons.BluetoothConnected
-                } else if (connectionState is ConnectionState.Connecting) {
+                } else if (isConnecting) {
                     MeshtasticIcons.BluetoothSearching
                 } else {
                     MeshtasticIcons.Bluetooth
@@ -155,7 +160,7 @@ fun DeviceListItem(
                     Rssi(rssi = displayedRssi)
                 }
 
-                if (connectionState is ConnectionState.Connecting) {
+                if (isConnecting) {
                     CircularProgressIndicator(modifier = Modifier.size(32.dp))
                 } else {
                     RadioButton(selected = connectionState is ConnectionState.Connected, onClick = null)

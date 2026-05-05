@@ -37,8 +37,8 @@ data class PacketEntity(
     val reactions: List<ReactionEntity> = emptyList(),
 ) {
     suspend fun toMessage(getNode: suspend (userId: String?) -> Node) = with(packet) {
-        val node = getNode(data.from)
-        val isFromLocal = node.user.id == DataPacket.ID_LOCAL || (myNodeNum != 0 && node.num == myNodeNum)
+        val node = getNode(DataPacket.nodeNumToId(data.from))
+        val isFromLocal = data.from == DataPacket.LOCAL || (myNodeNum != 0 && data.from == myNodeNum)
         Message(
             uuid = uuid,
             receivedTime = received_time,

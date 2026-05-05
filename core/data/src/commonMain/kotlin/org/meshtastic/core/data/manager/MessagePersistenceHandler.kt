@@ -78,12 +78,11 @@ class MessagePersistenceHandler(
 
     override fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
         if (dataPacket.dataType !in rememberDataType) return
-        val fromLocal =
-            dataPacket.from == DataPacket.ID_LOCAL || dataPacket.from == DataPacket.nodeNumToDefaultId(myNodeNum)
-        val toBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
+        val fromLocal = dataPacket.from == DataPacket.LOCAL || dataPacket.from == myNodeNum
+        val toBroadcast = dataPacket.to == DataPacket.BROADCAST
         val contactId = if (fromLocal || toBroadcast) dataPacket.to else dataPacket.from
 
-        val contactKey = "${dataPacket.channel}$contactId"
+        val contactKey = "${dataPacket.channel}${DataPacket.nodeNumToId(contactId)}"
 
         scope.handledLaunch {
             packetRepository.value.apply {
@@ -116,7 +115,7 @@ class MessagePersistenceHandler(
 
     @Suppress("ReturnCount")
     private suspend fun PacketRepository.shouldFilterMessage(dataPacket: DataPacket, contactKey: String): Boolean {
-        val isIgnored = nodeRepository.nodeDBbyID[dataPacket.from]?.isIgnored == true
+        val isIgnored = nodeRepository.nodeDBbyNum.value[dataPacket.from]?.isIgnored == true
         if (isIgnored) return true
 
         if (dataPacket.dataType != PortNum.TEXT_MESSAGE_APP.value) return false
@@ -130,7 +129,7 @@ class MessagePersistenceHandler(
         updateNotification: Boolean,
     ) {
         val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
-        val nodeMuted = nodeRepository.nodeDBbyID[dataPacket.from]?.isMuted == true
+        val nodeMuted = nodeRepository.nodeDBbyNum.value[dataPacket.from]?.isMuted == true
         val isSilent = conversationMuted || nodeMuted
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
             scope.launch {
@@ -149,11 +148,10 @@ class MessagePersistenceHandler(
     }
 
     private suspend fun getSenderName(packet: DataPacket): String {
-        if (packet.from == DataPacket.ID_LOCAL) {
-            val myId = nodeRepository.getMyId()
-            return nodeRepository.nodeDBbyID[myId]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
+        if (packet.from == DataPacket.LOCAL) {
+            return nodeRepository.ourNodeInfo.value?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
         }
-        return nodeRepository.nodeDBbyID[packet.from]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
+        return nodeRepository.nodeDBbyNum.value[packet.from]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
     }
 
     private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket, isSilent: Boolean) {
@@ -161,7 +159,7 @@ class MessagePersistenceHandler(
             PortNum.TEXT_MESSAGE_APP.value -> {
                 val message = dataPacket.text!!
                 val channelName =
-                    if (dataPacket.to == DataPacket.ID_BROADCAST) {
+                    if (dataPacket.to == DataPacket.BROADCAST) {
                         radioConfigRepository.channelSetFlow.first().settings.getOrNull(dataPacket.channel)?.name
                     } else {
                         null
@@ -170,7 +168,7 @@ class MessagePersistenceHandler(
                     contactKey,
                     getSenderName(dataPacket),
                     message,
-                    dataPacket.to == DataPacket.ID_BROADCAST,
+                    dataPacket.to == DataPacket.BROADCAST,
                     channelName,
                     isSilent,
                 )

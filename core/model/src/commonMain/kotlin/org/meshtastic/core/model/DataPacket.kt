@@ -17,7 +17,17 @@
 package org.meshtastic.core.model
 
 import co.touchlab.kermit.Logger
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.CommonIgnoredOnParcel
@@ -25,13 +35,15 @@ import org.meshtastic.core.common.util.CommonParcel
 import org.meshtastic.core.common.util.CommonParcelable
 import org.meshtastic.core.common.util.CommonParcelize
 import org.meshtastic.core.common.util.CommonTypeParceler
-import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.util.ByteStringParceler
 import org.meshtastic.core.model.util.ByteStringSerializer
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Waypoint
+import org.meshtastic.sdk.NodeId
+import org.meshtastic.sdk.fromDefaultId
+import org.meshtastic.sdk.toDefaultId
 
 @CommonParcelize
 enum class MessageStatus : CommonParcelable {
@@ -49,13 +61,15 @@ enum class MessageStatus : CommonParcelable {
 @Serializable
 @CommonParcelize
 data class DataPacket(
-    var to: String? = ID_BROADCAST, // a nodeID string, or ID_BROADCAST for broadcast
+    @Serializable(with = NodeNumSerializer::class)
+    var to: Int = BROADCAST,
     @Serializable(with = ByteStringSerializer::class)
     @CommonTypeParceler<ByteString?, ByteStringParceler>
     var bytes: ByteString?,
     // A port number for this packet
     var dataType: Int,
-    var from: String? = ID_LOCAL, // a nodeID string, or ID_LOCAL for localhost
+    @Serializable(with = NodeNumSerializer::class)
+    var from: Int = LOCAL,
     var time: Long = nowMillis, // msecs since 1970
     var id: Int = 0, // 0 means unassigned
     var status: MessageStatus? = MessageStatus.UNKNOWN,
@@ -78,10 +92,10 @@ data class DataPacket(
 ) : CommonParcelable {
 
     fun readFromParcel(parcel: CommonParcel) {
-        to = parcel.readString()
+        to = parcel.readInt()
         bytes = ByteStringParceler.create(parcel)
         dataType = parcel.readInt()
-        from = parcel.readString()
+        from = parcel.readInt()
         time = parcel.readLong()
         id = parcel.readInt()
 
@@ -121,7 +135,7 @@ data class DataPacket(
 
     /** Syntactic sugar to make it easy to create text messages */
     constructor(
-        to: String?,
+        to: Int,
         channel: Int,
         text: String,
         replyId: Int? = null,
@@ -151,7 +165,7 @@ data class DataPacket(
             }
 
     constructor(
-        to: String?,
+        to: Int,
         channel: Int,
         waypoint: Waypoint,
     ) : this(
@@ -177,23 +191,48 @@ data class DataPacket(
         get() = if (hopStart == 0 || (hopLimit > hopStart)) -1 else hopStart - hopLimit
 
     companion object {
-        // Special node IDs that can be used for sending messages
-
-        /** the Node ID for broadcast destinations */
-        const val ID_BROADCAST = "^all"
-
-        /** The Node ID for the local node - used for from when sender doesn't know our local node ID */
-        const val ID_LOCAL = "^local"
-
-        // special broadcast address
-        const val NODENUM_BROADCAST = (0xffffffff).toInt()
+        const val BROADCAST: Int = 0xffffffff.toInt()
+        const val LOCAL: Int = 0
 
         // Public-key cryptography (PKC) channel index
         const val PKC_CHANNEL_INDEX = 8
 
-        fun nodeNumToDefaultId(n: Int): String = formatString("!%08x", n)
+        /** Format a node number as the default display ID ("!aabbccdd"). */
+        fun nodeNumToDefaultId(n: Int): String = NodeId(n).toDefaultId()
 
-        @Suppress("MagicNumber")
-        fun idToDefaultNodeNum(id: String?): Int? = runCatching { id?.toLong(16)?.toInt() }.getOrNull()
+        fun nodeNumToId(n: Int): String = when (n) {
+            BROADCAST -> "^all"
+            LOCAL -> "^local"
+            else -> nodeNumToDefaultId(n)
+        }
+
+        fun parseNodeNum(id: String): Int {
+            val normalized = id.trim()
+            return when {
+                normalized.equals("^all", ignoreCase = true) -> BROADCAST
+                normalized.equals("^local", ignoreCase = true) -> LOCAL
+                else -> NodeId.fromDefaultId(normalized)?.raw
+                    ?: NodeId.fromDefaultId("!$normalized")?.raw
+                    ?: runCatching { normalized.toLong(16).toInt() }.getOrNull()
+                    ?: throw SerializationException("Unsupported node id: $id")
+            }
+        }
+    }
+}
+
+private object NodeNumSerializer : KSerializer<Int> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("NodeNum", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Int) {
+        encoder.encodeString(DataPacket.nodeNumToId(value))
+    }
+
+    override fun deserialize(decoder: Decoder): Int {
+        if (decoder is JsonDecoder) {
+            val primitive = decoder.decodeJsonElement().jsonPrimitive
+            primitive.intOrNull?.let { return it }
+            return DataPacket.parseNodeNum(primitive.content)
+        }
+        return DataPacket.parseNodeNum(decoder.decodeString())
     }
 }

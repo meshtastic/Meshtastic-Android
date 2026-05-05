@@ -23,9 +23,14 @@ import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DataRequester
+import org.meshtastic.core.model.DeviceAdmin
+import org.meshtastic.core.model.DeviceControl
 import org.meshtastic.core.model.MeshActivity
+import org.meshtastic.core.model.MessageSender
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.RemoteAdmin
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -55,13 +60,23 @@ import org.meshtastic.sdk.RadioClient
  * **State distribution:** Handled by [SdkStateBridge], which feeds SDK flows into
  * [ServiceRepository] and [org.meshtastic.core.repository.NodeRepository].
  */
-@Single(binds = [RadioController::class])
+@Single(
+    binds = [
+        RadioController::class,
+        MessageSender::class,
+        DeviceAdmin::class,
+        RemoteAdmin::class,
+        DeviceControl::class,
+        DataRequester::class,
+    ],
+)
 @Suppress("TooManyFunctions", "LongParameterList")
 class SdkRadioController(
     private val accessor: RadioClientAccessor,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val locationManager: MeshLocationManager,
+    private val deliveryTracker: MessageDeliveryTracker,
 ) : RadioController {
 
     private val packetIdCounter = atomic(1)
@@ -95,13 +110,14 @@ class SdkRadioController(
             Logger.w { "sendMessage: no client, dropping packet" }
             return
         }
-        val destNum = when (packet.to) {
-            null, DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
-            else -> DataPacket.idToDefaultNodeNum(packet.to?.removePrefix("!")) ?: DataPacket.NODENUM_BROADCAST
-        }
+        val destNum = packet.to
+        val packetId = packet.id.takeIf { it != 0 } ?: getPacketId()
         val meshPacket = MeshPacket(
+            id = packetId,
             to = destNum,
             channel = packet.channel,
+            want_ack = packet.wantAck,
+            hop_limit = packet.hopLimit,
             decoded = Data(
                 portnum = PortNum.fromValue(packet.dataType) ?: PortNum.UNKNOWN_APP,
                 payload = packet.bytes ?: okio.ByteString.EMPTY,
@@ -109,7 +125,8 @@ class SdkRadioController(
             ),
         )
         try {
-            c.send(meshPacket)
+            val handle = c.send(meshPacket)
+            deliveryTracker.track(packetId, handle)
             serviceRepository.emitMeshActivity(MeshActivity.Send)
         } catch (e: Exception) {
             Logger.e(e) { "sendMessage failed" }

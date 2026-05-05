@@ -142,19 +142,19 @@ open class BaseMapViewModel(
     }
 
     open fun getUser(userId: String?) =
-        nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
+        nodeRepository.getUser(userId ?: DataPacket.nodeNumToId(DataPacket.BROADCAST))
 
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
     fun deleteWaypoint(id: Int) =
         safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
 
-    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.nodeNumToId(DataPacket.BROADCAST)}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
 
-        val p = DataPacket(dest, channel ?: 0, wpt)
+        val p = DataPacket(DataPacket.parseNodeNum(dest), channel ?: 0, wpt)
         if (wpt.id != 0) sendDataPacket(p)
     }
 

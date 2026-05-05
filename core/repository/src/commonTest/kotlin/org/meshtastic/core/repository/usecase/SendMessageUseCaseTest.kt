@@ -68,7 +68,7 @@ class SendMessageUseCaseTest {
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
 
         // Act
-        useCase("Hello broadcast", "0${DataPacket.ID_BROADCAST}", null)
+        useCase("Hello broadcast", "0${DataPacket.nodeNumToId(DataPacket.BROADCAST)}", null)
 
         // Assert
         radioController.favoritedNodes.size shouldBe 0
@@ -133,7 +133,7 @@ class SendMessageUseCaseTest {
         val originalText = "\u0410pple" // Cyrillic A
 
         // Act
-        useCase(originalText, "0${DataPacket.ID_BROADCAST}", null)
+        useCase(originalText, "0${DataPacket.nodeNumToId(DataPacket.BROADCAST)}", null)
 
         // Assert
         // Verified by observing that no exception is thrown and coverage is hit.

@@ -75,12 +75,12 @@ class ContactsViewModel(
                 channelSet,
                 settings,
             ->
-            val (myNodeInfo, myId) = identity
+            val (myNodeInfo, _) = identity
             val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList<Contact>()
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
             val placeholder =
                 (0 until channelSet.settings.size).associate { ch ->
-                    val contactKey = "$ch${DataPacket.ID_BROADCAST}"
+                    val contactKey = "$ch${DataPacket.nodeNumToId(DataPacket.BROADCAST)}"
                     val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
                     contactKey to data
                 }
@@ -89,14 +89,13 @@ class ContactsViewModel(
                 val contactKey = entry.key
                 val packetData = entry.value
                 // Determine if this is my message (originated on this device)
-                val fromLocal =
-                    (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
-                val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
+                val fromLocal = packetData.from == DataPacket.LOCAL || packetData.from == myNodeNum
+                val toBroadcast = packetData.to == DataPacket.BROADCAST
 
                 // grab usernames from NodeInfo
-                val userId = if (fromLocal) packetData.to else packetData.from
-                val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
-                val node = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
+                val userId = DataPacket.nodeNumToId(if (fromLocal) packetData.to else packetData.from)
+                val user = nodeRepository.getUser(userId)
+                val node = nodeRepository.getNode(userId)
 
                 val shortName = user.short_name
                 val longName =
@@ -129,31 +128,30 @@ class ContactsViewModel(
 
     val contactListPaged: Flow<PagingData<Contact>> =
         combine(identityFlow, channels, packetRepository.getContactSettings()) { identity, channelSet, settings ->
-            val (myNodeInfo, myId) = identity
-            ContactsPagedParams(myNodeInfo?.myNodeNum, channelSet, settings, myId)
+            val (myNodeInfo, _) = identity
+            ContactsPagedParams(myNodeInfo?.myNodeNum, channelSet, settings)
         }
             .flatMapLatest { params ->
                 val channelSet = params.channelSet
                 val settings = params.settings
-                val myId = params.myId
+                val myNodeNum = params.myNodeNum
 
                 packetRepository.getContactsPaged().map { pagingData ->
                     pagingData.map { packetData: DataPacket ->
                         // Determine if this is my message (originated on this device)
-                        val fromLocal =
-                            (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
-                        val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
+                        val fromLocal = packetData.from == DataPacket.LOCAL || packetData.from == myNodeNum
+                        val toBroadcast = packetData.to == DataPacket.BROADCAST
 
                         // Reconstruct contactKey exactly as rememberDataPacket() computes it:
                         // For outgoing or broadcast: use the "to" field (recipient / ^all)
                         // For incoming DMs: use the "from" field (the other party)
                         val contactId = if (fromLocal || toBroadcast) packetData.to else packetData.from
-                        val contactKey = "${packetData.channel}$contactId"
+                        val contactKey = "${packetData.channel}${DataPacket.nodeNumToId(contactId)}"
 
                         // grab usernames from NodeInfo
-                        val userId = if (fromLocal) packetData.to else packetData.from
-                        val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
-                        val node = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
+                        val userId = DataPacket.nodeNumToId(if (fromLocal) packetData.to else packetData.from)
+                        val user = nodeRepository.getUser(userId)
+                        val node = nodeRepository.getNode(userId)
 
                         val shortName = user.short_name
                         val longName =
@@ -185,7 +183,7 @@ class ContactsViewModel(
             }
             .cachedIn(viewModelScope)
 
-    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
+    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.nodeNumToId(DataPacket.BROADCAST))
 
     fun deleteContacts(contacts: List<String>) =
         safeLaunch(context = ioDispatcher, tag = "deleteContacts") { packetRepository.deleteContacts(contacts) }
@@ -218,6 +216,5 @@ class ContactsViewModel(
         val myNodeNum: Int?,
         val channelSet: ChannelSet,
         val settings: Map<String, ContactSettings>,
-        val myId: String?,
     )
 }

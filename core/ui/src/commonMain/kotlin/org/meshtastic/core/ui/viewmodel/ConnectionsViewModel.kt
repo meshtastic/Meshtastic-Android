@@ -104,7 +104,9 @@ class ConnectionsViewModel(
                 is ConnectionState.Connected ->
                     if (unset) ConnectionStatus.MUST_SET_REGION else ConnectionStatus.CONNECTED
 
-                ConnectionState.Connecting -> ConnectionStatus.CONNECTING
+                is ConnectionState.Connecting,
+                is ConnectionState.Configuring,
+                is ConnectionState.Reconnecting -> ConnectionStatus.CONNECTING
 
                 ConnectionState.Disconnected -> ConnectionStatus.NOT_CONNECTED
 

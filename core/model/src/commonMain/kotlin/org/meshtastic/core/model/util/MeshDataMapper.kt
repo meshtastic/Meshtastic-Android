@@ -33,8 +33,8 @@ open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
     open fun toDataPacket(packet: MeshPacket): DataPacket? {
         val decoded = packet.decoded ?: return null
         return DataPacket(
-            from = nodeIdLookup.toNodeID(packet.from),
-            to = nodeIdLookup.toNodeID(packet.to),
+            from = packet.from,
+            to = packet.to,
             time = packet.rx_time * 1000L,
             id = packet.id,
             dataType = decoded.portnum.value,

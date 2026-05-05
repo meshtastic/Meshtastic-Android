@@ -44,7 +44,11 @@ import kotlin.random.Random
  * This implementation is platform-agnostic and relies on injected repositories and controllers.
  */
 interface SendMessageUseCase {
-    suspend operator fun invoke(text: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null)
+    suspend operator fun invoke(
+        text: String,
+        contactKey: String = "0${DataPacket.nodeNumToId(DataPacket.BROADCAST)}",
+        replyId: Int? = null,
+    )
 }
 
 @Suppress("TooGenericExceptionCaught")
@@ -69,15 +73,16 @@ class SendMessageUseCaseImpl(
         val dest = if (channel != null) contactKey.substring(1) else contactKey
 
         val ourNode = nodeRepository.ourNodeInfo.value
-        val fromId = ourNode?.user?.id ?: DataPacket.ID_LOCAL
+        val fromNodeNum = ourNode?.num ?: DataPacket.LOCAL
 
         // Direct message side-effects: share the contact's public key (PKI) or
         // favorite the node (legacy) before sending the first message.  PKI DMs use
         // channel == PKC_CHANNEL_INDEX (8); legacy DMs have no channel prefix
         // (channel == null).  Both formats target a specific node.
         val isDirectMessage = channel == null || channel == DataPacket.PKC_CHANNEL_INDEX
+        val destNode = if (isDirectMessage) nodeRepository.getNode(dest) else null
+        val destNodeNum = destNode?.num ?: DataPacket.parseNodeNum(dest)
         if (isDirectMessage) {
-            val destNode = nodeRepository.getNode(dest)
             val fwVersion = ourNode?.metadata?.firmware_version
             val isClientBase = ourNode?.user?.role == Config.DeviceConfig.Role.CLIENT_BASE
             val capabilities = Capabilities(fwVersion)
@@ -86,10 +91,10 @@ class SendMessageUseCaseImpl(
                 // Best-effort: inform firmware of the destination's public key
                 // for its NodeDB cache.  The MeshPacket itself carries the key
                 // directly, so the message can be encrypted regardless.
-                sendSharedContact(destNode)
+                sendSharedContact(destNode!!)
             } else if (channel == null) {
                 // Legacy favoriting only applies to old-style DMs without PKI
-                if (!destNode.isFavorite && !isClientBase) {
+                if (!destNode!!.isFavorite && !isClientBase) {
                     favoriteNode(destNode)
                 }
             }
@@ -106,8 +111,8 @@ class SendMessageUseCaseImpl(
         val packetId = Random.nextInt(1, Int.MAX_VALUE)
 
         val packet =
-            DataPacket(dest, channel ?: 0, finalMessageText, replyId).apply {
-                from = fromId
+            DataPacket(destNodeNum, channel ?: 0, finalMessageText, replyId).apply {
+                from = fromNodeNum
                 id = packetId
                 status = MessageStatus.QUEUED
             }

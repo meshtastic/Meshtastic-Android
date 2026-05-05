@@ -46,8 +46,10 @@ interface ServiceRepository {
      *
      * State transitions are managed by [SdkStateBridge], which maps SDK connection events into app-level transitions:
      * - [ConnectionState.Disconnected] — no active connection to a radio
-     * - [ConnectionState.Connecting] — transport is up, mesh handshake (config + node-info) in progress
+     * - [ConnectionState.Connecting] — transport establishment is in progress
+     * - [ConnectionState.Configuring] — transport is up and mesh handshake/config sync is in progress
      * - [ConnectionState.Connected] — handshake complete, radio fully operational
+     * - [ConnectionState.Reconnecting] — connection dropped and automatic retry is in progress
      * - [ConnectionState.DeviceSleep] — radio entered light-sleep (transient disconnect)
      */
     val connectionState: StateFlow<ConnectionState>

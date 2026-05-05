@@ -40,7 +40,7 @@ abstract class CommonPacketDaoTest {
 
     private val myNodeNum = 42424242
 
-    private val testContactKeys = listOf("0${DataPacket.ID_BROADCAST}", "1!test1234")
+    private val testContactKeys = listOf("0${DataPacket.nodeNumToId(DataPacket.BROADCAST)}", "1!test1234")
 
     private fun generateTestPackets(nodeNum: Int) = testContactKeys.flatMap { contactKey ->
         List(SAMPLE_SIZE) {
@@ -53,7 +53,7 @@ abstract class CommonPacketDaoTest {
                 read = false,
                 data =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = DataPacket.BROADCAST,
                     bytes = "Message $it!".encodeToByteArray().toByteString(),
                     dataType = PortNum.TEXT_MESSAGE_APP.value,
                 ),
@@ -115,7 +115,7 @@ abstract class CommonPacketDaoTest {
         val messages = packetDao.getMessagesFrom(myNodeNum, contactKey).first()
         val packet = messages.first().packet.data
 
-        val packetWithId = packet.copy(id = 999, from = "!$myNodeNum")
+        val packetWithId = packet.copy(id = 999, from = myNodeNum)
         val updatedRoomPacket = messages.first().packet.copy(data = packetWithId, packetId = 999)
         packetDao.update(updatedRoomPacket)
 
@@ -136,7 +136,7 @@ abstract class CommonPacketDaoTest {
                 read = true,
                 data =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = DataPacket.BROADCAST,
                     bytes = "Queued".encodeToByteArray().toByteString(),
                     dataType = PortNum.TEXT_MESSAGE_APP.value,
                     status = MessageStatus.QUEUED,
@@ -170,12 +170,12 @@ abstract class CommonPacketDaoTest {
                 uuid = 0L,
                 myNodeNum = myNodeNum,
                 port_num = PortNum.WAYPOINT_APP.value,
-                contact_key = "0${DataPacket.ID_BROADCAST}",
+                contact_key = "0${DataPacket.nodeNumToId(DataPacket.BROADCAST)}",
                 received_time = nowMillis,
                 read = true,
                 data =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = DataPacket.BROADCAST,
                     bytes = "Waypoint".encodeToByteArray().toByteString(),
                     dataType = PortNum.WAYPOINT_APP.value,
                 ),
@@ -208,7 +208,7 @@ abstract class CommonPacketDaoTest {
                     received_time = nowMillis + index,
                     read = false,
                     data = DataPacket(
-                        to = DataPacket.ID_BROADCAST,
+                        to = DataPacket.BROADCAST,
                         bytes = text.encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),
@@ -227,7 +227,7 @@ abstract class CommonPacketDaoTest {
                     received_time = nowMillis + normalMessages.size + index,
                     read = true,
                     data = DataPacket(
-                        to = DataPacket.ID_BROADCAST,
+                        to = DataPacket.BROADCAST,
                         bytes = text.encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),
@@ -265,7 +265,7 @@ abstract class CommonPacketDaoTest {
                     received_time = baseTime + id,
                     read = false,
                     data = DataPacket(
-                        to = DataPacket.ID_BROADCAST,
+                        to = DataPacket.BROADCAST,
                         bytes = "Chunk $id".encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),

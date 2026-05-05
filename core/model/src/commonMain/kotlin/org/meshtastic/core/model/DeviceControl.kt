@@ -16,19 +16,13 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.sdk.DeviceVersion as SdkDeviceVersion
-
-/** Provide structured access to parse and compare device version strings */
-data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
-    private val delegate = SdkDeviceVersion(asString)
-
-    val asInt: Int
-        get() = delegate.asInt
-
-    override fun compareTo(other: DeviceVersion): Int = delegate.compareTo(other.delegate)
-
-    companion object {
-        const val MIN_FW_VERSION = "2.5.14"
-        const val ABS_MIN_FW_VERSION = "2.3.15"
-    }
+/** Focused interface for device lifecycle control. */
+interface DeviceControl {
+    suspend fun reboot(destNum: Int, packetId: Int)
+    suspend fun rebootToDfu(nodeNum: Int)
+    suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?)
+    suspend fun shutdown(destNum: Int, packetId: Int)
+    suspend fun factoryReset(destNum: Int, packetId: Int)
+    suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean)
+    suspend fun removeByNodenum(packetId: Int, nodeNum: Int)
 }
