@@ -33,7 +33,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
@@ -50,11 +50,11 @@ import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.NodeId
 
 /**
- * Bridges SDK reactive flows into the legacy repository layer and routes [ServiceAction]s
+ * Bridges SDK reactive flows into the repository layer and routes [ServiceAction]s
  * directly through the SDK, bypassing the old CommandSender/MeshActionHandler pipeline.
  *
  * The SDK owns the transport and all state; this bridge maps SDK emissions into [ServiceRepository]
- * and [NodeManager] so that existing feature-module UI code (which observes those repositories)
+ * and [NodeRepository] so that existing feature-module UI code (which observes those repositories)
  * continues to work without modification.
  *
  * **Lifecycle:** Created as a Koin `@Single`. Automatically subscribes to [RadioClientAccessor.client]
@@ -65,7 +65,7 @@ import org.meshtastic.sdk.NodeId
 class SdkStateBridge(
     private val accessor: RadioClientAccessor,
     private val serviceRepository: ServiceRepository,
-    private val nodeManager: NodeManager,
+    private val nodeRepository: NodeRepository,
     private val packetRepository: Lazy<PacketRepository>,
     private val locationManager: MeshLocationManager,
     private val uiPrefs: UiPrefs,
@@ -93,15 +93,15 @@ class SdkStateBridge(
             .onEach { change ->
                 when (change) {
                     is NodeChange.Snapshot -> {
-                        nodeManager.clear()
+                        nodeRepository.clear()
                         change.nodes.forEach { (_, nodeInfo) ->
-                            nodeManager.installNodeInfo(nodeInfo, withBroadcast = false)
+                            nodeRepository.installNodeInfo(nodeInfo, withBroadcast = false)
                         }
-                        nodeManager.setNodeDbReady(true)
+                        nodeRepository.setNodeDbReady(true)
                     }
-                    is NodeChange.Added -> nodeManager.installNodeInfo(change.node, withBroadcast = true)
-                    is NodeChange.Updated -> nodeManager.installNodeInfo(change.node, withBroadcast = true)
-                    is NodeChange.Removed -> nodeManager.removeByNodenum(change.nodeId.raw)
+                    is NodeChange.Added -> nodeRepository.installNodeInfo(change.node, withBroadcast = true)
+                    is NodeChange.Updated -> nodeRepository.installNodeInfo(change.node, withBroadcast = true)
+                    is NodeChange.Removed -> nodeRepository.removeByNodenum(change.nodeId.raw)
                 }
             }
             .launchIn(scope)
@@ -109,7 +109,7 @@ class SdkStateBridge(
         // ── Own node identity ───────────────────────────────────────────────
         accessor.client
             .flatMapLatest { client -> client?.ownNode ?: flowOf(null) }
-            .onEach { ownNode -> if (ownNode != null) nodeManager.setMyNodeNum(ownNode.num) }
+            .onEach { ownNode -> if (ownNode != null) nodeRepository.setMyNodeNum(ownNode.num) }
             .launchIn(scope)
 
         // ── Raw packet forward (for RadioConfigViewModel + TAK) ─────────────
@@ -188,21 +188,21 @@ class SdkStateBridge(
             is ServiceAction.Favorite -> {
                 val node = action.node
                 client.admin.setFavorite(NodeId(node.num), !node.isFavorite)
-                nodeManager.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
+                nodeRepository.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
             }
 
             is ServiceAction.Ignore -> {
                 val node = action.node
                 val newIgnored = !node.isIgnored
                 client.admin.setIgnored(NodeId(node.num), newIgnored)
-                nodeManager.updateNode(node.num) { it.copy(isIgnored = newIgnored) }
+                nodeRepository.updateNode(node.num) { it.copy(isIgnored = newIgnored) }
                 packetRepository.value.updateFilteredBySender(node.user.id, newIgnored)
             }
 
             is ServiceAction.Mute -> {
                 val node = action.node
                 client.admin.toggleMuted(NodeId(node.num))
-                nodeManager.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
+                nodeRepository.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
             }
 
             is ServiceAction.Reaction -> {
@@ -228,7 +228,7 @@ class SdkStateBridge(
             is ServiceAction.ImportContact -> {
                 val verified = action.contact.copy(manually_verified = true)
                 client.admin.addContact(verified)
-                nodeManager.handleReceivedUser(
+                nodeRepository.handleReceivedUser(
                     verified.node_num,
                     verified.user ?: User(),
                     manuallyVerified = true,

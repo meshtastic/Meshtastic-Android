@@ -29,7 +29,6 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
@@ -48,7 +47,6 @@ import org.meshtastic.core.takserver.TAKServerManager
 @Single
 class MeshServiceOrchestrator(
     private val radioPrefs: RadioPrefs,
-    private val nodeManager: NodeManager,
     private val serviceNotifications: MeshServiceNotifications,
     private val takServerManager: TAKServerManager,
     private val takMeshIntegration: TAKMeshIntegration,

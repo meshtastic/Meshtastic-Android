@@ -21,19 +21,25 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.util.NodeIdLookup
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
+import org.meshtastic.proto.Position as ProtoPosition
 
 /**
  * Repository interface for managing node-related data.
  *
  * This component provides access to the mesh's node database, local device information, and mesh-wide statistics. It
- * supports reactive queries for node lists, counts, and filtered/sorted views.
+ * supports reactive queries for node lists, counts, and filtered/sorted views, as well as runtime in-memory state
+ * management for processing incoming node packets from the radio.
  *
  * This interface is shared across platforms via Kotlin Multiplatform (KMP).
  */
 @Suppress("TooManyFunctions")
-interface NodeRepository {
+interface NodeRepository : NodeIdLookup {
     /** Reactive flow of hardware info about our local radio device. */
     val myNodeInfo: StateFlow<MyNodeInfo?>
 
@@ -165,4 +171,57 @@ interface NodeRepository {
      * Used during the initial connection handshake.
      */
     suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>)
+
+    // ── Runtime node state management ───────────────────────────────────────
+
+    /** Reactive map of all nodes by their number (snapshot access). */
+    val nodeDBbyNodeNum: Map<Int, Node>
+
+    /** Reactive map of all nodes by their ID string. */
+    val nodeDBbyID: Map<String, Node>
+
+    /** Whether the node database is ready. */
+    val isNodeDbReady: StateFlow<Boolean>
+
+    /** Sets whether the node database is ready. */
+    fun setNodeDbReady(ready: Boolean)
+
+    /** The local node number as a thread-safe [StateFlow]. */
+    val myNodeNum: StateFlow<Int?>
+
+    /** Sets the local node number. */
+    fun setMyNodeNum(num: Int?)
+
+    /** The firmware edition reported by the connected device. */
+    val firmwareEdition: StateFlow<FirmwareEdition?>
+
+    /** Sets the firmware edition of the connected device. */
+    fun setFirmwareEdition(edition: FirmwareEdition?)
+
+    /** Clears the in-memory node database. */
+    fun clear()
+
+    /** Returns information about the local node. */
+    fun getMyNodeInfo(): MyNodeInfo?
+
+    /** Returns the local node ID. */
+    fun getMyId(): String
+
+    /** Processes a received user packet. */
+    fun handleReceivedUser(fromNum: Int, p: User, channel: Int = 0, manuallyVerified: Boolean = false)
+
+    /** Processes a received position packet. */
+    fun handleReceivedPosition(fromNum: Int, myNodeNum: Int, p: ProtoPosition, defaultTime: Long)
+
+    /** Processes a received telemetry packet. */
+    fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry)
+
+    /** Updates a node using a transformation function. */
+    fun updateNode(nodeNum: Int, withBroadcast: Boolean = true, channel: Int = 0, transform: (Node) -> Node)
+
+    /** Removes a node from the in-memory database by its number. */
+    fun removeByNodenum(nodeNum: Int)
+
+    /** Installs node information from a ProtoNodeInfo object. */
+    fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true)
 }

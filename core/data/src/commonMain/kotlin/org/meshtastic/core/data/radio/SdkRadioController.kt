@@ -53,7 +53,7 @@ import org.meshtastic.sdk.RadioClient
  * [RadioClient.telemetry], and [RadioClient.routing] respectively.
  *
  * **State distribution:** Handled by [SdkStateBridge], which feeds SDK flows into
- * [ServiceRepository] and [org.meshtastic.core.repository.NodeManager].
+ * [ServiceRepository] and [org.meshtastic.core.repository.NodeRepository].
  */
 @Single(binds = [RadioController::class])
 @Suppress("TooManyFunctions", "LongParameterList")

@@ -27,7 +27,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceMetrics
@@ -42,7 +42,7 @@ import kotlin.test.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class TelemetryPacketHandlerImplTest {
 
-    private val nodeManager = mock<NodeManager>(MockMode.autofill)
+    private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
     private val notificationManager = mock<NotificationManager>(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
@@ -57,7 +57,7 @@ class TelemetryPacketHandlerImplTest {
     fun setUp() {
         handler =
             TelemetryPacketHandlerImpl(
-                nodeManager = nodeManager,
+                nodeRepository = nodeRepository,
                 notificationManager = notificationManager,
                 scope = testScope,
             )
@@ -93,7 +93,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(myNodeNum, any(), any(), any()) }
+        verify { nodeRepository.updateNode(myNodeNum, any(), any(), any()) }
     }
 
     // ---------- Device metrics from remote node ----------
@@ -108,7 +108,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(remoteNodeNum, any(), any(), any()) }
+        verify { nodeRepository.updateNode(remoteNodeNum, any(), any(), any()) }
     }
 
     // ---------- Environment metrics ----------
@@ -126,7 +126,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(remoteNodeNum, any(), any(), any()) }
+        verify { nodeRepository.updateNode(remoteNodeNum, any(), any(), any()) }
     }
 
     // ---------- Power metrics ----------
@@ -140,7 +140,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(remoteNodeNum, any(), any(), any()) }
+        verify { nodeRepository.updateNode(remoteNodeNum, any(), any(), any()) }
     }
 
     // ---------- Telemetry time handling ----------
@@ -154,7 +154,7 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { nodeManager.updateNode(myNodeNum, any(), any(), any()) }
+        verify { nodeRepository.updateNode(myNodeNum, any(), any(), any()) }
     }
 
     // ---------- Null payload ----------

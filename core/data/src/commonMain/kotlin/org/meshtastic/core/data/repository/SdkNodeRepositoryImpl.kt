@@ -43,7 +43,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.core.model.util.onlineTimeThreshold
-import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
@@ -61,7 +60,7 @@ import org.meshtastic.proto.Position as ProtoPosition
 /**
  * Unified node repository and manager — single source of truth for all mesh node state.
  *
- * Replaces the previous split between `NodeManagerImpl` (write operations, in-memory atomicfu maps)
+ * Replaces the previous split between a write-operation layer (in-memory atomicfu maps)
  * and `SdkNodeRepositoryImpl` (repository interface, StateFlows). Now uses a single StateFlow
  * with metadata enrichment on every write.
  *
@@ -69,14 +68,14 @@ import org.meshtastic.proto.Position as ProtoPosition
  * database in-memory, populated by SdkStateBridge from the SDK's NodeChange flow.
  * Node metadata (favorites, notes, ignored, muted) persists via Room's node_metadata table.
  */
-@Single(binds = [NodeRepository::class, NodeManager::class, NodeIdLookup::class])
+@Single(binds = [NodeRepository::class, NodeIdLookup::class])
 @Suppress("TooManyFunctions", "LongParameterList")
 class SdkNodeRepositoryImpl(
     private val localStatsDataSource: LocalStatsDataSource,
     private val dbManager: DatabaseProvider,
     private val notificationManager: NotificationManager,
     @Named("ServiceScope") private val scope: CoroutineScope,
-) : NodeRepository, NodeManager {
+) : NodeRepository {
 
     private val _nodeDBbyNum = MutableStateFlow<Map<Int, Node>>(emptyMap())
     private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
@@ -227,7 +226,7 @@ class SdkNodeRepositoryImpl(
         }
     }
 
-    // ── NodeManager surface ─────────────────────────────────────────────────
+    // ── Runtime node state management ────────────────────────────────────────
 
     override val nodeDBbyNodeNum: Map<Int, Node>
         get() = _nodeDBbyNum.value

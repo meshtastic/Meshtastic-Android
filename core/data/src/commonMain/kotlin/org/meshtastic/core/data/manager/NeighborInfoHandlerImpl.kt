@@ -24,7 +24,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.NeighborInfoHandler
-import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
@@ -32,9 +31,8 @@ import org.meshtastic.proto.NeighborInfo
 
 @Single
 class NeighborInfoHandlerImpl(
-    private val nodeManager: NodeManager,
-    private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
+    private val serviceRepository: ServiceRepository,
 ) : NeighborInfoHandler {
 
     private val startTimes = atomic(persistentMapOf<Int, Long>())
@@ -51,13 +49,13 @@ class NeighborInfoHandlerImpl(
 
         // Store the last neighbor info from our connected radio
         val from = packet.from
-        if (from == nodeManager.myNodeNum.value) {
+        if (from == nodeRepository.myNodeNum.value) {
             lastNeighborInfo = ni
             Logger.d { "Stored last neighbor info from connected radio" }
         }
 
         // Update Node DB
-        nodeManager.nodeDBbyNodeNum[from]?.let { /* SDK client.nodes is canonical source */ }
+        nodeRepository.nodeDBbyNodeNum[from]?.let { /* SDK client.nodes is canonical source */ }
 
         // Format for UI response
         val requestId = packet.decoded?.request_id ?: 0

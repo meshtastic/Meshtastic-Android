@@ -24,8 +24,12 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
+import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
+import org.meshtastic.proto.Position as ProtoPosition
 
 /**
  * A test double for [NodeRepository] that provides an in-memory implementation.
@@ -162,6 +166,73 @@ class FakeNodeRepository :
         _myNodeInfo.value = mi
         _nodeDBbyNum.value = nodes.associateBy { it.num }
     }
+
+    // ── Runtime node state management (from NodeManager merge) ──────────────
+
+    override val nodeDBbyNodeNum: Map<Int, Node>
+        get() = _nodeDBbyNum.value
+
+    override val nodeDBbyID: Map<String, Node>
+        get() = _nodeDBbyNum.value.values.associateBy { it.user.id }
+
+    private val _isNodeDbReady = MutableStateFlow(false)
+    override val isNodeDbReady: StateFlow<Boolean> = _isNodeDbReady
+
+    override fun setNodeDbReady(ready: Boolean) {
+        _isNodeDbReady.value = ready
+    }
+
+    private val _myNodeNum = MutableStateFlow<Int?>(null)
+    override val myNodeNum: StateFlow<Int?> = _myNodeNum
+
+    override fun setMyNodeNum(num: Int?) {
+        _myNodeNum.value = num
+    }
+
+    private val _firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)
+    override val firmwareEdition: StateFlow<FirmwareEdition?> = _firmwareEdition
+
+    override fun setFirmwareEdition(edition: FirmwareEdition?) {
+        _firmwareEdition.value = edition
+    }
+
+    override fun clear() {
+        _nodeDBbyNum.value = emptyMap()
+    }
+
+    override fun getMyNodeInfo(): MyNodeInfo? = _myNodeInfo.value
+
+    override fun getMyId(): String = _myId.value ?: ""
+
+    override fun handleReceivedUser(fromNum: Int, p: User, channel: Int, manuallyVerified: Boolean) {
+        // no-op for tests
+    }
+
+    override fun handleReceivedPosition(fromNum: Int, myNodeNum: Int, p: ProtoPosition, defaultTime: Long) {
+        // no-op for tests
+    }
+
+    override fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry) {
+        // no-op for tests
+    }
+
+    override fun updateNode(nodeNum: Int, withBroadcast: Boolean, channel: Int, transform: (Node) -> Node) {
+        val current = _nodeDBbyNum.value[nodeNum] ?: return
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (nodeNum to transform(current))
+    }
+
+    override fun removeByNodenum(nodeNum: Int) {
+        _nodeDBbyNum.value = _nodeDBbyNum.value - nodeNum
+    }
+
+    override fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean) {
+        // Simplified: just store the node number
+        val num = info.num
+        val existing = _nodeDBbyNum.value[num] ?: Node(num = num, user = User())
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (num to existing)
+    }
+
+    override fun toNodeID(nodeNum: Int): String = "!%08x".format(nodeNum)
 
     // --- Helper methods for testing ---
 

@@ -28,7 +28,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MessageFilter
-import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
@@ -49,7 +49,7 @@ import org.meshtastic.proto.PortNum
  */
 @Single
 class MessagePersistenceHandler(
-    private val nodeManager: NodeManager,
+    private val nodeRepository: NodeRepository,
     private val packetRepository: Lazy<PacketRepository>,
     private val notificationManager: NotificationManager,
     private val serviceNotifications: MeshServiceNotifications,
@@ -116,7 +116,7 @@ class MessagePersistenceHandler(
 
     @Suppress("ReturnCount")
     private suspend fun PacketRepository.shouldFilterMessage(dataPacket: DataPacket, contactKey: String): Boolean {
-        val isIgnored = nodeManager.nodeDBbyID[dataPacket.from]?.isIgnored == true
+        val isIgnored = nodeRepository.nodeDBbyID[dataPacket.from]?.isIgnored == true
         if (isIgnored) return true
 
         if (dataPacket.dataType != PortNum.TEXT_MESSAGE_APP.value) return false
@@ -130,7 +130,7 @@ class MessagePersistenceHandler(
         updateNotification: Boolean,
     ) {
         val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
-        val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
+        val nodeMuted = nodeRepository.nodeDBbyID[dataPacket.from]?.isMuted == true
         val isSilent = conversationMuted || nodeMuted
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
             scope.launch {
@@ -150,10 +150,10 @@ class MessagePersistenceHandler(
 
     private suspend fun getSenderName(packet: DataPacket): String {
         if (packet.from == DataPacket.ID_LOCAL) {
-            val myId = nodeManager.getMyId()
-            return nodeManager.nodeDBbyID[myId]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
+            val myId = nodeRepository.getMyId()
+            return nodeRepository.nodeDBbyID[myId]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
         }
-        return nodeManager.nodeDBbyID[packet.from]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
+        return nodeRepository.nodeDBbyID[packet.from]?.user?.long_name ?: getStringSuspend(Res.string.unknown_username)
     }
 
     private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket, isSilent: Boolean) {

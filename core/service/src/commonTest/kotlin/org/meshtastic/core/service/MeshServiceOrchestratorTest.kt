@@ -34,7 +34,6 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioPrefs
@@ -51,7 +50,6 @@ import kotlin.test.assertTrue
 class MeshServiceOrchestratorTest {
 
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
-    private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
     private val takServerManager: TAKServerManager = mock(MockMode.autofill)
     private val takPrefs: TakPrefs = mock(MockMode.autofill)
@@ -94,7 +92,6 @@ class MeshServiceOrchestratorTest {
 
         return MeshServiceOrchestrator(
             radioPrefs = radioPrefs,
-            nodeManager = nodeManager,
             serviceNotifications = serviceNotifications,
             takServerManager = takServerManager,
             takMeshIntegration = takMeshIntegration,

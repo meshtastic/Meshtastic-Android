@@ -25,17 +25,17 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 
 class RefreshLocalStatsAction :
     ActionCallback,
     KoinComponent {
 
     private val radioController: RadioController by inject()
-    private val nodeManager: NodeManager by inject()
+    private val nodeRepository: NodeRepository by inject()
 
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val myNodeNum = nodeManager.myNodeNum.value
+        val myNodeNum = nodeRepository.myNodeNum.value
         if (myNodeNum == null) {
             Logger.w { "RefreshLocalStatsAction: myNodeNum is null, skipping telemetry request" }
             return

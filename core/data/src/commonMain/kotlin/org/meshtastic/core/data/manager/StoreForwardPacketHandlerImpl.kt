@@ -28,7 +28,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
-import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.proto.MeshPacket
@@ -40,7 +40,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /** Implementation of [StoreForwardPacketHandler] that handles both legacy S&F and SF++ packets. */
 @Single
 class StoreForwardPacketHandlerImpl(
-    private val nodeManager: NodeManager,
+    private val nodeRepository: NodeRepository,
     private val packetRepository: Lazy<PacketRepository>,
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,
@@ -111,7 +111,7 @@ class StoreForwardPacketHandlerImpl(
 
         Logger.d {
             "SFPP updateStatus: packetId=${sfpp.encapsulated_id} from=${sfpp.encapsulated_from} " +
-                "to=${sfpp.encapsulated_to} myNodeNum=${nodeManager.myNodeNum.value} status=$status"
+                "to=${sfpp.encapsulated_to} myNodeNum=${nodeRepository.myNodeNum.value} status=$status"
         }
         scope.handledLaunch {
             packetRepository.value.updateSFPPStatus(
@@ -121,7 +121,7 @@ class StoreForwardPacketHandlerImpl(
                 hash = hash,
                 status = status,
                 rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
-                myNodeNum = nodeManager.myNodeNum.value ?: 0,
+                myNodeNum = nodeRepository.myNodeNum.value ?: 0,
             )
         }
     }
