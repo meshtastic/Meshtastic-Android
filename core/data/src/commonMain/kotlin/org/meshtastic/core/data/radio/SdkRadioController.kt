@@ -108,8 +108,13 @@ class SdkRadioController(
                 want_response = false,
             ),
         )
-        c.send(meshPacket)
-        serviceRepository.emitMeshActivity(MeshActivity.Send)
+        try {
+            c.send(meshPacket)
+            serviceRepository.emitMeshActivity(MeshActivity.Send)
+        } catch (e: Exception) {
+            Logger.e(e) { "sendMessage failed" }
+            throw e
+        }
     }
 
     // ── Node operations ─────────────────────────────────────────────────────
@@ -462,16 +467,21 @@ class SdkRadioController(
         wantResponse: Boolean = false,
     ) {
         val payload = AdminMessage.ADAPTER.encode(adminMsg).toByteString()
-        c.send(
-            MeshPacket(
-                to = destNum,
-                want_ack = true,
-                decoded = Data(
-                    portnum = PortNum.ADMIN_APP,
-                    payload = payload,
-                    want_response = wantResponse,
+        try {
+            c.send(
+                MeshPacket(
+                    to = destNum,
+                    want_ack = true,
+                    decoded = Data(
+                        portnum = PortNum.ADMIN_APP,
+                        payload = payload,
+                        want_response = wantResponse,
+                    ),
                 ),
-            ),
-        )
+            )
+        } catch (e: Exception) {
+            Logger.e(e) { "sendRemoteAdmin to $destNum failed" }
+            throw e
+        }
     }
 }

@@ -184,25 +184,47 @@ class SdkStateBridge(
             return
         }
 
+        try {
+            dispatchAction(client, action)
+        } catch (e: Exception) {
+            Logger.e(e) { "[SdkBridge] ServiceAction ${action::class.simpleName} failed" }
+            if (action is ServiceAction.SendContact) action.result.complete(false)
+        }
+    }
+
+    @Suppress("CyclomaticComplexMethod")
+    private suspend fun dispatchAction(client: org.meshtastic.sdk.RadioClient, action: ServiceAction) {
         when (action) {
             is ServiceAction.Favorite -> {
                 val node = action.node
-                client.admin.setFavorite(NodeId(node.num), !node.isFavorite)
-                nodeRepository.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
+                val result = runCatching { client.admin.setFavorite(NodeId(node.num), !node.isFavorite) }
+                if (result.isSuccess) {
+                    nodeRepository.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
+                } else {
+                    Logger.w(result.exceptionOrNull()) { "[SdkBridge] setFavorite failed for ${node.num}" }
+                }
             }
 
             is ServiceAction.Ignore -> {
                 val node = action.node
                 val newIgnored = !node.isIgnored
-                client.admin.setIgnored(NodeId(node.num), newIgnored)
-                nodeRepository.updateNode(node.num) { it.copy(isIgnored = newIgnored) }
-                packetRepository.value.updateFilteredBySender(node.user.id, newIgnored)
+                val result = runCatching { client.admin.setIgnored(NodeId(node.num), newIgnored) }
+                if (result.isSuccess) {
+                    nodeRepository.updateNode(node.num) { it.copy(isIgnored = newIgnored) }
+                    packetRepository.value.updateFilteredBySender(node.user.id, newIgnored)
+                } else {
+                    Logger.w(result.exceptionOrNull()) { "[SdkBridge] setIgnored failed for ${node.num}" }
+                }
             }
 
             is ServiceAction.Mute -> {
                 val node = action.node
-                client.admin.toggleMuted(NodeId(node.num))
-                nodeRepository.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
+                val result = runCatching { client.admin.toggleMuted(NodeId(node.num)) }
+                if (result.isSuccess) {
+                    nodeRepository.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
+                } else {
+                    Logger.w(result.exceptionOrNull()) { "[SdkBridge] toggleMuted failed for ${node.num}" }
+                }
             }
 
             is ServiceAction.Reaction -> {
@@ -227,12 +249,16 @@ class SdkStateBridge(
 
             is ServiceAction.ImportContact -> {
                 val verified = action.contact.copy(manually_verified = true)
-                client.admin.addContact(verified)
-                nodeRepository.handleReceivedUser(
-                    verified.node_num,
-                    verified.user ?: User(),
-                    manuallyVerified = true,
-                )
+                val result = runCatching { client.admin.addContact(verified) }
+                if (result.isSuccess) {
+                    nodeRepository.handleReceivedUser(
+                        verified.node_num,
+                        verified.user ?: User(),
+                        manuallyVerified = true,
+                    )
+                } else {
+                    Logger.w(result.exceptionOrNull()) { "[SdkBridge] importContact failed" }
+                }
             }
 
             is ServiceAction.SendContact -> {
