@@ -41,25 +41,25 @@ import kotlin.test.assertTrue
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
-class NodeManagerImplTest {
+class SdkNodeRepositoryImplTest {
 
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val testScope = TestScope()
 
-    private lateinit var nodeManager: SdkNodeRepositoryImpl
+    private lateinit var nodeRepository: SdkNodeRepositoryImpl
 
     @BeforeTest
     fun setUp() {
         val dbProvider: DatabaseProvider = mock(MockMode.autofill)
         val localStatsDataSource: LocalStatsDataSource = mock(MockMode.autofill)
-        nodeManager = SdkNodeRepositoryImpl(localStatsDataSource, dbProvider, notificationManager, testScope)
+        nodeRepository = SdkNodeRepositoryImpl(localStatsDataSource, dbProvider, notificationManager, testScope)
     }
 
     @Test
     fun `getOrCreateNode creates default user for unknown node`() {
         val nodeNum = 1234
-        nodeManager.updateNode(nodeNum) { it }
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        nodeRepository.updateNode(nodeNum) { it }
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]
 
         assertNotNull(result)
         assertEquals(nodeNum, result.num)
@@ -73,14 +73,14 @@ class NodeManagerImplTest {
         val existingUser =
             User(id = "!12345678", long_name = "My Custom Name", short_name = "MCN", hw_model = HardwareModel.TLORA_V2)
 
-        nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
+        nodeRepository.updateNode(nodeNum) { it.copy(user = existingUser) }
 
         val incomingDefaultUser =
             User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
 
-        nodeManager.handleReceivedUser(nodeNum, incomingDefaultUser)
+        nodeRepository.handleReceivedUser(nodeNum, incomingDefaultUser)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]
         assertEquals("My Custom Name", result!!.user.long_name)
         assertEquals(HardwareModel.TLORA_V2, result.user.hw_model)
     }
@@ -91,14 +91,14 @@ class NodeManagerImplTest {
         val existingUser =
             User(id = "!12345678", long_name = "Old Name", short_name = "ON", hw_model = HardwareModel.TLORA_V2)
 
-        nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
+        nodeRepository.updateNode(nodeNum) { it.copy(user = existingUser) }
 
         val incomingDetailedUser =
             User(id = "!12345678", long_name = "Real User", short_name = "RU", hw_model = HardwareModel.TLORA_V1)
 
-        nodeManager.handleReceivedUser(nodeNum, incomingDetailedUser)
+        nodeRepository.handleReceivedUser(nodeNum, incomingDetailedUser)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]
         assertEquals("Real User", result!!.user.long_name)
         assertEquals(HardwareModel.TLORA_V1, result.user.hw_model)
     }
@@ -108,9 +108,9 @@ class NodeManagerImplTest {
         val nodeNum = 1234
         val position = ProtoPosition(latitude_i = 450000000, longitude_i = 900000000)
 
-        nodeManager.handleReceivedPosition(nodeNum, 9999, position, 0)
+        nodeRepository.handleReceivedPosition(nodeNum, 9999, position, 0)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]
         assertNotNull(result)
         assertNotNull(result.position)
         assertEquals(450000000, result.position.latitude_i)
@@ -121,13 +121,13 @@ class NodeManagerImplTest {
     fun `handleReceivedPosition with zero coordinates preserves last known location but updates satellites`() {
         val nodeNum = 1234
         val initialPosition = ProtoPosition(latitude_i = 450000000, longitude_i = 900000000, sats_in_view = 10)
-        nodeManager.handleReceivedPosition(nodeNum, 9999, initialPosition, 1000000L)
+        nodeRepository.handleReceivedPosition(nodeNum, 9999, initialPosition, 1000000L)
 
         // Receive "zero" position with new satellite count
         val zeroPosition = ProtoPosition(latitude_i = 0, longitude_i = 0, sats_in_view = 5, time = 1001)
-        nodeManager.handleReceivedPosition(nodeNum, 9999, zeroPosition, 1001000L)
+        nodeRepository.handleReceivedPosition(nodeNum, 9999, zeroPosition, 1001000L)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]
         assertEquals(450000000, result!!.position.latitude_i)
         assertEquals(900000000, result.position.longitude_i)
         assertEquals(5, result.position.sats_in_view)
@@ -139,9 +139,9 @@ class NodeManagerImplTest {
         val myNum = 1111
         val emptyPos = ProtoPosition(latitude_i = 0, longitude_i = 0, sats_in_view = 0, time = 0)
 
-        nodeManager.handleReceivedPosition(myNum, myNum, emptyPos, 0)
+        nodeRepository.handleReceivedPosition(myNum, myNum, emptyPos, 0)
 
-        val result = nodeManager.nodeDBbyNodeNum[myNum]
+        val result = nodeRepository.nodeDBbyNodeNum[myNum]
         // Should still be null since the empty position for local node is ignored
         assertNull(result)
     }
@@ -149,13 +149,13 @@ class NodeManagerImplTest {
     @Test
     fun `handleReceivedTelemetry updates lastHeard`() {
         val nodeNum = 1234
-        nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
+        nodeRepository.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
 
         val telemetry = Telemetry(time = 2000, device_metrics = DeviceMetrics(battery_level = 50))
 
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
+        nodeRepository.handleReceivedTelemetry(nodeNum, telemetry)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]
         assertEquals(2000, result!!.lastHeard)
     }
 
@@ -164,9 +164,9 @@ class NodeManagerImplTest {
         val nodeNum = 1234
         val telemetry = Telemetry(device_metrics = DeviceMetrics(battery_level = 75, voltage = 3.8f))
 
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
+        nodeRepository.handleReceivedTelemetry(nodeNum, telemetry)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]
         assertNotNull(result!!.deviceMetrics)
         assertEquals(75, result.deviceMetrics.battery_level)
         assertEquals(3.8f, result.deviceMetrics.voltage)
@@ -178,9 +178,9 @@ class NodeManagerImplTest {
         val telemetry =
             Telemetry(environment_metrics = EnvironmentMetrics(temperature = 22.5f, relative_humidity = 45.0f))
 
-        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
+        nodeRepository.handleReceivedTelemetry(nodeNum, telemetry)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]
         assertNotNull(result!!.environmentMetrics)
         assertEquals(22.5f, result.environmentMetrics.temperature)
         assertEquals(45.0f, result.environmentMetrics.relative_humidity)
@@ -188,23 +188,23 @@ class NodeManagerImplTest {
 
     @Test
     fun `clear resets internal state`() {
-        nodeManager.updateNode(1234) { it.copy(user = it.user.copy(long_name = "Test")) }
-        nodeManager.clear()
+        nodeRepository.updateNode(1234) { it.copy(user = it.user.copy(long_name = "Test")) }
+        nodeRepository.clear()
 
-        assertTrue(nodeManager.nodeDBbyNodeNum.isEmpty())
-        assertTrue(nodeManager.nodeDBbyID.isEmpty())
-        assertNull(nodeManager.myNodeNum.value)
+        assertTrue(nodeRepository.nodeDBbyNodeNum.isEmpty())
+        assertTrue(nodeRepository.nodeDBbyID.isEmpty())
+        assertNull(nodeRepository.myNodeNum.value)
     }
 
     @Test
     fun `toNodeID returns broadcast ID for broadcast nodeNum`() {
-        val result = nodeManager.toNodeID(DataPacket.NODENUM_BROADCAST)
+        val result = nodeRepository.toNodeID(DataPacket.NODENUM_BROADCAST)
         assertEquals(DataPacket.ID_BROADCAST, result)
     }
 
     @Test
     fun `toNodeID returns default hex ID for unknown node`() {
-        val result = nodeManager.toNodeID(0x1234)
+        val result = nodeRepository.toNodeID(0x1234)
         assertEquals(DataPacket.nodeNumToDefaultId(0x1234), result)
     }
 
@@ -212,24 +212,24 @@ class NodeManagerImplTest {
     fun `toNodeID returns user ID for known node`() {
         val nodeNum = 5678
         val userId = "!customid"
-        nodeManager.updateNode(nodeNum) { it.copy(user = it.user.copy(id = userId)) }
-        val result = nodeManager.toNodeID(nodeNum)
+        nodeRepository.updateNode(nodeNum) { it.copy(user = it.user.copy(id = userId)) }
+        val result = nodeRepository.toNodeID(nodeNum)
         assertEquals(userId, result)
     }
 
     @Test
     fun `removeByNodenum removes node from both maps`() {
         val nodeNum = 1234
-        nodeManager.updateNode(nodeNum) {
+        nodeRepository.updateNode(nodeNum) {
             Node(num = nodeNum, user = User(id = "!testnode", long_name = "Test", short_name = "T"))
         }
-        assertTrue(nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
-        assertTrue(nodeManager.nodeDBbyID.containsKey("!testnode"))
+        assertTrue(nodeRepository.nodeDBbyNodeNum.containsKey(nodeNum))
+        assertTrue(nodeRepository.nodeDBbyID.containsKey("!testnode"))
 
-        nodeManager.removeByNodenum(nodeNum)
+        nodeRepository.removeByNodenum(nodeNum)
 
-        assertTrue(!nodeManager.nodeDBbyNodeNum.containsKey(nodeNum))
-        assertTrue(!nodeManager.nodeDBbyID.containsKey("!testnode"))
+        assertTrue(!nodeRepository.nodeDBbyNodeNum.containsKey(nodeNum))
+        assertTrue(!nodeRepository.nodeDBbyID.containsKey("!testnode"))
     }
 
     @Test
@@ -238,7 +238,7 @@ class NodeManagerImplTest {
         val pk = ByteArray(32) { (it + 1).toByte() }.toByteString()
         val existingUser =
             User(id = "!12345678", long_name = "Existing", short_name = "EX", hw_model = HardwareModel.TLORA_V2)
-        nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
+        nodeRepository.updateNode(nodeNum) { it.copy(user = existingUser) }
 
         val incomingUser =
             User(
@@ -248,9 +248,9 @@ class NodeManagerImplTest {
                 hw_model = HardwareModel.TLORA_V2,
                 public_key = pk,
             )
-        nodeManager.handleReceivedUser(nodeNum, incomingUser)
+        nodeRepository.handleReceivedUser(nodeNum, incomingUser)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]!!
         assertEquals(pk, result.publicKey)
         assertEquals(pk, result.user.public_key)
         assertTrue(result.hasPKC)
@@ -268,7 +268,7 @@ class NodeManagerImplTest {
                 hw_model = HardwareModel.TLORA_V2,
                 public_key = existingPk,
             )
-        nodeManager.updateNode(nodeNum) { it.copy(user = existingUser, publicKey = existingPk) }
+        nodeRepository.updateNode(nodeNum) { it.copy(user = existingUser, publicKey = existingPk) }
 
         val differentPk = ByteArray(32) { (it + 10).toByte() }.toByteString()
         val incomingUser =
@@ -279,9 +279,9 @@ class NodeManagerImplTest {
                 hw_model = HardwareModel.TLORA_V2,
                 public_key = differentPk,
             )
-        nodeManager.handleReceivedUser(nodeNum, incomingUser)
+        nodeRepository.handleReceivedUser(nodeNum, incomingUser)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]!!
         // Key mismatch: newUser gets public_key cleared to EMPTY, and publicKey should match
         assertEquals(ByteString.EMPTY, result.publicKey)
         assertEquals(ByteString.EMPTY, result.user.public_key)
@@ -301,9 +301,9 @@ class NodeManagerImplTest {
             )
         val info = ProtoNodeInfo(num = nodeNum, user = user, last_heard = 1000, channel = 0)
 
-        nodeManager.installNodeInfo(info)
+        nodeRepository.installNodeInfo(info)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]!!
         assertEquals(pk, result.publicKey)
         assertEquals(pk, result.user.public_key)
         assertTrue(result.hasPKC)
@@ -324,9 +324,9 @@ class NodeManagerImplTest {
             )
         val info = ProtoNodeInfo(num = nodeNum, user = user, last_heard = 1000, channel = 0)
 
-        nodeManager.installNodeInfo(info)
+        nodeRepository.installNodeInfo(info)
 
-        val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
+        val result = nodeRepository.nodeDBbyNodeNum[nodeNum]!!
         assertEquals(ByteString.EMPTY, result.publicKey)
         assertEquals(ByteString.EMPTY, result.user.public_key)
     }

@@ -77,7 +77,7 @@ NodeManager merged into SdkNodeRepositoryImpl, MeshActivity restored.
 ### Data Layer ✅
 - Room migration 38→39: NodeMetadata persistence
 - Room migration 39→40: DROP legacy `nodes`, `my_node`, `metadata` tables
-- `SdkNodeRepositoryImpl` implements NodeRepository + NodeManager + NodeIdLookup
+- `SdkNodeRepositoryImpl` implements unified NodeRepository + NodeIdLookup
 - SDK storage (SqlDelight) is source of truth for node data
 - `AppMetadataRepository` provides firmware/hardware/model info
 - NodeManagerImpl deleted — logic merged into SdkNodeRepositoryImpl
@@ -88,10 +88,12 @@ NodeManager merged into SdkNodeRepositoryImpl, MeshActivity restored.
 - No transport stubs needed — SDK handles everything
 
 ### NodeManager Merge ✅
-- `SdkNodeRepositoryImpl` now binds NodeRepository, NodeManager, NodeIdLookup
+- NodeManager interface eliminated — all methods merged into NodeRepository
+- `SdkNodeRepositoryImpl` now binds [NodeRepository, NodeIdLookup]
 - Single in-memory StateFlow — no duplicate maps
 - Metadata enrichment on every write (favorites, notes, ignore, mute)
 - `NodeManagerImpl.kt` deleted (377 LOC)
+- `NodeManager.kt` interface deleted (82 LOC)
 
 ### MeshActivity Restoration ✅
 - `meshActivityFlow` added to ServiceRepository interface
@@ -99,6 +101,18 @@ NodeManager merged into SdkNodeRepositoryImpl, MeshActivity restored.
 - Emit `Receive` from ServiceRepositoryImpl.emitMeshPacket()
 - UIViewModel.meshActivity wired to serviceRepository.meshActivityFlow
 - Connection icon animation fully functional
+
+### Dead Code Removal ✅
+- Removed 7 dead methods from NodeManager/NodeRepository interfaces (~220 LOC)
+- Deleted `NodeInfo` data class (kept MeshUser, Position, DeviceMetrics, EnvironmentMetrics)
+- Renamed `NodeInfo.kt` → `MeshModels.kt`
+- Removed dead `nodeManager` parameter from MeshServiceOrchestrator
+
+### Error Handling ✅
+- SdkStateBridge: ServiceAction dispatch wrapped in try/catch (prevents bridge death)
+- Favorite/Ignore/Mute: local state update only applied on admin call success
+- SdkRadioController: sendMessage + sendRemoteAdmin log errors before re-throwing
+- ImportContact: guarded with runCatching
 
 ### UseCases Deleted ✅
 - ProcessRadioResponse (tests only — impl kept, has real packet parsing logic)
