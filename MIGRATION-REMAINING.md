@@ -7,13 +7,14 @@
 
 ## Summary
 
-**Completed:** ~90% of the Clean Break migration. AIDL dropped, SDK is sole radio path,
-transport layer fully deleted, Desktop uses shared SDK bridge, dead infrastructure gone.
+**Completed:** ~92% of the Clean Break migration. AIDL dropped, SDK is sole radio path,
+transport layer fully deleted, Desktop uses shared SDK bridge, dead infrastructure gone,
+POC ViewModels removed, stale broadcast constants removed.
 
-**Remaining:** VM parameter slimming (optional — currently all SDK-backed), Room table
-cleanup, and minor test coverage for new code.
+**Remaining:** Room table cleanup, optional VM parameter slimming, and test coverage for
+new bridge code.
 
-**Net change:** 145 files changed, +2,752 / -15,059 lines (net -12,307 LOC removed)
+**Net change:** 154 files changed, +3,655 / -15,301 lines (net -11,646 LOC removed)
 
 ---
 
@@ -59,14 +60,19 @@ cleanup, and minor test coverage for new code.
 - **Fully deleted:** BleRadioTransport, TcpRadioTransport, SerialRadioTransport, StreamTransport, HeartbeatSender, StreamFrameCodec, all transport factories, BleReconnectPolicy, TcpTransport
 - `RadioInterfaceService` slimmed to device-address surface only
 - `SdkRadioInterfaceService` created (thin adapter over RadioPrefs + RadioClientAccessor)
-- Desktop `NoopRadioInterfaceService` updated to match
+- `NoopRadioInterfaceService` deleted (superseded by SdkRadioInterfaceService)
 - `JvmUsbScanner` migrated to SDK's `JvmSerialPorts.list()`
 
 ### Pipeline ✅
-- **Fully deleted:** CommandSender, MeshRouter, MeshActionHandler, PacketHandlerImpl, MeshDataHandlerImpl, MeshConnectionManager, MeshConfigFlowManager, ServiceBroadcasts, DirectRadioControllerImpl
+- **Fully deleted:** CommandSender, MeshRouter, MeshActionHandler, PacketHandlerImpl, MeshDataHandlerImpl, MeshConnectionManager, MeshConfigFlowManager, ServiceBroadcasts, DirectRadioControllerImpl, broadcast Constants.kt
 - `SdkRadioController` is sole RadioController impl
 - `SdkStateBridge` bridges SDK events → repositories
 - `SdkPacketHandler` routes MeshPackets via `client.send()`, raw ToRadio via `client.sendRaw()`
+
+### POC Code ✅
+- **Deleted:** SdkConfigViewModel, SdkMessagingViewModel, SdkTelemetryViewModel, RadioClientViewModel, SdkNodeListViewModel
+- All POC diagnostic logging removed from Main.kt
+- Dead test fakes removed (app/test/Fakes.kt)
 
 ### Data Layer ✅
 - Room migration 38→39: NodeMetadata persistence
@@ -94,7 +100,10 @@ cleanup, and minor test coverage for new code.
 ### 1. Room Table Cleanup (low priority)
 - Migration 39→40: DROP legacy `nodes`, `my_node` tables
 - Remove old `NodeEntity`, `MyNodeEntity` Room entities + DAOs
-- SDK SqlDelight is already source of truth; Room tables are unused dead weight
+- SDK SqlDelight is already source of truth; Room tables are redundant
+- **Blocked by:** `NodeInfoReadDataSource` (used by `MeshLogRepositoryImpl` for node
+  name resolution), `PacketRepositoryImpl` (uses `NodeInfoDao.MAX_BIND_PARAMS`)
+- Requires migrating node-name lookup to SDK APIs before tables can be dropped
 
 ### 2. VM Parameter Slimming (optional, quality-of-life)
 VMs currently inject SDK-backed adapters (RadioController, NodeRepository, etc.)
