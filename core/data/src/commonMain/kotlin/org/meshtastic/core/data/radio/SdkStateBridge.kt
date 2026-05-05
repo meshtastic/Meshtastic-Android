@@ -33,6 +33,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState as AppConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.service.ServiceAction
@@ -208,6 +209,28 @@ class SdkStateBridge(
                             "[SdkBridge] S&F heartbeat from ${DataPacket.nodeNumToDefaultId(event.server.raw)}"
                         }
                     }
+                    is StoreForwardEvent.SfppLinkProvided -> {
+                        event.messageHash?.let { hash ->
+                            val status = if (event.confirmed) MessageStatus.SFPP_CONFIRMED else MessageStatus.SFPP_ROUTING
+                            packetRepository.value.updateSFPPStatus(
+                                packetId = event.packetId,
+                                from = event.from,
+                                to = event.to,
+                                hash = hash,
+                                status = status,
+                                rxTime = 0L,
+                                myNodeNum = nodeRepository.myNodeNum.value ?: 0,
+                            )
+                        }
+                    }
+                    is StoreForwardEvent.SfppCanonAnnounced -> {
+                        packetRepository.value.updateSFPPStatusByHash(
+                            hash = event.messageHash,
+                            status = MessageStatus.SFPP_CONFIRMED,
+                            rxTime = event.rxTime,
+                        )
+                    }
+                    else -> Logger.d { "[SdkBridge] S&F event: $event" }
                 }
             }
             .launchIn(scope)

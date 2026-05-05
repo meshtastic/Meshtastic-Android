@@ -39,6 +39,7 @@ import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
+import org.meshtastic.sdk.CongestionLevel
 
 @Suppress("LongParameterList")
 @KoinViewModel
@@ -61,6 +62,10 @@ class NodeListViewModel(
     val totalNodeCount = nodeRepository.totalNodeCount.stateInWhileSubscribed(initialValue = 0)
 
     val connectionState = serviceRepository.connectionState
+
+    val congestionLevel: StateFlow<CongestionLevel?> = serviceRepository.congestionLevel
+
+    val storeForwardServers: StateFlow<List<Int>> = serviceRepository.storeForwardServers
 
     val deviceType: StateFlow<DeviceType?> =
         radioPrefs.devAddr

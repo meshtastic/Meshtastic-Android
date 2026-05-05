@@ -17,19 +17,16 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
-import dev.mokkery.answering.returns
-import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.HistoryManager
@@ -40,7 +37,6 @@ import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.StoreAndForward
-import org.meshtastic.proto.StoreForwardPlusPlus
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -61,8 +57,6 @@ class StoreForwardPacketHandlerImplTest {
 
     @BeforeTest
     fun setUp() {
-        every { nodeRepository.myNodeNum } returns MutableStateFlow<Int?>(myNodeNum)
-
         handler =
             StoreForwardPacketHandlerImpl(
                 nodeRepository = nodeRepository,
@@ -75,11 +69,6 @@ class StoreForwardPacketHandlerImplTest {
 
     private fun makeSfPacket(from: Int, sf: StoreAndForward): MeshPacket {
         val payload = StoreAndForward.ADAPTER.encode(sf).toByteString()
-        return MeshPacket(from = from, decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = payload))
-    }
-
-    private fun makeSfppPacket(from: Int, sfpp: StoreForwardPlusPlus): MeshPacket {
-        val payload = StoreForwardPlusPlus.ADAPTER.encode(sfpp).toByteString()
         return MeshPacket(from = from, decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = payload))
     }
 
@@ -200,138 +189,27 @@ class StoreForwardPacketHandlerImplTest {
         // No crash — falls through to else branch
     }
 
-    // ---------- SF++: LINK_PROVIDE ----------
+    // ---------- SF++: delegated to SDK ----------
 
     @Test
-    fun `handleStoreForwardPlusPlus LINK_PROVIDE with message_hash updates status`() = testScope.runTest {
-        val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
-                encapsulated_id = 42,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x01, 0x02, 0x03, 0x04),
-                commit_hash = ByteString.EMPTY,
+    fun `handleStoreForwardPlusPlus logs only and leaves repository untouched`() = testScope.runTest {
+        val packet =
+            MeshPacket(
+                from = 999,
+                decoded = Data(
+                    portnum = PortNum.STORE_FORWARD_APP,
+                    payload = "ignored".encodeToByteArray().toByteString(),
+                ),
             )
-        val packet = makeSfppPacket(999, sfpp)
 
         handler.handleStoreForwardPlusPlus(packet)
         advanceUntilIdle()
 
-        verifySuspend { packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any()) }
-    }
-
-    // ---------- SF++: CANON_ANNOUNCE ----------
-
-    @Test
-    fun `handleStoreForwardPlusPlus CANON_ANNOUNCE updates status by hash`() = testScope.runTest {
-        val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE,
-                message_hash = ByteString.of(0xAA.toByte(), 0xBB.toByte()),
-                encapsulated_rxtime = 1700000000,
-            )
-        val packet = makeSfppPacket(999, sfpp)
-
-        handler.handleStoreForwardPlusPlus(packet)
-        advanceUntilIdle()
-
-        verifySuspend { packetRepository.updateSFPPStatusByHash(any(), any(), any()) }
-    }
-
-    // ---------- SF++: CHAIN_QUERY ----------
-
-    @Test
-    fun `handleStoreForwardPlusPlus CHAIN_QUERY logs info without crash`() = testScope.runTest {
-        val sfpp = StoreForwardPlusPlus(sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.CHAIN_QUERY)
-        val packet = makeSfppPacket(999, sfpp)
-
-        handler.handleStoreForwardPlusPlus(packet)
-        advanceUntilIdle()
-        // No crash, just logs
-    }
-
-    // ---------- SF++: LINK_REQUEST ----------
-
-    @Test
-    fun `handleStoreForwardPlusPlus LINK_REQUEST logs info without crash`() = testScope.runTest {
-        val sfpp = StoreForwardPlusPlus(sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_REQUEST)
-        val packet = makeSfppPacket(999, sfpp)
-
-        handler.handleStoreForwardPlusPlus(packet)
-        advanceUntilIdle()
-        // No crash, just logs
-    }
-
-    // ---------- SF++: invalid payload ----------
-
-    @Test
-    fun `handleStoreForwardPlusPlus with null payload returns early`() = testScope.runTest {
-        val packet = MeshPacket(from = 999, decoded = null)
-
-        handler.handleStoreForwardPlusPlus(packet)
-        advanceUntilIdle()
-        // No crash
-    }
-
-    // ---------- SF++: fragment types ----------
-
-    @Test
-    fun `handleStoreForwardPlusPlus LINK_PROVIDE_FIRSTHALF handled as link provide`() = testScope.runTest {
-        val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF,
-                encapsulated_id = 55,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x01, 0x02),
-                commit_hash = ByteString.EMPTY,
-            )
-        val packet = makeSfppPacket(999, sfpp)
-
-        handler.handleStoreForwardPlusPlus(packet)
-        advanceUntilIdle()
-
-        verifySuspend { packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any()) }
-    }
-
-    @Test
-    fun `handleStoreForwardPlusPlus LINK_PROVIDE_SECONDHALF handled as link provide`() = testScope.runTest {
-        val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_SECONDHALF,
-                encapsulated_id = 56,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x03, 0x04),
-                commit_hash = ByteString.EMPTY,
-            )
-        val packet = makeSfppPacket(999, sfpp)
-
-        handler.handleStoreForwardPlusPlus(packet)
-        advanceUntilIdle()
-
-        verifySuspend { packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any()) }
-    }
-
-    // ---------- SF++: commit_hash present changes status ----------
-
-    @Test
-    fun `handleStoreForwardPlusPlus LINK_PROVIDE with commit_hash sets SFPP_CONFIRMED`() = testScope.runTest {
-        val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
-                encapsulated_id = 77,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x01, 0x02),
-                commit_hash = ByteString.of(0xAA.toByte()), // non-empty
-            )
-        val packet = makeSfppPacket(999, sfpp)
-
-        handler.handleStoreForwardPlusPlus(packet)
-        advanceUntilIdle()
-
-        verifySuspend { packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) {
+            packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any())
+        }
+        verifySuspend(mode = VerifyMode.exactly(0)) {
+            packetRepository.updateSFPPStatusByHash(any(), any(), any())
+        }
     }
 }

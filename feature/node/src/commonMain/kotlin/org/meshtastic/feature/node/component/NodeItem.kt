@@ -90,6 +90,7 @@ import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.proto.Config
+import org.meshtastic.sdk.CongestionLevel
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
@@ -102,12 +103,14 @@ fun NodeItem(
     thatNode: Node,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
+    congestionLevel: CongestionLevel? = null,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
     connectionState: ConnectionState,
     deviceType: DeviceType? = null,
     isActive: Boolean = false,
+    isStoreForwardServer: Boolean = false,
 ) {
     val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isMuted = remember(thatNode) { thatNode.isMuted }
@@ -167,7 +170,9 @@ fun NodeItem(
                 isMuted = isMuted,
                 isUnmessageable = unmessageable,
                 connectionState = connectionState,
+                congestionLevel = congestionLevel,
                 deviceType = deviceType,
+                isStoreForwardServer = isStoreForwardServer,
                 contentColor = contentColor,
             )
 
@@ -395,7 +400,9 @@ private fun NodeItemHeader(
     isMuted: Boolean,
     isUnmessageable: Boolean,
     connectionState: ConnectionState,
+    congestionLevel: CongestionLevel?,
     deviceType: DeviceType?,
+    isStoreForwardServer: Boolean,
     contentColor: Color,
 ) {
     Row(
@@ -441,7 +448,9 @@ private fun NodeItemHeader(
             isMuted = isMuted,
             isUnmessageable = isUnmessageable,
             connectionState = connectionState,
+            congestionLevel = congestionLevel,
             deviceType = deviceType,
+            isStoreForwardServer = isStoreForwardServer,
             contentColor = contentColor,
         )
     }

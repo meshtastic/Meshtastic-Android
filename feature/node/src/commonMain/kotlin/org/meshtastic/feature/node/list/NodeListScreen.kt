@@ -98,6 +98,8 @@ fun NodeListScreen(
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val congestionLevel by viewModel.congestionLevel.collectAsStateWithLifecycle()
+    val storeForwardServers by viewModel.storeForwardServers.collectAsStateWithLifecycle()
     val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
@@ -203,11 +205,13 @@ fun NodeListScreen(
                             thatNode = node,
                             distanceUnits = state.distanceUnits,
                             tempInFahrenheit = state.tempInFahrenheit,
+                            congestionLevel = congestionLevel,
                             onClick = { navigateToNodeDetails(node.num) },
                             onLongClick = longClick,
                             connectionState = connectionState,
                             deviceType = deviceType,
                             isActive = isActive,
+                            isStoreForwardServer = node.num in storeForwardServers,
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {

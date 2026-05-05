@@ -48,11 +48,17 @@ import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
 import org.meshtastic.core.ui.component.ConnectionsNavIcon
+import org.meshtastic.core.ui.icon.CloudDownload
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.VolumeOff
+import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.sdk.CongestionLevel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,13 +68,18 @@ fun NodeStatusIcons(
     isFavorite: Boolean,
     isMuted: Boolean,
     connectionState: ConnectionState,
+    congestionLevel: CongestionLevel? = null,
     modifier: Modifier = Modifier,
     deviceType: DeviceType? = null,
+    isStoreForwardServer: Boolean = false,
     contentColor: Color = LocalContentColor.current,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
         if (isThisNode) {
             ThisNodeStatusBadge(connectionState = connectionState, deviceType = deviceType)
+        }
+        if (isThisNode && congestionLevel != null && congestionLevel != CongestionLevel.LOW) {
+            CongestionBadge(congestionLevel)
         }
 
         if (isUnmessageable) {
@@ -78,6 +89,9 @@ fun NodeStatusIcons(
                 tooltipText = Res.string.unmonitored_or_infrastructure,
                 tint = contentColor,
             )
+        }
+        if (isStoreForwardServer) {
+            StoreForwardBadge()
         }
         if (isMuted && !isThisNode) {
             StatusBadge(
@@ -122,6 +136,47 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState, deviceType: De
         state = rememberTooltipState(),
     ) {
         ConnectionsNavIcon(connectionState = connectionState, deviceType = deviceType, modifier = Modifier.size(24.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StoreForwardBadge() {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text("Store & Forward server") } },
+        state = rememberTooltipState(),
+    ) {
+        Icon(
+            imageVector = MeshtasticIcons.CloudDownload,
+            contentDescription = "Store & Forward server",
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.StatusBlue,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CongestionBadge(level: CongestionLevel) {
+    val color =
+        when (level) {
+            CongestionLevel.MEDIUM -> MaterialTheme.colorScheme.StatusYellow
+            CongestionLevel.HIGH -> MaterialTheme.colorScheme.StatusOrange
+            CongestionLevel.CRITICAL -> MaterialTheme.colorScheme.StatusRed
+            else -> return
+        }
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = { PlainTooltip { Text("Channel: ${level.name}") } },
+        state = rememberTooltipState(),
+    ) {
+        Icon(
+            imageVector = MeshtasticIcons.Warning,
+            contentDescription = "Congestion: ${level.name}",
+            modifier = Modifier.size(24.dp),
+            tint = color,
+        )
     }
 }
 

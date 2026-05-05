@@ -17,7 +17,9 @@
 package org.meshtastic.core.data.radio
 
 import dev.mokkery.MockMode
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +27,9 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.PacketRepository
@@ -37,6 +41,7 @@ import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
+import org.meshtastic.proto.StoreForwardPlusPlus
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.DeviceStorage
 import org.meshtastic.sdk.NodeId
@@ -126,6 +131,71 @@ class SdkStateBridgeTest {
         client.disconnect()
     }
 
+    @Test
+    fun `sfpp link provided updates packet repository`() = runTest {
+        val packetRepository = mock<PacketRepository>(MockMode.autofill)
+        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(emptyMap()))
+        buildBridge(client, FakeNodeRepository(), packetRepository)
+
+        client.connect()
+        runCurrent()
+
+        transport.injectSfpp(
+            StoreForwardPlusPlus(
+                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
+                message_hash = byteArrayOf(1, 2, 3, 4).toByteString(),
+                commit_hash = byteArrayOf(9, 8, 7).toByteString(),
+                encapsulated_id = 0x1234,
+                encapsulated_to = 0x01020304,
+                encapsulated_from = 0x55667788,
+            ),
+        )
+        runCurrent()
+
+        verifySuspend {
+            packetRepository.updateSFPPStatus(
+                0x1234,
+                0x55667788,
+                0x01020304,
+                any(),
+                MessageStatus.SFPP_CONFIRMED,
+                0L,
+                0,
+            )
+        }
+
+        client.disconnect()
+    }
+
+    @Test
+    fun `sfpp canon announce updates packet repository by hash`() = runTest {
+        val packetRepository = mock<PacketRepository>(MockMode.autofill)
+        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(emptyMap()))
+        buildBridge(client, FakeNodeRepository(), packetRepository)
+
+        client.connect()
+        runCurrent()
+
+        transport.injectSfpp(
+            StoreForwardPlusPlus(
+                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE,
+                message_hash = byteArrayOf(7, 6, 5, 4).toByteString(),
+                encapsulated_rxtime = 0xFEDCBA98.toInt(),
+            ),
+        )
+        runCurrent()
+
+        verifySuspend {
+            packetRepository.updateSFPPStatusByHash(
+                any(),
+                MessageStatus.SFPP_CONFIRMED,
+                0xFEDCBA98L,
+            )
+        }
+
+        client.disconnect()
+    }
+
     private fun TestScope.connectedClient(
         storage: StorageProvider,
         myNodeNum: Int = 0x11111111,
@@ -146,12 +216,13 @@ class SdkStateBridgeTest {
     private fun TestScope.buildBridge(
         client: RadioClient,
         nodeRepository: FakeNodeRepository,
+        packetRepository: PacketRepository = mock(MockMode.autofill),
     ): SdkStateBridge =
         SdkStateBridge(
             accessor = TestRadioClientAccessor(client),
             serviceRepository = FakeServiceRepository(),
             nodeRepository = nodeRepository,
-            packetRepository = lazyOf(mock<PacketRepository>(MockMode.autofill)),
+            packetRepository = lazyOf(packetRepository),
             locationManager = NoOpLocationManager,
             uiPrefs = FakeUiPrefs(),
             radioController = FakeRadioController(),
@@ -161,6 +232,23 @@ class SdkStateBridgeTest {
                 default = backgroundScope.coroutineContext[kotlin.coroutines.ContinuationInterceptor] as kotlinx.coroutines.CoroutineDispatcher,
             ),
         )
+
+    private fun FakeRadioTransport.injectSfpp(
+        message: StoreForwardPlusPlus,
+        fromNode: Int = 0x10203040,
+    ) {
+        injectPacket(
+            MeshPacket(
+                id = 1,
+                from = fromNode,
+                to = 0,
+                decoded = Data(
+                    portnum = PortNum.STORE_FORWARD_APP,
+                    payload = StoreForwardPlusPlus.ADAPTER.encode(message).toByteString(),
+                ),
+            ),
+        )
+    }
 
     private class TestRadioClientAccessor(client: RadioClient) : RadioClientAccessor {
         override val client = MutableStateFlow<RadioClient?>(client)

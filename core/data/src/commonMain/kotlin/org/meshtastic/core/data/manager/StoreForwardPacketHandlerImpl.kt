@@ -19,13 +19,9 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import okio.ByteString.Companion.toByteString
-import okio.IOException
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.NodeRepository
@@ -34,14 +30,12 @@ import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.StoreAndForward
-import org.meshtastic.proto.StoreForwardPlusPlus
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Implementation of [StoreForwardPacketHandler] that handles both legacy S&F and SF++ packets.
+ * Implementation of [StoreForwardPacketHandler] that keeps legacy S&F parsing for backward compatibility.
  *
- * Legacy Store-and-Forward discovery/history is now exposed through `RadioClient.storeForward`, but we still keep
- * this parser for backward compatibility and for SF++ handling that the SDK does not fully replace yet.
+ * SF++ parsing/status updates are now delegated to the SDK and consumed via [org.meshtastic.core.data.radio.SdkStateBridge].
  */
 @Single
 class StoreForwardPacketHandlerImpl(
@@ -58,89 +52,8 @@ class StoreForwardPacketHandlerImpl(
         handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
     }
 
-    @Suppress("LongMethod", "ReturnCount")
     override fun handleStoreForwardPlusPlus(packet: MeshPacket) {
-        val payload = packet.decoded?.payload ?: return
-        val sfpp =
-            try {
-                StoreForwardPlusPlus.ADAPTER.decode(payload)
-            } catch (e: IOException) {
-                Logger.e(e) { "Failed to parse StoreForwardPlusPlus packet" }
-                return
-            }
-        Logger.d { "Received StoreForwardPlusPlus packet: $sfpp" }
-
-        when (sfpp.sfpp_message_type) {
-            StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
-            StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF,
-            StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_SECONDHALF,
-            -> handleLinkProvide(sfpp)
-
-            StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE -> handleCanonAnnounce(sfpp)
-
-            StoreForwardPlusPlus.SFPP_message_type.CHAIN_QUERY -> {
-                Logger.i { "SF++: Node ${packet.from} is querying chain status" }
-            }
-
-            StoreForwardPlusPlus.SFPP_message_type.LINK_REQUEST -> {
-                Logger.i { "SF++: Node ${packet.from} is requesting links" }
-            }
-        }
-    }
-
-    private fun handleLinkProvide(sfpp: StoreForwardPlusPlus) {
-        val isFragment = sfpp.sfpp_message_type != StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE
-
-        val status = if (sfpp.commit_hash.size == 0) MessageStatus.SFPP_ROUTING else MessageStatus.SFPP_CONFIRMED
-
-        val hash =
-            when {
-                sfpp.message_hash.size != 0 -> sfpp.message_hash.toByteArray()
-
-                !isFragment && sfpp.message.size != 0 -> {
-                    SfppHasher.computeMessageHash(
-                        encryptedPayload = sfpp.message.toByteArray(),
-                        to =
-                        if (sfpp.encapsulated_to == 0) {
-                            DataPacket.BROADCAST
-                        } else {
-                            sfpp.encapsulated_to
-                        },
-                        from = sfpp.encapsulated_from,
-                        id = sfpp.encapsulated_id,
-                    )
-                }
-
-                else -> null
-            } ?: return
-
-        Logger.d {
-            "SFPP updateStatus: packetId=${sfpp.encapsulated_id} from=${sfpp.encapsulated_from} " +
-                "to=${sfpp.encapsulated_to} myNodeNum=${nodeRepository.myNodeNum.value} status=$status"
-        }
-        scope.handledLaunch {
-            packetRepository.value.updateSFPPStatus(
-                packetId = sfpp.encapsulated_id,
-                from = sfpp.encapsulated_from,
-                to = sfpp.encapsulated_to,
-                hash = hash,
-                status = status,
-                rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
-                myNodeNum = nodeRepository.myNodeNum.value ?: 0,
-            )
-        }
-    }
-
-    private fun handleCanonAnnounce(sfpp: StoreForwardPlusPlus) {
-        scope.handledLaunch {
-            sfpp.message_hash.let {
-                packetRepository.value.updateSFPPStatusByHash(
-                    hash = it.toByteArray(),
-                    status = MessageStatus.SFPP_CONFIRMED,
-                    rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
-                )
-            }
-        }
+        Logger.d { "SFPP packet received from=${packet.from} (handled by SDK)" }
     }
 
     private fun handleReceivedStoreAndForward(dataPacket: DataPacket, s: StoreAndForward, myNodeNum: Int) {

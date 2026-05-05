@@ -28,6 +28,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
+import org.meshtastic.sdk.NeighborInfo as SdkNeighborInfo
 
 @Single
 class NeighborInfoHandlerImpl(
@@ -47,37 +48,33 @@ class NeighborInfoHandlerImpl(
         val payload = packet.decoded?.payload ?: return
         val ni = NeighborInfo.ADAPTER.decode(payload)
 
-        // Store the last neighbor info from our connected radio
         val from = packet.from
         if (from == nodeRepository.myNodeNum.value) {
             lastNeighborInfo = ni
             Logger.d { "Stored last neighbor info from connected radio" }
         }
 
-        // Update Node DB
-        nodeRepository.nodeDBbyNodeNum[from]?.let { /* SDK client.nodes is canonical source */ }
-
-        // Format for UI response
         val requestId = packet.decoded?.request_id ?: 0
         val start = startTimes.value[requestId]
         startTimes.update { it.remove(requestId) }
 
-        val neighbors =
-            ni.neighbors.joinToString("\n") { n ->
-                val user = nodeRepository.getUser(n.node_id)
-                val name = "${user.long_name} (${user.short_name})"
-                "• $name (SNR: ${n.snr})"
-            }
-
-        val fromUser = nodeRepository.getUser(from)
-        val formatted = "Neighbors of ${fromUser.long_name}:\n$neighbors"
+        val formatted =
+            SdkNeighborInfo
+                .fromProto(
+                    reportingNode = from,
+                    neighborNodeIds = ni.neighbors.map { it.node_id },
+                    snrValues = ni.neighbors.map { it.snr },
+                ).format { nodeId ->
+                    val user = nodeRepository.getUser(nodeId.raw)
+                    "${user.long_name} (${user.short_name})"
+                }
 
         val responseText =
             if (start != null) {
                 val elapsedMs = nowMillis - start
                 val seconds = elapsedMs / MILLIS_PER_SECOND
                 Logger.i { "Neighbor info $requestId complete in $seconds s" }
-                "$formatted\n\nDuration: ${NumberFormatter.format(seconds, 1)} s"
+                "$formatted\nDuration: ${NumberFormatter.format(seconds, 1)} s"
             } else {
                 formatted
             }
