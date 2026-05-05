@@ -28,7 +28,6 @@ import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
-import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.toReaction
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -245,7 +244,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     } else {
         withContext(dispatchers.io) {
             val dao = dbManager.currentDb.value.packetDao()
-            ids.chunked(NodeInfoDao.MAX_BIND_PARAMS)
+            ids.chunked(MAX_SQLITE_BIND_PARAMS)
                 .flatMap { dao.getPacketsByPacketIds(it) }
                 .associateBy { it.packet.packetId }
         }
@@ -515,5 +514,6 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         private const val MESSAGES_PAGE_SIZE = 50
         private const val DELETE_CHUNK_SIZE = 500
         private const val MILLISECONDS_IN_SECOND = 1000L
+        private const val MAX_SQLITE_BIND_PARAMS = 999
     }
 }

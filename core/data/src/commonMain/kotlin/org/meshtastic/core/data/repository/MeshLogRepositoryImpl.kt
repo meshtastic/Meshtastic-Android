@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.database.entity.asExternalModel
@@ -36,6 +35,7 @@ import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshLogRepository.Companion.DEFAULT_MAX_LOGS
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
@@ -53,7 +53,7 @@ open class MeshLogRepositoryImpl(
     private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogPrefs: MeshLogPrefs,
-    private val nodeInfoReadDataSource: NodeInfoReadDataSource,
+    private val nodeRepository: NodeRepository,
 ) : MeshLogRepository {
 
     /** Retrieves all [MeshLog]s in the database, up to [maxItem]. */
@@ -142,8 +142,8 @@ open class MeshLogRepositoryImpl(
         .getOrNull()
 
     /** Returns a flow that maps a [nodeNum] to [MeshLog.NODE_NUM_LOCAL] if it is the locally connected node. */
-    private fun effectiveLogId(nodeNum: Int): Flow<Int> = nodeInfoReadDataSource
-        .myNodeInfoFlow()
+    private fun effectiveLogId(nodeNum: Int): Flow<Int> = nodeRepository
+        .myNodeInfo
         .map { info -> if (nodeNum == info?.myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum }
         .distinctUntilChanged()
 
@@ -169,7 +169,7 @@ open class MeshLogRepositoryImpl(
 
     /** Deletes all logs associated with a specific [nodeNum] and [portNum]. */
     override suspend fun deleteLogs(nodeNum: Int, portNum: Int) = withContext(dispatchers.io) {
-        val myNodeNum = nodeInfoReadDataSource.myNodeInfoFlow().firstOrNull()?.myNodeNum
+        val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
         val logId = if (nodeNum == myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum
         dbManager.currentDb.value.meshLogDao().deleteLogs(logId, portNum)
     }

@@ -25,10 +25,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import org.meshtastic.core.testing.FakeMeshLogPrefs
 import org.meshtastic.proto.Data
@@ -47,7 +47,7 @@ abstract class CommonMeshLogRepositoryTest {
 
     protected lateinit var dbProvider: FakeDatabaseProvider
     protected lateinit var meshLogPrefs: FakeMeshLogPrefs
-    protected lateinit var nodeInfoReadDataSource: NodeInfoReadDataSource
+    protected lateinit var nodeRepository: NodeRepository
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
@@ -59,11 +59,11 @@ abstract class CommonMeshLogRepositoryTest {
         dbProvider = FakeDatabaseProvider()
         meshLogPrefs = FakeMeshLogPrefs()
         meshLogPrefs.setLoggingEnabled(true)
-        nodeInfoReadDataSource = mock(MockMode.autofill)
+        nodeRepository = mock(MockMode.autofill)
 
-        every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(null)
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
-        repository = MeshLogRepositoryImpl(dbProvider, dispatchers, meshLogPrefs, nodeInfoReadDataSource)
+        repository = MeshLogRepositoryImpl(dbProvider, dispatchers, meshLogPrefs, nodeRepository)
     }
 
     @AfterTest
@@ -105,9 +105,10 @@ abstract class CommonMeshLogRepositoryTest {
     fun `deleteLogs redirects local node number to NODE_NUM_LOCAL`() = runTest(testDispatcher) {
         val localNodeNum = 999
         val port = PortNum.TEXT_MESSAGE_APP.value
-        val myNodeEntity =
-            MyNodeEntity(
+        val myNodeInfo =
+            MyNodeInfo(
                 myNodeNum = localNodeNum,
+                hasGPS = false,
                 model = "model",
                 firmwareVersion = "1.0",
                 couldUpdate = false,
@@ -117,8 +118,11 @@ abstract class CommonMeshLogRepositoryTest {
                 minAppVersion = 0,
                 maxChannels = 0,
                 hasWifi = false,
+                channelUtilization = 0f,
+                airUtilTx = 0f,
+                deviceId = null,
             )
-        every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(myNodeEntity)
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(myNodeInfo)
 
         val log =
             MeshLog(
