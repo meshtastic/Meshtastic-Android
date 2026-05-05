@@ -30,9 +30,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.MeshConfigHandler
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
@@ -55,7 +56,7 @@ class MeshServiceOrchestratorTest {
     private val takServerManager: TAKServerManager = mock(MockMode.autofill)
     private val takPrefs: TakPrefs = mock(MockMode.autofill)
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
-    private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
+    private val appWidgetUpdater: AppWidgetUpdater = mock(MockMode.autofill)
 
     // TAKMeshIntegration deps (final class — constructed directly)
     private val radioController: RadioController = mock(MockMode.autofill)
@@ -80,6 +81,7 @@ class MeshServiceOrchestratorTest {
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
+        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
         val takMeshIntegration = TAKMeshIntegration(
             takServerManager = takServerManager,
@@ -98,7 +100,8 @@ class MeshServiceOrchestratorTest {
             takMeshIntegration = takMeshIntegration,
             takPrefs = takPrefs,
             databaseManager = databaseManager,
-            connectionManager = connectionManager,
+            serviceRepository = serviceRepository,
+            appWidgetUpdater = appWidgetUpdater,
             dispatchers = dispatchers,
         )
     }

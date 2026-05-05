@@ -99,6 +99,7 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
         freeCompilerArgs.add("-jvm-default=no-compatibility")
+        freeCompilerArgs.add("-Xskip-prerelease-check")
     }
 }
 
@@ -261,6 +262,12 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.proto)
     implementation(projects.core.ble)
+
+    // Meshtastic SDK (composite build — TCP, Serial transports + storage)
+    implementation(libs.sdk.core)
+    implementation(libs.sdk.transport.tcp)
+    implementation(libs.sdk.transport.serial)
+    implementation(libs.sdk.storage.sqldelight)
 
     // Feature modules (JVM variants for real composable wiring)
     implementation(projects.feature.settings)

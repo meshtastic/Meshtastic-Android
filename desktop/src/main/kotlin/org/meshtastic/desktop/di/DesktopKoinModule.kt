@@ -39,7 +39,7 @@ import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.data.radio.RadioClientAccessor
 import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.repository.MQTTRepository
@@ -54,9 +54,8 @@ import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioTransportFactory
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.service.DirectRadioControllerImpl
+import org.meshtastic.core.service.SdkClientLifecycle
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.desktop.DesktopNotificationManager
@@ -67,6 +66,7 @@ import org.meshtastic.desktop.notification.MacOSNotificationSender
 import org.meshtastic.desktop.notification.NativeNotificationSender
 import org.meshtastic.desktop.notification.WindowsNotificationSender
 import org.meshtastic.desktop.radio.DesktopMessageQueue
+import org.meshtastic.desktop.radio.DesktopRadioClientProvider
 import org.meshtastic.desktop.radio.DesktopRadioTransportFactory
 import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
 import org.meshtastic.desktop.stub.NoopCompassHeadingProvider
@@ -77,7 +77,6 @@ import org.meshtastic.desktop.stub.NoopMeshLocationManager
 import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
-import org.meshtastic.desktop.stub.NoopServiceBroadcasts
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.MagneticFieldProvider
 import org.meshtastic.feature.node.compass.PhoneLocationProvider
@@ -159,17 +158,10 @@ private fun desktopPlatformStubsModule() = module {
             connectionFactory = get(),
         )
     }
-    single<RadioController> {
-        DirectRadioControllerImpl(
-            serviceRepository = get(),
-            nodeRepository = get(),
-            commandSender = get(),
-            router = get(),
-            nodeManager = get(),
-            radioInterfaceService = get(),
-            locationManager = get(),
-        )
-    }
+    // SDK-backed RadioClient lifecycle — replaces DirectRadioControllerImpl
+    single { DesktopRadioClientProvider(radioPrefs = get()) }
+    single<RadioClientAccessor> { get<DesktopRadioClientProvider>() }
+    single<SdkClientLifecycle> { get<DesktopRadioClientProvider>() }
     single<NativeNotificationSender> {
         when (DesktopOS.current()) {
             DesktopOS.Linux -> LinuxNotificationSender()
@@ -181,7 +173,6 @@ private fun desktopPlatformStubsModule() = module {
     single<NotificationManager> { get<DesktopNotificationManager>() }
     single<MeshServiceNotifications> { DesktopMeshServiceNotifications(notificationManager = get()) }
     single<PlatformAnalytics> { NoopPlatformAnalytics() }
-    single<ServiceBroadcasts> { NoopServiceBroadcasts() }
     single<AppWidgetUpdater> { NoopAppWidgetUpdater() }
     single<MeshWorkerManager> { NoopMeshWorkerManager() }
     single<MessageQueue> { DesktopMessageQueue(packetRepository = get(), radioController = get(), dispatchers = get()) }

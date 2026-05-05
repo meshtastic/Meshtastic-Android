@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.radio
+package org.meshtastic.desktop.radio
 
-import android.content.Context
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.koin.core.annotation.Single
 import org.meshtastic.core.data.radio.RadioClientAccessor
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.repository.RadioPrefs
@@ -36,99 +34,96 @@ import org.meshtastic.sdk.AutoReconnectConfig
 import org.meshtastic.sdk.RadioClient
 import org.meshtastic.sdk.RadioTransport
 import org.meshtastic.sdk.storage.sqldelight.SqlDelightStorageProvider
-import org.meshtastic.sdk.transport.ble.BleTransport
-import org.meshtastic.sdk.transport.serial.AndroidSerialPorts
+import org.meshtastic.sdk.transport.serial.JvmSerialPorts
 import org.meshtastic.sdk.transport.tcp.TcpTransport
 
 /**
- * Holds the active [RadioClient] and orchestrates connect/disconnect lifecycle.
+ * Desktop (JVM) implementation of [RadioClientAccessor].
  *
- * This is the SDK integration point for the POC. The [RadioClient] is exposed as a [StateFlow] so ViewModels and the
- * service can react to connection changes with `flatMapLatest`.
+ * Supports BLE (Kable JVM — macOS/Windows/Linux), TCP, and Serial (jSerialComm) transports.
+ * Storage uses file-system backed SqlDelightStorageProvider with a platform-appropriate data dir.
+ *
+ * Registered manually in [desktopPlatformStubsModule] — do NOT add @Single to avoid
+ * double-registration with the @ComponentScan in DesktopDiModule.
  */
-@Single(binds = [SdkClientLifecycle::class, RadioClientAccessor::class])
-class RadioClientProvider(
-    private val context: Context,
+class DesktopRadioClientProvider(
     private val radioPrefs: RadioPrefs,
-) : SdkClientLifecycle, RadioClientAccessor {
-    private val _client = MutableStateFlow<RadioClient?>(null)
+) : RadioClientAccessor, SdkClientLifecycle {
 
-    /** Active [RadioClient], or `null` when disconnected or between connections. */
+    private val _client = MutableStateFlow<RadioClient?>(null)
     override val client: StateFlow<RadioClient?> = _client.asStateFlow()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
 
     /**
-     * Tear down the existing client (if any) and build + connect a new one using the current saved radio address from
-     * [RadioPrefs].
+     * Tear down the existing client (if any) and build + connect a new one using the current
+     * saved radio address from [RadioPrefs].
      *
-     * Supports BLE (`x` prefix), TCP (`t` prefix, format `tHOST:PORT`), and Serial (`s` prefix, format `sPORTNAME`).
+     * Supports BLE (`x` prefix), TCP (`t` prefix, format `tHOST:PORT`), and Serial (`s` prefix).
      */
     suspend fun rebuildAndConnect() = mutex.withLock {
-        val rawAddress =
-            radioPrefs.devAddr.value
-                ?: run {
-                    Logger.w { "RadioClientProvider: no saved device address — skipping connect" }
-                    return@withLock
-                }
+        val rawAddress = radioPrefs.devAddr.value
+            ?: run {
+                Logger.w { "DesktopRadioClientProvider: no saved device address — skipping connect" }
+                return@withLock
+            }
 
         val interfaceChar = rawAddress.firstOrNull() ?: run {
-            Logger.w { "RadioClientProvider: empty address — skipping connect" }
+            Logger.w { "DesktopRadioClientProvider: empty address — skipping connect" }
             return@withLock
         }
-        val addressPayload = rawAddress.substring(1) // strip leading interface char
+        val addressPayload = rawAddress.substring(1)
 
         val transport: RadioTransport = when (InterfaceId.forIdChar(interfaceChar)) {
             InterfaceId.BLUETOOTH -> {
-                Logger.i { "RadioClientProvider: building BLE transport for $addressPayload" }
-                BleTransport(addressPayload) { autoConnectIf { true } }
+                // BLE on Desktop requires a Kable Peripheral (obtained via Scanner in the connections UI).
+                // Direct MAC-address construction is Android-only. Desktop BLE is handled by the
+                // connections feature via DesktopRadioTransportFactory; skip SDK client for BLE for now.
+                Logger.w { "DesktopRadioClientProvider: BLE not yet supported via SDK — use connections UI" }
+                return@withLock
             }
 
             InterfaceId.TCP -> {
                 val (host, port) = parseTcpAddress(addressPayload)
-                Logger.i { "RadioClientProvider: building TCP transport for $host:$port" }
+                Logger.i { "DesktopRadioClientProvider: building TCP transport for $host:$port" }
                 TcpTransport(host, port)
             }
 
             InterfaceId.SERIAL -> {
-                Logger.i { "RadioClientProvider: building Serial transport for $addressPayload" }
-                AndroidSerialPorts.init(context)
-                AndroidSerialPorts.open(addressPayload)
+                Logger.i { "DesktopRadioClientProvider: building Serial transport for $addressPayload" }
+                JvmSerialPorts.open(addressPayload)
             }
 
             InterfaceId.MOCK, InterfaceId.NOP, null -> {
-                Logger.w { "RadioClientProvider: unsupported transport type '$interfaceChar' ($rawAddress)" }
+                Logger.w { "DesktopRadioClientProvider: unsupported transport '$interfaceChar' ($rawAddress)" }
                 return@withLock
             }
         }
 
-        // Clear first so observers see null during teardown
         val old = _client.value
         _client.value = null
-        old?.let { runCatching { it.disconnect() }.onFailure { e -> Logger.w(e) { "disconnect old client" } } }
+        old?.let { runCatching { it.disconnect() }.onFailure { e -> Logger.w(e) { "disconnect old" } } }
 
-        val newClient =
-            RadioClient.Builder()
-                .transport(transport)
-                .storage(SqlDelightStorageProvider(baseDir = context.filesDir.absolutePath))
-                .autoReconnect(AutoReconnectConfig()) // enabled=true; Disabled is SDK default — must opt in
-                .build()
+        val newClient = RadioClient.Builder()
+            .transport(transport)
+            .storage(SqlDelightStorageProvider(baseDir = storageDir()))
+            .autoReconnect(AutoReconnectConfig())
+            .build()
 
         _client.value = newClient
         newClient.connect()
 
-        Logger.i { "RadioClientProvider: client connected via ${InterfaceId.forIdChar(interfaceChar)}" }
+        Logger.i { "DesktopRadioClientProvider: connected via ${InterfaceId.forIdChar(interfaceChar)}" }
     }
 
-    /** Fire-and-forget version of [rebuildAndConnect] for non-suspending call sites. */
     override fun rebuildAndConnectAsync() {
         scope.launch {
-            runCatching { rebuildAndConnect() }.onFailure { e -> Logger.e(e) { "RadioClientProvider: connect failed" } }
+            runCatching { rebuildAndConnect() }
+                .onFailure { e -> Logger.e(e) { "DesktopRadioClientProvider: connect failed" } }
         }
     }
 
-    /** Disconnect and clear the active client. */
     override fun disconnect() {
         scope.launch {
             mutex.withLock {
@@ -142,12 +137,22 @@ class RadioClientProvider(
     companion object {
         private const val DEFAULT_TCP_PORT = 4403
 
-        /** Parse "host:port" or "host" (uses default port 4403). */
         private fun parseTcpAddress(payload: String): Pair<String, Int> {
             val parts = payload.split(":")
             val host = parts[0]
             val port = parts.getOrNull(1)?.toIntOrNull() ?: DEFAULT_TCP_PORT
             return host to port
+        }
+
+        /** Platform-appropriate storage directory for SDK state (channels, nodeDB, etc.). */
+        private fun storageDir(): String {
+            val os = System.getProperty("os.name", "").lowercase()
+            val home = System.getProperty("user.home", ".")
+            return when {
+                os.contains("mac") -> "$home/Library/Application Support/Meshtastic/sdk"
+                os.contains("win") -> "${System.getenv("APPDATA") ?: home}/Meshtastic/sdk"
+                else -> "${System.getenv("XDG_DATA_HOME") ?: "$home/.local/share"}/meshtastic/sdk"
+            }
         }
     }
 }

@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.radio
+package org.meshtastic.core.data.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.StateFlow
-import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
@@ -42,37 +42,35 @@ import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.RadioClient
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * [RadioController] implementation that delegates all operations through the meshtastic-sdk.
+ * Shared KMP [RadioController] implementation that delegates all operations through the meshtastic-sdk.
  *
- * This replaces [org.meshtastic.core.service.AndroidRadioControllerImpl] in the hard-cutover POC. Feature modules
- * continue injecting [RadioController] and get SDK-backed behavior without code changes.
+ * Feature modules inject [RadioController] and get SDK-backed behavior without needing platform-specific code.
  *
  * **Command dispatch:** All admin, telemetry, and routing operations go through [RadioClient.admin],
  * [RadioClient.telemetry], and [RadioClient.routing] respectively.
  *
- * **State distribution:** Handled separately by [SdkStateBridge], which feeds SDK flows back into
+ * **State distribution:** Handled by [SdkStateBridge], which feeds SDK flows into
  * [ServiceRepository] and [org.meshtastic.core.repository.NodeManager].
  */
 @Single(binds = [RadioController::class])
 @Suppress("TooManyFunctions", "LongParameterList")
-class SdkRadioControllerImpl(
-    private val provider: RadioClientProvider,
+class SdkRadioController(
+    private val accessor: RadioClientAccessor,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val locationManager: MeshLocationManager,
 ) : RadioController {
 
-    private val packetIdCounter = AtomicInteger(1)
+    private val packetIdCounter = atomic(1)
 
     private val client: RadioClient?
-        get() = provider.client.value
+        get() = accessor.client.value
 
     private fun requireClient(): RadioClient {
         return client ?: run {
-            Logger.w { "SdkRadioControllerImpl: no active RadioClient" }
+            Logger.w { "SdkRadioController: no active RadioClient" }
             throw IllegalStateException("RadioClient not connected")
         }
     }
@@ -105,7 +103,7 @@ class SdkRadioControllerImpl(
             channel = packet.channel,
             decoded = Data(
                 portnum = PortNum.fromValue(packet.dataType) ?: PortNum.UNKNOWN_APP,
-                payload = packet.bytes ?: ByteString.EMPTY,
+                payload = packet.bytes ?: okio.ByteString.EMPTY,
                 want_response = false,
             ),
         )
@@ -272,7 +270,12 @@ class SdkRadioControllerImpl(
         if (isLocalNode(destNum)) {
             c.admin.getCannedMessages()
         } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(get_canned_message_module_messages_request = true), wantResponse = true)
+            sendRemoteAdmin(
+                c,
+                destNum,
+                AdminMessage(get_canned_message_module_messages_request = true),
+                wantResponse = true,
+            )
         }
     }
 
@@ -281,7 +284,12 @@ class SdkRadioControllerImpl(
         if (isLocalNode(destNum)) {
             c.admin.getDeviceConnectionStatus()
         } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(get_device_connection_status_request = true), wantResponse = true)
+            sendRemoteAdmin(
+                c,
+                destNum,
+                AdminMessage(get_device_connection_status_request = true),
+                wantResponse = true,
+            )
         }
     }
 
@@ -366,7 +374,6 @@ class SdkRadioControllerImpl(
 
     override suspend fun requestUserInfo(destNum: Int) {
         val c = client ?: return
-        // Send an empty NODEINFO_APP packet with want_response to request user info
         c.send(
             MeshPacket(
                 to = destNum,
@@ -388,7 +395,6 @@ class SdkRadioControllerImpl(
     override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
         val c = requireClient()
         val node = NodeId(destNum)
-        // TelemetryType enum values: 0=DEVICE, 1=ENVIRONMENT, 2=AIR_QUALITY, 3=POWER, 4=LOCAL_STATS, 5=HEALTH
         when (typeValue) {
             0 -> c.telemetry.requestDevice(node)
             1 -> c.telemetry.requestEnvironment(node)
@@ -411,7 +417,6 @@ class SdkRadioControllerImpl(
 
     override suspend fun beginEditSettings(destNum: Int) {
         val c = client ?: return
-        // Send raw begin_edit_settings admin message for compatibility with the split begin/commit pattern
         val msg = AdminMessage(begin_edit_settings = true)
         val target = if (isLocalNode(destNum)) NodeId(c.ownNode.value?.num ?: 0) else NodeId(destNum)
         sendRemoteAdmin(c, target.raw, msg)
@@ -429,7 +434,7 @@ class SdkRadioControllerImpl(
     override fun getPacketId(): Int = packetIdCounter.getAndIncrement()
 
     override fun startProvideLocation() {
-        // Location provision is managed at the app level; no-op until bridge wires it
+        // Location provision is managed at the app level; no-op here
     }
 
     override fun stopProvideLocation() {
@@ -437,8 +442,7 @@ class SdkRadioControllerImpl(
     }
 
     override fun setDeviceAddress(address: String) {
-        // Changing device address requires rebuilding the SDK client connection
-        provider.rebuildAndConnectAsync()
+        accessor.rebuildAndConnectAsync()
     }
 
     // ── Private helpers ─────────────────────────────────────────────────────
@@ -449,10 +453,6 @@ class SdkRadioControllerImpl(
         return destNum == ownNum
     }
 
-    /**
-     * Sends a raw admin message to a remote node via the SDK's send path.
-     * Used for remote-admin operations where destNum != local node.
-     */
     private suspend fun sendRemoteAdmin(
         c: RadioClient,
         destNum: Int,

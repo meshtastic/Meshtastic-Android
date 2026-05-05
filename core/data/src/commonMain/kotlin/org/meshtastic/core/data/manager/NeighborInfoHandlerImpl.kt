@@ -26,7 +26,6 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
@@ -35,7 +34,6 @@ import org.meshtastic.proto.NeighborInfo
 class NeighborInfoHandlerImpl(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
-    private val serviceBroadcasts: ServiceBroadcasts,
     private val nodeRepository: NodeRepository,
 ) : NeighborInfoHandler {
 
@@ -59,7 +57,7 @@ class NeighborInfoHandlerImpl(
         }
 
         // Update Node DB
-        nodeManager.nodeDBbyNodeNum[from]?.let { serviceBroadcasts.broadcastNodeChange(it) }
+        nodeManager.nodeDBbyNodeNum[from]?.let { /* SDK client.nodes is canonical source */ }
 
         // Format for UI response
         val requestId = packet.decoded?.request_id ?: 0

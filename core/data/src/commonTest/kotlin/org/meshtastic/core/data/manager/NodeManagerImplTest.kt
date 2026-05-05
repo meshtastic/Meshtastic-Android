@@ -25,7 +25,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
@@ -43,7 +42,6 @@ import org.meshtastic.proto.Position as ProtoPosition
 class NodeManagerImplTest {
 
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
-    private val serviceBroadcasts: ServiceBroadcasts = mock(MockMode.autofill)
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
     private val testScope = TestScope()
 
@@ -51,7 +49,7 @@ class NodeManagerImplTest {
 
     @BeforeTest
     fun setUp() {
-        nodeManager = NodeManagerImpl(nodeRepository, serviceBroadcasts, notificationManager, testScope)
+        nodeManager = NodeManagerImpl(nodeRepository, notificationManager, testScope)
     }
 
     @Test

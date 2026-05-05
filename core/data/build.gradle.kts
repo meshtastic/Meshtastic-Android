@@ -44,6 +44,9 @@ kotlin {
             implementation(projects.core.proto)
             implementation(projects.core.takserver)
 
+            // Meshtastic SDK — shared RadioController and StateBridge implementations
+            api(libs.sdk.core)
+
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.androidx.paging.common)
             implementation(libs.kotlinx.serialization.json)
@@ -69,6 +72,7 @@ kotlin {
         commonTest.dependencies {
             implementation(projects.core.testing)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.sdk.testing)
         }
     }
 }

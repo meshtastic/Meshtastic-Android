@@ -28,7 +28,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
@@ -48,7 +47,6 @@ import kotlin.time.Duration.Companion.milliseconds
 @Single
 class TelemetryPacketHandlerImpl(
     private val nodeManager: NodeManager,
-    private val connectionManager: Lazy<MeshConnectionManager>,
     private val notificationManager: NotificationManager,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : TelemetryPacketHandler {
@@ -66,9 +64,8 @@ class TelemetryPacketHandlerImpl(
         Logger.d { "Telemetry from ${packet.from}: ${Telemetry.ADAPTER.toOneLiner(t)}" }
         val fromNum = packet.from
         val isRemote = (fromNum != myNodeNum)
-        if (!isRemote) {
-            connectionManager.value.updateTelemetry(t)
-        }
+        // Note: Local telemetry notification update was previously handled by
+        // MeshConnectionManager.updateTelemetry(), now managed via SDK flows.
 
         nodeManager.updateNode(fromNum) { node: Node ->
             val metrics = t.device_metrics

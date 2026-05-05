@@ -30,7 +30,6 @@ import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -43,7 +42,6 @@ import kotlin.time.Duration.Companion.milliseconds
 class StoreForwardPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val packetRepository: Lazy<PacketRepository>,
-    private val serviceBroadcasts: ServiceBroadcasts,
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,
     @Named("ServiceScope") private val scope: CoroutineScope,
@@ -125,7 +123,6 @@ class StoreForwardPacketHandlerImpl(
                 rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
                 myNodeNum = nodeManager.myNodeNum.value ?: 0,
             )
-            serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulated_id, status)
         }
     }
 

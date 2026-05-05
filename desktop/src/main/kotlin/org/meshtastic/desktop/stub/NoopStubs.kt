@@ -28,12 +28,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
-import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
@@ -43,7 +40,6 @@ import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.mqtt.ConnectionState as MqttConnectionState
 import org.meshtastic.proto.Position as ProtoPosition
@@ -120,18 +116,6 @@ class NoopPlatformAnalytics : PlatformAnalytics {
     override fun setDeviceAttributes(firmwareVersion: String, model: String) {}
 
     override val isPlatformServicesAvailable: Boolean = false
-}
-
-class NoopServiceBroadcasts : ServiceBroadcasts {
-    override fun subscribeReceiver(receiverName: String, packageName: String) {}
-
-    override fun broadcastReceivedData(dataPacket: DataPacket) {}
-
-    override fun broadcastConnection() {}
-
-    override fun broadcastNodeChange(node: Node) {}
-
-    override fun broadcastMessageStatus(packetId: Int, status: MessageStatus) {}
 }
 
 class NoopAppWidgetUpdater : AppWidgetUpdater {

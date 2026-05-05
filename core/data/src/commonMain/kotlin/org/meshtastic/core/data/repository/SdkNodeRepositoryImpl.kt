@@ -23,12 +23,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.database.entity.NodeMetadataEntity
 import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshLog
@@ -50,12 +53,13 @@ import org.meshtastic.proto.User
  * SDK's NodeChange flow (bridged through SdkStateBridge).
  *
  * Cold start: nodes are empty until the SDK emits its snapshot from storage (<1s).
- * Node notes: stored in-memory for this POC (will not survive process death).
+ * Node metadata (favorites, notes, ignored, muted) persists via Room's node_metadata table.
  */
 @Single(binds = [NodeRepository::class])
 @Suppress("TooManyFunctions")
 class SdkNodeRepositoryImpl(
     private val localStatsDataSource: LocalStatsDataSource,
+    private val dbManager: DatabaseProvider,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : NodeRepository {
 
@@ -63,8 +67,15 @@ class SdkNodeRepositoryImpl(
     private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
     private val _myNodeNum = MutableStateFlow<Int?>(null)
 
-    // Local-only notes storage (in-memory for POC; does not survive process death)
-    private val nodeNotes = MutableStateFlow<Map<Int, String>>(emptyMap())
+    // Cached metadata from Room (loaded on init, updated on writes)
+    private val _metadataCache = MutableStateFlow<Map<Int, NodeMetadataEntity>>(emptyMap())
+
+    init {
+        scope.launch {
+            dbManager.currentDb.flatMapLatest { db -> db.nodeMetadataDao().getAllFlow() }
+                .collect { list -> _metadataCache.value = list.associateBy { it.num } }
+        }
+    }
 
     override val nodeDBbyNum: StateFlow<Map<Int, Node>> = _nodeDBbyNum
 
@@ -151,11 +162,20 @@ class SdkNodeRepositoryImpl(
     }
 
     override suspend fun upsert(node: Node) {
-        _nodeDBbyNum.update { map -> map + (node.num to node) }
-        // Also keep _myNodeNum consistent
-        if (node.num == _myNodeNum.value) {
-            // ourNodeInfo will auto-update via combine
+        // Merge persisted metadata with incoming node data
+        val meta = _metadataCache.value[node.num]
+        val enriched = if (meta != null) {
+            node.copy(
+                isFavorite = meta.isFavorite,
+                isIgnored = meta.isIgnored,
+                isMuted = meta.isMuted,
+                notes = meta.notes,
+                manuallyVerified = meta.manuallyVerified,
+            )
+        } else {
+            node
         }
+        _nodeDBbyNum.update { map -> map + (enriched.num to enriched) }
     }
 
     override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) {
@@ -178,12 +198,12 @@ class SdkNodeRepositoryImpl(
 
     override suspend fun deleteNode(num: Int) {
         _nodeDBbyNum.update { it - num }
-        nodeNotes.update { it - num }
+        dbManager.withDb { it.nodeMetadataDao().delete(num) }
     }
 
     override suspend fun deleteNodes(nodeNums: List<Int>) {
         _nodeDBbyNum.update { map -> map - nodeNums.toSet() }
-        nodeNotes.update { notes -> notes - nodeNums.toSet() }
+        dbManager.withDb { db -> nodeNums.forEach { db.nodeMetadataDao().delete(it) } }
     }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
@@ -193,7 +213,8 @@ class SdkNodeRepositoryImpl(
         _nodeDBbyNum.value.values.filter { it.user.hw_model == HardwareModel.UNSET }
 
     override suspend fun setNodeNotes(num: Int, notes: String) {
-        nodeNotes.update { it + (num to notes) }
+        ensureMetadataExists(num)
+        dbManager.withDb { it.nodeMetadataDao().setNotes(num, notes) }
         _nodeDBbyNum.update { map ->
             val node = map[num] ?: return@update map
             map + (num to node.copy(notes = notes))
@@ -210,6 +231,13 @@ class SdkNodeRepositoryImpl(
     /** Called by [NodeManager] to set the local node number for ourNodeInfo/myId derivation. */
     fun setMyNodeNum(num: Int?) {
         _myNodeNum.value = num
+    }
+
+    /** Ensures a metadata row exists for the given node, creating a default if needed. */
+    private suspend fun ensureMetadataExists(num: Int) {
+        if (_metadataCache.value[num] == null) {
+            dbManager.withDb { it.nodeMetadataDao().upsert(NodeMetadataEntity(num = num)) }
+        }
     }
 
     private fun sortComparator(sort: NodeSortOption): Comparator<Node> = when (sort) {

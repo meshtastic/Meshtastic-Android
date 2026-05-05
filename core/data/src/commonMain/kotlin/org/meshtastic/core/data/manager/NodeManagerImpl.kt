@@ -41,7 +41,6 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.data.repository.SdkNodeRepositoryImpl
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.new_node_seen
@@ -60,7 +59,6 @@ import org.meshtastic.proto.Position as ProtoPosition
 @Single(binds = [NodeManager::class, NodeIdLookup::class])
 class NodeManagerImpl(
     private val nodeRepository: NodeRepository,
-    private val serviceBroadcasts: ServiceBroadcasts,
     private val notificationManager: NotificationManager,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : NodeManager {
@@ -197,9 +195,7 @@ class NodeManagerImpl(
             scope.handledLaunch { nodeRepository.upsert(result) }
         }
 
-        if (withBroadcast) {
-            serviceBroadcasts.broadcastNodeChange(result)
-        }
+
     }
 
     override fun handleReceivedUser(fromNum: Int, p: User, channel: Int, manuallyVerified: Boolean) {

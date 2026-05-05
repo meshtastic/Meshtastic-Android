@@ -36,7 +36,6 @@ import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -50,7 +49,6 @@ class StoreForwardPacketHandlerImplTest {
 
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val packetRepository = mock<PacketRepository>(MockMode.autofill)
-    private val serviceBroadcasts = mock<ServiceBroadcasts>(MockMode.autofill)
     private val historyManager = mock<HistoryManager>(MockMode.autofill)
     private val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
 
@@ -69,7 +67,6 @@ class StoreForwardPacketHandlerImplTest {
             StoreForwardPacketHandlerImpl(
                 nodeManager = nodeManager,
                 packetRepository = lazy { packetRepository },
-                serviceBroadcasts = serviceBroadcasts,
                 historyManager = historyManager,
                 dataHandler = lazy { dataHandler },
                 scope = testScope,
@@ -222,7 +219,6 @@ class StoreForwardPacketHandlerImplTest {
         advanceUntilIdle()
 
         verifySuspend { packetRepository.updateSFPPStatus(any(), any(), any(), any(), any(), any(), any()) }
-        verify { serviceBroadcasts.broadcastMessageStatus(42, any()) }
     }
 
     // ---------- SF++: CANON_ANNOUNCE ----------

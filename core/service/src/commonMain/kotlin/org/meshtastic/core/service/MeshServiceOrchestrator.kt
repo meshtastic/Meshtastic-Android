@@ -27,10 +27,11 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServerManager
@@ -53,7 +54,8 @@ class MeshServiceOrchestrator(
     private val takMeshIntegration: TAKMeshIntegration,
     private val takPrefs: TakPrefs,
     private val databaseManager: DatabaseManager,
-    private val connectionManager: MeshConnectionManager,
+    private val serviceRepository: ServiceRepository,
+    private val appWidgetUpdater: AppWidgetUpdater,
     private val dispatchers: CoroutineDispatchers,
 ) {
     // Per-start coroutine scope. A fresh scope is created on each start() and cancelled on stop(), so all collectors
@@ -86,7 +88,21 @@ class MeshServiceOrchestrator(
         scope = newScope
 
         serviceNotifications.initChannels()
-        connectionManager.updateStatusNotification()
+        serviceNotifications.updateServiceStateNotification(serviceRepository.connectionState.value, null)
+
+        // Keep notification in sync with connection state changes
+        serviceRepository.connectionState
+            .onEach { state -> serviceNotifications.updateServiceStateNotification(state, null) }
+            .launchIn(newScope)
+
+        // Kickstart app widget
+        newScope.handledLaunch {
+            try {
+                appWidgetUpdater.updateAll()
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "Failed to kickstart LocalStatsWidget" }
+            }
+        }
 
         // Observe TAK server pref to start/stop
         takPrefs.isTakServerEnabled
@@ -106,10 +122,6 @@ class MeshServiceOrchestrator(
             databaseManager.switchActiveDatabase(radioInterfaceService.getDeviceAddress())
             Logger.i { "Per-device database initialized" }
         }
-
-        // NOTE: Radio connection, packet routing, and ServiceAction dispatch are now handled
-        // by RadioClientProvider + SdkStateBridge. The old radioInterfaceService.connect() /
-        // receivedData / serviceAction subscription paths are no longer needed.
 
         nodeManager.loadCachedNodeDB()
     }

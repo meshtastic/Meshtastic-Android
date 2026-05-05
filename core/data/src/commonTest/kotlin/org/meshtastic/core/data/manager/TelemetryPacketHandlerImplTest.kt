@@ -27,7 +27,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.proto.Data
@@ -44,7 +43,6 @@ import kotlin.test.Test
 class TelemetryPacketHandlerImplTest {
 
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
-    private val connectionManager = mock<MeshConnectionManager>(MockMode.autofill)
     private val notificationManager = mock<NotificationManager>(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
@@ -60,7 +58,6 @@ class TelemetryPacketHandlerImplTest {
         handler =
             TelemetryPacketHandlerImpl(
                 nodeManager = nodeManager,
-                connectionManager = lazy { connectionManager },
                 notificationManager = notificationManager,
                 scope = testScope,
             )
@@ -87,7 +84,7 @@ class TelemetryPacketHandlerImplTest {
     // ---------- Device metrics from local node ----------
 
     @Test
-    fun `local device metrics updates telemetry on connectionManager`() = testScope.runTest {
+    fun `local device metrics updates node`() = testScope.runTest {
         val telemetry =
             Telemetry(time = 1700000000, device_metrics = DeviceMetrics(battery_level = 80, voltage = 4.1f))
         val packet = makeTelemetryPacket(myNodeNum, telemetry)
@@ -96,14 +93,13 @@ class TelemetryPacketHandlerImplTest {
         handler.handleTelemetry(packet, dataPacket, myNodeNum)
         advanceUntilIdle()
 
-        verify { connectionManager.updateTelemetry(any()) }
         verify { nodeManager.updateNode(myNodeNum, any(), any(), any()) }
     }
 
     // ---------- Device metrics from remote node ----------
 
     @Test
-    fun `remote device metrics updates node but not connectionManager`() = testScope.runTest {
+    fun `remote device metrics updates node`() = testScope.runTest {
         val telemetry =
             Telemetry(time = 1700000000, device_metrics = DeviceMetrics(battery_level = 90, voltage = 4.2f))
         val packet = makeTelemetryPacket(remoteNodeNum, telemetry)

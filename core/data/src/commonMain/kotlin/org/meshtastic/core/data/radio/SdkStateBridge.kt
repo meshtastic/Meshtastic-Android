@@ -14,24 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.radio
+package org.meshtastic.core.data.radio
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState as AppConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Data
@@ -52,28 +57,23 @@ import org.meshtastic.sdk.NodeId
  * and [NodeManager] so that existing feature-module UI code (which observes those repositories)
  * continues to work without modification.
  *
- * **Node state:** The SDK's [NodeChange] flow provides fully-updated [NodeInfo] instances that
- * already include position, telemetry, and user changes. No manual packet decoding is needed.
- *
- * **Packets:** Raw [MeshPacket]s are forwarded to [ServiceRepository.emitMeshPacket] for
- * consumers that need them (RadioConfigViewModel admin responses, TAK integration).
- *
- * **ServiceActions:** Handled inline via SDK [AdminApi] — eliminates the old
- * MeshServiceOrchestrator → MeshActionHandler → CommandSender dispatch chain.
- *
- * **Lifecycle:** Created as a Koin `@Single`. Automatically subscribes to [RadioClientProvider.client]
+ * **Lifecycle:** Created as a Koin `@Single`. Automatically subscribes to [RadioClientAccessor.client]
  * and starts/stops collection as clients come and go.
  */
 @Single
 @Suppress("TooManyFunctions")
 class SdkStateBridge(
-    private val provider: RadioClientProvider,
+    private val accessor: RadioClientAccessor,
     private val serviceRepository: ServiceRepository,
     private val nodeManager: NodeManager,
     private val packetRepository: Lazy<PacketRepository>,
+    private val locationManager: MeshLocationManager,
+    private val uiPrefs: UiPrefs,
+    private val radioController: RadioController,
     private val dispatchers: CoroutineDispatchers,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
+    private var locationJob: Job? = null
 
     init {
         startBridge()
@@ -82,13 +82,13 @@ class SdkStateBridge(
     private fun startBridge() {
 
         // ── Connection state ────────────────────────────────────────────────
-        provider.client
+        accessor.client
             .flatMapLatest { client -> client?.connection ?: flowOf(SdkConnectionState.Disconnected) }
             .onEach { sdkState -> serviceRepository.setConnectionState(mapConnectionState(sdkState)) }
             .launchIn(scope)
 
         // ── Node updates (position, telemetry, user all included in NodeInfo) ─
-        provider.client
+        accessor.client
             .flatMapLatest { client -> client?.nodes ?: flowOf() }
             .onEach { change ->
                 when (change) {
@@ -107,19 +107,19 @@ class SdkStateBridge(
             .launchIn(scope)
 
         // ── Own node identity ───────────────────────────────────────────────
-        provider.client
+        accessor.client
             .flatMapLatest { client -> client?.ownNode ?: flowOf(null) }
             .onEach { ownNode -> if (ownNode != null) nodeManager.setMyNodeNum(ownNode.num) }
             .launchIn(scope)
 
         // ── Raw packet forward (for RadioConfigViewModel + TAK) ─────────────
-        provider.client
+        accessor.client
             .flatMapLatest { client -> client?.packets ?: flowOf() }
             .onEach { packet -> serviceRepository.emitMeshPacket(packet) }
             .launchIn(scope)
 
         // ── Events (notifications, security, backpressure) ──────────────────
-        provider.client
+        accessor.client
             .flatMapLatest { client -> client?.events ?: flowOf() }
             .onEach { event ->
                 when (event) {
@@ -141,13 +141,43 @@ class SdkStateBridge(
             .onEach { action -> handleServiceAction(action) }
             .launchIn(scope)
 
+        // ── Location publishing ─────────────────────────────────────────────
+        accessor.client
+            .flatMapLatest { client -> client?.ownNode ?: flowOf(null) }
+            .onEach { ownNode ->
+                locationJob?.cancel()
+                locationJob = null
+                if (ownNode != null) {
+                    locationJob = uiPrefs.shouldProvideNodeLocation(ownNode.num)
+                        .onEach { shouldProvide ->
+                            if (shouldProvide) {
+                                locationManager.start(scope) { pos ->
+                                    scope.launch {
+                                        val packet = DataPacket(
+                                            bytes = okio.ByteString.of(
+                                                *org.meshtastic.proto.Position.ADAPTER.encode(pos),
+                                            ),
+                                            dataType = PortNum.POSITION_APP.value,
+                                        )
+                                        radioController.sendMessage(packet)
+                                    }
+                                }
+                            } else {
+                                locationManager.stop()
+                            }
+                        }
+                        .launchIn(scope)
+                }
+            }
+            .launchIn(scope)
+
         Logger.i { "SdkStateBridge started — SDK owns transport + ServiceAction dispatch" }
     }
 
     // ── ServiceAction handling ───────────────────────────────────────────────
 
     private suspend fun handleServiceAction(action: ServiceAction) {
-        val client = provider.client.value
+        val client = accessor.client.value
         if (client == null) {
             Logger.w { "[SdkBridge] ServiceAction ${action::class.simpleName} dropped — no client" }
             if (action is ServiceAction.SendContact) action.result.complete(false)

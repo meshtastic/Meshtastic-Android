@@ -46,9 +46,7 @@ class DesktopMessageQueue(
 
             // Verify we are connected before attempting to send to avoid unnecessary Exception bubbling
             if (radioController.connectionState.value != ConnectionState.Connected) {
-                // In a real desktop environment, we might want a background loop to retry queued messages.
-                // For now, it will retry when connection is re-established (handled by
-                // MeshConnectionManager.onRadioConfigLoaded).
+                // Queued messages will be retried when connection is re-established.
                 return@launch
             }
 

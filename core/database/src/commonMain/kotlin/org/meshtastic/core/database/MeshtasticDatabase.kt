@@ -23,11 +23,14 @@ import androidx.room3.DeleteTable
 import androidx.room3.RoomDatabase
 import androidx.room3.TypeConverters
 import androidx.room3.migration.AutoMigrationSpec
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.dao.NodeInfoDao
+import org.meshtastic.core.database.dao.NodeMetadataDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.dao.QuickChatActionDao
 import org.meshtastic.core.database.dao.TracerouteNodePositionDao
@@ -38,6 +41,7 @@ import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.database.entity.NodeMetadataEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.ReactionEntity
@@ -48,6 +52,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
     [
         MyNodeEntity::class,
         NodeEntity::class,
+        NodeMetadataEntity::class,
         Packet::class,
         ContactSettings::class,
         MeshLog::class,
@@ -95,8 +100,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 35, to = 36),
         AutoMigration(from = 36, to = 37),
         AutoMigration(from = 37, to = 38),
+        AutoMigration(from = 38, to = 39, spec = AutoMigration38to39::class),
     ],
-    version = 38,
+    version = 39,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -104,6 +110,8 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
 @androidx.room3.DaoReturnTypeConverters(androidx.room3.paging.PagingSourceDaoReturnTypeConverter::class)
 abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun nodeInfoDao(): NodeInfoDao
+
+    abstract fun nodeMetadataDao(): NodeMetadataDao
 
     abstract fun packetDao(): PacketDao
 
@@ -138,3 +146,17 @@ class AutoMigration33to34 : AutoMigrationSpec
 @DeleteColumn(tableName = "packet", columnName = "retry_count")
 @DeleteColumn(tableName = "reactions", columnName = "retry_count")
 class AutoMigration34to35 : AutoMigrationSpec
+
+/** Copies favorites, notes, ignored, muted, and manuallyVerified from nodes → node_metadata. */
+class AutoMigration38to39 : AutoMigrationSpec {
+    override suspend fun onPostMigrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            """
+            INSERT OR IGNORE INTO node_metadata (num, is_favorite, is_ignored, is_muted, notes, manually_verified)
+            SELECT num, is_favorite, is_ignored, is_muted, notes, manually_verified
+            FROM nodes
+            WHERE is_favorite = 1 OR is_ignored = 1 OR is_muted = 1 OR notes != '' OR manually_verified = 1
+            """.trimIndent()
+        )
+    }
+}

@@ -44,8 +44,6 @@ import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
-import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
-import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
@@ -121,8 +119,6 @@ open class RadioConfigViewModel(
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
-    private val toggleAnalyticsUseCase: ToggleAnalyticsUseCase,
-    private val toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase,
     protected val importProfileUseCase: ImportProfileUseCase,
     protected val exportProfileUseCase: ExportProfileUseCase,
     protected val exportSecurityConfigUseCase: ExportSecurityConfigUseCase,
@@ -137,13 +133,13 @@ open class RadioConfigViewModel(
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {
-        toggleAnalyticsUseCase()
+        analyticsPrefs.setAnalyticsAllowed(!analyticsPrefs.analyticsAllowed.value)
     }
 
     val homoglyphEncodingEnabledFlow = homoglyphEncodingPrefs.homoglyphEncodingEnabled
 
     fun toggleHomoglyphCharactersEncodingEnabled() {
-        toggleHomoglyphEncodingUseCase()
+        homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(!homoglyphEncodingPrefs.homoglyphEncodingEnabled.value)
     }
 
     /** MQTT proxy connection state for the settings UI. */
