@@ -7,14 +7,14 @@
 
 ## Summary
 
-**Completed:** ~97% of the Clean Break migration. AIDL dropped, SDK is sole radio path,
+**Completed:** ~100% of the Clean Break migration. AIDL dropped, SDK is sole radio path,
 transport layer fully deleted, Desktop uses shared SDK bridge, dead infrastructure gone,
-POC ViewModels removed, NodeInfoReadDataSource eliminated, Room legacy tables dropped.
+POC ViewModels removed, NodeInfoReadDataSource eliminated, Room legacy tables dropped,
+NodeManager merged into SdkNodeRepositoryImpl, MeshActivity restored.
 
-**Remaining:** Optional VM parameter slimming, NodeManager merge, and test coverage for
-new bridge code.
+**Remaining:** Optional VM parameter slimming and test coverage for new bridge code.
 
-**Net change:** 169 files changed, +4,638 / -16,549 lines (net -11,911 LOC removed)
+**Net change:** 170 files changed, +4,601 / -16,963 lines (net -12,362 LOC removed)
 
 ---
 
@@ -76,14 +76,29 @@ new bridge code.
 
 ### Data Layer ✅
 - Room migration 38→39: NodeMetadata persistence
-- `SdkNodeRepositoryImpl` enriches SDK nodes with persisted favorites/notes/ignore
+- Room migration 39→40: DROP legacy `nodes`, `my_node`, `metadata` tables
+- `SdkNodeRepositoryImpl` implements NodeRepository + NodeManager + NodeIdLookup
 - SDK storage (SqlDelight) is source of truth for node data
 - `AppMetadataRepository` provides firmware/hardware/model info
+- NodeManagerImpl deleted — logic merged into SdkNodeRepositoryImpl
 
 ### Desktop ✅
 - Fully cut over to SDK via shared KMP bridge
 - `DesktopRadioClientProvider` manages TCP/Serial transport
 - No transport stubs needed — SDK handles everything
+
+### NodeManager Merge ✅
+- `SdkNodeRepositoryImpl` now binds NodeRepository, NodeManager, NodeIdLookup
+- Single in-memory StateFlow — no duplicate maps
+- Metadata enrichment on every write (favorites, notes, ignore, mute)
+- `NodeManagerImpl.kt` deleted (377 LOC)
+
+### MeshActivity Restoration ✅
+- `meshActivityFlow` added to ServiceRepository interface
+- Emit `Send` from SdkPacketHandler.sendToRadio() and SdkRadioController.sendMessage()
+- Emit `Receive` from ServiceRepositoryImpl.emitMeshPacket()
+- UIViewModel.meshActivity wired to serviceRepository.meshActivityFlow
+- Connection icon animation fully functional
 
 ### UseCases Deleted ✅
 - ProcessRadioResponse (tests only — impl kept, has real packet parsing logic)
@@ -95,16 +110,9 @@ new bridge code.
 
 ---
 
-## What Remains
+## What Remains (optional, quality-of-life)
 
-### 1. Room Table Cleanup ✅ (completed)
-- Migration 39→40: DROP legacy `nodes`, `my_node`, `metadata` tables
-- Deleted `NodeEntity`, `MyNodeEntity`, `MetadataEntity`, `NodeInfoDao`
-- PacketDao parameterized with `myNodeNum` (34 queries)
-- PacketRepositoryImpl injects NodeRepository for myNodeNum
-- SDK SqlDelight is sole source of truth for all node data
-
-### 2. VM Parameter Slimming (optional, quality-of-life)
+### 1. VM Parameter Slimming
 VMs currently inject SDK-backed adapters (RadioController, NodeRepository, etc.)
 which work correctly. Direct SDK injection would reduce params but isn't required:
 
@@ -116,16 +124,7 @@ which work correctly. Direct SDK injection would reduce params but isn't require
 | NodeListVM | 9 | 5-6 |
 | NodeDetailVM | 7 | 4-5 |
 
-### 3. NodeManager Merge (optional)
-`NodeManager` (25 methods, 8+ consumers) could merge into `SdkNodeRepositoryImpl`.
-Currently SDK feeds it via SdkStateBridge. Works fine as-is.
-
-### 4. MeshActivity Restoration (cosmetic)
-`UIViewModel.meshActivity` currently emits `emptyFlow()`. Could be restored by
-having `SdkStateBridge` emit send/receive events when SDK delivers/receives packets.
-Purely cosmetic — affects connection icon animation only.
-
-### 5. Test Coverage
+### 2. Test Coverage
 - New code (`SdkRadioInterfaceService`, `SdkPacketHandler`, `MessagePersistenceHandler`)
   has no dedicated tests yet (existing integration tests cover happy paths)
 - UseCase tests were deleted with the impls — should add back for kept impls
