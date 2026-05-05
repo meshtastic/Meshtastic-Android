@@ -24,7 +24,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.proto.MeshPacket
@@ -39,7 +38,6 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 @Single
 class StoreForwardPacketHandlerImpl(
-    private val nodeRepository: NodeRepository,
     private val packetRepository: Lazy<PacketRepository>,
     private val historyManager: HistoryManager,
     private val dataHandler: Lazy<MeshDataHandler>,

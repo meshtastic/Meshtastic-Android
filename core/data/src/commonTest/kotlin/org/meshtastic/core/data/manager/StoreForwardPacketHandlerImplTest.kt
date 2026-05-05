@@ -31,7 +31,6 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshDataHandler
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -43,7 +42,6 @@ import kotlin.test.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class StoreForwardPacketHandlerImplTest {
 
-    private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
     private val packetRepository = mock<PacketRepository>(MockMode.autofill)
     private val historyManager = mock<HistoryManager>(MockMode.autofill)
     private val dataHandler = mock<MeshDataHandler>(MockMode.autofill)
@@ -59,7 +57,6 @@ class StoreForwardPacketHandlerImplTest {
     fun setUp() {
         handler =
             StoreForwardPacketHandlerImpl(
-                nodeRepository = nodeRepository,
                 packetRepository = lazy { packetRepository },
                 historyManager = historyManager,
                 dataHandler = lazy { dataHandler },
