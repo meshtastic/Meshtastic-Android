@@ -31,7 +31,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.model.service.ServiceAction
-import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import kotlin.time.Duration.Companion.seconds
@@ -55,7 +54,6 @@ import kotlin.time.Duration.Companion.seconds
 @Single
 open class EnsureRemoteAdminSessionUseCase(
     private val sessionManager: SessionManager,
-    private val meshActionHandler: MeshActionHandler,
     private val serviceRepository: ServiceRepository,
     @Named("ServiceScope") private val serviceScope: CoroutineScope,
 ) {
@@ -94,7 +92,7 @@ open class EnsureRemoteAdminSessionUseCase(
                     sessionManager.sessionRefreshFlow.filter { it == destNum }.first()
                 }
             try {
-                meshActionHandler.onServiceAction(ServiceAction.GetDeviceMetadata(destNum))
+                serviceRepository.onServiceAction(ServiceAction.GetDeviceMetadata(destNum))
                 refreshed.await()
                 EnsureSessionResult.Refreshed
             } finally {

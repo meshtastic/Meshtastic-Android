@@ -36,7 +36,6 @@ import okio.ByteString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.model.service.ServiceAction
-import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import kotlin.test.Test
@@ -68,9 +67,8 @@ class EnsureRemoteAdminSessionUseCaseTest {
     @Test
     fun `returns Disconnected without dispatching when not connected`() = runTest {
         val sessionManager = stubSessionManager()
-        val handler = mock<MeshActionHandler>(MockMode.autofill)
         val useCase =
-            EnsureRemoteAdminSessionUseCase(sessionManager, handler, connectedRepo(ConnectionState.Disconnected), this)
+            EnsureRemoteAdminSessionUseCase(sessionManager, connectedRepo(ConnectionState.Disconnected), this)
 
         val result = useCase(destNum)
 
@@ -81,8 +79,7 @@ class EnsureRemoteAdminSessionUseCaseTest {
     fun `returns AlreadyActive without dispatching when status already Active`() = runTest {
         val active = SessionStatus.Active(Clock.System.now())
         val sessionManager = stubSessionManager(initialStatus = active)
-        val handler = mock<MeshActionHandler>(MockMode.autofill)
-        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, handler, connectedRepo(), this)
+        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, connectedRepo(), this)
 
         val result = useCase(destNum)
 
@@ -93,30 +90,30 @@ class EnsureRemoteAdminSessionUseCaseTest {
     fun `dispatches metadata request and returns Refreshed when refresh flow emits`() = runTest {
         val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
         val sessionManager = stubSessionManager(refreshFlow = refresh)
-        val handler = mock<MeshActionHandler>(MockMode.autofill)
+        val repo = connectedRepo()
         // Simulate the radio responding by emitting on the refresh flow when the metadata request fires.
-        everySuspend { handler.onServiceAction(any()) } calls
+        everySuspend { repo.onServiceAction(any()) } calls
             {
                 refresh.tryEmit(destNum)
                 Unit
             }
 
-        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, handler, connectedRepo(), this)
+        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, repo, this)
 
         val result = useCase(destNum)
 
         assertEquals(EnsureSessionResult.Refreshed, result)
-        verifySuspend { handler.onServiceAction(ServiceAction.GetDeviceMetadata(destNum)) }
+        verifySuspend { repo.onServiceAction(ServiceAction.GetDeviceMetadata(destNum)) }
     }
 
     @Test
     fun `returns Timeout when no refresh arrives within deadline`() = runTest {
         val refresh = MutableSharedFlow<Int>(extraBufferCapacity = 8)
         val sessionManager = stubSessionManager(refreshFlow = refresh)
-        val handler = mock<MeshActionHandler>(MockMode.autofill)
-        everySuspend { handler.onServiceAction(any()) } returns Unit
+        val repo = connectedRepo()
+        everySuspend { repo.onServiceAction(any()) } returns Unit
 
-        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, handler, connectedRepo(), this)
+        val useCase = EnsureRemoteAdminSessionUseCase(sessionManager, repo, this)
 
         var observed: EnsureSessionResult? = null
         val job = launch { observed = useCase(destNum) }

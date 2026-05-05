@@ -39,7 +39,6 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshDataHandler
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationManager
@@ -72,7 +71,6 @@ class MeshActionHandlerImplTest {
     private val uiPrefs = mock<UiPrefs>(MockMode.autofill)
     private val databaseManager = mock<DatabaseManager>(MockMode.autofill)
     private val notificationManager = mock<NotificationManager>(MockMode.autofill)
-    private val messageProcessor = mock<MeshMessageProcessor>(MockMode.autofill)
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
 
     private val myNodeNumFlow = MutableStateFlow<Int?>(MY_NODE_NUM)
@@ -105,7 +103,6 @@ class MeshActionHandlerImplTest {
         uiPrefs = uiPrefs,
         databaseManager = databaseManager,
         notificationManager = notificationManager,
-        messageProcessor = lazy { messageProcessor },
         radioConfigRepository = radioConfigRepository,
         scope = scope,
     )
@@ -124,7 +121,6 @@ class MeshActionHandlerImplTest {
 
         verify { meshPrefs.setDeviceAddress("new_addr") }
         verify { nodeManager.clear() }
-        verifySuspend { messageProcessor.clearEarlyPackets() }
         verifySuspend { databaseManager.switchActiveDatabase("new_addr") }
         verify { notificationManager.cancelAll() }
         verify { nodeManager.loadCachedNodeDB() }

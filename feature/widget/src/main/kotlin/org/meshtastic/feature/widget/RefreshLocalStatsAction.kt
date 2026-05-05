@@ -23,15 +23,15 @@ import androidx.glance.appwidget.action.ActionCallback
 import co.touchlab.kermit.Logger
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeManager
 
 class RefreshLocalStatsAction :
     ActionCallback,
     KoinComponent {
 
-    private val commandSender: CommandSender by inject()
+    private val radioController: RadioController by inject()
     private val nodeManager: NodeManager by inject()
 
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
@@ -41,7 +41,7 @@ class RefreshLocalStatsAction :
             return
         }
 
-        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
-        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.DEVICE.ordinal)
+        radioController.requestTelemetry(myNodeNum.hashCode(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
+        radioController.requestTelemetry(myNodeNum.hashCode() + 1, myNodeNum, TelemetryType.DEVICE.ordinal)
     }
 }

@@ -32,7 +32,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.encodeUtf8
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
@@ -63,7 +62,6 @@ class MeshConfigFlowManagerImplTest {
     private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
     private val serviceBroadcasts = mock<ServiceBroadcasts>(MockMode.autofill)
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
-    private val commandSender = mock<CommandSender>(MockMode.autofill)
     private val packetHandler = mock<PacketHandler>(MockMode.autofill)
     private val notificationPrefs = mock<NotificationPrefs>(MockMode.autofill)
 
@@ -87,7 +85,6 @@ class MeshConfigFlowManagerImplTest {
 
     @BeforeTest
     fun setUp() {
-        every { commandSender.getCurrentPacketId() } returns 100
         every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
@@ -103,7 +100,6 @@ class MeshConfigFlowManagerImplTest {
                 serviceRepository = serviceRepository,
                 serviceBroadcasts = serviceBroadcasts,
                 analytics = analytics,
-                commandSender = commandSender,
                 heartbeatSender = DataLayerHeartbeatSender(packetHandler),
                 notificationPrefs = notificationPrefs,
                 scope = testScope,

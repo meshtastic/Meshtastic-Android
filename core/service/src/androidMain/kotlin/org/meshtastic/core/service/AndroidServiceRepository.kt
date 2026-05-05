@@ -20,19 +20,10 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.ServiceRepository
 
 /**
- * Android-specific [ServiceRepository] that extends [ServiceRepositoryImpl] with AIDL service binding.
+ * Android-specific [ServiceRepository] that extends [ServiceRepositoryImpl].
  *
- * The base class provides all reactive state management (connection state, error messages, mesh packets, etc.) in pure
- * KMP code. This subclass adds the [IMeshService] reference needed by [AndroidRadioControllerImpl] and the AIDL binder
- * in `MeshService`.
+ * With the SDK hard-cutover, the AIDL [IMeshService] reference is no longer needed — all radio communication flows
+ * through [SdkRadioControllerImpl] and [SdkStateBridge]. This subclass exists only to preserve the Android DI binding.
  */
 @Single(binds = [ServiceRepository::class, AndroidServiceRepository::class])
-@Suppress("DEPRECATION") // IMeshService is deprecated but still required for AIDL binding
-class AndroidServiceRepository : ServiceRepositoryImpl() {
-    var meshService: IMeshService? = null
-        private set
-
-    fun setMeshService(service: IMeshService?) {
-        meshService = service
-    }
-}
+class AndroidServiceRepository : ServiceRepositoryImpl()

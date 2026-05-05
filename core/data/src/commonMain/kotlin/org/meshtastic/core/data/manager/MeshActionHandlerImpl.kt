@@ -37,7 +37,6 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshDataHandler
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationManager
@@ -67,7 +66,6 @@ class MeshActionHandlerImpl(
     private val uiPrefs: UiPrefs,
     private val databaseManager: DatabaseManager,
     private val notificationManager: NotificationManager,
-    private val messageProcessor: Lazy<MeshMessageProcessor>,
     private val radioConfigRepository: RadioConfigRepository,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshActionHandler {
@@ -394,7 +392,6 @@ class MeshActionHandlerImpl(
             meshPrefs.setDeviceAddress(deviceAddr)
             scope.handledLaunch {
                 nodeManager.clear()
-                messageProcessor.value.clearEarlyPackets()
                 databaseManager.switchActiveDatabase(deviceAddr)
                 notificationManager.cancelAll()
                 nodeManager.loadCachedNodeDB()

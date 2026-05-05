@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -44,7 +44,7 @@ import kotlin.concurrent.Volatile
 
 class TAKMeshIntegration(
     private val takServerManager: TAKServerManager,
-    private val commandSender: CommandSender,
+    private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
     private val meshConfigHandler: MeshConfigHandler,
@@ -135,7 +135,7 @@ class TAKMeshIntegration(
                 dataType = PortNum.ATAK_PLUGIN.value,
             )
 
-        commandSender.sendData(dataPacket)
+        radioController.sendMessage(dataPacket)
         Logger.d { "Forwarded CoT to mesh as TAKPacket: ${cotMessage.type}" }
     }
 

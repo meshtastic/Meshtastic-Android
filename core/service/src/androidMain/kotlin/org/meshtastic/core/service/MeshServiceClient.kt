@@ -17,89 +17,46 @@
 package org.meshtastic.core.service
 
 import android.content.Context
-import android.content.Context.BIND_ABOVE_CLIENT
-import android.content.Context.BIND_AUTO_CREATE
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
-import org.meshtastic.core.common.util.SequentialJob
 
-/** A Activity-lifecycle-aware [ServiceClient] that binds [MeshService] once the Activity is started. */
+/**
+ * Activity-lifecycle-aware component that starts [MeshService] when the Activity becomes visible.
+ *
+ * With the SDK hard-cutover, AIDL binding is no longer used. This simply ensures the foreground service is running
+ * while the UI is active.
+ */
 @Factory
-@Suppress("DEPRECATION") // IMeshService is deprecated but still required for AIDL binding
 class MeshServiceClient(
     private val context: Context,
-    private val serviceRepository: AndroidServiceRepository,
-    private val serviceSetupJob: SequentialJob,
-) : ServiceClient<IMeshService>(IMeshService.Stub::asInterface),
-    DefaultLifecycleObserver {
+) : DefaultLifecycleObserver {
 
     private val lifecycleOwner: LifecycleOwner = context as LifecycleOwner
 
     init {
-        Logger.d { "Adding self as LifecycleObserver for $lifecycleOwner" }
+        Logger.d { "Adding MeshServiceClient as LifecycleObserver for $lifecycleOwner" }
         lifecycleOwner.lifecycle.addObserver(this)
     }
 
-    // region ServiceClient overrides
-
-    override fun onConnected(service: IMeshService) {
-        serviceSetupJob.launch(lifecycleOwner.lifecycleScope) {
-            serviceRepository.setMeshService(service)
-            Logger.d { "connected to mesh service, connectionState=${serviceRepository.connectionState.value}" }
-        }
-    }
-
-    override fun onDisconnected() {
-        serviceSetupJob.cancel()
-        serviceRepository.setMeshService(null)
-    }
-
-    // endregion
-
-    // region DefaultLifecycleObserver overrides
-
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        Logger.d { "Lifecycle: ON_START" }
-
+        Logger.d { "Lifecycle: ON_START — starting MeshService" }
         owner.lifecycleScope.launch {
             try {
-                bindMeshService()
-            } catch (ex: BindFailedException) {
-                Logger.e { "Bind of MeshService failed: ${ex.message}" }
+                MeshService.startService(context)
+            } catch (ex: Exception) {
+                Logger.e { "Failed to start MeshService: ${ex.message}" }
             }
         }
     }
 
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        Logger.d { "Lifecycle: ON_STOP" }
-        close()
-    }
-
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        Logger.d { "Lifecycle: ON_DESTROY" }
-
         owner.lifecycle.removeObserver(this)
-        Logger.d { "Removed self as LifecycleObserver to $lifecycleOwner" }
-    }
-
-    // endregion
-
-    @Suppress("TooGenericExceptionCaught")
-    private suspend fun bindMeshService() {
-        Logger.d { "Binding to mesh service!" }
-        try {
-            MeshService.startService(context)
-        } catch (ex: Exception) {
-            Logger.e { "Failed to start service from activity - but ignoring because bind will work: ${ex.message}" }
-        }
-
-        connect(context, MeshService.createIntent(context), BIND_AUTO_CREATE or BIND_ABOVE_CLIENT)
+        Logger.d { "Removed MeshServiceClient as LifecycleObserver" }
     }
 }

@@ -35,8 +35,8 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.AppWidgetUpdater
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -75,7 +75,7 @@ class MeshConnectionManagerImplTest {
     private val mqttManager = mock<MqttManager>(MockMode.autofill)
     private val historyManager = mock<HistoryManager>(MockMode.autofill)
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
-    private val commandSender = mock<CommandSender>(MockMode.autofill)
+    private val radioController = mock<RadioController>(MockMode.autofill)
     private val sessionManager = mock<SessionManager>(MockMode.autofill)
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
@@ -105,7 +105,6 @@ class MeshConnectionManagerImplTest {
                 connectionStateFlow.value = call.arg<ConnectionState>(0)
             }
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns Unit
-        every { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
         every { packetHandler.stopPacketQueue() } returns Unit
         every { locationManager.stop() } returns Unit
         every { mqttManager.stop() } returns Unit
@@ -125,7 +124,7 @@ class MeshConnectionManagerImplTest {
         mqttManager,
         historyManager,
         radioConfigRepository,
-        commandSender,
+        radioController,
         sessionManager,
         nodeManager,
         analytics,
@@ -290,8 +289,8 @@ class MeshConnectionManagerImplTest {
                 store_forward = ModuleConfig.StoreForwardConfig(enabled = true),
             )
         moduleConfigFlow.value = moduleConfig
-        every { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
+        everySuspend { radioController.requestTelemetry(any(), any(), any()) } returns Unit
         every { mqttManager.startProxy(any(), any()) } returns Unit
         every { historyManager.requestHistoryReplay(any(), any(), any(), any()) } returns Unit
         every { nodeManager.getMyNodeInfo() } returns null

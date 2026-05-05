@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -58,7 +58,7 @@ class MeshServiceOrchestratorTest {
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
 
     // TAKMeshIntegration deps (final class — constructed directly)
-    private val commandSender: CommandSender = mock(MockMode.autofill)
+    private val radioController: RadioController = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val meshConfigHandler: MeshConfigHandler = mock(MockMode.autofill)
@@ -83,7 +83,7 @@ class MeshServiceOrchestratorTest {
 
         val takMeshIntegration = TAKMeshIntegration(
             takServerManager = takServerManager,
-            commandSender = commandSender,
+            radioController = radioController,
             nodeRepository = nodeRepository,
             serviceRepository = serviceRepository,
             meshConfigHandler = meshConfigHandler,

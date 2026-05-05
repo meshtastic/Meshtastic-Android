@@ -25,7 +25,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConnectionManager
@@ -54,7 +53,6 @@ class MeshConfigFlowManagerImpl(
     private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val analytics: PlatformAnalytics,
-    private val commandSender: CommandSender,
     private val heartbeatSender: DataLayerHeartbeatSender,
     private val notificationPrefs: NotificationPrefs,
     @Named("ServiceScope") private val scope: CoroutineScope,
@@ -278,7 +276,7 @@ class MeshConfigFlowManagerImpl(
                 firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
                 couldUpdate = false,
                 shouldUpdate = false,
-                currentPacketId = commandSender.getCurrentPacketId() and 0xffffffffL,
+                currentPacketId = 0L,
                 messageTimeoutMsec = 300000,
                 minAppVersion = min_app_version,
                 maxChannels = 8,

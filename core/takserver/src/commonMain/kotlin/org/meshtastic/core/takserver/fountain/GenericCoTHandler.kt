@@ -22,7 +22,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.takserver.CoTMessage
 import org.meshtastic.core.takserver.CoTXmlParser
 import org.meshtastic.core.takserver.TAKServerManager
@@ -30,7 +30,7 @@ import org.meshtastic.core.takserver.toXml
 import org.meshtastic.proto.PortNum
 import kotlin.time.Clock
 
-class GenericCoTHandler(private val commandSender: CommandSender, private val takServerManager: TAKServerManager) :
+class GenericCoTHandler(private val radioController: RadioController, private val takServerManager: TAKServerManager) :
     CoTHandler {
     companion object {
         private const val INTER_PACKET_DELAY_MS = 100L
@@ -90,14 +90,14 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
         }
     }
 
-    private fun sendDirect(payload: ByteArray) {
+    private suspend fun sendDirect(payload: ByteArray) {
         val dataPacket =
             DataPacket(
                 to = DataPacket.ID_BROADCAST,
                 bytes = payload.toByteString(),
                 dataType = PortNum.ATAK_FORWARDER.value,
             )
-        commandSender.sendData(dataPacket)
+        radioController.sendMessage(dataPacket)
         Logger.i { "Sent generic CoT directly: ${payload.size} bytes on port 257" }
     }
 
@@ -119,7 +119,7 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
                     bytes = packetData.toByteString(),
                     dataType = PortNum.ATAK_FORWARDER.value,
                 )
-            commandSender.sendData(dataPacket)
+            radioController.sendMessage(dataPacket)
 
             if (index < packets.size - 1) {
                 delay(INTER_PACKET_DELAY_MS) // Inter-packet delay
@@ -179,7 +179,7 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
         }
     }
 
-    private fun sendFountainAck(transferId: Int, hash: ByteArray, toNodeNum: Int) {
+    private suspend fun sendFountainAck(transferId: Int, hash: ByteArray, toNodeNum: Int) {
         val ackPacket =
             fountainCodec.buildAck(
                 transferId,
@@ -195,7 +195,7 @@ class GenericCoTHandler(private val commandSender: CommandSender, private val ta
                 bytes = ackPacket.toByteString(),
                 dataType = PortNum.ATAK_FORWARDER.value,
             )
-        commandSender.sendData(dataPacket)
+        radioController.sendMessage(dataPacket)
         Logger.d { "Sent fountain ACK for transfer $transferId" }
     }
 

@@ -33,10 +33,11 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AppWidgetUpdater
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.HistoryManager
@@ -56,7 +57,6 @@ import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
@@ -79,7 +79,7 @@ class MeshConnectionManagerImpl(
     private val mqttManager: MqttManager,
     private val historyManager: HistoryManager,
     private val radioConfigRepository: RadioConfigRepository,
-    private val commandSender: CommandSender,
+    private val radioController: RadioController,
     private val sessionManager: SessionManager,
     private val nodeManager: NodeManager,
     private val analytics: PlatformAnalytics,
@@ -128,7 +128,15 @@ class MeshConnectionManagerImpl(
                             .shouldProvideNodeLocation(myNodeEntity.myNodeNum)
                             .onEach { shouldProvide ->
                                 if (shouldProvide) {
-                                    locationManager.start(scope) { pos -> commandSender.sendPosition(pos) }
+                                    locationManager.start(scope) { pos ->
+                                        scope.handledLaunch {
+                                            val packet = DataPacket(
+                                                bytes = okio.ByteString.of(*org.meshtastic.proto.Position.ADAPTER.encode(pos)),
+                                                dataType = org.meshtastic.proto.PortNum.POSITION_APP.value,
+                                            )
+                                            radioController.sendMessage(packet)
+                                        }
+                                    }
                                 } else {
                                     locationManager.stop()
                                 }
@@ -325,15 +333,8 @@ class MeshConnectionManagerImpl(
 
         val myNodeNum = nodeManager.myNodeNum.value ?: 0
 
-        // Set device time now that the full node picture is ready. Sending this during Stage 1
-        // (onRadioConfigLoaded) introduced GATT write contention with the Stage 2 node-info burst.
-        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
-
-        // Proactively seed the session passkey. The firmware embeds session_passkey in every
-        // admin *response* (wantResponse=true), but set_time_only has no response. A get_owner
-        // request is the lightest way to trigger a response and populate the passkey cache so
-        // that subsequent write operations don't fail with ADMIN_BAD_SESSION_KEY.
-        commandSender.sendAdmin(myNodeNum, wantResponse = true) { AdminMessage(get_owner_request = true) }
+        // NOTE: Time sync and session passkey seeding are handled by the SDK's RadioClient
+        // during its own handshake — no need to send set_time_only or get_owner_request here.
 
         // Start MQTT if enabled
         scope.handledLaunch {
@@ -354,9 +355,11 @@ class MeshConnectionManagerImpl(
             }
         }
 
-        // Request immediate LocalStats and DeviceMetrics update on connection with proper request IDs
-        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
-        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.DEVICE.ordinal)
+        // Request immediate LocalStats and DeviceMetrics update on connection
+        scope.handledLaunch {
+            radioController.requestTelemetry(myNodeNum.hashCode(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
+            radioController.requestTelemetry(myNodeNum.hashCode() + 1, myNodeNum, TelemetryType.DEVICE.ordinal)
+        }
     }
 
     private fun reportConnection() {

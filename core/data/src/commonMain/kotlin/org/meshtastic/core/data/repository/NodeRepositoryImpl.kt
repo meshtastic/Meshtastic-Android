@@ -55,7 +55,7 @@ import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 
 /** Repository for managing node-related data, including hardware info, node database, and identity. */
-@Single
+// @Single — Replaced by SdkNodeRepositoryImpl in SDK mode. Kept for reference/desktop fallback.
 @Suppress("TooManyFunctions")
 class NodeRepositoryImpl(
     @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,

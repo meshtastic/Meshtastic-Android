@@ -38,6 +38,7 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.data.repository.SdkNodeRepositoryImpl
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.ServiceBroadcasts
@@ -88,6 +89,8 @@ class NodeManagerImpl(
 
     override fun setMyNodeNum(num: Int?) {
         myNodeNum.value = num
+        // Propagate to SdkNodeRepositoryImpl so ourNodeInfo/myId reactive flows update
+        (nodeRepository as? SdkNodeRepositoryImpl)?.setMyNodeNum(num)
     }
 
     override val firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)

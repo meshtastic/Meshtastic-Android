@@ -19,7 +19,7 @@ package org.meshtastic.core.takserver.di
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -37,20 +37,20 @@ class CoreTakServerModule {
     @Single fun provideTAKServerManager(takServer: TAKServer): TAKServerManager = TAKServerManagerImpl(takServer)
 
     @Single
-    fun provideGenericCoTHandler(commandSender: CommandSender, takServerManager: TAKServerManager): CoTHandler =
-        GenericCoTHandler(commandSender, takServerManager)
+    fun provideGenericCoTHandler(radioController: RadioController, takServerManager: TAKServerManager): CoTHandler =
+        GenericCoTHandler(radioController, takServerManager)
 
     @Single
     fun provideTAKMeshIntegration(
         takServerManager: TAKServerManager,
-        commandSender: CommandSender,
+        radioController: RadioController,
         nodeRepository: NodeRepository,
         serviceRepository: ServiceRepository,
         meshConfigHandler: MeshConfigHandler,
         cotHandler: CoTHandler,
     ): TAKMeshIntegration = TAKMeshIntegration(
         takServerManager,
-        commandSender,
+        radioController,
         nodeRepository,
         serviceRepository,
         meshConfigHandler,
