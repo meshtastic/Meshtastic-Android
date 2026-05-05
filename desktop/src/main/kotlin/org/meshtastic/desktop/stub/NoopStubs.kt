@@ -23,8 +23,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
@@ -33,7 +31,6 @@ import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.mqtt.ConnectionState as MqttConnectionState
 import org.meshtastic.proto.Position as ProtoPosition
@@ -53,32 +50,6 @@ private const val TAG = "NoopStub"
 private fun logWarn(message: String) {
     Logger.w(tag = TAG) { message }
 }
-
-// region Transport / Radio Stubs (Android BLE/USB — no commonMain impl)
-
-class NoopRadioInterfaceService : RadioInterfaceService {
-    override val supportedDeviceTypes: List<DeviceType> = emptyList()
-
-    override val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
-
-    override fun isMockTransport(): Boolean = false
-
-    override fun connect() {
-        logWarn("NoopRadioInterfaceService.connect()")
-    }
-
-    override suspend fun disconnect() {
-        logWarn("NoopRadioInterfaceService.disconnect()")
-    }
-
-    override fun getDeviceAddress(): String? = null
-
-    override fun setDeviceAddress(deviceAddr: String?): Boolean = false
-
-    override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = ""
-}
-
-// endregion
 
 // region Notification / Platform Stubs (Android-only)
 

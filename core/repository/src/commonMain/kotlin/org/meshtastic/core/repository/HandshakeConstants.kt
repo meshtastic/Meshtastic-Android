@@ -22,7 +22,7 @@ package org.meshtastic.core.repository
  * Stage 1 (`CONFIG_NONCE`): requests device config, module config, and channels. Stage 2 (`NODE_INFO_NONCE`): requests
  * the full node database.
  *
- * Both [MeshConfigFlowManager] (consumer) and [MeshConnectionManager] (sender) reference these.
+ * Both the SDK state bridge (consumer) and handshake initiator (sender) reference these.
  */
 object HandshakeConstants {
     /** Nonce sent in `want_config_id` to request config-only (Stage 1). */

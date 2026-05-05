@@ -32,12 +32,8 @@ import org.meshtastic.proto.MeshPacket
  * maintains reactive flows for connection status, error messages, and incoming mesh traffic.
  *
  * **Connection state contract:** [connectionState] is the **canonical, app-level** connection state that all UI,
- * feature modules, and ViewModels should observe. It incorporates handshake progress, light-sleep policy, and transport
- * reconciliation — unlike [RadioInterfaceService.connectionState], which only reflects the raw hardware link status.
- * The [MeshConnectionManager] is the sole writer of this state; it bridges [RadioInterfaceService.connectionState]
- * changes into app-level transitions via [setConnectionState].
- *
- * @see RadioInterfaceService.connectionState
+ * feature modules, and ViewModels should observe. The SDK's [SdkStateBridge] is the sole writer of this state;
+ * it maps SDK connection events into app-level transitions via [setConnectionState].
  */
 @Suppress("TooManyFunctions")
 interface ServiceRepository {
@@ -45,24 +41,21 @@ interface ServiceRepository {
      * Canonical app-level connection state.
      *
      * This is the **single source of truth** for connection status across the entire application. All UI components,
-     * feature modules, and ViewModels should observe this flow — never [RadioInterfaceService.connectionState].
+     * feature modules, and ViewModels should observe this flow.
      *
-     * State transitions are managed exclusively by [MeshConnectionManager], which reconciles transport-level events
-     * with handshake progress and device sleep policy:
+     * State transitions are managed by [SdkStateBridge], which maps SDK connection events into app-level transitions:
      * - [ConnectionState.Disconnected] — no active connection to a radio
      * - [ConnectionState.Connecting] — transport is up, mesh handshake (config + node-info) in progress
      * - [ConnectionState.Connected] — handshake complete, radio fully operational
      * - [ConnectionState.DeviceSleep] — radio entered light-sleep (transient disconnect)
-     *
-     * @see RadioInterfaceService.connectionState
      */
     val connectionState: StateFlow<ConnectionState>
 
     /**
      * Updates the canonical app-level connection state.
      *
-     * **This should only be called by [MeshConnectionManager].** Direct mutation from other components would bypass the
-     * transport-to-app reconciliation logic and create state inconsistencies.
+     * **This should only be called by [SdkStateBridge].** Direct mutation from other components would bypass the
+     * SDK-to-app state mapping logic and create state inconsistencies.
      *
      * @param connectionState The new [ConnectionState].
      */

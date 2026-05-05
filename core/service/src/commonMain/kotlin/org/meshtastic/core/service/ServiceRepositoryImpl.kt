@@ -42,7 +42,7 @@ import org.meshtastic.proto.MeshPacket
 @Suppress("TooManyFunctions")
 open class ServiceRepositoryImpl : ServiceRepository {
 
-    // Canonical app-level connection state — written exclusively by MeshConnectionManager.
+    // Canonical app-level connection state — written exclusively by SdkStateBridge.
     private val _connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState>
         get() = _connectionState

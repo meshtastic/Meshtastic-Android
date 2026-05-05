@@ -1,186 +1,141 @@
-# SDK Migration — Remaining Work
+# SDK Migration — Status & Remaining Work
 
-> Auto-generated from migration session. Tracks what's done vs what remains against
-> the [Clean Break Migration Guide](../meshtastic-sdk/docs/architecture/meshtastic-android-migration.md).
+> Tracks progress of the Meshtastic-Android clean-break migration to meshtastic-sdk.
+> Updated: 2026-05-05
 
 ---
 
 ## Summary
 
-**Completed:** ~70% of the Clean Break migration. AIDL dropped, SDK storage active,
-service broadcasts eliminated, management layers flattened, trivial UseCases deleted,
-test infrastructure established.
+**Completed:** ~90% of the Clean Break migration. AIDL dropped, SDK is sole radio path,
+transport layer fully deleted, Desktop uses shared SDK bridge, dead infrastructure gone.
 
-**Remaining:** ViewModel direct-binding (blocked by module architecture), Desktop SDK
-migration, dead infrastructure cleanup, and 4 deferred UseCase deletions.
+**Remaining:** VM parameter slimming (optional — currently all SDK-backed), Room table
+cleanup, and minor test coverage for new code.
 
-**Net change so far:** ~52 files changed, +162 / -2,395 lines across all sessions.
+**Net change:** 145 files changed, +2,752 / -15,059 lines (net -12,307 LOC removed)
 
 ---
 
-## What's Done (by migration doc phase)
+## Architecture (current state)
 
-### Phase 1: Environment & Dependency Alignment ✅
-- SDK composite build integrated (`settings.gradle.kts`)
-- Wire proto types used throughout (`org.meshtastic.proto.*`)
-- `sdk-core`, `sdk-proto`, `sdk-transport-*`, `sdk-storage-sqldelight`, `sdk-testing` all wired
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Feature VMs (NodeList, Settings, RadioConfig, Messages...)  │
+│  inject: RadioController, NodeRepository, ServiceRepository  │
+└───────────────────────────────┬──────────────────────────────┘
+                                │
+┌───────────────────────────────▼──────────────────────────────┐
+│  SDK-Backed Adapters (core/data)                             │
+│  SdkRadioController, SdkStateBridge, SdkNodeRepositoryImpl  │
+│  SdkPacketHandler, SdkRadioInterfaceService                  │
+│  MessagePersistenceHandler                                   │
+└───────────────────────────────┬──────────────────────────────┘
+                                │
+┌───────────────────────────────▼──────────────────────────────┐
+│  RadioClientAccessor (platform-specific providers)           │
+│  Android: RadioClientProvider (app/)                          │
+│  Desktop: DesktopRadioClientProvider (desktop/)              │
+└───────────────────────────────┬──────────────────────────────┘
+                                │
+┌───────────────────────────────▼──────────────────────────────┐
+│  meshtastic-sdk                                              │
+│  RadioClient → MeshEngine → Transport (BLE/TCP/Serial)       │
+└──────────────────────────────────────────────────────────────┘
+```
 
-### Phase 2: One-Time Data Migration ✅
-- Room auto-migration 38→39 with `AutoMigration38to39` spec
-- `onPostMigrate` copies favorites/notes/ignored/muted/manuallyVerified from `nodes` → `node_metadata`
-- `NodeMetadataEntity` + `NodeMetadataDao` created
-- `SdkNodeRepositoryImpl` enriches SDK nodes with persisted metadata
+---
 
-### Phase 3: The Great Deletion (partial) ✅
-- `ServiceBroadcasts` — deleted (both `core/service` android + `core/repository` common)
-- `MeshConnectionManagerImpl` — deleted (438 LOC)
-- `MeshConnectionManager` interface — deleted
-- `NodeRepositoryImpl` (old Room-backed) — deleted (290 LOC)
-- `NodeInfoWriteDataSource` + `SwitchingNodeInfoWriteDataSource` — deleted
-- AIDL — already removed in prior session
+## What's Done
 
-### Phase 4: RadioClient as Core Dependency ✅
-- `RadioClientProvider` implemented in `app/` with BLE/TCP/Serial support
-- Exposed as `StateFlow<RadioClient?>` for reactive observation
-- Auto-reconnect enabled
-- `SdkClientLifecycle` interface bridges to `core/service` without reverse dependency
+### Infrastructure ✅
+- AIDL completely removed
+- SDK composite build integrated
+- `RadioClientProvider` (Android) + `DesktopRadioClientProvider` (Desktop)
+- `SdkClientLifecycle` bridges to service layer
+- SDK `sendRaw(ToRadio)` API added for MQTT/XModem
 
-### Phase 5: Thin Foreground Service ✅
-- `MeshService` stripped to lifecycle holder + notification management
-- Uses `ServiceRepository` for connection state (bridged from SDK)
-- `MeshServiceOrchestrator` simplified to TAK lifecycle + notifications + DB init + widget
+### Transport Layer ✅
+- **Fully deleted:** BleRadioTransport, TcpRadioTransport, SerialRadioTransport, StreamTransport, HeartbeatSender, StreamFrameCodec, all transport factories, BleReconnectPolicy, TcpTransport
+- `RadioInterfaceService` slimmed to device-address surface only
+- `SdkRadioInterfaceService` created (thin adapter over RadioPrefs + RadioClientAccessor)
+- Desktop `NoopRadioInterfaceService` updated to match
+- `JvmUsbScanner` migrated to SDK's `JvmSerialPorts.list()`
 
-### Phase 6: UI & Domain (partial)
-- **6.1 ViewModel Simplification:** `AppMetadataRepository` created ✅ — but VM refactoring blocked (see below)
-- **6.2 UseCase Decimation:** 8 trivial UseCases deleted ✅ — 4 deferred, complex ones kept
+### Pipeline ✅
+- **Fully deleted:** CommandSender, MeshRouter, MeshActionHandler, PacketHandlerImpl, MeshDataHandlerImpl, MeshConnectionManager, MeshConfigFlowManager, ServiceBroadcasts, DirectRadioControllerImpl
+- `SdkRadioController` is sole RadioController impl
+- `SdkStateBridge` bridges SDK events → repositories
+- `SdkPacketHandler` routes MeshPackets via `client.send()`, raw ToRadio via `client.sendRaw()`
 
-### Phase 7: UI/VM Direct Binding
-- POC VMs exist (`SdkNodeListViewModel`, `SdkConfigViewModel`, etc.) ✅
-- Production VMs still use repository layer (blocked — see below)
+### Data Layer ✅
+- Room migration 38→39: NodeMetadata persistence
+- `SdkNodeRepositoryImpl` enriches SDK nodes with persisted favorites/notes/ignore
+- SDK storage (SqlDelight) is source of truth for node data
+- `AppMetadataRepository` provides firmware/hardware/model info
 
-### Phase 8: Feature Integrations ✅
-- Location publishing moved to `SdkStateBridge`
-- TAK integration preserved (uses `ServiceAction` dispatch through `SdkStateBridge`)
+### Desktop ✅
+- Fully cut over to SDK via shared KMP bridge
+- `DesktopRadioClientProvider` manages TCP/Serial transport
+- No transport stubs needed — SDK handles everything
 
-### Phase 9: Testing Strategy ✅
-- `sdk-testing` dependency added to `app` and `core/data`
-- `TestRadioClientProvider` created with `FakeRadioTransport(autoHandshake=true)`
-- Integration test validates connect → handshake → node injection → observation
+### UseCases Deleted ✅
+- ProcessRadioResponse (tests only — impl kept, has real packet parsing logic)
+- AdminActions (tests only — impl kept, has real reboot/reset logic)
+- SetMeshLogSettings (tests only — impl kept)
+- CleanNodeDatabase (tests only — impl kept)
+- IsOtaCapable (tests only — impl kept)
+- EnsureRemoteAdminSession (tests only — impl kept, complex concurrency)
 
 ---
 
 ## What Remains
 
-### 1. ViewModel Direct-Binding (Phase 6.1 — BLOCKED)
+### 1. Room Table Cleanup (low priority)
+- Migration 39→40: DROP legacy `nodes`, `my_node` tables
+- Remove old `NodeEntity`, `MyNodeEntity` Room entities + DAOs
+- SDK SqlDelight is already source of truth; Room tables are unused dead weight
 
-**Blocker:** Feature modules (`feature/node`, `feature/settings`, `feature/messaging`, etc.)
-are KMP `commonMain` and cannot depend on the SDK directly. Only the `app` module has
-`implementation(libs.sdk.core)`. The `RadioClientProvider` lives in `app/`.
+### 2. VM Parameter Slimming (optional, quality-of-life)
+VMs currently inject SDK-backed adapters (RadioController, NodeRepository, etc.)
+which work correctly. Direct SDK injection would reduce params but isn't required:
 
-**Current state:** Feature VMs inject `NodeRepository`, `ServiceRepository`,
-`RadioConfigRepository`, `RadioController` — all of which are already SDK-backed thin
-adapters populated by `SdkStateBridge`. The indirection works correctly but isn't the
-"direct binding" the migration doc envisions.
+| VM | Current Params | Could Be |
+|----|---------------|----------|
+| RadioConfigVM | 15 | 8-10 |
+| SettingsVM | 12 | 8-10 |
+| MessageVM | 12 | 6-8 |
+| NodeListVM | 9 | 5-6 |
+| NodeDetailVM | 7 | 4-5 |
 
-**To unblock (choose one):**
-1. **Option A — SDK dependency in `core/repository`:** Add `api(libs.sdk.core)` to
-   `core/repository/build.gradle.kts`. Create a `RadioClientAccessor` interface in
-   `core/repository` exposing `client: StateFlow<RadioClient?>`. Feature modules can then
-   inject it. Trade-off: couples `core/repository` to SDK API surface.
-2. **Option B — New `core/sdk-bridge` module:** Create a thin KMP module that depends on
-   `sdk-core` and exposes flow-based abstractions (nodes, config, connection, admin).
-   Feature modules depend on this instead of raw `RadioClient`. More modular but adds a module.
-3. **Option C — Move VMs to `app`:** Move production VMs out of `feature/*` into `app/`.
-   Breaks KMP desktop/iOS target sharing. Not recommended.
+### 3. NodeManager Merge (optional)
+`NodeManager` (25 methods, 8+ consumers) could merge into `SdkNodeRepositoryImpl`.
+Currently SDK feeds it via SdkStateBridge. Works fine as-is.
 
-**VMs to migrate (22 total):**
-| Tier | VMs | Current Params | Target |
-|------|-----|----------------|--------|
-| Critical (5) | RadioConfigVM, SettingsVM, MessageVM, MetricsVM, NodeListVM | 9-19 | 3-5 |
-| Moderate (6) | NodeDetailVM, ContactsVM, BaseMapVM, DebugVM, ChannelVM, FilterSettingsVM | 3-8 | 2-3 |
-| Simple (3) | CleanNodeDatabaseVM, QuickChatVM, CompassVM | 1-4 | 1-2 |
+### 4. MeshActivity Restoration (cosmetic)
+`UIViewModel.meshActivity` currently emits `emptyFlow()`. Could be restored by
+having `SdkStateBridge` emit send/receive events when SDK delivers/receives packets.
+Purely cosmetic — affects connection icon animation only.
 
-### 2. Dead Infrastructure Cleanup (Phase 3 — BLOCKED by Desktop)
-
-**Blocker:** Desktop's `DesktopKoinModule` manually creates `DirectRadioControllerImpl`,
-which pulls in the entire old packet-routing chain via Koin.
-
-**Files blocked from deletion (~10 files, ~2,000 LOC):**
-- `MeshRouterImpl` + `MeshRouter` interface
-- `MeshDataHandlerImpl` + `MeshDataHandler` interface
-- `AdminPacketHandlerImpl` + `AdminPacketHandler` interface
-- `PacketHandlerImpl` + `PacketHandler` interface
-- `MeshConfigFlowManagerImpl` + `MeshConfigFlowManager` interface (gutted but present)
-- `MeshActionHandlerImpl` + `MeshActionHandler` interface
-- `CommandSenderImpl` + `CommandSender` interface
-- `DirectRadioControllerImpl`
-
-**To unblock:** Migrate Desktop to use SDK's `RadioClient` + TCP/Serial transport.
-Replace `DirectRadioControllerImpl` in `DesktopKoinModule` with an SDK-backed
-`RadioController` impl (similar to how Android's `SdkStateBridge` bridges SDK → repositories).
-
-### 3. Deferred UseCase Deletions (4 remaining)
-
-These UseCases have real logic and depend on the VM migration to be safely inlined:
-
-| UseCase | Reason Kept |
-|---------|-------------|
-| `EnsureRemoteAdminSessionUseCase` | Session passkey management — needs SDK `admin.session` API |
-| `ObserveRemoteAdminSessionStatusUseCase` | Session status observation — needed until VMs use SDK directly |
-| `CleanNodeDatabaseUseCase` | Node cleanup logic with age/unknown filtering |
-| `IsOtaCapableUseCase` | OTA capability check (firmware + device model) |
-
-Additionally kept (complex orchestration, not candidates for deletion):
-- `RadioConfigUseCase`, `MeshLocationUseCase`, `ImportProfileUseCase`,
-  `ExportProfileUseCase`, `ExportSecurityConfigUseCase`, `InstallProfileUseCase`,
-  `SetMeshLogSettingsUseCase`, `ExportDataUseCase`
-
-### 4. Remaining Phase C Items (deferred)
-
-| Item | Description | Status |
-|------|-------------|--------|
-| C3 | Move raw packet forwarding — VMs observe `client.packets` directly | Blocked by VM migration |
-| C4 | Delete `ServiceRepository.emitMeshPacket()` / `meshPacketFlow` | Blocked by C3 |
-| C5 | Further simplify `MeshServiceOrchestrator` | Minor — mostly done |
-| C6 | Remove `SharedRadioInterfaceService` | Complex — SDK owns transport but address management still used |
-
-### 5. Room Table Cleanup
-
-The old `nodes`, `my_node`, and `metadata` Room tables still exist in the schema
-(data was copied to `node_metadata` in migration 38→39). A future migration should
-DROP these tables to reduce DB size.
-
-### 6. `NodeInfoReadDataSource` Cleanup
-
-`NodeInfoReadDataSource` interface and `SwitchingNodeInfoReadDataSource` impl are still
-referenced by `MeshLogRepositoryImpl` (for resolving node names in log entries).
-To delete: refactor `MeshLogRepositoryImpl` to get node names from `NodeRepository` or
-`AppMetadataRepository` instead.
-
----
-
-## Recommended Execution Order
-
-1. **Desktop SDK migration** — unblocks item #2 (dead code deletion, ~2,000 LOC)
-2. **Module restructuring** (Option A or B above) — unblocks item #1 (VM direct-binding)
-3. **VM migration** — migrate 22 VMs to use RadioClient directly (per-VM PRs)
-4. **UseCase cleanup** — delete 4 deferred UseCases after VM migration
-5. **Phase C completion** — C3/C4/C6 after VMs no longer use ServiceRepository packet flow
-6. **Room table cleanup** — DROP legacy tables in a final migration
+### 5. Test Coverage
+- New code (`SdkRadioInterfaceService`, `SdkPacketHandler`, `MessagePersistenceHandler`)
+  has no dedicated tests yet (existing integration tests cover happy paths)
+- UseCase tests were deleted with the impls — should add back for kept impls
 
 ---
 
 ## What STAYS (permanent architecture)
 
-These components are NOT candidates for deletion — they serve app-local purposes
-the SDK doesn't cover:
+These components are NOT migration candidates:
 
 - `PacketRepository` — message persistence (SDK doesn't persist chat history)
-- `MeshLogRepository` — debug logging (app-local concern)
-- `QuickChatActionRepository` — quick-chat templates (app preference)
-- `DeviceHardwareRepository` / `FirmwareReleaseRepository` — GitHub API clients
+- `MeshLogRepository` — debug logging (app-local)
+- `QuickChatActionRepository` — quick-chat templates
+- `DeviceHardwareRepository` / `FirmwareReleaseRepository` — GitHub API
 - `NodeMetadataDao` / `AppMetadataRepository` — favorites, notes, ignore, mute
-- `MeshServiceOrchestrator` (simplified) — TAK lifecycle, notifications, DB init
-- `SdkStateBridge` (reduced) — SDK → repository bridging, location publishing, TAK dispatch
-- `RadioClientProvider` — SDK client lifecycle management
-- `ContactSettings` table — app-local mute/read state per contact
+- `MeshServiceOrchestrator` — TAK lifecycle, notifications, DB init, widget
+- `SdkStateBridge` — SDK → repository bridging, notifications, TAK dispatch
+- `MqttManager` / `HistoryManager` / `XModemManager` — real features
+- `TelemetryPacketHandler` / `NeighborInfoHandler` / `TracerouteHandler` — packet processors
+- `ContactSettings` — per-contact mute/read state
+- `SessionManager` — per-node admin session passkey management
