@@ -1,0 +1,5 @@
+id: remove-android-main-dependencies
+language: kotlin
+rule:
+  pattern: androidMain.dependencies { $$$ }
+fix: ""
