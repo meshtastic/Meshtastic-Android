@@ -1,5 +1,0 @@
-id: remove-android-block
-language: kotlin
-rule:
-  pattern: android { $$$ }
-fix: ""
