@@ -284,6 +284,7 @@ class SdkStateBridgeTest {
             nodeRepository = nodeRepository,
             packetRepository = lazyOf(packetRepository),
             locationManager = NoOpLocationManager,
+            topologyService = MeshTopologyService(),
             uiPrefs = FakeUiPrefs(),
             dispatchers = CoroutineDispatchers(
                 io = backgroundScope.coroutineContext[kotlin.coroutines.ContinuationInterceptor] as kotlinx.coroutines.CoroutineDispatcher,

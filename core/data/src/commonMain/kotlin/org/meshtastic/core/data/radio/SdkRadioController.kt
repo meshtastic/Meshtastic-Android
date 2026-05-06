@@ -32,6 +32,7 @@ import org.meshtastic.core.model.MessageSender
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.RemoteAdmin
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioPrefs
@@ -322,19 +323,18 @@ class SdkRadioController(
         c.routing.traceRoute(NodeId(destNum))
     }
 
-    override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
+    override suspend fun requestTelemetry(destNum: Int, type: TelemetryType) {
         val c = requireClient()
         val node = NodeId(destNum)
-        when (typeValue) {
-            0 -> c.telemetry.requestDevice(node)
-            1 -> c.telemetry.requestEnvironment(node)
-            2 -> c.telemetry.requestAirQuality(node)
-            3 -> c.telemetry.requestPower(node)
-            4 -> c.telemetry.requestLocalStats()
-            5 -> c.telemetry.requestHealth(node)
-            6 -> c.telemetry.requestHost(node)
-            7 -> c.telemetry.requestTrafficManagement(node)
-            else -> Logger.w { "Unknown telemetry type: $typeValue" }
+        when (type) {
+            TelemetryType.DEVICE -> c.telemetry.requestDevice(node)
+            TelemetryType.ENVIRONMENT -> c.telemetry.requestEnvironment(node)
+            TelemetryType.AIR_QUALITY -> c.telemetry.requestAirQuality(node)
+            TelemetryType.POWER -> c.telemetry.requestPower(node)
+            TelemetryType.LOCAL_STATS -> c.telemetry.requestLocalStats()
+            TelemetryType.HEALTH -> c.telemetry.requestHealth(node)
+            TelemetryType.HOST -> c.telemetry.requestHost(node)
+            TelemetryType.TRAFFIC_MANAGEMENT -> c.telemetry.requestTrafficManagement(node)
         }
     }
 

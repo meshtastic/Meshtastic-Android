@@ -22,6 +22,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceAdminEdit
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -141,7 +142,7 @@ class FakeRadioController :
 
     override suspend fun requestTraceroute(requestId: Int, destNum: Int) {}
 
-    override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
+    override suspend fun requestTelemetry(destNum: Int, type: TelemetryType) {}
 
     override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
 

@@ -41,7 +41,7 @@ class RefreshLocalStatsAction :
             return
         }
 
-        radioController.requestTelemetry(myNodeNum.hashCode(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
-        radioController.requestTelemetry(myNodeNum.hashCode() + 1, myNodeNum, TelemetryType.DEVICE.ordinal)
+        radioController.requestTelemetry(myNodeNum, TelemetryType.LOCAL_STATS)
+        radioController.requestTelemetry(myNodeNum, TelemetryType.DEVICE)
     }
 }

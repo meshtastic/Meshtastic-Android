@@ -100,8 +100,7 @@ constructor(
         scope.launch(ioDispatcher) {
             runCatching {
                 Logger.i { "Requesting telemetry for '$destNum'" }
-                val packetId = messageSender.getPacketId()
-                dataRequester.requestTelemetry(packetId, destNum, type.ordinal)
+                dataRequester.requestTelemetry(destNum, type)
 
                 val typeRes =
                     when (type) {
@@ -110,8 +109,9 @@ constructor(
                         TelemetryType.AIR_QUALITY -> Res.string.request_air_quality_metrics
                         TelemetryType.POWER -> Res.string.request_power_metrics
                         TelemetryType.LOCAL_STATS -> Res.string.signal_quality
+                        TelemetryType.HEALTH -> Res.string.request_device_metrics
                         TelemetryType.HOST -> Res.string.request_host_metrics
-                        TelemetryType.PAX -> Res.string.request_pax_metrics
+                        TelemetryType.TRAFFIC_MANAGEMENT -> Res.string.request_device_metrics
                     }
 
                 showFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName))

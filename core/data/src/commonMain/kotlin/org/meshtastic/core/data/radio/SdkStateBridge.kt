@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -47,6 +48,7 @@ import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 import org.meshtastic.sdk.MeshEvent
+import org.meshtastic.sdk.NeighborInfo
 import org.meshtastic.sdk.NodeChange
 import org.meshtastic.sdk.NodeId
 import org.meshtastic.sdk.StoreForwardEvent
@@ -70,6 +72,7 @@ class SdkStateBridge(
     private val nodeRepository: NodeRepository,
     private val packetRepository: Lazy<PacketRepository>,
     private val locationManager: MeshLocationManager,
+    private val topologyService: MeshTopologyService,
     private val uiPrefs: UiPrefs,
     private val dispatchers: CoroutineDispatchers,
 ) {
@@ -95,6 +98,7 @@ class SdkStateBridge(
                 when (change) {
                     is NodeChange.Snapshot -> {
                         nodeRepository.clear()
+                        topologyService.clear()
                         change.nodes.forEach { (_, nodeInfo) ->
                             nodeRepository.installNodeInfo(nodeInfo, withBroadcast = false)
                         }
@@ -137,6 +141,25 @@ class SdkStateBridge(
         accessor.client
             .flatMapLatest { client -> client?.packets ?: flowOf() }
             .onEach { packet -> serviceRepository.emitMeshPacket(packet) }
+            .launchIn(scope)
+
+        // ── Topology: ingest NeighborInfo packets into MeshTopology graph ────
+        accessor.client
+            .flatMapLatest { client -> client?.packets ?: flowOf() }
+            .filter { it.decoded?.portnum == PortNum.NEIGHBORINFO_APP }
+            .onEach { packet ->
+                val payload = packet.decoded?.payload?.toByteArray() ?: return@onEach
+                runCatching {
+                    val proto = org.meshtastic.proto.NeighborInfo.ADAPTER.decode(payload)
+                    val info = NeighborInfo.fromProto(
+                        reportingNode = packet.from,
+                        neighborNodeIds = proto.neighbors.map { it.node_id },
+                        snrValues = proto.neighbors.map { it.snr },
+                        timestamp = proto.last_sent_by_id,
+                    )
+                    topologyService.ingestNeighborInfo(info)
+                }.onFailure { e -> Logger.w(e) { "[SdkBridge] Failed to parse NeighborInfo" } }
+            }
             .launchIn(scope)
 
         // ── Events (notifications, security, backpressure) ──────────────────

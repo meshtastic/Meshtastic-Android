@@ -197,7 +197,7 @@ private fun rememberTelemetricFeatures(
             TelemetricFeature(
                 titleRes = LogsType.PAX.titleRes,
                 icon = LogsType.PAX.icon,
-                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.PAX) },
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.DEVICE) },
                 logsType = LogsType.PAX,
             ),
             TelemetricFeature(

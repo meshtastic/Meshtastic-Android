@@ -191,12 +191,12 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
-        telemetryType = TelemetryType.PAX,
+        telemetryType = TelemetryType.DEVICE,
         titleRes = Res.string.pax_metrics_log,
         nodeName = state.node?.user?.long_name ?: "",
         data = paxMetrics,
         timeProvider = { (it.first.received_date / MS_PER_SEC).toDouble() },
-        onRequestTelemetry = { metricsViewModel.requestTelemetry(TelemetryType.PAX) },
+        onRequestTelemetry = { metricsViewModel.requestTelemetry(TelemetryType.DEVICE) },
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
