@@ -9,18 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore(deps): update room to v3.0.0-alpha04 (#5368) by @renovate[bot] in [`f547be6cb`](https://github.com/meshtastic/Meshtastic-Android/commit/f547be6cbf9539a240bac5532501405933837912)
-* chore(deps): update androidx.camera:camera-view to v1.6.1 (#5367) by @renovate[bot] in [`8434b5761`](https://github.com/meshtastic/Meshtastic-Android/commit/8434b57613ce80fefd570a0493a465ad6c8094f7)
-* fix(mqtt): harden TLS enforcement, add user CA trust, and improve error diagnostics (#5365) by @James Rich in [`3c75510f0`](https://github.com/meshtastic/Meshtastic-Android/commit/3c75510f0144483c3244f3bfa5d1b4dfd9dc6ca6)
-* chore(deps): update org.jetbrains.androidx.navigation3:navigation3-ui to v1.1.1 (#5364) by @renovate[bot] in [`f97900b55`](https://github.com/meshtastic/Meshtastic-Android/commit/f97900b55851353721d4fae9a09f484eea820d4c)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5357) by @James Rich in [`3e5557925`](https://github.com/meshtastic/Meshtastic-Android/commit/3e55579250c6fd7d487ef86571874a1c45d9370c)
-* chore(deps): update jetbrains.lifecycle to v2.11.0-beta01 (#5359) by @renovate[bot] in [`7db0f9a03`](https://github.com/meshtastic/Meshtastic-Android/commit/7db0f9a0325c76f94b90b4e0b7c06fa36607b8e6)
-* feat: desktop-only build isolation for Flatpak packaging (#5360) by @James Rich in [`086c9afba`](https://github.com/meshtastic/Meshtastic-Android/commit/086c9afbafa53cf3851ef94a964030ad8104f717)
-* chore(deps): update compose-multiplatform to v1.11.0-rc01 (#5358) by @renovate[bot] in [`94e3901bd`](https://github.com/meshtastic/Meshtastic-Android/commit/94e3901bd44f5062f49773c724aeb1bcdb4bd96f)
-* chore(deps): update agp to v9.2.1 (#5361) by @renovate[bot] in [`5a303e148`](https://github.com/meshtastic/Meshtastic-Android/commit/5a303e148cdb4be4532c54313dfe8784ad81b850)
-* chore(deps): update com.android.tools:common to v32.2.1 (#5362) by @renovate[bot] in [`702198428`](https://github.com/meshtastic/Meshtastic-Android/commit/70219842818031af5cea701f6cd5db5ad6fea9b9)
+* chore(deps): update paging to v3.5.0 (#5375) by @renovate[bot] in [`0b75fd414`](https://github.com/meshtastic/Meshtastic-Android/commit/0b75fd4140ed5643806fc8f1a6eb8c3dfaaeb049)
+* chore(deps): update compose-multiplatform to v1.11.1 (#5371) by @renovate[bot] in [`d28d684d0`](https://github.com/meshtastic/Meshtastic-Android/commit/d28d684d054fa1d82ec84ed0c2ecb3ddf4705766)
+* chore(deps): update androidx.camera.viewfinder:viewfinder-compose to v1.6.1 (#5370) by @renovate[bot] in [`2f2a71587`](https://github.com/meshtastic/Meshtastic-Android/commit/2f2a71587dd5ff36da025e5761159ff182371b81)
 
-### Open Beta (v2.7.14-open.7)
+### Open Beta (v2.7.14-open.8)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -205,6 +198,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix(ui): align Cancel and Send enabled state by @elagin in https://github.com/meshtastic/Meshtastic-Android/pull/5284
 * fix(data): default new-node notifications off for event firmware by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5323
 * fix(network): resolve empty MQTT address and enforce TLS on default server by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5333
+* fix(mqtt): harden TLS enforcement, add user CA trust, and improve error diagnostics by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5365
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
