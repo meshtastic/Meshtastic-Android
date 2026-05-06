@@ -172,8 +172,7 @@ class MessageViewModelTest {
     fun testFrequentEmojis() = runTest {
         customEmojiFrequencyFlow.value = "👍=10,👎=5,😂=20"
 
-        // frequentEmojis is a property, not a flow.
-        val emojis = viewModel.frequentEmojis
+        val emojis = viewModel.frequentEmojis.value
         assertEquals(listOf("😂", "👍", "👎"), emojis)
     }
 

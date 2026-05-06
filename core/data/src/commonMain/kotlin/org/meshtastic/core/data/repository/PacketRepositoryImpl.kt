@@ -21,6 +21,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -61,12 +62,15 @@ class PacketRepositoryImpl(
         .map { it?.myNodeNum ?: 0 }
         .distinctUntilChanged()
 
-    override fun getWaypoints(): Flow<List<DataPacket>> = myNodeNumFlow
-        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getAllWaypointsFlow(num) } }
+    /** Cached upstream combining myNodeNum + currentDb — avoids creating duplicate flatMapLatest chains. */
+    private val numAndDb = combine(myNodeNumFlow, dbManager.currentDb) { num, db -> num to db }
+
+    override fun getWaypoints(): Flow<List<DataPacket>> = numAndDb
+        .flatMapLatest { (num, db) -> db.packetDao().getAllWaypointsFlow(num) }
         .map { list -> list.map { it.data } }
 
-    override fun getContacts(): Flow<Map<String, DataPacket>> = myNodeNumFlow
-        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactKeys(num) } }
+    override fun getContacts(): Flow<Map<String, DataPacket>> = numAndDb
+        .flatMapLatest { (num, db) -> db.packetDao().getContactKeys(num) }
         .map { map -> map.mapValues { it.value.data } }
 
     override fun getContactsPaged(): Flow<PagingData<DataPacket>> = Pager(
@@ -87,17 +91,17 @@ class PacketRepositoryImpl(
     override suspend fun getUnreadCount(contact: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getUnreadCount(currentMyNodeNum, contact) }
 
-    override fun getUnreadCountFlow(contact: String): Flow<Int> = myNodeNumFlow
-        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountFlow(num, contact) } }
+    override fun getUnreadCountFlow(contact: String): Flow<Int> = numAndDb
+        .flatMapLatest { (num, db) -> db.packetDao().getUnreadCountFlow(num, contact) }
 
-    override fun getFirstUnreadMessageUuid(contact: String): Flow<Long?> = myNodeNumFlow
-        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFirstUnreadMessageUuid(num, contact) } }
+    override fun getFirstUnreadMessageUuid(contact: String): Flow<Long?> = numAndDb
+        .flatMapLatest { (num, db) -> db.packetDao().getFirstUnreadMessageUuid(num, contact) }
 
-    override fun hasUnreadMessages(contact: String): Flow<Boolean> = myNodeNumFlow
-        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().hasUnreadMessages(num, contact) } }
+    override fun hasUnreadMessages(contact: String): Flow<Boolean> = numAndDb
+        .flatMapLatest { (num, db) -> db.packetDao().hasUnreadMessages(num, contact) }
 
-    override fun getUnreadCountTotal(): Flow<Int> = myNodeNumFlow
-        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal(num) } }
+    override fun getUnreadCountTotal(): Flow<Int> = numAndDb
+        .flatMapLatest { (num, db) -> db.packetDao().getUnreadCountTotal(num) }
 
     override suspend fun clearUnreadCount(contact: String, timestamp: Long) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearUnreadCount(currentMyNodeNum, contact, timestamp) }
@@ -463,8 +467,8 @@ class PacketRepositoryImpl(
     suspend fun updateReaction(reaction: RoomReaction) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().update(reaction) }
 
-    override fun getFilteredCountFlow(contactKey: String): Flow<Int> = myNodeNumFlow
-        .flatMapLatest { num -> dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFilteredCountFlow(num, contactKey) } }
+    override fun getFilteredCountFlow(contactKey: String): Flow<Int> = numAndDb
+        .flatMapLatest { (num, db) -> db.packetDao().getFilteredCountFlow(num, contactKey) }
 
     override suspend fun getFilteredCount(contactKey: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getFilteredCount(currentMyNodeNum, contactKey) }

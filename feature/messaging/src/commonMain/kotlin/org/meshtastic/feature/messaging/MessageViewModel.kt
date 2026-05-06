@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
@@ -105,17 +106,21 @@ class MessageViewModel(
             }
             .cachedIn(viewModelScope)
 
-    val frequentEmojis: List<String>
-        get() =
-            customEmojiPrefs.customEmojiFrequency.value
-                ?.split(",")
-                ?.associate { entry ->
-                    entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() } ?: ("" to 0)
-                }
-                ?.toList()
-                ?.sortedByDescending { it.second }
-                ?.map { it.first }
-                ?.take(6) ?: listOf("👍", "👎", "😂", "🔥", "❤️", "😮")
+    private val defaultEmojis = listOf("👍", "👎", "😂", "🔥", "❤️", "😮")
+
+    val frequentEmojis: StateFlow<List<String>> =
+        customEmojiPrefs.customEmojiFrequency
+            .map { raw ->
+                raw?.split(",")
+                    ?.associate { entry ->
+                        entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() } ?: ("" to 0)
+                    }
+                    ?.toList()
+                    ?.sortedByDescending { it.second }
+                    ?.map { it.first }
+                    ?.take(6) ?: defaultEmojis
+            }
+            .stateInWhileSubscribed(defaultEmojis)
 
     val homoglyphEncodingEnabled = homoglyphEncodingPrefs.homoglyphEncodingEnabled
 

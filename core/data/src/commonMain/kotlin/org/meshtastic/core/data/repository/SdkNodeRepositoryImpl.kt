@@ -99,15 +99,15 @@ class SdkNodeRepositoryImpl(
 
     override val ourNodeInfo: StateFlow<Node?> =
         combine(_nodeDBbyNum, _myNodeNum) { db, myNum -> myNum?.let { db[it] } }
-            .stateIn(scope, SharingStarted.Eagerly, null)
+            .stateIn(scope, SharingStarted.WhileSubscribed(5_000), null)
 
     override val myId: StateFlow<String?> =
         ourNodeInfo.map { it?.user?.id }
-            .stateIn(scope, SharingStarted.Eagerly, null)
+            .stateIn(scope, SharingStarted.WhileSubscribed(5_000), null)
 
     override val localStats: StateFlow<LocalStats> =
         localStatsDataSource.localStatsFlow
-            .stateIn(scope, SharingStarted.Eagerly, LocalStats())
+            .stateIn(scope, SharingStarted.WhileSubscribed(5_000), LocalStats())
 
     override fun updateLocalStats(stats: LocalStats) {
         scope.launch { localStatsDataSource.setLocalStats(stats) }

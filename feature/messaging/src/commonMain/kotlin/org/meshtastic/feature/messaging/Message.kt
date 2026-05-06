@@ -401,7 +401,7 @@ fun MessageScreen(
                     onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
                     onReply = { message -> replyingToPacketId = message?.packetId },
                 ),
-                quickEmojis = viewModel.frequentEmojis,
+                quickEmojis = viewModel.frequentEmojis.collectAsStateWithLifecycle().value,
             )
             // Show FAB if we can scroll towards the newest messages (index 0).
             if (listState.canScrollBackward) {
