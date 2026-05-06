@@ -33,7 +33,6 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState as AppConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.MeshLocationManager
@@ -72,7 +71,6 @@ class SdkStateBridge(
     private val packetRepository: Lazy<PacketRepository>,
     private val locationManager: MeshLocationManager,
     private val uiPrefs: UiPrefs,
-    private val radioController: RadioController,
     private val dispatchers: CoroutineDispatchers,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -249,13 +247,13 @@ class SdkStateBridge(
                             if (shouldProvide) {
                                 locationManager.start(scope) { pos ->
                                     scope.launch {
-                                        val packet = DataPacket(
-                                            bytes = okio.ByteString.of(
-                                                *org.meshtastic.proto.Position.ADAPTER.encode(pos),
-                                            ),
-                                            dataType = PortNum.POSITION_APP.value,
+                                        val c = accessor.client.value ?: return@launch
+                                        val posBytes = org.meshtastic.proto.Position.ADAPTER.encode(pos)
+                                        c.send(
+                                            portnum = PortNum.POSITION_APP,
+                                            payload = posBytes,
+                                            wantAck = false,
                                         )
-                                        radioController.sendMessage(packet)
                                     }
                                 }
                             } else {

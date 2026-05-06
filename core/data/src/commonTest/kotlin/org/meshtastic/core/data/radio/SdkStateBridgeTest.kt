@@ -34,7 +34,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeNodeRepository
-import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.proto.Data
@@ -286,7 +285,6 @@ class SdkStateBridgeTest {
             packetRepository = lazyOf(packetRepository),
             locationManager = NoOpLocationManager,
             uiPrefs = FakeUiPrefs(),
-            radioController = FakeRadioController(),
             dispatchers = CoroutineDispatchers(
                 io = backgroundScope.coroutineContext[kotlin.coroutines.ContinuationInterceptor] as kotlinx.coroutines.CoroutineDispatcher,
                 main = backgroundScope.coroutineContext[kotlin.coroutines.ContinuationInterceptor] as kotlinx.coroutines.CoroutineDispatcher,

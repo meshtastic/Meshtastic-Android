@@ -19,7 +19,6 @@ package org.meshtastic.core.data.radio
 import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.StateFlow
-import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -38,8 +37,6 @@ import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.Data
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.SharedContact
@@ -110,22 +107,16 @@ class SdkRadioController(
             Logger.w { "sendMessage: no client, dropping packet" }
             return
         }
-        val destNum = packet.to
         val packetId = packet.id.takeIf { it != 0 } ?: getPacketId()
-        val meshPacket = MeshPacket(
-            id = packetId,
-            to = destNum,
-            channel = packet.channel,
-            want_ack = packet.wantAck,
-            hop_limit = packet.hopLimit,
-            decoded = Data(
-                portnum = PortNum.fromValue(packet.dataType) ?: PortNum.UNKNOWN_APP,
-                payload = packet.bytes ?: okio.ByteString.EMPTY,
-                want_response = false,
-            ),
-        )
         try {
-            val handle = c.send(meshPacket)
+            val handle = c.send(
+                portnum = PortNum.fromValue(packet.dataType) ?: PortNum.UNKNOWN_APP,
+                payload = packet.bytes?.toByteArray() ?: byteArrayOf(),
+                to = NodeId(packet.to),
+                channel = ChannelIndex(packet.channel),
+                wantAck = packet.wantAck,
+                hopLimit = packet.hopLimit.takeIf { it > 0 },
+            )
             deliveryTracker.track(packetId, handle)
             serviceRepository.emitMeshActivity(MeshActivity.Send)
         } catch (e: Exception) {
@@ -308,17 +299,7 @@ class SdkRadioController(
 
     override suspend fun requestUserInfo(destNum: Int) {
         val c = client ?: return
-        c.send(
-            MeshPacket(
-                to = destNum,
-                want_ack = true,
-                decoded = Data(
-                    portnum = PortNum.NODEINFO_APP,
-                    payload = byteArrayOf().toByteString(),
-                    want_response = true,
-                ),
-            ),
-        )
+        c.requestNodeInfo(NodeId(destNum))
     }
 
     override suspend fun requestTraceroute(requestId: Int, destNum: Int) {
