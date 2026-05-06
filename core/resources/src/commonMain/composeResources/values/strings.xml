@@ -719,7 +719,7 @@
     <string name="mqtt_probe_success_with_info">Reachable (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Cannot reach broker (TCP)</string>
     <string name="mqtt_probe_timeout">Timed out after %1$d ms</string>
-    <string name="mqtt_probe_tls_failure">TLS handshake failed</string>
+    <string name="mqtt_probe_tls_failure">TLS handshake failed: %1$s</string>
     <string name="mqtt_status_connected">Connected</string>
     <string name="mqtt_status_connecting">Connecting…</string>
     <string name="mqtt_status_disconnected">Disconnected</string>
