@@ -263,7 +263,6 @@ interface PacketDao {
     @Transaction
     suspend fun updateMessageStatus(myNodeNum: Int, data: DataPacket, m: MessageStatus) {
         val new = data.copy(status = m)
-        // Match on key fields that identify the packet, rather than the entire data object
         findPacketsWithId(myNodeNum, data.id)
             .find { it.data.id == data.id && it.data.from == data.from && it.data.to == data.to }
             ?.let { update(it.copy(data = new)) }
@@ -272,7 +271,6 @@ interface PacketDao {
     @Transaction
     suspend fun updateMessageId(myNodeNum: Int, data: DataPacket, id: Int) {
         val new = data.copy(id = id)
-        // Match on key fields that identify the packet
         findPacketsWithId(myNodeNum, data.id)
             .find { it.data.id == data.id && it.data.from == data.from && it.data.to == data.to }
             ?.let { update(it.copy(data = new, packetId = id)) }

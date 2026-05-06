@@ -25,6 +25,9 @@ import org.meshtastic.core.database.entity.NodeMetadataEntity
 import org.meshtastic.core.repository.AppMetadataRepository
 import org.meshtastic.core.repository.NodeMetadata
 
+/**
+ * Stores app-managed node metadata such as favorites, mute state, and notes.
+ */
 @Single(binds = [AppMetadataRepository::class])
 class AppMetadataRepositoryImpl(
     private val dbManager: DatabaseProvider,
@@ -35,40 +38,27 @@ class AppMetadataRepositoryImpl(
             .map { list -> list.associate { it.num to it.toModel() } }
 
     override suspend fun setFavorite(nodeNum: Int, isFavorite: Boolean) {
-        ensureExists(nodeNum)
-        dbManager.withDb { it.nodeMetadataDao().setFavorite(nodeNum, isFavorite) }
+        dbManager.withDb { it.nodeMetadataDao().setFavoriteEnsuringExists(nodeNum, isFavorite) }
     }
 
     override suspend fun setIgnored(nodeNum: Int, isIgnored: Boolean) {
-        ensureExists(nodeNum)
-        dbManager.withDb { it.nodeMetadataDao().setIgnored(nodeNum, isIgnored) }
+        dbManager.withDb { it.nodeMetadataDao().setIgnoredEnsuringExists(nodeNum, isIgnored) }
     }
 
     override suspend fun setMuted(nodeNum: Int, isMuted: Boolean) {
-        ensureExists(nodeNum)
-        dbManager.withDb { it.nodeMetadataDao().setMuted(nodeNum, isMuted) }
+        dbManager.withDb { it.nodeMetadataDao().setMutedEnsuringExists(nodeNum, isMuted) }
     }
 
     override suspend fun setNotes(nodeNum: Int, notes: String) {
-        ensureExists(nodeNum)
-        dbManager.withDb { it.nodeMetadataDao().setNotes(nodeNum, notes) }
+        dbManager.withDb { it.nodeMetadataDao().setNotesEnsuringExists(nodeNum, notes) }
     }
 
     override suspend fun setManuallyVerified(nodeNum: Int, verified: Boolean) {
-        ensureExists(nodeNum)
-        dbManager.withDb { it.nodeMetadataDao().setManuallyVerified(nodeNum, verified) }
+        dbManager.withDb { it.nodeMetadataDao().setManuallyVerifiedEnsuringExists(nodeNum, verified) }
     }
 
     override suspend fun delete(nodeNum: Int) {
         dbManager.withDb { it.nodeMetadataDao().delete(nodeNum) }
-    }
-
-    private suspend fun ensureExists(nodeNum: Int) {
-        dbManager.withDb { db ->
-            if (db.nodeMetadataDao().getByNum(nodeNum) == null) {
-                db.nodeMetadataDao().upsert(NodeMetadataEntity(num = nodeNum))
-            }
-        }
     }
 }
 

@@ -232,10 +232,6 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
     }
 }
 
-// Assuming Iaq is an enum class with color and description properties
-// and that it conforms to CaseIterable.
-// Replace with your actual implementation
-
 @Composable
 fun IAQScale(modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(16.dp), horizontalAlignment = Alignment.Start) {

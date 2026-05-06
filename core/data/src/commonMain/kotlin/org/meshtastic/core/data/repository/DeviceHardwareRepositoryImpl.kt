@@ -33,7 +33,9 @@ import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.DeviceHardwareRepository
 
-// Annotating with Singleton to ensure a single instance manages the cache
+/**
+ * Resolves device hardware metadata from cache, remote data, and bundled JSON fallbacks.
+ */
 @Single
 class DeviceHardwareRepositoryImpl(
     private val remoteDataSource: DeviceHardwareRemoteDataSource,
@@ -189,15 +191,17 @@ class DeviceHardwareRepositoryImpl(
             }
         }
 
-    private fun disambiguate(entities: List<DeviceHardwareEntity>, target: String?): DeviceHardwareEntity? = when {
-        entities.isEmpty() -> null
+    private fun disambiguate(entities: List<DeviceHardwareEntity>, target: String?): DeviceHardwareEntity? {
+        if (entities.isEmpty()) return null
 
-        target == null -> entities.first()
+        val preferred = entities.sortedWith(compareBy<DeviceHardwareEntity> { it.isIncomplete() }.thenByDescending { it.lastUpdated })
 
-        else -> {
+        return if (target == null) {
+            preferred.first()
+        } else {
             entities.find { it.platformioTarget == target }
                 ?: entities.find { it.platformioTarget.equals(target, ignoreCase = true) }
-                ?: entities.first()
+                ?: preferred.first()
         }
     }
 

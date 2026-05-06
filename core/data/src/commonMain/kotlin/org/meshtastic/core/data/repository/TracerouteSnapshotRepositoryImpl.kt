@@ -30,6 +30,9 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.proto.Position
 
+/**
+ * Persists and exposes traceroute snapshot positions for a traceroute log entry.
+ */
 @Single
 class TracerouteSnapshotRepositoryImpl(
     private val dbManager: DatabaseProvider,

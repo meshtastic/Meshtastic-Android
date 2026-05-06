@@ -18,6 +18,10 @@ package org.meshtastic.core.data.datasource
 
 import org.meshtastic.core.model.BootloaderOtaQuirk
 
+/**
+ * Loads bundled bootloader OTA quirk metadata for hardware-specific update handling.
+ */
 interface BootloaderOtaQuirksJsonDataSource {
+    /** Returns bootloader OTA quirks parsed from the packaged JSON asset. */
     fun loadBootloaderOtaQuirksFromJsonAsset(): List<BootloaderOtaQuirk>
 }

@@ -46,6 +46,9 @@ import org.meshtastic.core.database.entity.Packet as RoomPacket
 import org.meshtastic.core.database.entity.ReactionEntity as RoomReaction
 import org.meshtastic.core.repository.PacketRepository as SharedPacketRepository
 
+/**
+ * Provides reactive access to packets, messages, contacts, and related packet metadata.
+ */
 @Suppress("TooManyFunctions", "LongParameterList")
 @Single
 class PacketRepositoryImpl(

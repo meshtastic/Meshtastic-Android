@@ -32,6 +32,9 @@ import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 
+/**
+ * Serves firmware release data from local cache, bundled assets, and remote updates.
+ */
 @Single
 open class FirmwareReleaseRepositoryImpl(
     private val remoteDataSource: FirmwareReleaseRemoteDataSource,

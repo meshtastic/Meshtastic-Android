@@ -58,15 +58,7 @@ import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
 /**
- * Unified node repository and manager — single source of truth for all mesh node state.
- *
- * Replaces the previous split between a write-operation layer (in-memory atomicfu maps)
- * and `SdkNodeRepositoryImpl` (repository interface, StateFlows). Now uses a single StateFlow
- * with metadata enrichment on every write.
- *
- * The SDK manages node persistence via its SqlDelight storage. This class stores the live node
- * database in-memory, populated by SdkStateBridge from the SDK's NodeChange flow.
- * Node metadata (favorites, notes, ignored, muted) persists via Room's node_metadata table.
+ * Maintains live mesh node state and exposes reactive node data for the app layer.
  */
 @Single(binds = [NodeRepository::class, NodeIdLookup::class])
 @Suppress("TooManyFunctions", "LongParameterList")

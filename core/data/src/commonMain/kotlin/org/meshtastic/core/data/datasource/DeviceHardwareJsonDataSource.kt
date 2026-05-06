@@ -18,6 +18,10 @@ package org.meshtastic.core.data.datasource
 
 import org.meshtastic.core.model.NetworkDeviceHardware
 
+/**
+ * Loads bundled device hardware metadata used when cached or remote data is unavailable.
+ */
 interface DeviceHardwareJsonDataSource {
+    /** Returns device hardware entries parsed from the packaged JSON asset. */
     fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware>
 }
