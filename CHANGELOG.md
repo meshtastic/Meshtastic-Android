@@ -9,23 +9,18 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* feat: align theme with Design Standards v1.3, remove contrast setting (#5355) by @James Rich in [`2de57a9e8`](https://github.com/meshtastic/Meshtastic-Android/commit/2de57a9e810373f31b62079a62cf9a210a9d419d)
+* chore(deps): update room to v3.0.0-alpha04 (#5368) by @renovate[bot] in [`f547be6cb`](https://github.com/meshtastic/Meshtastic-Android/commit/f547be6cbf9539a240bac5532501405933837912)
+* chore(deps): update androidx.camera:camera-view to v1.6.1 (#5367) by @renovate[bot] in [`8434b5761`](https://github.com/meshtastic/Meshtastic-Android/commit/8434b57613ce80fefd570a0493a465ad6c8094f7)
+* fix(mqtt): harden TLS enforcement, add user CA trust, and improve error diagnostics (#5365) by @James Rich in [`3c75510f0`](https://github.com/meshtastic/Meshtastic-Android/commit/3c75510f0144483c3244f3bfa5d1b4dfd9dc6ca6)
+* chore(deps): update org.jetbrains.androidx.navigation3:navigation3-ui to v1.1.1 (#5364) by @renovate[bot] in [`f97900b55`](https://github.com/meshtastic/Meshtastic-Android/commit/f97900b55851353721d4fae9a09f484eea820d4c)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5357) by @James Rich in [`3e5557925`](https://github.com/meshtastic/Meshtastic-Android/commit/3e55579250c6fd7d487ef86571874a1c45d9370c)
+* chore(deps): update jetbrains.lifecycle to v2.11.0-beta01 (#5359) by @renovate[bot] in [`7db0f9a03`](https://github.com/meshtastic/Meshtastic-Android/commit/7db0f9a0325c76f94b90b4e0b7c06fa36607b8e6)
+* feat: desktop-only build isolation for Flatpak packaging (#5360) by @James Rich in [`086c9afba`](https://github.com/meshtastic/Meshtastic-Android/commit/086c9afbafa53cf3851ef94a964030ad8104f717)
+* chore(deps): update compose-multiplatform to v1.11.0-rc01 (#5358) by @renovate[bot] in [`94e3901bd`](https://github.com/meshtastic/Meshtastic-Android/commit/94e3901bd44f5062f49773c724aeb1bcdb4bd96f)
+* chore(deps): update agp to v9.2.1 (#5361) by @renovate[bot] in [`5a303e148`](https://github.com/meshtastic/Meshtastic-Android/commit/5a303e148cdb4be4532c54313dfe8784ad81b850)
+* chore(deps): update com.android.tools:common to v32.2.1 (#5362) by @renovate[bot] in [`702198428`](https://github.com/meshtastic/Meshtastic-Android/commit/70219842818031af5cea701f6cd5db5ad6fea9b9)
 
-### Internal (v2.7.14-internal.85)
-Changes since [`v2.7.14-open.6`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.6):
-
-* docs: update CHANGELOG.md (#5353) by @github-actions[bot] in [`1a6774d67`](https://github.com/meshtastic/Meshtastic-Android/commit/1a6774d67c7f509490fc52944be17e8c3c5365d6)
-* feat: event firmware easter egg with ambient branding (#5354) by @James Rich in [`82926fd73`](https://github.com/meshtastic/Meshtastic-Android/commit/82926fd7347c21519d47455649e88c12023ae25e)
-* chore(ble): don't surface ui message when canceling scope (#5352) by @James Rich in [`78ff3f599`](https://github.com/meshtastic/Meshtastic-Android/commit/78ff3f599c7a813dfe2c5cbf92b5febb8fbe7c36)
-* docs: update CHANGELOG.md (#5351) by @github-actions[bot] in [`c9d633f1d`](https://github.com/meshtastic/Meshtastic-Android/commit/c9d633f1d381f478941d388a6cdf0755ae333fa6)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5349) by @James Rich in [`fa3437b14`](https://github.com/meshtastic/Meshtastic-Android/commit/fa3437b14728c545a606527284c429d86cae3956)
-* chore(deps): update org.meshtastic:mqtt-client to v0.3.6 (#5350) by @renovate[bot] in [`fca1fd824`](https://github.com/meshtastic/Meshtastic-Android/commit/fca1fd8248640a1e39c4bb7b4c7f654fc92cca9d)
-* docs: update CHANGELOG.md (#5348) by @github-actions[bot] in [`e70396f55`](https://github.com/meshtastic/Meshtastic-Android/commit/e70396f55f5ccd05abdb11cd2005877a02f212fc)
-* Add Meshtastic design standards as a skill (#5346) by @Copilot in [`f51e04604`](https://github.com/meshtastic/Meshtastic-Android/commit/f51e0460430a2c30c734551caba1f0a110793f97)
-* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5347) by @James Rich in [`26c50258d`](https://github.com/meshtastic/Meshtastic-Android/commit/26c50258dab0f0c352036944320f4c297203fe5b)
-* docs: update CHANGELOG.md (#5345) by @github-actions[bot] in [`7d9f0e968`](https://github.com/meshtastic/Meshtastic-Android/commit/7d9f0e9682d1edf3844b7323e80b7ef818b23709)
-
-### Open Beta (v2.7.14-open.6)
+### Open Beta (v2.7.14-open.7)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -104,6 +99,8 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: update notification icon by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5293
 * feat(connections): connection sorting & conversation empty channel ranking by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5295
 * fix(connections): improve BLE scan reliability and UI lifecycle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5329
+* feat: event firmware easter egg with ambient branding by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5354
+* feat: align theme with Design Standards v1.3, remove contrast setting by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5355
 #### 🛠️ Fixes
 * fix(strings): replace plurals by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4596
 * fix: replace fdroid map_style_selection string by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4598
