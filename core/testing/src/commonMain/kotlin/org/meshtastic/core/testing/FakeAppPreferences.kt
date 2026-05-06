@@ -132,6 +132,12 @@ class FakeUiPrefs : UiPrefs {
         excludeMqtt.value = value
     }
 
+    override val maxDistanceKm = MutableStateFlow<Float?>(null)
+
+    override fun setMaxDistanceKm(value: Float?) {
+        maxDistanceKm.value = value
+    }
+
     override val hasShownNotPairedWarning = MutableStateFlow(false)
 
     override fun setHasShownNotPairedWarning(shown: Boolean) {

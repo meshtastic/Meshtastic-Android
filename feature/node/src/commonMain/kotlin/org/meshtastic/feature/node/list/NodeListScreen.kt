@@ -183,6 +183,8 @@ fun NodeListScreen(
                         ignoredNodeCount = ignoredNodeCount,
                         excludeMqtt = state.filter.excludeMqtt,
                         onToggleExcludeMqtt = { viewModel.nodeFilterPreferences.toggleExcludeMqtt() },
+                        maxDistanceKm = state.filter.maxDistanceKm,
+                        onMaxDistanceKmChange = viewModel.nodeFilterPreferences::setMaxDistanceKm,
                     )
                 }
 

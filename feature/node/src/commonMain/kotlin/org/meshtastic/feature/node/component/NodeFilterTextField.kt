@@ -18,6 +18,7 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,9 +41,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,8 +65,12 @@ import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.desc_node_filter_clear
 import org.meshtastic.core.resources.node_filter_exclude_infrastructure
 import org.meshtastic.core.resources.node_filter_exclude_mqtt
+import org.meshtastic.core.resources.node_filter_distance_km
+import org.meshtastic.core.resources.node_filter_distance_unlimited
 import org.meshtastic.core.resources.node_filter_ignored
 import org.meshtastic.core.resources.node_filter_include_unknown
+import org.meshtastic.core.resources.node_filter_max_distance
+import org.meshtastic.core.resources.node_filter_max_distance_value
 import org.meshtastic.core.resources.node_filter_only_direct
 import org.meshtastic.core.resources.node_filter_only_online
 import org.meshtastic.core.resources.node_filter_placeholder
@@ -74,6 +82,8 @@ import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.Sort
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Suppress("LongParameterList")
 @Composable
@@ -96,6 +106,8 @@ fun NodeFilterTextField(
     ignoredNodeCount: Int,
     excludeMqtt: Boolean,
     onToggleExcludeMqtt: () -> Unit,
+    maxDistanceKm: Float?,
+    onMaxDistanceKmChange: (Float?) -> Unit,
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
@@ -120,6 +132,8 @@ fun NodeFilterTextField(
                     ignoredNodeCount = ignoredNodeCount,
                     excludeMqtt = excludeMqtt,
                     onToggleExcludeMqtt = onToggleExcludeMqtt,
+                    maxDistanceKm = maxDistanceKm,
+                    onMaxDistanceKmChange = onMaxDistanceKmChange,
                 ),
             )
         }
@@ -157,6 +171,8 @@ data class NodeFilterToggles(
     val ignoredNodeCount: Int,
     val excludeMqtt: Boolean,
     val onToggleExcludeMqtt: () -> Unit,
+    val maxDistanceKm: Float?,
+    val onMaxDistanceKmChange: (Float?) -> Unit,
 )
 
 @Composable
@@ -288,8 +304,69 @@ private fun NodeSortButton(
             checked = toggles.excludeMqtt,
             onClick = toggles.onToggleExcludeMqtt,
         )
+
+        HorizontalDivider(modifier = Modifier.padding(MenuDefaults.DropdownMenuItemContentPadding))
+
+        DistanceFilterDropdownSection(
+            maxDistanceKm = toggles.maxDistanceKm,
+            onMaxDistanceKmChange = toggles.onMaxDistanceKmChange,
+        )
     }
 }
+
+@Composable
+private fun DistanceFilterDropdownSection(maxDistanceKm: Float?, onMaxDistanceKmChange: (Float?) -> Unit) {
+    val distanceOptions = remember { listOf<Float?>(null, 1f, 5f, 10f, 50f) }
+    val selectedIndex =
+        remember(maxDistanceKm) {
+            distanceOptions.indexOf(maxDistanceKm).takeIf { it >= 0 }
+                ?: distanceOptions.indices
+                    .filter { distanceOptions[it] != null }
+                    .minByOrNull { index -> abs(distanceOptions[index]!! - (maxDistanceKm ?: 0f)) }
+                ?: 0
+        }
+    var sliderPosition by remember(selectedIndex) { mutableFloatStateOf(selectedIndex.toFloat()) }
+    val distanceLabel =
+        maxDistanceKm?.let { stringResource(Res.string.node_filter_distance_km, formatDistanceKm(it)) }
+            ?: stringResource(Res.string.node_filter_distance_unlimited)
+
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).widthIn(min = 240.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(text = stringResource(Res.string.node_filter_max_distance), style = MaterialTheme.typography.titleSmall)
+        Text(
+            text = stringResource(Res.string.node_filter_max_distance_value, distanceLabel),
+            style = MaterialTheme.typography.labelLarge,
+        )
+        Slider(
+            value = sliderPosition,
+            onValueChange = { sliderPosition = it },
+            onValueChangeFinished = {
+                val newIndex = sliderPosition.roundToInt().coerceIn(0, distanceOptions.lastIndex)
+                onMaxDistanceKmChange(distanceOptions[newIndex])
+            },
+            valueRange = 0f..distanceOptions.lastIndex.toFloat(),
+            steps = distanceOptions.size - 2,
+        )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            distanceOptions.forEach { option ->
+                Text(
+                    text =
+                        option?.let { stringResource(Res.string.node_filter_distance_km, formatDistanceKm(it)) }
+                            ?: stringResource(Res.string.node_filter_distance_unlimited),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+    }
+}
+
+private fun formatDistanceKm(value: Float): String =
+    value.toInt().takeIf { it.toFloat() == value }?.toString() ?: value.toString()
 
 @Composable
 private fun DropdownMenuTitle(text: String) {

@@ -94,10 +94,11 @@ class NodeListViewModel(
         }
 
     private val nodeFilter: Flow<NodeFilterState> =
-        combine(_nodeFilterText, filterToggles, nodeFilterPreferences.excludeMqtt) {
+        combine(_nodeFilterText, filterToggles, nodeFilterPreferences.excludeMqtt, nodeFilterPreferences.maxDistanceKm) {
                 filterText,
                 filterToggles,
                 excludeMqtt,
+                maxDistanceKm,
             ->
             NodeFilterState(
                 filterText = filterText,
@@ -107,6 +108,7 @@ class NodeListViewModel(
                 onlyDirect = filterToggles.onlyDirect,
                 showIgnored = filterToggles.showIgnored,
                 excludeMqtt = excludeMqtt,
+                maxDistanceKm = maxDistanceKm,
             )
         }
     val nodesUiState: StateFlow<NodesUiState> =
@@ -176,10 +178,11 @@ data class NodeFilterState(
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
     val excludeMqtt: Boolean = false,
+    val maxDistanceKm: Float? = null,
 ) {
     /** True if any user-applied filter is narrowing the visible node set. */
     val isActive: Boolean
-        get() = filterText.isNotEmpty() || excludeInfrastructure || onlyOnline || onlyDirect || excludeMqtt
+        get() = filterText.isNotEmpty() || excludeInfrastructure || onlyOnline || onlyDirect || excludeMqtt || maxDistanceKm != null
 }
 
 data class NodeFilterToggles(

@@ -29,6 +29,7 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
     open val onlyDirect = uiPrefs.onlyDirect
     open val showIgnored = uiPrefs.showIgnored
     open val excludeMqtt = uiPrefs.excludeMqtt
+    open val maxDistanceKm = uiPrefs.maxDistanceKm
 
     open val nodeSortOption =
         uiPrefs.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
@@ -59,5 +60,9 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
 
     open fun toggleExcludeMqtt() {
         uiPrefs.setExcludeMqtt(!excludeMqtt.value)
+    }
+
+    open fun setMaxDistanceKm(value: Float?) {
+        uiPrefs.setMaxDistanceKm(value)
     }
 }

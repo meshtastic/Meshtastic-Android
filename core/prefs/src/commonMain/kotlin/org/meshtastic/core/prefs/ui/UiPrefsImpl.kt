@@ -20,6 +20,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.atomicfu.atomic
@@ -118,6 +119,21 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_EXCLUDE_MQTT] = value } }
     }
 
+    override val maxDistanceKm: StateFlow<Float?> =
+        dataStore.data.map { it[KEY_MAX_DISTANCE_KM] }.stateIn(scope, SharingStarted.Lazily, null)
+
+    override fun setMaxDistanceKm(value: Float?) {
+        scope.launch {
+            dataStore.edit {
+                if (value == null) {
+                    it.remove(KEY_MAX_DISTANCE_KM)
+                } else {
+                    it[KEY_MAX_DISTANCE_KM] = value
+                }
+            }
+        }
+    }
+
     override val hasShownNotPairedWarning: StateFlow<Boolean> =
         dataStore.data
             .map { it[KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF] ?: false }
@@ -195,6 +211,7 @@ class UiPrefsImpl(
         val KEY_ONLY_DIRECT = booleanPreferencesKey("only-direct")
         val KEY_SHOW_IGNORED = booleanPreferencesKey("show-ignored")
         val KEY_EXCLUDE_MQTT = booleanPreferencesKey("exclude-mqtt")
+        val KEY_MAX_DISTANCE_KM = floatPreferencesKey("max-distance-km")
         val KEY_BLE_AUTO_SCAN = booleanPreferencesKey("ble-auto-scan")
         val KEY_NETWORK_AUTO_SCAN = booleanPreferencesKey("network-auto-scan")
         val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")

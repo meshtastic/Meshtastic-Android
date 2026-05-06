@@ -112,6 +112,10 @@ interface UiPrefs {
 
     fun setExcludeMqtt(value: Boolean)
 
+    val maxDistanceKm: StateFlow<Float?>
+
+    fun setMaxDistanceKm(value: Float?)
+
     val hasShownNotPairedWarning: StateFlow<Boolean>
 
     fun setHasShownNotPairedWarning(shown: Boolean)

@@ -779,6 +779,10 @@
     <string name="node_filter_exclude_mqtt">Exclude MQTT</string>
     <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
     <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_filter_max_distance">Max distance</string>
+    <string name="node_filter_max_distance_value">Max distance: %1$s</string>
+    <string name="node_filter_distance_km">%1$s km</string>
+    <string name="node_filter_distance_unlimited">Unlimited</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
     <string name="node_filter_placeholder">Filter</string>

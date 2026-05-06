@@ -70,6 +70,7 @@ class NodeListViewModelTest {
         every { nodeFilterPreferences.onlyDirect } returns MutableStateFlow(false)
         every { nodeFilterPreferences.showIgnored } returns MutableStateFlow(false)
         every { nodeFilterPreferences.excludeMqtt } returns MutableStateFlow(false)
+        every { nodeFilterPreferences.maxDistanceKm } returns MutableStateFlow(null)
 
         every { getFilteredNodesUseCase(any(), any()) } returns MutableStateFlow(emptyList())
 

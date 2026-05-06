@@ -38,6 +38,10 @@ object GPSFormat {
 fun latLongToMeter(latitudeA: Double, longitudeA: Double, latitudeB: Double, longitudeB: Double): Double =
     PositionUtils.distance(latitudeA, longitudeA, latitudeB, longitudeB)
 
+/** @return distance in kilometers along the surface of the earth (ish) */
+fun distanceKm(latitudeA: Double, longitudeA: Double, latitudeB: Double, longitudeB: Double): Double =
+    latLongToMeter(latitudeA, longitudeA, latitudeB, longitudeB) / 1000.0
+
 /**
  * Computes the bearing in degrees between two points on Earth.
  *

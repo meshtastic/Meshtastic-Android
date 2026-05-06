@@ -17,8 +17,10 @@
 package org.meshtastic.feature.node.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.distanceKm
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.NodeRepository
@@ -29,15 +31,19 @@ import org.meshtastic.proto.Config
 @Single
 open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeRepository) {
     @Suppress("CyclomaticComplexMethod", "LongMethod")
-    open operator fun invoke(filter: NodeFilterState, sort: NodeSortOption): Flow<List<Node>> = nodeRepository
-        .getNodes(
-            sort = sort,
-            filter = filter.filterText,
-            includeUnknown = filter.includeUnknown,
-            onlyOnline = filter.onlyOnline,
-            onlyDirect = filter.onlyDirect,
-        )
-        .map { list ->
+    open operator fun invoke(filter: NodeFilterState, sort: NodeSortOption): Flow<List<Node>> =
+        combine(
+            nodeRepository.getNodes(
+                sort = sort,
+                filter = filter.filterText,
+                includeUnknown = filter.includeUnknown,
+                onlyOnline = filter.onlyOnline,
+                onlyDirect = filter.onlyDirect,
+            ),
+            nodeRepository.ourNodeInfo,
+        ) { list, ourNode ->
+            list to ourNode
+        }.map { (list, ourNode) ->
             list
                 .filter { node -> node.isIgnored == filter.showIgnored }
                 .filter { node ->
@@ -58,5 +64,21 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
                     }
                 }
                 .filter { node -> if (filter.excludeMqtt) !node.viaMqtt else true }
+                .filter { node ->
+                    val maxDistanceKm = filter.maxDistanceKm
+                    val ourDistanceAnchor = ourNode?.takeIf { it.validPosition != null }
+                    val nodePosition = node.validPosition
+
+                    if (maxDistanceKm == null || ourDistanceAnchor == null || nodePosition == null) {
+                        true
+                    } else {
+                        distanceKm(
+                            latitudeA = ourDistanceAnchor.latitude,
+                            longitudeA = ourDistanceAnchor.longitude,
+                            latitudeB = node.latitude,
+                            longitudeB = node.longitude,
+                        ) <= maxDistanceKm
+                    }
+                }
         }
 }

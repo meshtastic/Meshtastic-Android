@@ -20,6 +20,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -28,6 +29,7 @@ import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.node.list.NodeFilterState
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -36,11 +38,14 @@ import kotlin.test.assertEquals
 class GetFilteredNodesUseCaseTest {
 
     private lateinit var nodeRepository: NodeRepository
+    private lateinit var ourNodeInfo: MutableStateFlow<Node?>
     private lateinit var useCase: GetFilteredNodesUseCase
 
     @BeforeTest
     fun setUp() {
         nodeRepository = mock()
+        ourNodeInfo = MutableStateFlow(null)
+        every { nodeRepository.ourNodeInfo } returns ourNodeInfo
         useCase = GetFilteredNodesUseCase(nodeRepository)
     }
 
@@ -50,9 +55,17 @@ class GetFilteredNodesUseCaseTest {
         ignored: Boolean = false,
         name: String = "Node$num",
         viaMqtt: Boolean = false,
+        latitudeI: Int = 0,
+        longitudeI: Int = 0,
     ): Node {
         val user = User(id = "!$num", long_name = name, short_name = "N$num", role = role)
-        return Node(num = num, user = user, isIgnored = ignored, viaMqtt = viaMqtt)
+        return Node(
+            num = num,
+            user = user,
+            position = Position(latitude_i = latitudeI, longitude_i = longitudeI),
+            isIgnored = ignored,
+            viaMqtt = viaMqtt,
+        )
     }
 
     @Test
@@ -151,5 +164,22 @@ class GetFilteredNodesUseCaseTest {
 
         // Assert
         assertEquals(2, result.size)
+    }
+
+    @Test
+    fun `invoke filters out nodes beyond max distance and keeps nodes without position`() = runTest {
+        val ourNode = createNode(0, latitudeI = 10000000, longitudeI = 10000000)
+        val nearbyNode = createNode(1, latitudeI = 10000000, longitudeI = 10100000)
+        val farNode = createNode(2, latitudeI = 10000000, longitudeI = 12000000)
+        val noPositionNode = createNode(3)
+        val filter = NodeFilterState(maxDistanceKm = 5f)
+
+        ourNodeInfo.value = ourNode
+        every { nodeRepository.getNodes(any(), any(), any(), any(), any()) } returns
+            flowOf(listOf(nearbyNode, farNode, noPositionNode))
+
+        val result = useCase(filter, NodeSortOption.LAST_HEARD).first()
+
+        assertEquals(listOf(1, 3), result.map(Node::num))
     }
 }

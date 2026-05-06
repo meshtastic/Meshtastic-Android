@@ -40,6 +40,12 @@ class LocationUtilsTest {
     }
 
     @Test
+    fun testDistanceKm() {
+        val distance = distanceKm(0.0, 0.0, 0.0, 1.0)
+        assertTrue(distance > 111 && distance < 112, "Distance was $distance")
+    }
+
+    @Test
     fun testBearing() {
         // North
         assertEquals(0.0, bearing(0.0, 0.0, 1.0, 0.0), 0.1)
