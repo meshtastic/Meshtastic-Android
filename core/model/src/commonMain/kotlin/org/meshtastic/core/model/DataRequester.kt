@@ -20,8 +20,8 @@ package org.meshtastic.core.model
 interface DataRequester {
     suspend fun requestPosition(destNum: Int, currentPosition: Position)
     suspend fun requestUserInfo(destNum: Int)
-    suspend fun requestTraceroute(requestId: Int, destNum: Int)
+    suspend fun requestTraceroute(destNum: Int)
     suspend fun requestTelemetry(destNum: Int, type: TelemetryType)
-    suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
+    suspend fun requestNeighborInfo(destNum: Int)
     suspend fun requestStoreForwardHistory(since: Int? = null, serverNodeNum: Int? = null): Boolean
 }

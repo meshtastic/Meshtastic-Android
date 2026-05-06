@@ -41,8 +41,6 @@ class RadioConfigUseCaseTest {
     fun `setOwner calls radioController`() = runTest {
         val user = User(long_name = "New Name")
         useCase.setOwner(1234, user)
-        // Verify call implicitly or by adding tracking to FakeRadioController if needed.
-        // FakeRadioController already has getPacketId returning 1.
     }
 
     @Test

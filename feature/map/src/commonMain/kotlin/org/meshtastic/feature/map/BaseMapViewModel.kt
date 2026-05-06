@@ -162,7 +162,8 @@ open class BaseMapViewModel(
         safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
     }
 
-    fun generatePacketId(): Int = radioController.getPacketId()
+    /** Generate a unique ID for a new waypoint. */
+    fun generatePacketId(): Int = kotlin.random.Random.nextInt(1, Int.MAX_VALUE)
 
     data class MapFilterState(
         val onlyFavorites: Boolean,

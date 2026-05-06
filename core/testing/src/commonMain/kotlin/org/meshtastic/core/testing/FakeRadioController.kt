@@ -140,11 +140,11 @@ class FakeRadioController :
 
     override suspend fun requestUserInfo(destNum: Int) {}
 
-    override suspend fun requestTraceroute(requestId: Int, destNum: Int) {}
+    override suspend fun requestTraceroute(destNum: Int) {}
 
     override suspend fun requestTelemetry(destNum: Int, type: TelemetryType) {}
 
-    override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
+    override suspend fun requestNeighborInfo(destNum: Int) {}
 
     override suspend fun requestStoreForwardHistory(since: Int?, serverNodeNum: Int?): Boolean {
         lastStoreForwardHistoryRequest = since to serverNodeNum
@@ -161,8 +161,6 @@ class FakeRadioController :
         }
         block(edit)
     }
-
-    override fun getPacketId(): Int = 1
 
     override fun startProvideLocation() {
         startProvideLocationCalled = true

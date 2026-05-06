@@ -318,7 +318,7 @@ class SdkRadioController(
         c.requestNodeInfo(NodeId(destNum))
     }
 
-    override suspend fun requestTraceroute(requestId: Int, destNum: Int) {
+    override suspend fun requestTraceroute(destNum: Int) {
         val c = requireClient()
         c.routing.traceRoute(NodeId(destNum))
     }
@@ -338,7 +338,7 @@ class SdkRadioController(
         }
     }
 
-    override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
+    override suspend fun requestNeighborInfo(destNum: Int) {
         val c = requireClient()
         c.routing.requestNeighborInfo(NodeId(destNum))
     }
@@ -381,7 +381,7 @@ class SdkRadioController(
 
     // ── Utility ─────────────────────────────────────────────────────────────
 
-    override fun getPacketId(): Int = packetIdCounter.getAndIncrement()
+    private fun getPacketId(): Int = packetIdCounter.getAndIncrement()
 
     override fun startProvideLocation() {
         // Location provision is managed at the app level; no-op here

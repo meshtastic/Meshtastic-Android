@@ -19,5 +19,4 @@ package org.meshtastic.core.model
 /** Focused interface for sending messages over the mesh. */
 interface MessageSender : ConnectionAware {
     suspend fun sendMessage(packet: DataPacket)
-    fun getPacketId(): Int
 }

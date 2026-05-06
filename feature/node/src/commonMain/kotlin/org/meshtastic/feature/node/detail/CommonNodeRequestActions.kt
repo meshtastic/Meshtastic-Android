@@ -27,7 +27,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataRequester
-import org.meshtastic.core.model.MessageSender
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
@@ -50,7 +49,6 @@ import org.meshtastic.core.ui.util.SnackbarManager
 class CommonNodeRequestActions
 constructor(
     private val dataRequester: DataRequester,
-    private val messageSender: MessageSender,
     private val snackbarManager: SnackbarManager,
 ) : NodeRequestActions {
 
@@ -78,8 +76,7 @@ constructor(
         scope.launch(ioDispatcher) {
             runCatching {
                 Logger.i { "Requesting NeighborInfo for '$destNum'" }
-                val packetId = messageSender.getPacketId()
-                dataRequester.requestNeighborInfo(packetId, destNum)
+                dataRequester.requestNeighborInfo(destNum)
                 _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
                 showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
             }.onFailure { e -> Logger.e(e) { "requestNeighborInfo failed" } }
@@ -123,8 +120,7 @@ constructor(
         scope.launch(ioDispatcher) {
             runCatching {
                 Logger.i { "Requesting traceroute for '$destNum'" }
-                val packetId = messageSender.getPacketId()
-                dataRequester.requestTraceroute(packetId, destNum)
+                dataRequester.requestTraceroute(destNum)
                 _lastTracerouteTime.value = nowMillis
                 showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
             }.onFailure { e -> Logger.e(e) { "requestTraceroute failed" } }
