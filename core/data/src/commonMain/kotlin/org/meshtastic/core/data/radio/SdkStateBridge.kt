@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -42,13 +41,11 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
-import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ClientNotification
-import org.meshtastic.proto.Data
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminResult
+import org.meshtastic.sdk.ChannelIndex
 import org.meshtastic.sdk.ConnectionState as SdkConnectionState
 import org.meshtastic.sdk.MeshEvent
 import org.meshtastic.sdk.NodeChange
@@ -330,18 +327,11 @@ class SdkStateBridge(
                 val channel = action.contactKey[0].digitToInt()
                 val destId = action.contactKey.substring(1)
                 val destNum = runCatching { DataPacket.parseNodeNum(destId) }.getOrDefault(DataPacket.BROADCAST)
-                client.send(
-                    MeshPacket(
-                        to = destNum,
-                        channel = channel,
-                        want_ack = true,
-                        decoded = Data(
-                            portnum = PortNum.TEXT_MESSAGE_APP,
-                            payload = action.emoji.encodeToByteArray().toByteString(),
-                            emoji = EMOJI_INDICATOR,
-                            reply_id = action.replyId,
-                        ),
-                    ),
+                client.sendReaction(
+                    emoji = action.emoji,
+                    to = NodeId(destNum),
+                    channel = ChannelIndex(channel),
+                    replyId = action.replyId,
                 )
             }
 
@@ -365,27 +355,12 @@ class SdkStateBridge(
             }
 
             is ServiceAction.GetDeviceMetadata -> {
-                val payload = AdminMessage.ADAPTER.encode(
-                    AdminMessage(get_device_metadata_request = true),
-                ).toByteString()
-                client.send(
-                    MeshPacket(
-                        to = action.destNum,
-                        want_ack = true,
-                        decoded = Data(
-                            portnum = PortNum.ADMIN_APP,
-                            payload = payload,
-                            want_response = true,
-                        ),
-                    ),
-                )
+                client.admin.forNode(NodeId(action.destNum)).getDeviceMetadata()
             }
         }
     }
 
     companion object {
-        private const val EMOJI_INDICATOR = 1
-
         private fun mapConnectionState(sdkState: SdkConnectionState): AppConnectionState = when (sdkState) {
             is SdkConnectionState.Disconnected -> AppConnectionState.Disconnected
             is SdkConnectionState.Connecting -> AppConnectionState.Connecting(attempt = sdkState.attempt)

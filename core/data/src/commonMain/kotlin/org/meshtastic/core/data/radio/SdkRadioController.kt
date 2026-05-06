@@ -173,38 +173,22 @@ class SdkRadioController(
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.setOwner(user)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(set_owner = user))
-        }
+        c.admin.forNode(NodeId(destNum)).setOwner(user)
     }
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.setConfig(config)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(set_config = config))
-        }
+        c.admin.forNode(NodeId(destNum)).setConfig(config)
     }
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.setModuleConfig(config)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(set_module_config = config))
-        }
+        c.admin.forNode(NodeId(destNum)).setModuleConfig(config)
     }
 
     override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.setChannel(channel)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(set_channel = channel))
-        }
+        c.admin.forNode(NodeId(destNum)).setChannel(channel)
     }
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {
@@ -215,162 +199,88 @@ class SdkRadioController(
             altitude = position.altitude,
             time = position.time,
         )
-        if (isLocalNode(destNum)) {
-            c.admin.setFixedPosition(protoPos)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(set_fixed_position = protoPos))
-        }
+        c.admin.forNode(NodeId(destNum)).setFixedPosition(protoPos)
     }
 
     override suspend fun setRingtone(destNum: Int, ringtone: String) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.setRingtone(ringtone)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(set_ringtone_message = ringtone))
-        }
+        c.admin.forNode(NodeId(destNum)).setRingtone(ringtone)
     }
 
     override suspend fun setCannedMessages(destNum: Int, messages: String) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.setCannedMessages(messages)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(set_canned_message_module_messages = messages))
-        }
+        c.admin.forNode(NodeId(destNum)).setCannedMessages(messages)
     }
 
     // ── Remote admin (getters) ──────────────────────────────────────────────
 
     override suspend fun getOwner(destNum: Int, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.getOwner()
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(get_owner_request = true), wantResponse = true)
-        }
+        c.admin.forNode(NodeId(destNum)).getOwner()
     }
 
     override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
         val c = requireClient()
         val type = AdminMessage.ConfigType.fromValue(configType) ?: return
-        if (isLocalNode(destNum)) {
-            c.admin.getConfig(type)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(get_config_request = type), wantResponse = true)
-        }
+        c.admin.forNode(NodeId(destNum)).getConfig(type)
     }
 
     override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
         val c = requireClient()
         val type = AdminMessage.ModuleConfigType.fromValue(moduleConfigType) ?: return
-        if (isLocalNode(destNum)) {
-            c.admin.getModuleConfig(type)
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(get_module_config_request = type), wantResponse = true)
-        }
+        c.admin.forNode(NodeId(destNum)).getModuleConfig(type)
     }
 
     override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.getChannel(ChannelIndex(index))
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(get_channel_request = index + 1), wantResponse = true)
-        }
+        c.admin.forNode(NodeId(destNum)).getChannel(ChannelIndex(index))
     }
 
     override suspend fun getRingtone(destNum: Int, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.getRingtone()
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(get_ringtone_request = true), wantResponse = true)
-        }
+        c.admin.forNode(NodeId(destNum)).getRingtone()
     }
 
     override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.getCannedMessages()
-        } else {
-            sendRemoteAdmin(
-                c,
-                destNum,
-                AdminMessage(get_canned_message_module_messages_request = true),
-                wantResponse = true,
-            )
-        }
+        c.admin.forNode(NodeId(destNum)).getCannedMessages()
     }
 
     override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.getDeviceConnectionStatus()
-        } else {
-            sendRemoteAdmin(
-                c,
-                destNum,
-                AdminMessage(get_device_connection_status_request = true),
-                wantResponse = true,
-            )
-        }
+        c.admin.forNode(NodeId(destNum)).getDeviceConnectionStatus()
     }
 
     // ── Lifecycle commands ───────────────────────────────────────────────────
 
     override suspend fun reboot(destNum: Int, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.reboot()
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(reboot_seconds = 0))
-        }
+        c.admin.forNode(NodeId(destNum)).reboot()
     }
 
     override suspend fun rebootToDfu(nodeNum: Int) {
         val c = requireClient()
-        if (isLocalNode(nodeNum)) {
-            c.admin.enterDfuMode()
-        } else {
-            sendRemoteAdmin(c, nodeNum, AdminMessage(enter_dfu_mode_request = true))
-        }
+        c.admin.forNode(NodeId(nodeNum)).enterDfuMode()
     }
 
     override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.rebootOta()
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(reboot_ota_seconds = 0))
-        }
+        c.admin.forNode(NodeId(destNum)).rebootOta()
     }
 
     override suspend fun shutdown(destNum: Int, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.shutdown()
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(shutdown_seconds = 0))
-        }
+        c.admin.forNode(NodeId(destNum)).shutdown()
     }
 
     override suspend fun factoryReset(destNum: Int, packetId: Int) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.factoryReset()
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(factory_reset_config = 1))
-        }
+        c.admin.forNode(NodeId(destNum)).factoryReset()
     }
 
     override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
         val c = requireClient()
-        if (isLocalNode(destNum)) {
-            c.admin.nodeDbReset()
-        } else {
-            sendRemoteAdmin(c, destNum, AdminMessage(nodedb_reset = true))
-        }
+        c.admin.forNode(NodeId(destNum)).nodeDbReset()
     }
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
@@ -459,17 +369,27 @@ class SdkRadioController(
     // ── Edit settings (transactional) ───────────────────────────────────────
 
     override suspend fun beginEditSettings(destNum: Int) {
-        val c = client ?: return
-        val msg = AdminMessage(begin_edit_settings = true)
-        val target = if (isLocalNode(destNum)) NodeId(c.ownNode.value?.num ?: 0) else NodeId(destNum)
-        sendRemoteAdmin(c, target.raw, msg)
+        val c = requireClient()
+        val target = resolveTarget(c, destNum)
+        val payload = AdminMessage.ADAPTER.encode(AdminMessage(begin_edit_settings = true))
+        c.send(
+            portnum = PortNum.ADMIN_APP,
+            payload = payload,
+            to = target,
+            wantAck = false,
+        )
     }
 
     override suspend fun commitEditSettings(destNum: Int) {
-        val c = client ?: return
-        val msg = AdminMessage(commit_edit_settings = true)
-        val target = if (isLocalNode(destNum)) NodeId(c.ownNode.value?.num ?: 0) else NodeId(destNum)
-        sendRemoteAdmin(c, target.raw, msg)
+        val c = requireClient()
+        val target = resolveTarget(c, destNum)
+        val payload = AdminMessage.ADAPTER.encode(AdminMessage(commit_edit_settings = true))
+        c.send(
+            portnum = PortNum.ADMIN_APP,
+            payload = payload,
+            to = target,
+            wantAck = true,
+        )
     }
 
     // ── Utility ─────────────────────────────────────────────────────────────
@@ -490,34 +410,8 @@ class SdkRadioController(
 
     // ── Private helpers ─────────────────────────────────────────────────────
 
-    private fun isLocalNode(destNum: Int): Boolean {
-        if (destNum == 0) return true
-        val ownNum = client?.ownNode?.value?.num ?: return true
-        return destNum == ownNum
-    }
-
-    private suspend fun sendRemoteAdmin(
-        c: RadioClient,
-        destNum: Int,
-        adminMsg: AdminMessage,
-        wantResponse: Boolean = false,
-    ) {
-        val payload = AdminMessage.ADAPTER.encode(adminMsg).toByteString()
-        try {
-            c.send(
-                MeshPacket(
-                    to = destNum,
-                    want_ack = true,
-                    decoded = Data(
-                        portnum = PortNum.ADMIN_APP,
-                        payload = payload,
-                        want_response = wantResponse,
-                    ),
-                ),
-            )
-        } catch (e: Exception) {
-            Logger.e(e) { "sendRemoteAdmin to $destNum failed" }
-            throw e
-        }
+    private fun resolveTarget(c: RadioClient, destNum: Int): NodeId {
+        if (destNum == 0) return NodeId(c.ownNode.value?.num ?: 0)
+        return NodeId(destNum)
     }
 }
