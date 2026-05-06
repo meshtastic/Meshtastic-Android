@@ -35,6 +35,7 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.mqtt.ConnectionState
 import org.meshtastic.mqtt.MqttException
@@ -58,6 +59,7 @@ class MqttManagerImplTest {
     private lateinit var mqttRepository: MQTTRepository
     private lateinit var packetHandler: PacketHandler
     private lateinit var serviceRepository: FakeServiceRepository
+    private lateinit var nodeRepository: NodeRepository
     private lateinit var serviceScope: TestScope
     private lateinit var connectionStateFlow: MutableStateFlow<ConnectionState>
     private lateinit var proxyMessageFlow: MutableSharedFlow<MqttClientProxyMessage>
@@ -73,6 +75,7 @@ class MqttManagerImplTest {
         mqttRepository = mock(MockMode.autofill)
         packetHandler = mock(MockMode.autofill)
         serviceRepository = FakeServiceRepository()
+        nodeRepository = mock(MockMode.autofill)
         publishCalls.clear()
 
         every { mqttRepository.connectionState } returns connectionStateFlow
@@ -87,7 +90,7 @@ class MqttManagerImplTest {
         }
         every { packetHandler.sendToRadio(any<ToRadio>()) } returns Unit
 
-        mqttManager = MqttManagerImpl(mqttRepository, packetHandler, serviceRepository, serviceScope)
+        mqttManager = MqttManagerImpl(mqttRepository, packetHandler, serviceRepository, nodeRepository, serviceScope)
     }
 
     @AfterTest
