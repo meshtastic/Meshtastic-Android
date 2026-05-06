@@ -65,14 +65,14 @@ import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.core.model.ResponseState
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
 import org.meshtastic.feature.settings.radio.channel.component.ChannelConfigHeader
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegend
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDialog
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
 import org.meshtastic.feature.settings.radio.component.LoadingOverlay
-import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
+import org.meshtastic.core.ui.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 

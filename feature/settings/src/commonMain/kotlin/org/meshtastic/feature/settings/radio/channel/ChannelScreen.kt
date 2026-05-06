@@ -95,7 +95,7 @@ import org.meshtastic.feature.settings.channel.ChannelViewModel
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
+import org.meshtastic.core.ui.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config

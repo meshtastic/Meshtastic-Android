@@ -22,12 +22,15 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -48,6 +51,7 @@ import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.RadioConfigStateProvider
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -80,6 +84,7 @@ import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
+import org.meshtastic.core.model.ResponseState
 
 /** Data class that represents the current RadioConfig state. */
 @androidx.compose.runtime.Immutable
@@ -124,7 +129,7 @@ open class RadioConfigViewModel(
     private val locationService: LocationService,
     private val fileService: FileService,
     private val mqttManager: MqttManager,
-) : ViewModel() {
+) : ViewModel(), RadioConfigStateProvider {
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {
@@ -398,9 +403,28 @@ open class RadioConfigViewModel(
         safeLaunch(tag = "installProfile") { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
     }
 
-    fun clearPacketResponse() {
+    // region RadioConfigStateProvider implementation
+
+    override val packetResponseState: StateFlow<ResponseState<Boolean>> =
+        _radioConfigState.map { it.responseState }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ResponseState.Empty)
+
+    override val pendingRouteName: StateFlow<String> =
+        _radioConfigState.map { it.route }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
+
+    override fun requestConfigLoad(routeName: String) {
+        val route = ConfigRoute.entries.find { it.name == routeName }
+            ?: ModuleRoute.entries.find { it.name == routeName }
+            ?: return
+        setResponseStateLoading(route)
+    }
+
+    override fun clearPacketResponse() {
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
+
+    // endregion
 
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNumFlow.value ?: destNode.value?.num ?: return

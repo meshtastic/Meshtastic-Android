@@ -78,10 +78,8 @@ import org.meshtastic.feature.connections.ui.components.ConnectingDeviceInfo
 import org.meshtastic.feature.connections.ui.components.CurrentlyConnectedInfo
 import org.meshtastic.feature.connections.ui.components.DeviceList
 import org.meshtastic.feature.connections.ui.components.TransportFilterChips
-import org.meshtastic.feature.settings.navigation.ConfigRoute
-import org.meshtastic.feature.settings.navigation.getNavRouteFrom
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
+import org.meshtastic.core.model.RadioConfigStateProvider
+import org.meshtastic.core.ui.component.PacketResponseStateDialog
 import kotlin.uuid.ExperimentalUuidApi
 
 /**
@@ -98,12 +96,13 @@ private val CardMinHeight = 100.dp
 fun ConnectionsScreen(
     connectionsViewModel: ConnectionsViewModel = koinViewModel(),
     scanModel: ScannerViewModel = koinViewModel(),
-    radioConfigViewModel: RadioConfigViewModel = koinViewModel(),
+    radioConfigStateProvider: RadioConfigStateProvider,
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
 ) {
-    val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
+    val responseState by radioConfigStateProvider.packetResponseState.collectAsStateWithLifecycle()
+    val pendingRoute by radioConfigStateProvider.pendingRouteName.collectAsStateWithLifecycle()
     val connectionProgress by scanModel.connectionProgressText.collectAsStateWithLifecycle()
     val connectionStatus by connectionsViewModel.connectionStatus.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
@@ -153,18 +152,16 @@ fun ConnectionsScreen(
     var isWaiting by remember { mutableStateOf(false) }
     if (isWaiting) {
         PacketResponseStateDialog(
-            state = radioConfigState.responseState,
+            state = responseState,
             onDismiss = {
                 isWaiting = false
-                radioConfigViewModel.clearPacketResponse()
+                radioConfigStateProvider.clearPacketResponse()
             },
             onComplete = {
-                getNavRouteFrom(radioConfigState.route)?.let { route ->
+                if (pendingRoute == "LORA") {
                     isWaiting = false
-                    radioConfigViewModel.clearPacketResponse()
-                    if (route == SettingsRoute.LoRa) {
-                        onConfigNavigate(SettingsRoute.LoRa)
-                    }
+                    radioConfigStateProvider.clearPacketResponse()
+                    onConfigNavigate(SettingsRoute.LoRa)
                 }
             },
         )
@@ -264,7 +261,7 @@ fun ConnectionsScreen(
                                     text = stringResource(Res.string.set_your_region),
                                     onClick = {
                                         isWaiting = true
-                                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                                        radioConfigStateProvider.requestConfigLoad("LORA")
                                     },
                                 )
                             }

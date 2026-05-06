@@ -51,9 +51,9 @@ import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.radio.AdminRoute
 import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.core.model.ResponseState
 import org.meshtastic.feature.settings.radio.component.LoadingOverlay
-import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
+import org.meshtastic.core.ui.component.PacketResponseStateDialog
 import org.meshtastic.feature.settings.radio.component.ShutdownConfirmationDialog
 import org.meshtastic.feature.settings.radio.component.WarningDialog
 

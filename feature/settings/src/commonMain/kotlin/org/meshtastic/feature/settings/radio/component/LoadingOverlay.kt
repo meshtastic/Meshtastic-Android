@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.common.util.MetricFormatter
-import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.core.model.ResponseState
 
 private const val LOADING_OVERLAY_ALPHA = 0.8f
 private const val PERCENTAGE_FACTOR = 100

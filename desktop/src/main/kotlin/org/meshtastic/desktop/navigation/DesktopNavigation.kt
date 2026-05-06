@@ -19,6 +19,7 @@ package org.meshtastic.desktop.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -28,6 +29,7 @@ import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
 import org.meshtastic.feature.settings.navigation.settingsGraph
+import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
 
@@ -53,6 +55,6 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(
     firmwareGraph(backStack)
     settingsGraph(backStack)
     channelsGraph(backStack)
-    connectionsGraph(backStack)
+    connectionsGraph(backStack) { koinViewModel<RadioConfigViewModel>() }
     wifiProvisionGraph(backStack)
 }

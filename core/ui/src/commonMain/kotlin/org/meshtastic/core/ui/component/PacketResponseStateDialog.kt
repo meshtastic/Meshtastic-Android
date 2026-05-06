@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.radio.component
+package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -36,17 +36,16 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.model.ResponseState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.delivery_confirmed
 import org.meshtastic.core.resources.delivery_confirmed_reboot_warning
 import org.meshtastic.core.resources.error
-import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.Error
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Success
-import org.meshtastic.feature.settings.radio.ResponseState
 
 private const val AUTO_DISMISS_DELAY_MS = 1500L
 

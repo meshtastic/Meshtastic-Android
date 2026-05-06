@@ -21,9 +21,12 @@ import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.model.RadioConfigStateProvider
+import org.meshtastic.core.model.ResponseState
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
@@ -49,7 +52,14 @@ class NavigationAssemblyTest {
                 nodesGraph(backStack = backStack, scrollToTopEvents = emptyFlow())
                 mapGraph(backStack)
                 channelsGraph(backStack)
-                connectionsGraph(backStack)
+                connectionsGraph(backStack) {
+                    object : RadioConfigStateProvider {
+                        override val packetResponseState = MutableStateFlow<ResponseState<Boolean>>(ResponseState.Empty)
+                        override val pendingRouteName = MutableStateFlow("")
+                        override fun requestConfigLoad(routeName: String) {}
+                        override fun clearPacketResponse() {}
+                    }
+                }
                 settingsGraph(backStack)
                 firmwareGraph(backStack)
             }

@@ -16,22 +16,26 @@
  */
 package org.meshtastic.feature.connections.navigation
 
+import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.model.RadioConfigStateProvider
 import org.meshtastic.core.navigation.ConnectionsRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.ui.ConnectionsScreen
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoute.Connections]. */
-fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>) {
+fun EntryProviderScope<NavKey>.connectionsGraph(
+    backStack: NavBackStack<NavKey>,
+    radioConfigStateProvider: @Composable () -> RadioConfigStateProvider,
+) {
     entry<ConnectionsRoute.ConnectionsGraph> {
         ConnectionsScreen(
             scanModel = koinViewModel<ScannerViewModel>(),
-            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
+            radioConfigStateProvider = radioConfigStateProvider(),
             onClickNodeChip = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onNavigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onConfigNavigate = { route -> backStack.add(route) },
@@ -41,7 +45,7 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
     entry<ConnectionsRoute.Connections> {
         ConnectionsScreen(
             scanModel = koinViewModel<ScannerViewModel>(),
-            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
+            radioConfigStateProvider = radioConfigStateProvider(),
             onClickNodeChip = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onNavigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
             onConfigNavigate = { route -> backStack.add(route) },

@@ -40,7 +40,6 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.ble)
             implementation(projects.core.network)
-            implementation(projects.feature.settings)
 
             implementation(libs.jetbrains.navigation3.ui)
         }

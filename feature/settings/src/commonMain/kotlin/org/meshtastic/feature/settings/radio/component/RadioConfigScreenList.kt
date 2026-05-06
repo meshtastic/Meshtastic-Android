@@ -40,8 +40,9 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.discard_changes
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.PacketResponseStateDialog
 import org.meshtastic.core.ui.component.PreferenceFooter
-import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.core.model.ResponseState
 
 @Suppress("LongMethod")
 @Composable

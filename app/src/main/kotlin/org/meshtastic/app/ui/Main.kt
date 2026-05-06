@@ -44,6 +44,7 @@ import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.navigation.connectionsGraph
 import org.meshtastic.feature.firmware.navigation.firmwareGraph
+import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
@@ -86,7 +87,7 @@ fun MainScreen() {
                     )
                     mapGraph(backStack)
                     channelsGraph(backStack)
-                    connectionsGraph(backStack)
+                    connectionsGraph(backStack) { koinViewModel<RadioConfigViewModel>() }
                     settingsGraph(backStack)
                     firmwareGraph(backStack)
                     wifiProvisionGraph(backStack)
