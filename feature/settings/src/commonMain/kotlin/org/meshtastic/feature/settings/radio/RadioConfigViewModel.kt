@@ -24,7 +24,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -37,7 +36,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -142,39 +140,25 @@ open class RadioConfigViewModel(
         homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(!homoglyphEncodingPrefs.homoglyphEncodingEnabled.value)
     }
 
-    /** MQTT proxy connection state for the settings UI. */
-    val mqttConnectionState: StateFlow<MqttConnectionState> = mqttManager.mqttConnectionState
+    private val mqttProbeCoordinator = MqttProbeCoordinator(mqttManager, viewModelScope)
 
-    private val _mqttProbeStatus = MutableStateFlow<MqttProbeStatus?>(null)
+    /** MQTT proxy connection state for the settings UI. */
+    val mqttConnectionState: StateFlow<MqttConnectionState> = mqttProbeCoordinator.mqttConnectionState
 
     /** Latest result from a [probeMqttConnection] call, or `null` if no probe has been run. */
-    val mqttProbeStatus: StateFlow<MqttProbeStatus?> = _mqttProbeStatus.asStateFlow()
-
-    private var probeJob: Job? = null
+    val mqttProbeStatus: StateFlow<MqttProbeStatus?> = mqttProbeCoordinator.probeStatus
 
     /**
      * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
      * a new one. Result is exposed via [mqttProbeStatus].
      */
     fun probeMqttConnection(address: String, tlsEnabled: Boolean, username: String?, password: String?) {
-        probeJob?.cancel()
-        _mqttProbeStatus.value = MqttProbeStatus.Probing
-        probeJob =
-            viewModelScope.launch {
-                val result =
-                    safeCatching { mqttManager.probe(address, tlsEnabled, username, password) }
-                        .getOrElse { e ->
-                            Logger.w(e) { "MQTT probe threw" }
-                            MqttProbeStatus.Other(message = e.message)
-                        }
-                _mqttProbeStatus.value = result
-            }
+        mqttProbeCoordinator.probe(address, tlsEnabled, username, password)
     }
 
     /** Clear the latest probe result (e.g. when the user edits the address). */
     fun clearMqttProbeStatus() {
-        probeJob?.cancel()
-        _mqttProbeStatus.value = null
+        mqttProbeCoordinator.clearProbeStatus()
     }
 
     private val destNumFlow = MutableStateFlow(savedStateHandle.get<Int>("destNum"))
@@ -372,35 +356,26 @@ open class RadioConfigViewModel(
         writeAction("removeFixedPosition") { radioConfigUseCase.removeFixedPosition(destNum) }
     }
 
+    private val profileCoordinator = ProfileCoordinator(
+        fileService, importProfileUseCase, exportProfileUseCase,
+        exportSecurityConfigUseCase, installProfileUseCase, viewModelScope,
+    )
+
     fun importProfile(uri: CommonUri, onResult: (DeviceProfile) -> Unit) {
-        safeLaunch(tag = "importProfile") {
-            var profile: DeviceProfile? = null
-            fileService.read(uri) { source ->
-                importProfileUseCase(source).onSuccess { profile = it }.onFailure { throw it }
-            }
-            profile?.let { onResult(it) }
-        }
+        profileCoordinator.importProfile(uri, onResult)
     }
 
     fun exportProfile(uri: CommonUri, profile: DeviceProfile) {
-        safeLaunch(tag = "exportProfile") {
-            fileService.write(uri) { sink ->
-                exportProfileUseCase(sink, profile).onSuccess { /* Success */ }.onFailure { throw it }
-            }
-        }
+        profileCoordinator.exportProfile(uri, profile)
     }
 
     fun exportSecurityConfig(uri: CommonUri, securityConfig: Config.SecurityConfig) {
-        safeLaunch(tag = "exportSecurityConfig") {
-            fileService.write(uri) { sink ->
-                exportSecurityConfigUseCase(sink, securityConfig).onSuccess { /* Success */ }.onFailure { throw it }
-            }
-        }
+        profileCoordinator.exportSecurityConfig(uri, securityConfig)
     }
 
     fun installProfile(protobuf: DeviceProfile) {
         val destNum = destNode.value?.num ?: return
-        safeLaunch(tag = "installProfile") { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
+        profileCoordinator.installProfile(destNum, protobuf, destNode.value?.user)
     }
 
     // region RadioConfigStateProvider implementation
