@@ -1156,6 +1156,7 @@
     <string name="screen_on_for">Screen on for</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
     <string name="search_emoji">Search emoji...</string>
+    <string name="search_messages">Search messages…</string>
     <string name="secondary">Secondary</string>
     <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
     <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>
