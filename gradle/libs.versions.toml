@@ -57,7 +57,7 @@ maps-compose = "8.3.0"
 mlkit-barcode-scanning = "17.3.0"
 
 # CameraX
-camerax = "1.6.0"
+camerax = "1.6.1"
 
 # Networking
 ktor = "3.4.3"
