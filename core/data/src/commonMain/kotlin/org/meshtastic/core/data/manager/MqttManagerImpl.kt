@@ -35,6 +35,7 @@ import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.core.repository.MqttManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.mqtt.ConnectionState
@@ -44,13 +45,13 @@ import org.meshtastic.mqtt.ProbeResult
 import org.meshtastic.mqtt.probe
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
-import kotlin.time.Clock
 
 @Single
 class MqttManagerImpl(
     private val mqttRepository: MQTTRepository,
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
+    private val nodeRepository: NodeRepository,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MqttManager {
     private var mqttMessageFlow: Job? = null
@@ -131,8 +132,8 @@ class MqttManagerImpl(
         val endpoint = resolveEndpoint(address, tlsEnabled)
         val result =
             MqttClient.probe(endpoint = endpoint) {
-                // Provide a valid client ID for the probe; brokers reject empty identifiers
-                clientId = "MeshtasticProbe-${Clock.System.now().toEpochMilliseconds()}"
+                // Use node ID for consistent client identification across platforms
+                clientId = "MeshtasticAndroidMqttProbe-${nodeRepository.myId.value ?: "unknown"}"
                 val user = username?.takeUnless { it.isEmpty() }
                 val pass = password?.takeUnless { it.isEmpty() }
                 if (user != null) this.username = user
