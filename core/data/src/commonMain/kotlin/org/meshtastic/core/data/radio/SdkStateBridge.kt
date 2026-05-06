@@ -164,6 +164,16 @@ class SdkStateBridge(
             }
             .launchIn(scope)
 
+        // ── NODE_STATUS_APP: update node status string ───────────────────────
+        accessor.client
+            .flatMapLatest { client -> client?.packets ?: flowOf() }
+            .filter { it.decoded?.portnum == PortNum.NODE_STATUS_APP }
+            .onEach { packet ->
+                val status = packet.decoded?.payload?.utf8() ?: return@onEach
+                nodeRepository.updateNode(packet.from) { it.copy(nodeStatus = status) }
+            }
+            .launchIn(scope)
+
         // ── Events (notifications, security, backpressure) ──────────────────
         accessor.client
             .flatMapLatest { client -> client?.events ?: flowOf() }
