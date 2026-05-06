@@ -89,7 +89,7 @@ import org.meshtastic.core.model.ResponseState
 data class RadioConfigState(
     val isLocal: Boolean = false,
     val connected: Boolean = false,
-    val route: String = "",
+    val route: Enum<*>? = null,
     val metadata: DeviceMetadata? = null,
     val userConfig: User = User(),
     val channelList: List<ChannelSettings> = emptyList(),
@@ -385,7 +385,7 @@ open class RadioConfigViewModel(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ResponseState.Empty)
 
     override val pendingRouteName: StateFlow<String> =
-        _radioConfigState.map { it.route }
+        _radioConfigState.map { it.route?.name.orEmpty() }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "")
 
     override fun requestConfigLoad(routeName: String) {
@@ -404,7 +404,7 @@ open class RadioConfigViewModel(
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNumFlow.value ?: destNode.value?.num ?: return
 
-        _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Loading()) }
+        _radioConfigState.update { it.copy(route = route, responseState = ResponseState.Loading()) }
 
         loadJob?.cancel()
         loadJob = viewModelScope.launch {

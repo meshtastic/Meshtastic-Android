@@ -93,7 +93,7 @@ import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.channel.ChannelViewModel
 import org.meshtastic.feature.settings.navigation.ConfigRoute
-import org.meshtastic.feature.settings.navigation.getNavRouteFrom
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.ui.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSet
@@ -140,10 +140,12 @@ fun ChannelScreen(
                 radioConfigViewModel.clearPacketResponse()
             },
             onComplete = {
-                getNavRouteFrom(radioConfigState.route)?.let { route ->
+                val navRoute = (radioConfigState.route as? ConfigRoute)?.route
+                    ?: (radioConfigState.route as? ModuleRoute)?.route
+                if (navRoute != null) {
                     isWaiting = false
                     radioConfigViewModel.clearPacketResponse()
-                    onNavigate(route)
+                    onNavigate(navRoute)
                 }
             },
         )
