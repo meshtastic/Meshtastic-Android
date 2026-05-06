@@ -35,6 +35,7 @@
     <!-- ADD -->
     <string name="add">Hinzufügen</string>
     <string name="add_a_note">Persönliche Notiz hinzufügen.</string>
+    <string name="add_channels_description">Die folgenden Kanäle wurden im QR-Code gefunden. Wählen Sie, welche Sie Ihrem Gerät hinzufügen möchten. Vorhandene Kanäle werden beibehalten.</string>
     <string name="add_custom_tile_source">Netzwerk Kachelquelle hinzufügen</string>
     <string name="add_favorite">Zu Favoriten hinzufügen</string>
     <string name="add_layer">Ebene hinzufügen</string>
@@ -86,6 +87,7 @@
     <string name="audio_config">Audioeinstellungen</string>
     <string name="available_pins">Verfügbare Pins</string>
     <string name="back">Zurück</string>
+    <string name="backup_restore">Sichern &amp; Wiederherstellen</string>
     <string name="bad">Schlecht</string>
     <string name="bandwidth">Bandbreite</string>
     <string name="baro_pressure">Luftdruck</string>
@@ -323,6 +325,7 @@
     <string name="distance_measurements_description">Zeigt den Abstand zwischen Ihrem Telefon und anderen Meshtastic Knoten mit einem Standort an.</string>
     <string name="dns">DNS</string>
     <string name="done">Fertig</string>
+    <string name="dont_show_again_for_device">Für dieses Gerät nicht erneut anzeigen</string>
     <string name="double_tap_as_button_press">Doppelklick als Taste</string>
     <string name="downlink_enabled">Downlink aktiviert</string>
     <string name="downlink_feature_description">Nachrichten von einem öffentlichen Internet Gateway werden an das lokale Mesh weitergeleitet. Aufgrund der Nullsprungrichtlinie wird der Datenverkehr vom MQTT Standardserver nicht über dieses Gerät hinaus weitergeleitet.</string>
@@ -433,10 +436,12 @@
     <string name="firmware_update_node_info_missing">Benutzerinformationen des Knotens fehlen.</string>
     <string name="firmware_update_not_found_in_release">Firmware für %1$s in der Release Version nicht gefunden.</string>
     <string name="firmware_update_ota_failed">OTA Aktualisierung fehlgeschlagen: %1$s</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
     <string name="firmware_update_rebooting">Neustart in DFU Modus...</string>
     <string name="firmware_update_release_notes">Versionshinweise</string>
     <string name="firmware_update_retrieval_failed">Konnte Firmware Datei nicht abrufen.</string>
     <string name="firmware_update_retry">Erneut versuchen</string>
+    <string name="firmware_update_save_dfu_file">Bitte speichern Sie die .uf2-Datei auf dem DFU-Laufwerk Ihres Geräts.</string>
     <string name="firmware_update_select_file">Lokale Datei auswählen</string>
     <string name="firmware_update_source_local">Quelle: Lokale Datei</string>
     <string name="firmware_update_stable">Stabil</string>
@@ -634,6 +639,7 @@
     <string name="map_download_region">Region herunterladen</string>
     <string name="map_filter">Kartenfilter\n</string>
     <string name="map_layer_formats">Kartenebenen unterstützen kml, kmz oder GeoJSON Format.</string>
+    <string name="map_node_popup_details">%1$s&lt;br&gt;Zuletzt gehört: %2$s&lt;br&gt;Letzte Position: %3$s&lt;br&gt;Akku: %4$s</string>
     <string name="map_offline_manager">Offline-Verwaltung</string>
     <string name="map_purge_fail">Das Säubern des SQL-Zwischenspeichers ist fehlgeschlagen, siehe Logcat für Details</string>
     <string name="map_purge_success">SQL-Zwischenspeicher gelöscht für %1$s</string>
@@ -998,6 +1004,7 @@
     <string name="role_tracker_desc">GPS Standortnachricht mit Priorität gesendet.</string>
     <string name="root_topic">Hauptthema</string>
     <string name="rotary_encoder_1_enabled">Drehencoder #1 aktiviert</string>
+    <string name="router_role_confirmation_text">Ich habe die &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt; Dokumentation der Geräterollen &lt;/a&gt; und den dazugehörigen Blogeintrag &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt; über die Auswahl der richtigen Geräterolle&lt;/a&gt; gelesen.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Fehlerhafter Sitzungsschlüssel</string>
     <string name="routing_error_admin_public_key_unauthorized">Öffentlicher Schlüssel nicht autorisiert</string>
@@ -1120,6 +1127,9 @@
     <string name="status_message">Statusmeldung</string>
     <string name="status_message_config">Konfiguration der Statusmeldung</string>
     <string name="stay_connected_anywhere">Bleibe überall in Verbindung</string>
+    <string name="store_forward">Speichern &amp; Weiterleiten</string>
+    <string name="store_forward_config">Speichern &amp; Weiterleiten Einstellungen</string>
+    <string name="store_forward_enabled">Speichern &amp; Weiterleiten aktiviert</string>
     <string name="subnet">Subnet</string>
     <string name="super_deep_sleep_duration_seconds">Dauer Supertiefschlaf</string>
     <string name="supported">Unterstützt</string>

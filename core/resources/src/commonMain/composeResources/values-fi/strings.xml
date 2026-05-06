@@ -361,6 +361,10 @@
     <string name="ethernet_config">Verkon asetukset</string>
     <string name="ethernet_enabled">Ethernet käytössä</string>
     <string name="ethernet_ip">Ethernet-verkon IP:</string>
+    <string name="event_welcome_burning_man">Welcome to Burning Man! 🔥</string>
+    <string name="event_welcome_defcon">Welcome to DEFCON! 💀</string>
+    <string name="event_welcome_hamvention">Welcome to Hamvention! 🍖📻</string>
+    <string name="event_welcome_open_sauce">Welcome to Open Sauce! 🔧</string>
     <string name="exchange_position">Tarkastele sijaintia</string>
     <string name="expand_chart">Laajenna kaavio</string>
     <string name="expires">Päättyy</string>

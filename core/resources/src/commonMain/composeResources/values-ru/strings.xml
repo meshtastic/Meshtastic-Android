@@ -363,6 +363,8 @@
     <string name="ethernet_config">Настройки Ethernet</string>
     <string name="ethernet_enabled">Ethernet включен</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="event_welcome_hamvention">Добро пожаловать на охоту на лис! 📻</string>
+    <string name="event_welcome_open_sauce">Добро пожаловать на масленицу! 🥞</string>
     <string name="exchange_position">Обменяться местоположением</string>
     <string name="expand_chart">Развернуть диаграмму</string>
     <string name="expires">Срок действия</string>
