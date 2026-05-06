@@ -405,6 +405,7 @@ class SdkRadioController(
         is AdminResult.Unauthorized -> throw AdminException.Unauthorized()
         is AdminResult.NodeUnreachable -> throw AdminException.NodeUnreachable()
         is AdminResult.SessionKeyExpired -> throw AdminException.SessionKeyExpired()
+        is AdminResult.RateLimited -> throw AdminException.RateLimited()
         is AdminResult.Failed -> throw AdminException.RoutingError(routingError.name)
     }
 }

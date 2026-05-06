@@ -56,7 +56,7 @@ class MeshTopologyService {
         mutex.withLock {
             topology.addNeighborInfo(info)
             _edges.value = topology.allEdges()
-            _nodeCount.value = topology.nodes.size
+            _nodeCount.value = topology.nodes().size
         }
         Logger.d { "[Topology] Ingested neighbors from ${info.nodeId}: ${info.neighbors.size} edges" }
     }
@@ -66,7 +66,7 @@ class MeshTopologyService {
         mutex.withLock {
             topology.removeNode(nodeId)
             _edges.value = topology.allEdges()
-            _nodeCount.value = topology.nodes.size
+            _nodeCount.value = topology.nodes().size
         }
     }
 

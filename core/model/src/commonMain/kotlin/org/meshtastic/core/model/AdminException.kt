@@ -39,4 +39,7 @@ sealed class AdminException(message: String) : Exception(message) {
 
     /** Device reported a routing error not covered by the other subtypes. */
     class RoutingError(val errorName: String) : AdminException("Routing error: $errorName")
+
+    /** Device rate-limited the request; back off before retrying. */
+    class RateLimited : AdminException("Rate limit exceeded")
 }
