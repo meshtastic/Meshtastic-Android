@@ -35,11 +35,13 @@
     <!-- ADD -->
     <string name="add">Ajouter</string>
     <string name="add_a_note">Ajouter une note privée…</string>
+    <string name="add_channels_description">Les canaux suivants ont été trouvés dans le QR code. Sélectionnez ceux que vous souhaitez ajouter à votre appareil. Les canaux existants seront préservés.</string>
     <string name="add_custom_tile_source">Ajouter un réseau de tuile personnalisée</string>
     <string name="add_favorite">Ajouter aux favoris</string>
     <string name="add_layer">Ajouter un calque</string>
     <string name="add_local_mbtiles_file">Ajouter un fichier local MBTiles</string>
     <string name="add_network_device">Ajouter</string>
+    <string name="add_network_device_manually">Ajouter un appareil manuellement…</string>
     <string name="add_network_layer">Ajouter une couche de réseau</string>
     <string name="address">Adresse</string>
     <string name="admin_key">Clé Admin</string>
@@ -85,6 +87,7 @@
     <string name="audio_config">Configuration audio</string>
     <string name="available_pins">Broches disponibles</string>
     <string name="back">Retour</string>
+    <string name="backup_restore">Sauvegarder &amp; Restaurer</string>
     <string name="bad">Mauvais</string>
     <string name="bandwidth">Bande Passante</string>
     <string name="baro_pressure">Baro</string>
@@ -147,6 +150,7 @@
     <string name="clean_unknown_nodes">Nettoyer uniquement les nœuds inconnus</string>
     <string name="clear">Effacer</string>
     <string name="clear_selection">Effacer la sélection</string>
+    <string name="clear_time_zone">Effacer le fuseau horaire</string>
     <string name="client_notification">Notification client</string>
     <string name="close">Fermer</string>
     <string name="close_selection">Fermer le choix</string>
@@ -209,6 +213,7 @@
     <string name="configure_location_permissions">Configurer les autorisations de localisation</string>
     <string name="configure_notification_permissions">Configurer les autorisations de notification</string>
     <string name="connect">Connecter</string>
+    <string name="connect_radio_for_remote_admin">Se connecter à une radio pour administrer des nœuds distants.</string>
     <string name="connected">Connecté</string>
     <string name="connected_device">Périphérique connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
@@ -317,6 +322,7 @@
     <string name="distance_measurements_description">Afficher la distance entre votre téléphone et les autres nœuds Meshtastic avec des positions.</string>
     <string name="dns">DNS</string>
     <string name="done">Terminé</string>
+    <string name="dont_show_again_for_device">Ne plus afficher pour cet appareil</string>
     <string name="double_tap_as_button_press">Double clic comme appui sur le bouton</string>
     <string name="downlink_enabled">Liaison descendante activée (MQTT vers LoRa)</string>
     <string name="downlink_feature_description">Les messages provenant d'une passerelle Internet publique sont transmis au maillage local. En raison de la politique zéro saut, le trafic du serveur MQTT par défaut ne se propagera pas plus loin que cet appareil.</string>
@@ -347,9 +353,15 @@
     <string name="environment_metrics_use_fahrenheit">Les mesures environnementales utilisent Fahrenheit</string>
     <string name="error">Erreur</string>
     <string name="error_duty_cycle">Limite du temps d'émission autorisé par heure (duty cycle) atteinte. Vous ne pouvez pas envoyer de messages maintenant, veuillez réessayer plus tard.</string>
+    <string name="establish_session">Connecter &amp; administrer</string>
+    <string name="establishing_session">Établissement de la session distante…</string>
     <string name="ethernet_config">Options Ethernet</string>
     <string name="ethernet_enabled">Ethernet activé</string>
     <string name="ethernet_ip">IP Ethernet :</string>
+    <string name="event_welcome_burning_man">Bienvenue à Burning Man! 🔥</string>
+    <string name="event_welcome_defcon">Bienvenue à DEFCON! 💀</string>
+    <string name="event_welcome_hamvention">Bienvenue à Hamvention! 🍖📻</string>
+    <string name="event_welcome_open_sauce">Bienvenue à Open Sauce ! 🔧</string>
     <string name="exchange_position">Demander position</string>
     <string name="expand_chart">Agrandir le graphique</string>
     <string name="expires">Expire</string>
@@ -425,10 +437,12 @@
     <string name="firmware_update_node_info_missing">Les informations de l'utilisateur du nœud sont manquantes.</string>
     <string name="firmware_update_not_found_in_release">Impossible de trouver le firmware pour %1$s dans cette version.</string>
     <string name="firmware_update_ota_failed">Échec de la mise à jour de l'OTA : %1$s</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Pour le RAK WisBlock RAK4631, utilisez l'outil DFU série du fournisseur (par exemple, adafruit-nrfutil dfu serial avec le fichier .zip du bootloader fourni). La copie du fichier .uf2 seul ne permettra pas de mettre à jour le bootloader.</string>
     <string name="firmware_update_rebooting">Redémarrage en mode DFU...</string>
     <string name="firmware_update_release_notes">Notes de Version</string>
     <string name="firmware_update_retrieval_failed">Impossible de récupérer le fichier firmware.</string>
     <string name="firmware_update_retry">Réessayer</string>
+    <string name="firmware_update_save_dfu_file">Veuillez enregistrer le fichier .uf2 sur le lecteur DFU de votre appareil.</string>
     <string name="firmware_update_select_file">Sélectionnez le fichier local</string>
     <string name="firmware_update_source_local">Source : Fichier local</string>
     <string name="firmware_update_stable">Stable</string>
@@ -622,6 +636,7 @@
     <string name="map_download_region">Télécharger la région</string>
     <string name="map_filter">Filtre de carte\n</string>
     <string name="map_layer_formats">Les calques personnalisés prennent en charge les fichiers .kml, .kmz ou GeoJSON.</string>
+    <string name="map_node_popup_details">%1$s&lt;br&gt;Dernière écoute : %2$s&lt;br&gt;Dernière position : %3$s&lt;br&gt;Batterie : %4$s</string>
     <string name="map_offline_manager">Gestionnaire hors-ligne</string>
     <string name="map_purge_fail">La purge du cache SQL a échoué, consultez « logcat » pour plus de détails</string>
     <string name="map_purge_success">Cache SQL purgé pour %1$s</string>
@@ -683,12 +698,21 @@
     <string name="mqtt">MQTT</string>
     <string name="mqtt_config">Configuration MQTT</string>
     <string name="mqtt_enabled">MQTT activé</string>
+    <string name="mqtt_probe_dns_failure">Hôte introuvable</string>
     <string name="mqtt_probe_other_failure">Échec de la connexion</string>
+    <string name="mqtt_probe_rejected">Broker rejeté : %1$s</string>
+    <string name="mqtt_probe_success">Accessible. Le broker a accepté les identifiants.</string>
+    <string name="mqtt_probe_success_with_info">Accessible (%1$s)</string>
+    <string name="mqtt_probe_tcp_failure">Impossible d'atteindre le broker (TCP)</string>
+    <string name="mqtt_probe_timeout">Délai expiré après %1$d ms</string>
+    <string name="mqtt_probe_tls_failure">Échec de la connexion TLS</string>
     <string name="mqtt_status_connected">Connecté</string>
     <string name="mqtt_status_connecting">Connexion…</string>
     <string name="mqtt_status_disconnected">Déconnecté</string>
+    <string name="mqtt_status_disconnected_with_reason">Déconnecté — %1$s</string>
     <string name="mqtt_status_inactive">Inactif</string>
     <string name="mqtt_status_reconnecting">Reconnexion…</string>
+    <string name="mqtt_status_reconnecting_with_attempt">Reconnexion (tentative %1$d) — %2$s</string>
     <string name="mqtt_test_connection">Test de la connexion</string>
     <string name="must_set_region">Vous devez définir une région !</string>
     <string name="must_update">Vous devez mettre à jour cette application sur l'app store (ou Github). Il est trop vieux pour dialoguer avec le micrologiciel de la radio. Veuillez lire nos  <a href="https://meshtastic.org/docs/software/android/installation"> docs</a> sur ce sujet.</string>
@@ -719,14 +743,21 @@
     <string name="next">Suivant</string>
     <string name="nfc_disabled">Le NFC est désactivé. Veuillez l'activer dans les paramètres du système.</string>
     <!-- NO -->
+    <string name="no_bluetooth_devices_hint">Assurez-vous que vous êtes à portée de l'appareil.</string>
+    <string name="no_bluetooth_devices_seen">Aucun périphérique Bluetooth détecté</string>
     <string name="no_custom_tile_sources_found">Aucune source de tuiles personnalisées trouvée.</string>
     <string name="no_device_selected">Aucun appareil sélectionné</string>
+    <string name="no_devices_found">Aucun appareil trouvé</string>
     <string name="no_files_manifested">Aucun fichier affiché.</string>
     <string name="no_local_stats">Pas de stats disponibles</string>
     <string name="no_map_layers_loaded">Aucun calque personnalisé chargé.</string>
     <string name="no_network_devices_found">Aucun périphérique réseau trouvé</string>
+    <string name="no_network_devices_hint">Assurez-vous que vous êtes connecté au même réseau que l'appareil.</string>
+    <string name="no_network_devices_seen">Aucun appareil réseau détecté</string>
     <string name="no_pax_metrics_logs">Aucune métrique PAX disponible.</string>
     <string name="no_usb_devices_found">Pas de périphérique USB trouvé</string>
+    <string name="no_usb_devices_hint">Connectez le périphérique via le port série ou USB.</string>
+    <string name="no_usb_devices_seen">Aucun appareil USB détecté</string>
     <!-- NODE -->
     <string name="node_count_template">(%1$d en ligne / %2$d affichés / %3$d total)</string>
     <string name="node_filter_exclude_infrastructure">Exclure les nœuds infrastructure</string>
@@ -755,7 +786,10 @@
     <!-- NODES -->
     <string name="nodes">Nœuds</string>
     <string name="nodes_at_this_location">Nœuds à cet emplacement</string>
+    <string name="nodes_empty_disconnected_hint">Connectez-vous à un appareil pour découvrir les nœuds à proximité.</string>
     <string name="nodes_empty_disconnected_title">Aucun appareil connecté</string>
+    <string name="nodes_empty_searching_hint">Les nœuds à proximité apparaîtront ici quand ils seront découverts.</string>
+    <string name="nodes_empty_searching_title">Recherche de nœuds en cours</string>
     <string name="nodes_queued_for_deletion">%1$d nœuds en attente de suppression :</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="none_quality">Aucun</string>
@@ -902,6 +936,7 @@
     <string name="recent_network_devices">Périphériques réseaux récents</string>
     <string name="red">Rouge</string>
     <string name="refresh">Actualiser</string>
+    <string name="refresh_metadata">Actualiser les métadonnées</string>
     <string name="regenerate_keys_confirmation">Êtes-vous sûr de vouloir régénérer votre clé privée ?\n\nLes nœuds qui peuvent avoir précédemment échangé des clés avec ce nœud devront supprimer ce nœud et ré-échanger des clés afin de reprendre une communication sécurisée.</string>
     <string name="regenerate_private_key">Régénérer la clé privée</string>
     <string name="region_frequency_plan">Région</string>
@@ -912,6 +947,7 @@
     <!-- REMOTE -->
     <string name="remote">Distant</string>
     <string name="remote_admin">Administration à distance</string>
+    <string name="remote_admin_unreachable">Impossible d'atteindre le nœud — essayez à nouveau ou approchez-le.</string>
     <string name="remote_hardware">Matériel télécommande</string>
     <string name="remote_hardware_config">Configuration du matériel distant</string>
     <string name="remote_hardware_enabled">Matériel distant activé</string>
@@ -964,6 +1000,7 @@
     <string name="role_tracker_desc">Transmet les paquets de positions GPS en priorité.</string>
     <string name="root_topic">Sujet principal</string>
     <string name="rotary_encoder_1_enabled">Encodeur rotatif #1 activé</string>
+    <string name="router_role_confirmation_text">J'ai lu la &lt;a href=\"https://meshtastic.org/docs/configuration/radio/device/#roles\"&gt;Documentation du rôle de l'appareil&lt;/a&gt; et le billet de blog sur comment &lt;a href=\"http://meshtastic.org/blog/choosing-the-right-device-role\"&gt;Choisir le rôle de l'appareil approprié&lt;/a&gt;.</string>
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Mauvaise clé de session</string>
     <string name="routing_error_admin_public_key_unauthorized">Clé publique non autorisée</string>
@@ -992,8 +1029,10 @@
     <string name="save_rangetest">Exporter les paquets tests de portée</string>
     <!-- SCAN -->
     <string name="scan">Scanner</string>
+    <string name="scan_bluetooth_devices">Recherche de périphériques Bluetooth</string>
     <string name="scan_channels_nfc">Scanner les canaux NFC</string>
     <string name="scan_channels_qr">Scanner les canaux QR Code</string>
+    <string name="scan_network_devices">Recherche de périphériques réseau</string>
     <string name="scan_nfc">Scan NFC</string>
     <string name="scan_nfc_text">Approchez votre appareil près de la balise NFC à scanner.</string>
     <string name="scan_shared_contact_nfc">Scanner le contact partagé NFC</string>
@@ -1041,6 +1080,9 @@
     <string name="serial_rx_pin">RX</string>
     <string name="serial_tx_pin">Tx</string>
     <string name="server">Serveur</string>
+    <string name="session_active">Session active</string>
+    <string name="session_refresh_required">Actualisation requise</string>
+    <string name="set_up_connection">Configurer la connexion</string>
     <string name="set_your_region">Définir votre région</string>
     <string name="settings">paramètres</string>
     <!-- SHARE -->
@@ -1056,6 +1098,7 @@
     <string name="should_update_firmware">Mise à jour du micrologiciel recommandée.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Signification de la clé de chiffrement</string>
+    <string name="show_iaq_legend">Afficher la légende de la qualité de l'air</string>
     <string name="show_layer">Afficher le calque</string>
     <string name="show_password">Afficher le mot de passe</string>
     <string name="show_precision_circle">Afficher les cercles de précision</string>
@@ -1080,6 +1123,9 @@
     <string name="status_message">Statut du message</string>
     <string name="status_message_config">Configuration du statut du message</string>
     <string name="stay_connected_anywhere">Restez connecté n'importe où</string>
+    <string name="store_forward">Stocker &amp; Transférer</string>
+    <string name="store_forward_config">Stocker &amp; Transférer la configuration</string>
+    <string name="store_forward_enabled">Stocker &amp; Transférer activé</string>
     <string name="subnet">Subred</string>
     <string name="super_deep_sleep_duration_seconds">Durée du sommeil extra profond</string>
     <string name="supported">Pris en charge</string>
@@ -1172,6 +1218,7 @@
     <string name="traffic_management_unknown_packet_threshold">Seuil de paquets inconnu</string>
     <string name="transmit_over_lora">Transmettre par LoRa</string>
     <string name="transport_ble">BLE</string>
+    <string name="transport_tcp">TCP</string>
     <string name="transport_usb">USB</string>
     <string name="triple_click_adhoc_ping">Triple clic pour faire un ping Ad Hoc</string>
     <string name="twenty_four_hours">24H</string>
@@ -1259,8 +1306,18 @@
     <string name="wifi_provision_ssid_placeholder">Saisir ou sélectionnez un réseau</string>
     <string name="wifi_provision_status_applied">WiFi configuré avec succès !</string>
     <string name="wifi_provision_status_failed">Impossible d'appliquer la configuration WiFi</string>
+    <string name="wifi_provision_success_description">Votre appareil mPWRD-OS a rejoint le réseau Wi-Fi.</string>
+    <string name="wifi_provision_success_device_connected">Appareil connecté</string>
     <string name="wifi_provision_success_done">Terminé</string>
     <string name="wifi_provision_success_ip_address">Adresse IP</string>
+    <string name="wifi_provision_success_missing_ip">IP indisponible</string>
+    <string name="wifi_provision_success_open_ssh">Ouvrir le client SSH</string>
+    <string name="wifi_provision_success_open_ssh_fallback">Si aucune application ne s'ouvre, copiez la commande SSH et collez-la dans votre client SSH.</string>
+    <string name="wifi_provision_success_setup_description">Connectez-vous par SSH pour changer le nom d'utilisateur et le mot de passe par défaut.</string>
+    <string name="wifi_provision_success_setup_title">Compléter la configuration de l'appareil</string>
+    <string name="wifi_provision_success_ssh_command">ssh %1$s@%2$s</string>
+    <string name="wifi_provision_success_ssh_label">Commande SSH</string>
+    <string name="wifi_provision_success_ssh_unavailable">Commande SSH disponible après l'attribution de l'IP.</string>
     <string name="wifi_provision_success_username">Nom d'utilisateur</string>
     <string name="wifi_provisioning">Approvisionnement Wi-Fi pour mPWRD-OS</string>
     <string name="wifi_qr_code_error">Format du code QR d'identification WiFi invalide</string>
