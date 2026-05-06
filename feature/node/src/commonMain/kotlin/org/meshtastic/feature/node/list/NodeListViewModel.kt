@@ -159,6 +159,7 @@ class NodeListViewModel(
     }
 }
 
+@androidx.compose.runtime.Immutable
 data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: NodeFilterState = NodeFilterState(),
@@ -166,6 +167,7 @@ data class NodesUiState(
     val tempInFahrenheit: Boolean = false,
 )
 
+@androidx.compose.runtime.Immutable
 data class NodeFilterState(
     val filterText: String = "",
     val includeUnknown: Boolean = false,

@@ -29,7 +29,6 @@ kotlin {
             implementation(libs.compose.multiplatform.foundation)
             implementation(projects.core.common)
             implementation(projects.core.data)
-            implementation(projects.core.database)
             implementation(projects.core.datastore)
             implementation(projects.core.di)
             implementation(projects.core.domain)
