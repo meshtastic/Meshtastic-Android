@@ -28,6 +28,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.sdk.NodeChange
 
@@ -49,14 +50,11 @@ internal class SdkNodeBridge(
         accessor.client
             .flatMapLatest { client -> client?.packets ?: emptyFlow() }
             .filter { it.decoded?.portnum == PortNum.NODE_STATUS_APP }
-            .onEach { packet ->
-                val status = packet.decoded?.payload?.utf8() ?: return@onEach
-                nodeRepository.updateNode(packet.from) { it.copy(nodeStatus = status) }
-            }
+            .onEach(::handleNodeStatusPacket)
             .launchIn(scope)
     }
 
-    private suspend fun handleNodeChange(change: NodeChange) {
+    internal suspend fun handleNodeChange(change: NodeChange) {
         when (change) {
             is NodeChange.Snapshot -> {
                 nodeRepository.clear()
@@ -73,6 +71,11 @@ internal class SdkNodeBridge(
             is NodeChange.WentOffline -> handleWentOffline(change)
             is NodeChange.CameOnline -> handleCameOnline(change)
         }
+    }
+
+    internal fun handleNodeStatusPacket(packet: MeshPacket) {
+        val status = packet.decoded?.payload?.utf8() ?: return
+        nodeRepository.updateNode(packet.from) { it.copy(nodeStatus = status) }
     }
 
     private fun handleWentOffline(change: NodeChange.WentOffline) {

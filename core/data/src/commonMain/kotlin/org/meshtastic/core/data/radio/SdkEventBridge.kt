@@ -36,7 +36,7 @@ internal class SdkEventBridge(
             .launchIn(scope)
     }
 
-    private fun handleEvent(event: MeshEvent) {
+    internal fun handleEvent(event: MeshEvent) {
         when (event) {
             is MeshEvent.DeviceRebooted -> {
                 Logger.i { "[SdkBridge] Device rebooted" }

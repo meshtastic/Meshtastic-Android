@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.sdk.NeighborInfo
 
@@ -33,19 +34,21 @@ internal class SdkTopologyBridge(
         accessor.client
             .flatMapLatest { client -> client?.packets ?: emptyFlow() }
             .filter { it.decoded?.portnum == PortNum.NEIGHBORINFO_APP }
-            .onEach { packet ->
-                val payload = packet.decoded?.payload?.toByteArray() ?: return@onEach
-                runCatching {
-                    val proto = org.meshtastic.proto.NeighborInfo.ADAPTER.decode(payload)
-                    val info = NeighborInfo.fromProto(
-                        reportingNode = packet.from,
-                        neighborNodeIds = proto.neighbors.map { it.node_id },
-                        snrValues = proto.neighbors.map { it.snr },
-                        timestamp = proto.last_sent_by_id,
-                    )
-                    topologyService.ingestNeighborInfo(info)
-                }.onFailure { e -> Logger.w(e) { "[SdkBridge] Failed to parse NeighborInfo" } }
-            }
+            .onEach(::handleNeighborInfoPacket)
             .launchIn(scope)
+    }
+
+    internal suspend fun handleNeighborInfoPacket(packet: MeshPacket) {
+        val payload = packet.decoded?.payload?.toByteArray() ?: return
+        runCatching {
+            val proto = org.meshtastic.proto.NeighborInfo.ADAPTER.decode(payload)
+            val info = NeighborInfo.fromProto(
+                reportingNode = packet.from,
+                neighborNodeIds = proto.neighbors.map { it.node_id },
+                snrValues = proto.neighbors.map { it.snr },
+                timestamp = proto.last_sent_by_id,
+            )
+            topologyService.ingestNeighborInfo(info)
+        }.onFailure { e -> Logger.w(e) { "[SdkBridge] Failed to parse NeighborInfo" } }
     }
 }

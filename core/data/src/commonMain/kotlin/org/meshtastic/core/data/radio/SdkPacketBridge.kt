@@ -57,7 +57,7 @@ internal class SdkPacketBridge(
             .launchIn(scope)
     }
 
-    private suspend fun handleStoreForwardEvent(event: StoreForwardEvent) {
+    internal suspend fun handleStoreForwardEvent(event: StoreForwardEvent) {
         when (event) {
             is StoreForwardEvent.ServerDiscovered -> {
                 Logger.i {
