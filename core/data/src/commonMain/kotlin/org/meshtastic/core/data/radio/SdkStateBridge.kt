@@ -42,7 +42,9 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 import org.meshtastic.sdk.AdminResult
 import org.meshtastic.sdk.ChannelIndex
@@ -327,7 +329,19 @@ class SdkStateBridge(
                 val newIgnored = !node.isIgnored
                 val result = runCatching { client.admin.setIgnored(NodeId(node.num), newIgnored) }
                 if (result.isSuccess) {
-                    nodeRepository.updateNode(node.num) { it.copy(isIgnored = newIgnored) }
+                    nodeRepository.updateNode(node.num) { n ->
+                        if (newIgnored) {
+                            // Mirror firmware behavior: wipe position, device_metrics, zero public_key
+                            n.copy(
+                                isIgnored = true,
+                                position = Position(),
+                                deviceMetrics = DeviceMetrics(),
+                                publicKey = null,
+                            )
+                        } else {
+                            n.copy(isIgnored = false)
+                        }
+                    }
                     packetRepository.value.updateFilteredBySender(node.user.id, newIgnored)
                 } else {
                     Logger.w(result.exceptionOrNull()) { "[SdkBridge] setIgnored failed for ${node.num}" }
