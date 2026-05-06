@@ -111,6 +111,21 @@ class MQTTRepositoryImplTest {
     }
 
     @Test
+    fun `default server with explicit port still forces TLS`() {
+        assertEquals(true, effectiveTlsEnabled("mqtt.meshtastic.org:1883", tlsEnabled = false))
+    }
+
+    @Test
+    fun `default server with tcp scheme still forces TLS`() {
+        assertEquals(true, effectiveTlsEnabled("tcp://mqtt.meshtastic.org:1883", tlsEnabled = false))
+    }
+
+    @Test
+    fun `default server with ssl scheme still forces TLS`() {
+        assertEquals(true, effectiveTlsEnabled("ssl://mqtt.meshtastic.org", tlsEnabled = false))
+    }
+
+    @Test
     fun `custom server respects tlsEnabled false`() {
         assertEquals(false, effectiveTlsEnabled("mqtt.myserver.pt", tlsEnabled = false))
     }
@@ -118,6 +133,35 @@ class MQTTRepositoryImplTest {
     @Test
     fun `custom server respects tlsEnabled true`() {
         assertEquals(true, effectiveTlsEnabled("mqtt.myserver.pt", tlsEnabled = true))
+    }
+
+    // endregion
+
+    // region extractHost — address canonicalization tests.
+
+    @Test
+    fun `extractHost bare hostname`() {
+        assertEquals("mqtt.meshtastic.org", extractHost("mqtt.meshtastic.org"))
+    }
+
+    @Test
+    fun `extractHost with port`() {
+        assertEquals("mqtt.meshtastic.org", extractHost("mqtt.meshtastic.org:8883"))
+    }
+
+    @Test
+    fun `extractHost with tcp scheme and port`() {
+        assertEquals("mqtt.meshtastic.org", extractHost("tcp://mqtt.meshtastic.org:1883"))
+    }
+
+    @Test
+    fun `extractHost with ssl scheme no port`() {
+        assertEquals("mqtt.meshtastic.org", extractHost("ssl://mqtt.meshtastic.org"))
+    }
+
+    @Test
+    fun `extractHost with path`() {
+        assertEquals("broker.example.com", extractHost("ws://broker.example.com:8080/mqtt"))
     }
 
     // endregion

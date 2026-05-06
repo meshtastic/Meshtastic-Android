@@ -290,4 +290,22 @@ fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if 
 private const val DEFAULT_PUBLIC_SERVER = "mqtt.meshtastic.org"
 
 fun effectiveTlsEnabled(address: String, tlsEnabled: Boolean): Boolean =
-    tlsEnabled || address.equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)
+    tlsEnabled || extractHost(address).equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)
+
+/**
+ * Extracts the bare hostname from an address that may include a scheme, port, or path. Examples:
+ * - `mqtt.meshtastic.org` → `mqtt.meshtastic.org`
+ * - `mqtt.meshtastic.org:1883` → `mqtt.meshtastic.org`
+ * - `tcp://mqtt.meshtastic.org:1883` → `mqtt.meshtastic.org`
+ * - `ssl://mqtt.meshtastic.org` → `mqtt.meshtastic.org`
+ */
+internal fun extractHost(address: String): String {
+    val afterScheme =
+        if (address.contains("://")) {
+            address.substringAfter("://")
+        } else {
+            address
+        }
+    // Remove path (if any), then remove port
+    return afterScheme.substringBefore("/").substringBefore(":")
+}
