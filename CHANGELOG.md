@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* refactor(firmware): replace PlatformBackHandler with NavigationBackHandler (#5376) by @James Rich in [`213c38051`](https://github.com/meshtastic/Meshtastic-Android/commit/213c380514438e1e208f0a0439437d6e62b041f1)
+* docs: update CHANGELOG.md (#5374) by @github-actions[bot] in [`8d621bc6f`](https://github.com/meshtastic/Meshtastic-Android/commit/8d621bc6f48e167c3bdda1add22e2938dadf0bd5)
 * chore(deps): update paging to v3.5.0 (#5375) by @renovate[bot] in [`0b75fd414`](https://github.com/meshtastic/Meshtastic-Android/commit/0b75fd4140ed5643806fc8f1a6eb8c3dfaaeb049)
 * chore(deps): update compose-multiplatform to v1.11.1 (#5371) by @renovate[bot] in [`d28d684d0`](https://github.com/meshtastic/Meshtastic-Android/commit/d28d684d054fa1d82ec84ed0c2ecb3ddf4705766)
 * chore(deps): update androidx.camera.viewfinder:viewfinder-compose to v1.6.1 (#5370) by @renovate[bot] in [`2f2a71587`](https://github.com/meshtastic/Meshtastic-Android/commit/2f2a71587dd5ff36da025e5761159ff182371b81)
