@@ -120,7 +120,9 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     companion object {
         /** Configures a [RoomDatabase.Builder] with standard settings for this project. */
         fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
-            this.fallbackToDestructiveMigration(dropAllTables = false).setQueryCoroutineContext(ioDispatcher)
+            this.fallbackToDestructiveMigration(dropAllTables = false)
+                .setMultipleConnectionPool(maxNumOfReaders = 4, maxNumOfWriters = 1)
+                .setQueryCoroutineContext(ioDispatcher)
     }
 }
 
