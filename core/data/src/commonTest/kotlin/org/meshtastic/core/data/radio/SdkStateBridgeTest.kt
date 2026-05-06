@@ -76,7 +76,7 @@ class SdkStateBridgeTest {
                     ),
                 )
             }
-        val (_, client) = connectedClient(SeededHeartbeatStorageProvider(mapOf(remoteNode to staleHeartbeatMs)))
+        val (_, client) = connectedClient(StateBridgeHeartbeatStorageProvider(mapOf(remoteNode to staleHeartbeatMs)))
         buildBridge(client, nodeRepository)
 
         client.connect()
@@ -107,7 +107,7 @@ class SdkStateBridgeTest {
                     ),
                 )
             }
-        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(mapOf(remoteNode to staleHeartbeatMs)))
+        val (transport, client) = connectedClient(StateBridgeHeartbeatStorageProvider(mapOf(remoteNode to staleHeartbeatMs)))
         buildBridge(client, nodeRepository)
 
         client.connect()
@@ -134,7 +134,7 @@ class SdkStateBridgeTest {
     @Test
     fun `sfpp link provided updates packet repository`() = runTest {
         val packetRepository = mock<PacketRepository>(MockMode.autofill)
-        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(emptyMap()))
+        val (transport, client) = connectedClient(StateBridgeHeartbeatStorageProvider(emptyMap()))
         buildBridge(client, FakeNodeRepository(), packetRepository)
 
         client.connect()
@@ -170,7 +170,7 @@ class SdkStateBridgeTest {
     @Test
     fun `sfpp canon announce updates packet repository by hash`() = runTest {
         val packetRepository = mock<PacketRepository>(MockMode.autofill)
-        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(emptyMap()))
+        val (transport, client) = connectedClient(StateBridgeHeartbeatStorageProvider(emptyMap()))
         buildBridge(client, FakeNodeRepository(), packetRepository)
 
         client.connect()
@@ -199,7 +199,7 @@ class SdkStateBridgeTest {
     @Test
     fun `congestion warning updates service repository congestion level`() = runTest {
         val serviceRepo = FakeServiceRepository()
-        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(emptyMap()))
+        val (transport, client) = connectedClient(StateBridgeHeartbeatStorageProvider(emptyMap()))
         buildBridge(client, FakeNodeRepository(), serviceRepository = serviceRepo)
 
         client.connect()
@@ -231,7 +231,7 @@ class SdkStateBridgeTest {
     @Test
     fun `store forward server list propagates to service repository`() = runTest {
         val serviceRepo = FakeServiceRepository()
-        val (transport, client) = connectedClient(SeededHeartbeatStorageProvider(emptyMap()))
+        val (transport, client) = connectedClient(StateBridgeHeartbeatStorageProvider(emptyMap()))
         buildBridge(client, FakeNodeRepository(), serviceRepository = serviceRepo)
 
         client.connect()
@@ -325,7 +325,7 @@ class SdkStateBridgeTest {
     }
 }
 
-private class SeededHeartbeatStorageProvider(
+private class StateBridgeHeartbeatStorageProvider(
     private val heartbeats: Map<NodeId, Long>,
 ) : StorageProvider {
     override suspend fun activate(identity: TransportIdentity): DeviceStorage =
