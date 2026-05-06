@@ -115,12 +115,6 @@ actual fun KeepScreenOn(enabled: Boolean) {
     // No-op on JVM/Desktop
 }
 
-/** JVM no-op — Desktop has no system back gesture. */
-@Composable
-actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) {
-    // No-op on JVM/Desktop — no system back button
-}
-
 @Composable
 actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
     Logger.w { "Location permissions not implemented on Desktop" }

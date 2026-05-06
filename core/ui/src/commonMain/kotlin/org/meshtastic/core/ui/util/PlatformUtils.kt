@@ -55,9 +55,6 @@ expect fun rememberSaveFileLauncher(
 /** Keeps the screen awake while [enabled] is true. No-op on platforms that don't support it. */
 @Composable expect fun KeepScreenOn(enabled: Boolean)
 
-/** Intercepts the platform back gesture/button while [enabled] is true. No-op on platforms without a system back. */
-@Composable expect fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit)
-
 /** Returns a launcher to request location permissions. */
 @Composable expect fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
 
