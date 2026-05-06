@@ -25,6 +25,7 @@ import org.meshtastic.core.model.util.anonymize
 interface UsbDeviceData
 
 /** A sealed class representing the different types of devices that can be displayed in the connections list. */
+@androidx.compose.runtime.Immutable
 sealed class DeviceListEntry(
     open val name: String,
     open val fullAddress: String,

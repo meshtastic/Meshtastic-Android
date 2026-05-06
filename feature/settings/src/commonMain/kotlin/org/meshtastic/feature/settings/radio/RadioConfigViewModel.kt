@@ -82,6 +82,7 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
 /** Data class that represents the current RadioConfig state. */
+@androidx.compose.runtime.Immutable
 data class RadioConfigState(
     val isLocal: Boolean = false,
     val connected: Boolean = false,

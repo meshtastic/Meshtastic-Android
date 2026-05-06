@@ -19,6 +19,7 @@ package org.meshtastic.feature.connections.model
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.network.repository.DiscoveredService
 
+@androidx.compose.runtime.Immutable
 data class DiscoveredDevices(
     val bleDevices: List<DeviceListEntry> = emptyList(),
     val usbDevices: List<DeviceListEntry> = emptyList(),
