@@ -186,6 +186,8 @@ open class RadioConfigViewModel(
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
+    private var loadJob: Job? = null
+
     fun setPreserveFavorites(preserveFavorites: Boolean) {
         _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) }
     }
@@ -272,18 +274,14 @@ open class RadioConfigViewModel(
 
     fun setOwner(user: User) {
         val destNum = destNode.value?.num ?: return
-        safeLaunch(tag = "setOwner") {
-            _radioConfigState.update { it.copy(userConfig = user) }
-            radioConfigUseCase.setOwner(destNum, user)
-        }
+        _radioConfigState.update { it.copy(userConfig = user) }
+        writeAction("setOwner") { radioConfigUseCase.setOwner(destNum, user) }
     }
 
     fun updateChannels(new: List<ChannelSettings>, old: List<ChannelSettings>) {
         val destNum = destNode.value?.num ?: return
         getChannelList(new, old).forEach { channel ->
-            safeLaunch(tag = "setRemoteChannel") {
-                radioConfigUseCase.setRemoteChannel(destNum, channel)
-            }
+            writeAction("setRemoteChannel") { radioConfigUseCase.setRemoteChannel(destNum, channel) }
         }
 
         if (destNum == myNodeNum) {
@@ -297,78 +295,74 @@ open class RadioConfigViewModel(
 
     fun setConfig(config: Config) {
         val destNum = destNode.value?.num ?: return
-        safeLaunch(tag = "setConfig") {
-            _radioConfigState.update { state ->
-                state.copy(
-                    radioConfig =
-                    state.radioConfig.copy(
-                        device = config.device ?: state.radioConfig.device,
-                        position = config.position ?: state.radioConfig.position,
-                        power = config.power ?: state.radioConfig.power,
-                        network = config.network ?: state.radioConfig.network,
-                        display = config.display ?: state.radioConfig.display,
-                        lora = config.lora ?: state.radioConfig.lora,
-                        bluetooth = config.bluetooth ?: state.radioConfig.bluetooth,
-                        security = config.security ?: state.radioConfig.security,
-                    ),
-                )
-            }
-            radioConfigUseCase.setConfig(destNum, config)
+        _radioConfigState.update { state ->
+            state.copy(
+                radioConfig =
+                state.radioConfig.copy(
+                    device = config.device ?: state.radioConfig.device,
+                    position = config.position ?: state.radioConfig.position,
+                    power = config.power ?: state.radioConfig.power,
+                    network = config.network ?: state.radioConfig.network,
+                    display = config.display ?: state.radioConfig.display,
+                    lora = config.lora ?: state.radioConfig.lora,
+                    bluetooth = config.bluetooth ?: state.radioConfig.bluetooth,
+                    security = config.security ?: state.radioConfig.security,
+                ),
+            )
         }
+        writeAction("setConfig") { radioConfigUseCase.setConfig(destNum, config) }
     }
 
     @Suppress("CyclomaticComplexMethod")
     fun setModuleConfig(config: ModuleConfig) {
         val destNum = destNode.value?.num ?: return
-        safeLaunch(tag = "setModuleConfig") {
-            _radioConfigState.update { state ->
-                state.copy(
-                    moduleConfig =
-                    state.moduleConfig.copy(
-                        mqtt = config.mqtt ?: state.moduleConfig.mqtt,
-                        serial = config.serial ?: state.moduleConfig.serial,
-                        external_notification =
-                        config.external_notification ?: state.moduleConfig.external_notification,
-                        store_forward = config.store_forward ?: state.moduleConfig.store_forward,
-                        range_test = config.range_test ?: state.moduleConfig.range_test,
-                        telemetry = config.telemetry ?: state.moduleConfig.telemetry,
-                        canned_message = config.canned_message ?: state.moduleConfig.canned_message,
-                        audio = config.audio ?: state.moduleConfig.audio,
-                        remote_hardware = config.remote_hardware ?: state.moduleConfig.remote_hardware,
-                        neighbor_info = config.neighbor_info ?: state.moduleConfig.neighbor_info,
-                        ambient_lighting = config.ambient_lighting ?: state.moduleConfig.ambient_lighting,
-                        detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor,
-                        paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter,
-                        statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage,
-                        traffic_management = config.traffic_management ?: state.moduleConfig.traffic_management,
-                        tak = config.tak ?: state.moduleConfig.tak,
-                    ),
-                )
-            }
-            radioConfigUseCase.setModuleConfig(destNum, config)
+        _radioConfigState.update { state ->
+            state.copy(
+                moduleConfig =
+                state.moduleConfig.copy(
+                    mqtt = config.mqtt ?: state.moduleConfig.mqtt,
+                    serial = config.serial ?: state.moduleConfig.serial,
+                    external_notification =
+                    config.external_notification ?: state.moduleConfig.external_notification,
+                    store_forward = config.store_forward ?: state.moduleConfig.store_forward,
+                    range_test = config.range_test ?: state.moduleConfig.range_test,
+                    telemetry = config.telemetry ?: state.moduleConfig.telemetry,
+                    canned_message = config.canned_message ?: state.moduleConfig.canned_message,
+                    audio = config.audio ?: state.moduleConfig.audio,
+                    remote_hardware = config.remote_hardware ?: state.moduleConfig.remote_hardware,
+                    neighbor_info = config.neighbor_info ?: state.moduleConfig.neighbor_info,
+                    ambient_lighting = config.ambient_lighting ?: state.moduleConfig.ambient_lighting,
+                    detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor,
+                    paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter,
+                    statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage,
+                    traffic_management = config.traffic_management ?: state.moduleConfig.traffic_management,
+                    tak = config.tak ?: state.moduleConfig.tak,
+                ),
+            )
         }
+        writeAction("setModuleConfig") { radioConfigUseCase.setModuleConfig(destNum, config) }
     }
 
     fun setRingtone(ringtone: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(ringtone = ringtone) }
-        safeLaunch(tag = "setRingtone") { radioConfigUseCase.setRingtone(destNum, ringtone) }
+        writeAction("setRingtone") { radioConfigUseCase.setRingtone(destNum, ringtone) }
     }
 
     fun setCannedMessages(messages: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
-        safeLaunch(tag = "setCannedMessages") { radioConfigUseCase.setCannedMessages(destNum, messages) }
+        writeAction("setCannedMessages") { radioConfigUseCase.setCannedMessages(destNum, messages) }
     }
 
     fun setFixedPosition(position: Position) {
         val destNum = destNode.value?.num ?: return
-        safeLaunch(tag = "setFixedPosition") { radioConfigUseCase.setFixedPosition(destNum, position) }
+        writeAction("setFixedPosition") { radioConfigUseCase.setFixedPosition(destNum, position) }
     }
 
     fun removeFixedPosition() {
         val destNum = destNode.value?.num ?: return
-        safeLaunch(tag = "removeFixedPosition") { radioConfigUseCase.removeFixedPosition(destNum) }
+        writeAction("removeFixedPosition") { radioConfigUseCase.removeFixedPosition(destNum) }
     }
 
     fun importProfile(uri: CommonUri, onResult: (DeviceProfile) -> Unit) {
@@ -411,7 +405,8 @@ open class RadioConfigViewModel(
 
         _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Loading()) }
 
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             try {
                 when (route) {
                     ConfigRoute.USER -> {
@@ -537,6 +532,17 @@ open class RadioConfigViewModel(
     private fun AdminException.toUiText(): UiText = when (this) {
         is AdminException.Timeout -> UiText.Resource(Res.string.timeout)
         else -> UiText.DynamicString(message ?: "Admin request failed")
+    }
+
+    /** Launch a write operation that reports [AdminException] to the UI as an error state. */
+    private fun writeAction(tag: String, block: suspend () -> Unit) {
+        safeLaunch(tag = tag) {
+            try {
+                block()
+            } catch (e: AdminException) {
+                sendError(e.toUiText())
+            }
+        }
     }
 
     fun shouldReportLocation(nodeNum: Int?) = mapConsentPrefs.shouldReportLocation(nodeNum)

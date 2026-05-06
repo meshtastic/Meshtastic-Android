@@ -34,6 +34,7 @@ import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.RemoteAdmin
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
@@ -77,6 +78,7 @@ class SdkRadioController(
     private val nodeRepository: NodeRepository,
     private val locationManager: MeshLocationManager,
     private val deliveryTracker: MessageDeliveryTracker,
+    private val radioPrefs: RadioPrefs,
 ) : RadioController {
 
     private val packetIdCounter = atomic(1)
@@ -281,6 +283,9 @@ class SdkRadioController(
 
     override suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean) {
         val c = requireClient()
+        // Note: The firmware's nodedb_reset command always preserves favorites (proto3 boolean
+        // semantics — only true can be encoded). The preserveFavorites parameter only affects
+        // local Room DB cleanup in AdminActionsUseCase.
         c.admin.forNode(NodeId(destNum)).nodeDbReset().unwrap()
     }
 
@@ -387,6 +392,7 @@ class SdkRadioController(
     }
 
     override fun setDeviceAddress(address: String) {
+        radioPrefs.setDevAddr(address)
         accessor.rebuildAndConnectAsync()
     }
 

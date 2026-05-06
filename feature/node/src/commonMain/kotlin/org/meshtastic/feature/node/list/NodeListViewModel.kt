@@ -39,7 +39,7 @@ import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
-import org.meshtastic.sdk.CongestionLevel
+import org.meshtastic.core.model.CongestionLevel
 
 @Suppress("LongParameterList")
 @KoinViewModel

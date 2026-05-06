@@ -66,58 +66,68 @@ constructor(
 
     override fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(ioDispatcher) {
-            Logger.i { "Requesting UserInfo for '$destNum'" }
-            dataRequester.requestUserInfo(destNum)
-            showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName))
+            runCatching {
+                Logger.i { "Requesting UserInfo for '$destNum'" }
+                dataRequester.requestUserInfo(destNum)
+                showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName))
+            }.onFailure { e -> Logger.e(e) { "requestUserInfo failed" } }
         }
     }
 
     override fun requestNeighborInfo(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(ioDispatcher) {
-            Logger.i { "Requesting NeighborInfo for '$destNum'" }
-            val packetId = messageSender.getPacketId()
-            dataRequester.requestNeighborInfo(packetId, destNum)
-            _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
-            showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
+            runCatching {
+                Logger.i { "Requesting NeighborInfo for '$destNum'" }
+                val packetId = messageSender.getPacketId()
+                dataRequester.requestNeighborInfo(packetId, destNum)
+                _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
+                showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName))
+            }.onFailure { e -> Logger.e(e) { "requestNeighborInfo failed" } }
         }
     }
 
     override fun requestPosition(scope: CoroutineScope, destNum: Int, longName: String, position: Position) {
         scope.launch(ioDispatcher) {
-            Logger.i { "Requesting position for '$destNum'" }
-            dataRequester.requestPosition(destNum, position)
-            showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.position, longName))
+            runCatching {
+                Logger.i { "Requesting position for '$destNum'" }
+                dataRequester.requestPosition(destNum, position)
+                showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.position, longName))
+            }.onFailure { e -> Logger.e(e) { "requestPosition failed" } }
         }
     }
 
     override fun requestTelemetry(scope: CoroutineScope, destNum: Int, longName: String, type: TelemetryType) {
         scope.launch(ioDispatcher) {
-            Logger.i { "Requesting telemetry for '$destNum'" }
-            val packetId = messageSender.getPacketId()
-            dataRequester.requestTelemetry(packetId, destNum, type.ordinal)
+            runCatching {
+                Logger.i { "Requesting telemetry for '$destNum'" }
+                val packetId = messageSender.getPacketId()
+                dataRequester.requestTelemetry(packetId, destNum, type.ordinal)
 
-            val typeRes =
-                when (type) {
-                    TelemetryType.DEVICE -> Res.string.request_device_metrics
-                    TelemetryType.ENVIRONMENT -> Res.string.request_environment_metrics
-                    TelemetryType.AIR_QUALITY -> Res.string.request_air_quality_metrics
-                    TelemetryType.POWER -> Res.string.request_power_metrics
-                    TelemetryType.LOCAL_STATS -> Res.string.signal_quality
-                    TelemetryType.HOST -> Res.string.request_host_metrics
-                    TelemetryType.PAX -> Res.string.request_pax_metrics
-                }
+                val typeRes =
+                    when (type) {
+                        TelemetryType.DEVICE -> Res.string.request_device_metrics
+                        TelemetryType.ENVIRONMENT -> Res.string.request_environment_metrics
+                        TelemetryType.AIR_QUALITY -> Res.string.request_air_quality_metrics
+                        TelemetryType.POWER -> Res.string.request_power_metrics
+                        TelemetryType.LOCAL_STATS -> Res.string.signal_quality
+                        TelemetryType.HOST -> Res.string.request_host_metrics
+                        TelemetryType.PAX -> Res.string.request_pax_metrics
+                    }
 
-            showFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName))
+                showFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName))
+            }.onFailure { e -> Logger.e(e) { "requestTelemetry failed" } }
         }
     }
 
     override fun requestTraceroute(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(ioDispatcher) {
-            Logger.i { "Requesting traceroute for '$destNum'" }
-            val packetId = messageSender.getPacketId()
-            dataRequester.requestTraceroute(packetId, destNum)
-            _lastTracerouteTime.value = nowMillis
-            showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
+            runCatching {
+                Logger.i { "Requesting traceroute for '$destNum'" }
+                val packetId = messageSender.getPacketId()
+                dataRequester.requestTraceroute(packetId, destNum)
+                _lastTracerouteTime.value = nowMillis
+                showFeedback(UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName))
+            }.onFailure { e -> Logger.e(e) { "requestTraceroute failed" } }
         }
     }
 }

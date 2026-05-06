@@ -25,7 +25,7 @@ import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
-import org.meshtastic.sdk.CongestionLevel
+import org.meshtastic.core.model.CongestionLevel
 
 /**
  * Interface for managing background service state, connection status, and mesh events.

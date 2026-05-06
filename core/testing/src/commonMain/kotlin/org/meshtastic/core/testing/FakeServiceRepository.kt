@@ -30,7 +30,7 @@ import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
-import org.meshtastic.sdk.CongestionLevel
+import org.meshtastic.core.model.CongestionLevel
 
 @Suppress("TooManyFunctions")
 class FakeServiceRepository : ServiceRepository {

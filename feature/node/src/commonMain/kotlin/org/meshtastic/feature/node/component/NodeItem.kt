@@ -90,7 +90,7 @@ import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.proto.Config
-import org.meshtastic.sdk.CongestionLevel
+import org.meshtastic.core.model.CongestionLevel
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f

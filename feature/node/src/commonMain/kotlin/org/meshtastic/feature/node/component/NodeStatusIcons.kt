@@ -60,7 +60,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
-import org.meshtastic.sdk.CongestionLevel
+import org.meshtastic.core.model.CongestionLevel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
