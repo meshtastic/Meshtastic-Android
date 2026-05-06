@@ -235,9 +235,10 @@ open class RadioConfigViewModel(
             .onEach { manifest -> _radioConfigState.update { it.copy(fileManifest = manifest) } }
             .launchIn(viewModelScope)
 
-        combine(serviceRepository.connectionState, radioConfigState) { connState, _ ->
-            _radioConfigState.update { it.copy(connected = connState == ConnectionState.Connected) }
-        }
+        serviceRepository.connectionState
+            .onEach { connState ->
+                _radioConfigState.update { it.copy(connected = connState == ConnectionState.Connected) }
+            }
             .launchIn(viewModelScope)
 
         combine(nodeRepository.myNodeInfo, destNumFlow) { ni, id ->
