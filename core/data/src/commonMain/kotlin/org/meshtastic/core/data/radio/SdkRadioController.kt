@@ -20,10 +20,12 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.AdminException
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DataRequester
 import org.meshtastic.core.model.DeviceAdmin
+import org.meshtastic.core.model.DeviceAdminEdit
 import org.meshtastic.core.model.DeviceControl
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MessageSender
@@ -37,6 +39,7 @@ import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.SharedContact
@@ -162,24 +165,24 @@ class SdkRadioController(
 
     // ── Remote admin (config/owner/channel) ─────────────────────────────────
 
-    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
+    override suspend fun setOwner(destNum: Int, user: User) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).setOwner(user)
+        c.admin.forNode(NodeId(destNum)).setOwner(user).unwrap()
     }
 
-    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
+    override suspend fun setConfig(destNum: Int, config: Config) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).setConfig(config)
+        c.admin.forNode(NodeId(destNum)).setConfig(config).unwrap()
     }
 
-    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
+    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).setModuleConfig(config)
+        c.admin.forNode(NodeId(destNum)).setModuleConfig(config).unwrap()
     }
 
-    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
+    override suspend fun setRemoteChannel(destNum: Int, channel: Channel) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).setChannel(channel)
+        c.admin.forNode(NodeId(destNum)).setChannel(channel).unwrap()
     }
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {
@@ -205,78 +208,85 @@ class SdkRadioController(
 
     // ── Remote admin (getters) ──────────────────────────────────────────────
 
-    override suspend fun getOwner(destNum: Int, packetId: Int) {
+    override suspend fun getOwner(destNum: Int): User {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).getOwner()
+        return c.admin.forNode(NodeId(destNum)).getOwner().unwrap()
     }
 
-    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
+    override suspend fun getConfig(destNum: Int, configType: Int): Config {
         val c = requireClient()
-        val type = AdminMessage.ConfigType.fromValue(configType) ?: return
-        c.admin.forNode(NodeId(destNum)).getConfig(type)
+        val type = AdminMessage.ConfigType.fromValue(configType)
+            ?: throw IllegalArgumentException("Unknown config type: $configType")
+        return c.admin.forNode(NodeId(destNum)).getConfig(type).unwrap()
     }
 
-    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): ModuleConfig {
         val c = requireClient()
-        val type = AdminMessage.ModuleConfigType.fromValue(moduleConfigType) ?: return
-        c.admin.forNode(NodeId(destNum)).getModuleConfig(type)
+        val type = AdminMessage.ModuleConfigType.fromValue(moduleConfigType)
+            ?: throw IllegalArgumentException("Unknown module config type: $moduleConfigType")
+        return c.admin.forNode(NodeId(destNum)).getModuleConfig(type).unwrap()
     }
 
-    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
+    override suspend fun getChannel(destNum: Int, index: Int): Channel {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).getChannel(ChannelIndex(index))
+        return c.admin.forNode(NodeId(destNum)).getChannel(ChannelIndex(index)).unwrap()
     }
 
-    override suspend fun getRingtone(destNum: Int, packetId: Int) {
+    override suspend fun listChannels(destNum: Int): List<Channel> {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).getRingtone()
+        return c.admin.forNode(NodeId(destNum)).listChannels().unwrap()
     }
 
-    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
+    override suspend fun getRingtone(destNum: Int): String {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).getCannedMessages()
+        return c.admin.forNode(NodeId(destNum)).getRingtone().unwrap()
     }
 
-    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
+    override suspend fun getCannedMessages(destNum: Int): String {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).getDeviceConnectionStatus()
+        return c.admin.forNode(NodeId(destNum)).getCannedMessages().unwrap()
+    }
+
+    override suspend fun getDeviceConnectionStatus(destNum: Int): DeviceConnectionStatus {
+        val c = requireClient()
+        return c.admin.forNode(NodeId(destNum)).getDeviceConnectionStatus().unwrap()
     }
 
     // ── Lifecycle commands ───────────────────────────────────────────────────
 
-    override suspend fun reboot(destNum: Int, packetId: Int) {
+    override suspend fun reboot(destNum: Int) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).reboot()
+        c.admin.forNode(NodeId(destNum)).reboot().unwrap()
     }
 
     override suspend fun rebootToDfu(nodeNum: Int) {
         val c = requireClient()
-        c.admin.forNode(NodeId(nodeNum)).enterDfuMode()
+        c.admin.forNode(NodeId(nodeNum)).enterDfuMode().unwrap()
     }
 
-    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+    override suspend fun requestRebootOta(destNum: Int, mode: Int, hash: ByteArray?) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).rebootOta()
+        c.admin.forNode(NodeId(destNum)).rebootOta().unwrap()
     }
 
-    override suspend fun shutdown(destNum: Int, packetId: Int) {
+    override suspend fun shutdown(destNum: Int) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).shutdown()
+        c.admin.forNode(NodeId(destNum)).shutdown().unwrap()
     }
 
-    override suspend fun factoryReset(destNum: Int, packetId: Int) {
+    override suspend fun factoryReset(destNum: Int) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).factoryReset()
+        c.admin.forNode(NodeId(destNum)).factoryReset().unwrap()
     }
 
-    override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
+    override suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean) {
         val c = requireClient()
-        c.admin.forNode(NodeId(destNum)).nodeDbReset()
+        c.admin.forNode(NodeId(destNum)).nodeDbReset().unwrap()
     }
 
-    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
+    override suspend fun removeByNodenum(nodeNum: Int) {
         val c = requireClient()
-        c.admin.removeNode(NodeId(nodeNum))
+        c.admin.removeNode(NodeId(nodeNum)).unwrap()
     }
 
     // ── Data requests ───────────────────────────────────────────────────────
@@ -349,28 +359,19 @@ class SdkRadioController(
 
     // ── Edit settings (transactional) ───────────────────────────────────────
 
-    override suspend fun beginEditSettings(destNum: Int) {
+    override suspend fun editSettings(destNum: Int, block: suspend DeviceAdminEdit.() -> Unit) {
         val c = requireClient()
-        val target = resolveTarget(c, destNum)
-        val payload = AdminMessage.ADAPTER.encode(AdminMessage(begin_edit_settings = true))
-        c.send(
-            portnum = PortNum.ADMIN_APP,
-            payload = payload,
-            to = target,
-            wantAck = false,
-        )
-    }
-
-    override suspend fun commitEditSettings(destNum: Int) {
-        val c = requireClient()
-        val target = resolveTarget(c, destNum)
-        val payload = AdminMessage.ADAPTER.encode(AdminMessage(commit_edit_settings = true))
-        c.send(
-            portnum = PortNum.ADMIN_APP,
-            payload = payload,
-            to = target,
-            wantAck = true,
-        )
+        val admin = c.admin.forNode(NodeId(destNum))
+        admin.editSettings {
+            val edit = this
+            val bridge = object : DeviceAdminEdit {
+                override suspend fun setConfig(config: Config) { edit.setConfig(config) }
+                override suspend fun setModuleConfig(config: ModuleConfig) { edit.setModuleConfig(config) }
+                override suspend fun setOwner(user: User) { edit.setOwner(user) }
+                override suspend fun setChannel(channel: Channel) { edit.setChannel(channel) }
+            }
+            block(bridge)
+        }.unwrap()
     }
 
     // ── Utility ─────────────────────────────────────────────────────────────
@@ -391,8 +392,13 @@ class SdkRadioController(
 
     // ── Private helpers ─────────────────────────────────────────────────────
 
-    private fun resolveTarget(c: RadioClient, destNum: Int): NodeId {
-        if (destNum == 0) return NodeId(c.ownNode.value?.num ?: 0)
-        return NodeId(destNum)
+    /** Unwrap an [AdminResult], returning the value on success or throwing [AdminException] on failure. */
+    private fun <T> AdminResult<T>.unwrap(): T = when (this) {
+        is AdminResult.Success -> value
+        is AdminResult.Timeout -> throw AdminException.Timeout()
+        is AdminResult.Unauthorized -> throw AdminException.Unauthorized()
+        is AdminResult.NodeUnreachable -> throw AdminException.NodeUnreachable()
+        is AdminResult.SessionKeyExpired -> throw AdminException.SessionKeyExpired()
+        is AdminResult.Failed -> throw AdminException.RoutingError(routingError.name)
     }
 }

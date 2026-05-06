@@ -16,17 +16,21 @@
  */
 package org.meshtastic.core.model
 
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.User
+
 /**
- * Focused interface for device lifecycle control.
+ * Receiver interface for batched admin writes inside an [DeviceAdmin.editSettings] block.
  *
- * Methods suspend until the device acknowledges the command. On failure, they throw [AdminException].
+ * Methods queue writes without awaiting individual acknowledgements. The enclosing
+ * `editSettings` call handles `begin_edit_settings` / `commit_edit_settings` framing so
+ * the device applies all writes atomically.
  */
-interface DeviceControl : ConnectionAware {
-    suspend fun reboot(destNum: Int)
-    suspend fun rebootToDfu(nodeNum: Int)
-    suspend fun requestRebootOta(destNum: Int, mode: Int, hash: ByteArray?)
-    suspend fun shutdown(destNum: Int)
-    suspend fun factoryReset(destNum: Int)
-    suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean)
-    suspend fun removeByNodenum(nodeNum: Int)
+interface DeviceAdminEdit {
+    suspend fun setConfig(config: Config)
+    suspend fun setModuleConfig(config: ModuleConfig)
+    suspend fun setOwner(user: User)
+    suspend fun setChannel(channel: Channel)
 }

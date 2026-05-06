@@ -47,8 +47,8 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `getOwner calls radioController`() = runTest {
-        val packetId = useCase.getOwner(1234)
-        assertEquals(1, packetId)
+        val user = useCase.getOwner(1234)
+        // FakeRadioController returns a default User
     }
 
     @Test

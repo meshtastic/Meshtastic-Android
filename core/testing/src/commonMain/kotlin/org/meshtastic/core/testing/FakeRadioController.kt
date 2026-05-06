@@ -19,11 +19,13 @@ package org.meshtastic.core.testing
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DeviceAdminEdit
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
@@ -48,8 +50,7 @@ class FakeRadioController :
     var throwOnSend: Boolean = false
     var lastSetDeviceAddress: String? = null
     var lastStoreForwardHistoryRequest: Pair<Int?, Int?>? = null
-    var beginEditSettingsCalled = false
-    var commitEditSettingsCalled = false
+    var editSettingsCalled = false
     var startProvideLocationCalled = false
     var stopProvideLocationCalled = false
 
@@ -61,8 +62,7 @@ class FakeRadioController :
             throwOnSend = false
             lastSetDeviceAddress = null
             lastStoreForwardHistoryRequest = null
-            beginEditSettingsCalled = false
-            commitEditSettingsCalled = false
+            editSettingsCalled = false
             startProvideLocationCalled = false
             stopProvideLocationCalled = false
         }
@@ -90,13 +90,13 @@ class FakeRadioController :
 
     override suspend fun setLocalChannel(channel: Channel) {}
 
-    override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {}
+    override suspend fun setOwner(destNum: Int, user: User) {}
 
-    override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {}
+    override suspend fun setConfig(destNum: Int, config: Config) {}
 
-    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {}
+    override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig) {}
 
-    override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {}
+    override suspend fun setRemoteChannel(destNum: Int, channel: Channel) {}
 
     override suspend fun setFixedPosition(destNum: Int, position: Position) {}
 
@@ -104,33 +104,36 @@ class FakeRadioController :
 
     override suspend fun setCannedMessages(destNum: Int, messages: String) {}
 
-    override suspend fun getOwner(destNum: Int, packetId: Int) {}
+    override suspend fun getOwner(destNum: Int): User = User()
 
-    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {}
+    override suspend fun getConfig(destNum: Int, configType: Int): Config = Config()
 
-    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {}
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): ModuleConfig = ModuleConfig()
 
-    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {}
+    override suspend fun getChannel(destNum: Int, index: Int): Channel = Channel()
 
-    override suspend fun getRingtone(destNum: Int, packetId: Int) {}
+    override suspend fun listChannels(destNum: Int): List<Channel> = emptyList()
 
-    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {}
+    override suspend fun getRingtone(destNum: Int): String = ""
 
-    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {}
+    override suspend fun getCannedMessages(destNum: Int): String = ""
 
-    override suspend fun reboot(destNum: Int, packetId: Int) {}
+    override suspend fun getDeviceConnectionStatus(destNum: Int): DeviceConnectionStatus =
+        DeviceConnectionStatus()
+
+    override suspend fun reboot(destNum: Int) {}
 
     override suspend fun rebootToDfu(nodeNum: Int) {}
 
-    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {}
+    override suspend fun requestRebootOta(destNum: Int, mode: Int, hash: ByteArray?) {}
 
-    override suspend fun shutdown(destNum: Int, packetId: Int) {}
+    override suspend fun shutdown(destNum: Int) {}
 
-    override suspend fun factoryReset(destNum: Int, packetId: Int) {}
+    override suspend fun factoryReset(destNum: Int) {}
 
-    override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {}
+    override suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean) {}
 
-    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
+    override suspend fun removeByNodenum(nodeNum: Int) {}
 
     override suspend fun requestPosition(destNum: Int, currentPosition: Position) {}
 
@@ -147,12 +150,15 @@ class FakeRadioController :
         return true
     }
 
-    override suspend fun beginEditSettings(destNum: Int) {
-        beginEditSettingsCalled = true
-    }
-
-    override suspend fun commitEditSettings(destNum: Int) {
-        commitEditSettingsCalled = true
+    override suspend fun editSettings(destNum: Int, block: suspend DeviceAdminEdit.() -> Unit) {
+        editSettingsCalled = true
+        val edit = object : DeviceAdminEdit {
+            override suspend fun setConfig(config: Config) {}
+            override suspend fun setModuleConfig(config: ModuleConfig) {}
+            override suspend fun setOwner(user: User) {}
+            override suspend fun setChannel(channel: Channel) {}
+        }
+        block(edit)
     }
 
     override fun getPacketId(): Int = 1

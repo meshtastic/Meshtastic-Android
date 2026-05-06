@@ -23,6 +23,14 @@ import org.meshtastic.proto.Config
 interface DeviceAdmin : ConnectionAware {
     suspend fun setLocalConfig(config: Config)
     suspend fun setLocalChannel(channel: Channel)
-    suspend fun beginEditSettings(destNum: Int)
-    suspend fun commitEditSettings(destNum: Int)
+
+    /**
+     * Run [block] inside a `begin_edit_settings` / `commit_edit_settings` envelope so the device
+     * applies all writes atomically.
+     *
+     * @param destNum the target node number (local or remote)
+     * @param block a suspending block using [DeviceAdminEdit] receiver to queue writes
+     * @throws AdminException on begin/commit failure (timeout, unauthorized, etc.)
+     */
+    suspend fun editSettings(destNum: Int, block: suspend DeviceAdminEdit.() -> Unit)
 }

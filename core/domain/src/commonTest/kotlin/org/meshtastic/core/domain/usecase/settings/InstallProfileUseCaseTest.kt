@@ -60,11 +60,10 @@ class InstallProfileUseCaseTest {
     }
 
     @Test
-    fun `invoke calls begin and commit edit settings`() = runTest {
+    fun `invoke calls editSettings`() = runTest {
         useCase(1234, DeviceProfile(), User())
 
-        assertTrue(radioController.beginEditSettingsCalled)
-        assertTrue(radioController.commitEditSettingsCalled)
+        assertTrue(radioController.editSettingsCalled)
     }
 
     @Test
@@ -108,7 +107,6 @@ class InstallProfileUseCaseTest {
 
         useCase(1234, profile, org.meshtastic.proto.User(long_name = "Old"))
 
-        assertTrue(radioController.beginEditSettingsCalled)
-        assertTrue(radioController.commitEditSettingsCalled)
+        assertTrue(radioController.editSettingsCalled)
     }
 }

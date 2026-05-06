@@ -47,7 +47,6 @@ class NodeManagementActionsTest {
             nodeRepository = nodeRepository,
             serviceRepository = serviceRepository,
             deviceControl = radioController,
-            messageSender = radioController,
             alertManager = alertManager,
         )
 
@@ -80,7 +79,6 @@ class NodeManagementActionsTest {
                 nodeRepository = nodeRepository,
                 serviceRepository = serviceRepository,
                 deviceControl = radioController,
-                messageSender = radioController,
                 alertManager = realAlertManager,
             )
         val node = Node(num = 123, user = User(long_name = "Test Node"))

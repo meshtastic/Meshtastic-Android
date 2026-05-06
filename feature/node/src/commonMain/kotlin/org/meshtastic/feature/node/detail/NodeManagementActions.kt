@@ -23,7 +23,6 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.DeviceControl
-import org.meshtastic.core.model.MessageSender
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
@@ -49,7 +48,6 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
     private val deviceControl: DeviceControl,
-    private val messageSender: MessageSender,
     private val alertManager: AlertManager,
 ) {
     open fun requestRemoveNode(scope: CoroutineScope, node: Node, onAfterRemove: () -> Unit = {}) {
@@ -66,8 +64,7 @@ constructor(
     open fun removeNode(scope: CoroutineScope, nodeNum: Int) {
         scope.launch(ioDispatcher) {
             Logger.i { "Removing node '$nodeNum'" }
-            val packetId = messageSender.getPacketId()
-            deviceControl.removeByNodenum(packetId, nodeNum)
+            deviceControl.removeByNodenum(nodeNum)
             nodeRepository.deleteNode(nodeNum)
         }
     }
