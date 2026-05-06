@@ -39,7 +39,6 @@ kotlin {
             implementation(projects.core.network)
             implementation(projects.core.proto)
             implementation(projects.core.repository)
-            implementation(projects.core.service)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
             implementation(projects.core.di)

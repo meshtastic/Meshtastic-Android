@@ -38,7 +38,6 @@ kotlin {
             implementation(projects.core.prefs)
             implementation(projects.core.proto)
             implementation(projects.core.resources)
-            implementation(projects.core.service)
             implementation(projects.core.ui)
             implementation(projects.core.ble)
             implementation(projects.core.network)

@@ -40,7 +40,6 @@ kotlin {
             implementation(projects.core.proto)
             implementation(projects.core.repository)
             implementation(projects.core.resources)
-            implementation(projects.core.service)
             implementation(projects.core.ui)
             implementation(projects.core.di)
             implementation(projects.feature.map)
