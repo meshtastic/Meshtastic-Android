@@ -1,5 +1,0 @@
-id: remove-parcelize-plugin
-language: kotlin
-rule:
-  pattern: alias(libs.plugins.kotlin.parcelize)
-fix: ""
