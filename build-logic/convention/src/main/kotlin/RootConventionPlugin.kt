@@ -21,6 +21,7 @@ import org.meshtastic.buildlogic.configureDokkaAggregation
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKover
 import org.meshtastic.buildlogic.configureKoverAggregation
+import org.meshtastic.buildlogic.isDesktopOnly
 
 /**
  * Root convention plugin applied to the top-level project.
@@ -34,12 +35,14 @@ class RootConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         require(target.path == ":")
         with(target) {
+            val modules = allModules()
+
             apply(plugin = "org.jetbrains.dokka")
-            configureDokkaAggregation(ALL_MODULES)
+            configureDokkaAggregation(modules)
 
             apply(plugin = "org.jetbrains.kotlinx.kover")
             configureKover()
-            configureKoverAggregation(ALL_MODULES)
+            configureKoverAggregation(modules)
 
             // Register graph tasks on the root project itself
             configureGraphTasks()
@@ -56,19 +59,22 @@ class RootConventionPlugin : Plugin<Project> {
  * Non-KMP modules simply won't have these tasks, so the path-based dependencies will be silently ignored.
  */
 private fun Project.registerKmpSmokeCompileTask() {
+    val kmp = kmpModules()
     tasks.register("kmpSmokeCompile") {
         group = "verification"
         description = "Compile all KMP modules for JVM and iOS Simulator ARM64 targets."
 
-        KMP_MODULES.forEach { path ->
+        kmp.forEach { path ->
             dependsOn("$path:compileKotlinJvm")
-            dependsOn("$path:compileKotlinIosSimulatorArm64")
+            if (!isDesktopOnly) {
+                dependsOn("$path:compileKotlinIosSimulatorArm64")
+            }
         }
     }
 }
 
 /** All modules included in `settings.gradle.kts`. Update this list when adding or removing modules. */
-private val ALL_MODULES =
+private val ALL_MODULES_FULL =
     listOf(
         ":app",
         ":core:api",
@@ -104,9 +110,14 @@ private val ALL_MODULES =
         ":desktop",
     )
 
+/** Android-only modules excluded in desktop-only builds. */
+private val ANDROID_ONLY_MODULES = setOf(":app", ":core:api", ":core:barcode", ":feature:widget")
+
+private fun Project.allModules(): List<String> =
+    if (isDesktopOnly) ALL_MODULES_FULL.filter { it !in ANDROID_ONLY_MODULES } else ALL_MODULES_FULL
+
 /**
  * Modules that apply the KMP plugin and should be compiled for JVM + iOS targets. Excludes pure-Android modules (:app,
  * :core:api, :core:barcode, :feature:widget) and the desktop JVM-only module.
  */
-private val KMP_MODULES =
-    ALL_MODULES.filter { path -> path !in setOf(":app", ":core:api", ":core:barcode", ":feature:widget", ":desktop") }
+private fun Project.kmpModules(): List<String> = allModules().filter { it !in ANDROID_ONLY_MODULES + ":desktop" }

@@ -77,10 +77,13 @@ toolchainManagement {
     }
 }
 
+// Desktop-only mode: skip Android-only modules when ANDROID_HOME is unavailable (e.g. Flatpak builds).
+// Activate via: DESKTOP_ONLY=true ./gradlew :desktop:packageUberJarForCurrentOS
+val desktopOnly =
+    providers.gradleProperty("desktop.only").orNull?.toBoolean() == true ||
+        System.getenv("DESKTOP_ONLY")?.toBoolean() == true
+
 include(
-    ":app",
-    ":core:api",
-    ":core:barcode",
     ":core:ble",
     ":core:common",
     ":core:data",
@@ -108,6 +111,14 @@ include(
     ":feature:settings",
     ":feature:firmware",
     ":feature:wifi-provision",
-    ":feature:widget",
     ":desktop",
 )
+
+if (!desktopOnly) {
+    include(
+        ":app",
+        ":core:api",
+        ":core:barcode",
+        ":feature:widget",
+    )
+}
