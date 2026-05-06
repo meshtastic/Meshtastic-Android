@@ -1,0 +1,10 @@
+id: remove-android-block
+language: kotlin
+severity: warning
+message: "Remove android { } block for desktop-only build"
+rule:
+  pattern: |-
+    android {
+      $$$BODY
+    }
+fix: "// [desktop-only] android { ... } block removed"
