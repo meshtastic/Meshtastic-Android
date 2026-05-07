@@ -5,6 +5,23 @@
 **Status**: Not Started
 **Input**: Node layout engine with complete and compact views for Compose Multiplatform
 
+## Summary
+
+Node List Layout introduces a density-switching system for the Meshtastic node list, giving users a choice between a full-detail "Complete" layout and a condensed "Compact" layout with per-field toggle controls. The feature lives entirely in `commonMain` (Compose Multiplatform) and persists preferences via DataStore.
+
+## Goals
+
+1. Let users reduce visual noise and scrolling on large meshes (100+ nodes) by switching to a compact row layout.
+2. Give users fine-grained control over which data fields appear in compact mode via individually toggleable switches.
+3. Provide adaptive circle sizing so the compact layout scales gracefully as fields are enabled or disabled.
+4. Document signal strength color semantics in a discoverable help sheet.
+
+## Non-Goals
+
+- Modifying the Complete layout to support per-field toggles (it intentionally shows everything).
+- Adding new data fields or metrics beyond what the node model already provides.
+- Platform-specific layout variations — all UI is shared `commonMain`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Switch Between Complete and Compact Density (Priority: P1)

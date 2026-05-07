@@ -178,6 +178,8 @@ Bindings:
 
 This keeps `feature/docs` KMP-friendly and protects the `fdroid` flavor from proprietary dependencies.
 
+> **Cross-spec note (F3):** Feature 001 (Local Mesh Discovery) defines a parallel `DiscoveryRecommendationEngine` interface with the same platform-gating and fallback pattern. The two abstractions are intentionally separate because their prompts, result types, and domain contexts differ significantly. If a third AI-powered feature is added, a shared `core:ai` capability-check and session-factory module should be extracted to avoid further duplication.
+
 ## Build Pipeline Plan
 
 ### Docs generation

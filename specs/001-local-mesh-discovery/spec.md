@@ -206,7 +206,7 @@ A user must not be allowed to choose 2.4 GHz discovery presets on unsupported ha
 - **NFR-002**: Platform-specific code shall be limited to map rendering, Gemini Nano integration, export/share flows, and other thin host integrations.
 - **NFR-003**: Coroutine code shall use project conventions such as `safeCatching {}` and injected dispatchers / shared dispatcher utilities rather than ad-hoc exception handling or `Dispatchers.IO`.
 - **NFR-004**: The feature shall be compatible with existing BLE reconnect behavior and must not introduce a second reconnect loop.
-- **NFR-005**: History loading should remain responsive for at least 100 stored sessions with typical Meshtastic node counts.
+- **NFR-005**: History loading shall load and render the session list within 500 ms for up to 100 stored sessions with typical Meshtastic node counts, and the list shall scroll at 60 fps once loaded.
 - **NFR-006**: Unsupported targets (for example Desktop without a native map snapshotter or Android without Gemini Nano) shall degrade gracefully rather than hiding the whole feature.
 - **NFR-007**: The feature shall preserve privacy by keeping recommendations on-device and by avoiding unnecessary export of raw packet payloads in shared reports.
 - **NFR-008**: The design shall remain buildable across Android, Desktop/JVM, and iOS source-set compilation expectations even if full host UI is only wired on Android and Desktop initially.
@@ -338,7 +338,7 @@ If two presets still tie after all heuristics, the UI labels them as tied and av
 - **SC-001**: A user can complete a single-preset or multi-preset scan without manual radio reconnection steps.
 - **SC-002**: Completed sessions can be reopened later and still show useful summary + map data.
 - **SC-003**: Unsupported platforms still present a valid non-AI, non-map-crash experience.
-- **SC-004**: The scan engine reuses existing packet/config/BLE infrastructure rather than duplicating it.
+- **SC-004**: The scan engine introduces zero new BLE reconnect logic; all reconnection uses `BleReconnectPolicy` exclusively. No parallel packet decoder is introduced — collection flows through `ServiceRepository.meshPacketFlow`.
 
 ## Open Implementation Constraints
 

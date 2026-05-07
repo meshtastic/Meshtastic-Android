@@ -41,6 +41,7 @@
 - [ ] **D012** [P] Add discovery prefs contract in `core:repository` and DataStore implementation in `core:prefs`.
 - [ ] **D013** [P] Implement `DiscoveryScanState` / state machine in `commonMain`.
 - [ ] **D014** [P] Implement `DiscoveryScanCoordinator` to validate inputs, snapshot home preset, switch presets, and manage dwell timing.
+- [ ] **D014b** [P] Implement `DiscoveryViewModel` in `commonMain` to expose scan state, session data, and user actions to the UI layer. Wire to `DiscoveryScanCoordinator` and `DiscoveryRepository`.
 - [ ] **D015** [P] Reuse the existing radio config/admin path to apply `Config.LoRaConfig` preset changes.
 - [ ] **D016** [P] Observe shared connection state and pause/resume around BLE reconnects without introducing a custom reconnect loop.
 - [ ] **D017** [P] Persist scan lifecycle milestones (session start, preset start, stop/cancel/fail, restore result).
@@ -63,7 +64,7 @@
 ## Phase 5 — Map visualization (CompositionLocal map, markers, topology)
 
 - [ ] **D024** [P] Build shared discovery map presentation models and preset filter state in `commonMain`.
-- [ ] **D025** [P] Implement `DiscoveryMapScreen` and node detail sheet/cards using Compose Multiplatform.
+- [ ] **D025** [P] Implement `DiscoveryMapScreen` and node detail sheet/cards using Compose Multiplatform. Verify that distance displays use `MetricFormatter` / `Node.distance(...)` shared formatting (FR-016).
 - [ ] **D026** [P] Reuse or extend platform map providers for discovery overlays on Android.
 - [ ] **D027** [P] Provide Desktop map fallback (provider or placeholder/list hybrid) that does not break the feature.
 - [ ] **D028** Add UI tests for preset filtering, mapped/unmapped counts, and topology toggle behavior.

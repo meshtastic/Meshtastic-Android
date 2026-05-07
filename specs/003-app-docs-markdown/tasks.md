@@ -43,7 +43,7 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [ ] T018 [P] [US1] Create `docs/user/telemetry-and-sensors.md` covering telemetry surfaces and sensor interpretation using `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/metrics/EnvironmentMetrics.kt`, `PowerMetrics.kt`, and related metric screens.
 - [ ] T019 [P] [US1] Create `docs/user/tak.md` covering TAK integration and setup using `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/radio/component/TAKConfigItemList.kt` and related settings screens.
 - [ ] T020 [P] [US1] Create `docs/user/mqtt.md` covering MQTT setup and usage using `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/radio/component/MQTTConfigItemList.kt` and messaging references.
-- [ ] T021 [P] [US1] Create `docs/user/discovery.md` covering local mesh discovery and node exploration based on current discovery-related UI/state and app navigation flows.
+- [ ] T021 [P] [US1] Create `docs/user/discovery.md` covering local mesh discovery and node exploration based on current discovery-related UI/state and app navigation flows. **Note**: Feature 001 (Local Mesh Discovery) is Not Started — author this page as a concept/goals overview initially and revise with screenshots and detailed UI guidance once 001 reaches Phase 5+ UI milestones.
 - [ ] T022 [P] [US1] Create `docs/user/firmware.md` covering update flows, warnings, and recovery using `feature/firmware/src/commonMain/kotlin/org/meshtastic/feature/firmware/FirmwareUpdateScreen.kt`.
 - [ ] T023 [P] [US1] Create `docs/user/desktop.md` covering Desktop host usage, transport differences, and parity notes using `desktop/src/main/kotlin/org/meshtastic/desktop/` and shared navigation patterns.
 
@@ -112,7 +112,7 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [ ] T075 [P] [US2] Create Desktop/iOS page renderers in `src/jvmMain` and `src/iosMain` using Compose markdown or embedded browser abstraction.
 - [ ] T076 [P] [US2] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/navigation/DocsNavigation.kt` with typed navigation entries.
 - [ ] T077 [P] [US2] Add `SettingsRoute.HelpDocs` and `SettingsRoute.HelpDocPage` to `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`.
-- [ ] T078 [P] [US2] Update `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt` for `helpDocs` / `help-docs` aliases.
+- [ ] T078 [P] [US2] Update `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/DeepLinkRouter.kt` for `help-docs` (canonical) / `helpDocs` (compat alias) routing.
 - [ ] T079 [P] [US2] Update `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt` to add the Help & Documentation row and register docs destinations.
 - [ ] T080 [P] [US2] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/di/FeatureDocsModule.kt`.
 - [ ] T081 [P] [US2] Include `FeatureDocsModule` in `app/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt` and `desktop/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`.
@@ -144,9 +144,10 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [ ] T100 [P] [US3] Create shared AI contracts in `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ai/AIDocAssistant.kt` and result/state models.
 - [ ] T101 [P] [US3] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ui/ChirpyAssistantSheet.kt` with chat UI, pinned input, session history, and source-page chips.
 - [ ] T102 [P] [US3] Add keyword-retrieval + token-budget helper logic in shared code.
-- [ ] T103 [P] [US3] Implement Google-flavor Android binding under `app/src/google/kotlin/org/meshtastic/app/docs/GoogleDocsAiModule.kt` (or equivalent) to call Gemini Nano via AICore / ML Kit GenAI Prompt API.
+- [ ] T103 [P] [US3] Implement Google-flavor Android binding under `app/src/google/kotlin/org/meshtastic/app/docs/GoogleDocsAiModule.kt` (or equivalent) to call Gemini Nano via Google AI Edge SDK.
 - [ ] T104 [P] [US3] Bind a no-op or keyword-only fallback implementation in `app/src/fdroid/kotlin/org/meshtastic/app/di/FlavorModule.kt`.
 - [ ] T105 [P] [US3] Bind a Desktop fallback implementation from `desktop/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`.
+- [ ] T105b [P] [US3] Bind an iOS fallback implementation (keyword-search-only, sharing the Desktop fallback pattern) in the iOS Koin module or via a shared non-Android default binding.
 - [ ] T106 [P] [US3] Add runtime capability checks for Android API level, flavor, model availability, and busy/quota states.
 - [ ] T107 [P] [US3] Surface assistant fallback states cleanly in the shared UI and hide the input entirely when unsupported.
 - [ ] T108 [P] [US3] Add tests covering token budget trimming, unsupported platform behavior, and fallback search suggestions.

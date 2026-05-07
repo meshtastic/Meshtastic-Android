@@ -223,6 +223,8 @@ interface DiscoveryRecommendationEngine {
 - `AndroidDiscoveryRecommendationEngine` in `androidMain` (Google flavor only, Gemini Nano capable devices only)
 - No-op / fallback binding on unsupported targets
 
+> **Cross-spec note (F3):** Feature 003 (App Documentation) defines a parallel `AIDocAssistant` interface with the same platform-gating and fallback pattern. The two abstractions are intentionally separate because their prompts, result types, and domain contexts differ significantly. If a third AI-powered feature is added, a shared `core:ai` capability-check and session-factory module should be extracted to avoid further duplication.
+
 ### Prompting strategy
 
 Pass only compact structured metrics into the AI layer:
