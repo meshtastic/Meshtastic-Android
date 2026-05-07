@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5378) by @James Rich in [`924f8a507`](https://github.com/meshtastic/Meshtastic-Android/commit/924f8a507b257829ec15ac446ff31c26f1ecb6ac)
+* chore(deps): update aboutlibraries to v14.2.0 (#5380) by @renovate[bot] in [`d68aada1b`](https://github.com/meshtastic/Meshtastic-Android/commit/d68aada1ba9142efd088d9e205341322e267936d)
+* docs: update CHANGELOG.md (#5377) by @github-actions[bot] in [`3dd985d7d`](https://github.com/meshtastic/Meshtastic-Android/commit/3dd985d7dfaa53891eca4dcdc90f0330044d5106)
 * refactor(firmware): replace PlatformBackHandler with NavigationBackHandler (#5376) by @James Rich in [`213c38051`](https://github.com/meshtastic/Meshtastic-Android/commit/213c380514438e1e208f0a0439437d6e62b041f1)
 * docs: update CHANGELOG.md (#5374) by @github-actions[bot] in [`8d621bc6f`](https://github.com/meshtastic/Meshtastic-Android/commit/8d621bc6f48e167c3bdda1add22e2938dadf0bd5)
 * chore(deps): update paging to v3.5.0 (#5375) by @renovate[bot] in [`0b75fd414`](https://github.com/meshtastic/Meshtastic-Android/commit/0b75fd4140ed5643806fc8f1a6eb8c3dfaaeb049)
