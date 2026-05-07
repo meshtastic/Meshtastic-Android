@@ -713,7 +713,7 @@
     <string name="mqtt_probe_success_with_info">Kättesaadav (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Vahendajaga ei saa ühendust (TCP)</string>
     <string name="mqtt_probe_timeout">Ajaline katkestus peale %1$d ms</string>
-    <string name="mqtt_probe_tls_failure">TLS ühendus ebaõnnestus</string>
+    <string name="mqtt_probe_tls_failure">TLS kätlemine ebaõnnestus: %1$s</string>
     <string name="mqtt_status_connected">Ühendatud</string>
     <string name="mqtt_status_connecting">Ühendan…</string>
     <string name="mqtt_status_disconnected">Ühendus katkenud</string>

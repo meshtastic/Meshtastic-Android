@@ -692,7 +692,6 @@
     <string name="mqtt_probe_success_with_info">可供連線（%1$s）</string>
     <string name="mqtt_probe_tcp_failure">無法連線至 Broker 中繼伺服器（TCP）</string>
     <string name="mqtt_probe_timeout">經過 %1$d 毫秒後逾時</string>
-    <string name="mqtt_probe_tls_failure">TLS 握手失敗</string>
     <string name="mqtt_status_connected">已連線</string>
     <string name="mqtt_status_connecting">正在連接…</string>
     <string name="mqtt_status_disconnected">已中斷連線</string>

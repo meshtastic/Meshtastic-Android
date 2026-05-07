@@ -705,7 +705,6 @@
     <string name="mqtt_probe_success_with_info">Accessible (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Impossible d'atteindre le broker (TCP)</string>
     <string name="mqtt_probe_timeout">Délai expiré après %1$d ms</string>
-    <string name="mqtt_probe_tls_failure">Échec de la connexion TLS</string>
     <string name="mqtt_status_connected">Connecté</string>
     <string name="mqtt_status_connecting">Connexion…</string>
     <string name="mqtt_status_disconnected">Déconnecté</string>
