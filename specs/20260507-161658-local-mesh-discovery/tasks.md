@@ -75,7 +75,7 @@
 ## Phase 6 — Summary / analysis (per-preset metrics, charts)
 
 - [X] **D029** [P] Implement `DiscoveryRankingEngine` deterministic heuristic in `commonMain`.
-- [ ] **D030** [P] Build summary presentation models for overview cards, comparison table, and tie explanations.
+- [X] **D030** [P] Build summary presentation models for overview cards, comparison table, and tie explanations.
 - [X] **D031** [P] Implement `DiscoverySummaryScreen` with per-preset ranking, warnings, and partial-session handling.
 - [ ] **D032** Add tests for ranking ties, failed presets, and deterministic fallback output.
 
