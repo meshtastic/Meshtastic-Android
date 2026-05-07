@@ -18,6 +18,7 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
   - `.skills/implement-feature/` - Feature workflow.
   - `.skills/code-review/` - **PR & Commit Hygiene**, validation checklist.
   - `.skills/new-branch/` - Branching and rebasing recipes.
+  - `.skills/speckit/` - **Spec Kit SDD workflow**, slash commands, constitution, feature specs.
 </context_and_memory>
 
 <process_essentials>

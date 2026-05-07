@@ -163,3 +163,4 @@ Consult `.skills/` for detailed playbooks:
 - `.skills/testing-ci/` — CI architecture, verification matrix
 - `.skills/implement-feature/` — Feature development workflow
 - `.skills/code-review/` — PR hygiene checklist
+- `.skills/speckit/` — Spec Kit SDD workflow, slash commands, constitution
