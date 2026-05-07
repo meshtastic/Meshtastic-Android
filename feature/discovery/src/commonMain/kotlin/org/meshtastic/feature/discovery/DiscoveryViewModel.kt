@@ -27,16 +27,17 @@ import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.DiscoveryPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 
-@Suppress("MagicNumber")
 @KoinViewModel
 class DiscoveryViewModel(
     private val scanEngine: DiscoveryScanEngine,
     private val serviceRepository: ServiceRepository,
+    private val discoveryPrefs: DiscoveryPrefs,
     radioConfigRepository: RadioConfigRepository,
     discoveryDao: DiscoveryDao,
 ) : ViewModel() {
@@ -53,10 +54,10 @@ class DiscoveryViewModel(
             }
             .stateInWhileSubscribed(initialValue = ChannelOption.DEFAULT)
 
-    private val _selectedPresets = MutableStateFlow<Set<ChannelOption>>(emptySet())
+    private val _selectedPresets = MutableStateFlow<Set<ChannelOption>>(restoreSelectedPresets())
     val selectedPresets: StateFlow<Set<ChannelOption>> = _selectedPresets.asStateFlow()
 
-    private val _dwellDurationMinutes = MutableStateFlow(DEFAULT_DWELL_MINUTES)
+    private val _dwellDurationMinutes = MutableStateFlow(discoveryPrefs.dwellMinutes.value)
     val dwellDurationMinutes: StateFlow<Int> = _dwellDurationMinutes.asStateFlow()
 
     val isConnected: StateFlow<Boolean> =
@@ -68,11 +69,16 @@ class DiscoveryViewModel(
         discoveryDao.getAllSessions().stateInWhileSubscribed(initialValue = emptyList())
 
     fun togglePreset(preset: ChannelOption) {
-        _selectedPresets.update { current -> if (preset in current) current - preset else current + preset }
+        _selectedPresets.update { current ->
+            val updated = if (preset in current) current - preset else current + preset
+            discoveryPrefs.setSelectedPresets(updated.map { it.name }.toSet())
+            updated
+        }
     }
 
     fun setDwellDuration(minutes: Int) {
         _dwellDurationMinutes.value = minutes
+        discoveryPrefs.setDwellMinutes(minutes)
     }
 
     fun startScan() {
@@ -92,8 +98,11 @@ class DiscoveryViewModel(
         scanEngine.reset()
     }
 
+    private fun restoreSelectedPresets(): Set<ChannelOption> = discoveryPrefs.selectedPresets.value
+        .mapNotNull { name -> ChannelOption.entries.firstOrNull { it.name == name } }
+        .toSet()
+
     companion object {
-        private const val DEFAULT_DWELL_MINUTES = 15
         private const val SECONDS_PER_MINUTE = 60L
     }
 }

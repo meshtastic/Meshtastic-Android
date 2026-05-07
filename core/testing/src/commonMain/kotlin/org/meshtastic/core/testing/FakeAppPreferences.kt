@@ -349,6 +349,33 @@ class FakeAppPreferences : AppPreferences {
     override val radio = FakeRadioPrefs()
     override val mesh = FakeMeshPrefs()
     override val tak = FakeTakPrefs()
+    override val discovery = FakeDiscoveryPrefs()
+}
+
+class FakeDiscoveryPrefs : org.meshtastic.core.repository.DiscoveryPrefs {
+    override val dwellMinutes = MutableStateFlow(org.meshtastic.core.repository.DiscoveryPrefs.DEFAULT_DWELL_MINUTES)
+
+    override fun setDwellMinutes(minutes: Int) {
+        dwellMinutes.value = minutes
+    }
+
+    override val selectedPresets = MutableStateFlow<Set<String>>(emptySet())
+
+    override fun setSelectedPresets(presets: Set<String>) {
+        selectedPresets.value = presets
+    }
+
+    override val aiEnabled = MutableStateFlow(true)
+
+    override fun setAiEnabled(enabled: Boolean) {
+        aiEnabled.value = enabled
+    }
+
+    override val topologyOverlayEnabled = MutableStateFlow(false)
+
+    override fun setTopologyOverlayEnabled(enabled: Boolean) {
+        topologyOverlayEnabled.value = enabled
+    }
 }
 
 class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {

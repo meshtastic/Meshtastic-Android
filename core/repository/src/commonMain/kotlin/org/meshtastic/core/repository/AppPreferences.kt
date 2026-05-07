@@ -310,4 +310,28 @@ interface AppPreferences {
     val radio: RadioPrefs
     val mesh: MeshPrefs
     val tak: TakPrefs
+    val discovery: DiscoveryPrefs
+}
+
+/** Reactive interface for Local Mesh Discovery scan preferences. */
+interface DiscoveryPrefs {
+    val dwellMinutes: StateFlow<Int>
+
+    fun setDwellMinutes(minutes: Int)
+
+    val selectedPresets: StateFlow<Set<String>>
+
+    fun setSelectedPresets(presets: Set<String>)
+
+    val aiEnabled: StateFlow<Boolean>
+
+    fun setAiEnabled(enabled: Boolean)
+
+    val topologyOverlayEnabled: StateFlow<Boolean>
+
+    fun setTopologyOverlayEnabled(enabled: Boolean)
+
+    companion object {
+        const val DEFAULT_DWELL_MINUTES = 15
+    }
 }
