@@ -42,5 +42,10 @@ You are an expert Android/KMP engineer. Maintain architectural boundaries, use M
 </rules>
 
 <documentation_sync>
-`AGENTS.md` is the source of truth. Redirects: `.github/copilot-instructions.md`, `CLAUDE.md`, `GEMINI.md`.
+`AGENTS.md` is the source of truth for rules and principles. `.github/copilot-instructions.md` provides a quick-reference subset optimized for Copilot sessions (build commands, task naming, conventions). `CLAUDE.md` and `GEMINI.md` redirect here.
 </documentation_sync>
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
