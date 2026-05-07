@@ -81,10 +81,12 @@ fun DiscoverySummaryScreen(
                 // TODO: Wire platform share intent (Android) / file-save dialog (Desktop)
                 viewModel.clearExportResult()
             }
+
             is ExportResult.Error -> {
                 // TODO: Show snackbar with error message
                 viewModel.clearExportResult()
             }
+
             null -> {
                 /* no-op */
             }

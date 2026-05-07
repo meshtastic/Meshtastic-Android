@@ -18,17 +18,22 @@
 
 package org.meshtastic.feature.discovery
 
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -187,8 +192,15 @@ class DiscoveryScanEngineTest {
     private val discoveryDao = FakeDiscoveryDao()
     private val aiProvider = FakeAiProvider()
 
-    private val engine =
-        DiscoveryScanEngine(
+    /** Creates a [DiscoveryScanEngine] wired to test dispatchers sharing the given [testScope]'s scheduler. */
+    private fun createEngine(testScope: TestScope): DiscoveryScanEngine {
+        val testDispatcher = UnconfinedTestDispatcher(testScope.testScheduler)
+        val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
+        val appScope =
+            object : ApplicationCoroutineScope {
+                override val coroutineContext = testDispatcher + SupervisorJob()
+            }
+        return DiscoveryScanEngine(
             radioController = radioController,
             serviceRepository = serviceRepository,
             nodeRepository = nodeRepository,
@@ -196,7 +208,10 @@ class DiscoveryScanEngineTest {
             collectorRegistry = collectorRegistry,
             discoveryDao = discoveryDao,
             aiProvider = aiProvider,
+            applicationScope = appScope,
+            dispatchers = dispatchers,
         )
+    }
 
     private val testPresets = listOf(ChannelOption.LONG_FAST)
 
@@ -204,18 +219,18 @@ class DiscoveryScanEngineTest {
      * After [DiscoveryScanEngine.startScan], the state is set to [DiscoveryScanState.Shifting] synchronously. This
      * helper asserts that the engine is active — no real-time wait needed.
      */
-    private fun assertScanActive() {
+    private fun assertScanActive(engine: DiscoveryScanEngine) {
         assertTrue(engine.isActive, "Engine should be active after startScan")
     }
 
     /**
-     * Waits briefly for the scan loop (running on [ioDispatcher]) to complete its per-preset initialization (collection
-     * clearing). Call before sending packets to avoid a race where the scan loop's `collectedNodes.clear()` wipes out
-     * test-injected data.
+     * Waits briefly for the scan loop (running on test dispatcher) to complete its per-preset initialization
+     * (collection clearing). Call before sending packets to avoid a race where the scan loop's `collectedNodes.clear()`
+     * wipes out test-injected data.
      */
     @Suppress("MagicNumber")
-    private fun awaitScanLoopInit() {
-        Thread.sleep(5000)
+    private suspend fun awaitScanLoopInit() {
+        delay(100)
     }
 
     // region Helper factories
@@ -274,6 +289,7 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun startScanCreatesSessionAndRegistersCollector() = runTest {
+        val engine = createEngine(this)
         engine.startScan(testPresets, dwellDurationSeconds = 10)
 
         // Session should be persisted (happens synchronously inside startScan)
@@ -293,22 +309,25 @@ class DiscoveryScanEngineTest {
         assertEquals(session.id, currentSession.id)
 
         // Wait for scan loop to start then clean up
-        assertScanActive()
+        assertScanActive(engine)
         engine.stopScan()
     }
 
     @Test
     fun stopScanPersistsResultsAndTransitionsToIdle() = runTest {
+        val engine = createEngine(this)
         engine.startScan(testPresets, dwellDurationSeconds = 60)
-        assertScanActive()
+        assertScanActive(engine)
 
         // Verify scan is active
         assertTrue(engine.isActive)
 
         engine.stopScan()
 
-        // State should be Idle
-        assertTrue(engine.scanState.value is DiscoveryScanState.Idle)
+        // State should be Complete(Cancelled)
+        assertTrue(engine.scanState.value is DiscoveryScanState.Complete)
+        val completeState = engine.scanState.value as DiscoveryScanState.Complete
+        assertEquals(DiscoveryScanState.CompletionOutcome.Cancelled, completeState.outcome)
         assertFalse(engine.isActive)
 
         // Collector should be unregistered
@@ -321,6 +340,7 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun completeScanCreatesSessionWithInProgressStatus() = runTest {
+        val engine = createEngine(this)
         engine.startScan(testPresets, dwellDurationSeconds = 5)
 
         // Immediately after startScan, the session should exist with "in_progress"
@@ -328,7 +348,7 @@ class DiscoveryScanEngineTest {
         assertEquals("in_progress", session.completionStatus)
 
         // Wait for the scan loop to start, then verify active
-        assertScanActive()
+        assertScanActive(engine)
         assertTrue(engine.isActive)
 
         engine.stopScan()
@@ -336,8 +356,9 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun emptyPresetDwellPersistsZeroResultEntry() = runTest {
+        val engine = createEngine(this)
         engine.startScan(testPresets, dwellDurationSeconds = 10)
-        assertScanActive()
+        assertScanActive(engine)
 
         // Stop without receiving any packets — forces persistCurrentDwellResults
         engine.stopScan()
@@ -357,12 +378,13 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun packetCollectionPopulatesNodeData() = runTest {
+        val engine = createEngine(this)
         val myNodeNum = 1000
         nodeRepository.setMyNodeInfo(createMyNodeInfo(myNodeNum))
         nodeRepository.setNodes(listOf(createNodeWithPosition(num = myNodeNum, latI = 377749000, lonI = -1224194000)))
 
         engine.startScan(testPresets, dwellDurationSeconds = 60)
-        assertScanActive()
+        assertScanActive(engine)
 
         // Wait for Dwell state
         while (engine.scanState.value !is DiscoveryScanState.Dwell) {
@@ -397,10 +419,11 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun telemetryWithLocalStatsPopulatesRfHealth() = runTest {
+        val engine = createEngine(this)
         nodeRepository.setMyNodeInfo(createMyNodeInfo())
 
         engine.startScan(testPresets, dwellDurationSeconds = 60)
-        assertScanActive()
+        assertScanActive(engine)
 
         // Wait for Dwell state and ensure sessionId is set
         while (engine.scanState.value !is DiscoveryScanState.Dwell || engine.currentSession.value == null) {
@@ -452,6 +475,7 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun userPositionCapturedAtScanStart() = runTest {
+        val engine = createEngine(this)
         val myNodeNum = 1000
         nodeRepository.setMyNodeInfo(createMyNodeInfo(myNodeNum))
         nodeRepository.setNodes(listOf(createNodeWithPosition(num = myNodeNum, latI = 377749300, lonI = -1224194200)))
@@ -469,13 +493,14 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun distanceFromUserCalculatedForDiscoveredNodes() = runTest {
+        val engine = createEngine(this)
         val myNodeNum = 1000
         nodeRepository.setMyNodeInfo(createMyNodeInfo(myNodeNum))
         // User at San Francisco (37.7749, -122.4194)
         nodeRepository.setNodes(listOf(createNodeWithPosition(num = myNodeNum, latI = 377749000, lonI = -1224194000)))
 
         engine.startScan(testPresets, dwellDurationSeconds = 60)
-        assertScanActive()
+        assertScanActive(engine)
 
         // Wait for Dwell state
         while (engine.scanState.value !is DiscoveryScanState.Dwell) {

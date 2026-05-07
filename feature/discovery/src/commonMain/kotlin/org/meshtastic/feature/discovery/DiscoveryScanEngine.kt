@@ -88,7 +88,10 @@ class DiscoveryScanEngine(
     val currentSession: StateFlow<DiscoverySessionEntity?> = _currentSession.asStateFlow()
 
     override val isActive: Boolean
-        get() = _scanState.value !is DiscoveryScanState.Idle && _scanState.value !is DiscoveryScanState.Complete
+        get() =
+            _scanState.value !is DiscoveryScanState.Idle &&
+                _scanState.value !is DiscoveryScanState.Complete &&
+                _scanState.value !is DiscoveryScanState.Failed
 
     // endregion
 
@@ -150,6 +153,8 @@ class DiscoveryScanEngine(
                 return
             }
 
+            _scanState.value = DiscoveryScanState.Preparing
+
             // Capture the entire original LoRa config to restore it accurately later
             val initialLoraConfig = radioConfigRepository.localConfigFlow.first().lora
             originalLoRaConfig = initialLoraConfig
@@ -199,11 +204,12 @@ class DiscoveryScanEngine(
         mutex.withLock {
             if (!isActive) return
             Logger.i { "DiscoveryScanEngine: stopping scan" }
+            _scanState.value = DiscoveryScanState.Cancelling
             cancelScanInternal()
         }
         persistCurrentDwellResults()
         finalizeSession("stopped")
-        _scanState.value = DiscoveryScanState.Idle
+        _scanState.value = DiscoveryScanState.Complete(DiscoveryScanState.CompletionOutcome.Cancelled)
 
         // Restore home preset in the background so we don't block the UI with the connection wait
         applicationScope.launch { restoreHomePreset() }
@@ -303,15 +309,16 @@ class DiscoveryScanEngine(
         restoreHomePreset()
         generateAiSummaries()
         finalizeSession("complete")
-        _scanState.value = DiscoveryScanState.Complete
+        _scanState.value = DiscoveryScanState.Complete(DiscoveryScanState.CompletionOutcome.Success)
     }
 
     /** Common cleanup path when a scan step fails mid-loop. */
     private suspend fun pauseAndAbort() {
+        _scanState.value = DiscoveryScanState.Failed("Connection lost during scan")
         cancelScanInternal()
         restoreHomePreset()
-        finalizeSession("paused")
-        _scanState.value = DiscoveryScanState.Idle
+        finalizeSession("failed")
+        _scanState.value = DiscoveryScanState.Complete(DiscoveryScanState.CompletionOutcome.Failed)
     }
 
     private suspend fun shiftPreset(preset: ChannelOption) {
@@ -461,6 +468,10 @@ class DiscoveryScanEngine(
         val directCount = collectedNodes.values.count { it.neighborType == "direct" }
         val meshCount = collectedNodes.values.count { it.neighborType == "mesh" }
 
+        val packetsRx = lastLocalStats?.num_packets_rx ?: 0
+        val packetsRxBad = lastLocalStats?.num_packets_rx_bad ?: 0
+        val (successRate, failureRate) = computePacketRates(packetsRx, packetsRxBad)
+
         val presetResult =
             DiscoveryPresetResultEntity(
                 sessionId = sessionId,
@@ -473,9 +484,11 @@ class DiscoveryScanEngine(
                 sensorPacketCount = collectedNodes.values.sumOf { it.sensorPacketCount },
                 avgChannelUtilization = avgChannelUtil,
                 avgAirtimeRate = avgAirUtil,
+                packetSuccessRate = successRate,
+                packetFailureRate = failureRate,
                 numPacketsTx = lastLocalStats?.num_packets_tx ?: 0,
-                numPacketsRx = lastLocalStats?.num_packets_rx ?: 0,
-                numPacketsRxBad = lastLocalStats?.num_packets_rx_bad ?: 0,
+                numPacketsRx = packetsRx,
+                numPacketsRxBad = packetsRxBad,
                 numRxDupe = lastLocalStats?.num_rx_dupe ?: 0,
                 numTxRelay = lastLocalStats?.num_tx_relay ?: 0,
                 numTxRelayCanceled = lastLocalStats?.num_tx_relay_canceled ?: 0,
@@ -484,6 +497,17 @@ class DiscoveryScanEngine(
                 uptimeSeconds = lastLocalStats?.uptime_seconds ?: 0,
             )
         return discoveryDao.insertPresetResult(presetResult)
+    }
+
+    /**
+     * Computes packet success and failure rates as percentages (0–100) from LocalStats counters. Returns (successRate,
+     * failureRate). Both are 0.0 if no packets were received.
+     */
+    private fun computePacketRates(packetsRx: Int, packetsRxBad: Int): Pair<Double, Double> {
+        if (packetsRx <= 0) return 0.0 to 0.0
+        val failureRate = (packetsRxBad.toDouble() / packetsRx) * PERCENT_MULTIPLIER
+        val successRate = PERCENT_MULTIPLIER - failureRate
+        return successRate to failureRate
     }
 
     private suspend fun persistDiscoveredNodes(presetResultId: Long) {
@@ -620,5 +644,6 @@ class DiscoveryScanEngine(
         private const val TICK_INTERVAL_MS = 1_000L
         private const val POSITION_DIVISOR = 1e7
         private const val MIN_DEVICE_METRICS_PACKETS = 2
+        private const val PERCENT_MULTIPLIER = 100.0
     }
 }

@@ -20,14 +20,18 @@ package org.meshtastic.feature.discovery
  * State machine for a discovery scan lifecycle.
  *
  * ```
- * Idle → Shifting → [Reconnecting] → Dwell → Shifting (loop) → Analysis → Complete
- * Any scanning → Restoring → Idle
+ * Idle → Preparing → Shifting → [Reconnecting] → Dwell → Shifting (loop) → Analysis → Complete(Success)
+ * Any scanning → Cancelling → Restoring → Complete(Cancelled)
+ * Any scanning → Failed(reason) → Restoring → Complete(Failed)
  * Reconnecting timeout → Paused
  * ```
  */
 sealed interface DiscoveryScanState {
     /** No scan is active. */
     data object Idle : DiscoveryScanState
+
+    /** Validating inputs, capturing home preset snapshot. */
+    data object Preparing : DiscoveryScanState
 
     /** Radio is switching to a new LoRa preset. */
     data class Shifting(val presetName: String) : DiscoveryScanState
@@ -42,11 +46,29 @@ sealed interface DiscoveryScanState {
     data object Analysis : DiscoveryScanState
 
     /** Scan finished and results are persisted. */
-    data object Complete : DiscoveryScanState
+    data class Complete(val outcome: CompletionOutcome = CompletionOutcome.Success) : DiscoveryScanState
 
     /** Scan paused due to an unrecoverable transient condition (e.g. reconnect timeout). */
     data class Paused(val reason: String) : DiscoveryScanState
 
+    /** User-initiated cancellation in progress; persisting partial results before restoring home preset. */
+    data object Cancelling : DiscoveryScanState
+
     /** Restoring the home preset after scan stop or completion. */
     data object Restoring : DiscoveryScanState
+
+    /** Scan failed due to an unrecoverable error. */
+    data class Failed(val reason: String) : DiscoveryScanState
+
+    /** Differentiates how a scan completed. */
+    enum class CompletionOutcome {
+        /** All presets were scanned successfully. */
+        Success,
+
+        /** The user cancelled the scan mid-way. */
+        Cancelled,
+
+        /** The scan failed due to an unrecoverable error. */
+        Failed,
+    }
 }

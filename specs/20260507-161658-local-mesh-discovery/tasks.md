@@ -19,7 +19,7 @@
 - [ ] **D002** Add `FeatureDiscoveryModule` with `@Module` + `@ComponentScan("org.meshtastic.feature.discovery")`.
 - [ ] **D003** Register the module in `settings.gradle.kts` and include it in Android / Desktop Koin roots.
 - [ ] **D004** Add typed discovery routes to `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`.
-- [ ] **D005** Extend `DeepLinkRouter` and navigation tests for discovery entry paths.
+- [X] **D005** Extend `DeepLinkRouter` and navigation tests for discovery entry paths.
 - [ ] **D006** Add the Settings > Advanced entry point and placeholder discovery screen wiring.
 
 **Phase dependency**: none  
@@ -39,13 +39,13 @@
 ## Phase 3 — Scan engine (preset cycling, admin messages, BLE reconnection)
 
 - [ ] **D012** [P] Add discovery prefs contract in `core:repository` and DataStore implementation in `core:prefs`.
-- [ ] **D013** [P] Implement `DiscoveryScanState` / state machine in `commonMain`.
+- [X] **D013** [P] Implement `DiscoveryScanState` / state machine in `commonMain`.
 - [ ] **D014** [P] Implement `DiscoveryScanCoordinator` to validate inputs, snapshot home preset, switch presets, and manage dwell timing.
 - [ ] **D014b** [P] Implement `DiscoveryViewModel` in `commonMain` to expose scan state, session data, and user actions to the UI layer. Wire to `DiscoveryScanCoordinator` and `DiscoveryRepository`.
 - [ ] **D015** [P] Reuse the existing radio config/admin path to apply `Config.LoRaConfig` preset changes.
 - [ ] **D016** [P] Observe shared connection state and pause/resume around BLE reconnects without introducing a custom reconnect loop.
 - [ ] **D017** [P] Persist scan lifecycle milestones (session start, preset start, stop/cancel/fail, restore result).
-- [ ] **D018** Add unit tests for normal flow, reconnect delays, timeout, cancel, and home-preset restore failure.
+- [X] **D018** Add unit tests for normal flow, reconnect delays, timeout, cancel, and home-preset restore failure.
 
 **Depends on**: D007-D009  
 **Exit criteria**: a scan can run end-to-end against fake or mocked dependencies and persist lifecycle state correctly.

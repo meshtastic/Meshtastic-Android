@@ -307,12 +307,18 @@ private fun ScanProgressSection(scanState: DiscoveryScanState, modifier: Modifie
         Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(CONTENT_PADDING)) {
             Text(text = "Scan Progress", style = MaterialTheme.typography.titleMedium)
             when (scanState) {
+                is DiscoveryScanState.Preparing -> {
+                    Text(text = "Preparing scan…", style = MaterialTheme.typography.bodyMedium)
+                }
+
                 is DiscoveryScanState.Shifting -> {
                     Text(text = "Shifting to ${scanState.presetName}…", style = MaterialTheme.typography.bodyMedium)
                 }
+
                 is DiscoveryScanState.Reconnecting -> {
                     Text(text = "Reconnecting on ${scanState.presetName}…", style = MaterialTheme.typography.bodyMedium)
                 }
+
                 is DiscoveryScanState.Dwell -> {
                     DwellProgressIndicator(
                         presetName = scanState.presetName,
@@ -320,12 +326,19 @@ private fun ScanProgressSection(scanState: DiscoveryScanState, modifier: Modifie
                         totalSeconds = scanState.totalSeconds,
                     )
                 }
+
                 is DiscoveryScanState.Analysis -> {
                     Text(text = "Analyzing results…", style = MaterialTheme.typography.bodyMedium)
                 }
+
                 is DiscoveryScanState.Restoring -> {
                     Text(text = "Restoring home preset…", style = MaterialTheme.typography.bodyMedium)
                 }
+
+                is DiscoveryScanState.Cancelling -> {
+                    Text(text = "Cancelling scan…", style = MaterialTheme.typography.bodyMedium)
+                }
+
                 is DiscoveryScanState.Paused -> {
                     Text(
                         text = "Paused: ${scanState.reason}",
@@ -333,6 +346,15 @@ private fun ScanProgressSection(scanState: DiscoveryScanState, modifier: Modifie
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
+
+                is DiscoveryScanState.Failed -> {
+                    Text(
+                        text = "Failed: ${scanState.reason}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+
                 is DiscoveryScanState.Complete,
                 is DiscoveryScanState.Idle,
                 -> Unit

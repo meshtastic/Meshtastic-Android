@@ -165,6 +165,20 @@ object DeepLinkRouter {
             }
         }
 
+        // Handle discovery session deep links: /settings/local-mesh-discovery/session/{sessionId}
+        if (subRouteStr in discoveryAliases && segments.size > 3 && segments[2].lowercase() == "session") {
+            val sessionId = segments[3].toLongOrNull()
+            return if (sessionId != null) {
+                listOf(
+                    SettingsRoute.SettingsGraph(destNum),
+                    DiscoveryRoute.DiscoveryGraph,
+                    DiscoveryRoute.DiscoverySummary(sessionId),
+                )
+            } else {
+                listOf(SettingsRoute.SettingsGraph(destNum), DiscoveryRoute.DiscoveryGraph)
+            }
+        }
+
         val subRoute = settingsSubRoutes[subRouteStr]
         return if (subRoute != null) {
             listOf(SettingsRoute.Settings(destNum), subRoute)
@@ -224,7 +238,12 @@ object DeepLinkRouter {
             "filter-settings" to SettingsRoute.FilterSettings,
             "helpdocs" to SettingsRoute.HelpDocs,
             "help-docs" to SettingsRoute.HelpDocs,
+            "local-mesh-discovery" to DiscoveryRoute.DiscoveryGraph,
+            "localmeshdiscovery" to DiscoveryRoute.DiscoveryGraph,
         )
+
+    /** URL path segments that map to the discovery feature. */
+    private val discoveryAliases = setOf("local-mesh-discovery", "localmeshdiscovery")
 
     private val nodeDetailSubRoutes: Map<String, (Int) -> Route> =
         mapOf(
