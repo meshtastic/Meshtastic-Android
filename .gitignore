@@ -59,3 +59,4 @@ firebase-debug.log
 # Local library development clones
 /coil/
 /kable/
+.opencode/
