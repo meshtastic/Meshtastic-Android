@@ -58,6 +58,7 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.feature.discovery.DiscoverySummaryViewModel
 import org.meshtastic.feature.discovery.export.ExportResult
+import org.meshtastic.feature.discovery.scan.PresetRanking
 import org.meshtastic.feature.discovery.ui.component.PresetResultCard
 
 @Composable
@@ -69,6 +70,7 @@ fun DiscoverySummaryScreen(
     val session by viewModel.session.collectAsStateWithLifecycle()
     val presetResults by viewModel.presetResults.collectAsStateWithLifecycle()
     val nodesByPreset by viewModel.nodesByPreset.collectAsStateWithLifecycle()
+    val rankings by viewModel.rankings.collectAsStateWithLifecycle()
     val algorithmicSummary by viewModel.algorithmicSummary.collectAsStateWithLifecycle()
     val aiSummary by viewModel.aiSummary.collectAsStateWithLifecycle()
     val presetAiSummaries by viewModel.presetAiSummaries.collectAsStateWithLifecycle()
@@ -97,6 +99,7 @@ fun DiscoverySummaryScreen(
         session = session,
         presetResults = presetResults,
         nodesByPreset = nodesByPreset,
+        rankings = rankings,
         algorithmicSummary = algorithmicSummary,
         aiSummary = aiSummary,
         presetAiSummaries = presetAiSummaries,
@@ -115,6 +118,7 @@ private fun DiscoverySummaryContent(
     session: DiscoverySessionEntity?,
     presetResults: List<DiscoveryPresetResultEntity>,
     nodesByPreset: Map<Long, List<DiscoveredNodeEntity>>,
+    rankings: List<PresetRanking>,
     algorithmicSummary: String?,
     aiSummary: String?,
     presetAiSummaries: Map<Long, String>,
@@ -156,10 +160,13 @@ private fun DiscoverySummaryContent(
             item { SessionOverviewCard(session = session) }
 
             items(presetResults, key = { it.id }) { result ->
+                val ranking = rankings.find { it.presetResult.id == result.id }
                 PresetResultCard(
                     result = result,
                     nodes = nodesByPreset[result.id].orEmpty(),
                     aiSummary = presetAiSummaries[result.id],
+                    rank = ranking?.rank,
+                    isTied = ranking?.isTied == true,
                 )
             }
 

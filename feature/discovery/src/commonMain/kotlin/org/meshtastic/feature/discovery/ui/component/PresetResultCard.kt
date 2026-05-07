@@ -45,11 +45,13 @@ fun PresetResultCard(
     result: DiscoveryPresetResultEntity,
     @Suppress("UnusedParameter") nodes: List<DiscoveredNodeEntity>,
     aiSummary: String? = null,
+    rank: Int? = null,
+    isTied: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            PresetHeader(result = result)
+            PresetHeader(result = result, rank = rank, isTied = isTied)
             Spacer(modifier = Modifier.height(12.dp))
 
             StatsGrid(result = result)
@@ -80,13 +82,25 @@ fun PresetResultCard(
 }
 
 @Composable
-private fun PresetHeader(result: DiscoveryPresetResultEntity) {
+private fun PresetHeader(result: DiscoveryPresetResultEntity, rank: Int?, isTied: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = result.presetName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(text = result.presetName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            if (rank != null) {
+                val rankLabel = if (isTied) "#$rank (tied)" else "#$rank"
+                val rankColor =
+                    if (rank == 1 && !isTied) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                Text(text = rankLabel, style = MaterialTheme.typography.labelMedium, color = rankColor)
+            }
+        }
         Text(
             text = formatDuration(result.dwellDurationSeconds),
             style = MaterialTheme.typography.bodySmall,

@@ -32,12 +32,16 @@ import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
 import org.meshtastic.feature.discovery.export.DiscoveryExportData
 import org.meshtastic.feature.discovery.export.DiscoveryExporter
 import org.meshtastic.feature.discovery.export.ExportResult
+import org.meshtastic.feature.discovery.scan.DiscoveryRankingEngine
+import org.meshtastic.feature.discovery.scan.PresetRanking
+import org.meshtastic.feature.discovery.scan.PresetRankingInput
 
 @KoinViewModel
 class DiscoverySummaryViewModel(
     @InjectedParam private val sessionId: Long,
     private val discoveryDao: DiscoveryDao,
     private val summaryGenerator: DiscoverySummaryGenerator,
+    private val rankingEngine: DiscoveryRankingEngine,
     private val aiProvider: DiscoverySummaryAiProvider,
     private val exporter: DiscoveryExporter,
 ) : ViewModel() {
@@ -50,6 +54,9 @@ class DiscoverySummaryViewModel(
 
     private val _nodesByPreset = MutableStateFlow<Map<Long, List<DiscoveredNodeEntity>>>(emptyMap())
     val nodesByPreset: StateFlow<Map<Long, List<DiscoveredNodeEntity>>> = _nodesByPreset.asStateFlow()
+
+    private val _rankings = MutableStateFlow<List<PresetRanking>>(emptyList())
+    val rankings: StateFlow<List<PresetRanking>> = _rankings.asStateFlow()
 
     private val _algorithmicSummary = MutableStateFlow<String?>(null)
     val algorithmicSummary: StateFlow<String?> = _algorithmicSummary.asStateFlow()
@@ -112,6 +119,16 @@ class DiscoverySummaryViewModel(
             // Regenerate algorithmic
             _algorithmicSummary.value = summaryGenerator.generateSessionSummary(currentSession, results)
 
+            // Recompute rankings
+            val rankingInputs =
+                results.map { result ->
+                    PresetRankingInput(
+                        presetResult = result,
+                        discoveredNodes = _nodesByPreset.value[result.id].orEmpty(),
+                    )
+                }
+            _rankings.value = rankingEngine.rank(rankingInputs)
+
             // Regenerate AI
             generateAiSummary(currentSession, results)
             generatePresetAiSummaries(results)
@@ -128,6 +145,13 @@ class DiscoverySummaryViewModel(
                 nodesMap[result.id] = discoveryDao.getDiscoveredNodes(result.id)
             }
             _nodesByPreset.value = nodesMap
+
+            // Compute deterministic rankings
+            val rankingInputs =
+                results.map { result ->
+                    PresetRankingInput(presetResult = result, discoveredNodes = nodesMap[result.id].orEmpty())
+                }
+            _rankings.value = rankingEngine.rank(rankingInputs)
 
             // Load cached per-preset AI summaries
             val cachedPresetSummaries =
