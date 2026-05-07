@@ -296,13 +296,18 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        # Build the release distribution for the current OS.
+        # On macOS, also build a ReleaseUberJar for the Homebrew Cask.
         # Quote the -P flag: PowerShell on Windows interprets the dot in
         # `-PaboutLibraries.release=true` as member access on `-PaboutLibraries`,
         # splitting the token and feeding `.release=true` to Gradle as a task name.
-        run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS '-PaboutLibraries.release=true' --no-daemon
+        run: >
+          ./gradlew :desktop:packageReleaseDistributionForCurrentOS
+          ${{ contains(runner.os, 'macOS') && ':desktop:packageReleaseUberJarForCurrentOS' }}
+          '-PaboutLibraries.release=true' --no-daemon
 
       - name: List Desktop Binaries
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' || runner.os == 'macOS'
         run: ls -R desktop/build/compose/binaries/main-release
 
       - name: Upload Desktop Artifacts
@@ -317,6 +322,7 @@ jobs:
             desktop/build/compose/binaries/main-release/*/*.deb
             desktop/build/compose/binaries/main-release/*/*.rpm
             desktop/build/compose/binaries/main-release/*/*.AppImage
+            desktop/build/compose/jars/*-release.jar
           retention-days: 1
           if-no-files-found: ignore
 
@@ -331,6 +337,7 @@ jobs:
             desktop/build/compose/binaries/main-release/*/*.deb
             desktop/build/compose/binaries/main-release/*/*.rpm
             desktop/build/compose/binaries/main-release/*/*.AppImage
+            desktop/build/compose/jars/*-release.jar
 
   github-release:
     if: ${{ !cancelled() && !failure() }}
