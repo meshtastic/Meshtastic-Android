@@ -38,7 +38,7 @@
 
 ## Phase 3 — Scan engine (preset cycling, admin messages, BLE reconnection)
 
-- [ ] **D012** [P] Add discovery prefs contract in `core:repository` and DataStore implementation in `core:prefs`.
+- [X] **D012** [P] Add discovery prefs contract in `core:repository` and DataStore implementation in `core:prefs`.
 - [X] **D013** [P] Implement `DiscoveryScanState` / state machine in `commonMain`.
 - [X] **D014** [P] Implement `DiscoveryScanCoordinator` to validate inputs, snapshot home preset, switch presets, and manage dwell timing.
 - [X] **D014b** [P] Implement `DiscoveryViewModel` in `commonMain` to expose scan state, session data, and user actions to the UI layer. Wire to `DiscoveryScanCoordinator` and `DiscoveryRepository`.
