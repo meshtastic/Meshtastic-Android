@@ -636,7 +636,6 @@
     <string name="mqtt_probe_success_with_info">Доступно (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Неможливо зв'язатися з брокером (TCP)</string>
     <string name="mqtt_probe_timeout">Тайм-аут після %1$d мілісекунд</string>
-    <string name="mqtt_probe_tls_failure">TLS рукопотискання невірне</string>
     <string name="mqtt_status_connected">Під’єднано</string>
     <string name="mqtt_status_connecting">З'єднання…</string>
     <string name="mqtt_status_disconnected">Відключено</string>

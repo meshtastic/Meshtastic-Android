@@ -709,7 +709,6 @@
     <string name="mqtt_probe_success_with_info">Erreichbar (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Broker (TCP) nicht erreichbar</string>
     <string name="mqtt_probe_timeout">Zeitüberschreitung nach %1$d ms</string>
-    <string name="mqtt_probe_tls_failure">TLS Handshake fehlgeschlagen</string>
     <string name="mqtt_status_connected">Verbunden</string>
     <string name="mqtt_status_connecting">Wird verbunden</string>
     <string name="mqtt_status_disconnected">Verbindung getrennt</string>

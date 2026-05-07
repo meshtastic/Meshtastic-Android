@@ -714,7 +714,7 @@
     <string name="mqtt_probe_success_with_info">Yhteys onnistui (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Yhteyttä välityspalvelimeen ei saada (TCP)</string>
     <string name="mqtt_probe_timeout">Aikakatkaistu %1$d ms jälkeen</string>
-    <string name="mqtt_probe_tls_failure">TLS-yhteyden muodostus epäonnistui</string>
+    <string name="mqtt_probe_tls_failure">TLS-yhteyden muodostaminen epäonnistui: %1$s</string>
     <string name="mqtt_status_connected">Yhdistetty</string>
     <string name="mqtt_status_connecting">Yhdistetään…</string>
     <string name="mqtt_status_disconnected">Ei yhdistetty</string>

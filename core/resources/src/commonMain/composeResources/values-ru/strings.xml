@@ -717,7 +717,7 @@
     <string name="mqtt_probe_success_with_info">Доступно (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Не удается подключиться к брокеру (TCP)</string>
     <string name="mqtt_probe_timeout">Тайм-аут после %1$d мс</string>
-    <string name="mqtt_probe_tls_failure">Сбой TLS-рукопожатия</string>
+    <string name="mqtt_probe_tls_failure">Ошибка TLS-рукопожатия: %1$s</string>
     <string name="mqtt_status_connected">Подключено</string>
     <string name="mqtt_status_connecting">Подключение…</string>
     <string name="mqtt_status_disconnected">Отключено</string>
