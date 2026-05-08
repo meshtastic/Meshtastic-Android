@@ -67,7 +67,7 @@
 - [X] **D025** [P] Implement `DiscoveryMapScreen` and node detail sheet/cards using Compose Multiplatform. Verify that distance displays use `MetricFormatter` / `Node.distance(...)` shared formatting (FR-016).
 - [X] **D026** [P] Reuse or extend platform map providers for discovery overlays on Android.
 - [X] **D027** [P] Provide Desktop map fallback (provider or placeholder/list hybrid) that does not break the feature.
-- [ ] **D028** Add UI tests for preset filtering, mapped/unmapped counts, and topology toggle behavior.
+- [X] **D028** Add UI tests for preset filtering, mapped/unmapped counts, and topology toggle behavior.
 
 **Depends on**: D019-D022  
 **Exit criteria**: persisted discovery sessions can render a map tab or safe fallback on supported targets.
