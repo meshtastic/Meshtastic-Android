@@ -30,7 +30,7 @@
 - [X] **D007** [P] Add `DiscoverySessionEntity`, `DiscoveryPresetResultEntity`, and `DiscoveredNodeEntity` under `core:database`.
 - [X] **D008** [P] Add discovery DAO interfaces and relation models.
 - [X] **D009** Register entities / DAOs in `MeshtasticDatabase` and bump the schema version.
-- [ ] **D010** Add DAO tests for insert, relation loading, sort order, and cascade deletion.
+- [X] **D010** Add DAO tests for insert, relation loading, sort order, and cascade deletion.
 - [ ] **D011** Add migration coverage for the new schema version.
 
 **Depends on**: D001  
@@ -56,7 +56,7 @@
 - [ ] **D020** [P] Trigger neighbor info requests at dwell boundaries through the existing command path.
 - [X] **D021** [P] Aggregate per-preset metrics (packet count, telemetry count, neighbor count, unique nodes, best distance, link quality).
 - [X] **D022** [P] Upsert `DiscoveredNodeEntity` rows with deduped per-preset observations.
-- [ ] **D023** Add tests for duplicate packets, nodes without positions, and neighbor-info-only sightings.
+- [X] **D023** Add tests for duplicate packets, nodes without positions, and neighbor-info-only sightings.
 
 **Depends on**: D014-D017  
 **Exit criteria**: preset results and per-node observations are populated from live/shared data sources.
@@ -99,7 +99,7 @@
 - [X] **D039** [P] Implement session detail routing and history-to-detail navigation.
 - [X] **D040** [P] Implement delete flow with cascade validation.
 - [X] **D041** Ensure historical sessions load entirely from Room without requiring a live radio connection.
-- [ ] **D042** Add tests for history sorting, deep-link session load, and delete behavior.
+- [X] **D042** Add tests for history sorting, deep-link session load, and delete behavior.
 
 **Depends on**: D007-D010, D029-D031  
 **Exit criteria**: stored sessions can be reopened and managed after app restart.

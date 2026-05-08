@@ -380,6 +380,48 @@ class DeepLinkRouterTest {
 
     // endregion
 
+    // region discovery deep links
+
+    @Test
+    fun `discovery settings sub-route navigates to discovery graph`() {
+        val result = route("/settings/local-mesh-discovery")
+        assertEquals(listOf(SettingsRoute.SettingsGraph(null), DiscoveryRoute.DiscoveryGraph), result)
+    }
+
+    @Test
+    fun `discovery session deep link resolves session ID`() {
+        val result = route("/settings/local-mesh-discovery/session/42")
+        assertEquals(
+            listOf(
+                SettingsRoute.SettingsGraph(null),
+                DiscoveryRoute.DiscoveryGraph,
+                DiscoveryRoute.DiscoverySummary(42L),
+            ),
+            result,
+        )
+    }
+
+    @Test
+    fun `discovery alias localmeshdiscovery resolves session ID`() {
+        val result = route("/settings/localmeshdiscovery/session/99")
+        assertEquals(
+            listOf(
+                SettingsRoute.SettingsGraph(null),
+                DiscoveryRoute.DiscoveryGraph,
+                DiscoveryRoute.DiscoverySummary(99L),
+            ),
+            result,
+        )
+    }
+
+    @Test
+    fun `discovery session with invalid ID falls back to graph`() {
+        val result = route("/settings/local-mesh-discovery/session/notanumber")
+        assertEquals(listOf(SettingsRoute.SettingsGraph(null), DiscoveryRoute.DiscoveryGraph), result)
+    }
+
+    // endregion
+
     // region case insensitivity
 
     @Test
