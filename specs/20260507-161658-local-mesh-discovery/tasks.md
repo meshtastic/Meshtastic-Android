@@ -111,7 +111,7 @@
 - [X] **D045** [P] Finalize 2.4 GHz hardware gating using `DeviceHardwareRepository` + current radio metadata.
 - [X] **D046** [P] Add logging / diagnostics and make sure the feature is debuggable through existing app logging tools.
 - [X] **D047** [P] Add strings, icons, and docs updates (`core/resources`, deep-link docs, quickstart references).
-- [ ] **D048** Run targeted and full verification commands.
+- [X] **D048** Run targeted and full verification commands.
 
 **Depends on**: all previous phases  
 **Exit criteria**: feature is shippable, documented, accessible, and validated.

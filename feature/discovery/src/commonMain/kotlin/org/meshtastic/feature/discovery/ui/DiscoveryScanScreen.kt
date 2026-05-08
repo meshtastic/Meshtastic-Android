@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,6 +88,7 @@ fun DiscoveryScanScreen(
     onNavigateUp: () -> Unit,
     onNavigateToSummary: (sessionId: Long) -> Unit,
     onNavigateToHistory: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val scanState by viewModel.scanState.collectAsStateWithLifecycle()
     val selectedPresets by viewModel.selectedPresets.collectAsStateWithLifecycle()
@@ -103,7 +104,7 @@ fun DiscoveryScanScreen(
     KeepScreenOn(isScanning && keepScreenAwake)
 
     // Navigate to summary when scan completes
-    LaunchedEffect(scanState) {
+    LaunchedEffect(scanState, onNavigateToSummary) {
         if (scanState is DiscoveryScanState.Complete) {
             currentSession?.id?.let { sessionId ->
                 viewModel.reset()
@@ -113,6 +114,7 @@ fun DiscoveryScanScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(Res.string.discovery_local_mesh)) },
@@ -180,7 +182,7 @@ fun DiscoveryScanScreen(
                 item(key = "dwell_picker") {
                     DwellTimePicker(
                         selectedMinutes = dwellMinutes,
-                        onMinutesSelected = viewModel::setDwellDuration,
+                        onMinuteSelect = viewModel::setDwellDuration,
                         enabled = true,
                     )
                 }
@@ -248,7 +250,7 @@ private fun ConnectionWarningCard(modifier: Modifier = Modifier) {
 @Composable
 private fun DwellTimePicker(
     selectedMinutes: Int,
-    onMinutesSelected: (Int) -> Unit,
+    onMinuteSelect: (Int) -> Unit,
     enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -276,7 +278,7 @@ private fun DwellTimePicker(
                         DropdownMenuItem(
                             text = { Text("$minutes min") },
                             onClick = {
-                                onMinutesSelected(minutes)
+                                onMinuteSelect(minutes)
                                 expanded = false
                             },
                         )

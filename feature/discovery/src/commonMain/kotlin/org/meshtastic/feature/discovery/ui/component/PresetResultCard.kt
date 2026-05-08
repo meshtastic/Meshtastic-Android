@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,10 +44,10 @@ import org.meshtastic.feature.discovery.ui.formatDuration
 fun PresetResultCard(
     result: DiscoveryPresetResultEntity,
     @Suppress("UnusedParameter") nodes: List<DiscoveredNodeEntity>,
+    modifier: Modifier = Modifier,
     aiSummary: String? = null,
     rank: Int? = null,
     isTied: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {

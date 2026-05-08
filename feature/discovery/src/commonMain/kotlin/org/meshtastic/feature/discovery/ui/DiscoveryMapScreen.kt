@@ -48,12 +48,13 @@ import org.meshtastic.feature.discovery.DiscoveryMapViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiscoveryMapScreen(viewModel: DiscoveryMapViewModel, onNavigateUp: () -> Unit) {
+fun DiscoveryMapScreen(viewModel: DiscoveryMapViewModel, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val session by viewModel.session.collectAsStateWithLifecycle()
     val allNodes by viewModel.allNodes.collectAsStateWithLifecycle()
     val discoveryMap = LocalDiscoveryMapProvider.current
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(Res.string.discovery_map)) },

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,10 +75,12 @@ fun DiscoveryHistoryScreen(
     viewModel: DiscoveryHistoryViewModel,
     onNavigateUp: () -> Unit,
     onNavigateToDetail: (sessionId: Long) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val sessions by viewModel.sessions.collectAsStateWithLifecycle()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(Res.string.discovery_history)) },

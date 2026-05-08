@@ -34,7 +34,7 @@ import org.meshtastic.core.ui.component.PlaceholderScreen
  *
  * On Desktop/JVM targets where native maps are not yet available, it falls back to a [PlaceholderScreen].
  */
-@Suppress("Wrapping")
+@Suppress("Wrapping", "CompositionLocalAllowlist")
 val LocalDiscoveryMapProvider =
     compositionLocalOf<
         @Composable (
