@@ -265,6 +265,7 @@ dependencies {
 
     // Feature modules (JVM variants for real composable wiring)
     implementation(projects.feature.settings)
+    implementation(projects.feature.docs)
     implementation(projects.feature.node)
     implementation(projects.feature.messaging)
     implementation(projects.feature.connections)

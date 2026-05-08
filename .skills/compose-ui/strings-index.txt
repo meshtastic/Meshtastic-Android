@@ -483,6 +483,7 @@ hardware
 hardware_model
 heading
 heartbeat
+help_and_documentation
 hide_layer
 hide_password
 history_return_max

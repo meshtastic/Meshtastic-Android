@@ -22,6 +22,7 @@ import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_abc
 import org.meshtastic.core.resources.ic_admin_panel_settings
+import org.meshtastic.core.resources.ic_info
 import org.meshtastic.core.resources.ic_app_settings_alt
 import org.meshtastic.core.resources.ic_bug_report
 import org.meshtastic.core.resources.ic_cleaning_services
@@ -70,3 +71,5 @@ val MeshtasticIcons.SettingsRemote: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_settings_remote)
 val MeshtasticIcons.Storage: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_storage)
+val MeshtasticIcons.HelpOutline: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_info)

@@ -507,6 +507,7 @@
     <string name="hardware_model">Hardware model</string>
     <string name="heading">Heading</string>
     <string name="heartbeat">Heartbeat</string>
+    <string name="help_and_documentation">Help &amp; Documentation</string>
     <string name="hide_layer">Hide Layer</string>
     <string name="hide_password">Hide password</string>
     <string name="history_return_max">History return max</string>

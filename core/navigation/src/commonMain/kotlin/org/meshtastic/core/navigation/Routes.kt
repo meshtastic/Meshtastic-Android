@@ -167,6 +167,14 @@ sealed interface SettingsRoute : Route {
     @Serializable data object FilterSettings : SettingsRoute
 
     // endregion
+
+    // region help & documentation routes
+
+    @Serializable data object HelpDocs : SettingsRoute
+
+    @Serializable data class HelpDocPage(val pageId: String) : SettingsRoute
+
+    // endregion
 }
 
 @Serializable

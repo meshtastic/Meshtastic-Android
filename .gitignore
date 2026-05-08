@@ -51,6 +51,12 @@ docs/screenshots/
 build-and-install-android.sh
 wireless-install.sh
 
+# Generated docs artifacts
+docs/_site/
+docs/.jekyll-cache/
+docs/.jekyll-metadata
+docs/Gemfile.lock
+
 # Git worktrees
 .worktrees/
 /firebase-debug.log.jdk/

@@ -1,0 +1,38 @@
+title: Meshtastic App Documentation
+description: User and developer documentation for the Meshtastic Android, Desktop, and iOS applications.
+baseurl: ""
+url: ""
+
+theme: just-the-docs
+
+search_enabled: true
+search.heading_level: 3
+
+nav_sort: order
+
+collections:
+  user:
+    output: true
+    permalink: /:collection/:name/
+  developer:
+    output: true
+    permalink: /:collection/:name/
+
+just_the_docs:
+  collections:
+    user:
+      name: User Guide
+      nav_fold: false
+    developer:
+      name: Developer Guide
+      nav_fold: true
+
+plugins:
+  - jekyll-redirect-from
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - assets/screenshots/.gitkeep
+  - "*.sh"
+
