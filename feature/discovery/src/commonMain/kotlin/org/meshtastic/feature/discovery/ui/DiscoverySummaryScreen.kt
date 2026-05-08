@@ -46,11 +46,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.discovery_export_report
+import org.meshtastic.core.resources.discovery_rerun_analysis
+import org.meshtastic.core.resources.discovery_scan_summary
+import org.meshtastic.core.resources.discovery_view_map
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -131,17 +138,27 @@ private fun DiscoverySummaryContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scan Summary") },
+                title = { Text(stringResource(Res.string.discovery_scan_summary)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) { Icon(MeshtasticIcons.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
+                    }
                 },
                 actions = {
                     if (session != null) {
                         IconButton(onClick = { onNavigateToMap(session.id) }) {
-                            Icon(MeshtasticIcons.Map, contentDescription = "View map")
+                            Icon(
+                                MeshtasticIcons.Map,
+                                contentDescription = stringResource(Res.string.discovery_view_map),
+                            )
                         }
                     }
-                    IconButton(onClick = onExport) { Icon(MeshtasticIcons.Share, contentDescription = "Export report") }
+                    IconButton(onClick = onExport) {
+                        Icon(
+                            MeshtasticIcons.Share,
+                            contentDescription = stringResource(Res.string.discovery_export_report),
+                        )
+                    }
                 },
             )
         },
@@ -230,7 +247,7 @@ private fun AiSummaryCard(
                     IconButton(onClick = onRerunAnalysis) {
                         Icon(
                             MeshtasticIcons.Refresh,
-                            contentDescription = "Re-run analysis",
+                            contentDescription = stringResource(Res.string.discovery_rerun_analysis),
                             tint = MaterialTheme.colorScheme.onTertiaryContainer,
                         )
                     }

@@ -42,7 +42,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.discovery_session_detail
+import org.meshtastic.core.resources.discovery_view_map
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -63,9 +68,11 @@ fun DiscoveryHistoryDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Session Detail") },
+                title = { Text(stringResource(Res.string.discovery_session_detail)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) { Icon(MeshtasticIcons.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
+                    }
                 },
                 actions = {
                     val s = session
@@ -75,7 +82,10 @@ fun DiscoveryHistoryDetailScreen(
                         }
                     if (s != null && (s.userLatitude != 0.0 || hasAnyMappableNodes)) {
                         IconButton(onClick = { onNavigateToMap(s.id) }) {
-                            Icon(MeshtasticIcons.Map, contentDescription = "View map")
+                            Icon(
+                                MeshtasticIcons.Map,
+                                contentDescription = stringResource(Res.string.discovery_view_map),
+                            )
                         }
                     }
                 },

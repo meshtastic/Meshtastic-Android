@@ -51,8 +51,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.delete
+import org.meshtastic.core.resources.discovery_delete_session
+import org.meshtastic.core.resources.discovery_delete_session_confirm
+import org.meshtastic.core.resources.discovery_history
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.Delete
@@ -73,9 +81,11 @@ fun DiscoveryHistoryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Discovery History") },
+                title = { Text(stringResource(Res.string.discovery_history)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) { Icon(MeshtasticIcons.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
+                    }
                 },
             )
         },
@@ -187,10 +197,14 @@ private fun CompletionStatusIcon(status: String) {
 private fun DeleteConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Delete Session") },
-        text = { Text("Are you sure you want to delete this discovery session? This action cannot be undone.") },
-        confirmButton = { TextButton(onClick = onConfirm) { Text("Delete", color = MaterialTheme.colorScheme.error) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        title = { Text(stringResource(Res.string.discovery_delete_session)) },
+        text = { Text(stringResource(Res.string.discovery_delete_session_confirm)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 

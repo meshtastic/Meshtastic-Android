@@ -54,6 +54,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.discovery_local_mesh
+import org.meshtastic.core.resources.discovery_scan_history
+import org.meshtastic.core.resources.discovery_start_scan
+import org.meshtastic.core.resources.discovery_stop_scan
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Close
@@ -108,15 +115,21 @@ fun DiscoveryScanScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Local Mesh Discovery") },
+                title = { Text(stringResource(Res.string.discovery_local_mesh)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(imageVector = MeshtasticIcons.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = MeshtasticIcons.ArrowBack,
+                            contentDescription = stringResource(Res.string.back),
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = onNavigateToHistory) {
-                        Icon(imageVector = MeshtasticIcons.History, contentDescription = "Scan History")
+                        Icon(
+                            imageVector = MeshtasticIcons.History,
+                            contentDescription = stringResource(Res.string.discovery_scan_history),
+                        )
                     }
                 },
             )
@@ -291,12 +304,12 @@ private fun ScanButton(
             modifier = modifier.fillMaxWidth(),
         ) {
             Icon(imageVector = MeshtasticIcons.Close, contentDescription = null)
-            Text("Stop Scan", modifier = Modifier.padding(start = 8.dp))
+            Text(stringResource(Res.string.discovery_stop_scan), modifier = Modifier.padding(start = 8.dp))
         }
     } else {
         Button(onClick = onStart, enabled = isConnected && hasPresetsSelected, modifier = modifier.fillMaxWidth()) {
             Icon(imageVector = MeshtasticIcons.PlayArrow, contentDescription = null)
-            Text("Start Scan", modifier = Modifier.padding(start = 8.dp))
+            Text(stringResource(Res.string.discovery_start_scan), modifier = Modifier.padding(start = 8.dp))
         }
     }
 }

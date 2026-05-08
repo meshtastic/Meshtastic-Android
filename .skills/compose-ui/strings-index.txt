@@ -315,6 +315,21 @@ discard_changes
 disconnect
 disconnected
 discovered_network_devices
+### DISCOVERY ###
+discovery_delete_session
+discovery_delete_session_confirm
+discovery_dwell_minutes
+discovery_export_report
+discovery_history
+discovery_local_mesh
+discovery_map
+discovery_rerun_analysis
+discovery_scan_history
+discovery_scan_summary
+discovery_session_detail
+discovery_start_scan
+discovery_stop_scan
+discovery_view_map
 disk_free_indexed
 ### DISPLAY ###
 display

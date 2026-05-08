@@ -31,6 +31,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.discovery_map
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.DiscoveryMapNode
@@ -52,9 +56,11 @@ fun DiscoveryMapScreen(viewModel: DiscoveryMapViewModel, onNavigateUp: () -> Uni
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Discovery Map") },
+                title = { Text(stringResource(Res.string.discovery_map)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateUp) { Icon(MeshtasticIcons.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
+                    }
                 },
             )
         },

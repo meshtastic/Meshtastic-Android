@@ -339,6 +339,21 @@
     <string name="disconnect">Disconnect</string>
     <string name="disconnected">Disconnected</string>
     <string name="discovered_network_devices">Discovered Network Devices</string>
+    <!-- DISCOVERY -->
+    <string name="discovery_delete_session">Delete Session</string>
+    <string name="discovery_delete_session_confirm">Are you sure you want to delete this discovery session? This action cannot be undone.</string>
+    <string name="discovery_dwell_minutes">%1$d min</string>
+    <string name="discovery_export_report">Export report</string>
+    <string name="discovery_history">Discovery History</string>
+    <string name="discovery_local_mesh">Local Mesh Discovery</string>
+    <string name="discovery_map">Discovery Map</string>
+    <string name="discovery_rerun_analysis">Re-run analysis</string>
+    <string name="discovery_scan_history">Scan History</string>
+    <string name="discovery_scan_summary">Scan Summary</string>
+    <string name="discovery_session_detail">Session Detail</string>
+    <string name="discovery_start_scan">Start Scan</string>
+    <string name="discovery_stop_scan">Stop Scan</string>
+    <string name="discovery_view_map">View map</string>
     <string name="disk_free_indexed">Disk Free %1$d</string>
     <!-- DISPLAY -->
     <string name="display">Display</string>

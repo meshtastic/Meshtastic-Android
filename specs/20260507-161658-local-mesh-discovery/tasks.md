@@ -110,7 +110,7 @@
 - [ ] **D044** [P] Add accessibility polish: semantics, progress announcements, disabled-preset explanations, and large-screen layout checks.
 - [X] **D045** [P] Finalize 2.4 GHz hardware gating using `DeviceHardwareRepository` + current radio metadata.
 - [X] **D046** [P] Add logging / diagnostics and make sure the feature is debuggable through existing app logging tools.
-- [ ] **D047** [P] Add strings, icons, and docs updates (`core/resources`, deep-link docs, quickstart references).
+- [X] **D047** [P] Add strings, icons, and docs updates (`core/resources`, deep-link docs, quickstart references).
 - [ ] **D048** Run targeted and full verification commands.
 
 **Depends on**: all previous phases  
