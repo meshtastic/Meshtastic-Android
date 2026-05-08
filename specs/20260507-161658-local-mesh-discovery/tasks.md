@@ -53,7 +53,7 @@
 ## Phase 4 — Packet collection (integrate with existing packet pipeline)
 
 - [X] **D019** [P] Implement `DiscoveryPacketCollector` that listens to shared packet / node / neighbor flows.
-- [ ] **D020** [P] Trigger neighbor info requests at dwell boundaries through the existing command path.
+- [X] **D020** [P] Trigger neighbor info requests at dwell boundaries through the existing command path.
 - [X] **D021** [P] Aggregate per-preset metrics (packet count, telemetry count, neighbor count, unique nodes, best distance, link quality).
 - [X] **D022** [P] Upsert `DiscoveredNodeEntity` rows with deduped per-preset observations.
 - [X] **D023** Add tests for duplicate packets, nodes without positions, and neighbor-info-only sightings.
@@ -63,7 +63,7 @@
 
 ## Phase 5 — Map visualization (CompositionLocal map, markers, topology)
 
-- [ ] **D024** [P] Build shared discovery map presentation models and preset filter state in `commonMain`.
+- [X] **D024** [P] Build shared discovery map presentation models and preset filter state in `commonMain`.
 - [X] **D025** [P] Implement `DiscoveryMapScreen` and node detail sheet/cards using Compose Multiplatform. Verify that distance displays use `MetricFormatter` / `Node.distance(...)` shared formatting (FR-016).
 - [X] **D026** [P] Reuse or extend platform map providers for discovery overlays on Android.
 - [X] **D027** [P] Provide Desktop map fallback (provider or placeholder/list hybrid) that does not break the feature.
@@ -77,7 +77,7 @@
 - [X] **D029** [P] Implement `DiscoveryRankingEngine` deterministic heuristic in `commonMain`.
 - [X] **D030** [P] Build summary presentation models for overview cards, comparison table, and tie explanations.
 - [X] **D031** [P] Implement `DiscoverySummaryScreen` with per-preset ranking, warnings, and partial-session handling.
-- [ ] **D032** Add tests for ranking ties, failed presets, and deterministic fallback output.
+- [X] **D032** Add tests for ranking ties, failed presets, and deterministic fallback output.
 
 **Depends on**: D021-D022  
 **Exit criteria**: every completed or partial session produces a usable non-AI summary.

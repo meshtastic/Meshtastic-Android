@@ -293,6 +293,9 @@ class DiscoveryScanEngine(
                 return
             }
 
+            // Request neighbor info at dwell start to seed mesh topology data (D020)
+            requestNeighborInfoAtDwellBoundary()
+
             // Dwell
             if (!runDwell(preset.name, dwellDurationSeconds)) {
                 pauseAndAbort()
@@ -337,6 +340,17 @@ class DiscoveryScanEngine(
                 serviceRepository.connectionState.first { it is ConnectionState.Connected }
             }
         return result != null
+    }
+
+    /**
+     * Requests NeighborInfo from the local node at each dwell boundary to seed mesh topology data. The response arrives
+     * via the normal packet pipeline → [handleNeighborInfo].
+     */
+    private suspend fun requestNeighborInfoAtDwellBoundary() {
+        val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: return
+        val packetId = radioController.getPacketId()
+        radioController.requestNeighborInfo(packetId, myNodeNum)
+        Logger.d { "DiscoveryScanEngine: requested NeighborInfo from local node $myNodeNum (packetId=$packetId)" }
     }
 
     private suspend fun runDwell(presetName: String, durationSeconds: Long): Boolean {
