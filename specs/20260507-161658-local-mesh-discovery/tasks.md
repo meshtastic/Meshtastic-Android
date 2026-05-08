@@ -88,7 +88,7 @@
 - [X] **D034** [P] Bind `RuleBasedDiscoveryRecommendationEngine` as the always-available default.
 - [X] **D035** [P] Implement Android Google-flavor Gemini Nano adapter and availability checks.
 - [X] **D036** [P] Add opt-in UI and non-blocking fallback behavior.
-- [ ] **D037** Add tests for supported / unsupported / failure cases.
+- [X] **D037** Add tests for supported / unsupported / failure cases.
 
 **Depends on**: D029-D031  
 **Exit criteria**: AI can enhance the summary on supported devices without blocking unsupported targets.
@@ -108,7 +108,7 @@
 
 - [X] **D043** [P] Implement Android share / PDF export and Desktop save/export fallback.
 - [ ] **D044** [P] Add accessibility polish: semantics, progress announcements, disabled-preset explanations, and large-screen layout checks.
-- [ ] **D045** [P] Finalize 2.4 GHz hardware gating using `DeviceHardwareRepository` + current radio metadata.
+- [X] **D045** [P] Finalize 2.4 GHz hardware gating using `DeviceHardwareRepository` + current radio metadata.
 - [X] **D046** [P] Add logging / diagnostics and make sure the feature is debuggable through existing app logging tools.
 - [ ] **D047** [P] Add strings, icons, and docs updates (`core/resources`, deep-link docs, quickstart references).
 - [ ] **D048** Run targeted and full verification commands.
