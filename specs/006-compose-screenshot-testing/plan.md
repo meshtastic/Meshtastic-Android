@@ -96,6 +96,7 @@ core/ui/src/commonMain/.../component/*.kt          # Theme wrapping consistency
 feature/settings/src/commonMain/...                 # New previews (commonMain)
 feature/connections/src/commonMain/...              # New previews
 feature/firmware/src/commonMain/...                 # New previews
+feature/intro/src/commonMain/...                    # New previews (migrate from androidMain)
 ```
 
 **Structure Decision**: The `screenshot-tests/` module sits at the repository root (same level as `app/`, `desktop/`, `core/`, `feature/`) because it is a cross-cutting test harness that spans multiple core and feature modules. It is NOT a KMP module — it is intentionally Android-only, using `com.android.library` + CST plugin.

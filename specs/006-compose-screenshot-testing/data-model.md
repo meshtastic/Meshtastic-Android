@@ -136,6 +136,7 @@ compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "com
 | `feature:connections` | `DeviceListItem`, `ConnectingDeviceInfo`, `DisconnectButton`, `DeviceList` |
 | `feature:firmware` | `FirmwareUpdateScreen` and sub-components |
 | `feature:settings` (commonMain) | Settings sections currently only previewed in `androidMain` |
+| `feature:intro` (commonMain) | Welcome/onboarding screen composables currently only previewed in `androidMain` |
 
 ### Modules deferred
 

@@ -110,9 +110,9 @@ The project already has preview composables in several modules (`core/ui`, `feat
 - **FR-009**: The `screenshot-tests` module MUST be included in `settings.gradle.kts`.
 - **FR-010**: The `screenshot-tests` module MUST apply `meshtastic.detekt` and `meshtastic.spotless` convention plugins so screenshot test code passes the same static analysis gates as all other code.
 - **FR-011**: Existing preview composables in `core/ui`, `feature/messaging`, and `feature/node` MUST be audited and upgraded to meet the visibility and theming conventions.
-- **FR-012**: New preview composables MUST be added for primary components in `feature/connections`, `feature/settings`, `feature/metrics`, `feature/map` (commonMain portions), `feature/firmware`, `feature/intro` (commonMain portions), and `core/ui` (shared components, icons, indicators).
+- **FR-012**: New preview composables MUST be added for primary components in `feature/connections`, `feature/settings`, `feature/firmware`, `feature/intro` (commonMain portions), and `core/ui` (shared components, icons, indicators). Modules without standard Compose UI composables (`feature/metrics`, `feature/auto`, `feature/discovery`, `feature/docs`) and modules relying on platform-specific renderers (`feature/map`, `feature/widget`) are excluded.
 - **FR-013**: A Gradle task or script MUST exist to copy selected reference images from the screenshot test output into a docs asset directory for consumption by the docs feature (spec 003).
-- **FR-014**: The CI workflow MUST include a screenshot validation step that runs `validateDebugScreenshotTest` (or the flavor-specific variant) and uploads the HTML diff report as a build artifact on failure.
+- **FR-014**: The CI workflow MUST include a screenshot validation step that runs `validateFdroidDebugScreenshotTest` and uploads the HTML diff report as a build artifact on failure.
 - **FR-015**: Reference images MUST be stored in version control so they are reviewable in pull request diffs.
 - **FR-016**: All user-visible strings used in preview sample data MUST use string resources from `core/resources` or hardcoded synthetic placeholders — never production user data.
 - **FR-017**: The screenshot test module's `build.gradle.kts` MUST enable the experimental screenshot test flag in the `android {}` block.
@@ -128,7 +128,7 @@ The project already has preview composables in several modules (`core/ui`, `feat
 ### Measurable Outcomes
 
 - **SC-001**: The screenshot validation task passes when no UI components have changed and fails within 60 seconds when a previewed component's appearance changes.
-- **SC-002**: At least 80% of KMP feature and core UI modules that contain user-facing composables have at least one preview composable covered by a screenshot test.
+- **SC-002**: At least 80% of eligible modules have at least one preview composable covered by a screenshot test. Eligible modules are those containing standard Compose UI composables in `commonMain`: `core:ui`, `feature:messaging`, `feature:node`, `feature:wifi-provision`, `feature:connections`, `feature:settings`, `feature:firmware`, `feature:intro` (8 modules; threshold = 7).
 - **SC-003**: The CI pipeline includes screenshot validation as a required check, and the HTML diff report is available as an artifact when validation fails.
 - **SC-004**: Reference images for docs-relevant components are consumable by the docs build pipeline (spec 003) without manual screenshot capture.
 - **SC-005**: A new contributor can add a preview and its screenshot test wrapper by following the quickstart guide in under 10 minutes.
