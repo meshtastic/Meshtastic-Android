@@ -51,8 +51,46 @@ kotlin {
     }
 }
 
+/**
+ * Sync task: copies markdown docs from the canonical `docs/` source directory
+ * into the CMP composeResources location. This eliminates manual content duplication
+ * and ensures the in-app bundled docs always reflect the source-of-truth.
+ *
+ * Usage:
+ *   ./gradlew :feature:docs:syncDocsToComposeResources
+ *
+ * This task runs automatically before resource generation tasks.
+ */
+val syncDocsToComposeResources by tasks.registering(Sync::class) {
+    description = "Syncs docs/ markdown source into composeResources for in-app bundling"
+    group = "docs"
 
+    val docsSourceDir = rootProject.layout.projectDirectory.dir("docs")
+    val composeResourcesTarget = layout.projectDirectory.dir(
+        "src/commonMain/composeResources/files/docs"
+    )
 
+    from(docsSourceDir) {
+        include("user/**/*.md")
+        include("developer/**/*.md")
+        // Exclude Jekyll/site-only files that are not needed in-app
+        exclude("_config.yml")
+        exclude("_data/**")
+        exclude("_includes/**")
+        exclude("_layouts/**")
+        exclude("index.md")
+        exclude("assets/**")
+        exclude("Gemfile*")
+    }
+    into(composeResourcesTarget)
 
+    // Preserve timestamps for up-to-date checks
+    preserve {
+        include("**/.gitkeep")
+    }
+}
 
-
+// Wire sync task to run before any resource generation
+tasks.matching { it.name.contains("generateComposeResClass") || it.name.contains("copyNonXmlValueResources") }.configureEach {
+    dependsOn(syncDocsToComposeResources)
+}

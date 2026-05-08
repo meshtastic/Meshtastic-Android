@@ -69,6 +69,10 @@ firebase-debug.log
 /coil/
 /kable/
 .opencode/
+# Synced docs in composeResources (generated from docs/ source by syncDocsToComposeResources task)
+feature/docs/src/commonMain/composeResources/files/docs/user/
+feature/docs/src/commonMain/composeResources/files/docs/developer/
+
 /desktop/bin/
 /build-logic/convention/bin/
 /.specify/extensions/.cache/

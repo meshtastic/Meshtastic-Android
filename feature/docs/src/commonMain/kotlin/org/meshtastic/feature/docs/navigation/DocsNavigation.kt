@@ -25,6 +25,9 @@ import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import org.koin.compose.koinInject
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.docs.data.DocBundleLoader
@@ -72,6 +75,12 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>) {
         }
     }
 
+    val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = backHandlerState,
+        onBackCompleted = { backStack.removeLastOrNull() },
+    )
+
     DocsBrowserScreen(
         pages = pages,
         isLoading = isLoading,
@@ -95,6 +104,12 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>) {
         content = bundleLoader.readPage(pageId)
         isLoading = false
     }
+
+    val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = backHandlerState,
+        onBackCompleted = { backStack.removeLastOrNull() },
+    )
 
     DocsPageRouteScreen(
         pageId = pageId,
