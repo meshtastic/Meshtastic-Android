@@ -25,7 +25,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.discovery_dwell_progress
 
 @Suppress("MagicNumber")
 private val CONTENT_PADDING = 8.dp
@@ -48,10 +56,18 @@ fun DwellProgressIndicator(
     val minutes = remainingSeconds / SECONDS_PER_MINUTE
     val seconds = remainingSeconds % SECONDS_PER_MINUTE
     val timeText = "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+    val progressDescription = stringResource(Res.string.discovery_dwell_progress, presetName, timeText)
 
-    Column(verticalArrangement = Arrangement.spacedBy(CONTENT_PADDING), modifier = modifier.fillMaxWidth()) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(CONTENT_PADDING),
+        modifier =
+        modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+            contentDescription = progressDescription
+            progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
+        },
+    ) {
         Text(text = "Dwelling on $presetName", style = MaterialTheme.typography.titleSmall)
-        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+        LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().clearAndSetSemantics {})
         Text(
             text = "$timeText remaining",
             style = MaterialTheme.typography.bodyMedium,

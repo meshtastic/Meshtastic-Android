@@ -52,13 +52,34 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.discovery_analysing_results
+import org.meshtastic.core.resources.discovery_cancelling_scan
+import org.meshtastic.core.resources.discovery_connection_warning
+import org.meshtastic.core.resources.discovery_dwell_time
+import org.meshtastic.core.resources.discovery_dwell_time_description
+import org.meshtastic.core.resources.discovery_keep_screen_awake
+import org.meshtastic.core.resources.discovery_keep_screen_awake_description
 import org.meshtastic.core.resources.discovery_local_mesh
+import org.meshtastic.core.resources.discovery_not_connected
+import org.meshtastic.core.resources.discovery_not_connected_description
+import org.meshtastic.core.resources.discovery_paused
+import org.meshtastic.core.resources.discovery_preparing
+import org.meshtastic.core.resources.discovery_reconnecting
+import org.meshtastic.core.resources.discovery_restoring_preset
+import org.meshtastic.core.resources.discovery_scan_failed
 import org.meshtastic.core.resources.discovery_scan_history
+import org.meshtastic.core.resources.discovery_scan_progress
+import org.meshtastic.core.resources.discovery_shifting_to
 import org.meshtastic.core.resources.discovery_start_scan
 import org.meshtastic.core.resources.discovery_stop_scan
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -208,8 +229,8 @@ fun DiscoveryScanScreen(
 private fun KeepAwakeToggleCard(keepAwake: Boolean, onToggle: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         SwitchPreference(
-            title = "Keep screen awake",
-            summary = "Prevents Android Doze mode from dropping radio packets during long scans. Recommended.",
+            title = stringResource(Res.string.discovery_keep_screen_awake),
+            summary = stringResource(Res.string.discovery_keep_screen_awake_description),
             checked = keepAwake,
             enabled = true,
             onCheckedChange = onToggle,
@@ -219,7 +240,14 @@ private fun KeepAwakeToggleCard(keepAwake: Boolean, onToggle: (Boolean) -> Unit,
 
 @Composable
 private fun ConnectionWarningCard(modifier: Modifier = Modifier) {
-    ElevatedCard(modifier = modifier.fillMaxWidth()) {
+    val warningDescription = stringResource(Res.string.discovery_connection_warning)
+    ElevatedCard(
+        modifier =
+        modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+            contentDescription = warningDescription
+            liveRegion = LiveRegionMode.Polite
+        },
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -232,12 +260,12 @@ private fun ConnectionWarningCard(modifier: Modifier = Modifier) {
             )
             Column {
                 Text(
-                    text = "Not Connected",
+                    text = stringResource(Res.string.discovery_not_connected),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.error,
                 )
                 Text(
-                    text = "Connect to a Meshtastic device to start scanning.",
+                    text = stringResource(Res.string.discovery_not_connected_description),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -257,9 +285,13 @@ private fun DwellTimePicker(
     var expanded by remember { mutableStateOf(false) }
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(CONTENT_PADDING)) {
-            Text(text = "Dwell Time", style = MaterialTheme.typography.titleMedium)
             Text(
-                text = "Time to listen on each preset",
+                text = stringResource(Res.string.discovery_dwell_time),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(
+                text = stringResource(Res.string.discovery_dwell_time_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 8.dp),
@@ -309,29 +341,59 @@ private fun ScanButton(
             Text(stringResource(Res.string.discovery_stop_scan), modifier = Modifier.padding(start = 8.dp))
         }
     } else {
-        Button(onClick = onStart, enabled = isConnected && hasPresetsSelected, modifier = modifier.fillMaxWidth()) {
+        val isEnabled = isConnected && hasPresetsSelected
+        val disabledReason =
+            when {
+                !isConnected -> "device not connected"
+                !hasPresetsSelected -> "no presets selected"
+                else -> ""
+            }
+        val buttonModifier =
+            if (!isEnabled) {
+                modifier.fillMaxWidth().semantics { contentDescription = "Start Scan button disabled. $disabledReason" }
+            } else {
+                modifier.fillMaxWidth()
+            }
+        Button(onClick = onStart, enabled = isEnabled, modifier = buttonModifier) {
             Icon(imageVector = MeshtasticIcons.PlayArrow, contentDescription = null)
             Text(stringResource(Res.string.discovery_start_scan), modifier = Modifier.padding(start = 8.dp))
         }
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun ScanProgressSection(scanState: DiscoveryScanState, modifier: Modifier = Modifier) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(CONTENT_PADDING)) {
-            Text(text = "Scan Progress", style = MaterialTheme.typography.titleMedium)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(CONTENT_PADDING).semantics { liveRegion = LiveRegionMode.Polite },
+        ) {
+            Text(
+                text = stringResource(Res.string.discovery_scan_progress),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
             when (scanState) {
                 is DiscoveryScanState.Preparing -> {
-                    Text(text = "Preparing scan…", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(Res.string.discovery_preparing),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
 
                 is DiscoveryScanState.Shifting -> {
-                    Text(text = "Shifting to ${scanState.presetName}…", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(Res.string.discovery_shifting_to, scanState.presetName),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
 
                 is DiscoveryScanState.Reconnecting -> {
-                    Text(text = "Reconnecting on ${scanState.presetName}…", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(Res.string.discovery_reconnecting, scanState.presetName),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
 
                 is DiscoveryScanState.Dwell -> {
@@ -343,20 +405,29 @@ private fun ScanProgressSection(scanState: DiscoveryScanState, modifier: Modifie
                 }
 
                 is DiscoveryScanState.Analysis -> {
-                    Text(text = "Analyzing results…", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(Res.string.discovery_analysing_results),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
 
                 is DiscoveryScanState.Restoring -> {
-                    Text(text = "Restoring home preset…", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(Res.string.discovery_restoring_preset),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
 
                 is DiscoveryScanState.Cancelling -> {
-                    Text(text = "Cancelling scan…", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(Res.string.discovery_cancelling_scan),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
 
                 is DiscoveryScanState.Paused -> {
                     Text(
-                        text = "Paused: ${scanState.reason}",
+                        text = stringResource(Res.string.discovery_paused, scanState.reason),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -364,7 +435,7 @@ private fun ScanProgressSection(scanState: DiscoveryScanState, modifier: Modifie
 
                 is DiscoveryScanState.Failed -> {
                     Text(
-                        text = "Failed: ${scanState.reason}",
+                        text = stringResource(Res.string.discovery_scan_failed, scanState.reason),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                     )

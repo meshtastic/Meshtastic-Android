@@ -8,7 +8,7 @@
 
 ## Phase 0 — Design Standards Gate (Blocking)
 
-- [ ] **D000** `[UI-GATE]` Review `.skills/design-standards/SKILL.md` and upstream Meshtastic design standards; record constraints for discovery scan screen, map overlays, summary cards, session history list, and AI recommendation UI.
+- [X] **D000** `[UI-GATE]` Review `.skills/design-standards/SKILL.md` and upstream Meshtastic design standards; record constraints for discovery scan screen, map overlays, summary cards, session history list, and AI recommendation UI.
 
 **Phase dependency**: none  
 **Exit criteria**: Design constraints are documented and ready to guide implementation.
@@ -31,7 +31,7 @@
 - [X] **D008** [P] Add discovery DAO interfaces and relation models.
 - [X] **D009** Register entities / DAOs in `MeshtasticDatabase` and bump the schema version.
 - [X] **D010** Add DAO tests for insert, relation loading, sort order, and cascade deletion.
-- [ ] **D011** Add migration coverage for the new schema version.
+- [X] **D011** Add migration coverage for the new schema version.
 
 **Depends on**: D001  
 **Exit criteria**: discovery data can be persisted and queried in tests.
@@ -107,7 +107,7 @@
 ## Phase 9 — Polish (PDF export, accessibility, edge cases)
 
 - [X] **D043** [P] Implement Android share / PDF export and Desktop save/export fallback.
-- [ ] **D044** [P] Add accessibility polish: semantics, progress announcements, disabled-preset explanations, and large-screen layout checks.
+- [X] **D044** [P] Add accessibility polish: semantics, progress announcements, disabled-preset explanations, and large-screen layout checks.
 - [X] **D045** [P] Finalize 2.4 GHz hardware gating using `DeviceHardwareRepository` + current radio metadata.
 - [X] **D046** [P] Add logging / diagnostics and make sure the feature is debuggable through existing app logging tools.
 - [X] **D047** [P] Add strings, icons, and docs updates (`core/resources`, deep-link docs, quickstart references).

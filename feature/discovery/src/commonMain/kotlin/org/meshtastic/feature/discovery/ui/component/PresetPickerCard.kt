@@ -31,8 +31,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ChannelOption
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.discovery_lora_presets
+import org.meshtastic.core.resources.discovery_lora_presets_description
+import org.meshtastic.core.resources.discovery_preset_home_label
 import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 
@@ -56,9 +64,13 @@ fun PresetPickerCard(
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(CARD_PADDING)) {
-            Text(text = "LoRa Presets", style = MaterialTheme.typography.titleMedium)
             Text(
-                text = "Select one or more presets to scan",
+                text = stringResource(Res.string.discovery_lora_presets),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(
+                text = stringResource(Res.string.discovery_lora_presets_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = CHIP_SPACING),
@@ -71,11 +83,19 @@ fun PresetPickerCard(
                 ChannelOption.entries.forEach { preset ->
                     val selected = preset in selectedPresets
                     val isHome = preset == homePreset
+                    val label =
+                        if (isHome) {
+                            stringResource(Res.string.discovery_preset_home_label, preset.displayName())
+                        } else {
+                            preset.displayName()
+                        }
                     FilterChip(
                         selected = selected,
                         onClick = { onTogglePreset(preset) },
-                        label = { Text(if (isHome) "${preset.displayName()} (Home)" else preset.displayName()) },
+                        label = { Text(label) },
                         enabled = enabled,
+                        modifier =
+                        Modifier.semantics { stateDescription = if (selected) "Selected" else "Not selected" },
                         leadingIcon =
                         if (selected) {
                             {

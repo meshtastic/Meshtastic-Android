@@ -47,6 +47,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.TimeZone
@@ -60,7 +62,11 @@ import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.discovery_delete_session
 import org.meshtastic.core.resources.discovery_delete_session_confirm
+import org.meshtastic.core.resources.discovery_empty_history
 import org.meshtastic.core.resources.discovery_history
+import org.meshtastic.core.resources.discovery_scan_complete
+import org.meshtastic.core.resources.discovery_scan_incomplete
+import org.meshtastic.core.resources.discovery_unique_nodes
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.Delete
@@ -124,7 +130,7 @@ private fun EmptyHistoryState(modifier: Modifier = Modifier) {
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "No discovery sessions yet",
+                text = stringResource(Res.string.discovery_empty_history),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -135,8 +141,17 @@ private fun EmptyHistoryState(modifier: Modifier = Modifier) {
 @Composable
 private fun SessionListItem(session: DiscoverySessionEntity, onClick: () -> Unit, onDelete: () -> Unit) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val sessionDescription =
+        "${formatTimestamp(session.timestamp)}, ${session.presetsScanned}, " +
+            "${session.totalUniqueNodes} unique nodes, " +
+            if (session.completionStatus == "complete") "complete" else "incomplete"
 
-    Card(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
+    Card(
+        modifier =
+        Modifier.fillMaxWidth().clickable(onClick = onClick).semantics(mergeDescendants = true) {
+            contentDescription = sessionDescription
+        },
+    ) {
         Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             CompletionStatusIcon(session.completionStatus)
             Spacer(Modifier.width(12.dp))
@@ -150,7 +165,7 @@ private fun SessionListItem(session: DiscoverySessionEntity, onClick: () -> Unit
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = "${session.totalUniqueNodes} unique nodes",
+                    text = stringResource(Res.string.discovery_unique_nodes, session.totalUniqueNodes),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -158,7 +173,7 @@ private fun SessionListItem(session: DiscoverySessionEntity, onClick: () -> Unit
             IconButton(onClick = { showDeleteDialog = true }) {
                 Icon(
                     imageVector = MeshtasticIcons.Delete,
-                    contentDescription = "Delete session",
+                    contentDescription = stringResource(Res.string.discovery_delete_session),
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
@@ -181,14 +196,14 @@ private fun CompletionStatusIcon(status: String) {
     if (status == "complete") {
         Icon(
             imageVector = MeshtasticIcons.CheckCircle,
-            contentDescription = "Complete",
+            contentDescription = stringResource(Res.string.discovery_scan_complete),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp),
         )
     } else {
         Icon(
             imageVector = MeshtasticIcons.Warning,
-            contentDescription = "Incomplete",
+            contentDescription = stringResource(Res.string.discovery_scan_incomplete),
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(24.dp),
         )
