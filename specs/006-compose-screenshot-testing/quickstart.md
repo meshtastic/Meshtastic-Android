@@ -18,7 +18,7 @@ Add a `@Preview` or `@PreviewLightDark` composable in your module's `commonMain`
 
 @PreviewLightDark
 @Composable
-internal fun MyComponentPreview() {
+fun MyComponentPreview() {
     AppTheme {
         MyComponent(
             title = "Sample Title",
@@ -29,10 +29,11 @@ internal fun MyComponentPreview() {
 ```
 
 **Rules**:
-- Visibility: `internal` (not `private`) — the screenshot-tests module must import it
+- Visibility: public (no modifier) — the screenshot-tests module must import it across module boundaries (`internal` does NOT work across modules)
 - Theme: Always wrap in `AppTheme { ... }`
 - Data: Use hardcoded synthetic values — never real user data or PII
 - Dependencies: No ViewModel, DI, or network access — stateless only
+- Determinism: Avoid time-dependent or random data (e.g., `Channel.getRandomKey()`, relative timestamps like "last heard X ago") — these cause flaky diffs
 
 ## Step 2: Add a Screenshot Test Wrapper
 
@@ -57,7 +58,7 @@ fun MyComponentScreenshotTest() {
 ## Step 3: Generate Reference Images
 
 ```bash
-./gradlew :screenshot-tests:updateFdroidDebugScreenshotTest
+./gradlew :screenshot-tests:updateDebugScreenshotTest
 ```
 
 Reference images are saved to `screenshot-tests/src/screenshotTestDebug/reference/`.
@@ -65,10 +66,10 @@ Reference images are saved to `screenshot-tests/src/screenshotTestDebug/referenc
 ## Step 4: Validate
 
 ```bash
-./gradlew :screenshot-tests:validateFdroidDebugScreenshotTest
+./gradlew :screenshot-tests:validateDebugScreenshotTest
 ```
 
-If no UI changes were made, this passes. If the rendered output differs from references, it fails and produces an HTML diff report at `screenshot-tests/build/reports/screenshotTest/preview/fdroidDebug/index.html`.
+If no UI changes were made, this passes. If the rendered output differs from references, it fails and produces an HTML diff report at `screenshot-tests/build/reports/screenshotTest/preview/debug/index.html`.
 
 ## Step 5: Commit Reference Images
 
@@ -85,18 +86,18 @@ If you intentionally change a component's appearance:
 
 1. Run the update task to regenerate references:
    ```bash
-   ./gradlew :screenshot-tests:updateFdroidDebugScreenshotTest
+   ./gradlew :screenshot-tests:updateDebugScreenshotTest
    ```
 2. Review the updated PNGs in `screenshot-tests/src/screenshotTestDebug/reference/`
 3. Commit the updated images
 4. Validate:
    ```bash
-   ./gradlew :screenshot-tests:validateFdroidDebugScreenshotTest
+   ./gradlew :screenshot-tests:validateDebugScreenshotTest
    ```
 
 ## Common Issues
 
-**Preview not found by CST**: Ensure the preview function is `internal` (not `private`) and the `screenshot-tests` module has an `implementation(project(":your:module"))` dependency.
+**Preview not found by CST**: Ensure the preview function is public (no modifier, not `private` or `internal`) and the `screenshot-tests` module has an `implementation(project(":your:module"))` dependency.
 
 **Theme not applied**: Wrap preview content in `AppTheme { ... }`. The theme is in `core:ui`.
 

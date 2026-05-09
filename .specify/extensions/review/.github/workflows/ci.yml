@@ -1,0 +1,243 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-manifest:
+    name: Validate Manifest & Commands
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files
+        run: |
+          files=("README.md" "CHANGELOG.md" "extension.yml" "LICENSE")
+          for f in "${files[@]}"; do
+            if [ -f "$f" ]; then
+              echo "✅ $f exists"
+            else
+              echo "❌ $f missing"
+              exit 1
+            fi
+          done
+
+      - name: Validate extension.yml
+        run: |
+          # Validate YAML syntax
+          python3 -c "import yaml; yaml.safe_load(open('extension.yml'))" || {
+            echo "❌ extension.yml has invalid YAML syntax"
+            exit 1
+          }
+          echo "✅ extension.yml has valid YAML syntax"
+
+          # Deep manifest validation
+          python3 << 'PYEOF'
+          import yaml, sys, re, os
+
+          with open('extension.yml') as f:
+              ext = yaml.safe_load(f)
+
+          errors = []
+
+          # --- Top-level required fields ---
+          for field in ['schema_version', 'extension']:
+              if field not in ext:
+                  errors.append(f"Missing required field: {field}")
+
+          if 'extension' not in ext:
+              for e in errors:
+                  print(f"❌ {e}")
+              sys.exit(1)
+
+          meta = ext['extension']
+
+          for field in ['id', 'name', 'version', 'description', 'author']:
+              if field not in meta:
+                  errors.append(f"Missing extension.{field}")
+
+          # --- Extension ID format (lowercase, alphanumeric, hyphens) ---
+          ext_id = meta.get('id', '')
+          if ext_id and not re.match(r'^[a-z0-9-]+$', ext_id):
+              errors.append(f"Extension ID '{ext_id}' must match ^[a-z0-9-]+$ (lowercase, alphanumeric, hyphens only)")
+          if ext_id:
+              print(f"✅ Extension ID '{ext_id}' has valid format")
+
+          # --- SemVer validation ---
+          version = meta.get('version', '')
+          if version and not re.match(r'^\d+\.\d+\.\d+$', version):
+              errors.append(f"Version '{version}' must follow semantic versioning (X.Y.Z)")
+          if version:
+              print(f"✅ Version '{version}' is valid SemVer")
+
+          # --- Description length (under 200 chars) ---
+          desc = meta.get('description', '')
+          if len(desc) > 200:
+              errors.append(f"Description is {len(desc)} characters (must be under 200)")
+          if desc:
+              print(f"✅ Description is {len(desc)} characters (under 200 limit)")
+
+          # --- requires.speckit_version ---
+          requires = ext.get('requires', {})
+          if not requires or 'speckit_version' not in requires:
+              errors.append("Missing requires.speckit_version (required)")
+          else:
+              print(f"✅ requires.speckit_version: {requires['speckit_version']}")
+
+          # --- provides.commands exists and is non-empty ---
+          provides = ext.get('provides', {})
+          commands = provides.get('commands', [])
+          if not commands:
+              errors.append("provides.commands must exist and contain at least one command")
+          else:
+              print(f"✅ provides.commands has {len(commands)} command(s)")
+
+          cmd_pattern = f'^speckit\\.{re.escape(ext_id)}\\.[a-z0-9-]+$'
+
+          # --- Command naming convention: speckit.{ext-id}.{command} ---
+          for cmd in commands:
+              name = cmd.get('name', '')
+              if not re.match(cmd_pattern, name):
+                  errors.append(f"Command name '{name}' must match pattern speckit.{ext_id}.<command>")
+              else:
+                  print(f"✅ Command '{name}' follows naming convention")
+
+          # --- Alias naming convention: speckit.{ext-id}.{alias} ---
+          for cmd in commands:
+              aliases = cmd.get('aliases', [])
+              if aliases is None:
+                  aliases = []
+              if not isinstance(aliases, list):
+                  errors.append(f"Aliases for command '{cmd.get('name', '')}' must be a list")
+                  continue
+              for alias in aliases:
+                  if not isinstance(alias, str):
+                      errors.append(f"Alias in command '{cmd.get('name', '')}' must be a string")
+                      continue
+                  if not re.match(cmd_pattern, alias):
+                      errors.append(f"Alias '{alias}' must match pattern speckit.{ext_id}.<command>")
+                  else:
+                      print(f"✅ Alias '{alias}' follows naming convention")
+
+          # --- Command file existence ---
+          for cmd in commands:
+              cmd_file = cmd.get('file', '')
+              if cmd_file and not os.path.isfile(cmd_file):
+                  errors.append(f"Command file '{cmd_file}' referenced in manifest does not exist")
+              elif cmd_file:
+                  print(f"✅ Command file '{cmd_file}' exists")
+
+          # --- Config template existence ---
+          configs = provides.get('config', [])
+          for cfg in configs:
+              template = cfg.get('template', '')
+              if template and not os.path.isfile(template):
+                  errors.append(f"Config template '{template}' referenced in manifest does not exist")
+              elif template:
+                  print(f"✅ Config template '{template}' exists")
+
+          # --- Report ---
+          if errors:
+              print()
+              for e in errors:
+                  print(f"❌ {e}")
+              sys.exit(1)
+
+          print()
+          print(f"✅ All manifest validations passed")
+          print(f"   Extension: {meta['name']} v{meta['version']}")
+          PYEOF
+
+      - name: Validate command files
+        run: |
+          if [ -d commands ]; then
+            for cmd in commands/*.md; do
+              if [ -f "$cmd" ]; then
+                # Check frontmatter exists
+                if head -1 "$cmd" | grep -q "^---"; then
+                  echo "✅ $cmd has frontmatter"
+
+                  # Check description field in frontmatter
+                  if python3 -c "
+          import yaml, sys
+          with open('$cmd') as f:
+              content = f.read()
+          parts = content.split('---', 2)
+          if len(parts) >= 3:
+              fm = yaml.safe_load(parts[1])
+              if fm and 'description' in fm:
+                  sys.exit(0)
+          sys.exit(1)
+          " 2>/dev/null; then
+                    echo "✅ $cmd has 'description' in frontmatter"
+                  else
+                    echo "❌ $cmd missing 'description' in frontmatter (required)"
+                    exit 1
+                  fi
+                else
+                  echo "❌ $cmd missing frontmatter"
+                  exit 1
+                fi
+              fi
+            done
+          else
+            echo "❌ No commands directory found"
+            exit 1
+          fi
+
+  validate-bash:
+    name: Validate & Test Bash Scripts (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check Bash scripts syntax
+        run: |
+          echo "Bash version: $(bash --version | head -1)"
+          for script in scripts/bash/*.sh; do
+            echo "Checking $script..."
+            bash -n "$script"
+            echo "  ✓ Syntax OK"
+          done
+
+      - name: Run BATS tests
+        run: |
+          echo "Running BATS tests on ${{ matrix.os }}..."
+          tests/bats/lib/bats-core/bin/bats tests/bats/*.bats
+
+  validate-powershell:
+    name: Validate & Test PowerShell Scripts
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check PowerShell scripts syntax
+        shell: pwsh
+        run: |
+          foreach ($script in Get-ChildItem scripts/powershell/*.ps1) {
+            Write-Host "Checking $($script.Name)..."
+            $null = [System.Management.Automation.PSParser]::Tokenize(
+              (Get-Content $script.FullName -Raw), [ref]$null
+            )
+            Write-Host "  OK"
+          }
+
+      - name: Run Pester tests
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = "tests/pester"
+          $config.Output.Verbosity = "Detailed"
+          $config.Run.Exit = $true
+          Invoke-Pester -Configuration $config
