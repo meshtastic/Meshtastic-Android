@@ -78,11 +78,11 @@ The layout reads from the existing `Node` model in `core:model`. No new fields a
 | Field | Type | Used By | Condition |
 |-------|------|---------|-----------|
 | `longName` | `String?` | Both | Always shown |
-| `shortName` | `String?` | Both | Circle avatar |
+| `shortName` | `String?` | Both | NodeChip avatar |
 | `lastHeard` | `Long` | Both | Non-zero, not > 1 year future |
 | `hopsAway` | `Int` | Both | `> 0` for hop count, `== 0` for signal |
 | `snr` | `Float` | Both | `!= 0` and `!viaMqtt` |
-| `rssi` | `Int` | Complete | Gradient gauge |
+| `rssi` | `Int` | Both | Signal quality via `determineSignalQuality(snr, rssi)` |
 | `batteryLevel` | `Int?` | Both | Non-null |
 | `channel` | `Int` | Both | `> 0` |
 | `position` | `Position?` | Both | Non-null, valid lat/lon |
@@ -95,9 +95,9 @@ The layout reads from the existing `Node` model in `core:model`. No new fields a
 | `hasTracerouteLog` | `Boolean` | Both | Log icon visibility |
 | `hasDeviceMetricsLog` | `Boolean` | Both | Log icon visibility |
 
-## Adaptive Circle Sizing
+## Adaptive Chip Sizing
 
-The compact circle size is derived from a `lineCount` property:
+The compact `NodeChip` size is derived from a `lineCount` property:
 
 ```kotlin
 val lineCount: Int = buildList {
@@ -107,11 +107,11 @@ val lineCount: Int = buildList {
         shouldShowChannel || shouldShowRole || shouldShowTelemetry) add(1)
 }.size
 
-val circleSize: Dp = max(36.dp, min(70.dp, 24.dp * lineCount))
+val chipSize: Dp = max(36.dp, min(70.dp, 24.dp * lineCount))
 ```
 
-| lineCount | Circle Size | Active Rows |
-|-----------|-------------|-------------|
+| lineCount | Chip Size | Active Rows |
+|-----------|-----------|-------------|
 | 1 | 36.dp | Name only |
 | 2 | 48.dp | Name + last heard OR Name + combined |
 | 3 | 70.dp | Name + last heard + combined |

@@ -39,7 +39,7 @@ No new navigation routes or deep links are required.
 | `feature/node/src/commonMain/.../list/NodeListViewModel.kt` | Exposes density + toggle state |
 | `feature/node/src/commonMain/.../list/NodeFilterPreferences.kt` | Layout preference integration |
 | `core/prefs/src/commonMain/.../ui/UiPrefsImpl.kt` | DataStore preference keys |
-| `feature/settings/src/commonMain/.../app/NodeLayoutSettings.kt` | Settings section UI (new) |
+| `feature/settings/src/commonMain/.../NodeLayoutSettings.kt` | Settings section UI (new) |
 | `core/resources/src/commonMain/composeResources/values/strings.xml` | Toggle labels, help text |
 
 ## Test Commands
@@ -81,7 +81,7 @@ No new navigation routes or deep links are required.
 ## Debugging Tips
 
 - **Toggle not persisting**: Check that the DataStore key string matches `NodeListLayoutPreferences` enum value exactly.
-- **Circle size wrong**: Verify `lineCount` derivation — it counts *toggle state*, not *data presence*.
+- **Chip size wrong**: Verify `lineCount` derivation — it counts *toggle state*, not *data presence*.
 - **Live preview empty**: The preview requires at least one node in the Room database. Connect to a radio or use test fixtures.
 - **LazyColumn jank**: Ensure stable `key` parameters are set on `LazyColumn` items. Profile with Layout Inspector if needed.
 
