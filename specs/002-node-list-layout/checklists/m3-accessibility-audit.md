@@ -68,8 +68,8 @@ The codebase already uses several M3 Expressive APIs (all behind `@OptIn(Experim
 **M3/Accessibility Best Practice**: List items should be a single focusable unit with a merged content description. Android accessibility guidelines recommend `mergeDescendants = true` for compound list items.
 
 **Applies to**:
-- Existing `NodeItem` (Complete layout) — **NL-T023 should be HIGH priority, not just "if not already present"**
-- New `NodeItemCompact` — NL-T016 correctly specifies this
+- Existing `NodeItem` (Complete layout) — **NL-T006 is HIGH priority**
+- New `NodeItemCompact` — NL-T012 correctly specifies this
 
 **Recommendation**: Add to both layouts:
 ```kotlin
@@ -105,7 +105,7 @@ Card(
 
 ### 2.5 Missing Minimum Touch Target Sizes
 
-**Finding**: The help button (?) referenced in NL-T053 should meet the minimum 48x48dp touch target per WCAG/Android guidelines. The spec does not specify touch target size.
+**Finding**: The help button (?) referenced in NL-T037 should meet the minimum 48x48dp touch target per WCAG/Android guidelines. The spec does not specify touch target size.
 
 **Recommendation**: Use `IconButton` (which has M3's built-in 48dp minimum) rather than a raw `Icon` with `clickable`.
 
@@ -155,19 +155,19 @@ Card(
 
 | ID | Finding | Spec Impact | Task Impact |
 |----|---------|-------------|-------------|
-| 2.1 | Row-level semantics merge | Add to FR-025: "MUST use `semantics(mergeDescendants = true)` with a composed `contentDescription`" | **NL-T023** must be HIGH priority (currently just "if not already present"). Both layouts need a `buildNodeDescription()` function. |
-| 2.3 | Missing `Role.Button` | Add to FR-025: "clickable rows MUST declare `role = Role.Button`" | Add to NL-T016 and NL-T023 |
-| 1.1 | Use `SwitchPreference`/`SwitchListItem` | Update FR-003: change "9 toggles (`Switch` composables)" → "9 toggles using `SwitchPreference` from `core:ui`" | Update NL-T041 to reference `SwitchPreference` |
-| 1.4 | VerticalDivider fragility | Update FR-014: note that parent Row should use `IntrinsicSize.Min` | Add note to NL-T013 |
-| 2.6 | Compact signal contentDescription | Add to FR-017: "Signal icon MUST include `contentDescription` with quality level name" | Add to NL-T013 |
-| 2.8 | Font scaling | Update FR-011: use `defaultMinSize` not hard `size` | Add note to NL-T014 |
+| 2.1 | Row-level semantics merge | Add to FR-025: "MUST use `semantics(mergeDescendants = true)` with a composed `contentDescription`" | **NL-T006** is HIGH priority — fixes existing `NodeItem`. NL-T012 covers `NodeItemCompact`. Both layouts need a `buildNodeDescription()` function. |
+| 2.3 | Missing `Role.Button` | Add to FR-025: "clickable rows MUST declare `role = Role.Button`" | Add to NL-T006 and NL-T012 |
+| 1.1 | Use `SwitchPreference`/`SwitchListItem` | Update FR-003: change "9 toggles (`Switch` composables)" → "9 toggles using `SwitchPreference` from `core:ui`" | Update NL-T028 to reference `SwitchPreference` |
+| 1.4 | VerticalDivider fragility | Update FR-014: note that parent Row should use `IntrinsicSize.Min` | Add note to NL-T020 |
+| 2.6 | Compact signal contentDescription | Add to FR-017: "Signal icon MUST include `contentDescription` with quality level name" | Add to NL-T023 |
+| 2.8 | Font scaling | Update FR-011: use `defaultMinSize` not hard `size` | Add note to NL-T032 |
 
 ### Recommended Additions (Non-Blocking)
 
 | Finding | Recommendation |
 |---------|---------------|
 | 1.4 spacing | Document 2.dp/3.dp padding as intentional density deviation from M3 8-16dp recommendation |
-| 2.5 touch targets | NL-T053: specify `IconButton` for help button |
+| 2.5 touch targets | NL-T037: specify `IconButton` for help button |
 | 2.7 live regions | Consider `LiveRegionMode.Polite` announcement on density change |
 | 2.9 contrast | Separate issue — audit `NodeChip` color contrast across all node color assignments |
 

@@ -20,17 +20,36 @@
   ============================================================================
 -->
 
+## Constitution Compliance
+
+- [ ] CHK001 — Principle I (KMP Core): All code in `commonMain`? No `java.*`/`android.*` imports? [Consistency]
+- [ ] CHK002 — Principle II (Zero Lint Tolerance): `spotlessApply` + `detekt` pass? [Consistency]
+- [ ] CHK003 — Principle III (CMP UI): Compose Multiplatform composables? `NumberFormatter.format()` for floats? Navigation 3 patterns? [Consistency]
+- [ ] CHK004 — Principle IV (Privacy First): No PII/location/key logging? Proto submodule untouched? [Consistency]
+- [ ] CHK005 — Principle V (Design Standards): UI reviewed against Meshtastic design standards? [Consistency]
+- [ ] CHK006 — Principle VI (Verify Before Push): Full verification passing locally? [Consistency]
+- [ ] CHK007 — Principle VII (Coroutine Safety): `safeCatching {}` used? Project `ioDispatcher`? [Consistency]
+- [ ] CHK008 — Principle VIII (Resource Discipline): `stringResource(Res.string.key)`? `MeshtasticIcons`? `sort-strings.py` run? [Consistency]
+- [ ] CHK009 — Principle IX (Branch & Scope Hygiene): Branch naming? Scope limit? [Consistency]
+
 ## [Category 1]
 
-- [ ] CHK001 First checklist item with clear action
-- [ ] CHK002 Second checklist item
-- [ ] CHK003 Third checklist item
+- [ ] CHK010 First checklist item with clear action
+- [ ] CHK011 Second checklist item
+- [ ] CHK012 Third checklist item
 
 ## [Category 2]
 
-- [ ] CHK004 Another category item
-- [ ] CHK005 Item with specific criteria
-- [ ] CHK006 Final item in this category
+- [ ] CHK013 Another category item
+- [ ] CHK014 Item with specific criteria
+- [ ] CHK015 Final item in this category
+
+## Cross-Artifact Consistency
+
+- [ ] CHK0XX — Do task IDs in tasks.md align with plan.md phase references? [Consistency]
+- [ ] CHK0XX — Do data model preference keys match spec Toggle/Key Reference? [Consistency]
+- [ ] CHK0XX — Do research decisions align with spec requirements? [Consistency]
+- [ ] CHK0XX — Are all audit/review findings reflected in spec or tasks? [Completeness]
 
 ## Notes
 

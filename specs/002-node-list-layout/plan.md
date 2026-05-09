@@ -17,7 +17,7 @@ Add a density-switching system to the existing node list in `feature/node/`. Use
 **Project Type**: Mobile/desktop app (Kotlin Multiplatform)  
 **Performance Goals**: 60fps scrolling with 200+ compact nodes in `LazyColumn`  
 **Constraints**: All UI in `commonMain`; no `java.*`/`android.*` in common; CMP float pre-formatting via `NumberFormatter.format()`  
-**Scale/Scope**: 3 new files, ~6 modified files across `feature/node`, `core/prefs`, `feature/settings`
+**Scale/Scope**: 5 new files, ~6 modified files across `feature/node`, `core/prefs`, `core/resources`, `feature/settings`
 
 ## Constitution Check
 
@@ -26,11 +26,11 @@ Add a density-switching system to the existing node list in `feature/node/`. Use
 | Principle | Status | Notes |
 |-----------|--------|-------|
 | I. Kotlin Multiplatform Core | ✅ PASS | All code in `commonMain`. No `java.*`/`android.*` imports. Uses DataStore KMP, Room KMP, Koin 4.2+. |
-| II. Zero Lint Tolerance | ✅ PASS | `spotlessApply` + `detekt` required before merge (NL-T066). |
+| II. Zero Lint Tolerance | ✅ PASS | `spotlessApply` + `detekt` required before merge (NL-T047). |
 | III. Compose Multiplatform UI | ✅ PASS | Uses JetBrains Compose Multiplatform composables. Floats pre-formatted via `NumberFormatter.format()`. No Android-only Compose APIs. |
 | IV. Privacy First | ✅ PASS | Feature is read-only display of existing node data. No new PII logging, no network calls, no crypto key exposure. |
-| V. Design Standards Compliance | ✅ PASS | Phase 0 (NL-T000) gates all UI work on design standards review. New composables reviewed against upstream standards. |
-| VI. Verify Before Push | ✅ PASS | Full verification via `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests` required (NL-T066). |
+| V. Design Standards Compliance | ✅ PASS | Phase 1 (NL-T001) gates all UI work on design standards review. New composables reviewed against upstream standards. |
+| VI. Verify Before Push | ✅ PASS | Full verification via `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests` required (NL-T047). |
 
 **Gate Result**: ✅ All six principles satisfied. No violations requiring justification.
 
@@ -44,7 +44,7 @@ specs/002-node-list-layout/
 ├── research.md          # Phase 0 output — 5 research decisions
 ├── data-model.md        # Phase 1 output — preference keys, density enum, node fields
 ├── quickstart.md        # Phase 1 output — bootstrap and development guide
-└── tasks.md             # Phase 2 output — 39 tasks across 8 phases
+└── tasks.md             # Phase 2 output — 47 tasks across 7 phases
 ```
 
 ### Source Code (repository root)
@@ -91,8 +91,8 @@ core/resources/
 
 | Module | Change Type | Files Affected | Risk |
 |--------|-------------|----------------|------|
-| `feature/node` | New + Modify | 6 files (3 new, 3 modified) | Medium — core feature changes |
-| `core/prefs` | Modify | 1 file (UiPrefsImpl.kt) | Low — additive preference keys |
+| `feature/node` | New + Modify | 7 files (3 new, 4 modified) | Medium — core feature changes |
+| `core/prefs` | New + Modify | 2 files (1 new, 1 modified) | Low — additive preference keys |
 | `feature/settings` | New | 1 file (NodeLayoutSettings.kt) | Low — new standalone section |
 | `core/ui` | None | 0 — uses existing composables only | None |
 | `core/resources` | Modify | 1 file (strings.xml) | Low — additive string resources |
@@ -157,43 +157,42 @@ No new routes needed. The settings section is embedded within the existing `Sett
 - Clickable rows MUST declare `role = Role.Button` for TalkBack "double tap to activate" announcement
 - Signal icons MUST include quality-level `contentDescription` (WCAG 1.4.1 — no color-only information)
 - Chip sizing MUST use `Modifier.defaultMinSize()` instead of hard `Modifier.size()` to grow with system font scaling
-- **NL-T023 is HIGH priority** — the existing `NodeItem` has zero row-level semantics, causing 8-12 separate TalkBack focus stops per node
+- **NL-T006 is HIGH priority** — the existing `NodeItem` has zero row-level semantics, causing 8-12 separate TalkBack focus stops per node
 
 ## Risk Assessment
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
-| Scroll performance degrades with 200+ compact rows | Low | High | Use stable `key` in `LazyColumn`, avoid unnecessary recompositions via `derivedStateOf` (NL-T032, NL-T033) |
+| Scroll performance degrades with 200+ compact rows | Low | High | Use stable `key` in `LazyColumn`, avoid unnecessary recompositions via `derivedStateOf` (NL-T018, NL-T038) |
 | Toggle state out of sync between Settings and NodeList | Low | Medium | Both screens observe the same DataStore flows — single source of truth |
-| Existing `NodeItem` refactor breaks current behavior | Medium | High | Add snapshot/screenshot tests for Complete layout before modifying (NL-T020) |
-| Live preview renders incorrectly without database nodes | Low | Low | Show placeholder text when no nodes exist (NL-T044) |
-| Design standards non-compliance | Low | Medium | Phase 0 gates all UI work on standards review (NL-T000) |
-| String resource conflicts | Low | Low | Run `python3 scripts/sort-strings.py` after adding strings (NL-T004) |
-| TalkBack regression in existing NodeItem | High | High | Existing `NodeItem` has no row-level semantics merge (8-12 focus stops per row). NL-T023 is HIGH priority to fix before shipping compact variant. |
-| Font scaling clips compact chip text | Medium | Medium | Use `defaultMinSize()` not hard `size()` for adaptive growth (NL-T014) |
+| Existing `NodeItem` refactor breaks current behavior | Medium | High | Validate Complete layout semantics before modifying (NL-T007, NL-T008) |
+| Live preview renders incorrectly without database nodes | Low | Low | Show placeholder text when no nodes exist (NL-T030) |
+| Design standards non-compliance | Low | Medium | Phase 1 gates all UI work on standards review (NL-T001) |
+| String resource conflicts | Low | Low | Run `python3 scripts/sort-strings.py` after adding strings (NL-T005) |
+| TalkBack regression in existing NodeItem | High | High | Existing `NodeItem` has no row-level semantics merge (8-12 focus stops per row). NL-T006 is HIGH priority to fix before shipping compact variant. |
+| Font scaling clips compact chip text | Medium | Medium | Use `defaultMinSize()` not hard `size()` for adaptive growth (NL-T032) |
 
 ## Phase Alignment with Tasks
 
-The implementation is structured across 8 phases (40 tasks) as defined in `tasks.md`:
+The implementation is structured across 7 phases (47 tasks) as defined in `tasks.md`:
 
 | Phase | Purpose | Key Tasks | Dependencies |
 |-------|---------|-----------|--------------|
-| 0. Design Gate | Review design standards | NL-T000 | None — blocks all UI |
-| 1. Preferences | Density enum + DataStore keys | NL-T001–T004 | None |
-| 2. Compact Row | `NodeItemCompact` composable | NL-T010–T019 | Phase 1 |
-| 3. Complete Refactor | Validate `NodeItem` as Complete | NL-T020–T023 | None (parallel with Phase 2) |
-| 4. Density Switching | Wire density into NodeList | NL-T030–T033 | Phases 2 + 3 |
-| 5. Settings UI | `NodeLayoutSettings` section | NL-T040–T045 | Phase 1 |
-| 6. Help Sheet | Signal strength documentation | NL-T050–T053 | None (parallel with 2–5) |
-| 7. Testing | Unit + UI tests, verification | NL-T060–T066 | Phases 1–6 |
+| 1. Setup | Design gate, density enum, DataStore keys, strings | NL-T001–T005 | None — NL-T001 blocks all UI |
+| 2. Foundational | NodeItem a11y fix, ViewModel wiring | NL-T006–T009 | Phase 1 |
+| 3. US1 — Density Switch | Compact scaffold, settings picker, list wiring | NL-T010–T018 | Phase 2 |
+| 4. US2 — Field Toggles | 9 compact toggles, all conditional fields | NL-T019–T030 | Phase 3 |
+| 5. US3 — Adaptive Sizing | lineCount + adaptive chip sizing | NL-T031–T033 | Phase 4 |
+| 6. US4 — Help Sheet | Signal strength documentation | NL-T034–T037 | Phase 1 (parallel with 3–5) |
+| 7. Polish | Performance, edge cases, tests, verification | NL-T038–T047 | Phases 3–6 |
 
 ### Critical Path
 
 ```
-Phase 0 → Phase 1 → Phase 2 → Phase 4 → Phase 7
+Phase 1 → Phase 2 → Phase 3 (US1) → Phase 4 (US2) → Phase 5 (US3) → Phase 7
 ```
 
-Phases 3, 5, and 6 run in parallel off the critical path, converging at Phase 7 (Testing).
+Phase 6 (US4) runs in parallel off the critical path, converging at Phase 7 (Polish).
 
 ## Complexity Tracking
 

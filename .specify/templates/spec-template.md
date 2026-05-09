@@ -5,6 +5,25 @@
 **Status**: Draft  
 **Input**: User description: "$ARGUMENTS"
 
+## Summary
+
+<!--
+  Provide a brief (2-3 sentence) summary of the feature, its purpose, and what
+  user problem it solves. Mention which modules are primarily affected.
+-->
+
+## Goals
+
+<!--
+  List 3-5 goals this feature achieves. Be specific and measurable.
+-->
+
+## Non-Goals
+
+<!--
+  Explicitly state what this feature does NOT do to prevent scope creep.
+-->
+
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
@@ -75,6 +94,26 @@
 - What happens when [boundary condition]?
 - How does system handle [error scenario]?
 
+## Architecture
+
+<!--
+  ACTION REQUIRED: Describe the layout structure, data flow, and key components.
+  Include ASCII diagrams for visual layouts and Mermaid flowcharts for data flow.
+  Reference existing composables from core:ui where applicable.
+-->
+
+### Key Components
+
+<!--
+  List the components involved in this feature with their module paths and purpose.
+  Reference existing components from core:ui, core:model, etc. where applicable.
+-->
+
+| Component | Module / File | Purpose |
+|-----------|---------------|---------|
+| [Component] | `feature/[name]/component/` | [Purpose] |
+| [Existing Component] | `core/ui/component/` | [Reuse purpose] |
+
 ## Requirements *(mandatory)*
 
 <!--
@@ -84,21 +123,49 @@
 
 ### Functional Requirements
 
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-001**: System MUST [specific capability]
+- **FR-002**: System MUST [specific capability]
 
-*Example of marking unclear requirements:*
+### Non-Functional Requirements
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **NFR-001**: [Performance, accessibility, or quality requirement]
 
-### Key Entities *(include if feature involves data)*
+## Source-Set Impact
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+<!--
+  ACTION REQUIRED: Identify which KMP source sets this feature affects.
+  All business logic and UI MUST be in commonMain (Constitution §I, §III).
+-->
+
+| Source Set | Impact | Justification |
+|-----------|--------|---------------|
+| `commonMain` | [New files / Modified files] | All business logic and UI |
+| `androidMain` | [None / Platform integration only] | [Justification if needed] |
+| `jvmMain` | [None / Shared JVM code] | [Justification if needed] |
+
+## Design Standards Compliance
+
+<!--
+  ACTION REQUIRED: Note any UI elements that must be reviewed against the
+  Meshtastic Client Design Standards (Constitution §V). Flag intentional
+  deviations with rationale.
+-->
+
+- [ ] New screens reviewed against [design standards](https://raw.githubusercontent.com/meshtastic/design/refs/heads/master/standards/meshtastic_design_standards_latest.md)
+- [ ] M3 component selection verified (e.g., `SwitchPreference` not raw `Switch`)
+- [ ] Accessibility: TalkBack semantics, touch targets, color-independent info
+- [ ] Typography: `titleMediumEmphasized` for emphasis, M3 scale for hierarchy
+
+## Privacy Assessment
+
+<!--
+  ACTION REQUIRED: Confirm this feature does not violate Constitution §IV.
+  If the feature handles any sensitive data, document the safeguards.
+-->
+
+- [ ] No PII, location data, or cryptographic keys logged or exposed
+- [ ] No new network calls that transmit user data
+- [ ] Proto submodule (`core/proto`) not modified (read-only upstream)
 
 ## Success Criteria *(mandatory)*
 
@@ -109,10 +176,8 @@
 
 ### Measurable Outcomes
 
-- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
-- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-001**: [Measurable metric]
+- **SC-002**: [Measurable metric]
 
 ## Assumptions
 
@@ -122,7 +187,8 @@
   chosen when the feature description did not specify certain details.
 -->
 
-- [Assumption about target users, e.g., "Users have stable internet connectivity"]
-- [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
-- [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
-- [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+- All business logic and UI composables reside in `commonMain` source set
+- String resources added to `core/resources/src/commonMain/composeResources/values/strings.xml`
+- Icons use `MeshtasticIcons` (from `core/ui/icon/`)
+- Float values pre-formatted with `NumberFormatter.format()` (CMP constraint)
+- [Additional feature-specific assumptions]

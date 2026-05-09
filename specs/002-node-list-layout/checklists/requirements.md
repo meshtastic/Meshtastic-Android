@@ -172,10 +172,10 @@
 
 - [ ] CHK099 — Are unit tests specified for preference defaults, `lineCount` calculation, and invalid density string fallback? [Coverage, Tasks §Phase 7]
 - [ ] CHK100 — Are Compose UI tests specified for both layout variants? [Coverage, Tasks §Phase 7]
-- [ ] CHK101 — Are unit tests specified for edge cases (future date filtering, channel 0, signal/hops exclusivity, connected node distance, MQTT signal)? [Coverage, Tasks §NL-T062]
-- [ ] CHK102 — Is the live preview empty-state placeholder specified for when Room database has zero nodes? [Coverage, Tasks §NL-T044]
-- [ ] CHK103 — Is the full verification command documented (`./gradlew spotlessApply detekt assembleDebug test allTests`)? [Completeness, Tasks §NL-T066]
-- [ ] CHK104 — Is the Phase 0 design gate (NL-T000) specified as blocking all UI work? [Completeness, Tasks §Phase 0]
+- [ ] CHK101 — Are unit tests specified for edge cases (future date filtering, channel 0, signal/hops exclusivity, connected node distance, MQTT signal)? [Coverage, Tasks §NL-T043]
+- [ ] CHK102 — Is the live preview empty-state placeholder specified for when Room database has zero nodes? [Coverage, Tasks §NL-T030]
+- [ ] CHK103 — Is the full verification command documented (`./gradlew spotlessApply detekt assembleDebug test allTests`)? [Completeness, Tasks §NL-T047]
+- [ ] CHK104 — Is the Phase 1 design gate (NL-T001) specified as blocking all UI work? [Completeness, Tasks §Phase 1]
 
 ## Constitution Compliance
 
@@ -196,8 +196,8 @@
 
 ## Cross-Artifact Consistency
 
-- [ ] CHK116 — Do the task IDs in `tasks.md` (40 tasks across 8 phases) align with the plan's phase descriptions? [Consistency, Plan §Phase Alignment]
+- [ ] CHK116 — Do the task IDs in `tasks.md` (47 tasks across 7 phases) align with the plan's phase descriptions? [Consistency, Plan §Phase Alignment]
 - [ ] CHK117 — Does the data model's preference key list match the spec's Toggle Reference table exactly? [Consistency, Data Model vs Spec §Toggle Reference]
 - [ ] CHK118 — Do research decisions (R-001 to R-005) align with the corresponding spec requirements? [Consistency, Research vs Spec]
 - [ ] CHK119 — Are all M3/accessibility audit findings (6 required changes, 4 recommendations) reflected in the spec or tasks? [Completeness, Audit §Summary]
-- [ ] CHK120 — Does the critical path in the plan (Phase 0→1→2→4→7) match the dependency graph in tasks? [Consistency, Plan §Critical Path vs Tasks §Dependency Graph]
+- [ ] CHK120 — Does the critical path in the plan (Phase 1→2→3→4→5→7) match the dependency graph in tasks? [Consistency, Plan §Critical Path vs Tasks §Dependency Graph]
