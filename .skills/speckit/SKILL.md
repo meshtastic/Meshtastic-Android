@@ -108,7 +108,7 @@ specs/
 The project constitution at `.specify/memory/constitution.md` defines non-negotiable principles.
 All specs, plans, and tasks are validated against it during `/speckit.analyze`.
 
-Current constitution (v1.1.0) enforces 6 principles:
+Current constitution (v1.2.3) enforces 9 principles:
 
 1. **KMP Core** — Business logic in `commonMain` only
 2. **Zero Lint Tolerance** — `spotlessCheck` + `detekt` must pass
@@ -116,6 +116,9 @@ Current constitution (v1.1.0) enforces 6 principles:
 4. **Privacy First** — No PII/location/key exposure
 5. **Design Standards Compliance** — Review against Meshtastic design standards
 6. **Verify Before Push** — Local verification before any `git push`
+7. **Coroutine Safety** — `safeCatching` over `runCatching`, project `ioDispatcher`
+8. **Resource Discipline** — `stringResource(Res.string.key)`, `MeshtasticIcons`, sort-strings
+9. **Branch & Scope Hygiene** — Naming conventions, upstream branching, scope limits
 
 ## Extension Hooks
 
@@ -129,8 +132,11 @@ Git hooks are configured in `.specify/extensions.yml` and run automatically:
 
 ### Branch Naming
 
-Feature branches created by `/speckit.git.feature` follow the project convention:
+Feature branches created by `/speckit.git.feature` follow sequential numbering:
 `<NNN>-feature-name` (e.g., `001-local-mesh-discovery`)
+
+Non-spec branches follow conventional commit-style prefixes:
+`feat/`, `fix/`, `chore/`, `docs/`, `build/`, `ci/`, `refactor/`, `test/`, `deps/`
 
 ### Task ID Namespacing
 
@@ -141,6 +147,20 @@ To avoid collision when multiple specs exist, prefix task IDs by feature:
 | 001-local-mesh-discovery | `D` | D001, D002, ... |
 | 002-node-list-layout | `NL-T` | NL-T001, NL-T002, ... |
 | 003-app-docs-markdown | `T` | T000, T010, ... |
+| 004-messaging | `MSG-T` | MSG-T001, MSG-T002, ... |
+| 005-device-connections | `DC-T` | DC-T001, DC-T002, ... |
+| 006-firmware-update | `FW-T` | FW-T001, FW-T002, ... |
+| 007-node-detail-metrics | `NDM-T` | NDM-T001, NDM-T002, ... |
+| 008-radio-app-settings | `SET-T` | SET-T001, SET-T002, ... |
+| 009-map-view | `MAP-T` | MAP-T001, MAP-T002, ... |
+| 010-onboarding | `OB-T` | OB-T001, OB-T002, ... |
+| 011-wifi-provisioning | `WFP-T` | WFP-T001, WFP-T002, ... |
+| 012-core-data | `DAT-T` | DAT-T001, DAT-T002, ... |
+| 013-core-ble | `BLE-T` | BLE-T001, BLE-T002, ... |
+| 014-core-network | `NET-T` | NET-T001, NET-T002, ... |
+| 015-core-database | `DB-T` | DB-T001, DB-T002, ... |
+| 016-core-service | `SVC-T` | SVC-T001, SVC-T002, ... |
+| 017-core-model | `MDL-T` | MDL-T001, MDL-T002, ... |
 
 ### Design Standards Gate
 
@@ -170,9 +190,23 @@ the primary contract.
 
 | ID | Feature | Status | FRs | Tasks |
 |----|---------|--------|-----|-------|
-| 001 | Local Mesh Discovery | Not Started | 38 | 49 |
-| 002 | Node List Layout | Not Started | 27 | 38 |
-| 003 | App Documentation | Not Started | 37 | 139 |
+| 001 | Local Mesh Discovery | Not Started | 38 | 50 |
+| 002 | Node List Layout | Not Started | 28 | 47 |
+| 003 | App Documentation | Not Started | 37 | 90 |
+| 004 | Messaging & Contacts | Migrated | 18 | 30 |
+| 005 | Device Connections | Migrated | 14 | 38 |
+| 006 | Firmware Update (OTA) | Migrated | 18 | 61 |
+| 007 | Node Detail & Metrics | Migrated | 18 | 46 |
+| 008 | Radio & App Settings | Migrated | 20 | 78 |
+| 009 | Map View | Migrated | 14 | 23 |
+| 010 | Onboarding | Migrated | 10 | 19 |
+| 011 | WiFi Provisioning | Migrated | 14 | 25 |
+| 012 | Core Data Layer | Migrated | 14 | 30 |
+| 013 | Core BLE | Migrated | 12 | 21 |
+| 014 | Core Network | Migrated | 16 | 26 |
+| 015 | Core Database | Migrated | 14 | 19 |
+| 016 | Core Service | Migrated | 14 | 24 |
+| 017 | Core Model | Migrated | 10 | 22 |
 
 ## Related Skills
 

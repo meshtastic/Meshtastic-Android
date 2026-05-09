@@ -45,11 +45,11 @@ Create `NodeItemCompact` as a standalone composable, separate from the existing 
 ### Consequences
 
 - Both `NodeItem` and `NodeItemCompact` must independently implement TalkBack semantics.
-- Shared sub-components (`CircleText`, `MaterialBatteryInfo`, `LastHeardInfo`, etc.) remain in `core:ui` and are composed by both layouts.
+- Shared sub-components (`NodeChip`, `MaterialBatteryInfo`, `LastHeardInfo`, etc.) remain in `core:ui` and are composed by both layouts.
 
 ---
 
-## R-003: Adaptive circle sizing formula
+## R-003: Adaptive chip sizing formula
 
 ### Decision
 
@@ -59,14 +59,14 @@ Use `max(36.dp, min(70.dp, 24.dp × lineCount))` where `lineCount` is the number
 
 - The formula produces three discrete sizes: 36.dp (1 row), 48.dp (2 rows), 70.dp (3 rows = same as Complete).
 - The minimum 36.dp ensures the short name remains readable even when all optional rows are hidden.
-- The maximum 70.dp matches the Complete layout's fixed circle, maintaining visual consistency when all rows are enabled.
-- 24.dp per line provides proportional vertical alignment between the circle and the content column.
+- The maximum 70.dp matches the Complete layout's fixed chip, maintaining visual consistency when all rows are enabled.
+- 24.dp per line provides proportional vertical alignment between the chip and the content column.
 
 ### Alternatives considered
 
-- **Fixed circle size regardless of toggles**: Rejected — wastes vertical space when optional rows are hidden, reducing the density benefit.
+- **Fixed chip size regardless of toggles**: Rejected — wastes vertical space when optional rows are hidden, reducing the density benefit.
 - **Continuous scaling based on total row height**: Rejected — overly complex and produces non-standard sizes that feel inconsistent.
-- **Collapsing to a capsule/pill shape at minimum**: Rejected — the spec requires the circle to always render as a circle (FR-010).
+- **Collapsing to a capsule/pill shape at minimum**: Rejected — the `NodeChip` maintains consistent card styling at all sizes (FR-010).
 
 ### Consequences
 
@@ -74,27 +74,27 @@ Use `max(36.dp, min(70.dp, 24.dp × lineCount))` where `lineCount` is the number
 
 ---
 
-## R-004: Signal strength display differences between layouts
+## R-004: Signal quality display differences between layouts
 
 ### Decision
 
-Complete layout uses `LoRaSignalStrengthMeter` (gradient gauge). Compact layout uses a single colored icon via `getSnrColor()`.
+Complete layout uses `LoraSignalIndicator` / `NodeSignalQuality` composables (quality icon + SNR/RSSI text). Compact layout uses a single colored icon via the `Quality` enum from `determineSignalQuality(snr, rssi)`.
 
 ### Rationale
 
-- The gradient gauge provides detailed visual feedback but requires horizontal space that the compact layout cannot afford.
-- A single colored icon conveys the essential information (good/fair/bad/very bad) at compact density.
-- The same `getSnrColor(snr, preset)` function drives both representations, ensuring consistent thresholds.
+- The `NodeSignalQuality` FlowRow provides detailed visual feedback (SNR value, RSSI value, quality label) but requires horizontal space that the compact layout cannot afford.
+- A single colored icon conveys the essential information (Good/Fair/Bad/None) at compact density.
+- The same `determineSignalQuality(snr, rssi)` function drives both representations, ensuring consistent thresholds.
 
 ### Alternatives considered
 
-- **Same gauge in both layouts**: Rejected — the gauge is too wide for the compact combined-icons row.
+- **Same composable in both layouts**: Rejected — the `NodeSignalQuality` FlowRow is too wide for the compact combined-icons row.
 - **No signal indicator in compact**: Rejected — signal quality is one of the most useful at-a-glance metrics.
 - **Numeric SNR value in compact**: Rejected — requires domain knowledge to interpret; color-coding is more accessible.
 
 ### Consequences
 
-- The help sheet must document both representations so users understand the relationship between the compact icon colors and the Complete gauge.
+- The help sheet must document both representations so users understand the relationship between the compact icon colors and the Complete layout's `LoraSignalIndicator` display.
 
 ---
 
