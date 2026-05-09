@@ -361,6 +361,10 @@
     <string name="ethernet_config">Ethernet Einstellungen</string>
     <string name="ethernet_enabled">Ethernet aktiviert</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="event_welcome_burning_man">Willkommen bei Burning Man! 🔥</string>
+    <string name="event_welcome_defcon">Willkommen bei DEFCON! 💀</string>
+    <string name="event_welcome_hamvention">Willkommen bei Hamvention! 🍖📻</string>
+    <string name="event_welcome_open_sauce">Willkommen bei Open Sauce! 🔧</string>
     <string name="exchange_position">Standort austauschen</string>
     <string name="expand_chart">Diagramm einblenden</string>
     <string name="expires">Gültig bis</string>
@@ -709,6 +713,7 @@
     <string name="mqtt_probe_success_with_info">Erreichbar (%1$s)</string>
     <string name="mqtt_probe_tcp_failure">Broker (TCP) nicht erreichbar</string>
     <string name="mqtt_probe_timeout">Zeitüberschreitung nach %1$d ms</string>
+    <string name="mqtt_probe_tls_failure">TLS Aushandlung fehlgeschlagen: %1$s</string>
     <string name="mqtt_status_connected">Verbunden</string>
     <string name="mqtt_status_connecting">Wird verbunden</string>
     <string name="mqtt_status_disconnected">Verbindung getrennt</string>
