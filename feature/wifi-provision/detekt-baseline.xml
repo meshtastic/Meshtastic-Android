@@ -3,5 +3,13 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>ModifierMissing:WifiProvisionScreen.kt:@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class) @Suppress("LongMethod") @Composable fun WifiProvisionScreen</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun ConnectedFailedPreview</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun ConnectedSuccessPreview</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun ConnectedWithNetworksPreview</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun DeviceFoundPreview</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun MpwrdDisclaimerBannerPreview</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun NetworkRowPreview</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun ProvisionStatusCardSuccessPreview</ID>
+    <ID>PreviewPublic:WifiProvisionPreviews.kt:@PreviewLightDark @Composable fun ScanningBlePreview</ID>
   </CurrentIssues>
 </SmellBaseline>

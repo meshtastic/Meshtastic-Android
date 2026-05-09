@@ -69,6 +69,6 @@ fun ChannelInfo(
 
 @PreviewLightDark
 @Composable
-private fun ChannelInfoPreview() {
+fun ChannelInfoPreview() {
     AppTheme { ChannelInfo(channel = 2) }
 }

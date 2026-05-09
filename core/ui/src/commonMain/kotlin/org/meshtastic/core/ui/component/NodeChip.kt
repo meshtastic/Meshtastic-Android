@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.User
@@ -78,7 +79,7 @@ fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit
 @Suppress("MagicNumber")
 @Preview
 @Composable
-private fun NodeChipPreview() {
+fun NodeChipPreview() {
     val user = User(short_name = "\uD83E\uDEE0", long_name = "John Doe")
     val node =
         Node(
@@ -88,5 +89,5 @@ private fun NodeChipPreview() {
             paxcounter = Paxcount(ble = 10, wifi = 5),
             environmentMetrics = EnvironmentMetrics(temperature = 25f, relative_humidity = 60f),
         )
-    NodeChip(node = node)
+    AppTheme { NodeChip(node = node) }
 }

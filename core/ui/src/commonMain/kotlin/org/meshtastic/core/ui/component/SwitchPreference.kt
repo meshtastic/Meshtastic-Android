@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun SwitchPreference(
@@ -86,6 +87,6 @@ fun SwitchPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun SwitchPreferencePreview() {
-    SwitchPreference(title = "Setting", checked = true, enabled = true, onCheckedChange = {})
+fun SwitchPreferencePreview() {
+    AppTheme { SwitchPreference(title = "Setting", checked = true, enabled = true, onCheckedChange = {}) }
 }

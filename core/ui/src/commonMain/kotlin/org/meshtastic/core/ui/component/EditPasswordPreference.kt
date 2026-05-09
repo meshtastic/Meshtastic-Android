@@ -38,6 +38,7 @@ import org.meshtastic.core.resources.show_password
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun EditPasswordPreference(
@@ -82,13 +83,15 @@ fun EditPasswordPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun EditPasswordPreferencePreview() {
-    EditPasswordPreference(
-        title = "Password",
-        value = "top secret",
-        maxSize = 63,
-        enabled = true,
-        keyboardActions = KeyboardActions {},
-        onValueChanged = {},
-    )
+fun EditPasswordPreferencePreview() {
+    AppTheme {
+        EditPasswordPreference(
+            title = "Password",
+            value = "top secret",
+            maxSize = 63,
+            enabled = true,
+            keyboardActions = KeyboardActions {},
+            onValueChanged = {},
+        )
+    }
 }

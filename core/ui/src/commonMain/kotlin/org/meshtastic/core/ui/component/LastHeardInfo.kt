@@ -49,6 +49,6 @@ fun LastHeardInfo(
 
 @PreviewLightDark
 @Composable
-private fun LastHeardInfoPreview() {
+fun LastHeardInfoPreview() {
     AppTheme { LastHeardInfo(lastHeard = nowSeconds.toInt() - 8600) }
 }

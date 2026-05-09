@@ -253,9 +253,8 @@ fun MetricIndicator(color: Color, modifier: Modifier = Modifier) {
 }
 
 @PreviewLightDark
-@Suppress("unused") // Compose preview
 @Composable
-private fun LegendPreview() {
+fun LegendPreview() {
     val data =
         listOf(
             LegendData(nameRes = Res.string.rssi, color = Color.Red, isLine = true),

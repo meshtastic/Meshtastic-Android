@@ -38,7 +38,7 @@ private val previewData = NodePreviewParameterProvider()
 
 @PreviewLightDark
 @Composable
-private fun DeviceActionsRemotePreview() {
+fun DeviceActionsRemotePreview() {
     val node = previewData.mickeyMouse
     AppTheme {
         Surface {
@@ -65,7 +65,7 @@ private fun DeviceActionsRemotePreview() {
 
 @PreviewLightDark
 @Composable
-private fun DeviceActionsLocalPreview() {
+fun DeviceActionsLocalPreview() {
     val node = previewData.mickeyMouse
     AppTheme {
         Surface {
@@ -90,7 +90,7 @@ private fun DeviceActionsLocalPreview() {
 
 @PreviewLightDark
 @Composable
-private fun TelemetricActionsSectionPreview() {
+fun TelemetricActionsSectionPreview() {
     val node = previewData.mickeyMouse
     AppTheme {
         Surface {
@@ -118,7 +118,7 @@ private fun TelemetricActionsSectionPreview() {
 
 @PreviewLightDark
 @Composable
-private fun TelemetricActionsSectionEmptyPreview() {
+fun TelemetricActionsSectionEmptyPreview() {
     val node = previewData.minnieMouse
     AppTheme {
         Surface {
@@ -142,7 +142,7 @@ private fun TelemetricActionsSectionEmptyPreview() {
 
 @PreviewLightDark
 @Composable
-private fun PositionInlineContentPreview() {
+fun PositionInlineContentPreview() {
     val node = previewData.mickeyMouse
     AppTheme {
         Surface {
@@ -162,7 +162,7 @@ private fun PositionInlineContentPreview() {
 
 @PreviewLightDark
 @Composable
-private fun NodeDetailsSectionPreview() {
+fun NodeDetailsSectionPreview() {
     val node = previewData.mickeyMouse
     AppTheme { Surface { NodeDetailsSection(node = node) } }
 }

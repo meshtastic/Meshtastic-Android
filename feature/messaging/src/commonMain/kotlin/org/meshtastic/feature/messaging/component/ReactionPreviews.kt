@@ -29,7 +29,7 @@ import org.meshtastic.proto.User
 
 @PreviewLightDark
 @Composable
-private fun ReactionItemPreview() {
+fun ReactionItemPreview() {
     AppTheme {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             ReactionItem(emoji = "\uD83D\uDE42")

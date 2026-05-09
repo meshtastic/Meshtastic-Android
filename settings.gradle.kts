@@ -122,5 +122,6 @@ if (!desktopOnly) {
         ":core:api",
         ":core:barcode",
         ":feature:widget",
+        ":screenshot-tests",
     )
 }

@@ -103,6 +103,20 @@ jobs:
         if: inputs.run_lint == false
         run: ./gradlew kmpSmokeCompile -Pci=true --continue --scan
 
+      - name: Screenshot Test Validation
+        id: screenshot-validation
+        if: inputs.run_lint == true
+        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true --scan
+
+      - name: Upload screenshot diff report
+        if: always() && steps.screenshot-validation.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshot-diff-report
+          path: screenshot-tests/build/reports/screenshotTest/
+          retention-days: 14
+          if-no-files-found: warn
+
   # ── Reproducible Build Verification ─────────────────────────────────
   rb-check:
     runs-on: ubuntu-24.04

@@ -28,6 +28,9 @@ keystore.properties
 # Kotlin compiler
 .kotlin
 
+# Generated docs screenshots (regenerated from reference images)
+docs/screenshots/
+
 # VS code
 .vscode/settings.json
 

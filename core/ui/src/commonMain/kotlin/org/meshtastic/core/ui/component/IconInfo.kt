@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 
 private const val SIZE_ICON = 14
 
@@ -89,8 +90,8 @@ fun IconInfo(
 
 @Composable
 @Preview
-private fun IconInfoPreview() {
-    MaterialTheme {
+fun IconInfoPreview() {
+    AppTheme {
         IconInfo(icon = MeshtasticIcons.Elevation, contentDescription = "Elevation", label = "Elevation", text = "100m")
     }
 }

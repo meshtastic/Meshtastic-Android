@@ -152,19 +152,19 @@ fun ImageVector?.icon(tint: Color = LocalContentColor.current): @Composable (() 
 
 @Preview(showBackground = true)
 @Composable
-private fun ListItemPreview() {
+fun ListItemPreview() {
     AppTheme { ListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, enabled = true) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ListItemDisabledPreview() {
+fun ListItemDisabledPreview() {
     AppTheme { ListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, enabled = false) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SwitchListItemPreview() {
+fun SwitchListItemPreview() {
     AppTheme { SwitchListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, checked = true, onClick = {}) }
 }
 

@@ -46,6 +46,6 @@ fun DistanceInfo(
 
 @PreviewLightDark
 @Composable
-private fun DistanceInfoPreview() {
+fun DistanceInfoPreview() {
     AppTheme { DistanceInfo(distance = "423 mi.") }
 }
