@@ -16,11 +16,9 @@
  */
 package org.meshtastic.feature.intro
 
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_feature_config
 import org.meshtastic.core.resources.bluetooth_feature_config_description
@@ -34,6 +32,7 @@ import org.meshtastic.core.resources.settings
 import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 
 /**
  * Screen for configuring Bluetooth permissions during the app introduction. It explains why Bluetooth permissions are
@@ -43,12 +42,17 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
  *   button.
  * @param onSkip Callback invoked if the user chooses to skip Bluetooth permission setup.
  * @param onConfigure Callback invoked when the user proceeds to configure or grant permissions.
+ * @param onOpenSettings Callback invoked when the user taps the settings link.
  */
 @Composable
-internal fun BluetoothScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfigure: () -> Unit) {
-    val context = LocalContext.current
+internal fun BluetoothScreen(
+    showNextButton: Boolean,
+    onSkip: () -> Unit,
+    onConfigure: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
     val annotatedString =
-        context.createClickableAnnotatedString(
+        createClickableAnnotatedString(
             fullTextRes = Res.string.permission_missing_31,
             linkTextRes = Res.string.settings,
             tag = SETTINGS_TAG,
@@ -75,10 +79,12 @@ internal fun BluetoothScreen(showNextButton: Boolean, onSkip: () -> Unit, onConf
         onSkip = onSkip,
         onConfigure = onConfigure,
         configureButtonTextRes = if (showNextButton) Res.string.next else Res.string.configure_bluetooth_permissions,
-        onAnnotationClick = {
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = Uri.fromParts("package", context.packageName, null)
-            context.startActivity(intent)
-        },
+        onAnnotationClick = { onOpenSettings() },
     )
+}
+
+@PreviewLightDark
+@Composable
+private fun BluetoothScreenPreview() {
+    AppTheme { Surface { BluetoothScreen(showNextButton = false, onSkip = {}, onConfigure = {}, onOpenSettings = {}) } }
 }

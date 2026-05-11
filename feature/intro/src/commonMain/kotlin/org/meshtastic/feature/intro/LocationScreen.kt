@@ -16,11 +16,9 @@
  */
 package org.meshtastic.feature.intro
 
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.configure_location_permissions
 import org.meshtastic.core.resources.distance_filters
@@ -38,6 +36,7 @@ import org.meshtastic.core.resources.share_location_description
 import org.meshtastic.core.ui.icon.HardwareModel
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 
 /**
  * Screen for configuring location permissions during the app introduction. It explains why location permissions are
@@ -47,12 +46,17 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
  *   button.
  * @param onSkip Callback invoked if the user chooses to skip location permission setup.
  * @param onConfigure Callback invoked when the user proceeds to configure or grant permissions.
+ * @param onOpenSettings Callback invoked when the user taps the settings link.
  */
 @Composable
-internal fun LocationScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfigure: () -> Unit) {
-    val context = LocalContext.current
+internal fun LocationScreen(
+    showNextButton: Boolean,
+    onSkip: () -> Unit,
+    onConfigure: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
     val annotatedString =
-        context.createClickableAnnotatedString(
+        createClickableAnnotatedString(
             fullTextRes = Res.string.phone_location_description,
             linkTextRes = Res.string.settings,
             tag = SETTINGS_TAG,
@@ -71,12 +75,12 @@ internal fun LocationScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfi
                 subtitleRes = Res.string.distance_measurements_description,
             ),
             FeatureUIData(
-                icon = MeshtasticIcons.HardwareModel, // Consider a different icon if appropriate
+                icon = MeshtasticIcons.HardwareModel,
                 titleRes = Res.string.distance_filters,
                 subtitleRes = Res.string.distance_filters_description,
             ),
             FeatureUIData(
-                icon = MeshtasticIcons.LocationOn, // Consider a different icon if appropriate
+                icon = MeshtasticIcons.LocationOn,
                 titleRes = Res.string.mesh_map_location,
                 subtitleRes = Res.string.mesh_map_location_description,
             ),
@@ -89,10 +93,12 @@ internal fun LocationScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfi
         onSkip = onSkip,
         onConfigure = onConfigure,
         configureButtonTextRes = if (showNextButton) Res.string.next else Res.string.configure_location_permissions,
-        onAnnotationClick = {
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = Uri.fromParts("package", context.packageName, null)
-            context.startActivity(intent)
-        },
+        onAnnotationClick = { onOpenSettings() },
     )
+}
+
+@PreviewLightDark
+@Composable
+private fun LocationScreenPreview() {
+    AppTheme { Surface { LocationScreen(showNextButton = false, onSkip = {}, onConfigure = {}, onOpenSettings = {}) } }
 }

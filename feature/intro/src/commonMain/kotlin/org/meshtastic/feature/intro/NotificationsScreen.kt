@@ -16,11 +16,9 @@
  */
 package org.meshtastic.feature.intro
 
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_notifications
 import org.meshtastic.core.resources.configure_notification_permissions
@@ -37,6 +35,7 @@ import org.meshtastic.core.ui.icon.BatteryAlert
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.Speaker
+import org.meshtastic.core.ui.theme.AppTheme
 
 /**
  * Screen for configuring notification permissions during the app introduction. It explains why notification permissions
@@ -46,12 +45,17 @@ import org.meshtastic.core.ui.icon.Speaker
  *   button.
  * @param onSkip Callback invoked if the user chooses to skip notification permission setup.
  * @param onConfigure Callback invoked when the user proceeds to configure or grant permissions.
+ * @param onOpenSettings Callback invoked when the user taps the settings link.
  */
 @Composable
-internal fun NotificationsScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfigure: () -> Unit) {
-    val context = LocalContext.current
+internal fun NotificationsScreen(
+    showNextButton: Boolean,
+    onSkip: () -> Unit,
+    onConfigure: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
     val annotatedString =
-        context.createClickableAnnotatedString(
+        createClickableAnnotatedString(
             fullTextRes = Res.string.notification_permissions_description,
             linkTextRes = Res.string.settings,
             tag = SETTINGS_TAG,
@@ -83,10 +87,14 @@ internal fun NotificationsScreen(showNextButton: Boolean, onSkip: () -> Unit, on
         onSkip = onSkip,
         onConfigure = onConfigure,
         configureButtonTextRes = if (showNextButton) Res.string.next else Res.string.configure_notification_permissions,
-        onAnnotationClick = {
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = Uri.fromParts("package", context.packageName, null)
-            context.startActivity(intent)
-        },
+        onAnnotationClick = { onOpenSettings() },
     )
+}
+
+@PreviewLightDark
+@Composable
+private fun NotificationsScreenPreview() {
+    AppTheme {
+        Surface { NotificationsScreen(showNextButton = false, onSkip = {}, onConfigure = {}, onOpenSettings = {}) }
+    }
 }

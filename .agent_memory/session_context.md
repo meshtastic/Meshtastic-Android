@@ -3,6 +3,11 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-11 — Migrated feature/intro UI to commonMain
+- Moved intro onboarding UI composables and nav graph from `feature/intro/src/androidMain/` into `feature/intro/src/commonMain/`, adding shared `IntroPermissions` and `IntroSettingsNavigator` interfaces plus a common `introGraph` Navigation 3 extension.
+- Refactored `AppIntroductionScreen` into a thin Android host that provides Android permission/settings adapters via composition locals, and added `AndroidIntroPermissions`, `AndroidIntroSettingsNavigator`, and JVM desktop no-op stubs.
+- Verified with `./gradlew spotlessApply :feature:intro:compileKotlinJvm :feature:intro:compileAndroidMain`.
+
 ## 2026-05-11 — Added Esp32OtaUpdateHandler common tests
 - Created `feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/ota/Esp32OtaUpdateHandlerTest.kt`.
 - Covered WiFi OTA success flow, download/upload progress reporting, connection-drop error handling, hash rejection, verification timeout, and cancellation propagation.

@@ -16,36 +16,17 @@
  */
 package org.meshtastic.feature.intro
 
-import android.content.Intent
-import android.provider.Settings
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.isGranted
-import org.meshtastic.core.service.NotificationChannels
 
-/**
- * Provides the navigation graph for the application introduction flow. The flow follows the hierarchy of necessity:
- * Core Connection -> Shared Location -> Notifications.
- */
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
+/** Navigation graph for the application introduction / onboarding flow. */
 @Suppress("LongMethod")
-internal fun introNavGraph(
+internal fun EntryProviderScope<NavKey>.introGraph(
     backStack: NavBackStack<NavKey>,
     viewModel: IntroViewModel,
-    notificationPermissionState: PermissionState?,
-    bluetoothPermissionState: MultiplePermissionsState,
-    locationPermissionState: MultiplePermissionsState,
     onDone: () -> Unit,
-) = entryProvider {
-    val context = LocalContext.current
-
+) {
     fun navigateToNext(current: NavKey, permissionsGranted: Boolean = true) {
         val next = viewModel.getNextKey(current, permissionsGranted)
         if (next != null) {
@@ -58,7 +39,9 @@ internal fun introNavGraph(
     entry<Welcome> { WelcomeScreen(onGetStarted = { navigateToNext(Welcome) }) }
 
     entry<Bluetooth> {
-        val isGranted = bluetoothPermissionState.allPermissionsGranted
+        val permissions = LocalIntroPermissions.current
+        val settingsNavigator = LocalIntroSettingsNavigator.current
+        val isGranted = permissions.bluetooth.isGranted
         BluetoothScreen(
             showNextButton = isGranted,
             onSkip = { navigateToNext(Bluetooth) },
@@ -66,14 +49,17 @@ internal fun introNavGraph(
                 if (isGranted) {
                     navigateToNext(Bluetooth)
                 } else {
-                    bluetoothPermissionState.launchMultiplePermissionRequest()
+                    permissions.bluetooth.launchRequest()
                 }
             },
+            onOpenSettings = { settingsNavigator.openAppSettings() },
         )
     }
 
     entry<Location> {
-        val isGranted = locationPermissionState.allPermissionsGranted
+        val permissions = LocalIntroPermissions.current
+        val settingsNavigator = LocalIntroSettingsNavigator.current
+        val isGranted = permissions.location.isGranted
         LocationScreen(
             showNextButton = isGranted,
             onSkip = { navigateToNext(Location) },
@@ -81,37 +67,38 @@ internal fun introNavGraph(
                 if (isGranted) {
                     navigateToNext(Location)
                 } else {
-                    locationPermissionState.launchMultiplePermissionRequest()
+                    permissions.location.launchRequest()
                 }
             },
+            onOpenSettings = { settingsNavigator.openAppSettings() },
         )
     }
 
     entry<Notifications> {
-        val isGranted = notificationPermissionState?.status?.isGranted ?: true
+        val permissions = LocalIntroPermissions.current
+        val settingsNavigator = LocalIntroSettingsNavigator.current
+        val notificationPermission = permissions.notification
+        val isGranted = notificationPermission?.isGranted ?: true
         NotificationsScreen(
             showNextButton = isGranted,
             onSkip = onDone,
             onConfigure = {
-                if (notificationPermissionState != null && !isGranted) {
-                    notificationPermissionState.launchPermissionRequest()
+                if (notificationPermission != null && !isGranted) {
+                    notificationPermission.launchRequest()
                 } else {
                     navigateToNext(Notifications, permissionsGranted = isGranted)
                 }
             },
+            onOpenSettings = { settingsNavigator.openAppSettings() },
         )
     }
 
     entry<CriticalAlerts> {
+        val settingsNavigator = LocalIntroSettingsNavigator.current
         CriticalAlertsScreen(
             onSkip = onDone,
             onConfigure = {
-                val intent =
-                    Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
-                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                        putExtra(Settings.EXTRA_CHANNEL_ID, NotificationChannels.ALERTS)
-                    }
-                context.startActivity(intent)
+                settingsNavigator.openCriticalAlertsSettings()
                 onDone()
             },
         )

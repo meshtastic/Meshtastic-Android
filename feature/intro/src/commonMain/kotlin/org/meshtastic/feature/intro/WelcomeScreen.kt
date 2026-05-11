@@ -25,13 +25,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
@@ -48,6 +49,7 @@ import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.MeshHub
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NearMe
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 
 /**
@@ -80,11 +82,11 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
     Scaffold(
         bottomBar = {
             IntroBottomBar(
-                onSkip = {}, // No skip on welcome
+                onSkip = {},
                 onConfigure = onGetStarted,
-                skipButtonText = "", // Not shown
+                skipButtonText = "",
                 configureButtonText = stringResource(Res.string.get_started),
-                showSkipButton = false, // Explicitly hide skip for welcome
+                showSkipButton = false,
             )
         },
     ) { innerPadding ->
@@ -114,8 +116,8 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
     }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun WelcomeScreenPreview() {
-    WelcomeScreen(onGetStarted = {})
+    AppTheme { Surface { WelcomeScreen(onGetStarted = {}) } }
 }
