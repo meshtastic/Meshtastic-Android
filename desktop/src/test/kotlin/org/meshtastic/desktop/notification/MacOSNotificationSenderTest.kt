@@ -24,62 +24,78 @@ import kotlin.test.assertTrue
 
 class MacOSNotificationSenderTest {
 
-    private val sender = MacOSNotificationSender()
-
     @Test
-    fun `command starts with osascript`() {
-        val notification = Notification(title = "Hi", message = "There")
-        val cmd = sender.buildCommand(notification)
-        assertEquals("osascript", cmd[0])
+    fun `returns false when bridge unavailable`() {
+        val bridge = FakeBridge(available = false)
+        val sender = MacOSNotificationSender(bridge)
+
+        val result = sender.send(Notification(title = "Hi", message = "There"))
+
+        assertFalse(result)
+        assertEquals(0, bridge.authorizationCalls)
+        assertEquals(0, bridge.postCalls.size)
     }
 
     @Test
-    fun `non-silent notification includes sound name`() {
-        val notification = Notification(title = "Hi", message = "There", isSilent = false)
-        val cmd = sender.buildCommand(notification)
-        val script = cmd.filter { it.contains("display notification") }.joinToString(" ")
-        assertTrue(script.contains("sound name \"default\""), "Expected sound name in: $script")
+    fun `requests authorization once then posts notification`() {
+        val bridge = FakeBridge(available = true)
+        val sender = MacOSNotificationSender(bridge)
+
+        val first =
+            sender.send(Notification(title = "One", message = "First", category = Notification.Category.Battery))
+        val second =
+            sender.send(Notification(title = "Two", message = "Second", category = Notification.Category.Alert))
+
+        assertTrue(first)
+        assertTrue(second)
+        assertEquals(1, bridge.authorizationCalls)
+        assertEquals(MacOSNotificationSender.DEFAULT_AUTHORIZATION_OPTIONS, bridge.lastAuthorizationOptions)
+        assertEquals(2, bridge.postCalls.size)
+        assertEquals("Low Battery", bridge.postCalls[0].subtitle)
+        assertEquals("Alert", bridge.postCalls[1].subtitle)
     }
 
     @Test
-    fun `silent notification omits sound name`() {
-        val notification = Notification(title = "Quiet", message = "Shhh", isSilent = true)
-        val cmd = sender.buildCommand(notification)
-        val script = cmd.filter { it.contains("display notification") }.joinToString(" ")
-        assertFalse(script.contains("sound name"), "Expected no sound name in: $script")
+    fun `silent notification disables sound`() {
+        val bridge = FakeBridge(available = true)
+        val sender = MacOSNotificationSender(bridge)
+
+        sender.send(Notification(title = "Quiet", message = "Shhh", isSilent = true))
+
+        assertEquals(1, bridge.postCalls.size)
+        assertFalse(bridge.postCalls[0].playSound)
     }
 
     @Test
-    fun `title and message passed as positional args after double dash`() {
-        val notification = Notification(title = "My Title", message = "My Message")
-        val cmd = sender.buildCommand(notification)
-        val dashDashIdx = cmd.indexOf("--")
-        assertTrue(dashDashIdx > 0, "Expected '--' separator in command")
-        assertEquals("My Title", cmd[dashDashIdx + 1])
-        assertEquals("My Message", cmd[dashDashIdx + 2])
+    fun `non-silent notification enables sound`() {
+        val bridge = FakeBridge(available = true)
+        val sender = MacOSNotificationSender(bridge)
+
+        sender.send(Notification(title = "Loud", message = "Ping", isSilent = false))
+
+        assertEquals(1, bridge.postCalls.size)
+        assertTrue(bridge.postCalls[0].playSound)
     }
 
-    @Test
-    fun `special characters are not interpolated into script`() {
-        val notification = Notification(title = "It's \"tricky\" & <bad>", message = "'; drop table;")
-        val cmd = sender.buildCommand(notification)
-        // Script lines should not contain the user content — only argv references
-        val scriptLines = cmd.filter { it.contains("notifTitle") || it.contains("notifMessage") }
-        for (line in scriptLines) {
-            assertFalse(line.contains("tricky"), "User content leaked into script: $line")
-            assertFalse(line.contains("drop table"), "User content leaked into script: $line")
+    private class FakeBridge(private val available: Boolean) : MacNotificationBridge {
+        override val isAvailable: Boolean
+            get() = available
+
+        var authorizationCalls: Int = 0
+        var lastAuthorizationOptions: Long? = null
+        val postCalls = mutableListOf<PostCall>()
+
+        override fun requestAuthorization(options: Long): Boolean {
+            authorizationCalls += 1
+            lastAuthorizationOptions = options
+            return true
         }
-        // But args should contain the raw content
-        val dashDashIdx = cmd.indexOf("--")
-        assertEquals("It's \"tricky\" & <bad>", cmd[dashDashIdx + 1])
-        assertEquals("'; drop table;", cmd[dashDashIdx + 2])
+
+        override fun post(title: String, message: String, subtitle: String, playSound: Boolean): Boolean {
+            postCalls += PostCall(title = title, message = message, subtitle = subtitle, playSound = playSound)
+            return true
+        }
     }
 
-    @Test
-    fun `battery category becomes subtitle`() {
-        val notification = Notification(title = "Bat", message = "Low", category = Notification.Category.Battery)
-        val cmd = sender.buildCommand(notification)
-        val dashDashIdx = cmd.indexOf("--")
-        assertEquals("Low Battery", cmd[dashDashIdx + 3])
-    }
+    private data class PostCall(val title: String, val message: String, val subtitle: String, val playSound: Boolean)
 }
