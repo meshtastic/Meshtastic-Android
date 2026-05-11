@@ -20,40 +20,60 @@ jobs:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
 
       - name: Update firmware releases list
+        id: firmware
         run: |
           firmware_file_path="app/src/main/assets/firmware_releases.json"
           temp_firmware_file="/tmp/new_firmware_releases.json"
-          
+
           echo "Fetching latest firmware releases..."
-          curl -s --fail https://api.meshtastic.org/github/firmware/list > "$temp_firmware_file"
-          
-          if ! jq empty "$temp_firmware_file" 2>/dev/null; then
-            echo "::error::Firmware API returned invalid JSON data. Skipping firmware update."
+          http_code=$(curl -s -o "$temp_firmware_file" -w '%{http_code}' https://api.meshtastic.org/github/firmware/list || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Firmware API returned HTTP $http_code. Skipping firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from firmware API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_firmware_file" 2>/dev/null; then
+            echo "::warning::Firmware API returned invalid JSON data. Skipping firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from firmware API" >> "$GITHUB_OUTPUT"
           else
             if [ ! -f "$firmware_file_path" ] || ! jq --sort-keys . "$temp_firmware_file" | diff -q - <(jq --sort-keys . "$firmware_file_path"); then
               echo "Changes detected in firmware list or local file missing. Updating $firmware_file_path."
               cp "$temp_firmware_file" "$firmware_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
             else
               echo "No changes detected in firmware list."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
             fi
           fi
 
       - name: Update hardware list
+        id: hardware
         run: |
           hardware_file_path="app/src/main/assets/device_hardware.json"
           temp_hardware_file="/tmp/new_device_hardware.json"
 
           echo "Fetching latest device hardware data..."
-          curl -s --fail https://api.meshtastic.org/resource/deviceHardware > "$temp_hardware_file"
+          http_code=$(curl -s -o "$temp_hardware_file" -w '%{http_code}' https://api.meshtastic.org/resource/deviceHardware || true)
+          http_code="${http_code:-0}"
 
-          if ! jq empty "$temp_hardware_file" 2>/dev/null; then
-            echo "::error::Hardware API returned invalid JSON data. Skipping hardware update."
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Hardware API returned HTTP $http_code. Skipping hardware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from hardware API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_hardware_file" 2>/dev/null; then
+            echo "::warning::Hardware API returned invalid JSON data. Skipping hardware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from hardware API" >> "$GITHUB_OUTPUT"
           else
             if [ ! -f "$hardware_file_path" ] || ! jq --sort-keys . "$temp_hardware_file" | diff -q - <(jq --sort-keys . "$hardware_file_path"); then
               echo "Changes detected in hardware list or local file missing. Updating $hardware_file_path."
               cp "$temp_hardware_file" "$hardware_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
             else
               echo "No changes detected in hardware list."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
             fi
           fi
 
@@ -92,6 +112,47 @@ jobs:
         continue-on-error: true
 
 
+      - name: Build PR body
+        id: pr_body
+        run: |
+          firmware_status="${{ steps.firmware.outputs.status }}"
+          firmware_detail="${{ steps.firmware.outputs.detail }}"
+          hardware_status="${{ steps.hardware.outputs.status }}"
+          hardware_detail="${{ steps.hardware.outputs.detail }}"
+
+          body="This PR includes automated updates from the scheduled workflow:"
+          body+=$'\n'
+
+          # Firmware status
+          case "$firmware_status" in
+            updated)   body+=$'\n'"- ✅ \`firmware_releases.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`firmware_releases.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`firmware_releases.json\` skipped — ${firmware_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`firmware_releases.json\` — unknown status." ;;
+          esac
+
+          # Hardware status
+          case "$hardware_status" in
+            updated)   body+=$'\n'"- ✅ \`device_hardware.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`device_hardware.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`device_hardware.json\` skipped — ${hardware_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`device_hardware.json\` — unknown status." ;;
+          esac
+
+          # Crowdin & graphs (always attempted)
+          body+=$'\n'"- Source strings were uploaded to Crowdin."
+          body+=$'\n'"- Latest translations were downloaded from Crowdin (if available)."
+          body+=$'\n'"- Updated module dependency graphs in README.md files (if changed)."
+          body+=$'\n'
+          body+=$'\n'"Please review the changes."
+
+          # Write multi-line body to output
+          {
+            echo "content<<PREOF"
+            echo "$body"
+            echo "PREOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create Pull Request if changes occurred
         uses: peter-evans/create-pull-request@v8
         with:
@@ -106,16 +167,7 @@ jobs:
             - Crowdin translation downloads
             - Module dependency graphs
           title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)'
-          body: |
-            This PR includes automated updates from the scheduled workflow:
-
-            - Updated `firmware_releases.json` from the Meshtastic API (if changed).
-            - Updated `device_hardware.json` from the Meshtastic API (if changed).
-            - Source strings were uploaded to Crowdin.
-            - Latest translations were downloaded from Crowdin (if available).
-            - Updated module dependency graphs in README.md files (if changed).
-
-            Please review the changes.
+          body: ${{ steps.pr_body.outputs.content }}
           branch: 'scheduled-updates'
           base: 'main'
           delete-branch: true
