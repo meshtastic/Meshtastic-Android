@@ -88,7 +88,7 @@
 **Purpose**: Address identified coverage gaps in the existing implementation.
 
 - [x] MAP-T022 [US3] **[GAP]** Add unit tests for waypoint expiration filtering logic in `BaseMapViewModel` — test that waypoints with `expire > nowSeconds` are included, `expire <= nowSeconds` are excluded, and `expire == 0` (never expires) are always included. File: `feature/map/src/commonTest/.../BaseMapViewModelTest.kt`. (SC-003)
-- [ ] MAP-T023 [US1,US5] **[GAP]** Add Compose UI tests for `MapControlsOverlay` and `MapButton` composables — verify compass rotation, filter button click, location tracking toggle icon switch, refresh spinner visibility. File: `feature/map/src/commonTest/.../component/MapControlsOverlayTest.kt`. (NFR-001)
+- [ ] **[DEFERRED]** MAP-T023 [US1,US5] **[GAP]** Add Compose UI tests for `MapControlsOverlay` and `MapButton` composables — verify compass rotation, filter button click, location tracking toggle icon switch, refresh spinner visibility. File: `feature/map/src/commonTest/.../component/MapControlsOverlayTest.kt`. (NFR-001) — *Deferred: requires Compose UI test infrastructure.*
 
 **Dependencies**: Phase 4 testing infrastructure.  
 **Checkpoint**: Full test coverage achieved.

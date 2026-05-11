@@ -257,10 +257,10 @@
 - [x] **FW-T059**: Add `WifiOtaTransport` unit tests  
   The WiFi/TCP OTA transport has no dedicated test coverage. Should test connection, command sending, response reading, firmware streaming, and error handling using a fake Ktor socket.
 
-- [ ] **FW-T060**: Add `FirmwareUpdateScreen` composable/screenshot tests  
+- [ ] **[DEFERRED]** **FW-T060**: Add `FirmwareUpdateScreen` composable/screenshot tests — *Deferred: requires Compose UI test infrastructure.*  
   No UI tests exist for the 889-line screen composable. Should test at minimum: Ready state rendering, progress state rendering, error state rendering, and success state rendering.
 
-- [ ] **FW-T061**: Add `Esp32OtaUpdateHandler` unit tests  
+- [ ] **[DEFERRED]** **FW-T061**: Add `Esp32OtaUpdateHandler` unit tests — *Deferred: requires integration test harness for TCP OTA protocol — mock dispatchers incompatible with real sockets.*  
   The ESP32 OTA handler orchestration logic (firmware retrieval → hash → reboot → connect → stream) has no isolated test. Currently only covered by proxy through integration tests.
 
 ---

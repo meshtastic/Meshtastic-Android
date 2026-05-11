@@ -318,7 +318,7 @@
 - **Priority**: Medium
 
 ### NDM-T105: Missing — Adaptive layout breakpoint test
-- [ ] Add UI test or screenshot test verifying `AdaptiveMetricLayout` switches from Column to Row at 600dp
+- [ ] **[DEFERRED]** Add UI test or screenshot test verifying `AdaptiveMetricLayout` switches from Column to Row at 600dp — *Deferred: requires Compose UI test infrastructure for adaptive layout breakpoints.*
 - **Rationale**: Responsive layout is untested.
 - **Priority**: Low
 

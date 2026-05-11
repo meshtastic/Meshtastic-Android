@@ -85,13 +85,13 @@
   - File: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/IntroNavGraph.kt` (line 112)
   - Rationale: Hardcoded string is fragile; should reference the same constant used when the channel is created.
 
-- [ ] **OB-T101**: Migrate UI screens from `androidMain` to `commonMain` using CMP-compatible permission abstraction
+- [ ] **[DEFERRED]** **OB-T101**: Migrate UI screens from `androidMain` to `commonMain` using CMP-compatible permission abstraction — *Deferred: large refactor — migrate intro UI from androidMain to commonMain. Requires CMP-compatible permission abstraction design.*
   - Files: All 8 `androidMain` UI files
   - Rationale: Constitution §I requires business logic in `commonMain`. While UI screens are *not* business logic, migrating them enables Desktop/iOS compilation. Requires replacing Accompanist Permissions with a KMP-compatible permission API (e.g., interface + DI expect/actual).
 
-- [ ] **OB-T102**: Add Compose UI tests (screenshot or interaction tests) for all 5 screens
+- [ ] **[DEFERRED]** **OB-T102**: Add Compose UI tests (screenshot or interaction tests) for all 5 screens — *Deferred: requires Compose UI test infrastructure.*
   - Rationale: Only ViewModel logic is unit-tested. No UI rendering or interaction tests exist. Consider `@Preview` screenshot tests or Compose test rule tests.
 
-- [ ] **OB-T103**: Add accessibility verification — ensure all icons have content descriptions, touch targets ≥ 48dp, and TalkBack announces screen transitions
+- [ ] **[DEFERRED]** **OB-T103**: Add accessibility verification — ensure all icons have content descriptions, touch targets ≥ 48dp, and TalkBack announces screen transitions — *Deferred: requires accessibility testing infrastructure.*
   - Rationale: Design Standards Compliance (Constitution §V) requires accessibility review. `FeatureRow` icons use `contentDescription` but no formal audit has been done.
 
