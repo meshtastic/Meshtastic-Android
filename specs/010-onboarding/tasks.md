@@ -81,17 +81,21 @@
 
 ## Gaps — Uncompleted Tasks
 
-- [ ] **OB-T100**: Extract hardcoded notification channel ID `"my_alerts"` to a shared constant or resource
+- [x] **OB-T100**: Extract hardcoded notification channel ID `"my_alerts"` to a shared constant or resource
   - File: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/IntroNavGraph.kt` (line 112)
   - Rationale: Hardcoded string is fragile; should reference the same constant used when the channel is created.
 
-- [ ] **OB-T101**: Migrate UI screens from `androidMain` to `commonMain` using CMP-compatible permission abstraction
-  - Files: All 8 `androidMain` UI files
-  - Rationale: Constitution §I requires business logic in `commonMain`. While UI screens are *not* business logic, migrating them enables Desktop/iOS compilation. Requires replacing Accompanist Permissions with a KMP-compatible permission API (e.g., interface + DI expect/actual).
+- [x] **OB-T101**: Migrate UI screens from `androidMain` to `commonMain` using CMP-compatible permission abstraction
+  - Created `IntroPermissions` and `IntroSettingsNavigator` abstractions in `commonMain`
+  - Moved all 8 UI files (screens, nav graph, helpers) to `commonMain`
+  - Added `AndroidIntroPermissions`/`AndroidIntroSettingsNavigator` adapters in `androidMain` (wrapping Accompanist)
+  - Added JVM stubs (`JvmIntroDefaults.kt`) with always-granted permissions
+  - `AppIntroductionScreen` remains in `androidMain` as thin CompositionLocal provider host
+  - Added CMP `@PreviewLightDark` previews for all 5 screens
 
-- [ ] **OB-T102**: Add Compose UI tests (screenshot or interaction tests) for all 5 screens
+- [ ] **[DEFERRED]** **OB-T102**: Add Compose UI tests (screenshot or interaction tests) for all 5 screens — *Deferred: requires Compose UI test infrastructure.*
   - Rationale: Only ViewModel logic is unit-tested. No UI rendering or interaction tests exist. Consider `@Preview` screenshot tests or Compose test rule tests.
 
-- [ ] **OB-T103**: Add accessibility verification — ensure all icons have content descriptions, touch targets ≥ 48dp, and TalkBack announces screen transitions
+- [ ] **[DEFERRED]** **OB-T103**: Add accessibility verification — ensure all icons have content descriptions, touch targets ≥ 48dp, and TalkBack announces screen transitions — *Deferred: requires accessibility testing infrastructure.*
   - Rationale: Design Standards Compliance (Constitution §V) requires accessibility review. `FeatureRow` icons use `contentDescription` but no formal audit has been done.
 

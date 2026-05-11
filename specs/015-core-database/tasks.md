@@ -131,19 +131,19 @@
 
 ## Gap Tasks (Incomplete)
 
-### DB-T017: Add Converters round-trip tests [ ]
+### DB-T017: Add Converters round-trip tests [x]
 
 - **File to create**: `commonTest/.../ConvertersTest.kt`
 - Test proto ↔ ByteArray, ByteString ↔ ByteArray round-trips for all converter methods.
 - **Priority**: Low
 
-### DB-T018: Add missing DAO tests [ ]
+### DB-T018: Add missing DAO tests [x]
 
 - **Files to create**: `commonTest/.../dao/CommonQuickChatActionDaoTest.kt`, `CommonMeshLogDaoTest.kt`, etc.
 - Cover CRUD + reactive query behavior for untested DAOs.
 - **Priority**: Medium
 
-### DB-T019: Add withDb() concurrent retry test [ ]
+### DB-T019: Add withDb() concurrent retry test [x]
 
 - **File to create**: `commonTest/.../DatabaseManagerRetryTest.kt`
 - Simulate DB switch during active `withDb()` query; verify retry succeeds.

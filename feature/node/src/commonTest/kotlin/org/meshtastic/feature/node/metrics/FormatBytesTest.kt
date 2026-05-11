@@ -47,6 +47,11 @@ class FormatBytesTest {
     }
 
     @Test
+    fun kilobytes_just_below_megabyte_boundary_round_up_without_switching_units() {
+        assertEquals("1024 KB", formatBytes(1_048_575L))
+    }
+
+    @Test
     fun megabyte_boundary() {
         assertEquals("1 MB", formatBytes(1024L * 1024))
     }
@@ -90,5 +95,11 @@ class FormatBytesTest {
     fun custom_decimal_places_one() {
         // 1536 bytes = 1.5 KB, with 1 decimal place → 1.5 KB
         assertEquals("1.5 KB", formatBytes(1536L, decimalPlaces = 1))
+    }
+
+    @Test
+    fun default_rounding_keeps_two_decimal_places_without_trailing_zeroes() {
+        assertEquals("1.46 KB", formatBytes(1500L))
+        assertEquals("1.5 KB", formatBytes(1536L))
     }
 }

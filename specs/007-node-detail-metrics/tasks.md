@@ -292,33 +292,33 @@
 ## Identified Gaps
 
 ### NDM-T100: Missing — MetricsViewModel CSV export tests for device/environment/signal/power
-- [ ] Add unit tests for `saveDeviceMetricsCSV`, `saveEnvironmentMetricsCSV`, `saveSignalMetricsCSV`, `savePowerMetricsCSV` verifying correct column headers and data formatting
+- [x] Add unit tests for `saveDeviceMetricsCSV`, `saveEnvironmentMetricsCSV`, `saveSignalMetricsCSV`, `savePowerMetricsCSV` verifying correct column headers and data formatting
 - **Rationale**: Only `savePositionCSV` has a test; the other four export methods are untested.
 - **Priority**: Medium
 
 ### NDM-T101: Missing — HostMetricsLogScreen chart+card test coverage
-- [ ] Add unit tests for `HostMetricsChart` data model and `formatBytes` edge cases (exact boundaries)
+- [x] Add unit tests for `HostMetricsChart` data model and `formatBytes` edge cases (exact boundaries)
 - **Rationale**: `formatBytes` is tested but chart data transformation and card selection sync are not.
 - **Priority**: Low
 
 ### NDM-T102: Missing — Compass accuracy edge cases
-- [ ] Add tests for `calculatePositionalAccuracyMeters` with various DOP combinations (PDOP-only, HDOP+VDOP, HDOP-only, precision-bits-only, and none)
-- [ ] Add test for `calculateAngularError` when distance is zero
+- [x] Add tests for `calculatePositionalAccuracyMeters` with various DOP combinations (PDOP-only, HDOP+VDOP, HDOP-only, precision-bits-only, and none)
+- [x] Add test for `calculateAngularError` when distance is zero
 - **Rationale**: `CompassViewModelTest` exists but accuracy calculation branch coverage is not verified.
 - **Priority**: Medium
 
 ### NDM-T103: Missing — Environment NaN guard tests
-- [ ] Add tests verifying that `NaN` temperature, humidity, and pressure values are correctly filtered (not rendered, not charted)
+- [x] Add tests verifying that `NaN` temperature, humidity, and pressure values are correctly filtered (not rendered, not charted)
 - **Rationale**: The code has `isNaN()` guards but no tests validate them.
 - **Priority**: Low
 
 ### NDM-T104: Missing — Remote admin session timeout testing
-- [ ] Add `NodeDetailViewModelTest` coverage for `openRemoteAdmin` with `Disconnected` and `Timeout` session results
+- [x] Add `NodeDetailViewModelTest` coverage for `openRemoteAdmin` with `Disconnected` and `Timeout` session results
 - **Rationale**: Only `Mute` and `TraceRoute` actions are tested; session error paths are untested.
 - **Priority**: Medium
 
 ### NDM-T105: Missing — Adaptive layout breakpoint test
-- [ ] Add UI test or screenshot test verifying `AdaptiveMetricLayout` switches from Column to Row at 600dp
+- [ ] **[DEFERRED]** Add UI test or screenshot test verifying `AdaptiveMetricLayout` switches from Column to Row at 600dp — *Deferred: requires Compose UI test infrastructure for adaptive layout breakpoints.*
 - **Rationale**: Responsive layout is untested.
 - **Priority**: Low
 
@@ -335,6 +335,6 @@
 | Compass | 2 | 2 | 0 |
 | Navigation | 1 | 1 | 0 |
 | Testing | 10 | 10 | 0 |
-| **Gaps** | 6 | 0 | **6** |
-| **Total** | **46** | **40** | **6** |
+| **Gaps** | 6 | 3 | **3** |
+| **Total** | **46** | **43** | **3** |
 

@@ -84,6 +84,49 @@ internal val HOST_METRICS_INFO_DATA =
         ),
     )
 
+internal data class HostMetricsChartPoint(val time: Int, val value: Double)
+
+internal data class HostMetricsChartData(
+    val load1: List<HostMetricsChartPoint> = emptyList(),
+    val load5: List<HostMetricsChartPoint> = emptyList(),
+    val load15: List<HostMetricsChartPoint> = emptyList(),
+    val freeMemoryMb: List<HostMetricsChartPoint> = emptyList(),
+) {
+    val hasLoad: Boolean
+        get() = load1.isNotEmpty() || load5.isNotEmpty() || load15.isNotEmpty()
+}
+
+internal fun buildHostMetricsChartData(data: List<Telemetry>): HostMetricsChartData = HostMetricsChartData(
+    load1 =
+    data.mapNotNull { telemetry ->
+        telemetry.host_metrics
+            ?.load1
+            ?.takeIf { it > 0 }
+            ?.let { HostMetricsChartPoint(time = telemetry.time, value = it / 100.0) }
+    },
+    load5 =
+    data.mapNotNull { telemetry ->
+        telemetry.host_metrics
+            ?.load5
+            ?.takeIf { it > 0 }
+            ?.let { HostMetricsChartPoint(time = telemetry.time, value = it / 100.0) }
+    },
+    load15 =
+    data.mapNotNull { telemetry ->
+        telemetry.host_metrics
+            ?.load15
+            ?.takeIf { it > 0 }
+            ?.let { HostMetricsChartPoint(time = telemetry.time, value = it / 100.0) }
+    },
+    freeMemoryMb =
+    data.mapNotNull { telemetry ->
+        telemetry.host_metrics
+            ?.freemem_bytes
+            ?.takeIf { it > 0 }
+            ?.let { HostMetricsChartPoint(time = telemetry.time, value = it.toDouble() / BYTES_IN_MB) }
+    },
+)
+
 /**
  * Vico chart composable that renders load averages (1m, 5m, 15m) and free memory as dual-axis line series: load on the
  * start axis (fixed min 0), free memory in MB on the end axis.
@@ -103,41 +146,29 @@ internal fun HostMetricsChart(
             modelProducer,
             chartModifier,
         ->
-        val load1Data = remember(data) { data.filter { it.host_metrics?.load1 != null && it.host_metrics!!.load1 > 0 } }
-        val load5Data = remember(data) { data.filter { it.host_metrics?.load5 != null && it.host_metrics!!.load5 > 0 } }
-        val load15Data =
-            remember(data) { data.filter { it.host_metrics?.load15 != null && it.host_metrics!!.load15 > 0 } }
-        val memData =
-            remember(data) {
-                data.filter { it.host_metrics?.freemem_bytes != null && it.host_metrics!!.freemem_bytes > 0 }
-            }
+        val chartData = remember(data) { buildHostMetricsChartData(data) }
+        val load1Data = chartData.load1
+        val load5Data = chartData.load5
+        val load15Data = chartData.load15
+        val memData = chartData.freeMemoryMb
 
-        LaunchedEffect(load1Data, load5Data, load15Data, memData) {
+        LaunchedEffect(chartData) {
             modelProducer.runTransaction {
-                val hasLoad = load1Data.isNotEmpty() || load5Data.isNotEmpty() || load15Data.isNotEmpty()
-                if (hasLoad) {
+                if (chartData.hasLoad) {
                     lineSeries {
                         if (load1Data.isNotEmpty()) {
-                            series(x = load1Data.map { it.time }, y = load1Data.map { it.host_metrics!!.load1 / 100.0 })
+                            series(x = load1Data.map { it.time }, y = load1Data.map { it.value })
                         }
                         if (load5Data.isNotEmpty()) {
-                            series(x = load5Data.map { it.time }, y = load5Data.map { it.host_metrics!!.load5 / 100.0 })
+                            series(x = load5Data.map { it.time }, y = load5Data.map { it.value })
                         }
                         if (load15Data.isNotEmpty()) {
-                            series(
-                                x = load15Data.map { it.time },
-                                y = load15Data.map { it.host_metrics!!.load15 / 100.0 },
-                            )
+                            series(x = load15Data.map { it.time }, y = load15Data.map { it.value })
                         }
                     }
                 }
                 if (memData.isNotEmpty()) {
-                    lineSeries {
-                        series(
-                            x = memData.map { it.time },
-                            y = memData.map { it.host_metrics!!.freemem_bytes.toDouble() / BYTES_IN_MB },
-                        )
-                    }
+                    lineSeries { series(x = memData.map { it.time }, y = memData.map { it.value }) }
                 }
             }
         }
@@ -160,7 +191,7 @@ internal fun HostMetricsChart(
                 },
             )
 
-        val hasLoad = load1Data.isNotEmpty() || load5Data.isNotEmpty() || load15Data.isNotEmpty()
+        val hasLoad = chartData.hasLoad
         val load1Style = if (load1Data.isNotEmpty()) ChartStyling.createStyledLine(load1Color) else null
         val load5Style = if (load5Data.isNotEmpty()) ChartStyling.createDashedLine(load5Color) else null
         val load15Style = if (load15Data.isNotEmpty()) ChartStyling.createSubtleLine(load15Color) else null

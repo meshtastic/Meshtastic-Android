@@ -312,35 +312,35 @@
 
 ## Phase 10 — Gap Tasks (Not Yet Implemented)
 
-- [ ] **SET-T069**: Add Compose UI tests for `RadioConfigItemList` composable — verify section rendering, managed device message display, enabled/disabled state based on connection
+- [ ] **[DEFERRED]** **SET-T069**: Add Compose UI tests for `RadioConfigItemList` composable — verify section rendering, managed device message display, enabled/disabled state based on connection — *Deferred: requires Compose UI test infrastructure.*
   - Target: `commonTest/radio/RadioConfigItemListTest.kt`
   - Gap: No UI test coverage for the main radio config list
 
-- [ ] **SET-T070**: Add Compose UI tests for `AdministrationScreen` — verify all admin route items render, confirmation dialogs appear on click, metadata-aware shutdown guard UX
+- [ ] **[DEFERRED]** **SET-T070**: Add Compose UI tests for `AdministrationScreen` — verify all admin route items render, confirmation dialogs appear on click, metadata-aware shutdown guard UX — *Deferred: requires Compose UI test infrastructure.*
   - Target: `commonTest/AdministrationScreenTest.kt`
   - Gap: No UI test for admin screen composable
 
-- [ ] **SET-T071**: Add Compose UI tests for `FilterSettingsScreen` — verify filter enable toggle, word add/remove flow, regex indicator display
+- [ ] **[DEFERRED]** **SET-T071**: Add Compose UI tests for `FilterSettingsScreen` — verify filter enable toggle, word add/remove flow, regex indicator display — *Deferred: requires Compose UI test infrastructure.*
   - Target: `commonTest/filter/FilterSettingsScreenTest.kt`
   - Gap: Only ViewModel is tested, not the composable
 
-- [ ] **SET-T072**: Add Compose UI tests for `CleanNodeDatabaseScreen` — verify slider interaction, preview list, confirm deletion flow
+- [ ] **[DEFERRED]** **SET-T072**: Add Compose UI tests for `CleanNodeDatabaseScreen` — verify slider interaction, preview list, confirm deletion flow — *Deferred: requires Compose UI test infrastructure.*
   - Target: `commonTest/radio/CleanNodeDatabaseScreenTest.kt`
   - Gap: Only ViewModel is tested, not the composable
 
-- [ ] **SET-T073**: Add integration test for profile import → export round-trip verifying `DeviceProfile` protobuf fidelity
+- [x] **SET-T073**: Add integration test for profile import → export round-trip verifying `DeviceProfile` protobuf fidelity
   - Target: `commonTest/radio/ProfileRoundTripTest.kt`
   - Gap: Import and export are tested individually but not end-to-end
 
-- [ ] **SET-T074**: Add test for MQTT probe timeout and error path (`probeMqttConnection` exception handling, `clearMqttProbeStatus`)
+- [x] **SET-T074**: Add test for MQTT probe timeout and error path (`probeMqttConnection` exception handling, `clearMqttProbeStatus`)
   - Target: `commonTest/radio/RadioConfigViewModelTest.kt` (extend)
   - Gap: MQTT probe not tested
 
-- [ ] **SET-T075**: Add accessibility tests — verify TalkBack semantics, touch target sizes, and color-independent information for admin action error colors
+- [ ] **[DEFERRED]** **SET-T075**: Add accessibility tests — verify TalkBack semantics, touch target sizes, and color-independent information for admin action error colors — *Deferred: requires accessibility testing infrastructure (TalkBack, touch target verification).*
   - Target: `commonTest/AdministrationAccessibilityTest.kt`
   - Gap: No accessibility testing exists
 
-- [ ] **SET-T076**: Add test for `SettingsViewModel.saveDataCsv()` verifying CSV export through `FileService` and `ExportDataUseCase`
+- [x] **SET-T076**: Add test for `SettingsViewModel.saveDataCsv()` verifying CSV export through `FileService` and `ExportDataUseCase`
   - Target: `commonTest/SettingsViewModelTest.kt` (extend)
   - Gap: CSV export function exists but is not tested
 

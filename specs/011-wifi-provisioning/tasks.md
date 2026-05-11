@@ -187,19 +187,19 @@
 ## Identified Gaps (not yet implemented)
 
 ### WFP-T023: Expose hidden network provisioning in UI
-- [ ] Add a "Hidden Network" toggle or option in `ConnectedContent` that sets `hidden = true` when calling `provisionWifi`
-- [ ] Domain layer already supports `CMD_CONNECT_HIDDEN` (2) — only UI wiring needed
+- [x] Add a "Hidden Network" toggle or option in `ConnectedContent` that sets `hidden = true` when calling `provisionWifi`
+- [ ] **[DEFERRED]** Domain layer already supports `CMD_CONNECT_HIDDEN` (2) — only UI wiring needed — *Deferred: already implemented in WFP-T023; this sub-task is redundant.*
 - **Priority**: Low — niche use case
 
 ### WFP-T024: Add retry mechanism for BLE scan timeout
-- [ ] When BLE scan times out (10s), offer a "Retry" button instead of requiring the user to navigate back and re-enter
-- [ ] Consider exponential backoff or a manual retry count limit
+- [x] When BLE scan times out (10s), offer a "Retry" button instead of requiring the user to navigate back and re-enter
+- [ ] **[DEFERRED]** Consider exponential backoff or a manual retry count limit — *Deferred: enhancement — current retry UX is sufficient for v1.*
 - **Priority**: Medium — improves UX for unreliable BLE environments
 
 ### WFP-T025: Add Compose UI tests
-- [ ] Add `@Test` composable tests for `WifiProvisionScreen` phase transitions (ConnectingBle → DeviceFound → Connected)
-- [ ] Add interaction tests for network selection, SSID/password input, Apply button enable/disable
-- [ ] Add snapshot or screenshot tests for `ProvisionStatusCard` states
+- [ ] **[DEFERRED]** Add `@Test` composable tests for `WifiProvisionScreen` phase transitions (ConnectingBle → DeviceFound → Connected) — *Deferred: requires Compose UI test infrastructure.*
+- [ ] **[DEFERRED]** Add interaction tests for network selection, SSID/password input, Apply button enable/disable — *Deferred: requires Compose UI test infrastructure.*
+- [ ] **[DEFERRED]** Add snapshot or screenshot tests for `ProvisionStatusCard` states — *Deferred: requires Compose UI test infrastructure.*
 - **Priority**: Medium — domain and ViewModel well-tested, but UI layer lacks automated verification
 
 ---

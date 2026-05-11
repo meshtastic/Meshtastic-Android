@@ -227,7 +227,7 @@
 
 ## Gap Tasks (Identified During Migration)
 
-### MSG-T029: Fix hardcoded English strings in SelectionToolbar [ ]
+### MSG-T029: Fix hardcoded English strings in SelectionToolbar [x]
 
 - **File**: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/ui/contact/Contacts.kt` (lines 468–470)
 - **Issue**: `contentDescription` for mute/unmute icons uses hardcoded `"Mute selected"` / `"Unmute selected"` instead of `stringResource()`.

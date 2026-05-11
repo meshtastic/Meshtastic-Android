@@ -19,6 +19,10 @@ package org.meshtastic.feature.intro
 import android.Manifest
 import android.os.Build
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
@@ -35,6 +39,8 @@ import org.meshtastic.core.ui.component.MeshtasticNavDisplay
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AppIntroductionScreen(onDone: () -> Unit, viewModel: IntroViewModel) {
+    val context = LocalContext.current
+
     val notificationPermissionState: PermissionState? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -50,23 +56,28 @@ fun AppIntroductionScreen(onDone: () -> Unit, viewModel: IntroViewModel) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
         } else {
-            // On older versions, location permission is used for scanning.
             emptyList()
         }
     val bluetoothPermissionState = rememberMultiplePermissionsState(permissions = bluetoothPermissions)
 
+    val permissions =
+        remember(notificationPermissionState, locationPermissionState, bluetoothPermissionState) {
+            AndroidIntroPermissions(
+                bluetoothState = bluetoothPermissionState,
+                locationState = locationPermissionState,
+                notificationState = notificationPermissionState,
+            )
+        }
+    val settingsNavigator = remember(context) { AndroidIntroSettingsNavigator(context) }
     val backStack = rememberNavBackStack(Welcome)
 
-    MeshtasticNavDisplay(
-        backStack = backStack,
-        entryProvider =
-        introNavGraph(
+    CompositionLocalProvider(
+        LocalIntroPermissions provides permissions,
+        LocalIntroSettingsNavigator provides settingsNavigator,
+    ) {
+        MeshtasticNavDisplay(
             backStack = backStack,
-            viewModel = viewModel,
-            notificationPermissionState = notificationPermissionState,
-            bluetoothPermissionState = bluetoothPermissionState,
-            locationPermissionState = locationPermissionState,
-            onDone = onDone,
-        ),
-    )
+            entryProvider = entryProvider { introGraph(backStack = backStack, viewModel = viewModel, onDone = onDone) },
+        )
+    }
 }

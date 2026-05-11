@@ -179,13 +179,13 @@
 - Test USB attach/detach event handling; serial parameter configuration.
 - **Priority**: Medium
 
-### NET-T024: Expand MQTT test coverage [ ]
+### NET-T024: Expand MQTT test coverage [x]
 
 - **File to extend**: `commonTest/.../MQTTRepositoryImplTest.kt`
 - Add tests: topic pattern construction, JSON decode, protobuf decode, reconnect, subscription failure.
 - **Priority**: Medium
 
-### NET-T025: Add HeartbeatSender unit test [ ]
+### NET-T025: Add HeartbeatSender unit test [x]
 
 - **File to create**: `commonTest/.../HeartbeatSenderTest.kt`
 - Test periodic interval, cancellation, edge cases.

@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.service
 
-internal object NotificationChannels {
+object NotificationChannels {
     const val SERVICE = "my_service"
     const val MESSAGES = "my_messages"
     const val BROADCASTS = "my_broadcasts"

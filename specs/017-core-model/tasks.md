@@ -132,13 +132,13 @@
 
 ## Gap Tasks (Incomplete)
 
-### MDL-T018: Add Node domain model unit tests [ ]
+### MDL-T018: Add Node domain model unit tests [x]
 
 - **File to create**: `commonTest/.../NodeTest.kt`
 - Test `isOnline` boundary values, `distance()` with known coordinates, `bearing()` cardinal directions, `colors` contrast, `createFallback()`, `getRelayNode()`.
 - **Priority**: Medium
 
-### MDL-T019: Add MeshDataMapper tests [ ]
+### MDL-T019: Add MeshDataMapper tests [x]
 
 - **File to create**: `commonTest/.../util/MeshDataMapperTest.kt`
 - Test proto → domain mapping for User, Position, DeviceMetrics, EnvironmentMetrics.
@@ -156,7 +156,7 @@
 - Metric ↔ imperial conversion, distance formatting for known values.
 - **Priority**: Low
 
-### MDL-T022: Add DataPacket + Message tests [ ]
+### MDL-T022: Add DataPacket + Message tests [x]
 
 - **File to create**: `commonTest/.../DataPacketTest.kt`
 - Test `nodeNumToDefaultId`, equality, display formatting.

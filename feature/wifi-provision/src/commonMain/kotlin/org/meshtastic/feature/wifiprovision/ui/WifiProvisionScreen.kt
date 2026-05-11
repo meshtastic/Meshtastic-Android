@@ -66,6 +66,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -101,12 +102,14 @@ import org.meshtastic.core.resources.hide_password
 import org.meshtastic.core.resources.img_mpwrd_logo
 import org.meshtastic.core.resources.mpwrd_os
 import org.meshtastic.core.resources.password
+import org.meshtastic.core.resources.retry
 import org.meshtastic.core.resources.show_password
 import org.meshtastic.core.resources.wifi_provision_available_networks
 import org.meshtastic.core.resources.wifi_provision_connect_failed
 import org.meshtastic.core.resources.wifi_provision_description
 import org.meshtastic.core.resources.wifi_provision_device_found
 import org.meshtastic.core.resources.wifi_provision_device_found_detail
+import org.meshtastic.core.resources.wifi_provision_hidden_network
 import org.meshtastic.core.resources.wifi_provision_mpwrd_disclaimer
 import org.meshtastic.core.resources.wifi_provision_no_networks
 import org.meshtastic.core.resources.wifi_provision_scan_failed
@@ -206,7 +209,11 @@ fun WifiProvisionScreen(
 
             Crossfade(targetState = screenKey(uiState), label = "wifi_provision") { key ->
                 when (key) {
-                    ScreenKey.ConnectingBle -> ScanningBleContent()
+                    ScreenKey.ConnectingBle ->
+                        ScanningBleContent(
+                            error = uiState.error as? WifiProvisionError.ConnectFailed,
+                            onRetry = { viewModel.connectToDevice(address) },
+                        )
 
                     ScreenKey.DeviceFound ->
                         DeviceFoundContent(
@@ -272,11 +279,29 @@ private val Phase.isLoading: Boolean
 /** BLE scanning spinner — shown while searching for a device. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun ScanningBleContent() {
+internal fun ScanningBleContent(error: WifiProvisionError.ConnectFailed? = null, onRetry: () -> Unit = {}) {
     CenteredStatusContent {
-        LoadingIndicator(modifier = Modifier.size(48.dp))
-        Spacer(Modifier.height(24.dp))
-        Text(stringResource(Res.string.wifi_provision_scanning_ble), style = MaterialTheme.typography.bodyLarge)
+        if (error != null) {
+            Icon(
+                MeshtasticIcons.Bluetooth,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.error,
+            )
+            Spacer(Modifier.height(24.dp))
+            Text(
+                stringResource(Res.string.wifi_provision_connect_failed, error.detail),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(16.dp))
+            FilledTonalButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+        } else {
+            LoadingIndicator(modifier = Modifier.size(48.dp))
+            Spacer(Modifier.height(24.dp))
+            Text(stringResource(Res.string.wifi_provision_scanning_ble), style = MaterialTheme.typography.bodyLarge)
+        }
     }
 }
 
@@ -349,7 +374,7 @@ internal fun ConnectedContent(
     isProvisioning: Boolean,
     isScanning: Boolean,
     onScanNetworks: () -> Unit,
-    onProvision: (ssid: String, password: String) -> Unit,
+    onProvision: (ssid: String, password: String, hidden: Boolean) -> Unit,
     onDisconnect: () -> Unit,
 ) {
     if (provisionStatus == ProvisionStatus.Success) {
@@ -360,6 +385,7 @@ internal fun ConnectedContent(
     var ssid by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var hiddenNetwork by rememberSaveable { mutableStateOf(false) }
 
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(provisionStatus) {
@@ -472,9 +498,19 @@ internal fun ConnectedContent(
                 }
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { onProvision(ssid, password) }),
+            keyboardActions = KeyboardActions(onDone = { onProvision(ssid, password, hiddenNetwork) }),
             modifier = Modifier.fillMaxWidth(),
         )
+
+        // Hidden network toggle
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable(role = Role.Switch) { hiddenNetwork = !hiddenNetwork },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(stringResource(Res.string.wifi_provision_hidden_network), style = MaterialTheme.typography.bodyMedium)
+            Switch(checked = hiddenNetwork, onCheckedChange = { hiddenNetwork = it })
+        }
 
         // Inline provision status (matches web flasher's status chip) — animated entrance
         AnimatedVisibility(
@@ -489,7 +525,7 @@ internal fun ConnectedContent(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(onClick = onDisconnect) { Text(stringResource(Res.string.cancel)) }
             Button(
-                onClick = { onProvision(ssid, password) },
+                onClick = { onProvision(ssid, password, hiddenNetwork) },
                 enabled = ssid.isNotBlank() && !isProvisioning,
                 modifier = Modifier.weight(1f),
             ) {

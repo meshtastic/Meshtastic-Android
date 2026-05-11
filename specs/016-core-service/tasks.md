@@ -153,13 +153,13 @@
 
 ## Gap Tasks (Incomplete)
 
-### SVC-T021: Add ServiceRepositoryImpl unit tests [ ]
+### SVC-T021: Add ServiceRepositoryImpl unit tests [x]
 
 - **File to create**: `commonTest/.../ServiceRepositoryImplTest.kt`
 - Test all state flow emissions: connection, errors, packets, actions, traceroute.
 - **Priority**: Medium
 
-### SVC-T022: Add DirectRadioControllerImpl tests [ ]
+### SVC-T022: Add DirectRadioControllerImpl tests [x]
 
 - **File to create**: `commonTest/.../DirectRadioControllerImplTest.kt`
 - Test direct radio control operations (send, request config, disconnect).

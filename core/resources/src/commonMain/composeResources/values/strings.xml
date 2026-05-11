@@ -737,6 +737,7 @@
     <string name="mute_always">Always</string>
     <string name="mute_notifications">Mute notifications</string>
     <string name="mute_remove">Unmute notifications for '%1$s'?</string>
+    <string name="mute_selected">Mute selected</string>
     <string name="mute_status_always">Always muted</string>
     <string name="mute_status_muted_for_days">Muted for %1$d days, %2$s hours</string>
     <string name="mute_status_muted_for_hours">Muted for %1$s hours</string>
@@ -1145,6 +1146,7 @@
     <string name="store_forward_config">Store &amp; Forward Config</string>
     <string name="store_forward_enabled">Store &amp; Forward enabled</string>
     <string name="subnet">Subred</string>
+    <string name="success">Success</string>
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
     <string name="supported">Supported</string>
     <string name="supported_by_community">Supported by Meshtastic Community</string>
@@ -1257,6 +1259,7 @@
     <string name="unmessageable">Unmessageable</string>
     <string name="unmonitored_or_infrastructure">Unmonitored or Infrastructure</string>
     <string name="unmute">Unmute</string>
+    <string name="unmute_selected">Unmute selected</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="unset">Unset - 0</string>
     <string name="up_down_select_input_enabled">Up/Down/Select input enabled</string>
@@ -1313,6 +1316,7 @@
     <string name="wifi_provision_description">Provision Wi-Fi credentials to your mPWRD-OS device via Bluetooth.</string>
     <string name="wifi_provision_device_found">Device found</string>
     <string name="wifi_provision_device_found_detail">Ready to scan for WiFi networks.</string>
+    <string name="wifi_provision_hidden_network">Hidden network</string>
     <string name="wifi_provision_mpwrd_disclaimer">Learn more about the mPWRD-OS project\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">No networks found</string>
     <string name="wifi_provision_scan_failed">Failed to scan for WiFi networks: %1$s</string>

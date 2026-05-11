@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.intro
 
-import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -78,7 +77,7 @@ internal fun FeatureRow(feature: FeatureUIData) {
  * @return An [AnnotatedString] with the specified portion styled and annotated.
  */
 @Composable
-internal fun Context.createClickableAnnotatedString(
+internal fun createClickableAnnotatedString(
     fullTextRes: StringResource,
     linkTextRes: StringResource,
     tag: String,
