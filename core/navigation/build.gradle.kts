@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
@@ -35,4 +36,24 @@ kotlin {
 
         commonTest.dependencies { implementation(projects.core.testing) }
     }
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-navigation.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidRuntimeClasspath",
+            "androidMainLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestCompileClasspath",
+            "androidDeviceTestRuntimeClasspath",
+            "androidDeviceTestLintChecksClasspath",
+            "androidDeviceTestCompileClasspath",
+            "androidCompileClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }

@@ -131,6 +131,7 @@ jobs:
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
       build_desktop: ${{ inputs.build_desktop }}
+      build_flatpak_src: ${{ inputs.build_desktop }}
     secrets: inherit
 
   call-promote-workflow:

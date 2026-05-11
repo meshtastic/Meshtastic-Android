@@ -21,6 +21,7 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.koin")
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
@@ -74,6 +75,29 @@ kotlin {
 dependencies {
     "kspJvm"(libs.androidx.room.compiler)
     "kspJvmTest"(libs.androidx.room.compiler)
+    // KSP resolves this via a detached configuration at task execution time,
+    // so we declare it explicitly to ensure offline/Flatpak builds can resolve it.
+    "kspJvm"("com.google.devtools.ksp:symbol-processing-aa-embeddable:${libs.versions.devtools.ksp.get()}")
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-database.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidRuntimeClasspath",
+            "androidMainLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestCompileClasspath",
+            "androidDeviceTestRuntimeClasspath",
+            "androidDeviceTestLintChecksClasspath",
+            "androidDeviceTestCompileClasspath",
+            "androidCompileClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }
