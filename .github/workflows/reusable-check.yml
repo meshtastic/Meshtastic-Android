@@ -17,7 +17,7 @@ on:
         default: true
       run_desktop_flatpak_src:
         type: boolean
-        default: true
+        default: false
       upload_artifacts:
         type: boolean
         default: true
