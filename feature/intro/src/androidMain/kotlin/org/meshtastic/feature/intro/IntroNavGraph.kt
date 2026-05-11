@@ -27,6 +27,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
+import org.meshtastic.core.service.NotificationChannels
 
 /**
  * Provides the navigation graph for the application introduction flow. The flow follows the hierarchy of necessity:
@@ -108,7 +109,7 @@ internal fun introNavGraph(
                 val intent =
                     Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
                         putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                        putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
+                        putExtra(Settings.EXTRA_CHANNEL_ID, NotificationChannels.ALERTS)
                     }
                 context.startActivity(intent)
                 onDone()

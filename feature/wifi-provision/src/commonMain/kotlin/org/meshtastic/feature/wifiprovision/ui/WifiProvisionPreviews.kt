@@ -71,7 +71,7 @@ private val manyNetworks =
     }
 
 private val noOp: () -> Unit = {}
-private val noOpProvision: (String, String) -> Unit = { _, _ -> }
+private val noOpProvision: (String, String, Boolean) -> Unit = { _, _, _ -> }
 
 // ---------------------------------------------------------------------------
 // Phase 1: BLE scanning

@@ -37,5 +37,6 @@ kotlin {
 
             implementation(libs.jetbrains.navigation3.ui)
         }
+        androidMain.dependencies { implementation(projects.core.service) }
     }
 }

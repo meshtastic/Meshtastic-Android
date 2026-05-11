@@ -3,6 +3,17 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-11 — Added Esp32OtaUpdateHandler common tests
+- Created `feature/firmware/src/commonTest/kotlin/org/meshtastic/feature/firmware/ota/Esp32OtaUpdateHandlerTest.kt`.
+- Covered WiFi OTA success flow, download/upload progress reporting, connection-drop error handling, hash rejection, verification timeout, and cancellation propagation.
+- Validation note: per task instruction, no Gradle commands were run.
+
+## 2026-05-11 — Added profile import/export round-trip coverage
+- Created `feature/settings/src/commonTest/kotlin/org/meshtastic/feature/settings/radio/ProfileRoundTripTest.kt`.
+- Covered `RadioConfigViewModel.exportProfile()` → `importProfile()` round trips using the real `ExportProfileUseCase` and `ImportProfileUseCase` with an in-memory `FileService` test double.
+- Added representative, empty, and partially populated `DeviceProfile` cases, asserting message equality and stable protobuf bytes across re-export.
+- Validation note: per task instruction, no Gradle commands were run.
+
 ## 2026-05-11 — Added DirectRadioControllerImpl common tests
 - Created `core/service/src/commonTest/kotlin/org/meshtastic/core/service/DirectRadioControllerImplTest.kt`.
 - Covered service-repository flow delegation, send message/send shared contact behavior, remote config request delegation, location stop, and device address updates.

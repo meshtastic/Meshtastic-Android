@@ -1315,6 +1315,7 @@
     <string name="wifi_provision_description">Provision Wi-Fi credentials to your mPWRD-OS device via Bluetooth.</string>
     <string name="wifi_provision_device_found">Device found</string>
     <string name="wifi_provision_device_found_detail">Ready to scan for WiFi networks.</string>
+    <string name="wifi_provision_hidden_network">Hidden network</string>
     <string name="wifi_provision_mpwrd_disclaimer">Learn more about the mPWRD-OS project\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">No networks found</string>
     <string name="wifi_provision_scan_failed">Failed to scan for WiFi networks: %1$s</string>

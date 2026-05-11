@@ -1270,6 +1270,7 @@ wifi_provision_connect_failed
 wifi_provision_description
 wifi_provision_device_found
 wifi_provision_device_found_detail
+wifi_provision_hidden_network
 wifi_provision_mpwrd_disclaimer
 wifi_provision_no_networks
 wifi_provision_scan_failed
