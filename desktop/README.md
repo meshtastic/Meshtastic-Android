@@ -55,9 +55,9 @@ The module depends on the JVM variants of KMP modules:
 
 **DI:** A Koin DI graph is bootstrapped in `Main.kt` with platform-specific implementations injected.
 
-**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop acts as a thin host shell, delegating almost entirely to fully shared KMP UI modules. Includes native macOS notification support (via `TrayState` and `bundleID` identification) and a monochrome SVG tray icon for a native look and feel.
+**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop acts as a thin host shell, delegating almost entirely to fully shared KMP UI modules. Includes native OS notifications (macOS `UNUserNotificationCenter`, Linux libnotify, Windows toast) and a monochrome SVG tray icon for a native look and feel.
 
-**Notifications:** Implements the common `NotificationManager` interface via `DesktopNotificationManager`. Repository-level notifications (messages, node events, alerts) are collected in `Main.kt` and forwarded to the system tray. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) and the `NSUserNotificationAlertStyle` key in `Info.plist` for notifications to appear correctly in the distributable.
+**Notifications:** Implements the common `NotificationManager` interface via `DesktopNotificationManager`. Repository-level notifications (messages, node events, alerts) are collected in `Main.kt` and forwarded to platform-native senders; the app falls back to Compose `TrayState` notifications only if native delivery fails. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
 
 **Localization:** Desktop exposes a language picker, persisting the selected BCP-47 tag in `UiPreferencesDataSource.locale`. `Main.kt` applies the override to the JVM default `Locale` and uses a `staticCompositionLocalOf`-backed recomposition trigger so Compose Multiplatform `stringResource()` calls update immediately without recreating the Navigation 3 backstack.
 

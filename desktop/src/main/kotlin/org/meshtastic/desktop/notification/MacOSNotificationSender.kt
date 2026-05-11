@@ -17,63 +17,48 @@
 package org.meshtastic.desktop.notification
 
 import co.touchlab.kermit.Logger
+import com.sun.jna.Function
+import com.sun.jna.NativeLibrary
+import com.sun.jna.Pointer
 import org.meshtastic.core.repository.Notification
-import java.util.concurrent.TimeUnit
-
-private const val PROCESS_TIMEOUT_SECONDS = 5L
+import java.util.UUID
 
 /**
- * Sends notifications via `osascript` on macOS, using AppleScript's `display notification` command.
- *
- * Content is passed as arguments to a pre-built script — never interpolated into the script source — to prevent
- * injection from untrusted message text. The `on run argv` handler receives title/message as positional args.
+ * Sends notifications through macOS UserNotifications (`UNUserNotificationCenter`) via JNA + Objective-C runtime. This
+ * ensures notifications are attributed to the app bundle instead of Script Editor.
  */
-class MacOSNotificationSender : NativeNotificationSender {
+class MacOSNotificationSender private constructor(private val bridge: MacNotificationBridge) :
+    NativeNotificationSender {
+    constructor() : this(JnaMacNotificationBridge())
 
-    override fun send(notification: Notification): Boolean = runCommand(buildCommand(notification))
+    internal constructor(bridge: MacNotificationBridge, unused: Unit = Unit) : this(bridge)
 
-    /**
-     * Builds an `osascript` command that passes title and message as arguments to a safe `on run argv` handler.
-     *
-     * AppleScript's `on run argv` receives command-line arguments as a list, avoiding any need to escape quotes or
-     * special characters in user content.
-     */
-    internal fun buildCommand(notification: Notification): List<String> = buildList {
-        add("osascript")
+    @Volatile private var authorizationRequested = false
 
-        // Build the script as a safe handler that reads argv items
-        val scriptLines = buildList {
-            add("on run argv")
-            add("  set notifTitle to item 1 of argv")
-            add("  set notifMessage to item 2 of argv")
-            add("  set notifSubtitle to item 3 of argv")
-            add("  set isSilent to item 4 of argv")
-            if (notification.isSilent) {
-                add("  display notification notifMessage with title notifTitle subtitle notifSubtitle")
-            } else {
-                add(
-                    "  display notification notifMessage with title notifTitle" +
-                        " subtitle notifSubtitle sound name \"default\"",
-                )
+    override fun send(notification: Notification): Boolean {
+        if (!bridge.isAvailable) return false
+
+        if (!authorizationRequested) {
+            synchronized(this) {
+                if (!authorizationRequested) {
+                    val authOk = bridge.requestAuthorization(DEFAULT_AUTHORIZATION_OPTIONS)
+                    if (!authOk) {
+                        Logger.w { "UNUserNotificationCenter authorization request failed" }
+                    }
+                    authorizationRequested = true
+                }
             }
-            add("end run")
         }
 
-        // Pass each line with -e
-        for (line in scriptLines) {
-            add("-e")
-            add(line)
-        }
-
-        // Positional arguments after "--"
-        add("--")
-        add(notification.title)
-        add(notification.message)
-        add(categorySubtitle(notification.category))
-        add(if (notification.isSilent) "true" else "false")
+        return bridge.post(
+            title = notification.title,
+            message = notification.message,
+            subtitle = categorySubtitle(notification.category),
+            playSound = !notification.isSilent,
+        )
     }
 
-    private fun categorySubtitle(category: Notification.Category): String = when (category) {
+    internal fun categorySubtitle(category: Notification.Category): String = when (category) {
         Notification.Category.Message -> "Message"
         Notification.Category.NodeEvent -> "Node Event"
         Notification.Category.Battery -> "Low Battery"
@@ -81,27 +66,134 @@ class MacOSNotificationSender : NativeNotificationSender {
         Notification.Category.Service -> "Service"
     }
 
-    private fun runCommand(command: List<String>): Boolean = try {
-        val process = ProcessBuilder(command).redirectErrorStream(true).start()
-        val completed = process.waitFor(PROCESS_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        if (!completed) {
-            process.destroyForcibly()
-            Logger.w { "osascript timed out after ${PROCESS_TIMEOUT_SECONDS}s" }
-            false
-        } else {
-            val exitCode = process.exitValue()
-            if (exitCode != 0) {
-                val stderr = process.inputStream.bufferedReader().readText().take(MAX_STDERR_CHARS)
-                Logger.w { "osascript exited $exitCode: $stderr" }
+    companion object {
+        // UNAuthorizationOptions: badge(1 << 0), sound(1 << 1), alert(1 << 2)
+        internal const val DEFAULT_AUTHORIZATION_OPTIONS = 0b111L
+    }
+}
+
+internal interface MacNotificationBridge {
+    val isAvailable: Boolean
+
+    fun requestAuthorization(options: Long): Boolean
+
+    fun post(title: String, message: String, subtitle: String, playSound: Boolean): Boolean
+}
+
+private class JnaMacNotificationBridge : MacNotificationBridge {
+    private val objc: NativeLibrary?
+    private val objcGetClass: Function?
+    private val selRegisterName: Function?
+    private val objcMsgSend: Function?
+
+    init {
+        val loaded =
+            if (!isMacOs()) {
+                LoadedBridge(null, null, null, null)
+            } else {
+                try {
+                    NativeLibrary.getInstance("UserNotifications")
+                    val nativeObjc = NativeLibrary.getInstance("objc")
+                    LoadedBridge(
+                        objc = nativeObjc,
+                        objcGetClass = nativeObjc.getFunction("objc_getClass"),
+                        selRegisterName = nativeObjc.getFunction("sel_registerName"),
+                        objcMsgSend = nativeObjc.getFunction("objc_msgSend"),
+                    )
+                } catch (e: UnsatisfiedLinkError) {
+                    Logger.w(e) { "Failed to initialize macOS notification bridge" }
+                    LoadedBridge(null, null, null, null)
+                } catch (e: SecurityException) {
+                    Logger.w(e) { "Failed to initialize macOS notification bridge" }
+                    LoadedBridge(null, null, null, null)
+                }
             }
-            exitCode == 0
-        }
-    } catch (e: java.io.IOException) {
-        Logger.w(e) { "Failed to run osascript" }
-        false
+
+        objc = loaded.objc
+        objcGetClass = loaded.objcGetClass
+        selRegisterName = loaded.selRegisterName
+        objcMsgSend = loaded.objcMsgSend
     }
 
-    companion object {
-        private const val MAX_STDERR_CHARS = 200
+    override val isAvailable: Boolean
+        get() = objc != null && objcGetClass != null && selRegisterName != null && objcMsgSend != null
+
+    override fun requestAuthorization(options: Long): Boolean = runCatching {
+        val centerClass = classRef("UNUserNotificationCenter") ?: return false
+        val center = msg(centerClass, selector("currentNotificationCenter")) ?: return false
+        msg(center, selector("requestAuthorizationWithOptions:completionHandler:"), options, Pointer.NULL)
+        true
     }
+        .getOrElse { e ->
+            Logger.w(e) { "Failed to request UNUserNotificationCenter authorization" }
+            false
+        }
+
+    override fun post(title: String, message: String, subtitle: String, playSound: Boolean): Boolean = runCatching {
+        val contentClass = classRef("UNMutableNotificationContent") ?: return false
+        val requestClass = classRef("UNNotificationRequest") ?: return false
+        val centerClass = classRef("UNUserNotificationCenter") ?: return false
+
+        val content = msg(msg(contentClass, selector("alloc")), selector("init")) ?: return false
+        msg(content, selector("setTitle:"), nsString(title) ?: return false)
+        msg(content, selector("setBody:"), nsString(message) ?: return false)
+        msg(content, selector("setSubtitle:"), nsString(subtitle) ?: return false)
+
+        if (playSound) {
+            val soundClass = classRef("UNNotificationSound")
+            val defaultSound = soundClass?.let { msg(it, selector("defaultSound")) }
+            if (defaultSound != null) {
+                msg(content, selector("setSound:"), defaultSound)
+            }
+        }
+
+        val request =
+            msg(
+                requestClass,
+                selector("requestWithIdentifier:content:trigger:"),
+                nsString(UUID.randomUUID().toString()) ?: return false,
+                content,
+                Pointer.NULL,
+            ) ?: return false
+
+        val center = msg(centerClass, selector("currentNotificationCenter")) ?: return false
+        msg(center, selector("addNotificationRequest:withCompletionHandler:"), request, Pointer.NULL)
+        true
+    }
+        .getOrElse { e ->
+            Logger.w(e) { "Failed to post macOS notification" }
+            false
+        }
+
+    private fun classRef(name: String): Pointer? = objcGetClass?.invoke(Pointer::class.java, arrayOf(name)) as? Pointer
+
+    private fun selector(name: String): Pointer =
+        selRegisterName?.invoke(Pointer::class.java, arrayOf(name)) as? Pointer
+            ?: error("Unable to resolve selector '$name'")
+
+    private fun nsString(value: String): Pointer? {
+        val nsStringClass = classRef("NSString") ?: return null
+        return msg(nsStringClass, selector("stringWithUTF8String:"), value)
+    }
+
+    private fun msg(receiver: Pointer?, selector: Pointer, vararg args: Any?): Pointer? {
+        val function = objcMsgSend
+        val target = receiver
+        if (function == null || target == null) return null
+        val callArgs = arrayOfNulls<Any>(args.size + 2)
+        callArgs[0] = target
+        callArgs[1] = selector
+        args.copyInto(callArgs, destinationOffset = 2)
+        return function.invoke(Pointer::class.java, callArgs) as? Pointer
+    }
+
+    private fun isMacOs(): Boolean =
+        System.getProperty("os.name", "").lowercase().let { it.contains("mac") || it.contains("darwin") }
+
+    private data class LoadedBridge(
+        val objc: NativeLibrary?,
+        val objcGetClass: Function?,
+        val selRegisterName: Function?,
+        val objcMsgSend: Function?,
+    )
 }
