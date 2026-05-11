@@ -194,7 +194,7 @@
 - Verify reconnect on network recovery.
 - **Priority**: Medium
 
-### DAT-T028: Add MeshRouterImpl unit tests [ ]
+### DAT-T028: Add MeshRouterImpl unit tests [x]
 
 - **File to create**: `commonTest/.../manager/MeshRouterImplTest.kt`
 - Cover service action routing: send message, request position, traceroute, admin commands.

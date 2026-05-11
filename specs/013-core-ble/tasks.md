@@ -149,7 +149,7 @@
 - Verify state transitions, profile access, disconnect handling.
 - **Priority**: Medium
 
-### BLE-T020: Add KableBleScanner unit tests [ ]
+### BLE-T020: Add KableBleScanner unit tests [x]
 
 - **File to create**: `commonTest/.../KableBleConnectionTest.kt`
 - Test scan flow emissions, timeout behavior, service UUID filtering.

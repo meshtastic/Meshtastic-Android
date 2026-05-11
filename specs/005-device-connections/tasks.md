@@ -162,7 +162,7 @@
 
 - [ ] DC-T036 `[GAP]` [US1] Write `AndroidScannerViewModelTest` in `feature/connections/src/androidTest/` — test `requestBonding()` success/failure paths, `requestPermission()` USB flow, `SecurityException` handling, "bond state 11" special case. *Rationale: Android-specific bonding and permission logic has no test coverage.*
 - [ ] DC-T037 `[GAP]` [US1/US5] Write Compose UI tests for `ConnectionsScreen` in `feature/connections/src/commonTest/` — test `AnimatedContent` state transitions (NO_DEVICE → CONNECTING → CONNECTED), transport chip toggles, device card selection. *Rationale: All existing tests are ViewModel/use-case level; no UI-layer test coverage.*
-- [ ] DC-T038 `[GAP]` Add KDoc to `ConnectionActionButtonStyle.kt` — document each enum value (`Filled`, `Tonal`, `Outlined`, `Text`) with usage context. *Rationale: Only enum in the module without documentation.*
+- [x] DC-T038 `[GAP]` Add KDoc to `ConnectionActionButtonStyle.kt` — document each enum value (`Filled`, `Tonal`, `Outlined`, `Text`) with usage context. *Rationale: Only enum in the module without documentation.*
 
 ---
 

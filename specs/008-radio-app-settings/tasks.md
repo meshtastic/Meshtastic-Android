@@ -332,7 +332,7 @@
   - Target: `commonTest/radio/ProfileRoundTripTest.kt`
   - Gap: Import and export are tested individually but not end-to-end
 
-- [ ] **SET-T074**: Add test for MQTT probe timeout and error path (`probeMqttConnection` exception handling, `clearMqttProbeStatus`)
+- [x] **SET-T074**: Add test for MQTT probe timeout and error path (`probeMqttConnection` exception handling, `clearMqttProbeStatus`)
   - Target: `commonTest/radio/RadioConfigViewModelTest.kt` (extend)
   - Gap: MQTT probe not tested
 
@@ -340,7 +340,7 @@
   - Target: `commonTest/AdministrationAccessibilityTest.kt`
   - Gap: No accessibility testing exists
 
-- [ ] **SET-T076**: Add test for `SettingsViewModel.saveDataCsv()` verifying CSV export through `FileService` and `ExportDataUseCase`
+- [x] **SET-T076**: Add test for `SettingsViewModel.saveDataCsv()` verifying CSV export through `FileService` and `ExportDataUseCase`
   - Target: `commonTest/SettingsViewModelTest.kt` (extend)
   - Gap: CSV export function exists but is not tested
 

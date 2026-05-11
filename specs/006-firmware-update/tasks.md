@@ -254,7 +254,7 @@
 
 ## Identified Gaps
 
-- [ ] **FW-T059**: Add `WifiOtaTransport` unit tests  
+- [x] **FW-T059**: Add `WifiOtaTransport` unit tests  
   The WiFi/TCP OTA transport has no dedicated test coverage. Should test connection, command sending, response reading, firmware streaming, and error handling using a fake Ktor socket.
 
 - [ ] **FW-T060**: Add `FirmwareUpdateScreen` composable/screenshot tests  

@@ -292,7 +292,7 @@
 ## Identified Gaps
 
 ### NDM-T100: Missing — MetricsViewModel CSV export tests for device/environment/signal/power
-- [ ] Add unit tests for `saveDeviceMetricsCSV`, `saveEnvironmentMetricsCSV`, `saveSignalMetricsCSV`, `savePowerMetricsCSV` verifying correct column headers and data formatting
+- [x] Add unit tests for `saveDeviceMetricsCSV`, `saveEnvironmentMetricsCSV`, `saveSignalMetricsCSV`, `savePowerMetricsCSV` verifying correct column headers and data formatting
 - **Rationale**: Only `savePositionCSV` has a test; the other four export methods are untested.
 - **Priority**: Medium
 
@@ -302,8 +302,8 @@
 - **Priority**: Low
 
 ### NDM-T102: Missing — Compass accuracy edge cases
-- [ ] Add tests for `calculatePositionalAccuracyMeters` with various DOP combinations (PDOP-only, HDOP+VDOP, HDOP-only, precision-bits-only, and none)
-- [ ] Add test for `calculateAngularError` when distance is zero
+- [x] Add tests for `calculatePositionalAccuracyMeters` with various DOP combinations (PDOP-only, HDOP+VDOP, HDOP-only, precision-bits-only, and none)
+- [x] Add test for `calculateAngularError` when distance is zero
 - **Rationale**: `CompassViewModelTest` exists but accuracy calculation branch coverage is not verified.
 - **Priority**: Medium
 
@@ -313,7 +313,7 @@
 - **Priority**: Low
 
 ### NDM-T104: Missing — Remote admin session timeout testing
-- [ ] Add `NodeDetailViewModelTest` coverage for `openRemoteAdmin` with `Disconnected` and `Timeout` session results
+- [x] Add `NodeDetailViewModelTest` coverage for `openRemoteAdmin` with `Disconnected` and `Timeout` session results
 - **Rationale**: Only `Mute` and `TraceRoute` actions are tested; session error paths are untested.
 - **Priority**: Medium
 
@@ -335,6 +335,6 @@
 | Compass | 2 | 2 | 0 |
 | Navigation | 1 | 1 | 0 |
 | Testing | 10 | 10 | 0 |
-| **Gaps** | 6 | 0 | **6** |
-| **Total** | **46** | **40** | **6** |
+| **Gaps** | 6 | 3 | **3** |
+| **Total** | **46** | **43** | **3** |
 
