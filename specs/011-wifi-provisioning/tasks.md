@@ -187,12 +187,12 @@
 ## Identified Gaps (not yet implemented)
 
 ### WFP-T023: Expose hidden network provisioning in UI
-- [ ] Add a "Hidden Network" toggle or option in `ConnectedContent` that sets `hidden = true` when calling `provisionWifi`
+- [x] Add a "Hidden Network" toggle or option in `ConnectedContent` that sets `hidden = true` when calling `provisionWifi`
 - [ ] Domain layer already supports `CMD_CONNECT_HIDDEN` (2) — only UI wiring needed
 - **Priority**: Low — niche use case
 
 ### WFP-T024: Add retry mechanism for BLE scan timeout
-- [ ] When BLE scan times out (10s), offer a "Retry" button instead of requiring the user to navigate back and re-enter
+- [x] When BLE scan times out (10s), offer a "Retry" button instead of requiring the user to navigate back and re-enter
 - [ ] Consider exponential backoff or a manual retry count limit
 - **Priority**: Medium — improves UX for unreliable BLE environments
 

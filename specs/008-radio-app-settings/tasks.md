@@ -328,7 +328,7 @@
   - Target: `commonTest/radio/CleanNodeDatabaseScreenTest.kt`
   - Gap: Only ViewModel is tested, not the composable
 
-- [ ] **SET-T073**: Add integration test for profile import → export round-trip verifying `DeviceProfile` protobuf fidelity
+- [x] **SET-T073**: Add integration test for profile import → export round-trip verifying `DeviceProfile` protobuf fidelity
   - Target: `commonTest/radio/ProfileRoundTripTest.kt`
   - Gap: Import and export are tested individually but not end-to-end
 

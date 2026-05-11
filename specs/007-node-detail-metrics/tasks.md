@@ -297,7 +297,7 @@
 - **Priority**: Medium
 
 ### NDM-T101: Missing — HostMetricsLogScreen chart+card test coverage
-- [ ] Add unit tests for `HostMetricsChart` data model and `formatBytes` edge cases (exact boundaries)
+- [x] Add unit tests for `HostMetricsChart` data model and `formatBytes` edge cases (exact boundaries)
 - **Rationale**: `formatBytes` is tested but chart data transformation and card selection sync are not.
 - **Priority**: Low
 
@@ -308,7 +308,7 @@
 - **Priority**: Medium
 
 ### NDM-T103: Missing — Environment NaN guard tests
-- [ ] Add tests verifying that `NaN` temperature, humidity, and pressure values are correctly filtered (not rendered, not charted)
+- [x] Add tests verifying that `NaN` temperature, humidity, and pressure values are correctly filtered (not rendered, not charted)
 - **Rationale**: The code has `isNaN()` guards but no tests validate them.
 - **Priority**: Low
 

@@ -81,7 +81,7 @@
 
 ## Gaps — Uncompleted Tasks
 
-- [ ] **OB-T100**: Extract hardcoded notification channel ID `"my_alerts"` to a shared constant or resource
+- [x] **OB-T100**: Extract hardcoded notification channel ID `"my_alerts"` to a shared constant or resource
   - File: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/IntroNavGraph.kt` (line 112)
   - Rationale: Hardcoded string is fragile; should reference the same constant used when the channel is created.
 
