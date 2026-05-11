@@ -68,6 +68,10 @@ data class NodeDetailUiState(
     val isEnsuringSession: Boolean = false,
 )
 
+internal object NodeDetailUiTextResolver {
+    var resolve: suspend (UiText) -> String = { it.resolve() }
+}
+
 /**
  * ViewModel for the Node Details screen, coordinating data from the node database, mesh logs, and radio configuration.
  */
@@ -179,13 +183,15 @@ class NodeDetailViewModel(
                     EnsureSessionResult.Refreshed,
                     -> _navigationEvents.trySend(SettingsRoute.Settings(destNum))
 
-                    EnsureSessionResult.Disconnected ->
-                        snackbarManager.showSnackbar(
-                            UiText.Resource(Res.string.connect_radio_for_remote_admin).resolve(),
-                        )
+                    EnsureSessionResult.Disconnected -> {
+                        val text = Res.string.connect_radio_for_remote_admin
+                        snackbarManager.showSnackbar(NodeDetailUiTextResolver.resolve(UiText.Resource(text)))
+                    }
 
                     EnsureSessionResult.Timeout ->
-                        snackbarManager.showSnackbar(UiText.Resource(Res.string.remote_admin_unreachable).resolve())
+                        snackbarManager.showSnackbar(
+                            NodeDetailUiTextResolver.resolve(UiText.Resource(Res.string.remote_admin_unreachable)),
+                        )
                 }
             } finally {
                 isEnsuringSession.value = false

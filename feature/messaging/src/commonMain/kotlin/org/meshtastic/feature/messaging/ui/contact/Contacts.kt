@@ -86,6 +86,7 @@ import org.meshtastic.core.resources.mute_1_week
 import org.meshtastic.core.resources.mute_8_hours
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.mute_notifications
+import org.meshtastic.core.resources.mute_selected
 import org.meshtastic.core.resources.mute_status_always
 import org.meshtastic.core.resources.mute_status_muted_for_days
 import org.meshtastic.core.resources.mute_status_muted_for_hours
@@ -93,6 +94,7 @@ import org.meshtastic.core.resources.mute_status_unmuted
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.select_all
 import org.meshtastic.core.resources.unmute
+import org.meshtastic.core.resources.unmute_selected
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
@@ -464,11 +466,13 @@ private fun SelectionToolbar(
                         MeshtasticIcons.VolumeMute
                     },
                     contentDescription =
-                    if (isAllMuted) {
-                        "Unmute selected"
-                    } else {
-                        "Mute selected"
-                    },
+                    stringResource(
+                        if (isAllMuted) {
+                            Res.string.unmute_selected
+                        } else {
+                            Res.string.mute_selected
+                        },
+                    ),
                 )
             }
             IconButton(onClick = onDeleteSelected) {

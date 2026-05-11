@@ -19,6 +19,7 @@ package org.meshtastic.feature.settings.radio
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -28,6 +29,7 @@ import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -46,6 +48,7 @@ import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
@@ -219,6 +222,68 @@ class RadioConfigViewModelTest {
             assertEquals("3.0.0", state.metadata?.firmware_version)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `probeMqttConnection updates status for success`() = runTest {
+        everySuspend { mqttManager.probe("mqtt.example.com", true, "user", "pass") }
+            .calls {
+                delay(1)
+                MqttProbeStatus.Success(serverInfo = "client=test")
+            }
+
+        viewModel.probeMqttConnection("mqtt.example.com", true, "user", "pass")
+
+        assertEquals(MqttProbeStatus.Probing, viewModel.mqttProbeStatus.value)
+
+        advanceTimeBy(1)
+        runCurrent()
+
+        assertEquals(MqttProbeStatus.Success(serverInfo = "client=test"), viewModel.mqttProbeStatus.value)
+        verifySuspend { mqttManager.probe("mqtt.example.com", true, "user", "pass") }
+    }
+
+    @Test
+    fun `probeMqttConnection updates status for timeout`() = runTest {
+        everySuspend { mqttManager.probe("mqtt.example.com", false, null, null) } returns MqttProbeStatus.Timeout(5_000)
+
+        viewModel.probeMqttConnection("mqtt.example.com", false, null, null)
+        runCurrent()
+
+        assertEquals(MqttProbeStatus.Timeout(5_000), viewModel.mqttProbeStatus.value)
+        verifySuspend { mqttManager.probe("mqtt.example.com", false, null, null) }
+    }
+
+    @Test
+    fun `probeMqttConnection converts thrown exception to other status`() = runTest {
+        everySuspend { mqttManager.probe("mqtt.example.com", true, null, null) }
+            .calls { throw IllegalStateException("boom") }
+
+        viewModel.probeMqttConnection("mqtt.example.com", true, null, null)
+        runCurrent()
+
+        assertEquals(MqttProbeStatus.Other(message = "boom"), viewModel.mqttProbeStatus.value)
+        verifySuspend { mqttManager.probe("mqtt.example.com", true, null, null) }
+    }
+
+    @Test
+    fun `clearMqttProbeStatus resets probe state`() = runTest {
+        everySuspend { mqttManager.probe("mqtt.example.com", false, null, null) }
+            .calls {
+                delay(1)
+                MqttProbeStatus.Success(serverInfo = "client=test")
+            }
+
+        viewModel.probeMqttConnection("mqtt.example.com", false, null, null)
+        assertEquals(MqttProbeStatus.Probing, viewModel.mqttProbeStatus.value)
+
+        viewModel.clearMqttProbeStatus()
+        assertEquals(null, viewModel.mqttProbeStatus.value)
+
+        advanceTimeBy(1)
+        runCurrent()
+
+        assertEquals(null, viewModel.mqttProbeStatus.value)
     }
 
     @Test

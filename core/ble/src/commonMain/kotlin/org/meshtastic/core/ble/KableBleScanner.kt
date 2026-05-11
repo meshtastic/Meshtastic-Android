@@ -16,44 +16,63 @@
  */
 package org.meshtastic.core.ble
 
+import com.juul.kable.Advertisement
 import com.juul.kable.Scanner
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.annotation.Single
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
+internal sealed interface KableScanFilter {
+    data object None : KableScanFilter
+
+    data class Address(val value: String) : KableScanFilter
+
+    data class ServiceUuid(val value: Uuid) : KableScanFilter
+}
+
+internal data class KableScanResult(val identifier: String, val name: String?, val advertisement: Advertisement?)
+
+internal fun resolveKableScanFilter(serviceUuid: Uuid?, address: String?): KableScanFilter = when {
+    address != null -> KableScanFilter.Address(address)
+    serviceUuid != null -> KableScanFilter.ServiceUuid(serviceUuid)
+    else -> KableScanFilter.None
+}
+
+private fun Advertisement.toScanResult(): KableScanResult =
+    KableScanResult(identifier = identifier.toString(), name = name, advertisement = this)
+
 @Single(binds = [BleScanner::class])
-class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
-    override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
+open class KableBleScanner(private val loggingConfig: BleLoggingConfig) : BleScanner {
+    internal open fun advertisements(filter: KableScanFilter): Flow<KableScanResult> {
         val scanner = Scanner {
             logging { applyConfig(loggingConfig) }
-            // When both address and serviceUuid are provided, use OR-semantics so the device
-            // is found even if one filter is ineffective on the current platform (e.g.
-            // CoreBluetooth may not re-report a cached identifier via the address filter).
-            if (address != null && serviceUuid != null) {
-                filters {
-                    match { this.address = address }
-                    match { services = listOf(serviceUuid) }
-                }
-            } else if (address != null) {
-                filters { match { this.address = address } }
-            } else if (serviceUuid != null) {
-                filters { match { services = listOf(serviceUuid) } }
+            when (filter) {
+                KableScanFilter.None -> Unit
+                is KableScanFilter.Address -> filters { match { address = filter.value } }
+                is KableScanFilter.ServiceUuid -> filters { match { services = listOf(filter.value) } }
             }
         }
+        return scanner.advertisements.map(Advertisement::toScanResult)
+    }
+
+    override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
+        val filter = resolveKableScanFilter(serviceUuid = serviceUuid, address = address)
 
         // Kable's Scanner doesn't enforce timeout internally, it runs until the Flow is cancelled.
         // By wrapping it in a channelFlow with a timeout, we enforce the BleScanner contract cleanly.
         return channelFlow {
             withTimeoutOrNull(timeout) {
-                scanner.advertisements.collect { advertisement ->
+                advertisements(filter).collect { advertisement ->
                     send(
                         MeshtasticBleDevice(
-                            address = advertisement.identifier.toString(),
+                            address = advertisement.identifier,
                             name = advertisement.name,
-                            advertisement = advertisement,
+                            advertisement = advertisement.advertisement,
                         ),
                     )
                 }

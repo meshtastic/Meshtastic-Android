@@ -22,6 +22,9 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
@@ -263,6 +266,18 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
                 freeCompilerArgs.add("-jvm-default=no-compatibility")
             }
+        }
+    }
+
+    // Published modules compile to JVM 17 for binary compatibility, but their test runtime
+    // classpath includes non-published dependencies compiled to JVM 21. Override the test
+    // launcher to JDK 21 so the JVM can load all class file versions at runtime.
+    if (isPublishedModule) {
+        val toolchains = extensions.getByType(JavaToolchainService::class.java)
+        tasks.withType<Test>().configureEach {
+            javaLauncher.set(
+                toolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(APP_JDK)) }
+            )
         }
     }
 }

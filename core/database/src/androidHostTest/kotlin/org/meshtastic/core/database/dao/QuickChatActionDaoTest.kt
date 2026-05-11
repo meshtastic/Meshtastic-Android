@@ -14,19 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.connections.ui.components
+package org.meshtastic.core.database.dao
 
-/** Visual style for [ConnectionActionButton]. Maps to the four canonical M3 button variants. */
-enum class ConnectionActionButtonStyle {
-    /** Solid-fill button for the primary action in a group (e.g. "Start scan"). */
-    Filled,
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
 
-    /** Tonal (filled-tonal) button for secondary prominence (e.g. "Add device manually"). */
-    Tonal,
-
-    /** Outlined button for neutral or tertiary actions (e.g. "Disconnect"). */
-    Outlined,
-
-    /** Text-only button for the least prominent action (e.g. inline toggles). */
-    Text,
-}
+@RunWith(AndroidJUnit4::class)
+@Config(sdk = [34])
+class QuickChatActionDaoTest : CommonQuickChatActionDaoTest()

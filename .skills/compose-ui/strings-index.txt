@@ -707,6 +707,7 @@ mute_add
 mute_always
 mute_notifications
 mute_remove
+mute_selected
 mute_status_always
 mute_status_muted_for_days
 mute_status_muted_for_hours
@@ -1212,6 +1213,7 @@ unknown_username
 unmessageable
 unmonitored_or_infrastructure
 unmute
+unmute_selected
 unrecognized
 unset
 up_down_select_input_enabled

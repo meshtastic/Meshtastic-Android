@@ -737,6 +737,7 @@
     <string name="mute_always">Always</string>
     <string name="mute_notifications">Mute notifications</string>
     <string name="mute_remove">Unmute notifications for '%1$s'?</string>
+    <string name="mute_selected">Mute selected</string>
     <string name="mute_status_always">Always muted</string>
     <string name="mute_status_muted_for_days">Muted for %1$d days, %2$s hours</string>
     <string name="mute_status_muted_for_hours">Muted for %1$s hours</string>
@@ -1257,6 +1258,7 @@
     <string name="unmessageable">Unmessageable</string>
     <string name="unmonitored_or_infrastructure">Unmonitored or Infrastructure</string>
     <string name="unmute">Unmute</string>
+    <string name="unmute_selected">Unmute selected</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="unset">Unset - 0</string>
     <string name="up_down_select_input_enabled">Up/Down/Select input enabled</string>
