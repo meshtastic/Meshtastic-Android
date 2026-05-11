@@ -69,6 +69,7 @@
     <string name="audio_config">Конфигуриране на аудиото</string>
     <string name="available_pins">Налични пинове</string>
     <string name="back">Назад</string>
+    <string name="backup_restore">Архивиране &amp; възстановяване</string>
     <string name="bad">Лош</string>
     <string name="bandwidth">Широчина на честотната лента</string>
     <string name="baro_pressure">Баро</string>
@@ -291,9 +292,15 @@
     <string name="environment_metrics_use_fahrenheit">Показателите на околната среда използват Фаренхайт</string>
     <string name="error">Грешка</string>
     <string name="error_duty_cycle">Достигнат лимит на Duty Cycle. Не може да се изпрати съобщение сега, опитайте по-късно.</string>
+    <string name="establish_session">Свързване &amp; администриране</string>
+    <string name="establishing_session">Установяване на отдалечена сесия…</string>
     <string name="ethernet_config">Опции за Ethernet</string>
     <string name="ethernet_enabled">Ethernet е активиран</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="event_welcome_burning_man">Добре дошли в Burning Man! 🔥</string>
+    <string name="event_welcome_defcon">Добре дошли в DEFCON! 💀</string>
+    <string name="event_welcome_hamvention">Добре дошли в Hamvention! 🍖📻</string>
+    <string name="event_welcome_open_sauce">Добре дошли в Open Sauce! 🔧</string>
     <string name="exchange_position">Размяна на позиция</string>
     <string name="expand_chart">Разгъване на диаграмата</string>
     <string name="expires">Изтича</string>
@@ -361,6 +368,7 @@
     <string name="firmware_update_rebooting">Рестартиране в DFU...</string>
     <string name="firmware_update_release_notes">Бележки за изданието</string>
     <string name="firmware_update_retry">Опитайте отново</string>
+    <string name="firmware_update_save_dfu_file">Моля, запазете .uf2 файла на DFU устройството си.</string>
     <string name="firmware_update_select_file">Изберете локален файл</string>
     <string name="firmware_update_source_local">Източник: Локален файл</string>
     <string name="firmware_update_stable">Стабилен</string>
@@ -510,6 +518,7 @@
     <string name="map_download_region">Сваляне на регион</string>
     <string name="map_filter">Филтър на картата\n</string>
     <string name="map_layer_formats">Слоевете на картата поддържат формати .kml, .kmz или GeoJSON.</string>
+    <string name="map_node_popup_details">%1$s&lt;br&gt;Последно чут: %2$s&lt;br&gt;Последна позиция: %3$s&lt;br&gt;Батерия: %4$s</string>
     <string name="map_offline_manager">Управление извън линия</string>
     <string name="map_purge_fail">Изчистването на SQL кеша е неуспешно, вижте logcat за подробности</string>
     <string name="map_purge_success">Свалените SQL данни бяха изчистени успешно за %1$s</string>
