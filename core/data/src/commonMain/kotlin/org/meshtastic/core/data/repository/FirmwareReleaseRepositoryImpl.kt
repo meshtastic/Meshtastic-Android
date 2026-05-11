@@ -40,11 +40,14 @@ open class FirmwareReleaseRepositoryImpl(
 ) : FirmwareReleaseRepository {
 
     /**
-     * A flow that provides the latest STABLE firmware release. It follows a "cache-then-network" strategy:
-     * 1. Immediately emits the cached version (if any).
-     * 2. If the cached version is stale, triggers a network fetch in the background.
-     * 3. Emits the updated version upon successful fetch. Collectors should use `.distinctUntilChanged()` to avoid
-     *    redundant UI updates.
+     * A flow that provides the latest STABLE firmware release.
+     *
+     * Pipeline:
+     * 1. If the local DB is empty, seed it from the bundled JSON asset (instant baseline).
+     * 2. Immediately emit the cached version.
+     * 3. If the cached version is stale, refresh from the remote API and re-emit.
+     *
+     * Collectors should use `.distinctUntilChanged()` to avoid redundant UI updates.
      */
     override val stableRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.STABLE)
 
@@ -55,76 +58,52 @@ open class FirmwareReleaseRepositoryImpl(
      */
     override val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
 
-    private fun getLatestFirmware(
-        releaseType: FirmwareReleaseType,
-        forceRefresh: Boolean = false,
-    ): Flow<FirmwareRelease?> = flow {
-        if (forceRefresh) {
-            invalidateCache()
+    private fun getLatestFirmware(releaseType: FirmwareReleaseType): Flow<FirmwareRelease?> = flow {
+        // 1. Seed from bundled JSON if the DB is completely empty (first launch or post-wipe).
+        if (!localDataSource.hasAnyEntries()) {
+            seedCacheFromBundledJson()
         }
 
-        // 1. Emit cached data first, regardless of staleness.
-        // This gives the UI something to show immediately.
+        // 2. Emit cached data immediately.
         val cachedRelease = localDataSource.getLatestRelease(releaseType)
-        if (cachedRelease != null) {
-            Logger.d { "Emitting cached firmware for $releaseType (isStale=${cachedRelease.isStale()})" }
-            emit(cachedRelease.asExternalModel())
-        } else {
-            emit(null)
-        }
+        emit(cachedRelease?.asExternalModel())
 
-        // 2. If the cache was fresh and we are not forcing a refresh, we're done.
-        if (cachedRelease != null && !cachedRelease.isStale() && !forceRefresh) {
+        // 3. If fresh, we're done.
+        if (cachedRelease?.isStale() == false) {
             return@flow
         }
 
-        // 3. Cache is stale, empty, or refresh is forced. Fetch new data.
-        updateCacheFromSources()
-
-        // 4. Emit the final, updated value from the cache.
-        // The `distinctUntilChanged()` operator on the collector side will prevent
-        // re-emitting the same data if the cache wasn't actually updated.
+        // 4. Cache is stale or empty — refresh from network and re-emit.
+        refreshFromNetwork()
         val finalRelease = localDataSource.getLatestRelease(releaseType)
         Logger.d { "Emitting final firmware for $releaseType from cache." }
         emit(finalRelease?.asExternalModel())
     }
 
-    /**
-     * Updates the local cache by fetching from the remote API, with a fallback to a bundled JSON asset if the remote
-     * fetch fails.
-     *
-     * This method is efficient because it fetches and caches all release types (stable, alpha, etc.) in a single
-     * operation.
-     */
-    private suspend fun updateCacheFromSources() {
-        val remoteFetchSuccess =
-            safeCatching {
-                Logger.d { "Fetching fresh firmware releases from remote API." }
-                val networkReleases = remoteDataSource.getFirmwareReleases()
-
-                // The API fetches all release types, so we cache them all at once.
-                localDataSource.insertFirmwareReleases(networkReleases.releases.stable, FirmwareReleaseType.STABLE)
-                localDataSource.insertFirmwareReleases(networkReleases.releases.alpha, FirmwareReleaseType.ALPHA)
-            }
-                .isSuccess
-
-        // If remote fetch failed, try the JSON fallback as a last resort.
-        if (!remoteFetchSuccess) {
-            Logger.w { "Remote fetch failed, attempting to cache from bundled JSON." }
-            safeCatching {
-                val jsonReleases = jsonDataSource.loadFirmwareReleaseFromJsonAsset()
-                localDataSource.insertFirmwareReleases(jsonReleases.releases.stable, FirmwareReleaseType.STABLE)
-                localDataSource.insertFirmwareReleases(jsonReleases.releases.alpha, FirmwareReleaseType.ALPHA)
-            }
-                .onFailure { Logger.w { "Failed to cache from JSON: ${it.message}" } }
+    private suspend fun refreshFromNetwork() {
+        safeCatching {
+            Logger.d { "Fetching fresh firmware releases from remote API." }
+            val networkReleases = remoteDataSource.getFirmwareReleases()
+            localDataSource.insertFirmwareReleases(networkReleases.releases.stable, FirmwareReleaseType.STABLE)
+            localDataSource.insertFirmwareReleases(networkReleases.releases.alpha, FirmwareReleaseType.ALPHA)
         }
+            .onFailure { e -> Logger.w(e) { "FirmwareReleaseRepository: network refresh failed" } }
     }
 
     override suspend fun invalidateCache() {
         localDataSource.deleteAllFirmwareReleases()
     }
 
-    /** Extension function to check if the cached entity is stale. */
+    private suspend fun seedCacheFromBundledJson() {
+        safeCatching {
+            Logger.d { "FirmwareReleaseRepository: seeding cache from bundled JSON" }
+            val jsonReleases = jsonDataSource.loadFirmwareReleaseFromJsonAsset()
+            localDataSource.insertFirmwareReleases(jsonReleases.releases.stable, FirmwareReleaseType.STABLE)
+            localDataSource.insertFirmwareReleases(jsonReleases.releases.alpha, FirmwareReleaseType.ALPHA)
+        }
+            .onFailure { e -> Logger.w(e) { "FirmwareReleaseRepository: failed to seed cache from bundled JSON" } }
+    }
+
     private fun FirmwareReleaseEntity.isStale(): Boolean = (nowMillis - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
 
     companion object {

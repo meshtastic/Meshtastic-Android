@@ -36,6 +36,9 @@ interface DeviceHardwareDao {
     @Query("SELECT * FROM device_hardware WHERE hwModel = :hwModel AND platformio_target = :target")
     suspend fun getByModelAndTarget(hwModel: Int, target: String): DeviceHardwareEntity?
 
+    @Query("SELECT COUNT(*) FROM device_hardware")
+    suspend fun count(): Int
+
     @Query("DELETE FROM device_hardware")
     suspend fun deleteAll()
 }
