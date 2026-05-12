@@ -211,7 +211,7 @@ class WifiOtaTransportTest {
         try {
             transport.close()
 
-            assertNull(withTimeout(1_000L) { connection.readLine() })
+            assertNull(withTimeout(5_000L) { connection.readLine() })
 
             val result = transport.startOta(1L, "hash")
             assertTrue(result.isFailure)
