@@ -59,8 +59,17 @@
 -dontwarn android.os.Parcelable
 -dontwarn android.os.Parcelable$*
 
-# Vico's ColorScale* classes call into skia-shader bridges that aren't on the
-# desktop ProGuard classpath. Vico ships no consumer rules.
+# Vico ships no consumer ProGuard rules. Without explicit keeps, ProGuard's
+# shrinker may remove "redundant" direct super-interfaces from class implements
+# lists (e.g. MeasuringContext from MutableCartesianMeasuringContext, since
+# CartesianMeasuringContext already extends it). This makes Kotlin-generated
+# invokespecial calls to interface default methods target an indirect
+# superinterface, which the JVM bytecode verifier rejects with:
+#   "Bad invokespecial instruction: interface method reference is in an
+#    indirect superinterface."
+# Keep the entire Vico package to prevent hierarchy restructuring.
+-keep class com.patrykandpatrick.vico.** { *; }
+-keep interface com.patrykandpatrick.vico.** { *; }
 -dontwarn com.patrykandpatrick.vico.compose.cartesian.ColorScaleShader
 -dontwarn com.patrykandpatrick.vico.compose.cartesian.layer.ColorScaleAreaFill
 -dontwarn com.patrykandpatrick.vico.compose.cartesian.layer.ColorScaleLineFill
