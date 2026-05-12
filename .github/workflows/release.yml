@@ -420,7 +420,7 @@ jobs:
 
       - name: Combine Flatpak source files
         run: >
-          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])' flatpak-multisrc/*/*.json
+          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"] + "/" + (.["only-arches"] | tostring))' flatpak-multisrc/*/*.json
           > flatpak-sources.json
 
       - name: Upload combined Flatpak source artifact
