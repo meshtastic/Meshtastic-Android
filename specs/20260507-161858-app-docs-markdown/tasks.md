@@ -95,8 +95,8 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T058 [P] [US1] Add Android asset mirroring if required for WebView file loading under `feature/docs/build/generated/docs/androidAssets/`.
 - [X] T059 [P] [US1] Enforce bundle-size warnings/failures and missing-asset validation in `validateDocsBundle`.
 - [X] T060 [US1] Add aggregate root tasks (`generateDocsBundle`, `validateDocsBundle`, `publishDocsSite`) and document their usage.
-- [ ] T061 [P] [US1] [FR-038] Update `syncDocsToComposeResources` in `feature/docs/build.gradle.kts` to include `assets/screenshots/**/*.png` alongside markdown files, and add a task dependency on `:screenshot-tests:copyDocsScreenshots` to ensure generated screenshots are populated before sync.
-- [ ] T062 [P] [US1] [FR-038] Rewrite or restructure markdown image paths during sync so `assets/screenshots/` references resolve to the compose resource file structure expected by the custom `ImageTransformer` at runtime.
+  - [X] T061 [P] [US1] [FR-038] Update `syncDocsToComposeResources` in `feature/docs/build.gradle.kts` to include `assets/screenshots/**/*.png` alongside markdown files, and add a task dependency on `:screenshot-tests:copyDocsScreenshots` to ensure generated screenshots are populated before sync.
+- [X] T062 [P] [US1] [FR-038] Rewrite or restructure markdown image paths during sync so `assets/screenshots/` references resolve to the compose resource file structure expected by the custom `ImageTransformer` at runtime.
 
 **Checkpoint**: Gradle can generate the docs bundle and website artifact from markdown.
 
@@ -119,9 +119,9 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T080 [P] [US2] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/di/FeatureDocsModule.kt`.
 - [X] T081 [P] [US2] Include `FeatureDocsModule` in `app/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt` and `desktop/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`.
 - [X] T082 [US2] Add shared/unit tests for bundle loading, page ordering, and route serialization under `feature/docs/src/commonTest/kotlin/org/meshtastic/feature/docs/`.
-- [ ] T083 [P] [US2] [FR-038] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ui/ComposeResourceImageTransformer.kt` implementing `ImageTransformer` from mikepenz markdown renderer. Must use `Res.getUri("files/docs/$link")` (synchronous) to resolve local resource URIs, then `rememberAsyncImagePainter()` from Coil 3 to load the image composably. Must return `null` for external `http://`/`https://` URLs. Add `libs.coil` dependency to `feature/docs/build.gradle.kts` commonMain.
-- [ ] T084 [P] [US2] [FR-038] Update `DocsPageRouteScreen.kt` to pass `ComposeResourceImageTransformer()` as the `imageTransformer` parameter to the `Markdown()` composable instead of using the default `NoOpImageTransformerImpl`.
-- [ ] T085 [US2] [FR-038] Verify inline screenshot rendering end-to-end: run `copyDocsScreenshots`, `syncDocsToComposeResources`, then launch the docs browser on Desktop and confirm images render inline on a page with `![alt](...)` references.
+- [X] T083 [P] [US2] [FR-038] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ui/ComposeResourceImageTransformer.kt` implementing `ImageTransformer` from mikepenz markdown renderer. Must use `Res.getUri("files/docs/$link")` (synchronous) to resolve local resource URIs, then `rememberAsyncImagePainter()` from Coil 3 to load the image composably. Must return `null` for external `http://`/`https://` URLs. Add `libs.coil` dependency to `feature/docs/build.gradle.kts` commonMain.
+- [X] T084 [P] [US2] [FR-038] Update `DocsPageRouteScreen.kt` to pass `ComposeResourceImageTransformer()` as the `imageTransformer` parameter to the `Markdown()` composable instead of using the default `NoOpImageTransformerImpl`.
+- [X] T085 [US2] [FR-038] Verify inline screenshot rendering end-to-end: run `copyDocsScreenshots`, `syncDocsToComposeResources`, then launch the docs browser on Desktop and confirm images render inline on a page with `![alt](...)` references.
 
 **Checkpoint**: Help & Documentation opens inside Settings and reads bundled content offline.
 
@@ -215,3 +215,20 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 3. Add **US3** (Gemini Nano + fallbacks).
 4. Finish **US4** polishing and architecture docs.
 5. Finish **US5** automation and screenshot bot flow.
+
+---
+
+## Phase 9: Apple Alignment (Cross-Platform Feature Parity)
+
+**Purpose**: Close feature gaps identified by comparing with `meshtastic-apple` docs implementation.
+
+- [X] T200 [P] [US1] Create `docs/user/signal-meter.md` explaining LoRa signal quality, RSSI vs SNR, bar-level criteria, and common misconceptions — adapted from Apple equivalent for Android-specific signal surfaces.
+- [X] T201 [P] [US1] Create `docs/user/units-and-locale.md` explaining automatic metric/imperial formatting via `MetricFormatter`, covering temperature, distance, speed, wind, rainfall, and locale settings — adapted from Apple equivalent for Android/KMP.
+- [X] T202 [P] [US2] Add `iconId: String?` field to `DocPage` and `KeywordIndexEntry` models in `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/model/DocModels.kt`.
+- [X] T203 [P] [US2] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ui/DocPageIconResolver.kt` mapping `iconId` values to `MeshtasticIcons` vectors (equivalent to Apple's SF Symbols per-page mapping).
+- [X] T204 [P] [US2] Update `DocsBrowserScreen.kt` TOC list items to show leading icon using `resolveIcon()`.
+- [X] T205 [P] [US2] Update `DocBundleLoader.kt` static index with `iconId` for all 24 pages and add two new `KeywordIndexEntry` entries for `signal-meter` and `units-and-locale`.
+- [X] T206 [P] [US5] Create `.github/workflows/docs-staleness.yml` — advisory CI workflow that posts a PR comment when user-facing UI files change without corresponding `docs/` updates, with `skip-docs-check` label bypass (adapted from Apple's `docs-staleness.yml` for Android KMP paths).
+
+**Checkpoint**: Feature parity with Apple docs: per-page icons in TOC, two new user guide pages, and docs staleness CI check.
+

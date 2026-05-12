@@ -203,3 +203,25 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - Gemini Nano availability is gated at runtime and may vary by hardware, region, downloaded models, and Google/AICore rollout. Unsupported environments must gracefully fall back to keyword search.
 - The `google` flavor can host AI bindings; `fdroid` must remain functional without requiring proprietary AI integrations.
 - Chirpy branding will be sourced from the Meshtastic design repository and packaged as a vector-compatible asset for all KMP targets.
+
+## Apple Alignment (Cross-Platform Parity)
+
+### Session 2026-05-12
+
+Gap analysis against `meshtastic-apple` identified these alignment items for Android:
+
+**Implemented:**
+1. **Per-page TOC icons** — Apple uses SF Symbols per `DocPage`; Android now maps `iconId` to `MeshtasticIcons` via `DocPageIconResolver.kt`.
+2. **Signal meter user guide page** — `docs/user/signal-meter.md` explains RSSI vs SNR, bar-level criteria, and LoRa-specific signal concepts. Adapted from Apple equivalent for Android signal surfaces.
+3. **Units & locale user guide page** — `docs/user/units-and-locale.md` explains automatic metric/imperial formatting via `MetricFormatter`. Adapted from Apple equivalent for Android/KMP stack.
+4. **Docs staleness CI workflow** — `.github/workflows/docs-staleness.yml` posts advisory PR comments when user-facing UI files change without corresponding `docs/` updates. Adapted from Apple's workflow for KMP feature/core paths.
+
+**Skipped (platform-specific to Apple):**
+- `docs/user/watch.md` — watchOS-only
+- `docs/user/carplay.md` — iOS CarPlay only
+- `docs/user/translate.md` — iOS Translate framework only
+- `docs/developer/carplay.md` — iOS CarPlay architecture only
+- `docs/developer/swiftdata.md` — Android has `persistence.md` (Room KMP)
+- `docs/developer/deep-links.md` — Android has `navigation-and-deep-links.md`
+- `docs/developer/measurement.md` — covered by `units-and-locale.md` user page
+- TipKit contextual tips — iOS TipKit has no direct KMP equivalent; contextual help is deferred

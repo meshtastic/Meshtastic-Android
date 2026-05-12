@@ -3,6 +3,21 @@
 # Do NOT edit or remove previous entries — stale state claims cause agent confusion.
 # Format: ## YYYY-MM-DD — <summary>
 
+## 2026-05-12 — Implemented Apple alignment for docs feature (FR-038)
+- Branch: `feat/20260507-161858-app-docs-markdown`
+- Gap analysis against `meshtastic-apple` completed. Implemented 4 alignment items:
+  1. Per-page TOC icons via `DocPageIconResolver.kt` mapping `iconId` to `MeshtasticIcons`
+  2. New `docs/user/signal-meter.md` (RSSI vs SNR, bar-level criteria, LoRa signal concepts)
+  3. New `docs/user/units-and-locale.md` (automatic metric/imperial via `MetricFormatter`)
+  4. New `.github/workflows/docs-staleness.yml` (advisory PR comments for UI changes without doc updates)
+- Added `iconId: String?` field to `DocPage` and `KeywordIndexEntry` models
+- Updated `DocBundleLoader` with iconId for all 24 pages plus 2 new entries (signal-meter, units-and-locale)
+- Updated `DocsBrowserScreen` to show leading icons in TOC list items
+- Marked T061-T085 as completed in tasks.md (were implemented in prior session)
+- Added Phase 9 (T200-T206) for Apple alignment tasks — all marked complete
+- Skipped Apple-only features: watch, carplay, translate, TipKit, SwiftData docs
+- Verified: `spotlessApply`, `detekt`, `assembleDebug`, `compileKotlinJvm` — all green
+
 ## 2026-05-11 — Migrated feature/intro UI to commonMain
 - Moved intro onboarding UI composables and nav graph from `feature/intro/src/androidMain/` into `feature/intro/src/commonMain/`, adding shared `IntroPermissions` and `IntroSettingsNavigator` interfaces plus a common `introGraph` Navigation 3 extension.
 - Refactored `AppIntroductionScreen` into a thin Android host that provides Android permission/settings adapters via composition locals, and added `AndroidIntroPermissions`, `AndroidIntroSettingsNavigator`, and JVM desktop no-op stubs.
