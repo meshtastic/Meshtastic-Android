@@ -80,7 +80,7 @@ fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit
 @Preview
 @Composable
 fun NodeChipPreview() {
-    val user = User(short_name = "\uD83E\uDEE0", long_name = "John Doe")
+    val user = User(short_name = "JD", long_name = "John Doe")
     val node =
         Node(
             num = 13444,

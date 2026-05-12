@@ -32,8 +32,8 @@ import org.meshtastic.proto.User
 fun ReactionItemPreview() {
     AppTheme {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-            ReactionItem(emoji = "\uD83D\uDE42")
-            ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
+            ReactionItem(emoji = "+1")
+            ReactionItem(emoji = "+1", emojiCount = 2)
             AddReactionButton()
         }
     }

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import com.android.build.api.dsl.LibraryExtension
+import org.gradle.testretry.TestRetryTaskExtension
 
 plugins {
     alias(libs.plugins.meshtastic.android.library)
@@ -28,6 +29,13 @@ configure<LibraryExtension> {
     experimentalProperties["android.experimental.enableScreenshotTest"] = true
 
     testOptions { screenshotTests { imageDifferenceThreshold = 0.0005f } }
+}
+
+// CST screenshot tests use a custom runner incompatible with test-retry
+tasks.withType<Test>().configureEach {
+    if (name.contains("ScreenshotTest", ignoreCase = true)) {
+        extensions.configure<TestRetryTaskExtension> { maxRetries.set(0) }
+    }
 }
 
 dependencies {
