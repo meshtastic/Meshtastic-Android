@@ -63,6 +63,7 @@ import org.meshtastic.core.resources.show_iaq_legend
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ThumbUp
 import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.IAQColors.IAQDangerouslyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQExcellent
 import org.meshtastic.core.ui.theme.IAQColors.IAQExtremelyPolluted
@@ -254,79 +255,81 @@ fun IAQScale(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun IAQScalePreview() {
-    IAQScale()
+    AppTheme { IAQScale() }
 }
 
 @Suppress("LongMethod")
 @Preview(showBackground = true)
 @Composable
 private fun IndoorAirQualityPreview() {
-    Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(stringResource(Res.string.preview_pill), style = MaterialTheme.typography.titleLarge)
-        Row {
-            IndoorAirQuality(iaq = 6)
-            IndoorAirQuality(iaq = 51)
-        }
-        Row {
-            IndoorAirQuality(iaq = 101)
-            IndoorAirQuality(iaq = 201)
-        }
-        Row {
-            IndoorAirQuality(iaq = 350)
-            IndoorAirQuality(iaq = 351)
-        }
+    AppTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(stringResource(Res.string.preview_pill), style = MaterialTheme.typography.titleLarge)
+            Row {
+                IndoorAirQuality(iaq = 6)
+                IndoorAirQuality(iaq = 51)
+            }
+            Row {
+                IndoorAirQuality(iaq = 101)
+                IndoorAirQuality(iaq = 201)
+            }
+            Row {
+                IndoorAirQuality(iaq = 350)
+                IndoorAirQuality(iaq = 351)
+            }
 
-        Text(stringResource(Res.string.preview_dot), style = MaterialTheme.typography.titleLarge)
-        Row {
-            IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Dot)
-            IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Dot)
-            IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Dot)
-            IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Dot)
-            IndoorAirQuality(iaq = 350, displayMode = IaqDisplayMode.Dot)
-            IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Dot)
-        }
+            Text(stringResource(Res.string.preview_dot), style = MaterialTheme.typography.titleLarge)
+            Row {
+                IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Dot)
+                IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Dot)
+                IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Dot)
+                IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Dot)
+                IndoorAirQuality(iaq = 350, displayMode = IaqDisplayMode.Dot)
+                IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Dot)
+            }
 
-        Text(stringResource(Res.string.preview_text), style = MaterialTheme.typography.titleLarge)
-        Row {
-            IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Text)
-            IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Text)
-            IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Text)
-        }
-        Row {
-            IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Text)
-            IndoorAirQuality(iaq = 350, displayMode = IaqDisplayMode.Text)
-            IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Text)
-        }
+            Text(stringResource(Res.string.preview_text), style = MaterialTheme.typography.titleLarge)
+            Row {
+                IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Text)
+                IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Text)
+                IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Text)
+            }
+            Row {
+                IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Text)
+                IndoorAirQuality(iaq = 350, displayMode = IaqDisplayMode.Text)
+                IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Text)
+            }
 
-        Text(stringResource(Res.string.preview_gauge), style = MaterialTheme.typography.titleLarge)
-        Row {
-            IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gauge)
-            IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gauge)
-            IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Gauge)
-            IndoorAirQuality(iaq = 151, displayMode = IaqDisplayMode.Gauge)
-        }
-        Row {
-            IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Gauge)
-            IndoorAirQuality(iaq = 251, displayMode = IaqDisplayMode.Gauge)
-            IndoorAirQuality(iaq = 301, displayMode = IaqDisplayMode.Gauge)
-            IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Gauge)
-        }
-        Row {
-            IndoorAirQuality(iaq = 401, displayMode = IaqDisplayMode.Gauge)
-            IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Gauge)
-        }
+            Text(stringResource(Res.string.preview_gauge), style = MaterialTheme.typography.titleLarge)
+            Row {
+                IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gauge)
+                IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gauge)
+                IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Gauge)
+                IndoorAirQuality(iaq = 151, displayMode = IaqDisplayMode.Gauge)
+            }
+            Row {
+                IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Gauge)
+                IndoorAirQuality(iaq = 251, displayMode = IaqDisplayMode.Gauge)
+                IndoorAirQuality(iaq = 301, displayMode = IaqDisplayMode.Gauge)
+                IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Gauge)
+            }
+            Row {
+                IndoorAirQuality(iaq = 401, displayMode = IaqDisplayMode.Gauge)
+                IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Gauge)
+            }
 
-        Text(stringResource(Res.string.preview_gradient), style = MaterialTheme.typography.titleLarge)
-        IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gradient)
-        IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gradient)
-        IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Gradient)
-        IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Gradient)
-        IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Gradient)
-        IndoorAirQuality(iaq = 401, displayMode = IaqDisplayMode.Gradient)
-        IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Gradient)
+            Text(stringResource(Res.string.preview_gradient), style = MaterialTheme.typography.titleLarge)
+            IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gradient)
+            IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gradient)
+            IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Gradient)
+            IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Gradient)
+            IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Gradient)
+            IndoorAirQuality(iaq = 401, displayMode = IaqDisplayMode.Gradient)
+            IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Gradient)
+        }
     }
 }

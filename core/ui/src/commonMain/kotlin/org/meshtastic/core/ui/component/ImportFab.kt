@@ -242,7 +242,7 @@ private fun InputUrlDialog(title: String, onDismiss: () -> Unit, onConfirm: (Str
 
 @Preview(showBackground = true, name = "Contact Context")
 @Composable
-private fun PreviewImportFABContact() {
+fun PreviewImportFABContact() {
     AppTheme {
         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             MeshtasticImportFAB(onImport = {}, modifier = Modifier.align(Alignment.BottomEnd), isContactContext = true)
@@ -252,7 +252,7 @@ private fun PreviewImportFABContact() {
 
 @Preview(showBackground = true, name = "Channel Context with Sharing")
 @Composable
-private fun PreviewImportFABChannel() {
+fun PreviewImportFABChannel() {
     AppTheme {
         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             MeshtasticImportFAB(

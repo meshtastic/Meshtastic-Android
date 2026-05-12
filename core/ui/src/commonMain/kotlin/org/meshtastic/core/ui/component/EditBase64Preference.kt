@@ -50,6 +50,7 @@ import org.meshtastic.core.resources.reset
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
 @Composable
@@ -142,14 +143,16 @@ fun EditBase64Preference(
 @Preview(showBackground = true)
 @Composable
 private fun EditBase64PreferencePreview() {
-    EditBase64Preference(
-        title = "Title",
-        summary = "This is a summary",
-        value = Channel.getRandomKey(),
-        enabled = true,
-        keyboardActions = KeyboardActions {},
-        onValueChange = { _ -> },
-        onGenerateKey = {},
-        modifier = Modifier.padding(16.dp),
-    )
+    AppTheme {
+        EditBase64Preference(
+            title = "Title",
+            summary = "This is a summary",
+            value = Channel.getRandomKey(),
+            enabled = true,
+            keyboardActions = KeyboardActions {},
+            onValueChange = { _ -> },
+            onGenerateKey = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
 }

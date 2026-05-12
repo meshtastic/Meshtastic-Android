@@ -78,6 +78,7 @@ import org.meshtastic.core.resources.security_icon_insecure_no_precise
 import org.meshtastic.core.resources.security_icon_insecure_precise_only
 import org.meshtastic.core.resources.security_icon_secure
 import org.meshtastic.core.resources.security_icon_warning_precise_mqtt
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
@@ -501,56 +502,61 @@ private fun AllSecurityStates() {
 @Preview(name = "Secure Channel Icon")
 @Composable
 private fun PreviewSecureChannel() {
-    SecurityIcon(securityState = SecurityState.SECURE)
+    AppTheme { SecurityIcon(securityState = SecurityState.SECURE) }
 }
 
 @Preview(name = "Insecure Precise Icon")
 @Composable
 private fun PreviewInsecureChannelWithPreciseLocation() {
-    SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_ONLY)
+    AppTheme { SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_ONLY) }
 }
 
 @Preview(name = "Insecure Channel Icon")
 @Composable
 private fun PreviewInsecureChannelWithoutPreciseLocation() {
-    SecurityIcon(securityState = SecurityState.INSECURE_NO_PRECISE)
+    AppTheme { SecurityIcon(securityState = SecurityState.INSECURE_NO_PRECISE) }
 }
 
 @Preview(name = "MQTT Enabled Icon")
 @Composable
 private fun PreviewMqttEnabled() {
-    SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_MQTT_WARNING)
+    AppTheme { SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_MQTT_WARNING) }
 }
 
 @Preview(name = "All Security Icons with Dialog")
 @Composable
-private fun PreviewAllSecurityIconsWithDialog() {
-    var showHelpDialogFor by remember { mutableStateOf<SecurityState?>(null) }
-    val stateLabels = remember {
-        // Using SecurityState.entries to build the map keys
-        mapOf(
-            SecurityState.SECURE to "Secure",
-            SecurityState.INSECURE_NO_PRECISE to "Insecure (No Precise Location)",
-            SecurityState.INSECURE_PRECISE_ONLY to "Insecure (Precise Location Only)",
-            SecurityState.INSECURE_PRECISE_MQTT_WARNING to "Insecure (Precise Location + MQTT Warning)",
-        )
-    }
-
-    Column(
-        modifier = Modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text(text = "Security Icons Preview (Click for Help)", style = MaterialTheme.typography.headlineSmall)
-
-        SecurityState.entries.forEach { state ->
-            // Iterate over enum entries
-            val label = stateLabels[state] ?: "Unknown State (${state.name})" // Fallback to enum name
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                SecurityIcon(securityState = state, externalOnClick = { showHelpDialogFor = state })
-                Text(label)
-            }
+fun PreviewAllSecurityIconsWithDialog() {
+    AppTheme {
+        var showHelpDialogFor by remember { mutableStateOf<SecurityState?>(null) }
+        val stateLabels = remember {
+            // Using SecurityState.entries to build the map keys
+            mapOf(
+                SecurityState.SECURE to "Secure",
+                SecurityState.INSECURE_NO_PRECISE to "Insecure (No Precise Location)",
+                SecurityState.INSECURE_PRECISE_ONLY to "Insecure (Precise Location Only)",
+                SecurityState.INSECURE_PRECISE_MQTT_WARNING to "Insecure (Precise Location + MQTT Warning)",
+            )
         }
-        showHelpDialogFor?.let { SecurityHelpDialog(securityState = it, onDismiss = { showHelpDialogFor = null }) }
+
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(text = "Security Icons Preview (Click for Help)", style = MaterialTheme.typography.headlineSmall)
+
+            SecurityState.entries.forEach { state ->
+                // Iterate over enum entries
+                val label = stateLabels[state] ?: "Unknown State (${state.name})" // Fallback to enum name
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SecurityIcon(securityState = state, externalOnClick = { showHelpDialogFor = state })
+                    Text(label)
+                }
+            }
+            showHelpDialogFor?.let { SecurityHelpDialog(securityState = it, onDismiss = { showHelpDialogFor = null }) }
+        }
     }
 }

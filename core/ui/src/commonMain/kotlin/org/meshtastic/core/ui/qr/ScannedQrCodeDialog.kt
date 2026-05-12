@@ -62,6 +62,7 @@ import org.meshtastic.core.resources.new_channel_rcvd
 import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.replace_channels_and_settings_description
 import org.meshtastic.core.ui.component.ChannelSelection
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ChannelSet
 
 @Composable
@@ -314,10 +315,14 @@ fun ScannedQrCodeDialog(
 @PreviewLightDark
 @Composable
 private fun ScannedQrCodeDialogPreview() {
-    ScannedQrCodeDialog(
-        channels = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
-        incoming = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
-        onDismiss = {},
-        onConfirm = {},
-    )
+    AppTheme {
+        ScannedQrCodeDialog(
+            channels =
+            ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+            incoming =
+            ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+            onDismiss = {},
+            onConfirm = {},
+        )
+    }
 }

@@ -336,7 +336,7 @@ private fun FirmwareUpdateContent(
 }
 
 @Composable
-private fun VerifyingState() {
+internal fun VerifyingState() {
     CircularProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_verifying), style = MaterialTheme.typography.titleMedium)
@@ -351,7 +351,7 @@ private fun VerifyingState() {
 }
 
 @Composable
-private fun CheckingState() {
+internal fun CheckingState() {
     CircularProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_checking), style = MaterialTheme.typography.bodyLarge)
@@ -446,7 +446,7 @@ private fun ReadyState(
 }
 
 @Composable
-private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+internal fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     MeshtasticDialog(
         onDismiss = onDismiss,
         title = stringResource(Res.string.firmware_update_disclaimer_title),
@@ -832,7 +832,7 @@ private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
 }
 
 @Composable
-private fun ErrorState(error: UiText, onRetry: () -> Unit) {
+internal fun ErrorState(error: UiText, onRetry: () -> Unit) {
     Icon(
         MeshtasticIcons.Dangerous,
         contentDescription = null,
@@ -855,7 +855,7 @@ private fun ErrorState(error: UiText, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun SuccessState(onDone: () -> Unit) {
+internal fun SuccessState(onDone: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(Unit) { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
 

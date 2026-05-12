@@ -23,13 +23,13 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 @PreviewLightDark
 @Composable
-private fun QuickChatItemPreview() {
+fun QuickChatItemPreview() {
     AppTheme { QuickChatItem(action = QuickChatAction(name = "TST", message = "Test", position = 0)) }
 }
 
 @PreviewLightDark
 @Composable
-private fun EditQuickChatDialogPreview() {
+fun EditQuickChatDialogPreview() {
     AppTheme {
         EditQuickChatDialog(
             action = QuickChatAction(name = "TST", message = "Test", position = 0),

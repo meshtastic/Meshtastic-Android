@@ -32,6 +32,9 @@ kotest = "6.1.11"
 testRetry = "1.6.4"
 turbine = "1.2.1"
 
+# Compose Screenshot Testing
+compose-screenshot = "0.0.1-alpha14"
+
 # Compose Multiplatform
 compose-multiplatform = "1.11.0-rc01"
 compose-multiplatform-material3 = "1.11.0-alpha07"
@@ -242,6 +245,9 @@ usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", versi
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
+# Screenshot Testing
+screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "compose-screenshot" }
+
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
 android-tools-common = { module = "com.android.tools:common", version = "32.2.1" }
@@ -270,6 +276,7 @@ jna = { module = "net.java.dev.jna:jna", version = "5.18.1" }
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+compose-screenshot = { id = "com.android.compose.screenshot", version.ref = "compose-screenshot" }
 
 # Jetbrains
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

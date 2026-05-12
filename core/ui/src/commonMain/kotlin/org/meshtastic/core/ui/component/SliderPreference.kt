@@ -79,7 +79,7 @@ fun <T> SliderPreference(
 @Suppress("MagicNumber")
 @Preview(showBackground = true)
 @Composable
-private fun SliderPreferencePreview() {
+fun SliderPreferencePreview() {
     val items = listOf(1L to "One", 2L to "Two", 3L to "Three", 4L to "Four", 5L to "Five")
     AppTheme {
         SliderPreference(
@@ -96,7 +96,7 @@ private fun SliderPreferencePreview() {
 @Suppress("MagicNumber")
 @Preview(showBackground = true)
 @Composable
-private fun SliderPreferenceDisabledPreview() {
+fun SliderPreferenceDisabledPreview() {
     val items = listOf(1L to "One", 2L to "Two", 3L to "Three", 4L to "Four", 5L to "Five")
     AppTheme {
         SliderPreference(

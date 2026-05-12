@@ -35,6 +35,7 @@ jobs:
               - 'desktop/**'
               - 'core/**'
               - 'feature/**'
+              - 'screenshot-tests/**'
               # Shared build infrastructure
               - 'build-logic/**'
               - 'config/**'

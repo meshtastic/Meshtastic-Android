@@ -45,6 +45,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun SignedIntegerEditTextPreference(
@@ -269,25 +270,27 @@ fun EditTextPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun EditTextPreferencePreview() {
-    Column {
-        EditTextPreference(
-            title = "String",
-            value = "Meshtastic",
-            summary = "This is a summary",
-            maxSize = 39,
-            enabled = true,
-            isError = false,
-            keyboardOptions = KeyboardOptions.Default,
-            keyboardActions = KeyboardActions {},
-            onValueChanged = {},
-        )
-        EditTextPreference(
-            title = "Advanced Settings",
-            value = UInt.MAX_VALUE.toInt(),
-            enabled = true,
-            keyboardActions = KeyboardActions {},
-            onValueChanged = {},
-        )
+fun EditTextPreferencePreview() {
+    AppTheme {
+        Column {
+            EditTextPreference(
+                title = "String",
+                value = "Meshtastic",
+                summary = "This is a summary",
+                maxSize = 39,
+                enabled = true,
+                isError = false,
+                keyboardOptions = KeyboardOptions.Default,
+                keyboardActions = KeyboardActions {},
+                onValueChanged = {},
+            )
+            EditTextPreference(
+                title = "Advanced Settings",
+                value = UInt.MAX_VALUE.toInt(),
+                enabled = true,
+                keyboardActions = KeyboardActions {},
+                onValueChanged = {},
+            )
+        }
     }
 }

@@ -64,6 +64,6 @@ fun ChannelItem(
 
 @Preview
 @Composable
-private fun ChannelItemPreview() {
+fun ChannelItemPreview() {
     AppTheme { ChannelItem(index = 0, title = "Medium Fast", enabled = true) {} }
 }

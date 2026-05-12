@@ -3,5 +3,11 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>Kdoc:TcpDiscoveryHelpers.kt:/** * Shared helpers for TCP device discovery logic used by both [CommonGetDiscoveredDevicesUseCase] and the * Android-specific variant. */</ID>
+    <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun ConnectingDeviceInfoPreview</ID>
+    <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun DeviceListItemPreview</ID>
+    <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun DeviceSectionHeaderPreview</ID>
+    <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun DisconnectButtonPreview</ID>
+    <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun EmptyStateContentPreview</ID>
+    <ID>PreviewPublic:ConnectionsPreviews.kt:@PreviewLightDark @Composable fun TransportFilterChipsPreview</ID>
   </CurrentIssues>
 </SmellBaseline>

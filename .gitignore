@@ -28,6 +28,9 @@ keystore.properties
 # Kotlin compiler
 .kotlin
 
+# Generated docs screenshots (regenerated from reference images)
+docs/screenshots/
+
 # VS code
 .vscode/settings.json
 
@@ -60,6 +63,6 @@ firebase-debug.log
 /coil/
 /kable/
 .opencode/
-
-# flatpakGradleGenerator output
-flatpak-sources*.json
+/desktop/bin/
+/build-logic/convention/bin/
+/.specify/extensions/.cache/

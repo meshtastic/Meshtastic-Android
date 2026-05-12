@@ -476,8 +476,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 @PreviewLightDark
 @Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
-private fun DeviceMetricsCardPreview() {
-    val now = nowSeconds.toInt()
+fun DeviceMetricsCardPreview() {
+    val now = 1700000000
     val telemetry =
         Telemetry(
             time = now,
