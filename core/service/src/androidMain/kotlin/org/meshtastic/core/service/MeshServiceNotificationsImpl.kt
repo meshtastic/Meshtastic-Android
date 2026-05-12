@@ -731,7 +731,7 @@ class MeshServiceNotificationsImpl(
     private val openAppIntent: PendingIntent by lazy {
         val intent =
             Intent(context, Class.forName("org.meshtastic.app.MainActivity")).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
         PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
@@ -763,7 +763,7 @@ class MeshServiceNotificationsImpl(
     }
 
     private fun createOpenNodeDetailIntent(nodeNum: Int): PendingIntent {
-        val deepLinkUri = "$DEEP_LINK_BASE_URI/node?destNum=$nodeNum".toUri()
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/nodes/$nodeNum".toUri()
         val deepLinkIntent =
             Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName("org.meshtastic.app.MainActivity")).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
