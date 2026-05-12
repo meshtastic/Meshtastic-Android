@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* feat: add Compose Preview Screenshot Testing infrastructure (#5410) by @James Rich in [`85c840de3`](https://github.com/meshtastic/Meshtastic-Android/commit/85c840de32096a00aa7fac42fca0d3a5417d3961)
+* fix(ci): prevent literal 'false' task name in desktop release build (#5411) by @James Rich in [`7202994ab`](https://github.com/meshtastic/Meshtastic-Android/commit/7202994abee99dc16a54f38d34a7607c2a573663)
+* docs: update CHANGELOG.md (#5409) by @github-actions[bot] in [`1373bd330`](https://github.com/meshtastic/Meshtastic-Android/commit/1373bd330b4829ac29d37b0e1e088d21b66dc037)
 * feat(api): add hasAnyEntries method to local data sources and improve… (#5406) by @James Rich in [`10c5b5db2`](https://github.com/meshtastic/Meshtastic-Android/commit/10c5b5db2e5b23c52a3a5689205bfc42285b7b0a)
 * Update notification intents and deep link URI format (#5408) by @James Rich in [`82135df86`](https://github.com/meshtastic/Meshtastic-Android/commit/82135df865c4595d3ee509ac3535b86e343874b6)
 * docs: update CHANGELOG.md (#5399) by @github-actions[bot] in [`fd0e2c090`](https://github.com/meshtastic/Meshtastic-Android/commit/fd0e2c0904d21df2a962bd18ee138afabf869e98)
