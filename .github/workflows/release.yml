@@ -420,7 +420,20 @@ jobs:
 
       - name: Combine Flatpak source files
         run: >
-          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"] + "/" + (.["only-arches"] | tostring))' flatpak-multisrc/*/*.json
+          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"] + "/" + (.["only-arches"] | tostring))'
+          flatpak-multisrc/*/*.json
+          > flatpak-sources-combined.json
+      
+      - name: Add mirror-urls for Maven Central
+        run: >
+          jq '[.[] | if (.url | test("^https://repo\\.maven\\.apache\\.org/maven2/")) then . + {"mirror-urls": [(.url | sub("^https://repo\\.maven\\.apache\\.org/maven2/"; "https://maven-central.storage-download.googleapis.com/maven2/"))]} else . end]'
+          flatpak-sources-combined.json
+          > flatpak-sources-central.json
+
+      - name: Add mirror-urls for Gradle Plugin Portal
+        run: >
+          jq '[.[] | if (.url | test("^https://plugins\\.gradle\\.org/m2/")) then . + {"mirror-urls": [(.url | sub("^https://plugins\\.gradle\\.org/m2/"; "https://maven.aliyun.com/repository/gradle-plugin/"))]} else . end]'
+          flatpak-sources-central.json
           > flatpak-sources.json
 
       - name: Upload combined Flatpak source artifact
