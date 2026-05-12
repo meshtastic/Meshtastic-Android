@@ -557,12 +557,12 @@ jobs:
           ./gradlew :build-logic:convention:flatpakGradleGenerator flatpakGradleGenerator
           --no-configuration-cache --refresh-dependencies --no-parallel
       
-      - run: ls -lah flatpak-sources*.json
+      - run: ls -lah flatpak-sources-*.json
 
       - name: Upload Flatpak Sources
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
           name: flatpak-sources-${{ runner.arch }}
-          path: flatpak-sources*.json
+          path: flatpak-sources-*.json
           retention-days: 7

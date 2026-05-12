@@ -391,14 +391,14 @@ jobs:
           --no-configuration-cache --refresh-dependencies --no-parallel
 
       - name: List Flatpak source files
-        run: ls -R flatpak-sources*.json
+        run: ls -R flatpak-sources-*.json
 
       - name: Upload Flatpak source artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: flatpak-multisrc-${{ runner.arch }}
-          path: flatpak-sources*.json
+          path: flatpak-sources-*.json
           retention-days: 1
 
   release-flatpak-src:
@@ -413,11 +413,11 @@ jobs:
           merge-multiple: true
       
       - name: List Flatpak source files
-        run: ls -R flatpak-sources*.json
+        run: ls -R flatpak-sources-*.json
 
       - name: Combine Flatpak source files
         run: >
-          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])' flatpak-sources*.json
+          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])' flatpak-sources-*.json
           > flatpak-sources.json
 
       - name: Upload combined Flatpak source artifact
