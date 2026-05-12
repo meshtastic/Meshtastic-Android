@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* fix: clamp future lastHeard timestamps to current time on ingestion (#5418) by @James Rich in [`0f2b1c064`](https://github.com/meshtastic/Meshtastic-Android/commit/0f2b1c064aa9b77685ac8a7d05fe81af89655027)
+* fix(ci): resolve flatpak source merge race condition (#5419) by @James Rich in [`6f42f0788`](https://github.com/meshtastic/Meshtastic-Android/commit/6f42f078878258b334ae5b234c08caf76d2fa817)
+* docs: update CHANGELOG.md (#5417) by @github-actions[bot] in [`b96515e7d`](https://github.com/meshtastic/Meshtastic-Android/commit/b96515e7d048a0850f29cc5381326fd796a07e2c)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5416) by @James Rich in [`09a0d123b`](https://github.com/meshtastic/Meshtastic-Android/commit/09a0d123bed0e79415a8297c5cba92bab636d79e)
 * chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5413) by @renovate[bot] in [`56077db6d`](https://github.com/meshtastic/Meshtastic-Android/commit/56077db6d93fd76ca2fa585f49eb63d2e91ad400)
 * chore(deps): update actions/checkout action to v6 (#5414) by @renovate[bot] in [`d4ff10ef3`](https://github.com/meshtastic/Meshtastic-Android/commit/d4ff10ef3b1551637e016e1f4bee4e5c2a98d645)
