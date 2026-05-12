@@ -1,11 +1,12 @@
-- name: beta
-  url: /beta/
-  prerelease: true
-  current: true
+versions:
+  - tag: beta
+    label: "Beta"
+    url: /beta/
+    current: true
 
 # Release entries are added by the docs-release.yml workflow:
-# - name: "2.8.0"
+# - tag: "v2.8.0"
+#   label: "2.8.0"
 #   url: /v2.8.0/
-#   prerelease: false
 #   current: false
 

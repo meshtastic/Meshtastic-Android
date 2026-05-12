@@ -1,0 +1,48 @@
+// Meshtastic Material 3 color scheme for just-the-docs
+// Source: Meshtastic Design Standards v1.4 — Section 8 (M3 Theme Mapping)
+//
+// Brand colors:
+//   Primary (Foreground): #2C2D3C
+//   Accent (Highlight):   #67EA94
+
+// ──────────────────────────────────────────────────────────
+// Light scheme
+// ──────────────────────────────────────────────────────────
+
+// Body / page background
+$body-background-color: #F5F6FA;       // Neutral 50
+$sidebar-color: #ECEDF3;              // Neutral 100
+$body-text-color: #2C2D3C;            // Neutral 800
+
+// Links
+$link-color: #2D8F52;                 // Green 700 (M3 primary light)
+$body-heading-color: #2C2D3C;         // Neutral 800
+
+// Navigation
+$nav-child-link-color: #555668;       // Neutral 600
+$search-result-preview-color: #555668;
+
+// Code
+$code-background-color: #ECEDF3;      // Neutral 100
+$code-linenumber-color: #9496A6;      // Neutral 400
+
+// Borders
+$border-color: #D5D6E0;               // Neutral 200
+$table-background-color: #F5F6FA;     // Neutral 50
+
+// Buttons
+$btn-primary-color: #2D8F52;          // Green 700
+
+// Feedback colors (callouts)
+$feedback-color: lighten(#2855A8, 45%);
+
+// Search
+$search-background-color: white;
+
+// ──────────────────────────────────────────────────────────
+// Overrides for specific just-the-docs variables
+// ──────────────────────────────────────────────────────────
+
+// The accent green for active nav + focus states
+$nav-link-color: #2D8F52;
+
