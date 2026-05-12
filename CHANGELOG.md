@@ -9,12 +9,17 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* fix: enhance uniqueness check for Flatpak source files in release workflow. (#5423) by @Austin in [`a2dd4d18a`](https://github.com/meshtastic/Meshtastic-Android/commit/a2dd4d18aab2ed1a9000e4ac3ed53260658a4734)
-* chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5421) by @renovate[bot] in [`05b1ea918`](https://github.com/meshtastic/Meshtastic-Android/commit/05b1ea918ef3f14b48f1777402e645df900dd337)
+* chore(deps): update gradle to v9.5.1 (#5429) by @renovate[bot] in [`010ff358d`](https://github.com/meshtastic/Meshtastic-Android/commit/010ff358d0cf5c586b557af186ffdd1ef719be81)
+* fix: clarify position precision as ± radius (#5428) by @James Rich in [`dcb147163`](https://github.com/meshtastic/Meshtastic-Android/commit/dcb147163c3a5c8dada885ee6e84790fcc24f651)
+* fix(desktop): keep Vico package to prevent bytecode verification errors (#5424) by @James Rich in [`ab4589c06`](https://github.com/meshtastic/Meshtastic-Android/commit/ab4589c06a849743268f926bbe52723c833add3d)
+* build: conditionalize JitPack repository for desktop-only builds (#5426) by @James Rich in [`fcf0b5074`](https://github.com/meshtastic/Meshtastic-Android/commit/fcf0b507461796ff2e84265de728283ed5537073)
 
-### Internal (v2.7.14-internal.88)
+### Internal (v2.7.14-internal.89)
 Changes since [`v2.7.14-open.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.8):
 
+* docs: update CHANGELOG.md (#5422) by @github-actions[bot] in [`3bfc66eb2`](https://github.com/meshtastic/Meshtastic-Android/commit/3bfc66eb29c438c3f2d68a9225eba9fb3d2c2e25)
+* fix: enhance uniqueness check for Flatpak source files in release workflow. (#5423) by @Austin in [`a2dd4d18a`](https://github.com/meshtastic/Meshtastic-Android/commit/a2dd4d18aab2ed1a9000e4ac3ed53260658a4734)
+* chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5421) by @renovate[bot] in [`05b1ea918`](https://github.com/meshtastic/Meshtastic-Android/commit/05b1ea918ef3f14b48f1777402e645df900dd337)
 * docs: update CHANGELOG.md (#5420) by @github-actions[bot] in [`827535ad4`](https://github.com/meshtastic/Meshtastic-Android/commit/827535ad45778e1eb5b369be70c955b300678a37)
 * fix: clamp future lastHeard timestamps to current time on ingestion (#5418) by @James Rich in [`0f2b1c064`](https://github.com/meshtastic/Meshtastic-Android/commit/0f2b1c064aa9b77685ac8a7d05fe81af89655027)
 * fix(ci): resolve flatpak source merge race condition (#5419) by @James Rich in [`6f42f0788`](https://github.com/meshtastic/Meshtastic-Android/commit/6f42f078878258b334ae5b234c08caf76d2fa817)
