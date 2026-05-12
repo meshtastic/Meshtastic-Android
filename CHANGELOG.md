@@ -9,6 +9,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5416) by @James Rich in [`09a0d123b`](https://github.com/meshtastic/Meshtastic-Android/commit/09a0d123bed0e79415a8297c5cba92bab636d79e)
+* chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5413) by @renovate[bot] in [`56077db6d`](https://github.com/meshtastic/Meshtastic-Android/commit/56077db6d93fd76ca2fa585f49eb63d2e91ad400)
+* chore(deps): update actions/checkout action to v6 (#5414) by @renovate[bot] in [`d4ff10ef3`](https://github.com/meshtastic/Meshtastic-Android/commit/d4ff10ef3b1551637e016e1f4bee4e5c2a98d645)
+* Actions: fix Flatpak source file patterns for jq (#5415) by @Austin in [`1c418a57e`](https://github.com/meshtastic/Meshtastic-Android/commit/1c418a57ea09b0c6af6fde22e9d0ddee16b53e7a)
+* docs: update CHANGELOG.md (#5412) by @github-actions[bot] in [`bce8bba90`](https://github.com/meshtastic/Meshtastic-Android/commit/bce8bba90a74bdc64353e28b5abeb11474017b74)
 * feat: add Compose Preview Screenshot Testing infrastructure (#5410) by @James Rich in [`85c840de3`](https://github.com/meshtastic/Meshtastic-Android/commit/85c840de32096a00aa7fac42fca0d3a5417d3961)
 * fix(ci): prevent literal 'false' task name in desktop release build (#5411) by @James Rich in [`7202994ab`](https://github.com/meshtastic/Meshtastic-Android/commit/7202994abee99dc16a54f38d34a7607c2a573663)
 * docs: update CHANGELOG.md (#5409) by @github-actions[bot] in [`1373bd330`](https://github.com/meshtastic/Meshtastic-Android/commit/1373bd330b4829ac29d37b0e1e088d21b66dc037)
