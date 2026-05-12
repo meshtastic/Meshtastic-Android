@@ -45,19 +45,26 @@ The TAK module allows Meshtastic nodes to:
 
 ## TAK Roles
 
-Nodes configured with TAK-related roles:
+Nodes configured with TAK-related roles behave differently from standard clients:
 
 | Role | Description |
 |------|-------------|
-| TAK | Full TAK interoperability |
-| TAK Tracker | Position-only TAK output |
+| **TAK** | Full TAK interoperability — sends and receives CoT data, chat messages, and PLI updates. Functions as a standard client plus TAK bridge. |
+| **TAK Tracker** | Position-only TAK output — automatically broadcasts PLI at regular intervals without user interaction. Optimized for unattended position beacons (vehicles, equipment, waypoints). Does not relay chat messages. |
+
+> 💡 **Tip:** Use **TAK Tracker** for devices that only need to report position (e.g., a radio mounted in a vehicle). Use **TAK** for devices where users actively participate in TAK operations.
+
+### CoT (Cursor on Target) Format
+
+TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic converts its internal protobuf messages to CoT format when bridging to TAK systems, so no manual format conversion is needed.
 
 ## Usage with ATAK
 
 Once configured:
-- Meshtastic nodes appear as markers on the ATAK map
+- Meshtastic nodes appear as markers on the ATAK map with callsign labels
 - Chat messages can bridge between mesh and TAK networks
-- Position updates flow bidirectionally
+- Position updates flow bidirectionally between Meshtastic and TAK
+- TAK Tracker nodes broadcast PLI automatically — their positions appear on ATAK maps without any ATAK-side configuration
 
 > ⚠️ **Note:** TAK integration requires specific node roles and module configuration. Standard client nodes don't automatically participate in TAK operations.
 

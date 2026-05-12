@@ -72,17 +72,39 @@ When Map Reporting is enabled, your node publishes its position to the Meshtasti
 
 | Direction | Description |
 |-----------|-------------|
-| Uplink | Messages from mesh → MQTT broker |
-| Downlink | Messages from MQTT broker → mesh |
+| **Uplink** | Messages from mesh → MQTT broker |
+| **Downlink** | Messages from MQTT broker → mesh |
 
-Configure per-channel which directions are active to control message flow.
+Configure per-channel which directions are active to control message flow and airtime usage.
+
+## Message Formats
+
+MQTT supports two message formats:
+
+| Format | Description | Use case |
+|--------|-------------|----------|
+| **Protobuf** (default) | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
+| **JSON** | Human-readable JSON encoding | Home automation, logging, custom integrations |
+
+When **JSON Output** is enabled, the gateway publishes both protobuf and JSON versions of each message to separate topics.
+
+## Encryption & Privacy
+
+Understanding the layered encryption model:
+
+1. **Channel encryption** happens on the mesh *before* MQTT. If your channel has a PSK, the MQTT payload is already encrypted — the broker and any subscribers see only the ciphertext.
+2. **MQTT encryption** (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.
+3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
+
+> 🔒 **Important:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
 
 ## Best Practices
 
-- Use encryption on channels that bridge to MQTT
+- Use channel-level encryption (PSK) on channels that bridge to MQTT
 - Don't enable MQTT on nodes without internet access (it will buffer and waste memory)
 - Use a private broker for sensitive deployments
-- Be mindful of airtime when downlinking messages from busy MQTT topics
+- Be mindful of airtime when downlinking messages from busy MQTT topics — every downlinked message consumes radio airtime on your local mesh
+- Consider enabling uplink-only if you only need to monitor your mesh remotely without injecting messages back
 
 ---
 

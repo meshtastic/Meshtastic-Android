@@ -73,11 +73,25 @@ For network-connected radios:
 
 ## UI Differences
 
-The Desktop app uses the same Compose Multiplatform UI with adaptations for:
+The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| **⌘Q** / **Ctrl+Q** | Quit the application |
+| **⌘,** / **Ctrl+,** | Open Settings |
+| **⌘1** / **Ctrl+1** | Switch to Conversations tab |
+| **⌘2** / **Ctrl+2** | Switch to Nodes tab |
+| **⌘3** / **Ctrl+3** | Switch to Map tab |
+| **⌘4** / **Ctrl+4** | Switch to Connections tab |
+
+### Window & System Tray
+
 - **Window resizing** — responsive layout adapts to window dimensions
-- **Keyboard shortcuts** — standard desktop keyboard navigation
-- **Mouse interaction** — right-click context menus, hover states
-- **System tray** — minimize to system tray for background operation
+- **System tray** — minimize to system tray for background mesh operation
+- **Tray menu** — right-click the tray icon to show window or quit
+- **Mouse interaction** — hover states and standard desktop navigation
 
 ## Building from Source
 

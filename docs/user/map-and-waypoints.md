@@ -53,15 +53,24 @@ Waypoints are shared geographic points of interest that all mesh members can see
 |----------|-------------|
 | Name | Short identifier (max 30 characters) |
 | Description | Optional longer description |
-| Icon | Visual marker on the map |
-| Locked | If locked, only the creator can edit/delete |
+| Icon | Visual marker emoji on the map |
+| Locked | If locked, only the creator can edit or delete |
 | Expiration | Optional auto-remove time |
+
+### Waypoint Expiration
+
+Waypoints can be set to expire automatically:
+- **Never** (expire = 0) — waypoint remains until manually deleted
+- **Timed** — waypoint is automatically removed after the specified duration
+- **Boundary** — a waypoint whose expiration time equals the current time is treated as expired
+- The map filters out expired waypoints so they don't clutter the display
 
 ### Managing Waypoints
 
-- Tap a waypoint on the map to view details
+- Tap a waypoint on the map to view its details and coordinates
 - Edit or delete waypoints you created
-- Locked waypoints cannot be modified by other nodes
+- **Locked waypoints** cannot be modified or deleted by other nodes — only the original creator can change them
+- Unlocked waypoints can be edited by any mesh member
 
 ## Position Sharing
 

@@ -62,11 +62,32 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 
 Pre-configured messages for rapid communication:
 - Access via the Quick Chat button in the message input area
+- Choose from built-in phrases or custom messages
 - Customize quick chat messages in **Settings → Quick Chat**
+- Useful when typing is impractical (gloves, small screen, urgent)
 
 ![Quick chat option](/assets/screenshots/messages_quick_chat.png)
 
 ![Message input area](/assets/screenshots/messages-and-channels_channel_list.png)
+
+### Reactions
+
+React to messages with emoji:
+- **Long-press** a message to open the actions menu
+- Tap **Add Reaction** to choose an emoji
+- Reactions appear below the message bubble
+- Multiple users can react to the same message
+- React to your own messages or others' messages
+
+> 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
+
+### Message Actions
+
+Long-press any message to access:
+- **Copy** — copy message text to clipboard
+- **Reply** — quote the message in your response
+- **React** — add an emoji reaction
+- **Delete** — remove a message you sent (local deletion)
 
 ### Message Priority
 
@@ -79,6 +100,7 @@ Messages are queued and transmitted based on priority:
 
 - **Maximum length:** 237 bytes (approximately 230 characters for ASCII text)
 - **Rate limiting:** The mesh enforces airtime fairness; heavy message volume may be throttled
+- **Delivery:** Messages are retried automatically if no acknowledgment is received
 
 ## Best Practices
 

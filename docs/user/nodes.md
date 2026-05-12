@@ -60,17 +60,32 @@ From the node list, you can:
 
 ## Filtering & Sorting
 
-Filter the node list by:
-- Online/offline status
-- Favorites only
-- Role type
-- Distance range
+### Text Search
 
-Sort by:
-- Last heard (default)
-- Name (alphabetical)
-- Distance
-- Signal quality
+Type in the search field to filter nodes by name or short name. The filter updates in real time as you type.
+
+### Filter Toggles
+
+| Filter | Description |
+|--------|-------------|
+| **Only online** | Show only nodes heard within the last 15 minutes |
+| **Only direct** | Show only nodes with direct (non-relayed) connections |
+| **Include unknown** | Show nodes that haven't sent user info yet |
+| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Repeater, Router Client) |
+| **Exclude MQTT** | Hide nodes heard only via MQTT internet bridge |
+| **Show ignored** | Show nodes you've previously dismissed or muted |
+
+### Sort Options
+
+| Sort | Description |
+|------|-------------|
+| **Last heard** (default) | Most recently heard nodes first |
+| **Alphabetical** | Sorted by node long name |
+| **Distance** | Nearest nodes first (requires position sharing) |
+| **Hops away** | Fewest relay hops first |
+| **Channel** | Grouped by channel index |
+| **Via MQTT** | Grouped by MQTT vs. radio-heard |
+| **Favorites** | Favorited nodes first |
 
 ## Node Detail
 
