@@ -9,6 +9,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* fix: enhance uniqueness check for Flatpak source files in release workflow. (#5423) by @Austin in [`a2dd4d18a`](https://github.com/meshtastic/Meshtastic-Android/commit/a2dd4d18aab2ed1a9000e4ac3ed53260658a4734)
+* chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5421) by @renovate[bot] in [`05b1ea918`](https://github.com/meshtastic/Meshtastic-Android/commit/05b1ea918ef3f14b48f1777402e645df900dd337)
+
+### Internal (v2.7.14-internal.88)
+Changes since [`v2.7.14-open.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.8):
+
+* docs: update CHANGELOG.md (#5420) by @github-actions[bot] in [`827535ad4`](https://github.com/meshtastic/Meshtastic-Android/commit/827535ad45778e1eb5b369be70c955b300678a37)
 * fix: clamp future lastHeard timestamps to current time on ingestion (#5418) by @James Rich in [`0f2b1c064`](https://github.com/meshtastic/Meshtastic-Android/commit/0f2b1c064aa9b77685ac8a7d05fe81af89655027)
 * fix(ci): resolve flatpak source merge race condition (#5419) by @James Rich in [`6f42f0788`](https://github.com/meshtastic/Meshtastic-Android/commit/6f42f078878258b334ae5b234c08caf76d2fa817)
 * docs: update CHANGELOG.md (#5417) by @github-actions[bot] in [`b96515e7d`](https://github.com/meshtastic/Meshtastic-Android/commit/b96515e7d048a0850f29cc5381326fd796a07e2c)
