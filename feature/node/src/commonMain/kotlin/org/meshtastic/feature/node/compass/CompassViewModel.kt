@@ -123,7 +123,8 @@ class CompassViewModel(
         val isAligned = isAligned(trueHeading, bearingDegrees)
         val lastUpdateText = targetPositionTimeSec?.let { formatElapsed(it) }
         val angularErrorDeg = calculateAngularError(positionalAccuracyMeters, distanceMeters)
-        val errorRadiusText = positionalAccuracyMeters?.toInt()?.toDistanceString(current.displayUnits)
+        val errorRadiusText =
+            positionalAccuracyMeters?.toInt()?.let { "± ${it.toDistanceString(current.displayUnits)}" }
 
         return current.copy(
             heading = trueHeading,

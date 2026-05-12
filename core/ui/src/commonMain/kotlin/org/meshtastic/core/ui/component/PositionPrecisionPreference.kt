@@ -93,7 +93,7 @@ fun PositionPrecisionPreference(
 
                 val precisionMeters = precisionBitsToMeters(value).toInt()
                 Text(
-                    text = precisionMeters.toDistanceString(unit),
+                    text = "± ${precisionMeters.toDistanceString(unit)}",
                     modifier = Modifier.padding(bottom = 16.dp),
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                     overflow = TextOverflow.Ellipsis,
