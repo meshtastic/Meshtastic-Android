@@ -169,7 +169,7 @@ class WifiProvisionViewModel(
      * @param ssid The target network SSID.
      * @param password The network password (empty string for open networks).
      */
-    fun provisionWifi(ssid: String, password: String) {
+    fun provisionWifi(ssid: String, password: String, hidden: Boolean = false) {
         if (ssid.isBlank()) return
         val nymeaService = service ?: return
 
@@ -183,7 +183,7 @@ class WifiProvisionViewModel(
         }
 
         viewModelScope.launch {
-            when (val result = nymeaService.provision(ssid, password)) {
+            when (val result = nymeaService.provision(ssid, password, hidden)) {
                 is ProvisionResult.Success -> {
                     Logger.i { "$TAG: Provisioned successfully" }
                     _uiState.update {

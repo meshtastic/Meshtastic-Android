@@ -16,122 +16,27 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="node_filter_placeholder">عربي</string>
-    <string name="desc_node_filter_clear">عربي</string>
-    <string name="node_filter_include_unknown">عربي</string>
-    <string name="node_sort_button">عربي</string>
-    <string name="node_sort_alpha">عربي</string>
-    <string name="node_sort_channel">عربي</string>
-    <string name="node_sort_distance">المسافة</string>
-    <string name="node_sort_hops_away">عربي</string>
-    <string name="node_sort_last_heard">آخر ظهور</string>
-    <string name="node_sort_via_mqtt">فقط شبكة MQTT</string>
-    <string name="via_mqtt">فقط شبكة MQTT</string>
-    <string name="node_sort_via_favorite">فقط المفضلين</string>
-    <string name="unrecognized">غير المعروفين</string>
-    <string name="message_status_enroute">في انتظار رد الاستلام</string>
-    <string name="message_status_queued">في دور الإرسال</string>
-    <string name="routing_error_none">استلم</string>
-    <string name="routing_error_no_route">لاطريق</string>
-    <string name="routing_error_got_nak">لم يستلم</string>
-    <string name="routing_error_timeout">استغرق وقت طويل</string>
-    <string name="routing_error_no_interface">لم يجد وسيط</string>
-    <string name="routing_error_max_retransmit">وصول حد الإرسال الأعلى</string>
-    <string name="routing_error_no_channel">لا يوجد قناه</string>
-    <string name="routing_error_too_large">رسالة كبيره</string>
-    <string name="routing_error_no_response">لا يوجد رد</string>
-    <string name="routing_error_bad_request">طلب غير جيد</string>
-    <string name="routing_error_duty_cycle_limit">عدد الرسائل تعدى الحد المخصص في منطقتك</string>
-    <string name="routing_error_not_authorized">غير مسموح</string>
-    <string name="routing_error_pki_failed">فشل إرسال التشفير</string>
-    <string name="routing_error_pki_unknown_pubkey">المفتاح العام غير معروف</string>
-    <string name="routing_error_admin_bad_session_key">المفتاح المؤقت غير جيد</string>
-    <string name="routing_error_admin_public_key_unauthorized">المفتاح العام غير مسموح</string>
-    <!-- Position Config -->
-    <string name="channel_name">اسم القناة</string>
-    <string name="qr_code">رمز الاستجابة السريع</string>
-    <string name="unknown_username">اسم المستخدم غير معروف</string>
-    <string name="send">ارسل</string>
-    <string name="you">أنت</string>
     <string name="accept">قبول</string>
-    <string name="cancel">إلغاء</string>
-    <string name="save_changes">حفظ</string>
-    <string name="new_channel_rcvd">تم تلقي رابط القناة الجديدة</string>
-    <string name="report">إبلاغ</string>
-    <string name="location_disabled">تم إيقاف الوصول إلى الموقع، لا يمكن تحديد موقع للشبكة.</string>
-    <string name="share">مشاركة</string>
-    <string name="disconnected">انقطع الاتصال</string>
-    <string name="device_sleeping">الجهاز في وضعية السكون</string>
-    <string name="ip_address">عنوان الـ IP:</string>
-    <string name="not_connected">غير متصل</string>
-    <string name="connected_sleeping">تم الاتصال بالراديو، إلا أن الجهاز في وضعية السكون</string>
-    <string name="app_too_old">مطلوب تحديث التطبيق</string>
-    <string name="meshtastic_service_notifications">خدمة الإشعارات</string>
-    <string name="clear">مسح</string>
-    <string name="channel_label">عربي</string>
-    <string name="firmware_too_old">يجب عليك التحديث.</string>
-    <string name="okay">حسنا</string>
-    <string name="must_set_region">واجب إدخال المنطقة!</string>
-    <string name="reset">إعادة التشغيل</string>
-    <string name="scan">البحث</string>
-    <string name="add_network_device">أضف</string>
-    <string name="reset_to_defaults">العودة إلى الإعدادات الأصلية</string>
-    <string name="apply">تفعيل</string>
-    <string name="name">الاسم</string>
-    <string name="description">الوصف</string>
-    <string name="locked">مقفل</string>
-    <string name="save">حفظ</string>
-    <string name="preferences_language">اللغات</string>
-    <string name="resend">إعادة الإرسال</string>
-    <string name="reboot">إعادة التشغيل</string>
-    <string name="message">رسالة</string>
-    <string name="direct_message">رسالة مباشره</string>
-    <string name="error">غلط</string>
-    <string name="ignore">تجاهل</string>
-    <string name="ignore_add">أضف '%1$s' إلى قائمة التجاهل؟</string>
-    <string name="map_select_download_region">حدد جهة التحميل</string>
-    <string name="map_start_download">ابدأ التحميل</string>
-    <string name="close">أغلق</string>
-    <string name="radio_configuration">إعدادات الراديو</string>
-    <string name="module_settings">إعدادات الجهاز</string>
+    <!-- ACTION -->
+    <!-- ADD -->
     <string name="add">أضف</string>
-    <string name="edit">تعديل</string>
-    <string name="calculating">جاري الحساب…</string>
-    <string name="mute_notifications">كتم الإشهارات</string>
-    <string name="mute_8_hours">8 ساعات</string>
-    <string name="mute_1_week">أسبوع 1</string>
-    <string name="mute_always">دائما</string>
-    <string name="replace">استبدال</string>
-    <string name="navigate_back">العودة إلى الخلف</string>
-    <string name="battery">البطارية</string>
-    <string name="logs">سجلات</string>
-    <string name="info">معلومات</string>
-    <string name="iaq">معدل جودة الهواء الداخلي</string>
-    <string name="encryption_psk">مفتاح مشترك</string>
-    <string name="encryption_pkc">تشفير المفتاح العام</string>
-    <string name="encryption_error">المفتاح العام غير متطابق</string>
-    <string name="meshtastic_new_nodes_notifications">إشعارات العقدة الجديدة</string>
-    <string name="rssi">مؤشر القوة النسبية</string>
+    <string name="add_network_device">أضف</string>
     <string name="administration">الإدارة</string>
+    <!-- AIR -->
+    <!-- ALERT -->
+    <string name="app_too_old">مطلوب تحديث التطبيق</string>
+    <string name="apply">تفعيل</string>
+    <string name="are_you_sure">هل أنت متيقِّن؟</string>
+    <string name="audio">إعدادات الصوت</string>
     <string name="bad">سيئ</string>
-    <string name="fair">مناسب</string>
-    <string name="good">جيد</string>
-    <string name="none_quality">لا يوجد</string>
-    <string name="share_to">سجل تتبع المس…</string>
-    <string name="signal">الإشارة</string>
-    <string name="signal_quality">جودة الإشارة</string>
-    <string name="traceroute_direct">مباشره</string>
-    <string name="twenty_four_hours">24 ساعة</string>
-    <string name="one_week">أسبوع</string>
-    <string name="two_weeks">أسبوعين</string>
-    <string name="max">الأعلى</string>
-    <string name="unknown_age">عمر غير معروف</string>
-    <string name="copy">نسخ</string>
-    <string name="critical_alert">تنبيه حرج!</string>
-    <string name="favorite">المفضلة</string>
-    <string name="favorite_add">إضافة '%1$s' كعقدة مفضلة؟</string>
-    <string name="favorite_remove">إزالة '%1$s' كعقدة مفضلة؟</string>
+    <string name="battery">البطارية</string>
+    <!-- BLUETOOTH -->
+    <string name="bluetooth">إعدادات بلوتوث</string>
+    <string name="bluetooth_permission">إعدادات بلوتوث</string>
+    <string name="bottom_nav_settings">الإعدادات</string>
+    <string name="calculating">جاري الحساب…</string>
+    <string name="cancel">إلغاء</string>
+    <!-- CHANNEL -->
     <string name="channel_1">القناة 1</string>
     <string name="channel_2">القناة 2</string>
     <string name="channel_3">القناة 3</string>
@@ -140,45 +45,191 @@
     <string name="channel_6">القناة 6</string>
     <string name="channel_7">القناة 7</string>
     <string name="channel_8">القناة 8</string>
-    <string name="current">الحالي</string>
-    <string name="voltage">شدة التيار</string>
-    <string name="are_you_sure">هل أنت متيقِّن؟</string>
-    <string name="i_know_what_i_m_doing">أنا أعرف ما أفعله.</string>
-    <string name="meshtastic_low_battery_notifications">إشعارات انخفاض شدة البطارية</string>
-    <string name="low_battery_title">البطارية منخفضه: %1$s</string>
-    <string name="user">اسم المستخدم</string>
+    <string name="channel_label">عربي</string>
+    <string name="channel_name">اسم القناة</string>
     <string name="channels">القنوات</string>
+    <!-- CLEAN -->
+    <string name="clear">مسح</string>
+    <string name="close">أغلق</string>
+    <!-- COMPASS -->
+    <!-- CONFIG -->
+    <string name="connected_sleeping">تم الاتصال بالراديو، إلا أن الجهاز في وضعية السكون</string>
+    <string name="copy">نسخ</string>
+    <string name="critical_alert">تنبيه حرج!</string>
+    <string name="current">الحالي</string>
+    <!-- DEBUG -->
+    <!-- DELETE -->
+    <string name="desc_node_filter_clear">عربي</string>
+    <string name="description">الوصف</string>
+    <!-- DEVICE -->
     <string name="device">الجهاز</string>
+    <string name="device_sleeping">الجهاز في وضعية السكون</string>
+    <string name="direct_message">رسالة مباشره</string>
+    <string name="disconnected">انقطع الاتصال</string>
+    <!-- DISPLAY -->
     <string name="display">إعدادات الشاشة</string>
-    <string name="lora">إعدادات لورا</string>
-    <string name="bluetooth">إعدادات بلوتوث</string>
-    <string name="security">إعدادات الحماية</string>
-    <string name="mqtt">MQTT</string>
-    <string name="serial">رقم التسلسلي</string>
-    <string name="audio">إعدادات الصوت</string>
-    <string name="messages">الرسائل</string>
-    <string name="lora_config">إعدادات لورا</string>
-    <string name="region_frequency_plan">الجهة</string>
-    <string name="mqtt_status_disconnected">انقطع الاتصال</string>
-    <string name="timeout">استغرق وقت طويل</string>
+    <!-- DISTANCE -->
     <string name="distance">المسافة</string>
-    <string name="bottom_nav_settings">الإعدادات</string>
-    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
-    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
-    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
-    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
-    <string name="message_input_label">رسالة</string>
-    <string name="settings">الإعدادات</string>
+    <string name="edit">تعديل</string>
     <string name="eight_hours">8 ساعات</string>
-    <string name="one_day">24 ساعات</string>
-    <string name="two_days">48 ساعات</string>
-    <!-- Firmware Update -->
-    <string name="firmware_update_failed">التحديث فشل</string>
-    <string name="interval_unset">إلغاء تعيين</string>
-    <!-- Compass -->
-    <!-- Message Filter -->
-    <string name="bluetooth_permission">إعدادات بلوتوث</string>
-    <!-- Network Map Layers -->
-    <string name="wifi_provision_success_ip_address">عنوان الـ IP</string>
+    <!-- ENCRYPTION -->
+    <string name="encryption_error">المفتاح العام غير متطابق</string>
+    <string name="encryption_pkc">تشفير المفتاح العام</string>
+    <string name="encryption_psk">مفتاح مشترك</string>
+    <!-- ENVIRONMENT -->
+    <string name="error">غلط</string>
+    <!-- EXPORT -->
+    <string name="fair">مناسب</string>
+    <string name="favorite">المفضلة</string>
+    <string name="favorite_add">إضافة '%1$s' كعقدة مفضلة؟</string>
+    <string name="favorite_remove">إزالة '%1$s' كعقدة مفضلة؟</string>
+    <!-- FILTER -->
     <string name="filter_icon">عربي</string>
+    <!-- FIRMWARE -->
+    <string name="firmware_too_old">يجب عليك التحديث.</string>
+    <string name="firmware_update_failed">التحديث فشل</string>
+    <string name="good">جيد</string>
+    <!-- GPIO -->
+    <string name="i_know_what_i_m_doing">أنا أعرف ما أفعله.</string>
+    <string name="iaq">معدل جودة الهواء الداخلي</string>
+    <!-- IGNORE -->
+    <string name="ignore">تجاهل</string>
+    <string name="ignore_add">أضف '%1$s' إلى قائمة التجاهل؟</string>
+    <string name="info">معلومات</string>
+    <string name="interval_unset">إلغاء تعيين</string>
+    <string name="ip_address">عنوان الـ IP:</string>
+    <!-- LABEL -->
+    <!-- LOAD -->
+    <!-- LOCAL -->
+    <string name="location_disabled">تم إيقاف الوصول إلى الموقع، لا يمكن تحديد موقع للشبكة.</string>
+    <string name="locked">مقفل</string>
+    <!-- LOG -->
+    <string name="logs">سجلات</string>
+    <string name="lora">إعدادات لورا</string>
+    <string name="lora_config">إعدادات لورا</string>
+    <string name="low_battery_title">البطارية منخفضه: %1$s</string>
+    <!-- MAP -->
+    <string name="map_select_download_region">حدد جهة التحميل</string>
+    <string name="map_start_download">ابدأ التحميل</string>
+    <string name="max">الأعلى</string>
+    <!-- MESHTASTIC -->
+    <string name="meshtastic_low_battery_notifications">إشعارات انخفاض شدة البطارية</string>
+    <string name="meshtastic_new_nodes_notifications">إشعارات العقدة الجديدة</string>
+    <string name="meshtastic_service_notifications">خدمة الإشعارات</string>
+    <!-- MESSAGE -->
+    <string name="message">رسالة</string>
+    <string name="message_input_label">رسالة</string>
+    <string name="message_status_enroute">في انتظار رد الاستلام</string>
+    <string name="message_status_queued">في دور الإرسال</string>
+    <string name="messages">الرسائل</string>
+    <string name="module_settings">إعدادات الجهاز</string>
+    <!-- MQTT -->
+    <string name="mqtt">MQTT</string>
+    <string name="mqtt_status_disconnected">انقطع الاتصال</string>
+    <string name="must_set_region">واجب إدخال المنطقة!</string>
+    <!-- MUTE -->
+    <string name="mute_1_week">أسبوع 1</string>
+    <string name="mute_8_hours">8 ساعات</string>
+    <string name="mute_always">دائما</string>
+    <string name="mute_notifications">كتم الإشهارات</string>
+    <string name="name">الاسم</string>
+    <string name="navigate_back">العودة إلى الخلف</string>
+    <string name="new_channel_rcvd">تم تلقي رابط القناة الجديدة</string>
+    <!-- NO -->
+    <!-- NODE -->
+    <string name="node_filter_include_unknown">عربي</string>
+    <string name="node_filter_placeholder">عربي</string>
+    <string name="node_sort_alpha">عربي</string>
+    <string name="node_sort_button">عربي</string>
+    <string name="node_sort_channel">عربي</string>
+    <string name="node_sort_distance">المسافة</string>
+    <string name="node_sort_hops_away">عربي</string>
+    <string name="node_sort_last_heard">آخر ظهور</string>
+    <string name="node_sort_via_favorite">فقط المفضلين</string>
+    <string name="node_sort_via_mqtt">فقط شبكة MQTT</string>
+    <!-- NODES -->
+    <string name="none_quality">لا يوجد</string>
+    <string name="not_connected">غير متصل</string>
+    <!-- NOTIFICATIONS -->
+    <string name="okay">حسنا</string>
+    <!-- ONE -->
+    <string name="one_day">24 ساعات</string>
+    <string name="one_week">أسبوع</string>
+    <!-- OUTPUT -->
+    <!-- PAX -->
+    <!-- POSITION -->
+    <!-- POWER -->
+    <string name="preferences_language">اللغات</string>
+    <!-- PREVIEW -->
+    <string name="qr_code">رمز الاستجابة السريع</string>
+    <!-- QUICK -->
+    <string name="radio_configuration">إعدادات الراديو</string>
+    <string name="reboot">إعادة التشغيل</string>
+    <!-- REBROADCAST -->
+    <string name="region_frequency_plan">الجهة</string>
+    <!-- REMOTE -->
+    <!-- REMOVE -->
+    <string name="replace">استبدال</string>
+    <string name="report">إبلاغ</string>
+    <!-- REQUEST -->
+    <string name="resend">إعادة الإرسال</string>
+    <string name="reset">إعادة التشغيل</string>
+    <string name="reset_to_defaults">العودة إلى الإعدادات الأصلية</string>
+    <!-- ROLE -->
+    <!-- ROUTING -->
+    <string name="routing_error_admin_bad_session_key">المفتاح المؤقت غير جيد</string>
+    <string name="routing_error_admin_public_key_unauthorized">المفتاح العام غير مسموح</string>
+    <string name="routing_error_bad_request">طلب غير جيد</string>
+    <string name="routing_error_duty_cycle_limit">عدد الرسائل تعدى الحد المخصص في منطقتك</string>
+    <string name="routing_error_got_nak">لم يستلم</string>
+    <string name="routing_error_max_retransmit">وصول حد الإرسال الأعلى</string>
+    <string name="routing_error_no_channel">لا يوجد قناه</string>
+    <string name="routing_error_no_interface">لم يجد وسيط</string>
+    <string name="routing_error_no_response">لا يوجد رد</string>
+    <string name="routing_error_no_route">لاطريق</string>
+    <string name="routing_error_none">استلم</string>
+    <string name="routing_error_not_authorized">غير مسموح</string>
+    <string name="routing_error_pki_failed">فشل إرسال التشفير</string>
+    <string name="routing_error_pki_unknown_pubkey">المفتاح العام غير معروف</string>
+    <string name="routing_error_timeout">استغرق وقت طويل</string>
+    <string name="routing_error_too_large">رسالة كبيره</string>
+    <string name="rssi">مؤشر القوة النسبية</string>
+    <string name="save">حفظ</string>
+    <string name="save_changes">حفظ</string>
+    <!-- SCAN -->
+    <string name="scan">البحث</string>
+    <!-- SECURITY -->
+    <string name="security">إعدادات الحماية</string>
+    <string name="send">ارسل</string>
+    <!-- SERIAL -->
+    <string name="serial">رقم التسلسلي</string>
+    <string name="settings">الإعدادات</string>
+    <!-- SHARE -->
+    <string name="share">مشاركة</string>
+    <string name="share_to">سجل تتبع المس…</string>
+    <!-- SHOW -->
+    <string name="signal">الإشارة</string>
+    <string name="signal_quality">جودة الإشارة</string>
+    <!-- TAK -->
+    <string name="timeout">استغرق وقت طويل</string>
+    <!-- TRACEROUTE -->
+    <string name="traceroute_direct">مباشره</string>
+    <!-- TRAFFIC -->
+    <string name="twenty_four_hours">24 ساعة</string>
+    <string name="two_days">48 ساعات</string>
+    <string name="two_weeks">أسبوعين</string>
+    <!-- UNKNOWN -->
+    <string name="unknown_age">عمر غير معروف</string>
+    <string name="unknown_username">اسم المستخدم غير معروف</string>
+    <string name="unrecognized">غير المعروفين</string>
+    <!-- URL -->
+    <!-- USE -->
+    <!-- USER -->
+    <string name="user">اسم المستخدم</string>
+    <string name="via_mqtt">فقط شبكة MQTT</string>
+    <string name="voltage">شدة التيار</string>
+    <!-- WIFI -->
+    <string name="wifi_provision_success_ip_address">عنوان الـ IP</string>
+    <!-- WIND -->
+    <string name="you">أنت</string>
 </resources>

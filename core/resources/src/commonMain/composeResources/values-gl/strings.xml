@@ -16,156 +16,207 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="node_filter_placeholder">Filtro</string>
+    <string name="accept">Aceptar</string>
+    <!-- ACTION -->
+    <string name="action_delete_message">Eliminar mensaxe</string>
+    <!-- ADD -->
+    <string name="add">Engadir</string>
+    <string name="add_network_device">Engadir</string>
+    <!-- AIR -->
+    <!-- ALERT -->
+    <string name="app_too_old">Actualización da aplicación requerida</string>
+    <string name="apply">Aplicar</string>
+    <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
+    <!-- BLUETOOTH -->
+    <string name="calculating">Calculando…</string>
+    <string name="cancel">Cancelar</string>
+    <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>
+    <!-- CHANNEL -->
+    <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
+    <string name="channel_label">Canle</string>
+    <string name="channel_name">Nome de canle</string>
+    <string name="choose_theme">Escoller tema</string>
+    <!-- CLEAN -->
+    <string name="clear">Limpar</string>
+    <string name="close">Pechar</string>
+    <!-- COMPASS -->
+    <!-- CONFIG -->
+    <string name="connected_sleeping">Conectado á radio, pero está durmindo</string>
+    <!-- DEBUG -->
+    <string name="debug_filter_add">Engadir filtro</string>
+    <string name="debug_filter_clear">Limpar todos os filtros</string>
+    <string name="debug_filters">Filtros</string>
+    <string name="debug_panel">Panel de depuración</string>
+    <!-- DELETE -->
+    <string name="delete">Eliminar</string>
+    <string name="delete_for_everyone">Eliminar para todos</string>
+    <string name="delete_for_me">Eliminar para min</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Eliminar mensaxe?</item>
+        <item quantity="other">Eliminar %1$s mensaxes?</item>
+    </plurals>
+    <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
+    <string name="description">Descrición</string>
+    <!-- DEVICE -->
+    <string name="device_sleeping">Dispositivo durmindo</string>
+    <string name="direct_message">Mensaxe directa</string>
+    <string name="disconnected">Desconectado</string>
+    <!-- DISPLAY -->
+    <!-- DISTANCE -->
+    <string name="distance">Distancia</string>
+    <string name="edit">Editar</string>
+    <string name="eight_hours">8 Horas</string>
+    <!-- ENCRYPTION -->
+    <!-- ENVIRONMENT -->
+    <string name="error">Erro</string>
+    <string name="error_duty_cycle">O límite do Ciclo de Traballo de Sinal foi alcanzado. Non se pode enviar mensaxes agora, inténtao despois.</string>
+    <!-- EXPORT -->
+    <string name="factory_reset">Restablecemento de fábrica</string>
+    <!-- FILTER -->
+    <string name="filter_icon">Filtro</string>
+    <!-- FIRMWARE -->
+    <string name="firmware_old">O firmware de radio é moi vello para falar con esta aplicación. Para máis información nisto visita <a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> a nosa guía de instalación de Firmware</a>.</string>
+    <string name="firmware_too_old">Actualización de firmware necesaria.</string>
+    <string name="firmware_update_failed">Actualización fallou</string>
+    <!-- GPIO -->
+    <!-- IGNORE -->
+    <string name="ignore">Ignorar</string>
+    <string name="ignore_add">Engadir '%1$s' á lista de ignorar?</string>
+    <string name="ignore_remove">Quitar '%1$s' da lista de ignorar?</string>
+    <string name="interval_unset">Sen configurar</string>
+    <string name="intro_show">Amosar introdución</string>
+    <string name="ip_address">Enderezo IP:</string>
+    <string name="ip_port">Porto:</string>
+    <!-- LABEL -->
+    <!-- LOAD -->
+    <!-- LOCAL -->
+    <string name="location_disabled">Acceso á úbicación está apagado, non se pode prover posición na rede.</string>
+    <string name="locked">Bloqueado</string>
+    <!-- LOG -->
+    <!-- MAP -->
+    <string name="map_cache_info">Capacidade de Caché: %1$d MB\nUso de Caché: %2$d MB</string>
+    <string name="map_cache_manager">Xestor de caché</string>
+    <string name="map_cache_size">Tamaño de caché actual</string>
+    <string name="map_cache_tiles">%1$d 'tiles'</string>
+    <string name="map_clear_tiles">Limpar 'tiles' descargadas</string>
+    <string name="map_download_complete">Descarga completada!</string>
+    <string name="map_download_errors">Descarga completada con %1$d errores</string>
+    <string name="map_download_region">Descargar Rexión</string>
+    <string name="map_offline_manager">Xestor sen rede</string>
+    <string name="map_purge_fail">A purga de Caché SQL fallou, mira logcat para os detalles</string>
+    <string name="map_purge_success">Caché SQL purgada para %1$s</string>
+    <string name="map_select_download_region">Seleccionar a rexión de descarga</string>
+    <string name="map_start_download">Comezar a descarga</string>
+    <string name="map_subDescription">rumbo: %1$d distancia:%2$s</string>
+    <string name="map_tile_download_estimate">Descarga de 'tile' estimada:</string>
+    <string name="map_tile_source">Fonte de 'tile'</string>
+    <!-- MESHTASTIC -->
+    <string name="meshtastic_service_notifications">Notificacións de servizo</string>
+    <!-- MESSAGE -->
+    <string name="message">Mensaxe</string>
+    <string name="message_delivery_status">Estado de envío de mensaxe</string>
+    <string name="message_input_label">Mensaxe</string>
+    <string name="module_settings">Configuración de módulo</string>
+    <!-- MQTT -->
+    <string name="mqtt_status_disconnected">Desconectado</string>
+    <string name="must_set_region">Tes que seleccionar rexión!</string>
+    <string name="must_update">Debe actualizar esta aplicación na tenda (ou Github).  É moi vella para falar con este firmware de radio. Por favor lea a nosa <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> neste tema.</string>
+    <!-- MUTE -->
+    <string name="mute_1_week">1 semana</string>
+    <string name="mute_8_hours">8 horas</string>
+    <string name="mute_always">Sempre</string>
+    <string name="mute_notifications">Silenciar notificacións</string>
+    <string name="name">Nome</string>
+    <string name="new_channel_rcvd">Novo enlace de canle recibida</string>
+    <!-- NO -->
+    <!-- NODE -->
     <string name="node_filter_include_unknown">Incluír descoñecido</string>
+    <string name="node_filter_placeholder">Filtro</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canle</string>
     <string name="node_sort_distance">Distancia</string>
     <string name="node_sort_hops_away">Brinca fóra</string>
     <string name="node_sort_last_heard">Última escoita</string>
     <string name="node_sort_via_mqtt">vía MQTT</string>
-    <string name="via_mqtt">vía MQTT</string>
-    <string name="unrecognized">Non recoñecido</string>
+    <string name="nodedb_reset">Restablecer NodeDB</string>
+    <!-- NODES -->
+    <string name="none">Ningún (desactivado)</string>
+    <string name="not_connected">Non conectado</string>
+    <!-- NOTIFICATIONS -->
+    <string name="okay">OK</string>
+    <!-- ONE -->
+    <string name="one_day">24 Horas</string>
+    <!-- OUTPUT -->
+    <!-- PAX -->
+    <!-- POSITION -->
+    <!-- POWER -->
+    <string name="preferences_language">Linguaxe</string>
+    <string name="preferences_system_default">Predeterminado do sistema</string>
+    <!-- PREVIEW -->
+    <string name="provide_location_to_mesh">Proporcionar a ubicación do teléfono á malla</string>
+    <string name="qr_code">Código QR</string>
+    <!-- QUICK -->
+    <string name="quick_chat">Opcións de conversa rápida</string>
+    <string name="quick_chat_append">Anexar a mensaxe</string>
+    <string name="quick_chat_edit">Editar conversa rápida</string>
+    <string name="quick_chat_instant">Enviar instantaneamente</string>
+    <string name="quick_chat_new">Nova conversa rápida</string>
+    <string name="radio_configuration">Configuración de radio</string>
+    <string name="reboot">Reiniciar</string>
+    <!-- REBROADCAST -->
+    <string name="region_frequency_plan">Rexión</string>
+    <!-- REMOTE -->
+    <!-- REMOVE -->
+    <string name="remove">Eliminar</string>
+    <string name="remove_node_text">Este nodo será retirado da túa lista ata que o teu nodo reciba datos seus de novo.</string>
+    <string name="report">Reportar</string>
+    <!-- REQUEST -->
+    <string name="resend">Reenviar</string>
+    <string name="reset">Restablecer</string>
+    <string name="reset_to_defaults">Restablecer a por defecto</string>
+    <!-- ROLE -->
+    <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
+    <!-- ROUTING -->
     <string name="routing_error_no_response">Sen resposta</string>
     <string name="routing_error_not_authorized">Non autorizado</string>
     <string name="routing_error_pki_failed">Fallou o envío cifrado</string>
     <string name="routing_error_pki_unknown_pubkey">Chave pública descoñecida</string>
-    <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
-    <!-- Position Config -->
-    <string name="channel_name">Nome de canle</string>
-    <string name="qr_code">Código QR</string>
-    <string name="unknown_username">Nome de usuario descoñecido</string>
-    <string name="send">Enviar</string>
-    <string name="you">Ti</string>
-    <string name="accept">Aceptar</string>
-    <string name="cancel">Cancelar</string>
-    <string name="save_changes">Gardar</string>
-    <string name="new_channel_rcvd">Novo enlace de canle recibida</string>
-    <string name="report">Reportar</string>
-    <string name="location_disabled">Acceso á úbicación está apagado, non se pode prover posición na rede.</string>
-    <string name="share">Compartir</string>
-    <string name="disconnected">Desconectado</string>
-    <string name="device_sleeping">Dispositivo durmindo</string>
-    <string name="ip_address">Enderezo IP:</string>
-    <string name="ip_port">Porto:</string>
-    <string name="not_connected">Non conectado</string>
-    <string name="connected_sleeping">Conectado á radio, pero está durmindo</string>
-    <string name="app_too_old">Actualización da aplicación requerida</string>
-    <string name="must_update">Debe actualizar esta aplicación na tenda (ou Github).  É moi vella para falar con este firmware de radio. Por favor lea a nosa <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> neste tema.</string>
-    <string name="none">Ningún (desactivado)</string>
-    <string name="meshtastic_service_notifications">Notificacións de servizo</string>
-    <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
-    <string name="debug_panel">Panel de depuración</string>
-    <string name="debug_filters">Filtros</string>
-    <string name="debug_filter_add">Engadir filtro</string>
-    <string name="debug_filter_clear">Limpar todos os filtros</string>
-    <string name="clear">Limpar</string>
-    <string name="channel_label">Canle</string>
-    <string name="message_delivery_status">Estado de envío de mensaxe</string>
-    <string name="firmware_too_old">Actualización de firmware necesaria.</string>
-    <string name="firmware_old">O firmware de radio é moi vello para falar con esta aplicación. Para máis información nisto visita <a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> a nosa guía de instalación de Firmware</a>.</string>
-    <string name="okay">OK</string>
-    <string name="must_set_region">Tes que seleccionar rexión!</string>
-    <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>
-    <string name="reset">Restablecer</string>
-    <string name="scan">Escanear</string>
-    <string name="add_network_device">Engadir</string>
-    <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
-    <string name="reset_to_defaults">Restablecer a por defecto</string>
-    <string name="apply">Aplicar</string>
-    <string name="theme">Tema</string>
-    <string name="theme_light">Claro</string>
-    <string name="theme_dark">Escuro</string>
-    <string name="theme_system">Por defecto do sistema</string>
-    <string name="choose_theme">Escoller tema</string>
-    <string name="provide_location_to_mesh">Proporcionar a ubicación do teléfono á malla</string>
-    <plurals name="delete_messages">
-        <item quantity="one">Eliminar mensaxe?</item>
-        <item quantity="other">Eliminar %1$s mensaxes?</item>
-    </plurals>
-    <string name="delete">Eliminar</string>
-    <string name="delete_for_everyone">Eliminar para todos</string>
-    <string name="delete_for_me">Eliminar para min</string>
-    <string name="select_all">Seleccionar todo</string>
-    <string name="map_download_region">Descargar Rexión</string>
-    <string name="name">Nome</string>
-    <string name="description">Descrición</string>
-    <string name="locked">Bloqueado</string>
     <string name="save">Gardar</string>
-    <string name="preferences_language">Linguaxe</string>
-    <string name="preferences_system_default">Predeterminado do sistema</string>
-    <string name="resend">Reenviar</string>
+    <string name="save_changes">Gardar</string>
+    <!-- SCAN -->
+    <string name="scan">Escanear</string>
+    <!-- SECURITY -->
+    <string name="select_all">Seleccionar todo</string>
+    <string name="send">Enviar</string>
+    <!-- SERIAL -->
+    <!-- SHARE -->
+    <string name="share">Compartir</string>
+    <!-- SHOW -->
     <string name="shutdown">Apagar</string>
-    <string name="reboot">Reiniciar</string>
+    <!-- TAK -->
+    <string name="theme">Tema</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_system">Por defecto do sistema</string>
+    <!-- TRACEROUTE -->
     <string name="traceroute">Traza-ruta</string>
-    <string name="intro_show">Amosar introdución</string>
-    <string name="message">Mensaxe</string>
-    <string name="quick_chat">Opcións de conversa rápida</string>
-    <string name="quick_chat_new">Nova conversa rápida</string>
-    <string name="quick_chat_edit">Editar conversa rápida</string>
-    <string name="quick_chat_append">Anexar a mensaxe</string>
-    <string name="quick_chat_instant">Enviar instantaneamente</string>
-    <string name="factory_reset">Restablecemento de fábrica</string>
-    <string name="direct_message">Mensaxe directa</string>
-    <string name="nodedb_reset">Restablecer NodeDB</string>
-    <string name="delivery_confirmed">Entrega confirmada</string>
-    <string name="error">Erro</string>
-    <string name="ignore">Ignorar</string>
-    <string name="ignore_add">Engadir '%1$s' á lista de ignorar?</string>
-    <string name="ignore_remove">Quitar '%1$s' da lista de ignorar?</string>
-    <string name="map_select_download_region">Seleccionar a rexión de descarga</string>
-    <string name="map_tile_download_estimate">Descarga de 'tile' estimada:</string>
-    <string name="map_start_download">Comezar a descarga</string>
-    <string name="close">Pechar</string>
-    <string name="radio_configuration">Configuración de radio</string>
-    <string name="module_settings">Configuración de módulo</string>
-    <string name="add">Engadir</string>
-    <string name="edit">Editar</string>
-    <string name="calculating">Calculando…</string>
-    <string name="map_offline_manager">Xestor sen rede</string>
-    <string name="map_cache_size">Tamaño de caché actual</string>
-    <string name="map_cache_info">Capacidade de Caché: %1$d MB\nUso de Caché: %2$d MB</string>
-    <string name="map_clear_tiles">Limpar 'tiles' descargadas</string>
-    <string name="map_tile_source">Fonte de 'tile'</string>
-    <string name="map_purge_success">Caché SQL purgada para %1$s</string>
-    <string name="map_purge_fail">A purga de Caché SQL fallou, mira logcat para os detalles</string>
-    <string name="map_cache_manager">Xestor de caché</string>
-    <string name="map_download_complete">Descarga completada!</string>
-    <string name="map_download_errors">Descarga completada con %1$d errores</string>
-    <string name="map_cache_tiles">%1$d 'tiles'</string>
-    <string name="map_subDescription">rumbo: %1$d distancia:%2$s</string>
-    <string name="waypoint_edit">Editar punto de ruta</string>
+    <string name="traceroute_log">Traza-ruta</string>
+    <!-- TRAFFIC -->
+    <string name="two_days">48 Horas</string>
+    <!-- UNKNOWN -->
+    <string name="unknown_username">Nome de usuario descoñecido</string>
+    <string name="unrecognized">Non recoñecido</string>
+    <!-- URL -->
+    <!-- USE -->
+    <!-- USER -->
+    <string name="via_mqtt">vía MQTT</string>
     <string name="waypoint_delete">Eliminar punto de ruta?</string>
+    <string name="waypoint_edit">Editar punto de ruta</string>
     <string name="waypoint_new">Novo punto de ruta</string>
     <string name="waypoint_received">Punto de ruta recibido:%1$s</string>
-    <string name="error_duty_cycle">O límite do Ciclo de Traballo de Sinal foi alcanzado. Non se pode enviar mensaxes agora, inténtao despois.</string>
-    <string name="remove">Eliminar</string>
-    <string name="remove_node_text">Este nodo será retirado da túa lista ata que o teu nodo reciba datos seus de novo.</string>
-    <string name="mute_notifications">Silenciar notificacións</string>
-    <string name="mute_8_hours">8 horas</string>
-    <string name="mute_1_week">1 semana</string>
-    <string name="mute_always">Sempre</string>
-    <string name="traceroute_log">Traza-ruta</string>
-    <string name="region_frequency_plan">Rexión</string>
-    <string name="mqtt_status_disconnected">Desconectado</string>
-    <string name="distance">Distancia</string>
-    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
-    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
-    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
-    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
-    <string name="message_input_label">Mensaxe</string>
-    <string name="eight_hours">8 Horas</string>
-    <string name="one_day">24 Horas</string>
-    <string name="two_days">48 Horas</string>
-    <!-- Firmware Update -->
-    <string name="firmware_update_failed">Actualización fallou</string>
-    <string name="interval_unset">Sen configurar</string>
-    <!-- Compass -->
-    <!-- Message Filter -->
-    <!-- Network Map Layers -->
+    <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Enderezo IP</string>
-    <string name="filter_icon">Filtro</string>
-    <string name="action_delete_message">Eliminar mensaxe</string>
+    <!-- WIND -->
+    <string name="you">Ti</string>
 </resources>

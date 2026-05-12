@@ -340,6 +340,10 @@ establishing_session
 ethernet_config
 ethernet_enabled
 ethernet_ip
+event_welcome_burning_man
+event_welcome_defcon
+event_welcome_hamvention
+event_welcome_open_sauce
 exchange_position
 expand_chart
 expires
@@ -703,6 +707,7 @@ mute_add
 mute_always
 mute_notifications
 mute_remove
+mute_selected
 mute_status_always
 mute_status_muted_for_days
 mute_status_muted_for_hours
@@ -1099,6 +1104,7 @@ store_forward
 store_forward_config
 store_forward_enabled
 subnet
+success
 super_deep_sleep_duration_seconds
 supported
 supported_by_community
@@ -1208,6 +1214,7 @@ unknown_username
 unmessageable
 unmonitored_or_infrastructure
 unmute
+unmute_selected
 unrecognized
 unset
 up_down_select_input_enabled
@@ -1264,6 +1271,7 @@ wifi_provision_connect_failed
 wifi_provision_description
 wifi_provision_device_found
 wifi_provision_device_found_detail
+wifi_provision_hidden_network
 wifi_provision_mpwrd_disclaimer
 wifi_provision_no_networks
 wifi_provision_scan_failed

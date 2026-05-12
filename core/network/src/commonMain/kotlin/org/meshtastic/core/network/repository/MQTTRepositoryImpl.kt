@@ -51,6 +51,7 @@ import org.meshtastic.mqtt.MqttLogLevel
 import org.meshtastic.mqtt.MqttMessage
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.packet.Subscription
+import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import kotlin.concurrent.Volatile
 
@@ -62,18 +63,33 @@ class MQTTRepositoryImpl(
     dispatchers: CoroutineDispatchers,
 ) : MQTTRepository {
 
+    internal constructor(
+        radioConfigRepository: RadioConfigRepository,
+        nodeRepository: NodeRepository,
+        buildConfigProvider: org.meshtastic.core.common.BuildConfigProvider,
+        dispatchers: CoroutineDispatchers,
+        mqttClientFactory: (MqttClientSetup) -> MqttClientSession,
+    ) : this(
+        radioConfigRepository = radioConfigRepository,
+        nodeRepository = nodeRepository,
+        buildConfigProvider = buildConfigProvider,
+        dispatchers = dispatchers,
+    ) {
+        this.mqttClientFactory = mqttClientFactory
+    }
+
     companion object {
         private const val DEFAULT_TOPIC_ROOT = "msh"
         private const val DEFAULT_TOPIC_LEVEL = "/2/e/"
         private const val JSON_TOPIC_LEVEL = "/2/json/"
         private const val DEFAULT_SERVER_ADDRESS = "mqtt.meshtastic.org"
-        private const val KEEPALIVE_SECONDS = 30
         private const val INITIAL_RECONNECT_DELAY_MS = 1000L
         private const val MAX_RECONNECT_DELAY_MS = 30_000L
         private const val RECONNECT_BACKOFF_MULTIPLIER = 2
     }
 
-    @Volatile private var client: MqttClient? = null
+    @Volatile private var client: MqttClientSession? = null
+    private var mqttClientFactory: (MqttClientSetup) -> MqttClientSession = ::defaultMqttClientFactory
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
     override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
@@ -106,17 +122,13 @@ class MQTTRepositoryImpl(
         val endpoint = resolveEndpoint(rawAddress, effectiveTlsEnabled(rawAddress, mqttConfig?.tls_enabled == true))
 
         val newClient =
-            MqttClient(ownerId) {
-                keepAliveSeconds = KEEPALIVE_SECONDS
-                autoReconnect = true
-                username = mqttConfig?.username
-                mqttConfig?.password?.let { password(it) }
-                logger = KermitMqttLogger()
-                // WARN for production: the library emits endpoint addresses and topic strings at
-                // INFO level. WARN messages (reconnect, timeout, retry) contain no PII and are
-                // exactly the signals needed for production diagnostics.
-                logLevel = if (buildConfigProvider.isDebug) MqttLogLevel.DEBUG else MqttLogLevel.WARN
-            }
+            mqttClientFactory(
+                MqttClientSetup(
+                    ownerId = ownerId,
+                    mqttConfig = mqttConfig,
+                    logLevel = if (buildConfigProvider.isDebug) MqttLogLevel.DEBUG else MqttLogLevel.WARN,
+                ),
+            )
         client = newClient
 
         val subscriptions: List<Subscription> = buildList {
@@ -148,25 +160,7 @@ class MQTTRepositoryImpl(
         // Forward the client's connection state to the repo-level StateFlow for UI observation.
         // Also emit structured log messages on transitions so reconnect attempt counts and
         // disconnect reason codes are visible in Crashlytics/Datadog without any PII.
-        launch {
-            newClient.connectionState.collect { state ->
-                _connectionState.value = state
-                when (state) {
-                    ConnectionState.Connecting -> Logger.i { "MQTT connecting" }
-
-                    ConnectionState.Connected -> Logger.i { "MQTT connected" }
-
-                    is ConnectionState.Reconnecting -> {
-                        val errorDetail = state.lastError?.message?.let { ": $it" } ?: ""
-                        Logger.w { "MQTT reconnecting (attempt ${state.attempt}$errorDetail)" }
-                    }
-
-                    is ConnectionState.Disconnected -> {
-                        state.reason?.let { Logger.w { "MQTT disconnected: ${it.message}" } }
-                    }
-                }
-            }
-        }
+        launch { newClient.connectionState.collect { state -> updateConnectionState(state) } }
 
         // Retry the initial connect with exponential backoff. Once established,
         // autoReconnect handles subsequent drops and re-subscribes internally.
@@ -204,6 +198,24 @@ class MQTTRepositoryImpl(
         }
 
         awaitClose { disconnect() }
+    }
+
+    internal fun updateConnectionState(state: ConnectionState) {
+        _connectionState.value = state
+        when (state) {
+            ConnectionState.Connecting -> Logger.i { "MQTT connecting" }
+
+            ConnectionState.Connected -> Logger.i { "MQTT connected" }
+
+            is ConnectionState.Reconnecting -> {
+                val errorDetail = state.lastError?.message?.let { ": $it" } ?: ""
+                Logger.w { "MQTT reconnecting (attempt ${state.attempt}$errorDetail)" }
+            }
+
+            is ConnectionState.Disconnected -> {
+                state.reason?.let { Logger.w { "MQTT disconnected: ${it.message}" } }
+            }
+        }
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -261,6 +273,61 @@ class MQTTRepositoryImpl(
     }
 }
 
+internal data class MqttClientSetup(
+    val ownerId: String,
+    val mqttConfig: ModuleConfig.MQTTConfig?,
+    val logLevel: MqttLogLevel,
+)
+
+internal interface MqttClientSession {
+    val messages: Flow<MqttMessage>
+    val connectionState: StateFlow<ConnectionState>
+
+    suspend fun connect(endpoint: MqttEndpoint)
+
+    suspend fun subscribe(subscriptions: List<Subscription>)
+
+    suspend fun publish(message: MqttMessage)
+
+    suspend fun close()
+}
+
+private class DefaultMqttClientSession(private val delegate: MqttClient) : MqttClientSession {
+    override val messages: Flow<MqttMessage> = delegate.messages
+    override val connectionState: StateFlow<ConnectionState> = delegate.connectionState
+
+    override suspend fun connect(endpoint: MqttEndpoint) {
+        delegate.connect(endpoint)
+    }
+
+    override suspend fun subscribe(subscriptions: List<Subscription>) {
+        delegate.subscribe(subscriptions)
+    }
+
+    override suspend fun publish(message: MqttMessage) {
+        delegate.publish(message)
+    }
+
+    override suspend fun close() {
+        delegate.close()
+    }
+}
+
+private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession = DefaultMqttClientSession(
+    MqttClient(setup.ownerId) {
+        keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
+        autoReconnect = true
+        username = setup.mqttConfig?.username
+        setup.mqttConfig?.password?.let { password(it) }
+        logger = KermitMqttLogger()
+        // WARN for production: the library emits endpoint addresses and topic strings at
+        // INFO level. WARN messages (reconnect, timeout, retry) contain no PII and are
+        // exactly the signals needed for production diagnostics.
+        logLevel = setup.logLevel
+    },
+)
+
+private const val MQTT_KEEPALIVE_SECONDS = 30
 private const val MQTT_PORT_PLAIN = 1883
 private const val MQTT_PORT_TLS = 8883
 
@@ -290,4 +357,22 @@ fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if 
 private const val DEFAULT_PUBLIC_SERVER = "mqtt.meshtastic.org"
 
 fun effectiveTlsEnabled(address: String, tlsEnabled: Boolean): Boolean =
-    tlsEnabled || address.equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)
+    tlsEnabled || extractHost(address).equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)
+
+/**
+ * Extracts the bare hostname from an address that may include a scheme, port, or path. Examples:
+ * - `mqtt.meshtastic.org` → `mqtt.meshtastic.org`
+ * - `mqtt.meshtastic.org:1883` → `mqtt.meshtastic.org`
+ * - `tcp://mqtt.meshtastic.org:1883` → `mqtt.meshtastic.org`
+ * - `ssl://mqtt.meshtastic.org` → `mqtt.meshtastic.org`
+ */
+internal fun extractHost(address: String): String {
+    val afterScheme =
+        if (address.contains("://")) {
+            address.substringAfter("://")
+        } else {
+            address
+        }
+    // Remove path (if any), then remove port
+    return afterScheme.substringBefore("/").substringBefore(":")
+}

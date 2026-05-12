@@ -9,25 +9,41 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-* chore: Integrate MQTT logging with Kermit and enhance PII sanitization (#5338) by @James Rich in [`1c984d54f`](https://github.com/meshtastic/Meshtastic-Android/commit/1c984d54f492c79035e8d675fbc4e1929fef61fa)
-* chore(deps): update org.meshtastic:mqtt-client to v0.3.3 (#5337) by @renovate[bot] in [`61af98e96`](https://github.com/meshtastic/Meshtastic-Android/commit/61af98e9663439f19d66194cf61e52b55f2f6c5b)
-* chore: optimize AI agent context and implement CI cost controls (#5335) by @James Rich in [`9e396cdec`](https://github.com/meshtastic/Meshtastic-Android/commit/9e396cdeccffae17d4c4392a0107c4f99a9d2b4e)
-* docs: update CHANGELOG.md (#5334) by @github-actions[bot] in [`92b8f0ddf`](https://github.com/meshtastic/Meshtastic-Android/commit/92b8f0ddf5868cf14690396ca03b0bccb48c6693)
+* feat(api): add hasAnyEntries method to local data sources and improve… (#5406) by @James Rich in [`10c5b5db2`](https://github.com/meshtastic/Meshtastic-Android/commit/10c5b5db2e5b23c52a3a5689205bfc42285b7b0a)
+* Update notification intents and deep link URI format (#5408) by @James Rich in [`82135df86`](https://github.com/meshtastic/Meshtastic-Android/commit/82135df865c4595d3ee509ac3535b86e343874b6)
+* docs: update CHANGELOG.md (#5399) by @github-actions[bot] in [`fd0e2c090`](https://github.com/meshtastic/Meshtastic-Android/commit/fd0e2c0904d21df2a962bd18ee138afabf869e98)
+* chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5404) by @renovate[bot] in [`d84781848`](https://github.com/meshtastic/Meshtastic-Android/commit/d847818487787a854b59e06e29b7831aef45b514)
+* chore(deps): update ruby to v4.0.4 (#5407) by @renovate[bot] in [`84cc8ad0d`](https://github.com/meshtastic/Meshtastic-Android/commit/84cc8ad0debf620c614617cf32fcce971d48a87d)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5400) by @James Rich in [`313dc1c2f`](https://github.com/meshtastic/Meshtastic-Android/commit/313dc1c2f7734284a2c6822e2a62dc10c597bfb1)
+* fix: graceful HTTP error handling in scheduled-updates workflow (#5405) by @Copilot in [`b33738728`](https://github.com/meshtastic/Meshtastic-Android/commit/b337387287c8c4e0e3ec3c48cbf19ca39de1ea36)
+* feat(desktop): fix mac notifications, new desktop icons (#5403) by @James Rich in [`c77e03c5c`](https://github.com/meshtastic/Meshtastic-Android/commit/c77e03c5c1b49d9ce6684042dca684fca68a1e99)
+* Brownfield gap remediation: 28 tasks + intro commonMain migration (#5401) by @James Rich in [`95c3bc0bc`](https://github.com/meshtastic/Meshtastic-Android/commit/95c3bc0bce4a0d30228d9c411c76cedb818afc91)
+* ci: disable Flatpak source generation for PR and merge queue checks (#5402) by @James Rich in [`6eacee626`](https://github.com/meshtastic/Meshtastic-Android/commit/6eacee626b42133c742d8ca935590d7a4c94e3ee)
+* chore(deps): update core/proto/src/main/proto digest to b302d92 (#5398) by @renovate[bot] in [`f89fdaf99`](https://github.com/meshtastic/Meshtastic-Android/commit/f89fdaf99dccb46517458e7fecf840bcc9c86f44)
+* docs: update CHANGELOG.md (#5387) by @github-actions[bot] in [`8c0ced2ad`](https://github.com/meshtastic/Meshtastic-Android/commit/8c0ced2adcbd7a93aba109aeaab7405df57b03dd)
+* Gradle: Add flatpakGradleGenerator task (#5369) by @Austin in [`484518195`](https://github.com/meshtastic/Meshtastic-Android/commit/484518195e7dbf980de6b951410f23ebac11c237)
+* chore(deps): update core/proto/src/main/proto digest to 03eb534 (#5397) by @renovate[bot] in [`2d5bcc1e5`](https://github.com/meshtastic/Meshtastic-Android/commit/2d5bcc1e5093f21dbd73befe6dcfad4dac6b1cb6)
+* Release: Add MacOS ReleaseUberJar target (#5389) by @Austin in [`234a78a56`](https://github.com/meshtastic/Meshtastic-Android/commit/234a78a5640eb3979172b8523d49a1b35750e49c)
+* chore(deps): update vico to v3.2.0-next.4 (#5395) by @renovate[bot] in [`39c765c63`](https://github.com/meshtastic/Meshtastic-Android/commit/39c765c63e35afafb1b788d4ca3150b35c814348)
+* chore(deps): update fastlane to v2.234.0 (#5396) by @renovate[bot] in [`880e98abf`](https://github.com/meshtastic/Meshtastic-Android/commit/880e98abf05300a01f678bdee472b22b52d78058)
+* chore(deps): update org.jetbrains.kotlinx:kotlinx-datetime to v0.8.0-0.6.x-compat (#5382) by @renovate[bot] in [`879e147ef`](https://github.com/meshtastic/Meshtastic-Android/commit/879e147ef0a018b9d7b5214b70ec8e36a80e3d11)
+* chore(deps): update kotlinx.coroutines.android to v1.11.0 (#5393) by @renovate[bot] in [`78f9a8940`](https://github.com/meshtastic/Meshtastic-Android/commit/78f9a8940cdf4cbd83d78796ccc3a8aef4c4e5ac)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5383) by @James Rich in [`443de4a34`](https://github.com/meshtastic/Meshtastic-Android/commit/443de4a34d54d33a8e7d7ec46606b5fa70921a36)
+* docs: Update specs and governance for Android M3 accessibility (#5392) by @James Rich in [`0d195ead5`](https://github.com/meshtastic/Meshtastic-Android/commit/0d195ead53d5f88f73e581a7ee005f65bdceccfa)
+* docs(specs): add feature specs for discovery, node-list-layout, and app-docs (#5388) by @James Rich in [`c0d95d6ac`](https://github.com/meshtastic/Meshtastic-Android/commit/c0d95d6ac4196fcbc705f2d3f174c7d9c46a77b2)
+* chore(deps): update com.google.firebase:firebase-bom to v34.13.0 (#5385) by @renovate[bot] in [`934e687bc`](https://github.com/meshtastic/Meshtastic-Android/commit/934e687bc5c14b605797d2ca8f78c231fdfd5210)
+* docs: comprehensive copilot instructions & spec-kit setup (#5386) by @James Rich in [`031f25ced`](https://github.com/meshtastic/Meshtastic-Android/commit/031f25cedaf994b09bff014245ee8ab448aafa2a)
+* docs: update CHANGELOG.md (#5381) by @github-actions[bot] in [`aeff0a6ce`](https://github.com/meshtastic/Meshtastic-Android/commit/aeff0a6ce1b3a61669d55029ee04863c94711bc6)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5378) by @James Rich in [`924f8a507`](https://github.com/meshtastic/Meshtastic-Android/commit/924f8a507b257829ec15ac446ff31c26f1ecb6ac)
+* chore(deps): update aboutlibraries to v14.2.0 (#5380) by @renovate[bot] in [`d68aada1b`](https://github.com/meshtastic/Meshtastic-Android/commit/d68aada1ba9142efd088d9e205341322e267936d)
+* docs: update CHANGELOG.md (#5377) by @github-actions[bot] in [`3dd985d7d`](https://github.com/meshtastic/Meshtastic-Android/commit/3dd985d7dfaa53891eca4dcdc90f0330044d5106)
+* refactor(firmware): replace PlatformBackHandler with NavigationBackHandler (#5376) by @James Rich in [`213c38051`](https://github.com/meshtastic/Meshtastic-Android/commit/213c380514438e1e208f0a0439437d6e62b041f1)
+* docs: update CHANGELOG.md (#5374) by @github-actions[bot] in [`8d621bc6f`](https://github.com/meshtastic/Meshtastic-Android/commit/8d621bc6f48e167c3bdda1add22e2938dadf0bd5)
+* chore(deps): update paging to v3.5.0 (#5375) by @renovate[bot] in [`0b75fd414`](https://github.com/meshtastic/Meshtastic-Android/commit/0b75fd4140ed5643806fc8f1a6eb8c3dfaaeb049)
+* chore(deps): update compose-multiplatform to v1.11.1 (#5371) by @renovate[bot] in [`d28d684d0`](https://github.com/meshtastic/Meshtastic-Android/commit/d28d684d054fa1d82ec84ed0c2ecb3ddf4705766)
+* chore(deps): update androidx.camera.viewfinder:viewfinder-compose to v1.6.1 (#5370) by @renovate[bot] in [`2f2a71587`](https://github.com/meshtastic/Meshtastic-Android/commit/2f2a71587dd5ff36da025e5761159ff182371b81)
 
-### Closed Beta (v2.7.14-closed.21)
-Changes since [`v2.7.14-open.3`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.3):
-
-* chore(deps): update org.meshtastic:mqtt-client to v0.3.2 (#5331) by @renovate[bot] in [`519b9633a`](https://github.com/meshtastic/Meshtastic-Android/commit/519b9633a1c86f7b9d7616cc4a196af8bb4c1f38)
-* docs: update CHANGELOG.md (#5332) by @github-actions[bot] in [`20cc302bb`](https://github.com/meshtastic/Meshtastic-Android/commit/20cc302bb3c3f54fee7c82af9d41fcc33f1d3cba)
-* fix(network): resolve empty MQTT address and enforce TLS on default server (#5333) by @James Rich in [`c0b0b9edd`](https://github.com/meshtastic/Meshtastic-Android/commit/c0b0b9edd4377639e50f085a99e074196a108b39)
-* fix(connections): improve BLE scan reliability and UI lifecycle (#5329) by @James Rich in [`5a95201b4`](https://github.com/meshtastic/Meshtastic-Android/commit/5a95201b4e9657978ad8fada219b70ad6f23e6f1)
-* docs: update CHANGELOG.md (#5328) by @github-actions[bot] in [`7263dc1f7`](https://github.com/meshtastic/Meshtastic-Android/commit/7263dc1f73bf0789ccbc9327c88736d39ca11532)
-* Change default ContrastLevel from STANDARD to MEDIUM (#5325) by @Andrew Smith in [`2914bc6ff`](https://github.com/meshtastic/Meshtastic-Android/commit/2914bc6ff6441d246cba1ddbbc5d010f2da18102)
-* docs: update CHANGELOG.md (#5324) by @github-actions[bot] in [`a6b524d4c`](https://github.com/meshtastic/Meshtastic-Android/commit/a6b524d4c10bc896de3ddadc00582e2a25e6c67b)
-* chore(deps): update aboutlibraries to v14.1.0 (#5322) by @renovate[bot] in [`770fe3f62`](https://github.com/meshtastic/Meshtastic-Android/commit/770fe3f626aafab15c8725bcbf0345958223653f)
-* fix(data): default new-node notifications off for event firmware (#5323) by @James Rich in [`400e0404f`](https://github.com/meshtastic/Meshtastic-Android/commit/400e0404f666c4da122b0361ac4af466f0982c65)
-
-### Open Beta (v2.7.14-open.3)
+### Open Beta (v2.7.14-open.8)
 Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.13):
 
 #### 🏗️ Features
@@ -105,6 +121,9 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: update emoji catalog metadata and improve picker synchronization by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5292
 * fix: update notification icon by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5293
 * feat(connections): connection sorting & conversation empty channel ranking by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5295
+* fix(connections): improve BLE scan reliability and UI lifecycle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5329
+* feat: event firmware easter egg with ambient branding by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5354
+* feat: align theme with Design Standards v1.3, remove contrast setting by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5355
 #### 🛠️ Fixes
 * fix(strings): replace plurals by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4596
 * fix: replace fdroid map_style_selection string by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4598
@@ -207,6 +226,9 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * fix: persist language switching and correctly map locales by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5287
 * fix: ensure snackbar respects safe drawing padding over host modifiers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5290
 * fix(ui): align Cancel and Send enabled state by @elagin in https://github.com/meshtastic/Meshtastic-Android/pull/5284
+* fix(data): default new-node notifications off for event firmware by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5323
+* fix(network): resolve empty MQTT address and enforce TLS on default server by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5333
+* fix(mqtt): harden TLS enforcement, add user CA trust, and improve error diagnostics by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5365
 #### 📝 Other Changes
 * refactor(ui): compose resources, domain layer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/4628
 * Add per-message transport method icons for new message format by @Kealper in https://github.com/meshtastic/Meshtastic-Android/pull/4643
@@ -231,6 +253,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * chore(r8): remove redundant keep rules covered by consumer rules by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5172
 * Revert "diag(r8): disable minify for release builds (animation-freeze diagnostic)" by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/5176
 * Fix node-details remove action to preserve confirmation flow by @Copilot in https://github.com/meshtastic/Meshtastic-Android/pull/5192
+* Change default ContrastLevel from STANDARD to MEDIUM by @somenice in https://github.com/meshtastic/Meshtastic-Android/pull/5325
 
 ## New Contributors
 * @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607
@@ -244,6 +267,7 @@ Changes since [`v2.7.13`](https://github.com/meshtastic/Meshtastic-Android/relea
 * @zt64 made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5226
 * @riddlemd made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5265
 * @elagin made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5284
+* @somenice made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/5325
 
 ## New Contributors
 * @nreisbeck made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/4607

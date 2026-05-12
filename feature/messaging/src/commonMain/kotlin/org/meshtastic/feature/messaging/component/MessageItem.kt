@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -73,8 +74,6 @@ import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.FormatQuote
 import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.theme.ContrastLevel
-import org.meshtastic.core.ui.theme.LocalContrastLevel
 import org.meshtastic.core.ui.theme.MessageItemColors
 import org.meshtastic.core.ui.util.createClipEntry
 
@@ -178,7 +177,6 @@ fun MessageItem(
     }
 
     val containsBel = message.text.contains('\u0007')
-    val contrastLevel = LocalContrastLevel.current
 
     val nodeColor = Color(if (message.fromLocal) ourNode.colors.second else node.colors.second)
     val alpha =
@@ -190,33 +188,9 @@ fun MessageItem(
             NORMAL_ALPHA
         }
 
-    val containerColor =
-        when (contrastLevel) {
-            ContrastLevel.HIGH ->
-                when {
-                    message.filtered -> MaterialTheme.colorScheme.surfaceContainerLow
-                    inSelectionMode && selected -> MaterialTheme.colorScheme.surfaceContainerHighest
-                    inSelectionMode && !selected -> MaterialTheme.colorScheme.surfaceContainerLow
-                    else -> MaterialTheme.colorScheme.surfaceContainerHigh
-                }
-
-            ContrastLevel.MEDIUM -> nodeColor.copy(alpha = (alpha + 0.2f).coerceAtMost(1f))
-
-            ContrastLevel.STANDARD -> nodeColor.copy(alpha = alpha)
-        }
-    val contentColor =
-        when (contrastLevel) {
-            ContrastLevel.HIGH,
-            ContrastLevel.MEDIUM,
-            -> MaterialTheme.colorScheme.onSurface
-
-            ContrastLevel.STANDARD -> Color(if (message.fromLocal) ourNode.colors.first else node.colors.first)
-        }
-    val metadataStyle =
-        when (contrastLevel) {
-            ContrastLevel.HIGH -> MaterialTheme.typography.bodySmall
-            else -> MaterialTheme.typography.labelSmall
-        }
+    val containerColor = nodeColor.copy(alpha = alpha)
+    val contentColor = MaterialTheme.colorScheme.onSurface
+    val metadataStyle = MaterialTheme.typography.labelSmall
     val messageShape =
         getMessageBubbleShape(
             cornerRadius = 8.dp,
@@ -230,14 +204,7 @@ fun MessageItem(
                 if (containsBel) {
                     Modifier.border(2.dp, color = MessageItemColors.Red, shape = messageShape)
                 } else {
-                    when (contrastLevel) {
-                        ContrastLevel.HIGH -> Modifier.border(2.dp, color = nodeColor, shape = messageShape)
-
-                        ContrastLevel.MEDIUM ->
-                            Modifier.border(1.dp, color = nodeColor.copy(alpha = 0.6f), shape = messageShape)
-
-                        ContrastLevel.STANDARD -> Modifier
-                    }
+                    Modifier
                 },
             )
     val senderName = if (message.fromLocal) ourNode.user.long_name else node.user.long_name
@@ -282,6 +249,7 @@ fun MessageItem(
         color = containerColor,
         contentColor = contentColor,
         shape = messageShape,
+        border = BorderStroke(0.5.dp, nodeColor),
     ) {
         Column(modifier = Modifier.width(IntrinsicSize.Max)) {
             OriginalMessageSnippet(
@@ -292,7 +260,7 @@ fun MessageItem(
             )
 
             Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)) {
-                AutoLinkText(text = message.text, style = MaterialTheme.typography.bodyMedium, color = contentColor)
+                AutoLinkText(text = message.text, style = MaterialTheme.typography.bodyLarge, color = contentColor)
 
                 Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                     if (!message.fromLocal) {
@@ -337,12 +305,7 @@ fun MessageItem(
                         Text(
                             text = stringResource(Res.string.filter_message_label),
                             style = metadataStyle,
-                            color =
-                            if (contrastLevel == ContrastLevel.HIGH) {
-                                MaterialTheme.colorScheme.onSurface
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                         )
                     }
@@ -393,20 +356,8 @@ private fun OriginalMessageSnippet(
     val originalMessage = message.originalMessage
     if (originalMessage != null && originalMessage.packetId != 0) {
         val originalMessageNode = if (originalMessage.fromLocal) ourNode else originalMessage.node
-        val contrastLevel = LocalContrastLevel.current
-        val replyContainerColor =
-            when (contrastLevel) {
-                ContrastLevel.HIGH -> MaterialTheme.colorScheme.surfaceContainer
-                else -> Color(originalMessageNode.colors.second).copy(alpha = 0.8f)
-            }
-        val replyContentColor =
-            when (contrastLevel) {
-                ContrastLevel.HIGH,
-                ContrastLevel.MEDIUM,
-                -> MaterialTheme.colorScheme.onSurface
-
-                ContrastLevel.STANDARD -> Color(originalMessageNode.colors.first)
-            }
+        val replyContainerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f)
+        val replyContentColor = MaterialTheme.colorScheme.onSurface
         // Rectangle shape — the outer message bubble's Surface clips to its
         // rounded corners, so the reply header inherits the correct top radii
         // automatically and stays square on the bottom where body text follows.

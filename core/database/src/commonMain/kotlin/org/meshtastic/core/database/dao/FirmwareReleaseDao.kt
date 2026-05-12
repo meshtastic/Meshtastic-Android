@@ -34,4 +34,7 @@ interface FirmwareReleaseDao {
 
     @Query("SELECT * FROM firmware_release WHERE release_type = :releaseType")
     suspend fun getReleasesByType(releaseType: FirmwareReleaseType): List<FirmwareReleaseEntity>
+
+    @Query("SELECT COUNT(*) FROM firmware_release")
+    suspend fun count(): Int
 }

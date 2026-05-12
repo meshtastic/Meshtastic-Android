@@ -33,9 +33,9 @@ import androidx.compose.ui.window.Notification as ComposeNotification
 /**
  * Desktop notification manager that dispatches domain [Notification] objects to native OS notifications.
  *
- * Uses platform-specific [NativeNotificationSender] implementations (notify-send on Linux, osascript on macOS,
- * PowerShell toast on Windows) for proper native look-and-feel. Falls back to Compose Desktop tray notifications (via
- * [fallbackNotifications]) when the native sender is unavailable or fails.
+ * Uses platform-specific [NativeNotificationSender] implementations (libnotify on Linux, `UNUserNotificationCenter` on
+ * macOS, PowerShell toast on Windows) for proper native look-and-feel. Falls back to Compose Desktop tray notifications
+ * (via [fallbackNotifications]) when the native sender is unavailable or fails.
  *
  * All native sends are dispatched on a background scope to avoid blocking callers.
  *

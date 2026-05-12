@@ -1,18 +1,70 @@
-# Meshtastic Android - GitHub Copilot Guide
+# Meshtastic Android — Copilot Instructions
 
-> **Note:** The canonical instructions for all AI Agents have been deduplicated. 
+> **Full rules**: `AGENTS.md` is the source of truth. This file is a compact quick-reference for build commands and task naming. For architecture, conventions, and workflow details, consult `AGENTS.md` and the `.skills/` playbooks listed at the bottom.
 
-You MUST immediately read and internalize the unified instructions located at the root of the repository in `AGENTS.md`. 
-After reading `AGENTS.md`, consult the `.skills/` directory for task-specific playbooks.
+## Build, Test & Lint
 
-## Critical reminders (do not skip)
+**Requires:** JDK 21, `ANDROID_HOME` set, proto submodule initialized.
 
-These rules live in `AGENTS.md` but are inlined here because past sessions repeatedly violated them:
+```bash
+# Bootstrap (run once per fresh clone)
+git submodule update --init
+[ -f local.properties ] || cp secrets.defaults.properties local.properties
 
-- **Never modify `core/proto/src/main/proto/*.proto`** — it's an upstream submodule. If a feature needs a proto change, stop and label the issue `upstream` pointing at `meshtastic/protobufs`.
-- **Verify-then-push, never "should be green".** Before any `git push`, run `./gradlew spotlessApply detekt` plus relevant `:module:test` for touched modules. After pushing, do **not** claim CI is green based on assumption — fetch the actual status with `gh pr checks <PR>` (or `gh run list --branch <branch> --limit 5`) and only report success once the checks return ✅. Phrases like "CI should be green now" are banned.
+# Full local verification (formatting → lint → compile → tests)
+./gradlew spotlessApply detekt assembleDebug test allTests
 
-## Tooling conventions
+# Single module tests (KMP module)
+./gradlew :core:data:allTests
 
-- **Engage the `android-cli` skill automatically.** Whenever the user mentions adb, emulator, device install/run, screenshots, or named devices (e.g. `1c10`, `Pixel 6a`), invoke the `android-cli` skill *before* running raw `adb` or `gradle install*` commands. Don't wait for the user to paste the skill-context block.
-- **Screenshots and ad-hoc artifacts go to `/tmp/`.** Never write annotated screenshots, log dumps, or scratch files into the repo working tree — they pollute `git status` and risk accidental commits. Use `/tmp/` or the session workspace (`~/.copilot/session-state/<id>/files/`).
+# Single module tests (Android-only module like :app)
+./gradlew :app:testFdroidDebugUnitTest
+
+# Cross-platform compilation check (no tests)
+./gradlew kmpSmokeCompile
+
+# Flavor-specific lint
+./gradlew lintFdroidDebug lintGoogleDebug
+```
+
+> Both `test` AND `allTests` are needed. `allTests` covers KMP modules; `test` covers pure-Android modules. Neither alone catches everything.
+
+### Gradle task naming (KMP vs Android-only)
+
+KMP modules have different task names than pure-Android modules. Using the wrong name silently skips tests or fails resolution.
+
+| Intent | KMP modules (`core:*`, `feature:*`) | Android-only (`app`, `core:api`, `core:barcode`) |
+|--------|--------------------------------------|--------------------------------------------------|
+| Run tests | `:module:allTests` | `:module:testFdroidDebugUnitTest` |
+| Detekt | `:module:detekt` (lifecycle task) | `:module:detekt` |
+| Compile check | `:module:compileKotlinJvm` | `:module:compileFdroidDebugKotlin` |
+
+**Common mistakes:**
+- ❌ `:core:network:detektMain` — does not exist in KMP; variants are `detektJvmMain`, `detektMetadataCommonMain`, etc. Use `:core:network:detekt` instead.
+- ❌ `:feature:connections:testDebugUnitTest` — ambiguous in KMP modules. Use `:feature:connections:allTests`.
+- ❌ `:feature:connections:compileFdroidDebugKotlin` — wrong for KMP. Use `:feature:connections:compileKotlinJvm` or `kmpSmokeCompile`.
+
+## Quick Reference
+
+- **Architecture**: KMP project (Android, Desktop, iOS). Business logic in `commonMain`; platform shells (`app/`, `desktop/`) wire DI and host UI. See `AGENTS.md` and `.skills/kmp-architecture/`.
+- **Flavors**: `fdroid` (OSS) / `google` (Maps + DataDog). Only one installable at a time (different signing keys).
+- **Verify before push**: Run `./gradlew spotlessApply detekt assembleDebug test allTests`, then confirm CI with `gh pr checks <PR>`.
+- **Strings**: `stringResource(Res.string.key)` — run `python3 scripts/sort-strings.py` after adding strings.
+- **Icons**: `MeshtasticIcons` (from `core/ui/icon/`), not `material.icons.Icons`.
+- **Error handling**: `safeCatching {}` (not `runCatching {}`) in coroutine code.
+- **Dispatchers**: `org.meshtastic.core.common.util.ioDispatcher`, not `Dispatchers.IO`.
+- **Navigation**: `MeshtasticNavDisplay` + `NavigationBackHandler` (not Android `BackHandler`).
+- **Protos**: `core/proto/` is a read-only git submodule. Never modify proto files.
+- **Branches**: Must start with `feat/`, `fix/`, `chore/`, `docs/`, `build/`, `ci/`, `refactor/`, `test/`, `deps/`, or a numeric spec prefix. Always branch off `origin/main`.
+
+## Deeper Guidance
+
+Consult `.skills/` for detailed playbooks:
+- `.skills/project-overview/` — Full codebase map and bootstrap
+- `.skills/kmp-architecture/` — Source-set rules, expect/actual
+- `.skills/compose-ui/` — Adaptive UI, string resources
+- `.skills/navigation-and-di/` — Nav 3 & Koin patterns
+- `.skills/testing-ci/` — CI architecture, verification matrix
+- `.skills/implement-feature/` — Feature development workflow
+- `.skills/code-review/` — PR hygiene checklist
+- `.skills/speckit/` — Spec Kit SDD workflow, slash commands, constitution

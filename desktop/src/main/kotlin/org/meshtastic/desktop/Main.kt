@@ -18,6 +18,7 @@ package org.meshtastic.desktop
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -77,6 +78,7 @@ import org.meshtastic.core.resources.desktop_tray_show
 import org.meshtastic.core.resources.desktop_tray_tooltip
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
@@ -168,6 +170,7 @@ private fun MeshServiceLifecycle() {
 // ----- Theme, locale, and application shell -----
 
 /** Resolves the user's theme/locale preferences and renders the full application UI. */
+@Suppress("ViewModelForwarding")
 @Composable
 @OptIn(ExperimentalCoilApi::class)
 private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
@@ -175,8 +178,6 @@ private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
     val uiPrefs = koinInject<UiPrefs>()
     val themePref by uiPrefs.theme.collectAsState(initial = -1)
     val localePref by uiPrefs.locale.collectAsState(initial = "")
-    val contrastLevelValue by uiPrefs.contrastLevel.collectAsState(initial = 0)
-    val contrastLevel = org.meshtastic.core.ui.theme.ContrastLevel.fromValue(contrastLevelValue)
     Locale.setDefault(localePref.takeIf { it.isNotEmpty() }?.let(Locale::forLanguageTag) ?: systemLocale)
 
     val isDarkTheme =
@@ -186,19 +187,16 @@ private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
             else -> isSystemInDarkTheme()
         }
 
-    MeshtasticDesktopApp(uiViewModel, isDarkTheme, contrastLevel)
+    MeshtasticDesktopApp(uiViewModel, isDarkTheme)
 }
 
 // ----- Application chrome (tray, window, navigation) -----
 
 /** Composes the system tray, window, and Coil image loader. */
+@Suppress("ViewModelForwarding")
 @Composable
 @OptIn(ExperimentalCoilApi::class)
-private fun ApplicationScope.MeshtasticDesktopApp(
-    uiViewModel: UIViewModel,
-    isDarkTheme: Boolean,
-    contrastLevel: org.meshtastic.core.ui.theme.ContrastLevel,
-) {
+private fun ApplicationScope.MeshtasticDesktopApp(uiViewModel: UIViewModel, isDarkTheme: Boolean) {
     var isAppVisible by remember { mutableStateOf(true) }
     var isWindowReady by remember { mutableStateOf(false) }
     val trayState = rememberTrayState()
@@ -230,7 +228,7 @@ private fun ApplicationScope.MeshtasticDesktopApp(
     )
 
     if (isWindowReady && isAppVisible) {
-        MeshtasticWindow(uiViewModel, isDarkTheme, contrastLevel, appIcon, windowState) { isAppVisible = false }
+        MeshtasticWindow(uiViewModel, isDarkTheme, appIcon, windowState) { isAppVisible = false }
     }
 }
 
@@ -273,12 +271,12 @@ private fun WindowBoundsManager(
 // ----- Main window with keyboard shortcuts and Coil -----
 
 /** Renders the main application window with keyboard shortcuts, Coil image loading, and the Compose UI tree. */
+@Suppress("ViewModelForwarding")
 @Composable
 @OptIn(ExperimentalCoilApi::class)
 private fun ApplicationScope.MeshtasticWindow(
     uiViewModel: UIViewModel,
     isDarkTheme: Boolean,
-    contrastLevel: org.meshtastic.core.ui.theme.ContrastLevel,
     appIcon: Painter,
     windowState: WindowState,
     onCloseRequest: () -> Unit,
@@ -300,9 +298,11 @@ private fun ApplicationScope.MeshtasticWindow(
         state = windowState,
         onPreviewKeyEvent = { event -> handleKeyboardShortcut(event, multiBackstack, ::exitApplication) },
     ) {
+        val eventEdition by uiViewModel.eventEdition.collectAsState()
+
         CoilImageLoaderSetup()
-        AppTheme(darkTheme = isDarkTheme, contrastLevel = contrastLevel) {
-            DesktopMainScreen(uiViewModel, multiBackstack)
+        CompositionLocalProvider(LocalEventBranding provides eventEdition) {
+            AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
         }
     }
 }

@@ -228,6 +228,14 @@ class EnvironmentMetricsForGraphingTest {
     }
 
     @Test
+    fun nanHumidity_filteredOut() {
+        val metrics = listOf(telemetry(env = EnvironmentMetrics(relative_humidity = Float.NaN)))
+        val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
+
+        assertFalse(result.shouldPlot[Environment.HUMIDITY.ordinal])
+    }
+
+    @Test
     fun nanPressure_filteredOut() {
         val metrics = listOf(telemetry(env = EnvironmentMetrics(barometric_pressure = Float.NaN)))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
@@ -235,6 +243,71 @@ class EnvironmentMetricsForGraphingTest {
         assertFalse(result.shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal])
         assertEquals(0f, result.leftMinMax.first, 0.01f)
         assertEquals(0f, result.leftMinMax.second, 0.01f)
+    }
+
+    @Test
+    fun mixedValidAndNanValues_onlyValidEnvironmentMetricsAreCharted() {
+        val metrics =
+            listOf(
+                telemetry(
+                    env =
+                    EnvironmentMetrics(
+                        temperature = Float.NaN,
+                        relative_humidity = 50f,
+                        barometric_pressure = Float.NaN,
+                    ),
+                ),
+                telemetry(
+                    env =
+                    EnvironmentMetrics(
+                        temperature = 20f,
+                        relative_humidity = Float.NaN,
+                        barometric_pressure = 1015f,
+                    ),
+                ),
+                telemetry(
+                    env = EnvironmentMetrics(temperature = 25f, relative_humidity = 60f, barometric_pressure = 1020f),
+                ),
+            )
+        val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
+
+        assertTrue(result.shouldPlot[Environment.TEMPERATURE.ordinal])
+        assertTrue(result.shouldPlot[Environment.HUMIDITY.ordinal])
+        assertTrue(result.shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal])
+        assertEquals(1015f, result.leftMinMax.first, 0.01f)
+        assertEquals(1020f, result.leftMinMax.second, 0.01f)
+        assertEquals(20f, result.rightMinMax.first, 0.01f)
+        assertEquals(60f, result.rightMinMax.second, 0.01f)
+    }
+
+    @Test
+    fun allNanValues_returnDefaultAxesAndNoPlots() {
+        val metrics =
+            listOf(
+                telemetry(
+                    env =
+                    EnvironmentMetrics(
+                        temperature = Float.NaN,
+                        relative_humidity = Float.NaN,
+                        barometric_pressure = Float.NaN,
+                    ),
+                ),
+                telemetry(
+                    env =
+                    EnvironmentMetrics(
+                        temperature = Float.NaN,
+                        relative_humidity = Float.NaN,
+                        barometric_pressure = Float.NaN,
+                    ),
+                ),
+            )
+        val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
+
+        assertTrue(result.shouldPlot.none { it })
+        assertEquals(0f, result.leftMinMax.first, 0.01f)
+        assertEquals(0f, result.leftMinMax.second, 0.01f)
+        assertEquals(0f, result.rightMinMax.first, 0.01f)
+        assertEquals(1f, result.rightMinMax.second, 0.01f)
     }
 
     // ---- Multiple metrics combined ----

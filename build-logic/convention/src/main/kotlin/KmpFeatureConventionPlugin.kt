@@ -19,6 +19,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.meshtastic.buildlogic.isDesktopOnly
 import org.meshtastic.buildlogic.library
 import org.meshtastic.buildlogic.libs
 
@@ -60,12 +61,14 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                     implementation(libs.library("compose-multiplatform-ui-tooling-preview"))
                 }
 
-                sourceSets.getByName("androidMain").dependencies {
-                    // Common Android Compose dependencies
-                    implementation(libs.library("accompanist-permissions"))
-                    implementation(libs.library("androidx-activity-compose"))
+                if (!isDesktopOnly) {
+                    sourceSets.getByName("androidMain").dependencies {
+                        // Common Android Compose dependencies
+                        implementation(libs.library("accompanist-permissions"))
+                        implementation(libs.library("androidx-activity-compose"))
 
-                    implementation(libs.library("compose-multiplatform-ui"))
+                        implementation(libs.library("compose-multiplatform-ui"))
+                    }
                 }
 
                 sourceSets.getByName("commonTest").dependencies { implementation(project(":core:testing")) }

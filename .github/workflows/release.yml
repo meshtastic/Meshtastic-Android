@@ -24,6 +24,11 @@ on:
         required: false
         type: boolean
         default: false
+      build_flatpak_src:
+        description: 'Whether to build the Flatpak sources'
+        required: false
+        type: boolean
+        default: false
     secrets:
       GSERVICES:
         required: true
@@ -157,7 +162,7 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '4.0.3'
+          ruby-version: '4.0.4'
           bundler-cache: true
 
       - name: Build and Deploy Google Play to Internal Track with Fastlane
@@ -230,7 +235,7 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '4.0.3'
+          ruby-version: '4.0.4'
           bundler-cache: true
 
       - name: Build F-Droid with Fastlane
@@ -296,13 +301,18 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        # Build the release distribution for the current OS.
+        # On macOS, also build a ReleaseUberJar for the Homebrew Cask.
         # Quote the -P flag: PowerShell on Windows interprets the dot in
         # `-PaboutLibraries.release=true` as member access on `-PaboutLibraries`,
         # splitting the token and feeding `.release=true` to Gradle as a task name.
-        run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS '-PaboutLibraries.release=true' --no-daemon
+        run: >
+          ./gradlew :desktop:packageReleaseDistributionForCurrentOS
+          ${{ contains(runner.os, 'macOS') && ':desktop:packageReleaseUberJarForCurrentOS' }}
+          '-PaboutLibraries.release=true' --no-daemon
 
       - name: List Desktop Binaries
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' || runner.os == 'macOS'
         run: ls -R desktop/build/compose/binaries/main-release
 
       - name: Upload Desktop Artifacts
@@ -317,6 +327,7 @@ jobs:
             desktop/build/compose/binaries/main-release/*/*.deb
             desktop/build/compose/binaries/main-release/*/*.rpm
             desktop/build/compose/binaries/main-release/*/*.AppImage
+            desktop/build/compose/jars/*-release.jar
           retention-days: 1
           if-no-files-found: ignore
 
@@ -331,11 +342,107 @@ jobs:
             desktop/build/compose/binaries/main-release/*/*.deb
             desktop/build/compose/binaries/main-release/*/*.rpm
             desktop/build/compose/binaries/main-release/*/*.AppImage
+            desktop/build/compose/jars/*-release.jar
+
+  create-flatpak-src:
+    if: ${{ inputs.build_flatpak_src }}
+    runs-on: ${{ matrix.os }}
+    needs: [prepare-build-info]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-22.04-arm]
+    env:
+      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
+      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
+      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag_name }}
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: 'true'
+
+      - name: Python Setup
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Install ast-grep
+        run: pip install ast-grep-cli
+
+      # Remove Android/iOS targets and other non-desktop bits
+      # that would break the flatpakGradleGenerator
+      - name: Prepare Offline Desktop Build
+        run: ./scripts/desktop-only-prep.sh
+
+      - name: Generate Flatpak Sources
+        env:
+          DESKTOP_ONLY: true
+        run: >
+          ./gradlew :build-logic:convention:flatpakGradleGenerator flatpakGradleGenerator
+          --no-configuration-cache --refresh-dependencies --no-parallel
+
+      - name: List Flatpak source files
+        run: ls -R flatpak-sources*.json
+
+      - name: Upload Flatpak source artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-multisrc-${{ runner.arch }}
+          path: flatpak-sources*.json
+          retention-days: 1
+
+  release-flatpak-src:
+    if: ${{ inputs.build_flatpak_src }}
+    runs-on: ubuntu-24.04
+    needs: [create-flatpak-src]
+    steps:
+      - name: Download Flatpak source artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: flatpak-multisrc-*
+          merge-multiple: true
+      
+      - name: List Flatpak source files
+        run: ls -R flatpak-sources*.json
+
+      - name: Combine Flatpak source files
+        run: >
+          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])' flatpak-sources*.json
+          > flatpak-sources.json
+
+      - name: Upload combined Flatpak source artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-sources
+          path: flatpak-sources.json
+          retention-days: 1
+      
+      - name: Attest combined Flatpak source artifact provenance
+        if: success()
+        uses: actions/attest@v4
+        with:
+          subject-path: flatpak-sources.json
 
   github-release:
     if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-24.04-arm
-    needs: [prepare-build-info, release-google, release-fdroid, release-desktop]
+    needs:
+      - prepare-build-info
+      - release-google
+      - release-fdroid
+      - release-desktop
+      - release-flatpak-src
     env:
       INTERNAL_BUILDS_HOST: ${{ secrets.INTERNAL_BUILDS_HOST }}
     permissions:
@@ -352,6 +459,9 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           path: ./artifacts
+
+      - name: Exclude flatpak-multisrc artifacts from release
+        run: rm -rf ./artifacts/flatpak-multisrc-*
 
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v3

@@ -18,8 +18,15 @@ package org.meshtastic.feature.connections.ui.components
 
 /** Visual style for [ConnectionActionButton]. Maps to the four canonical M3 button variants. */
 enum class ConnectionActionButtonStyle {
+    /** Solid-fill button for the primary action in a group (e.g. "Start scan"). */
     Filled,
+
+    /** Tonal (filled-tonal) button for secondary prominence (e.g. "Add device manually"). */
     Tonal,
+
+    /** Outlined button for neutral or tertiary actions (e.g. "Disconnect"). */
     Outlined,
+
+    /** Text-only button for the least prominent action (e.g. inline toggles). */
     Text,
 }

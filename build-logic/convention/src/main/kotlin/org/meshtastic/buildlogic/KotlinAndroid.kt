@@ -22,6 +22,9 @@ import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
@@ -78,39 +81,48 @@ internal fun Project.configureKotlinMultiplatform() {
         // Standard KMP targets for Meshtastic
         jvm()
 
-        // Configure the iOS targets for compile-only validation
-        // We only add these for modules that already have KMP structure
-        iosArm64()
-        iosSimulatorArm64()
+        if (!isDesktopOnly) {
+            // Configure the iOS targets for compile-only validation
+            // We only add these for modules that already have KMP structure
+            iosArm64()
+            iosSimulatorArm64()
 
-        // Configure the Android target if the plugin is applied
-        pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
-            extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
-                compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
-                minSdk = configProperties.getProperty("MIN_SDK").toInt()
+            // Configure the Android target if the plugin is applied
+            pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+                extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
+                    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+                    minSdk = configProperties.getProperty("MIN_SDK").toInt()
 
-                // Set the namespace automatically if not already set
-                if (namespace == null) {
-                    val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
-                    namespace = "org.meshtastic.$pkg"
+                    // Set the namespace automatically if not already set
+                    if (namespace == null) {
+                        val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
+                        namespace = "org.meshtastic.$pkg"
+                    }
                 }
             }
+        } else {
+            // In desktop-only mode, create placeholder androidMain/iosMain source sets so
+            // module build scripts that reference them via the DSL accessor don't fail.
+            // These source sets are inert — no target compiles them.
+            sourceSets.apply { create("androidMain") { dependsOn(getByName("commonMain")) } }
         }
     }
 
-    // Disable iOS native test link & run tasks.
-    // iOS targets exist only for compile-time validation; linking test
-    // executables is extremely slow and causes `./gradlew test` to hang.
-    tasks.configureEach {
-        val taskName = name.lowercase()
-        if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
-            val isDisabledIosTask =
-                (taskName.startsWith("link") && taskName.contains("test")) ||
-                    taskName == "iosarm64test" ||
-                    taskName == "iossimulatorarm64test" ||
-                    taskName.endsWith("testbinaries")
-            if (isDisabledIosTask) {
-                enabled = false
+    if (!isDesktopOnly) {
+        // Disable iOS native test link & run tasks.
+        // iOS targets exist only for compile-time validation; linking test
+        // executables is extremely slow and causes `./gradlew test` to hang.
+        tasks.configureEach {
+            val taskName = name.lowercase()
+            if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
+                val isDisabledIosTask =
+                    (taskName.startsWith("link") && taskName.contains("test")) ||
+                        taskName == "iosarm64test" ||
+                        taskName == "iossimulatorarm64test" ||
+                        taskName.endsWith("testbinaries")
+                if (isDisabledIosTask) {
+                    enabled = false
+                }
             }
         }
     }
@@ -254,6 +266,18 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
                 freeCompilerArgs.add("-jvm-default=no-compatibility")
             }
+        }
+    }
+
+    // Published modules compile to JVM 17 for binary compatibility, but their test runtime
+    // classpath includes non-published dependencies compiled to JVM 21. Override the test
+    // launcher to JDK 21 so the JVM can load all class file versions at runtime.
+    if (isPublishedModule) {
+        val toolchains = extensions.getByType(JavaToolchainService::class.java)
+        tasks.withType<Test>().configureEach {
+            javaLauncher.set(
+                toolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(APP_JDK)) }
+            )
         }
     }
 }

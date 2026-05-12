@@ -70,6 +70,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -141,7 +144,6 @@ import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.KeepScreenOn
-import org.meshtastic.core.ui.util.PlatformBackHandler
 import org.meshtastic.core.ui.util.rememberOpenFileLauncher
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
@@ -185,7 +187,12 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
 
     KeepScreenOn(shouldKeepFirmwareScreenOn(state))
 
-    PlatformBackHandler(enabled = shouldKeepFirmwareScreenOn(state)) { showExitConfirmation = true }
+    val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = backHandlerState,
+        isBackEnabled = shouldKeepFirmwareScreenOn(state),
+        onBackCompleted = { showExitConfirmation = true },
+    )
 
     if (showExitConfirmation) {
         MeshtasticDialog(

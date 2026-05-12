@@ -49,9 +49,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
+import org.meshtastic.core.network.repository.effectiveTlsEnabled
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.address
-import org.meshtastic.core.resources.default_mqtt_address
 import org.meshtastic.core.resources.encryption_enabled
 import org.meshtastic.core.resources.json_output_enabled
 import org.meshtastic.core.resources.map_reporting
@@ -183,9 +183,8 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                val defaultAddress = stringResource(Res.string.default_mqtt_address)
-                val isDefault = formState.value.address.isEmpty() || formState.value.address.contains(defaultAddress)
-                val enforceTls = isDefault && formState.value.proxy_to_client_enabled
+                val resolvedAddress = formState.value.address.ifEmpty { "mqtt.meshtastic.org" }
+                val enforceTls = effectiveTlsEnabled(resolvedAddress, tlsEnabled = false)
                 SwitchPreference(
                     title = stringResource(Res.string.tls_enabled),
                     checked = formState.value.tls_enabled || enforceTls,
@@ -318,14 +317,13 @@ private fun MqttAddressAndProbe(
         },
     )
     HorizontalDivider()
-    val defaultAddress = stringResource(Res.string.default_mqtt_address)
     MqttProbeRow(
         enabled = enabled && formState.value.address.isNotBlank(),
         status = probeStatus,
         onTestClick = {
             focusManager.clearFocus()
-            val isDefault = formState.value.address.isEmpty() || formState.value.address.contains(defaultAddress)
-            val effectiveTls = formState.value.tls_enabled || isDefault
+            val resolvedAddress = formState.value.address.ifEmpty { "mqtt.meshtastic.org" }
+            val effectiveTls = effectiveTlsEnabled(resolvedAddress, formState.value.tls_enabled)
             onProbe(formState.value.address, effectiveTls, formState.value.username, formState.value.password)
         },
     )
@@ -376,7 +374,7 @@ private fun MqttProbeStatus?.toLabel(): Pair<String, Color>? = when (this) {
         stringResource(Res.string.mqtt_probe_tcp_failure) to MaterialTheme.colorScheme.error
 
     is MqttProbeStatus.TlsFailure ->
-        stringResource(Res.string.mqtt_probe_tls_failure) to MaterialTheme.colorScheme.error
+        stringResource(Res.string.mqtt_probe_tls_failure, message ?: "unknown") to MaterialTheme.colorScheme.error
 
     is MqttProbeStatus.Timeout ->
         stringResource(Res.string.mqtt_probe_timeout, timeoutMs.toInt()) to MaterialTheme.colorScheme.error

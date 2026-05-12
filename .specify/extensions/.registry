@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "git": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:9731aa8143a72fbebfdb440f155038ab42642517c2b2bdbbf67c8fdbe076ed79",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-07T18:46:46.224615+00:00"
+    },
+    "verify": {
+      "version": "1.0.3",
+      "source": "local",
+      "manifest_hash": "sha256:74202b2c3bb17058b10787838cdf30c9ebe11e8793fc1de04bee75d5f111949a",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.verify.run"
+        ],
+        "opencode": [
+          "speckit.verify.run"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-09T17:25:26.427246+00:00"
+    },
+    "brownfield": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:671babc47c752bf18868d0aeeef66f0fc4f37c6cf52622cfa07e8715fb5ac4a6",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.brownfield.scan",
+          "speckit.brownfield.bootstrap",
+          "speckit.brownfield.validate",
+          "speckit.brownfield.migrate"
+        ],
+        "opencode": [
+          "speckit.brownfield.scan",
+          "speckit.brownfield.bootstrap",
+          "speckit.brownfield.validate",
+          "speckit.brownfield.migrate"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-09T17:46:25.128200+00:00"
+    },
+    "optimize": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:011bc93e18ca788185271fc493d658d66c2544b99c131fcd293b136442af30f1",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "opencode": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-05-09T19:50:38.413050+00:00"
+    }
+  }
+}

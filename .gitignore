@@ -59,3 +59,7 @@ firebase-debug.log
 # Local library development clones
 /coil/
 /kable/
+.opencode/
+
+# flatpakGradleGenerator output
+flatpak-sources*.json

@@ -80,10 +80,6 @@ interface UiPrefs {
 
     fun setTheme(value: Int)
 
-    val contrastLevel: StateFlow<Int>
-
-    fun setContrastLevel(value: Int)
-
     val locale: StateFlow<String>
 
     fun setLocale(languageTag: String)

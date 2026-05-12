@@ -50,8 +50,6 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun KeepScreenOn(enabled: Boolean) {}
 
-@Composable actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) {}
-
 @Composable actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
 
 @Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}

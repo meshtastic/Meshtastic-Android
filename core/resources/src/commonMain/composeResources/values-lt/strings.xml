@@ -16,190 +16,252 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <!-- Language tags native names (not available via .getDisplayLanguage) -->
-    <string name="node_filter_placeholder">Filtras</string>
-    <string name="desc_node_filter_clear">išvalyti įtaisų filtrą</string>
-    <string name="node_filter_include_unknown">Įtraukti nežinomus</string>
-    <string name="node_sort_alpha">A-Z</string>
-    <string name="node_sort_channel">Kanalas</string>
-    <string name="node_sort_distance">Atstumas</string>
-    <string name="node_sort_hops_away">Persiuntimų kiekis</string>
-    <string name="node_sort_last_heard">Seniausiai girdėtas</string>
-    <string name="node_sort_via_mqtt">per MQTT</string>
-    <string name="via_mqtt">per MQTT</string>
-    <string name="unrecognized">Be kategorijos</string>
-    <string name="message_status_enroute">Laukiama patvirtinimo</string>
-    <string name="message_status_queued">Eilėje išsiuntimui</string>
-    <string name="routing_error_none">Pristatymas patvirtintas</string>
-    <string name="routing_error_no_route">Nėra maršruto</string>
-    <string name="routing_error_got_nak">Gautas negatyvus patvirtinimas</string>
-    <string name="routing_error_timeout">Baigėsi laikas</string>
-    <string name="routing_error_no_interface">Nėra sąsajos</string>
-    <string name="routing_error_max_retransmit">Pasiektas persiuntimų limitas</string>
-    <string name="routing_error_no_channel">Nėra kanalo</string>
-    <string name="routing_error_too_large">Paketas perdidelis</string>
-    <string name="routing_error_no_response">Nėra atsakymo</string>
-    <string name="routing_error_bad_request">Bloga užklausa</string>
-    <string name="routing_error_duty_cycle_limit">Pasiektas regioninis ciklų limitas</string>
-    <string name="routing_error_not_authorized">Neautorizuotas</string>
-    <string name="routing_error_pki_failed">Šifruotas siuntimas nepavyko</string>
-    <string name="routing_error_pki_unknown_pubkey">Nežinomas viešasis raktas</string>
-    <string name="routing_error_admin_bad_session_key">Blogas sesijos raktas</string>
-    <string name="routing_error_admin_public_key_unauthorized">Viešasis raktas nepatvirtintas</string>
-    <string name="role_client_desc">Programėlė prijungta prie atskiro susirašinėjimo įtaiso.</string>
-    <string name="role_client_mute_desc">Įtaisas kuris nepersiunčia kitų įtaisų paketų.</string>
-    <string name="role_router_desc">Stacionarus aukštuminis įtaisas geresniam tinklo padengimui. Matomas node`ų sąraše.</string>
-    <string name="role_router_client_desc">ROUTER ir CLIENT kombinacija. Neskirta mobiliems įtaisams.</string>
-    <string name="role_repeater_desc">Stacionarus įtaisas tinklo išplėtimui, persiunčiantis žinutes. Nerodomas įtaisų sąraše.</string>
-    <string name="role_tracker_desc">Pirmenybinis GPS pozicijos paketų siuntimas</string>
-    <string name="role_sensor_desc">Pirmenybinis telemetrijos paketų siuntimas</string>
-    <string name="role_tak_desc">Optimizuota ATAK komunikacijai, sumažinta rutininių transliacijų</string>
-    <string name="role_client_hidden_desc">Įtaisas transliuojantis tik prireikus. Naudojama slaptumo ar energijos taupymui.</string>
-    <string name="role_lost_and_found_desc">Reguliariai siunčia GPS pozicijos informaciją į pagrindinį kanalą, lengvesniam įtaiso radimui.</string>
-    <string name="role_tak_tracker_desc">Įgalina automatines TAK PLI transliacijas ir sumažina rutininių transliacijų kiekį.</string>
-    <string name="rebroadcast_mode_all_desc">Persiųsti visas žinutes, nesvarbu jos iš Jūsų privataus tinklo ar iš kito tinklo su analogiškais LoRa parametrais.</string>
-    <string name="rebroadcast_mode_all_skip_decoding_desc">Taip pat kaip ir VISI bet nebando dekoduoti paketų ir juos tiesiog persiunčia. Galima naudoti tik Repeater rolės įtaise. Įjungus bet kokiame kitame įtaise - veiks tiesiog kaip VISI.</string>
-    <string name="rebroadcast_mode_none_desc">Leidžiama tik SENSOR, TRACKER ar TAK_TRACKER rolių įtaisams. Tai užblokuos visas retransliacijas, ne taip kaip CLIENT_MUTE atveju.</string>
-    <!-- Position Config -->
-    <string name="channel_name">Kanalo pavadinimas</string>
-    <string name="qr_code">QR kodas</string>
-    <string name="unknown_username">Nežinomas vartotojo vardas</string>
-    <string name="send">Siųsti</string>
-    <string name="you">Tu</string>
     <string name="accept">Priimti</string>
-    <string name="cancel">Atšaukti</string>
-    <string name="save_changes">Išsaugoti</string>
-    <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
-    <string name="report">Raportuoti</string>
-    <string name="location_disabled">Vietos prieigos funkcija išjungta, negalima pateikti pozicijos tinklui.</string>
-    <string name="share">Dalintis</string>
-    <string name="disconnected">Atsijungta</string>
-    <string name="device_sleeping">Įrenginys miega</string>
-    <string name="ip_address">IP adresas:</string>
-    <string name="not_connected">Neprijungtas</string>
-    <string name="connected_sleeping">Prisijungta prie radijo, bet jis yra miego režime</string>
-    <string name="app_too_old">Reikalingas programos atnaujinimas</string>
-    <string name="must_update">Urite atnaujinti šią programą programėlių parduotuvėje (arba Github). Ji per sena, kad galėtų bendrauti su šiuo radijo įrangos programinės įrangos versija. Prašome perskaityti mūsų <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciją</a> šia tema.</string>
-    <string name="none">Nėra (išjungti)</string>
-    <string name="meshtastic_service_notifications">Paslaugos pranešimai</string>
-    <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
-    <string name="debug_panel">Derinimo skydelis</string>
-    <string name="clear">Išvalyti</string>
-    <string name="channel_label">Kanalas</string>
-    <string name="message_delivery_status">Žinutės pristatymo statusas</string>
-    <string name="firmware_too_old">Reikalingas įrangos Firmware atnaujinimas.</string>
-    <string name="firmware_old">Radijo įrangos pfirmware yra per sena, kad galėtų bendrauti su šia programa. Daugiau informacijos apie tai rasite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">mūsų firmware diegimo vadove</a>.</string>
-    <string name="okay">Gerai</string>
-    <string name="must_set_region">Turite nustatyti regioną!</string>
-    <string name="cant_change_no_radio">Nepavyko pakeisti kanalo, nes radijas dar nėra prisijungęs. Bandykite dar kartą.</string>
-    <string name="reset">Nustatyti iš naujo</string>
-    <string name="scan">Skenuoti</string>
+    <!-- ACTION -->
+    <string name="action_delete_message">Ištrinti pranešimą</string>
+    <!-- ADD -->
+    <string name="add">Pridėti</string>
     <string name="add_network_device">Pridėti</string>
-    <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
-    <string name="reset_to_defaults">Atkurti numatytuosius parametrus</string>
+    <string name="administration">Administravimas</string>
+    <!-- AIR -->
+    <string name="air_util_definition">Procentas eterio laiko naudoto perdavimams per pastarąją valandą.</string>
+    <!-- ALERT -->
+    <string name="alert_bell_text">Skambučio simbolis!</string>
+    <string name="app_too_old">Reikalingas programos atnaujinimas</string>
     <string name="apply">Taikyti</string>
-    <string name="theme">Išvaizda</string>
-    <string name="theme_light">Šviesi</string>
-    <string name="theme_dark">Tamsi</string>
-    <string name="theme_system">Sistemos numatyta</string>
+    <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
+    <string name="bad">Silpnas</string>
+    <string name="battery">Baterija</string>
+    <!-- BLUETOOTH -->
+    <string name="calculating">Skaičiuojama…</string>
+    <string name="cancel">Atšaukti</string>
+    <string name="cant_change_no_radio">Nepavyko pakeisti kanalo, nes radijas dar nėra prisijungęs. Bandykite dar kartą.</string>
+    <string name="cant_shutdown">Išjungimas nepalaikomas šiame įtaise</string>
+    <string name="ch_util_definition">Dabartinio kanalo panaudojimas, įskaitant gerai suformuotą TX (siuntimas), RX (gavimas) ir netinkamai suformuotą RX (arba - triukšmas).</string>
+    <!-- CHANNEL -->
+    <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
+    <string name="channel_label">Kanalas</string>
+    <string name="channel_name">Kanalo pavadinimas</string>
     <string name="choose_theme">Pasirinkite Aplinką</string>
-    <string name="provide_location_to_mesh">Pateikti telefono vietą tinklui</string>
+    <!-- CLEAN -->
+    <string name="clear">Išvalyti</string>
+    <string name="close">Uždaryti</string>
+    <!-- COMPASS -->
+    <!-- CONFIG -->
+    <string name="connected_sleeping">Prisijungta prie radijo, bet jis yra miego režime</string>
+    <string name="copy">Kopijuoti</string>
+    <!-- DEBUG -->
+    <string name="debug_panel">Derinimo skydelis</string>
+    <!-- DELETE -->
+    <string name="delete">Ištrinti</string>
+    <string name="delete_for_everyone">Ištrinti visiems</string>
+    <string name="delete_for_me">Ištrinti man</string>
     <plurals name="delete_messages">
         <item quantity="one">Ištrinti pranešimą?</item>
         <item quantity="few">Ištrinti %1$s pranešimus?</item>
         <item quantity="many">Ištrinti %1$s pranešimus?</item>
         <item quantity="other">Ištrinti %1$s pranešimus?</item>
     </plurals>
-    <string name="delete">Ištrinti</string>
-    <string name="delete_for_everyone">Ištrinti visiems</string>
-    <string name="delete_for_me">Ištrinti man</string>
-    <string name="select_all">Pažymėti visus</string>
-    <string name="map_download_region">Atsisiųsti regioną</string>
-    <string name="name">Pavadinimas</string>
-    <string name="description">Aprašymas</string>
-    <string name="locked">Užrakintas</string>
-    <string name="save">Išsaugoti</string>
-    <string name="preferences_language">Kalba</string>
-    <string name="preferences_system_default">Numatytoji sistema</string>
-    <string name="resend">Siųsti iš naujo</string>
-    <string name="shutdown">Išjungti</string>
-    <string name="cant_shutdown">Išjungimas nepalaikomas šiame įtaise</string>
-    <string name="reboot">Perkrauti</string>
-    <string name="traceroute">Žinutės kelias</string>
-    <string name="intro_show">Rodyti įvadą</string>
-    <string name="message">Žinutė</string>
-    <string name="quick_chat">Greito pokalbio parinktys</string>
-    <string name="quick_chat_new">Naujas greitas pokalbis</string>
-    <string name="quick_chat_edit">Redaguoti greitą pokalbį</string>
-    <string name="quick_chat_append">Pridėti prie žinutės</string>
-    <string name="quick_chat_instant">Siųsti nedelsiant</string>
-    <string name="factory_reset">Gamyklinis atstatymas</string>
-    <string name="open_settings">Atidaryti nustatymus</string>
-    <string name="direct_message">Tiesioginė žinutė</string>
-    <string name="nodedb_reset">NodeDB perkrauti</string>
     <string name="delivery_confirmed">Nustatymas įkeltas</string>
+    <string name="desc_node_filter_clear">išvalyti įtaisų filtrą</string>
+    <string name="description">Aprašymas</string>
+    <!-- DEVICE -->
+    <string name="device_sleeping">Įrenginys miega</string>
+    <string name="direct_message">Tiesioginė žinutė</string>
+    <string name="disconnected">Atsijungta</string>
+    <!-- DISPLAY -->
+    <!-- DISTANCE -->
+    <string name="distance">Atstumas</string>
+    <string name="edit">Redaguoti</string>
+    <string name="eight_hours">8 Valandos</string>
+    <!-- ENCRYPTION -->
+    <string name="encryption_error">Viešojo rakto neatitikimas</string>
+    <string name="encryption_pkc">Viešojo rakto šifruotė</string>
+    <string name="encryption_psk">Viešas raktas</string>
+    <!-- ENVIRONMENT -->
     <string name="error">Klaida</string>
+    <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
+    <!-- EXPORT -->
+    <string name="factory_reset">Gamyklinis atstatymas</string>
+    <string name="fair">Pakankamas</string>
+    <!-- FILTER -->
+    <string name="filter_icon">Filtras</string>
+    <!-- FIRMWARE -->
+    <string name="firmware_old">Radijo įrangos pfirmware yra per sena, kad galėtų bendrauti su šia programa. Daugiau informacijos apie tai rasite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">mūsų firmware diegimo vadove</a>.</string>
+    <string name="firmware_too_old">Reikalingas įrangos Firmware atnaujinimas.</string>
+    <string name="firmware_update_failed">Atnaujinti nepavyko</string>
+    <string name="good">Geras</string>
+    <!-- GPIO -->
+    <string name="hops_away">Persiuntimų kiekis</string>
+    <!-- IGNORE -->
     <string name="ignore">Ignoruoti</string>
     <string name="ignore_add">Ar pridėti „%1$s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="ignore_remove">Ar pašalinti „%1$s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
-    <string name="map_select_download_region">Pasirinkite atsisiuntimo regioną</string>
-    <string name="map_tile_download_estimate">Plytelių atsisiuntimo apskaičiavimas:</string>
-    <string name="map_start_download">Pradėti atsiuntimą</string>
-    <string name="close">Uždaryti</string>
-    <string name="radio_configuration">Radijo modulio konfigūracija</string>
-    <string name="module_settings">Modulio konfigūracija</string>
-    <string name="add">Pridėti</string>
-    <string name="edit">Redaguoti</string>
-    <string name="calculating">Skaičiuojama…</string>
-    <string name="map_offline_manager">Neprisijungusio režimo valdymas</string>
-    <string name="map_cache_size">Dabartinis talpyklos dydis</string>
+    <string name="info">Informacija</string>
+    <string name="interval_unset">Nenustatyta</string>
+    <string name="intro_show">Rodyti įvadą</string>
+    <string name="ip_address">IP adresas:</string>
+    <!-- LABEL -->
+    <!-- LOAD -->
+    <!-- LOCAL -->
+    <string name="location_disabled">Vietos prieigos funkcija išjungta, negalima pateikti pozicijos tinklui.</string>
+    <string name="locked">Užrakintas</string>
+    <!-- LOG -->
+    <string name="logs">Log`ai</string>
+    <!-- MAP -->
     <string name="map_cache_info">Talpyklos talpa: %1$d MB\nTalpyklos naudojimas: %2$d MB</string>
-    <string name="map_clear_tiles">Ištrinti atsisiųstas plyteles</string>
-    <string name="map_tile_source">Plytelių šaltinis</string>
-    <string name="map_purge_success">SQL talpykla išvalyta %1$s</string>
-    <string name="map_purge_fail">SQL talpyklos išvalymas nepavyko, detales žiūrėkite logcat</string>
     <string name="map_cache_manager">Talpyklos valdymas</string>
+    <string name="map_cache_size">Dabartinis talpyklos dydis</string>
+    <string name="map_cache_tiles">%1$d plytelės</string>
+    <string name="map_clear_tiles">Ištrinti atsisiųstas plyteles</string>
     <string name="map_download_complete">Atsiuntimas baigtas!</string>
     <string name="map_download_errors">Atsiuntimas baigtas su %1$d klaidomis</string>
-    <string name="map_cache_tiles">%1$d plytelės</string>
+    <string name="map_download_region">Atsisiųsti regioną</string>
+    <string name="map_offline_manager">Neprisijungusio režimo valdymas</string>
+    <string name="map_purge_fail">SQL talpyklos išvalymas nepavyko, detales žiūrėkite logcat</string>
+    <string name="map_purge_success">SQL talpykla išvalyta %1$s</string>
+    <string name="map_select_download_region">Pasirinkite atsisiuntimo regioną</string>
+    <string name="map_start_download">Pradėti atsiuntimą</string>
     <string name="map_subDescription">kryptis: %1$d° atstumas: %2$s</string>
-    <string name="waypoint_edit">Redaguoti kelio tašką</string>
-    <string name="waypoint_delete">Ištrinti orientyrą?</string>
-    <string name="waypoint_new">Naujas orientyras</string>
-    <string name="waypoint_received">Gautas orientyras: %1$s</string>
-    <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
+    <string name="map_tile_download_estimate">Plytelių atsisiuntimo apskaičiavimas:</string>
+    <string name="map_tile_source">Plytelių šaltinis</string>
+    <string name="max">Max</string>
+    <!-- MESHTASTIC -->
+    <string name="meshtastic_new_nodes_notifications">Naujo įtaiso pranešimas</string>
+    <string name="meshtastic_service_notifications">Paslaugos pranešimai</string>
+    <!-- MESSAGE -->
+    <string name="message">Žinutė</string>
+    <string name="message_delivery_status">Žinutės pristatymo statusas</string>
+    <string name="message_input_label">Žinutė</string>
+    <string name="message_status_enroute">Laukiama patvirtinimo</string>
+    <string name="message_status_queued">Eilėje išsiuntimui</string>
+    <string name="module_settings">Modulio konfigūracija</string>
+    <!-- MQTT -->
+    <string name="mqtt_status_disconnected">Atsijungta</string>
+    <string name="must_set_region">Turite nustatyti regioną!</string>
+    <string name="must_update">Urite atnaujinti šią programą programėlių parduotuvėje (arba Github). Ji per sena, kad galėtų bendrauti su šiuo radijo įrangos programinės įrangos versija. Prašome perskaityti mūsų <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciją</a> šia tema.</string>
+    <!-- MUTE -->
+    <string name="mute_1_week">1 savaitė</string>
+    <string name="mute_8_hours">8 valandos</string>
+    <string name="mute_always">Visada</string>
+    <string name="mute_notifications">Nutildyti pranešimus</string>
+    <string name="name">Pavadinimas</string>
+    <string name="navigate_back">Grįžti atgal</string>
+    <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
+    <!-- NO -->
+    <!-- NODE -->
+    <string name="node_filter_include_unknown">Įtraukti nežinomus</string>
+    <string name="node_filter_placeholder">Filtras</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Kanalas</string>
+    <string name="node_sort_distance">Atstumas</string>
+    <string name="node_sort_hops_away">Persiuntimų kiekis</string>
+    <string name="node_sort_last_heard">Seniausiai girdėtas</string>
+    <string name="node_sort_via_mqtt">per MQTT</string>
+    <string name="nodedb_reset">NodeDB perkrauti</string>
+    <!-- NODES -->
+    <string name="none">Nėra (išjungti)</string>
+    <string name="none_quality">Nėra</string>
+    <string name="not_connected">Neprijungtas</string>
+    <!-- NOTIFICATIONS -->
+    <string name="okay">Gerai</string>
+    <!-- ONE -->
+    <string name="one_day">24 Valandos</string>
+    <string name="one_week">1 sav</string>
+    <string name="open_settings">Atidaryti nustatymus</string>
+    <!-- OUTPUT -->
+    <!-- PAX -->
+    <!-- POSITION -->
+    <!-- POWER -->
+    <string name="preferences_language">Kalba</string>
+    <string name="preferences_system_default">Numatytoji sistema</string>
+    <!-- PREVIEW -->
+    <string name="private_key">Privatus raktas</string>
+    <string name="provide_location_to_mesh">Pateikti telefono vietą tinklui</string>
+    <string name="public_key">Viešasis raktas</string>
+    <string name="qr_code">QR kodas</string>
+    <!-- QUICK -->
+    <string name="quick_chat">Greito pokalbio parinktys</string>
+    <string name="quick_chat_append">Pridėti prie žinutės</string>
+    <string name="quick_chat_edit">Redaguoti greitą pokalbį</string>
+    <string name="quick_chat_instant">Siųsti nedelsiant</string>
+    <string name="quick_chat_new">Naujas greitas pokalbis</string>
+    <string name="radio_configuration">Radijo modulio konfigūracija</string>
+    <string name="reboot">Perkrauti</string>
+    <!-- REBROADCAST -->
+    <string name="rebroadcast_mode_all_desc">Persiųsti visas žinutes, nesvarbu jos iš Jūsų privataus tinklo ar iš kito tinklo su analogiškais LoRa parametrais.</string>
+    <string name="rebroadcast_mode_all_skip_decoding_desc">Taip pat kaip ir VISI bet nebando dekoduoti paketų ir juos tiesiog persiunčia. Galima naudoti tik Repeater rolės įtaise. Įjungus bet kokiame kitame įtaise - veiks tiesiog kaip VISI.</string>
+    <string name="rebroadcast_mode_none_desc">Leidžiama tik SENSOR, TRACKER ar TAK_TRACKER rolių įtaisams. Tai užblokuos visas retransliacijas, ne taip kaip CLIENT_MUTE atveju.</string>
+    <string name="red">Raudona</string>
+    <string name="region_frequency_plan">Regionas</string>
+    <!-- REMOTE -->
+    <string name="remote_admin">Nuotolinis administravimas</string>
+    <!-- REMOVE -->
     <string name="remove">Pašalinti</string>
     <string name="remove_node_text">Šis įtaisas bus pašalintas iš jūsų sąrašo iki tol kol vėl iš jo gausite žinutę / duomenų paketą.</string>
-    <string name="mute_notifications">Nutildyti pranešimus</string>
-    <string name="mute_8_hours">8 valandos</string>
-    <string name="mute_1_week">1 savaitė</string>
-    <string name="mute_always">Visada</string>
     <string name="replace">Pakeisti</string>
-    <string name="wifi_qr_code_scan">Nuskenuoti WiFi QR kodą</string>
-    <string name="wifi_qr_code_error">Neteisingas WiFi prisijungimo QR kodo formatas</string>
-    <string name="navigate_back">Grįžti atgal</string>
-    <string name="battery">Baterija</string>
-    <string name="logs">Log`ai</string>
-    <string name="hops_away">Persiuntimų kiekis</string>
-    <string name="info">Informacija</string>
-    <string name="ch_util_definition">Dabartinio kanalo panaudojimas, įskaitant gerai suformuotą TX (siuntimas), RX (gavimas) ir netinkamai suformuotą RX (arba - triukšmas).</string>
-    <string name="air_util_definition">Procentas eterio laiko naudoto perdavimams per pastarąją valandą.</string>
-    <string name="encryption_psk">Viešas raktas</string>
-    <string name="encryption_pkc">Viešojo rakto šifruotė</string>
-    <string name="encryption_error">Viešojo rakto neatitikimas</string>
-    <string name="meshtastic_new_nodes_notifications">Naujo įtaiso pranešimas</string>
-    <string name="snr">SNR</string>
+    <string name="reply">Atsakyti</string>
+    <string name="report">Raportuoti</string>
+    <!-- REQUEST -->
+    <string name="resend">Siųsti iš naujo</string>
+    <string name="reset">Nustatyti iš naujo</string>
+    <string name="reset_to_defaults">Atkurti numatytuosius parametrus</string>
+    <!-- ROLE -->
+    <string name="role_client_desc">Programėlė prijungta prie atskiro susirašinėjimo įtaiso.</string>
+    <string name="role_client_hidden_desc">Įtaisas transliuojantis tik prireikus. Naudojama slaptumo ar energijos taupymui.</string>
+    <string name="role_client_mute_desc">Įtaisas kuris nepersiunčia kitų įtaisų paketų.</string>
+    <string name="role_lost_and_found_desc">Reguliariai siunčia GPS pozicijos informaciją į pagrindinį kanalą, lengvesniam įtaiso radimui.</string>
+    <string name="role_repeater_desc">Stacionarus įtaisas tinklo išplėtimui, persiunčiantis žinutes. Nerodomas įtaisų sąraše.</string>
+    <string name="role_router_client_desc">ROUTER ir CLIENT kombinacija. Neskirta mobiliems įtaisams.</string>
+    <string name="role_router_desc">Stacionarus aukštuminis įtaisas geresniam tinklo padengimui. Matomas node`ų sąraše.</string>
+    <string name="role_sensor_desc">Pirmenybinis telemetrijos paketų siuntimas</string>
+    <string name="role_tak_desc">Optimizuota ATAK komunikacijai, sumažinta rutininių transliacijų</string>
+    <string name="role_tak_tracker_desc">Įgalina automatines TAK PLI transliacijas ir sumažina rutininių transliacijų kiekį.</string>
+    <string name="role_tracker_desc">Pirmenybinis GPS pozicijos paketų siuntimas</string>
+    <!-- ROUTING -->
+    <string name="routing_error_admin_bad_session_key">Blogas sesijos raktas</string>
+    <string name="routing_error_admin_public_key_unauthorized">Viešasis raktas nepatvirtintas</string>
+    <string name="routing_error_bad_request">Bloga užklausa</string>
+    <string name="routing_error_duty_cycle_limit">Pasiektas regioninis ciklų limitas</string>
+    <string name="routing_error_got_nak">Gautas negatyvus patvirtinimas</string>
+    <string name="routing_error_max_retransmit">Pasiektas persiuntimų limitas</string>
+    <string name="routing_error_no_channel">Nėra kanalo</string>
+    <string name="routing_error_no_interface">Nėra sąsajos</string>
+    <string name="routing_error_no_response">Nėra atsakymo</string>
+    <string name="routing_error_no_route">Nėra maršruto</string>
+    <string name="routing_error_none">Pristatymas patvirtintas</string>
+    <string name="routing_error_not_authorized">Neautorizuotas</string>
+    <string name="routing_error_pki_failed">Šifruotas siuntimas nepavyko</string>
+    <string name="routing_error_pki_unknown_pubkey">Nežinomas viešasis raktas</string>
+    <string name="routing_error_timeout">Baigėsi laikas</string>
+    <string name="routing_error_too_large">Paketas perdidelis</string>
     <string name="rssi">RSSI</string>
-    <string name="administration">Administravimas</string>
-    <string name="remote_admin">Nuotolinis administravimas</string>
-    <string name="bad">Silpnas</string>
-    <string name="fair">Pakankamas</string>
-    <string name="good">Geras</string>
-    <string name="none_quality">Nėra</string>
+    <string name="save">Išsaugoti</string>
+    <string name="save_changes">Išsaugoti</string>
+    <!-- SCAN -->
+    <string name="scan">Skenuoti</string>
+    <!-- SECURITY -->
+    <string name="select_all">Pažymėti visus</string>
+    <string name="send">Siųsti</string>
+    <!-- SERIAL -->
+    <!-- SHARE -->
+    <string name="share">Dalintis</string>
     <string name="share_to">Dalintis su…</string>
+    <!-- SHOW -->
+    <string name="shutdown">Išjungti</string>
     <string name="signal">Signalas</string>
     <string name="signal_quality">Signalo kokybė</string>
-    <string name="traceroute_log">Žinutės kelias</string>
+    <string name="snr">SNR</string>
+    <!-- TAK -->
+    <string name="tak_team_red">Raudona</string>
+    <string name="theme">Išvaizda</string>
+    <string name="theme_dark">Tamsi</string>
+    <string name="theme_light">Šviesi</string>
+    <string name="theme_system">Sistemos numatyta</string>
+    <string name="timeout">Baigėsi laikas</string>
+    <!-- TRACEROUTE -->
+    <string name="traceroute">Žinutės kelias</string>
+    <string name="traceroute_diff">Persiuntimų iki %1$d persiuntimų nuo %2$d</string>
     <string name="traceroute_direct">Tiesiogiai</string>
     <plurals name="traceroute_hops">
         <item quantity="one">Vienas</item>
@@ -207,37 +269,26 @@
         <item quantity="many">Daug</item>
         <item quantity="other">Kita</item>
     </plurals>
-    <string name="traceroute_diff">Persiuntimų iki %1$d persiuntimų nuo %2$d</string>
+    <string name="traceroute_log">Žinutės kelias</string>
+    <!-- TRAFFIC -->
     <string name="twenty_four_hours">24 val</string>
-    <string name="one_week">1 sav</string>
-    <string name="two_weeks">2 sav</string>
-    <string name="max">Max</string>
-    <string name="copy">Kopijuoti</string>
-    <string name="alert_bell_text">Skambučio simbolis!</string>
-    <string name="red">Raudona</string>
-    <string name="region_frequency_plan">Regionas</string>
-    <string name="mqtt_status_disconnected">Atsijungta</string>
-    <string name="public_key">Viešasis raktas</string>
-    <string name="private_key">Privatus raktas</string>
-    <string name="timeout">Baigėsi laikas</string>
-    <string name="distance">Atstumas</string>
-    <string name="reply">Atsakyti</string>
-    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
-    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
-    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
-    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
-    <string name="message_input_label">Žinutė</string>
-    <string name="eight_hours">8 Valandos</string>
-    <string name="one_day">24 Valandos</string>
     <string name="two_days">48 Valandos</string>
-    <!-- Firmware Update -->
-    <string name="firmware_update_failed">Atnaujinti nepavyko</string>
-    <string name="interval_unset">Nenustatyta</string>
-    <!-- Compass -->
-    <!-- Message Filter -->
-    <!-- Network Map Layers -->
-    <string name="tak_team_red">Raudona</string>
+    <string name="two_weeks">2 sav</string>
+    <!-- UNKNOWN -->
+    <string name="unknown_username">Nežinomas vartotojo vardas</string>
+    <string name="unrecognized">Be kategorijos</string>
+    <!-- URL -->
+    <!-- USE -->
+    <!-- USER -->
+    <string name="via_mqtt">per MQTT</string>
+    <string name="waypoint_delete">Ištrinti orientyrą?</string>
+    <string name="waypoint_edit">Redaguoti kelio tašką</string>
+    <string name="waypoint_new">Naujas orientyras</string>
+    <string name="waypoint_received">Gautas orientyras: %1$s</string>
+    <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP adresas</string>
-    <string name="filter_icon">Filtras</string>
-    <string name="action_delete_message">Ištrinti pranešimą</string>
+    <string name="wifi_qr_code_error">Neteisingas WiFi prisijungimo QR kodo formatas</string>
+    <string name="wifi_qr_code_scan">Nuskenuoti WiFi QR kodą</string>
+    <!-- WIND -->
+    <string name="you">Tu</string>
 </resources>

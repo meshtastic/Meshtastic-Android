@@ -69,6 +69,7 @@ import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
+import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
@@ -127,8 +128,6 @@ class MainActivity : AppCompatActivity() {
             setSingletonImageLoaderFactory { get<ImageLoader>() }
 
             val theme by model.theme.collectAsStateWithLifecycle()
-            val contrastLevelValue by model.contrastLevel.collectAsStateWithLifecycle()
-            val contrastLevel = org.meshtastic.core.ui.theme.ContrastLevel.fromValue(contrastLevelValue)
             val dynamic = theme == MODE_DYNAMIC
             val dark =
                 when (theme) {
@@ -146,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             AppCompositionLocals {
-                AppTheme(dynamicColor = dynamic, darkTheme = dark, contrastLevel = contrastLevel) {
+                AppTheme(dynamicColor = dynamic, darkTheme = dark) {
                     val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
 
                     // Signal to the system that the initial UI is "fully drawn"
@@ -179,9 +178,12 @@ class MainActivity : AppCompatActivity() {
         usbRepository.refreshState()
     }
 
+    @Suppress("LongMethod")
     @Composable
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
+        val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
         CompositionLocalProvider(
+            LocalEventBranding provides eventEdition,
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
             LocalBarcodeScannerSupported provides true,
