@@ -100,3 +100,53 @@ tasks
 
 // FR-038: Ensure screenshots are generated before syncing docs resources
 syncDocsToComposeResources.configure { dependsOn(":screenshot-tests:copyDocsScreenshots") }
+
+/**
+ * Sync Crowdin-translated docs into locale-qualified composeResources directories.
+ *
+ * Crowdin outputs translations to `docs/{locale}/user/*.md`. CMP resolves locale-qualified resources from
+ * `files-{locale}/` directories automatically (same system as `values-es/strings.xml`).
+ *
+ * Locale code mapping: Crowdin `es` → CMP `files-es`, Crowdin `pt-BR` → CMP `files-pt-rBR`.
+ *
+ * Usage: ./gradlew :feature:docs:syncTranslatedDocsToComposeResources
+ */
+val syncTranslatedDocsToComposeResources by
+    tasks.registering(Copy::class) {
+        description = "Syncs Crowdin-translated docs into locale-qualified composeResources"
+        group = "docs"
+
+        val docsDir = rootProject.layout.projectDirectory.dir("docs")
+        val targetBase = layout.projectDirectory.dir("src/commonMain/composeResources")
+
+        from(docsDir) {
+            // Only include locale directories (2-char or region-qualified like pt-BR)
+            // Exclude source directories and Jekyll internals
+            include("*/user/**/*.md")
+            exclude("user/**")
+            exclude("developer/**")
+            exclude("_*/**")
+            exclude("assets/**")
+            exclude("screenshots/**")
+        }
+
+        into(targetBase)
+
+        // Remap Crowdin locale dirs to CMP qualifier format: {locale}/user/foo.md → files-{locale}/docs/user/foo.md
+        eachFile {
+            val segments = relativePath.segments
+            if (segments.size >= 3) {
+                val locale = segments[0]
+                val cmpLocale = locale.replace("-", "-r")
+                val rest = segments.drop(1).joinToString("/")
+                path = "files-$cmpLocale/docs/$rest"
+            }
+        }
+        includeEmptyDirs = false
+    }
+
+// Wire translated docs sync to resource generation alongside the primary sync
+tasks
+    .matching { it.name.contains("generateComposeResClass") || it.name.contains("copyNonXmlValueResources") }
+    .configureEach { dependsOn(syncTranslatedDocsToComposeResources) }
+

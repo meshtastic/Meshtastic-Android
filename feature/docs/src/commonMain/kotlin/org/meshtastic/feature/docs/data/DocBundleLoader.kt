@@ -17,7 +17,42 @@
 package org.meshtastic.feature.docs.data
 
 import meshtasticandroid.feature.docs.generated.resources.Res
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.resources.Res as CoreRes
+import org.meshtastic.core.resources.doc_keywords_connections
+import org.meshtastic.core.resources.doc_keywords_desktop
+import org.meshtastic.core.resources.doc_keywords_discovery
+import org.meshtastic.core.resources.doc_keywords_firmware
+import org.meshtastic.core.resources.doc_keywords_map
+import org.meshtastic.core.resources.doc_keywords_messages
+import org.meshtastic.core.resources.doc_keywords_mqtt
+import org.meshtastic.core.resources.doc_keywords_node_metrics
+import org.meshtastic.core.resources.doc_keywords_nodes
+import org.meshtastic.core.resources.doc_keywords_onboarding
+import org.meshtastic.core.resources.doc_keywords_settings_module
+import org.meshtastic.core.resources.doc_keywords_settings_radio
+import org.meshtastic.core.resources.doc_keywords_signal_meter
+import org.meshtastic.core.resources.doc_keywords_tak
+import org.meshtastic.core.resources.doc_keywords_telemetry
+import org.meshtastic.core.resources.doc_keywords_units
+import org.meshtastic.core.resources.doc_title_connections
+import org.meshtastic.core.resources.doc_title_desktop
+import org.meshtastic.core.resources.doc_title_discovery
+import org.meshtastic.core.resources.doc_title_firmware
+import org.meshtastic.core.resources.doc_title_map
+import org.meshtastic.core.resources.doc_title_messages
+import org.meshtastic.core.resources.doc_title_mqtt
+import org.meshtastic.core.resources.doc_title_node_metrics
+import org.meshtastic.core.resources.doc_title_nodes
+import org.meshtastic.core.resources.doc_title_onboarding
+import org.meshtastic.core.resources.doc_title_settings_module
+import org.meshtastic.core.resources.doc_title_settings_radio
+import org.meshtastic.core.resources.doc_title_signal_meter
+import org.meshtastic.core.resources.doc_title_tak
+import org.meshtastic.core.resources.doc_title_telemetry
+import org.meshtastic.core.resources.doc_title_units
 import org.meshtastic.feature.docs.model.DocBundle
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
@@ -35,33 +70,32 @@ interface DocBundleLoader {
 
 /**
  * Default implementation that loads docs from bundled markdown files packaged as Compose Resources under `files/docs/`.
+ *
+ * User guide titles and keywords are resolved from string resources so Crowdin translations propagate to the in-app
+ * index and search. Developer guide entries stay hardcoded English (code-focused audience).
+ *
+ * No cross-locale caching — the bundle rebuilds on each [load] call (~1 ms) so locale changes take effect immediately.
  */
 @Single(binds = [DocBundleLoader::class])
 class DefaultDocBundleLoader : DocBundleLoader {
 
-    private var cachedBundle: DocBundle? = null
+    private var lastPages: List<DocPage> = emptyList()
 
     companion object {
         private const val FRONTMATTER_DELIMITER = "---"
     }
 
     override suspend fun load(): DocBundle {
-        cachedBundle?.let {
-            return it
-        }
-
-        val entries = buildStaticIndex()
+        val entries = buildUserGuideIndex() + buildDeveloperGuideIndex()
         val pages = entries.map { it.toDocPage() }
-        val bundle =
-            DocBundle(
-                pages = pages,
-                pageIndex = pages.associateBy { it.id },
-                bundleVersion = "beta",
-                generatedAt = "2026-05-07T00:00:00Z",
-                totalBytes = 0L,
-            )
-        cachedBundle = bundle
-        return bundle
+        lastPages = pages
+        return DocBundle(
+            pages = pages,
+            pageIndex = pages.associateBy { it.id },
+            bundleVersion = "beta",
+            generatedAt = "2026-05-07T00:00:00Z",
+            totalBytes = 0L,
+        )
     }
 
     override suspend fun readPage(pageId: String): DocPageContent? {
@@ -97,300 +131,81 @@ class DefaultDocBundleLoader : DocBundleLoader {
         return content.substring(endIndex + FRONTMATTER_DELIMITER.length).trimStart()
     }
 
-    override fun pagesBySection(section: DocSection): List<DocPage> {
-        val bundle = cachedBundle ?: return emptyList()
-        return bundle.pages.filter { it.section == section }.sortedWith(compareBy({ it.navOrder }, { it.title }))
-    }
+    override fun pagesBySection(section: DocSection): List<DocPage> =
+        lastPages.filter { it.section == section }.sortedWith(compareBy({ it.navOrder }, { it.title }))
+
+    /** Parse a comma-separated keyword string resource value into a list. */
+    private fun parseKeywords(csv: String): List<String> =
+        csv.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+
+    // ---------------------------------------------------------------------------
+    // User Guide index — titles and keywords from string resources (translatable)
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Metadata for a user guide page. [titleRes] and [keywordsRes] are resolved at runtime from the device locale,
+     * allowing Crowdin translations to appear in the in-app TOC and search index.
+     */
+    private data class UserPageDef(
+        val id: String,
+        val titleRes: StringResource,
+        val keywordsRes: StringResource,
+        val resourcePath: String,
+        val navOrder: Int,
+        val aliases: List<String>,
+        val charCount: Int,
+        val iconId: String,
+    )
+
+    @Suppress("MagicNumber")
+    private val userPages = listOf(
+        UserPageDef("onboarding", CoreRes.string.doc_title_onboarding, CoreRes.string.doc_keywords_onboarding, "docs/user/onboarding.html", 1, listOf("first-launch", "setup", "intro"), 3200, "onboarding"),
+        UserPageDef("connections", CoreRes.string.doc_title_connections, CoreRes.string.doc_keywords_connections, "docs/user/connections.html", 2, listOf("bluetooth", "usb", "tcp", "pairing"), 4100, "connections"),
+        UserPageDef("messages-and-channels", CoreRes.string.doc_title_messages, CoreRes.string.doc_keywords_messages, "docs/user/messages-and-channels.html", 3, listOf("channels", "direct-messages", "messaging", "conversations"), 4500, "messages"),
+        UserPageDef("nodes", CoreRes.string.doc_title_nodes, CoreRes.string.doc_keywords_nodes, "docs/user/nodes.html", 4, listOf("node-list", "mesh-nodes", "peers"), 3800, "nodes"),
+        UserPageDef("node-metrics", CoreRes.string.doc_title_node_metrics, CoreRes.string.doc_keywords_node_metrics, "docs/user/node-metrics.html", 5, listOf("metrics", "telemetry", "device-metrics", "signal"), 5200, "node-metrics"),
+        UserPageDef("map-and-waypoints", CoreRes.string.doc_title_map, CoreRes.string.doc_keywords_map, "docs/user/map-and-waypoints.html", 6, listOf("map", "waypoints", "gps", "location"), 3600, "map"),
+        UserPageDef("settings-radio-user", CoreRes.string.doc_title_settings_radio, CoreRes.string.doc_keywords_settings_radio, "docs/user/settings-radio-user.html", 7, listOf("settings", "radio-config", "user-config", "lora"), 6800, "settings-radio"),
+        UserPageDef("settings-module-admin", CoreRes.string.doc_title_settings_module, CoreRes.string.doc_keywords_settings_module, "docs/user/settings-module-admin.html", 8, listOf("modules", "module-config", "administration"), 5500, "settings-module"),
+        UserPageDef("telemetry-and-sensors", CoreRes.string.doc_title_telemetry, CoreRes.string.doc_keywords_telemetry, "docs/user/telemetry-and-sensors.html", 9, listOf("sensors", "environment", "weather", "power-metrics"), 4800, "telemetry"),
+        UserPageDef("tak", CoreRes.string.doc_title_tak, CoreRes.string.doc_keywords_tak, "docs/user/tak.html", 10, listOf("tak", "atak", "team-awareness-kit"), 2400, "tak"),
+        UserPageDef("mqtt", CoreRes.string.doc_title_mqtt, CoreRes.string.doc_keywords_mqtt, "docs/user/mqtt.html", 11, listOf("mqtt", "internet-bridge", "broker"), 4200, "mqtt"),
+        UserPageDef("discovery", CoreRes.string.doc_title_discovery, CoreRes.string.doc_keywords_discovery, "docs/user/discovery.html", 12, listOf("mesh-discovery", "local-discovery", "network-scan"), 2800, "discovery"),
+        UserPageDef("firmware", CoreRes.string.doc_title_firmware, CoreRes.string.doc_keywords_firmware, "docs/user/firmware.html", 13, listOf("firmware", "update", "ota", "flash"), 3400, "firmware"),
+        UserPageDef("desktop", CoreRes.string.doc_title_desktop, CoreRes.string.doc_keywords_desktop, "docs/user/desktop.html", 14, listOf("desktop", "linux", "macos", "windows", "jvm"), 3900, "desktop"),
+        UserPageDef("signal-meter", CoreRes.string.doc_title_signal_meter, CoreRes.string.doc_keywords_signal_meter, "docs/user/signal-meter.html", 15, listOf("signal-quality", "signal-strength", "rssi", "snr"), 3500, "signal-meter"),
+        UserPageDef("units-and-locale", CoreRes.string.doc_title_units, CoreRes.string.doc_keywords_units, "docs/user/units-and-locale.html", 16, listOf("measurement", "units", "locale", "metric", "imperial"), 3800, "units-locale"),
+    )
+
+    private suspend fun buildUserGuideIndex(): List<KeywordIndexEntry> =
+        userPages.map { def ->
+            KeywordIndexEntry(
+                id = def.id,
+                title = getString(def.titleRes),
+                section = "user",
+                resourcePath = def.resourcePath,
+                navOrder = def.navOrder,
+                keywords = parseKeywords(getString(def.keywordsRes)),
+                aliases = def.aliases,
+                charCount = def.charCount,
+                iconId = def.iconId,
+            )
+        }
+
+    // ---------------------------------------------------------------------------
+    // Developer Guide index — hardcoded English (code-focused, not translated)
+    // ---------------------------------------------------------------------------
 
     @Suppress("LongMethod", "MagicNumber")
-    private fun buildStaticIndex(): List<KeywordIndexEntry> = listOf(
-        KeywordIndexEntry(
-            "onboarding",
-            "Getting Started",
-            "user",
-            "docs/user/onboarding.html",
-            1,
-            listOf("setup", "welcome", "permissions", "first-launch", "intro"),
-            listOf("first-launch", "setup", "intro"),
-            3200,
-            "onboarding",
-        ),
-        KeywordIndexEntry(
-            "connections",
-            "Connections",
-            "user",
-            "docs/user/connections.html",
-            2,
-            listOf("bluetooth", "usb", "tcp", "pairing", "serial", "wifi"),
-            listOf("bluetooth", "usb", "tcp", "pairing"),
-            4100,
-            "connections",
-        ),
-        KeywordIndexEntry(
-            "messages-and-channels",
-            "Messages & Channels",
-            "user",
-            "docs/user/messages-and-channels.html",
-            3,
-            listOf("message", "channel", "encryption", "direct", "broadcast", "psk", "quick-chat"),
-            listOf("channels", "direct-messages", "messaging", "conversations"),
-            4500,
-            "messages",
-        ),
-        KeywordIndexEntry(
-            "nodes",
-            "Nodes",
-            "user",
-            "docs/user/nodes.html",
-            4,
-            listOf("node", "mesh", "list", "role", "status", "favorite", "filter"),
-            listOf("node-list", "mesh-nodes", "peers"),
-            3800,
-            "nodes",
-        ),
-        KeywordIndexEntry(
-            "node-metrics",
-            "Node Metrics",
-            "user",
-            "docs/user/node-metrics.html",
-            5,
-            listOf("metrics", "telemetry", "signal", "snr", "rssi", "battery", "traceroute", "environment"),
-            listOf("metrics", "telemetry", "device-metrics", "signal"),
-            5200,
-            "node-metrics",
-        ),
-        KeywordIndexEntry(
-            "map-and-waypoints",
-            "Map & Waypoints",
-            "user",
-            "docs/user/map-and-waypoints.html",
-            6,
-            listOf("map", "waypoint", "gps", "position", "location", "marker"),
-            listOf("map", "waypoints", "gps", "location"),
-            3600,
-            "map",
-        ),
-        KeywordIndexEntry(
-            "settings-radio-user",
-            "Settings — Radio & User",
-            "user",
-            "docs/user/settings-radio-user.html",
-            7,
-            listOf(
-                "settings",
-                "radio",
-                "lora",
-                "region",
-                "modem",
-                "device",
-                "display",
-                "position",
-                "power",
-                "network",
-                "bluetooth",
-                "security",
-            ),
-            listOf("settings", "radio-config", "user-config", "lora"),
-            6800,
-            "settings-radio",
-        ),
-        KeywordIndexEntry(
-            "settings-module-admin",
-            "Settings — Modules & Admin",
-            "user",
-            "docs/user/settings-module-admin.html",
-            8,
-            listOf(
-                "module",
-                "mqtt",
-                "serial",
-                "telemetry",
-                "canned",
-                "store-forward",
-                "administration",
-                "remote",
-                "factory-reset",
-            ),
-            listOf("modules", "module-config", "administration"),
-            5500,
-            "settings-module",
-        ),
-        KeywordIndexEntry(
-            "telemetry-and-sensors",
-            "Telemetry & Sensors",
-            "user",
-            "docs/user/telemetry-and-sensors.html",
-            9,
-            listOf("telemetry", "sensor", "temperature", "humidity", "pressure", "bme280", "power", "ina"),
-            listOf("sensors", "environment", "weather", "power-metrics"),
-            4800,
-            "telemetry",
-        ),
-        KeywordIndexEntry(
-            "tak",
-            "TAK Integration",
-            "user",
-            "docs/user/tak.html",
-            10,
-            listOf("tak", "atak", "cursor-on-target", "team-awareness", "military"),
-            listOf("tak", "atak", "team-awareness-kit"),
-            2400,
-            "tak",
-        ),
-        KeywordIndexEntry(
-            "mqtt",
-            "MQTT",
-            "user",
-            "docs/user/mqtt.html",
-            11,
-            listOf("mqtt", "broker", "internet", "bridge", "uplink", "downlink", "map-reporting"),
-            listOf("mqtt", "internet-bridge", "broker"),
-            4200,
-            "mqtt",
-        ),
-        KeywordIndexEntry(
-            "discovery",
-            "Discovery",
-            "user",
-            "docs/user/discovery.html",
-            12,
-            listOf("discovery", "topology", "network", "scan", "neighbor"),
-            listOf("mesh-discovery", "local-discovery", "network-scan"),
-            2800,
-            "discovery",
-        ),
-        KeywordIndexEntry(
-            "firmware",
-            "Firmware Updates",
-            "user",
-            "docs/user/firmware.html",
-            13,
-            listOf("firmware", "update", "ota", "flash", "version", "recovery"),
-            listOf("firmware", "update", "ota", "flash"),
-            3400,
-            "firmware",
-        ),
-        KeywordIndexEntry(
-            "desktop",
-            "Desktop App",
-            "user",
-            "docs/user/desktop.html",
-            14,
-            listOf("desktop", "linux", "macos", "windows", "jvm", "serial"),
-            listOf("desktop", "linux", "macos", "windows", "jvm"),
-            3900,
-            "desktop",
-        ),
-        KeywordIndexEntry(
-            "signal-meter",
-            "Signal Meter",
-            "user",
-            "docs/user/signal-meter.html",
-            15,
-            listOf("signal", "rssi", "snr", "bars", "quality", "lora", "noise", "meter"),
-            listOf("signal-quality", "signal-strength", "rssi", "snr"),
-            3500,
-            "signal-meter",
-        ),
-        KeywordIndexEntry(
-            "units-and-locale",
-            "Units & Locale",
-            "user",
-            "docs/user/units-and-locale.html",
-            16,
-            listOf("units", "locale", "metric", "imperial", "temperature", "distance", "measurement"),
-            listOf("measurement", "units", "locale", "metric", "imperial"),
-            3800,
-            "units-locale",
-        ),
-        KeywordIndexEntry(
-            "architecture",
-            "Architecture",
-            "developer",
-            "docs/developer/architecture.html",
-            1,
-            listOf("architecture", "kmp", "module", "layer", "core", "feature", "compose"),
-            listOf("layers", "module-architecture", "kmp"),
-            4600,
-            "architecture",
-        ),
-        KeywordIndexEntry(
-            "codebase",
-            "Codebase",
-            "developer",
-            "docs/developer/codebase.html",
-            2,
-            listOf("codebase", "repository", "layout", "gradle", "build", "namespace", "convention"),
-            listOf("repository-layout", "project-structure", "source-code"),
-            3700,
-            "codebase",
-        ),
-        KeywordIndexEntry(
-            "adding-a-feature-module",
-            "Adding a Feature Module",
-            "developer",
-            "docs/developer/adding-a-feature-module.html",
-            3,
-            listOf("module", "feature", "new", "create", "plugin", "di", "koin"),
-            listOf("new-module", "feature-module", "module-guide"),
-            3200,
-            "adding-features",
-        ),
-        KeywordIndexEntry(
-            "navigation-and-deep-links",
-            "Navigation & Deep Links",
-            "developer",
-            "docs/developer/navigation-and-deep-links.html",
-            4,
-            listOf("navigation", "deeplink", "route", "navkey", "backstack", "typed"),
-            listOf("deeplinks", "navigation-3", "routes"),
-            4100,
-            "navigation",
-        ),
-        KeywordIndexEntry(
-            "transport",
-            "Transport",
-            "developer",
-            "docs/developer/transport.html",
-            5,
-            listOf("transport", "ble", "serial", "tcp", "radio", "connection"),
-            listOf("ble", "serial", "tcp", "radio-transport"),
-            3000,
-            "transport",
-        ),
-        KeywordIndexEntry(
-            "persistence",
-            "Persistence",
-            "developer",
-            "docs/developer/persistence.html",
-            6,
-            listOf("room", "database", "datastore", "prefs", "storage", "migration"),
-            listOf("room", "database", "datastore", "prefs"),
-            2800,
-            "persistence",
-        ),
-        KeywordIndexEntry(
-            "testing",
-            "Testing",
-            "developer",
-            "docs/developer/testing.html",
-            7,
-            listOf("test", "unit", "screenshot", "compose", "roborazzi", "ci"),
-            listOf("tests", "unit-tests", "screenshot-tests"),
-            3100,
-            "testing",
-        ),
-        KeywordIndexEntry(
-            "contributing",
-            "Contributing",
-            "developer",
-            "docs/developer/contributing.html",
-            8,
-            listOf("contributing", "pull-request", "branch", "commit", "style", "pr"),
-            listOf("contributing", "pull-request", "branch-naming"),
-            2900,
-            "contributing",
-        ),
+    private fun buildDeveloperGuideIndex(): List<KeywordIndexEntry> = listOf(
+        KeywordIndexEntry("architecture", "Architecture", "developer", "docs/developer/architecture.html", 1, listOf("architecture", "kmp", "module", "layer", "core", "feature", "compose"), listOf("layers", "module-architecture", "kmp"), 4600, "architecture"),
+        KeywordIndexEntry("codebase", "Codebase", "developer", "docs/developer/codebase.html", 2, listOf("codebase", "repository", "layout", "gradle", "build", "namespace", "convention"), listOf("repository-layout", "project-structure", "source-code"), 3700, "codebase"),
+        KeywordIndexEntry("adding-a-feature-module", "Adding a Feature Module", "developer", "docs/developer/adding-a-feature-module.html", 3, listOf("module", "feature", "new", "create", "plugin", "di", "koin"), listOf("new-module", "feature-module", "module-guide"), 3200, "adding-features"),
+        KeywordIndexEntry("navigation-and-deep-links", "Navigation & Deep Links", "developer", "docs/developer/navigation-and-deep-links.html", 4, listOf("navigation", "deeplink", "route", "navkey", "backstack", "typed"), listOf("deeplinks", "navigation-3", "routes"), 4100, "navigation"),
+        KeywordIndexEntry("transport", "Transport", "developer", "docs/developer/transport.html", 5, listOf("transport", "ble", "serial", "tcp", "radio", "connection"), listOf("ble", "serial", "tcp", "radio-transport"), 3000, "transport"),
+        KeywordIndexEntry("persistence", "Persistence", "developer", "docs/developer/persistence.html", 6, listOf("room", "database", "datastore", "prefs", "storage", "migration"), listOf("room", "database", "datastore", "prefs"), 2800, "persistence"),
+        KeywordIndexEntry("testing", "Testing", "developer", "docs/developer/testing.html", 7, listOf("test", "unit", "screenshot", "compose", "roborazzi", "ci"), listOf("tests", "unit-tests", "screenshot-tests"), 3100, "testing"),
+        KeywordIndexEntry("contributing", "Contributing", "developer", "docs/developer/contributing.html", 8, listOf("contributing", "pull-request", "branch", "commit", "style", "pr"), listOf("contributing", "pull-request", "branch-naming"), 2900, "contributing"),
     )
 
     private fun KeywordIndexEntry.toDocPage(): DocPage = DocPage(

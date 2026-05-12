@@ -17,6 +17,10 @@
 package org.meshtastic.feature.docs.model
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.doc_section_developer
+import org.meshtastic.core.resources.doc_section_user
 
 /** Top-level documentation section. */
 @Serializable
@@ -37,9 +41,9 @@ sealed interface DocSection {
             DeveloperGuide -> "developer"
         }
 
-        fun displayName(section: DocSection): String = when (section) {
-            UserGuide -> "User Guide"
-            DeveloperGuide -> "Developer Guide"
+        suspend fun displayName(section: DocSection): String = when (section) {
+            UserGuide -> getString(Res.string.doc_section_user)
+            DeveloperGuide -> getString(Res.string.doc_section_developer)
         }
     }
 }

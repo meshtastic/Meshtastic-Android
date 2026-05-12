@@ -98,7 +98,7 @@ class KeywordSearchEngine(private val bundleLoader: DocBundleLoader) {
         val terms =
             queryText
                 .lowercase()
-                .replace(Regex("[^a-z0-9\\s-]"), " ")
+                .replace(Regex("[^\\p{L}\\p{N}\\s-]"), " ")
                 .split(Regex("\\s+"))
                 .filter { it.length >= 2 && it !in stopWords }
                 .distinct()
