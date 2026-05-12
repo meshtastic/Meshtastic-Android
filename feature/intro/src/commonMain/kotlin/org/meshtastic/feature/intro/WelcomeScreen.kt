@@ -116,6 +116,7 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
     }
 }
 
+@Suppress("PreviewPublic")
 @PreviewLightDark
 @Composable
 fun WelcomeScreenPreview() {
