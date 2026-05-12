@@ -31,8 +31,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.m3.Markdown
 import org.meshtastic.core.ui.icon.ArrowBack
@@ -47,6 +51,7 @@ fun DocsPageRouteScreen(
     content: DocPageContent?,
     isLoading: Boolean,
     onBack: () -> Unit,
+    onNavigateToPage: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -91,13 +96,57 @@ fun DocsPageRouteScreen(
 
                 else -> {
                     val markdownText = content.markdown ?: "No content available."
-                    Markdown(
-                        content = markdownText,
-                        imageTransformer = ComposeResourceImageTransformer(),
-                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-                    )
+                    val platformUriHandler = LocalUriHandler.current
+                    val docsUriHandler = remember(platformUriHandler) {
+                        DocsLinkUriHandler(
+                            onNavigateToPage = onNavigateToPage,
+                            fallback = platformUriHandler,
+                        )
+                    }
+                    CompositionLocalProvider(LocalUriHandler provides docsUriHandler) {
+                        Markdown(
+                            content = markdownText,
+                            imageTransformer = ComposeResourceImageTransformer(),
+                            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+                        )
+                    }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Custom [UriHandler] that intercepts relative doc links and navigates in-app.
+ *
+ * Relative links like `connections`, `../developer/architecture`, or anchor-only `#section`
+ * are resolved to a page ID and dispatched via [onNavigateToPage].
+ * External `http(s)://` URLs are forwarded to the [fallback] platform handler.
+ */
+private class DocsLinkUriHandler(
+    private val onNavigateToPage: (String) -> Unit,
+    private val fallback: UriHandler,
+) : UriHandler {
+    override fun openUri(uri: String) {
+        if (uri.startsWith("http://") || uri.startsWith("https://")) {
+            fallback.openUri(uri)
+            return
+        }
+        // Anchor-only links (e.g. "#permissions") — ignore, stay on current page
+        if (uri.startsWith("#")) return
+
+        // Resolve relative path to a page ID:
+        //   "connections"                    -> "connections"
+        //   "../developer/architecture"      -> "architecture"
+        //   "mqtt.html"                      -> "mqtt"
+        val cleaned = uri
+            .substringBefore('#')        // strip anchor
+            .substringAfterLast('/')     // take filename segment
+            .removeSuffix(".html")       // strip .html if present
+            .removeSuffix(".md")         // strip .md if present
+
+        if (cleaned.isNotBlank()) {
+            onNavigateToPage(cleaned)
         }
     }
 }

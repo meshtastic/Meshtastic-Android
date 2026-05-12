@@ -31,7 +31,7 @@ Bridges mesh messages to/from an MQTT broker for internet connectivity.
 | Root Topic | Base MQTT topic path |
 | Map Report | Publish position for public map |
 
-See [MQTT](mqtt.md) for detailed usage guide.
+See [MQTT](mqtt) for detailed usage guide.
 
 ### Serial Module
 
@@ -107,7 +107,7 @@ People counter using WiFi/BLE probe requests (ESP32 devices).
 
 ### TAK Module
 
-Team Awareness Kit integration. See [TAK](tak.md) for details.
+Team Awareness Kit integration. See [TAK](tak) for details.
 
 ## Administration
 

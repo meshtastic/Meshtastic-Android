@@ -89,7 +89,7 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 ## Node Detail
 
-Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics.md) for full details on metrics and telemetry.
+Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
 ![Node detail view](/assets/screenshots/nodes_node_list.png)
 

@@ -72,17 +72,17 @@ On supported devices, the app may request permission for critical alerts:
 
 ## After Setup
 
-Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see [Connections](connections.md) for detailed instructions.
+Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see [Connections](connections) for detailed instructions.
 
 > 💡 **Tip:** If you skipped any permissions during setup, you can grant them later through **Android Settings → Apps → Meshtastic → Permissions**. The app will prompt you again if a missing permission blocks a feature you try to use.
 
 ## What's Next?
 
 Once connected to a radio, explore:
-- [Connections](connections.md) — pair your first radio device
-- [Messages & Channels](messages-and-channels.md) — send your first message
-- [Nodes](nodes.md) — see who's on your mesh
-- [Map & Waypoints](map-and-waypoints.md) — view node positions
-- [Settings](settings-radio-user.md) — configure your radio and user profile
+- [Connections](connections) — pair your first radio device
+- [Messages & Channels](messages-and-channels) — send your first message
+- [Nodes](nodes) — see who's on your mesh
+- [Map & Waypoints](map-and-waypoints) — view node positions
+- [Settings](settings-radio-user) — configure your radio and user profile
 
 ---

@@ -125,7 +125,7 @@ Navigation uses **Navigation 3** with typed routes:
 - Deep links resolved through `DeepLinkRouter`
 - Each feature registers its own navigation entries
 
-See [Navigation & Deep Links](navigation-and-deep-links.md) for details.
+See [Navigation & Deep Links](navigation-and-deep-links) for details.
 
 ---
 

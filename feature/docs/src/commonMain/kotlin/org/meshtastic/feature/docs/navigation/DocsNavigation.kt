@@ -102,5 +102,6 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>) {
         content = content,
         isLoading = isLoading,
         onBack = { backStack.removeLastOrNull() },
+        onNavigateToPage = { targetPageId -> backStack.add(SettingsRoute.HelpDocPage(targetPageId)) },
     )
 }
