@@ -1,6 +1,6 @@
 # Data Model: Compose Preview Screenshot Testing
 
-**Feature**: 006-compose-screenshot-testing
+**Feature**: 018-compose-screenshot-testing
 **Date**: 2026-05-08
 
 ## Entities

@@ -1,7 +1,7 @@
 # Implementation Plan: Compose Preview Screenshot Testing
 
-**Branch**: `006-compose-screenshot-testing` | **Date**: 2026-05-08 | **Spec**: [spec.md](spec.md)
-**Input**: Feature specification from `specs/006-compose-screenshot-testing/spec.md`
+**Branch**: `018-compose-screenshot-testing` | **Date**: 2026-05-08 | **Spec**: [spec.md](spec.md)
+**Input**: Feature specification from `specs/018-compose-screenshot-testing/spec.md`
 
 ## Summary
 
@@ -50,7 +50,7 @@ Integrate the official Compose Preview Screenshot Testing (CST) plugin into the 
 ### Documentation (this feature)
 
 ```text
-specs/006-compose-screenshot-testing/
+specs/018-compose-screenshot-testing/
 ├── plan.md              # This file
 ├── research.md          # Phase 0 output — technology decisions
 ├── data-model.md        # Phase 1 output — entity catalog

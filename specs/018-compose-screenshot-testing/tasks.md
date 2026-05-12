@@ -1,6 +1,6 @@
 # Tasks: Compose Preview Screenshot Testing
 
-**Input**: Design documents from `specs/006-compose-screenshot-testing/`
+**Input**: Design documents from `specs/018-compose-screenshot-testing/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, quickstart.md
 
 ## Format: `[ID] [P?] [Story?] Description`
@@ -146,11 +146,11 @@
 
 **Purpose**: Verification, documentation, and quality gates.
 
-- [x] T045 [P] Update `specs/006-compose-screenshot-testing/quickstart.md` with any corrections discovered during implementation
+- [x] T045 [P] Update `specs/018-compose-screenshot-testing/quickstart.md` with any corrections discovered during implementation
 - [x] T046 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto`
 - [x] T047 [P] Run constitution-required verification: `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests :screenshot-tests:validateDebugScreenshotTest`
 - [x] T048 [P] Verify `screenshot-tests` module lint passes: `./gradlew :screenshot-tests:detekt`
-- [x] T049 Validate quickstart guide: follow the steps in `specs/006-compose-screenshot-testing/quickstart.md` to add a new preview + screenshot test from scratch, confirm it works end-to-end
+- [x] T049 Validate quickstart guide: follow the steps in `specs/018-compose-screenshot-testing/quickstart.md` to add a new preview + screenshot test from scratch, confirm it works end-to-end
 
 ---
 

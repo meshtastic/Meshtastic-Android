@@ -1,6 +1,6 @@
 # Feature Specification: Compose Preview Screenshot Testing
 
-**Feature Branch**: `006-compose-screenshot-testing`  
+**Feature Branch**: `018-compose-screenshot-testing`  
 **Created**: 2026-05-08  
 **Status**: Draft  
 **Input**: User description: "Set up official Compose Preview Screenshot Testing, add comprehensive CMP previews across modules, and leverage generated screenshots in the automated docs feature."

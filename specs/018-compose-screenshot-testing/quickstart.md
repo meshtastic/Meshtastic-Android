@@ -1,6 +1,6 @@
 # Quickstart: Adding Screenshot Tests
 
-**Feature**: 006-compose-screenshot-testing
+**Feature**: 018-compose-screenshot-testing
 
 This guide explains how to add a new preview composable and wire it into the screenshot test suite.
 
