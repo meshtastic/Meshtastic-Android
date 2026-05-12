@@ -735,6 +735,7 @@
     <string name="mute_always">Всегда</string>
     <string name="mute_notifications">Отключить уведомления</string>
     <string name="mute_remove">Откл. уведомления для '%1$s?</string>
+    <string name="mute_selected">Отключить звук выбранному</string>
     <string name="mute_status_always">Всегда заглушен</string>
     <string name="mute_status_muted_for_days">Обеззвучен на %1$d дней, %2$s часов</string>
     <string name="mute_status_muted_for_hours">Обеззвучен на %1$s часов</string>
@@ -1147,6 +1148,7 @@
     <string name="store_forward_config">Настройка Store &amp; Forward</string>
     <string name="store_forward_enabled">Store &amp; Forward включена</string>
     <string name="subnet">Подсеть</string>
+    <string name="success">Успешно</string>
     <string name="super_deep_sleep_duration_seconds">Длительность супер-глубокого сна</string>
     <string name="supported">Поддерживается</string>
     <string name="supported_by_community">Поддерживается Meshtastic Community</string>
@@ -1261,6 +1263,7 @@
     <string name="unmessageable">Без сообщений</string>
     <string name="unmonitored_or_infrastructure">Неконтролируемая или инфраструктура</string>
     <string name="unmute">Включить микрофон</string>
+    <string name="unmute_selected">Вернуть звук выбранному</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="unset">Не задано - 0</string>
     <string name="up_down_select_input_enabled">Вверх/Вниз/Выбирать включён</string>
@@ -1316,6 +1319,7 @@
     <string name="wifi_provision_description">Предоставьте учетные данные для доступа к Wi-Fi на вашем устройстве с mPWRD-OS через Bluetooth.</string>
     <string name="wifi_provision_device_found">Найденное устройство</string>
     <string name="wifi_provision_device_found_detail">Готов к сканированию Wi-Fi сетей.</string>
+    <string name="wifi_provision_hidden_network">Скрытая сеть</string>
     <string name="wifi_provision_mpwrd_disclaimer">Узнайте больше о проекте mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Сети не найдены</string>
     <string name="wifi_provision_scan_failed">Не удалось просканировать сети Wi-Fi: %1$s</string>
