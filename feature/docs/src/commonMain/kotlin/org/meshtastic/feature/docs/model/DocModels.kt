@@ -55,6 +55,8 @@ data class DocPage(
     val keywords: List<String>,
     val aliases: List<String> = emptyList(),
     val charCount: Int,
+    /** Icon identifier for TOC display (maps to MeshtasticIcons). */
+    val iconId: String? = null,
 )
 
 /** Content wrapper that decouples metadata from rendered content. */
@@ -85,6 +87,7 @@ data class KeywordIndexEntry(
     val keywords: List<String>,
     val aliases: List<String> = emptyList(),
     val charCount: Int,
+    val iconId: String? = null,
 )
 
 /** Normalized user search query. */

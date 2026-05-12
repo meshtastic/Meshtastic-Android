@@ -153,6 +153,13 @@ private fun DocsTocList(pages: List<DocPage>, onSelectPage: (String) -> Unit, mo
 @Composable
 private fun DocPageListItem(page: DocPage, onSelectPage: (String) -> Unit, modifier: Modifier = Modifier) {
     ListItem(
+        leadingContent = {
+            Icon(
+                imageVector = page.resolveIcon(),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
         headlineContent = { Text(page.title) },
         modifier = modifier.clickable { onSelectPage(page.id) }.semantics { contentDescription = "Open ${page.title}" },
     )

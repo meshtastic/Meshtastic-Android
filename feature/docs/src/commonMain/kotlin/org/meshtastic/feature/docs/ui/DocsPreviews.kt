@@ -53,6 +53,7 @@ private val sampleUserGuidePages =
             "user/onboarding.md",
             listOf("setup", "intro"),
             charCount = 3200,
+            iconId = "onboarding",
         ),
         DocPage(
             "connections",
@@ -62,6 +63,7 @@ private val sampleUserGuidePages =
             "user/connections.md",
             listOf("bluetooth", "usb"),
             charCount = 4100,
+            iconId = "connections",
         ),
         DocPage(
             "messages-and-channels",
@@ -71,8 +73,18 @@ private val sampleUserGuidePages =
             "user/messages-and-channels.md",
             listOf("chat"),
             charCount = 5200,
+            iconId = "messages",
         ),
-        DocPage("nodes", "Nodes", DocSection.UserGuide, 4, "user/nodes.md", listOf("node list"), charCount = 3800),
+        DocPage(
+            "nodes",
+            "Nodes",
+            DocSection.UserGuide,
+            4,
+            "user/nodes.md",
+            listOf("node list"),
+            charCount = 3800,
+            iconId = "nodes",
+        ),
         DocPage(
             "node-metrics",
             "Node Metrics",
@@ -81,6 +93,7 @@ private val sampleUserGuidePages =
             "user/node-metrics.md",
             listOf("telemetry"),
             charCount = 6200,
+            iconId = "node-metrics",
         ),
         DocPage(
             "map-and-waypoints",
@@ -90,6 +103,7 @@ private val sampleUserGuidePages =
             "user/map-and-waypoints.md",
             listOf("map"),
             charCount = 4500,
+            iconId = "map",
         ),
         DocPage(
             "settings-radio-user",
@@ -99,6 +113,7 @@ private val sampleUserGuidePages =
             "user/settings-radio-user.md",
             listOf("config"),
             charCount = 5800,
+            iconId = "settings-radio",
         ),
         DocPage(
             "firmware",
@@ -108,6 +123,27 @@ private val sampleUserGuidePages =
             "user/firmware.md",
             listOf("ota"),
             charCount = 3400,
+            iconId = "firmware",
+        ),
+        DocPage(
+            "signal-meter",
+            "Signal Meter",
+            DocSection.UserGuide,
+            15,
+            "user/signal-meter.md",
+            listOf("rssi", "snr"),
+            charCount = 3500,
+            iconId = "signal-meter",
+        ),
+        DocPage(
+            "units-and-locale",
+            "Units & Locale",
+            DocSection.UserGuide,
+            16,
+            "user/units-and-locale.md",
+            listOf("metric", "imperial"),
+            charCount = 3800,
+            iconId = "units-locale",
         ),
     )
 
@@ -121,6 +157,7 @@ private val sampleDevGuidePages =
             "developer/architecture.md",
             listOf("kmp"),
             charCount = 4800,
+            iconId = "architecture",
         ),
         DocPage(
             "codebase",
@@ -130,6 +167,7 @@ private val sampleDevGuidePages =
             "developer/codebase.md",
             listOf("structure"),
             charCount = 3600,
+            iconId = "codebase",
         ),
         DocPage(
             "contributing",
@@ -139,6 +177,7 @@ private val sampleDevGuidePages =
             "developer/contributing.md",
             listOf("pr"),
             charCount = 2900,
+            iconId = "contributing",
         ),
     )
 

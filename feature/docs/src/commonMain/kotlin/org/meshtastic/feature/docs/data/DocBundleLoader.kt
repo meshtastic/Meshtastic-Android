@@ -113,6 +113,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("setup", "welcome", "permissions", "first-launch", "intro"),
             listOf("first-launch", "setup", "intro"),
             3200,
+            "onboarding",
         ),
         KeywordIndexEntry(
             "connections",
@@ -123,6 +124,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("bluetooth", "usb", "tcp", "pairing", "serial", "wifi"),
             listOf("bluetooth", "usb", "tcp", "pairing"),
             4100,
+            "connections",
         ),
         KeywordIndexEntry(
             "messages-and-channels",
@@ -133,6 +135,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("message", "channel", "encryption", "direct", "broadcast", "psk", "quick-chat"),
             listOf("channels", "direct-messages", "messaging", "conversations"),
             4500,
+            "messages",
         ),
         KeywordIndexEntry(
             "nodes",
@@ -143,6 +146,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("node", "mesh", "list", "role", "status", "favorite", "filter"),
             listOf("node-list", "mesh-nodes", "peers"),
             3800,
+            "nodes",
         ),
         KeywordIndexEntry(
             "node-metrics",
@@ -153,6 +157,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("metrics", "telemetry", "signal", "snr", "rssi", "battery", "traceroute", "environment"),
             listOf("metrics", "telemetry", "device-metrics", "signal"),
             5200,
+            "node-metrics",
         ),
         KeywordIndexEntry(
             "map-and-waypoints",
@@ -163,6 +168,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("map", "waypoint", "gps", "position", "location", "marker"),
             listOf("map", "waypoints", "gps", "location"),
             3600,
+            "map",
         ),
         KeywordIndexEntry(
             "settings-radio-user",
@@ -186,6 +192,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             ),
             listOf("settings", "radio-config", "user-config", "lora"),
             6800,
+            "settings-radio",
         ),
         KeywordIndexEntry(
             "settings-module-admin",
@@ -206,6 +213,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             ),
             listOf("modules", "module-config", "administration"),
             5500,
+            "settings-module",
         ),
         KeywordIndexEntry(
             "telemetry-and-sensors",
@@ -216,6 +224,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("telemetry", "sensor", "temperature", "humidity", "pressure", "bme280", "power", "ina"),
             listOf("sensors", "environment", "weather", "power-metrics"),
             4800,
+            "telemetry",
         ),
         KeywordIndexEntry(
             "tak",
@@ -226,6 +235,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("tak", "atak", "cursor-on-target", "team-awareness", "military"),
             listOf("tak", "atak", "team-awareness-kit"),
             2400,
+            "tak",
         ),
         KeywordIndexEntry(
             "mqtt",
@@ -236,6 +246,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("mqtt", "broker", "internet", "bridge", "uplink", "downlink", "map-reporting"),
             listOf("mqtt", "internet-bridge", "broker"),
             4200,
+            "mqtt",
         ),
         KeywordIndexEntry(
             "discovery",
@@ -246,6 +257,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("discovery", "topology", "network", "scan", "neighbor"),
             listOf("mesh-discovery", "local-discovery", "network-scan"),
             2800,
+            "discovery",
         ),
         KeywordIndexEntry(
             "firmware",
@@ -256,6 +268,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("firmware", "update", "ota", "flash", "version", "recovery"),
             listOf("firmware", "update", "ota", "flash"),
             3400,
+            "firmware",
         ),
         KeywordIndexEntry(
             "desktop",
@@ -266,6 +279,29 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("desktop", "linux", "macos", "windows", "jvm", "serial"),
             listOf("desktop", "linux", "macos", "windows", "jvm"),
             3900,
+            "desktop",
+        ),
+        KeywordIndexEntry(
+            "signal-meter",
+            "Signal Meter",
+            "user",
+            "docs/user/signal-meter.html",
+            15,
+            listOf("signal", "rssi", "snr", "bars", "quality", "lora", "noise", "meter"),
+            listOf("signal-quality", "signal-strength", "rssi", "snr"),
+            3500,
+            "signal-meter",
+        ),
+        KeywordIndexEntry(
+            "units-and-locale",
+            "Units & Locale",
+            "user",
+            "docs/user/units-and-locale.html",
+            16,
+            listOf("units", "locale", "metric", "imperial", "temperature", "distance", "measurement"),
+            listOf("measurement", "units", "locale", "metric", "imperial"),
+            3800,
+            "units-locale",
         ),
         KeywordIndexEntry(
             "architecture",
@@ -276,6 +312,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("architecture", "kmp", "module", "layer", "core", "feature", "compose"),
             listOf("layers", "module-architecture", "kmp"),
             4600,
+            "architecture",
         ),
         KeywordIndexEntry(
             "codebase",
@@ -286,6 +323,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("codebase", "repository", "layout", "gradle", "build", "namespace", "convention"),
             listOf("repository-layout", "project-structure", "source-code"),
             3700,
+            "codebase",
         ),
         KeywordIndexEntry(
             "adding-a-feature-module",
@@ -296,6 +334,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("module", "feature", "new", "create", "plugin", "di", "koin"),
             listOf("new-module", "feature-module", "module-guide"),
             3200,
+            "adding-features",
         ),
         KeywordIndexEntry(
             "navigation-and-deep-links",
@@ -306,6 +345,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("navigation", "deeplink", "route", "navkey", "backstack", "typed"),
             listOf("deeplinks", "navigation-3", "routes"),
             4100,
+            "navigation",
         ),
         KeywordIndexEntry(
             "transport",
@@ -316,6 +356,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("transport", "ble", "serial", "tcp", "radio", "connection"),
             listOf("ble", "serial", "tcp", "radio-transport"),
             3000,
+            "transport",
         ),
         KeywordIndexEntry(
             "persistence",
@@ -326,6 +367,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("room", "database", "datastore", "prefs", "storage", "migration"),
             listOf("room", "database", "datastore", "prefs"),
             2800,
+            "persistence",
         ),
         KeywordIndexEntry(
             "testing",
@@ -336,6 +378,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("test", "unit", "screenshot", "compose", "roborazzi", "ci"),
             listOf("tests", "unit-tests", "screenshot-tests"),
             3100,
+            "testing",
         ),
         KeywordIndexEntry(
             "contributing",
@@ -346,6 +389,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("contributing", "pull-request", "branch", "commit", "style", "pr"),
             listOf("contributing", "pull-request", "branch-naming"),
             2900,
+            "contributing",
         ),
     )
 
@@ -358,5 +402,6 @@ class DefaultDocBundleLoader : DocBundleLoader {
         keywords = keywords,
         aliases = aliases,
         charCount = charCount,
+        iconId = iconId,
     )
 }
