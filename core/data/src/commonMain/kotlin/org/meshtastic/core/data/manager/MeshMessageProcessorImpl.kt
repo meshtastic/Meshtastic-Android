@@ -26,6 +26,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -244,7 +245,7 @@ class MeshMessageProcessorImpl(
                     }
 
                 node.copy(
-                    lastHeard = packet.rx_time,
+                    lastHeard = clampTimestampToNow(packet.rx_time),
                     viaMqtt = viaMqtt,
                     lastTransport = packet.transport_mechanism.value,
                     snr = snr,

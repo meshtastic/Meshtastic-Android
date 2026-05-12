@@ -23,6 +23,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -123,7 +124,7 @@ class TelemetryPacketHandlerImpl(
             }
 
             val telemetryTime = if (t.time != 0) t.time else nextNode.lastHeard
-            val newLastHeard = maxOf(nextNode.lastHeard, telemetryTime)
+            val newLastHeard = clampTimestampToNow(maxOf(nextNode.lastHeard, telemetryTime))
             nextNode.copy(lastHeard = newLastHeard)
         }
     }

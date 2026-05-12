@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.first
 import okio.ByteString
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceMetrics
@@ -241,7 +242,8 @@ class NodeManagerImpl(
         }
 
         updateNode(fromNum) { node ->
-            val posTime = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()
+            val rawPosTime = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()
+            val posTime = clampTimestampToNow(rawPosTime)
             val newLastHeard = maxOf(node.lastHeard, posTime)
 
             val newPos =
@@ -268,7 +270,7 @@ class NodeManagerImpl(
             telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
             telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
             val telemetryTime = if (telemetry.time != 0) telemetry.time else node.lastHeard
-            val newLastHeard = maxOf(node.lastHeard, telemetryTime)
+            val newLastHeard = clampTimestampToNow(maxOf(node.lastHeard, telemetryTime))
             nextNode.copy(lastHeard = newLastHeard)
         }
     }
@@ -303,11 +305,12 @@ class NodeManagerImpl(
             }
             val position = info.position
             if (position != null) {
-                next = next.copy(position = position)
+                val clampedPos = position.copy(time = clampTimestampToNow(position.time))
+                next = next.copy(position = clampedPos)
             }
             next =
                 next.copy(
-                    lastHeard = info.last_heard,
+                    lastHeard = clampTimestampToNow(info.last_heard),
                     deviceMetrics = info.device_metrics ?: next.deviceMetrics,
                     channel = info.channel,
                     viaMqtt = info.via_mqtt,
