@@ -42,7 +42,8 @@
 - **IV. Privacy First**: Confirm the change does not log or expose PII, location data,
   cryptographic keys, or modify the read-only `core/proto` submodule.
 - **V. Design Standards Compliance**: For any user-facing UI, record how the design was
-  checked against the Meshtastic Client Design Standards, or explicitly mark the gate N/A.
+  checked against the Meshtastic Client Design Standards. For cross-platform features,
+  link the upstream behavior spec from `meshtastic/design/features/` or justify N/A.
 - **VI. Verify Before Push**: Record the exact local verification commands and the expected
   post-push CI check command (`gh pr checks` or `gh run list`) before implementation starts.
 

@@ -3,13 +3,20 @@
 **Feature Branch**: `[###-feature-name]`  
 **Created**: [DATE]  
 **Status**: Draft  
-**Input**: User description: "$ARGUMENTS"
+**Input**: User description: "$ARGUMENTS"  
+**Cross-Platform Spec**: <!-- Link to meshtastic/design/features/ spec, or "N/A — platform-specific only" with justification -->
 
 ## Summary
 
 <!--
   Provide a brief (2-3 sentence) summary of the feature, its purpose, and what
   user problem it solves. Mention which modules are primarily affected.
+  
+  CROSS-PLATFORM CHECK: Before writing this spec, check meshtastic/design/features/
+  for an existing cross-platform behavior spec. If one exists, this spec should describe
+  the Android-specific scope and acceptance criteria — not redefine the cross-platform
+  behavior. If none exists and this feature affects multiple platforms, create one first
+  using the TEMPLATE.md in that repo.
 -->
 
 ## Goals
