@@ -27,12 +27,14 @@ import kotlinx.coroutines.flow.map
 
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.NodeRepository
 
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.takserver.TAKPacketV2Conversion.toCoTMessage
+import org.meshtastic.core.takserver.TAKPacketConversion.toTAKPacket
 import org.meshtastic.core.takserver.TAKPacketV2Conversion.toTAKPacketV2
 import org.meshtastic.proto.MemberRole
 import org.meshtastic.proto.MeshPacket
@@ -46,8 +48,23 @@ import kotlin.time.Duration.Companion.minutes
 /**
  * Bidirectional bridge between the local TAK server and the Meshtastic mesh network.
  *
- * V2 protocol only: All traffic uses port 78 (ATAK_PLUGIN_V2).
- * Legacy V1 port 72 is still received for backward compatibility but will be removed.
+ * Outbound traffic (TAK client -> mesh) is version-gated on the connected radio's
+ * firmware version, exposed via [Capabilities.supportsTakV2]:
+ *
+ *  - Firmware **>= 2.8.0**: TAKPacketV2 on port 78 (ATAK_PLUGIN_V2) with zstd
+ *    dictionary compression via TAKPacket-SDK. Supports all CoT payload types
+ *    (PLI, GeoChat, DrawnShape, Marker, Route, Aircraft, Casevac, Emergency, Task)
+ *    with compact typed encodings that fit under the 237B LoRa MTU.
+ *
+ *  - Firmware **<= 2.7.x**: Legacy [TAKPacket] on port 72 (ATAK_PLUGIN) with bare
+ *    protobuf encoding. Supports only PLI and GeoChat — shapes, markers, routes,
+ *    and other typed CoT events are dropped (with a warning) because the legacy
+ *    schema cannot represent them.
+ *
+ * Inbound traffic (mesh -> TAK client) is always dual-path tolerant — both port 72
+ * and port 78 are dispatched regardless of the local radio's firmware version, so
+ * a v2-capable node can still relay legacy v1 packets received from older nodes
+ * in mixed-firmware mesh deployments.
  */
 class TAKMeshIntegration(
     private val takServerManager: TAKServerManager,
@@ -55,6 +72,7 @@ class TAKMeshIntegration(
 
     private val serviceRepository: ServiceRepository,
     private val meshConfigHandler: MeshConfigHandler,
+    private val nodeRepository: NodeRepository,
 ) {
     @Volatile private var isRunning = false
     private val jobs = mutableListOf<Job>()
@@ -113,7 +131,9 @@ class TAKMeshIntegration(
         )
 
         jobs.addAll(newJobs)
-        Logger.i { "TAK Mesh Integration started (v2 protocol)" }
+        val fw = nodeRepository.myNodeInfo.value?.firmwareVersion
+        val proto = if (Capabilities(fw).supportsTakV2) "v2 (port 78, zstd)" else "v1 (port 72, legacy)"
+        Logger.i { "TAK Mesh Integration started — firmware=$fw, outbound=$proto" }
     }
 
     fun stop() {
@@ -128,7 +148,34 @@ class TAKMeshIntegration(
 
     // ── Send: TAK client → mesh ─────────────────────────────────────────────
 
+    /**
+     * Determine the outbound TAK protocol version based on the connected radio's
+     * firmware version. Evaluated per-send (not cached) so the bridge picks up
+     * firmware upgrades during a session without restart. If the firmware
+     * version is unavailable (radio not yet handshook), default to V2 — the
+     * v2 firmware was released widely enough that defaulting to legacy would
+     * be a regression for the common case.
+     */
+    private fun useTakV2(): Boolean {
+        val fw = nodeRepository.myNodeInfo.value?.firmwareVersion ?: return true
+        return Capabilities(fw).supportsTakV2
+    }
+
     private suspend fun sendCoTToMesh(cotMessage: CoTMessage) {
+        if (useTakV2()) {
+            sendCoTToMeshV2(cotMessage)
+        } else {
+            sendCoTToMeshV1(cotMessage)
+        }
+    }
+
+    /**
+     * v2 send path (firmware >= 2.8.0): SDK parser + zstd dictionary compression,
+     * full typed payload support (DrawnShape, Marker, Route, Aircraft, Casevac,
+     * Emergency, Task, plus PLI / GeoChat). Wire format: `[flags byte][zstd-compressed
+     * TAKPacketV2 protobuf]` on port 78 (ATAK_PLUGIN_V2).
+     */
+    private suspend fun sendCoTToMeshV2(cotMessage: CoTMessage) {
         // Prefer the sourceEventXml for shape/marker/route types — the SDK's
         // CotXmlParser extracts compact typed payloads (DrawnShape, Marker,
         // Route, etc.) that compress far better than raw_detail encoding.
@@ -141,8 +188,6 @@ class TAKMeshIntegration(
         val freshXml = ensureMinimumStaleForMesh(rawXml)
         // Strip non-essential elements before compression to save wire bytes
         val xml = stripNonEssentialElements(freshXml)
-
-        // Logger.d { "RAW CoT OUT (mesh, ${cotMessage.type}): $rawXml" }
 
         // Route through the SDK parser/compressor which handles all typed
         // payloads (DrawnShape, Marker, Route, Aircraft, etc.) with compact
@@ -196,6 +241,44 @@ class TAKMeshIntegration(
         } catch (e: Throwable) {
             // Something other than size — radio not connected, queue full, etc.
             Logger.e(e) { "Failed to send TAKPacketV2 to mesh (${cotMessage.type}, ${wirePayload.size} bytes): ${e.message}" }
+        }
+    }
+
+    /**
+     * Legacy v1 send path (firmware <= 2.7.x): bare protobuf-encoded [TAKPacket]
+     * on port 72 (ATAK_PLUGIN), no zstd compression. Only PLI and GeoChat
+     * payloads are supported by the v1 schema — shapes, markers, routes,
+     * casevac, emergency, and task CoT events are dropped with a warning.
+     */
+    private suspend fun sendCoTToMeshV1(cotMessage: CoTMessage) {
+        val takPacket = cotMessage.toTAKPacket() ?: run {
+            Logger.w {
+                "Dropping CoT for legacy v1 radio: type=${cotMessage.type} not representable " +
+                    "in v1 TAKPacket schema (only PLI and GeoChat are supported). " +
+                    "Upgrade radio firmware to >= 2.8.0 for full payload support."
+            }
+            return
+        }
+
+        val wirePayload = TAKPacket.ADAPTER.encode(takPacket)
+        if (wirePayload.size > MAX_TAK_WIRE_PAYLOAD_BYTES) {
+            Logger.w {
+                "Dropping oversized v1 TAK packet: type=${cotMessage.type} " +
+                    "size=${wirePayload.size}B max=$MAX_TAK_WIRE_PAYLOAD_BYTES"
+            }
+            return
+        }
+
+        try {
+            val dataPacket = DataPacket(
+                to = DataPacket.ID_BROADCAST,
+                bytes = wirePayload.toByteString(),
+                dataType = PortNum.ATAK_PLUGIN.value,
+            )
+            commandSender.sendData(dataPacket)
+            Logger.d { "Sent V1 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
+        } catch (e: Throwable) {
+            Logger.e(e) { "Failed to send v1 TAKPacket to mesh (${cotMessage.type}, ${wirePayload.size} bytes): ${e.message}" }
         }
     }
 

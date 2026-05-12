@@ -21,6 +21,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.NodeRepository
 
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.takserver.TAKMeshIntegration
@@ -41,10 +42,12 @@ class CoreTakServerModule {
         commandSender: CommandSender,
         serviceRepository: ServiceRepository,
         meshConfigHandler: MeshConfigHandler,
+        nodeRepository: NodeRepository,
     ): TAKMeshIntegration = TAKMeshIntegration(
         takServerManager,
         commandSender,
         serviceRepository,
         meshConfigHandler,
+        nodeRepository,
     )
 }
