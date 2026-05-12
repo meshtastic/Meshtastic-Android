@@ -55,4 +55,6 @@ class FirmwareReleaseLocalDataSource(
                 return@withContext latestRelease
             }
         }
+
+    suspend fun hasAnyEntries(): Boolean = withContext(dispatchers.io) { firmwareReleaseDao.count() > 0 }
 }

@@ -45,4 +45,6 @@ class DeviceHardwareLocalDataSource(
 
     suspend fun getByModelAndTarget(hwModel: Int, target: String): DeviceHardwareEntity? =
         withContext(dispatchers.io) { deviceHardwareDao.getByModelAndTarget(hwModel, target) }
+
+    suspend fun hasAnyEntries(): Boolean = withContext(dispatchers.io) { deviceHardwareDao.count() > 0 }
 }
