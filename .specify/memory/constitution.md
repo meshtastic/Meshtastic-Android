@@ -1,15 +1,18 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.1.0 → 1.1.1
+Version change: 1.1.1 → 1.2.0
 Modified principles:
-  - Governance (compliance review wording clarified to require plan-level constitution checks)
+  - V. Design Standards Compliance (expanded to require cross-platform behavior spec
+    from meshtastic/design/features/ for multi-platform features)
 Added sections: None.
 Removed sections: None.
 Templates requiring updates:
-  ✅ .specify/templates/plan-template.md — Constitution Check now enumerates the six project principles.
-  ✅ .specify/templates/spec-template.md — Validated against current constitution; no template changes required.
-  ✅ .specify/templates/tasks-template.md — Added required verification and design review task guidance.
+  ✅ .specify/templates/spec-template.md — Added Cross-Platform Spec metadata field and
+    cross-platform check guidance in Summary comment.
+  ✅ .specify/templates/plan-template.md — Constitution Check V updated to require upstream
+    spec link for cross-platform features.
+  ✅ .specify/templates/checklist-template.md — CHK005 updated to include cross-platform spec check.
 Follow-up TODOs: None.
 -->
 
@@ -77,6 +80,12 @@ All user-facing UI MUST conform to the Meshtastic Client Design Standards:
   before merge.
 - Deviations from the design standards require explicit justification in the PR description
   with a rationale for why the standard cannot or should not be followed.
+- Features that affect multiple platforms (messaging, settings, telemetry, etc.) MUST
+  reference an existing cross-platform behavior spec in
+  [`meshtastic/design/features/`](https://github.com/meshtastic/design/tree/master/features),
+  or create one using the `TEMPLATE.md` in that directory before writing the
+  Android implementation spec. Platform-specific-only features (e.g., Android widget,
+  Wear OS tile) may mark the `Cross-Platform Spec` field as N/A with justification.
 - Rationale: Consistent cross-platform UX across Android, iOS, and other clients ensures
   users have a predictable experience regardless of platform. The design standards are
   maintained collaboratively across all Meshtastic client teams.
@@ -139,8 +148,13 @@ This constitution supersedes all other practices, coding guidelines, and agent i
 **Amendment Procedure**:
 1. Propose the amendment with rationale and a migration plan in a PR description.
 2. Update `AGENTS.md` and this constitution atomically in the same commit.
-3. Increment `CONSTITUTION_VERSION` per the versioning policy below.
-4. All PRs and code reviews MUST verify compliance with the current constitution version.
+3. Update all downstream references in the same commit:
+   - `.skills/speckit/SKILL.md` (principle count and descriptions)
+   - `.specify/templates/checklist-template.md` (checklist items)
+   - `.specify/templates/plan-template.md` (Constitution Check section)
+   - The SYNC IMPACT REPORT comment at the top of this file
+4. Increment `CONSTITUTION_VERSION` per the versioning policy below.
+5. All PRs and code reviews MUST verify compliance with the current constitution version.
 
 **Versioning Policy**:
 - MAJOR: Backward-incompatible principle removal or fundamental redefinition.
@@ -151,4 +165,4 @@ This constitution supersedes all other practices, coding guidelines, and agent i
 Constitution Check confirming all six principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.1.1 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-05-08
+**Version**: 1.2.0 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-05-12

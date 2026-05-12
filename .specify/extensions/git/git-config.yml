@@ -2,7 +2,7 @@
 # Copied to .specify/extensions/git/git-config.yml on install
 
 # Branch numbering strategy: "sequential" (001, 002, ...) or "timestamp" (YYYYMMDD-HHMMSS)
-branch_numbering: sequential
+branch_numbering: timestamp
 
 # Commit message used by `git commit` during repository initialization
 init_commit_message: "[Spec Kit] Initial commit"
