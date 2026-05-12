@@ -308,7 +308,7 @@ jobs:
         # splitting the token and feeding `.release=true` to Gradle as a task name.
         run: >
           ./gradlew :desktop:packageReleaseDistributionForCurrentOS
-          ${{ contains(runner.os, 'macOS') && ':desktop:packageReleaseUberJarForCurrentOS' }}
+          ${{ contains(runner.os, 'macOS') && ':desktop:packageReleaseUberJarForCurrentOS' || '' }}
           '-PaboutLibraries.release=true' --no-daemon
 
       - name: List Desktop Binaries
