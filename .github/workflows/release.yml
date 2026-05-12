@@ -410,14 +410,17 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           pattern: flatpak-multisrc-*
-          merge-multiple: true
-      
+          path: flatpak-multisrc
+
       - name: List Flatpak source files
-        run: ls -R flatpak-sources-*.json
+        run: ls -R flatpak-multisrc/
+
+      - name: Validate Flatpak source files
+        run: jq empty flatpak-multisrc/*/*.json
 
       - name: Combine Flatpak source files
         run: >
-          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])' flatpak-sources-*.json
+          jq -s 'add | unique_by(.dest + "/" + .["dest-filename"])' flatpak-multisrc/*/*.json
           > flatpak-sources.json
 
       - name: Upload combined Flatpak source artifact
