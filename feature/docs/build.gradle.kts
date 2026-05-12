@@ -37,6 +37,7 @@ kotlin {
 
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.coil)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
         }
@@ -61,6 +62,7 @@ val syncDocsToComposeResources by
         group = "docs"
 
         val docsSourceDir = rootProject.layout.projectDirectory.dir("docs")
+        val screenshotsDir = rootProject.layout.projectDirectory.dir("docs/screenshots")
         val composeResourcesTarget = layout.projectDirectory.dir("src/commonMain/composeResources/files/docs")
 
         from(docsSourceDir) {
@@ -75,6 +77,16 @@ val syncDocsToComposeResources by
             exclude("assets/**")
             exclude("Gemfile*")
         }
+
+        // FR-038: Bundle screenshots into assets/screenshots/ to match markdown image paths.
+        // Markdown references use `assets/screenshots/foo.png` (relative to the doc page).
+        // copyDocsScreenshots flattens reference PNGs into docs/screenshots/,
+        // so we remap them into assets/screenshots/ within the compose resource tree.
+        from(screenshotsDir) {
+            include("**/*.png")
+            into("assets/screenshots")
+        }
+
         into(composeResourcesTarget)
 
         // Preserve timestamps for up-to-date checks
@@ -85,3 +97,6 @@ val syncDocsToComposeResources by
 tasks
     .matching { it.name.contains("generateComposeResClass") || it.name.contains("copyNonXmlValueResources") }
     .configureEach { dependsOn(syncDocsToComposeResources) }
+
+// FR-038: Ensure screenshots are generated before syncing docs resources
+syncDocsToComposeResources.configure { dependsOn(":screenshot-tests:copyDocsScreenshots") }

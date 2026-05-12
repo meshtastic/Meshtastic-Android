@@ -93,6 +93,7 @@ fun DocsPageRouteScreen(
                     val markdownText = content.markdown ?: "No content available."
                     Markdown(
                         content = markdownText,
+                        imageTransformer = ComposeResourceImageTransformer(),
                         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
                     )
                 }

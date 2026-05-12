@@ -64,9 +64,9 @@ Pre-configured messages for rapid communication:
 - Access via the Quick Chat button in the message input area
 - Customize quick chat messages in **Settings → Quick Chat**
 
-![Quick chat option](assets/screenshots/messages_quick_chat.png)
+![Quick chat option](/assets/screenshots/messages_quick_chat.png)
 
-![Message input area](assets/screenshots/messages-and-channels_channel_list.png)
+![Message input area](/assets/screenshots/messages-and-channels_channel_list.png)
 
 ### Message Priority
 

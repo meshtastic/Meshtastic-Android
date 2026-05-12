@@ -24,7 +24,7 @@ The welcome screen introduces Meshtastic and its core capabilities:
 
 Tap **Get Started** to proceed.
 
-![Welcome screen](assets/screenshots/onboarding_welcome.png)
+![Welcome screen](/assets/screenshots/onboarding_welcome.png)
 
 ## Permissions
 

@@ -24,11 +24,11 @@ Bluetooth Low Energy is the default and most common connection method on Android
 4. Select your device from the list.
 5. Accept the Bluetooth pairing prompt if shown.
 
-![Device list item](assets/screenshots/connections_bluetooth_scan.png)
+![Device list item](/assets/screenshots/connections_bluetooth_scan.png)
 
 You can filter devices by transport type using the filter chips at the top:
 
-![Transport filter chips](assets/screenshots/connections_transport_filters.png)
+![Transport filter chips](/assets/screenshots/connections_transport_filters.png)
 
 > 💡 **Tip:** If your device doesn't appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.
 
@@ -43,11 +43,11 @@ You can filter devices by transport type using the filter chips at the top:
 
 When connecting, a status indicator shows the current connection state:
 
-![Connecting status](assets/screenshots/connections_connecting.png)
+![Connecting status](/assets/screenshots/connections_connecting.png)
 
 If no devices are found, the app shows an empty state with instructions:
 
-![No devices found](assets/screenshots/connections_empty_state.png)
+![No devices found](/assets/screenshots/connections_empty_state.png)
 
 ### Troubleshooting Bluetooth
 

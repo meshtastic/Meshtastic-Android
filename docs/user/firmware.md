@@ -30,11 +30,11 @@ The most common update method for Android users:
 4. Tap **Update** to begin the OTA process.
 5. Wait for the update to complete — **do not disconnect** during the update.
 
-![Firmware checking for updates](assets/screenshots/firmware_checking.png)
+![Firmware checking for updates](/assets/screenshots/firmware_checking.png)
 
 > ⚠️ **Warning:** Interrupting a firmware update can brick your device. Ensure your radio has sufficient battery (>50% recommended) and maintain Bluetooth proximity during the entire process.
 
-![Firmware disclaimer](assets/screenshots/firmware_disclaimer.png)
+![Firmware disclaimer](/assets/screenshots/firmware_disclaimer.png)
 
 ### USB Flashing
 
@@ -65,7 +65,7 @@ After a successful update:
 - Verify your settings are intact
 - Check the firmware version in **Settings → About**
 
-![Firmware update success](assets/screenshots/firmware_success.png)
+![Firmware update success](/assets/screenshots/firmware_success.png)
 
 ## Troubleshooting
 

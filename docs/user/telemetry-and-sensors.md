@@ -98,7 +98,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
    - Power Metrics (if INA sensor present)
 3. Historical graphs show trends over time.
 
-![Telemetry actions](assets/screenshots/node-metrics_telemetric_actions.png)
+![Telemetry actions](/assets/screenshots/node-metrics_telemetric_actions.png)
 
 ---
 

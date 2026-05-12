@@ -95,6 +95,8 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T058 [P] [US1] Add Android asset mirroring if required for WebView file loading under `feature/docs/build/generated/docs/androidAssets/`.
 - [X] T059 [P] [US1] Enforce bundle-size warnings/failures and missing-asset validation in `validateDocsBundle`.
 - [X] T060 [US1] Add aggregate root tasks (`generateDocsBundle`, `validateDocsBundle`, `publishDocsSite`) and document their usage.
+- [ ] T061 [P] [US1] [FR-038] Update `syncDocsToComposeResources` in `feature/docs/build.gradle.kts` to include `assets/screenshots/**/*.png` alongside markdown files, and add a task dependency on `:screenshot-tests:copyDocsScreenshots` to ensure generated screenshots are populated before sync.
+- [ ] T062 [P] [US1] [FR-038] Rewrite or restructure markdown image paths during sync so `assets/screenshots/` references resolve to the compose resource file structure expected by the custom `ImageTransformer` at runtime.
 
 **Checkpoint**: Gradle can generate the docs bundle and website artifact from markdown.
 
@@ -117,6 +119,9 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T080 [P] [US2] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/di/FeatureDocsModule.kt`.
 - [X] T081 [P] [US2] Include `FeatureDocsModule` in `app/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt` and `desktop/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`.
 - [X] T082 [US2] Add shared/unit tests for bundle loading, page ordering, and route serialization under `feature/docs/src/commonTest/kotlin/org/meshtastic/feature/docs/`.
+- [ ] T083 [P] [US2] [FR-038] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ui/ComposeResourceImageTransformer.kt` implementing `ImageTransformer` from mikepenz markdown renderer. Must use `Res.getUri("files/docs/$link")` (synchronous) to resolve local resource URIs, then `rememberAsyncImagePainter()` from Coil 3 to load the image composably. Must return `null` for external `http://`/`https://` URLs. Add `libs.coil` dependency to `feature/docs/build.gradle.kts` commonMain.
+- [ ] T084 [P] [US2] [FR-038] Update `DocsPageRouteScreen.kt` to pass `ComposeResourceImageTransformer()` as the `imageTransformer` parameter to the `Markdown()` composable instead of using the default `NoOpImageTransformerImpl`.
+- [ ] T085 [US2] [FR-038] Verify inline screenshot rendering end-to-end: run `copyDocsScreenshots`, `syncDocsToComposeResources`, then launch the docs browser on Desktop and confirm images render inline on a page with `![alt](...)` references.
 
 **Checkpoint**: Help & Documentation opens inside Settings and reads bundled content offline.
 
@@ -197,6 +202,7 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - Phase 0 blocks all UI work.
 - Phase 1 (content) and Phase 2 (site scaffolding) can overlap.
 - Phase 3 must finish before Phase 4 can load generated bundles reliably.
+- T083/T084 (ImageTransformer) depend on T061/T062 (screenshots must be bundled before the transformer can resolve them).
 - Phase 5 depends on Phase 3 metadata/index generation and Phase 4 browser UI.
 - Phase 6 depends on Phase 5 because AI retrieval uses the keyword index and search engine.
 - Phase 7 depends on Phases 2 and 3.
