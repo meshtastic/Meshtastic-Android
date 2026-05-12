@@ -68,7 +68,15 @@ Pre-configured messages for rapid communication:
 
 ![Quick chat option](/assets/screenshots/messages_quick_chat.png)
 
-![Message input area](/assets/screenshots/messages-and-channels_channel_list.png)
+The channel list shows each channel with its latest message preview:
+
+![Channel list item showing channel name and last message](/assets/screenshots/messages-and-channels_channel_list.png)
+
+### Message Bubbles
+
+Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted original:
+
+![Chat bubbles showing sent and received messages with timestamps and delivery status](/assets/screenshots/messages_message_items.png)
 
 ### Reactions
 
@@ -78,6 +86,8 @@ React to messages with emoji:
 - Reactions appear below the message bubble
 - Multiple users can react to the same message
 - React to your own messages or others' messages
+
+![Emoji reaction badges displayed beneath a message](/assets/screenshots/messages_reactions.png)
 
 > 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
 

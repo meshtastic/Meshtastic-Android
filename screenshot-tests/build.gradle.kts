@@ -50,6 +50,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:firmware"))
     implementation(project(":feature:intro"))
+    implementation(project(":feature:map"))
     implementation(project(":feature:docs"))
 
     implementation(libs.compose.multiplatform.foundation)

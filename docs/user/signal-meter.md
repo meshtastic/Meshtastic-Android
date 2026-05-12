@@ -1,7 +1,11 @@
 ---
 title: Signal Meter
-parent: User Guide
 nav_order: 15
+aliases:
+  - signal
+  - signal-meter
+  - snr
+  - rssi
 ---
 
 # How the Meshtastic Signal Meter Works
@@ -63,10 +67,12 @@ Because Meshtastic's meter acts as a **"Clarity Meter"**, it behaves differently
 
 ## Where Signal Information Appears
 
-In the Android app, signal data is shown in several places:
+In the app, signal data is shown in several places:
 
 - **Node list** — signal bars icon next to each node
 - **Node detail** — SNR, RSSI, and signal quality in the device metrics section
 - **Traceroute** — per-hop signal quality for each relay node
-- **Environment metrics** — historical signal data in the metrics charts
+- **Signal metrics** — historical SNR and RSSI data in the metrics charts
+
+![Node entry showing SNR, RSSI values and colored signal bars](/assets/screenshots/nodes_signal_info.png)
 

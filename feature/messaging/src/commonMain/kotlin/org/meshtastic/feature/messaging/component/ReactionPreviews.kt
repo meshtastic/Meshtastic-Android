@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.ui.theme.AppTheme
@@ -39,9 +38,9 @@ fun ReactionItemPreview() {
     }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
-private fun ReactionRowPreview() {
+fun ReactionRowPreview() {
     AppTheme {
         ReactionRow(
             reactions =

@@ -24,6 +24,10 @@ Basic operating information reported by each node:
 | Airtime | Transmission time used by this node |
 | Uptime | Time since last reboot |
 
+Device metrics are displayed as individual cards showing battery, voltage, channel utilization, airtime, and uptime:
+
+![Card displaying battery level, voltage, channel utilization, air utilization, and uptime values](/assets/screenshots/nodes_device_metrics_card.png)
+
 ## Environment Metrics
 
 Environmental sensor data (requires compatible hardware):
@@ -35,6 +39,10 @@ Environmental sensor data (requires compatible hardware):
 | Barometric Pressure | BME280, BMP280 |
 | Gas Resistance | BME680 |
 | IAQ (Air Quality) | BME680 |
+
+Environment metrics are charted over time for easy trend analysis:
+
+![Charts showing temperature, humidity, and pressure trends over time](/assets/screenshots/nodes_environment_metrics.png)
 
 > 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data.
 

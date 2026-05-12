@@ -27,6 +27,7 @@ import org.meshtastic.feature.node.component.TelemetricActionsSectionEmptyPrevie
 import org.meshtastic.feature.node.component.TelemetricActionsSectionPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentLoadingPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentLocalPreview
+import org.meshtastic.feature.node.detail.NodeDetailContentMinimalPreview
 import org.meshtastic.feature.node.detail.NodeDetailContentRemotePreview
 import org.meshtastic.feature.node.metrics.DeviceMetricsCardPreview
 import org.meshtastic.feature.node.metrics.LegendPreview
@@ -115,3 +116,11 @@ fun ScreenshotDeviceMetricsCard() {
 fun ScreenshotEnvironmentMetricsContent() {
     PreviewEnvironmentMetricsContent()
 }
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeDetailContentMinimal() {
+    NodeDetailContentMinimalPreview()
+}
+

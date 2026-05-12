@@ -28,3 +28,13 @@
 
 # Feature: Docs
 **/DocsScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Map
+**/MapScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Messaging
+**/MessagingScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Nodes
+**/NodeScreenshotTestsKt/Screenshot*_Light_*.png
+

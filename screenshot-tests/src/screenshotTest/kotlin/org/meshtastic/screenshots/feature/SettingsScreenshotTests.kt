@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.settings.component.AppInfoSectionPreview
 import org.meshtastic.feature.settings.component.AppearanceSectionPreview
+import org.meshtastic.feature.settings.component.NotificationSectionPreview
 import org.meshtastic.feature.settings.component.PersistenceSectionPreview
 import org.meshtastic.feature.settings.radio.component.TakConfigCardPreview
 import org.meshtastic.feature.settings.radio.component.TakServerSectionDisabledPreview
@@ -48,6 +49,13 @@ fun ScreenshotPersistenceSection() {
 @Composable
 fun ScreenshotAppInfoSection() {
     AppInfoSectionPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNotificationSection() {
+    NotificationSectionPreview()
 }
 
 @PreviewTest

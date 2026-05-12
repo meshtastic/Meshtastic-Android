@@ -104,7 +104,7 @@ fun NodeDetailContentLoadingPreview() {
 
 @PreviewLightDark
 @Composable
-private fun NodeDetailContentMinimalPreview() {
+fun NodeDetailContentMinimalPreview() {
     val node = previewData.minnieMouse
     AppTheme {
         Surface {

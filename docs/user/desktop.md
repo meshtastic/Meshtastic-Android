@@ -49,7 +49,7 @@ The most reliable connection method on Desktop:
 For network-connected radios:
 
 1. Enter the radio's IP address and port (default: 4403).
-2. Tap **Connect**.
+2. Click **Connect**.
 
 ### Bluetooth
 
@@ -92,6 +92,12 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 - **System tray** — minimize to system tray for background mesh operation
 - **Tray menu** — right-click the tray icon to show window or quit
 - **Mouse interaction** — hover states and standard desktop navigation
+
+### Notification Preferences
+
+The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts:
+
+![Settings panel showing toggles for message, new node, and low battery notification preferences](/assets/screenshots/settings_notifications.png)
 
 ## Building from Source
 
