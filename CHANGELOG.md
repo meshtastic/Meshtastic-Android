@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* feat(api): add hasAnyEntries method to local data sources and improve… (#5406) by @James Rich in [`10c5b5db2`](https://github.com/meshtastic/Meshtastic-Android/commit/10c5b5db2e5b23c52a3a5689205bfc42285b7b0a)
+* Update notification intents and deep link URI format (#5408) by @James Rich in [`82135df86`](https://github.com/meshtastic/Meshtastic-Android/commit/82135df865c4595d3ee509ac3535b86e343874b6)
+* docs: update CHANGELOG.md (#5399) by @github-actions[bot] in [`fd0e2c090`](https://github.com/meshtastic/Meshtastic-Android/commit/fd0e2c0904d21df2a962bd18ee138afabf869e98)
 * chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5404) by @renovate[bot] in [`d84781848`](https://github.com/meshtastic/Meshtastic-Android/commit/d847818487787a854b59e06e29b7831aef45b514)
 * chore(deps): update ruby to v4.0.4 (#5407) by @renovate[bot] in [`84cc8ad0d`](https://github.com/meshtastic/Meshtastic-Android/commit/84cc8ad0debf620c614617cf32fcce971d48a87d)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5400) by @James Rich in [`313dc1c2f`](https://github.com/meshtastic/Meshtastic-Android/commit/313dc1c2f7734284a2c6822e2a62dc10c597bfb1)
