@@ -79,5 +79,3 @@ This page will be expanded with:
 
 ---
 
-*This page is a concept overview. Full documentation will be added as Feature 001 (Local Mesh Discovery) progresses through implementation.*
-

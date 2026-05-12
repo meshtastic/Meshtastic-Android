@@ -101,5 +101,3 @@ Requirements:
 
 ---
 
-*Screenshots will be added when the screenshot automation pipeline is operational.*
-

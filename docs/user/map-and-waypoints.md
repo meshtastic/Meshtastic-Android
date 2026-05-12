@@ -87,5 +87,3 @@ The app supports multiple map tile sources:
 
 ---
 
-*Screenshots will be added when the screenshot automation pipeline is operational.*
-

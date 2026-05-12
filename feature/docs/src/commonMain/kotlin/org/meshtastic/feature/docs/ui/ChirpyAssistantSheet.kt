@@ -45,10 +45,7 @@ import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.ChirpyMessage
 import org.meshtastic.feature.docs.model.ChirpyRole
 
-/**
- * Chirpy AI Assistant bottom sheet with chat UI.
- * Hidden entirely when the assistant reports unsupported.
- */
+/** Chirpy AI Assistant bottom sheet with chat UI. Hidden entirely when the assistant reports unsupported. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChirpyAssistantSheet(
@@ -63,17 +60,8 @@ fun ChirpyAssistantSheet(
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        modifier = modifier,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding()
-                .padding(16.dp),
-        ) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize().imePadding().padding(16.dp)) {
             Text(
                 text = "Chirpy Assistant",
                 style = MaterialTheme.typography.titleMedium,
@@ -82,12 +70,7 @@ fun ChirpyAssistantSheet(
 
             // Message list
             val listState = rememberLazyListState()
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-            ) {
+            LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth()) {
                 items(state.messages, key = { it.id }) { message ->
                     ChirpyMessageBubble(message = message)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -111,50 +94,37 @@ fun ChirpyAssistantSheet(
                 onValueChange = onDraftChange,
                 placeholder = { Text("Ask about Meshtastic...") },
                 trailingIcon = {
-                    TextButton(
-                        onClick = onSubmit,
-                        enabled = state.draftQuestion.isNotBlank() && !state.isLoading,
-                    ) {
+                    TextButton(onClick = onSubmit, enabled = state.draftQuestion.isNotBlank() && !state.isLoading) {
                         Text("Send")
                     }
                 },
                 singleLine = false,
                 maxLines = 3,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .semantics { contentDescription = "Ask Chirpy a question" },
+                modifier =
+                Modifier.fillMaxWidth().padding(top = 8.dp).semantics {
+                    contentDescription = "Ask Chirpy a question"
+                },
             )
         }
     }
 }
 
+private const val BUBBLE_WIDTH_FRACTION = 0.85f
+
 @Composable
-private fun ChirpyMessageBubble(
-    message: ChirpyMessage,
-    modifier: Modifier = Modifier,
-) {
+private fun ChirpyMessageBubble(message: ChirpyMessage, modifier: Modifier = Modifier) {
     val isUser = message.role == ChirpyRole.USER
     val alignment = if (isUser) Alignment.End else Alignment.Start
-    val colors = if (isUser) {
-        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-    } else {
-        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    }
+    val colors =
+        if (isUser) {
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        } else {
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        }
 
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = alignment,
-    ) {
-        Card(
-            colors = colors,
-            modifier = Modifier.fillMaxWidth(0.85f),
-        ) {
-            Text(
-                text = message.text,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(12.dp),
-            )
+    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = alignment) {
+        Card(colors = colors, modifier = Modifier.fillMaxWidth(BUBBLE_WIDTH_FRACTION)) {
+            Text(text = message.text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(12.dp))
         }
 
         if (message.sourcePageIds.isNotEmpty()) {
@@ -167,4 +137,3 @@ private fun ChirpyMessageBubble(
         }
     }
 }
-

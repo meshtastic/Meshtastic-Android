@@ -20,14 +20,9 @@ import org.koin.core.annotation.Single
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
 
-/**
- * Keyword-search-only fallback AI assistant implementation.
- * Used on Desktop, iOS, and Android fdroid flavor.
- */
+/** Keyword-search-only fallback AI assistant implementation. Used on Desktop, iOS, and Android fdroid flavor. */
 @Single
-class KeywordFallbackAssistant(
-    private val searchEngine: KeywordSearchEngine,
-) : AIDocAssistant {
+class KeywordFallbackAssistant(private val searchEngine: KeywordSearchEngine) : AIDocAssistant {
 
     override suspend fun isSupported(): Boolean = false
 
@@ -39,10 +34,7 @@ class KeywordFallbackAssistant(
                 suggestedPages = pages,
             )
         } else {
-            AIDocAssistantResult.Error(
-                reason = org.meshtastic.feature.docs.model.DocsAiError.UnsupportedPlatform,
-            )
+            AIDocAssistantResult.Error(reason = org.meshtastic.feature.docs.model.DocsAiError.UnsupportedPlatform)
         }
     }
 }
-

@@ -39,9 +39,7 @@ import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.DocPageContent
 
-/**
- * Routes a page ID to the appropriate page renderer surface.
- */
+/** Routes a page ID to the appropriate page renderer surface. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocsPageRouteScreen(
@@ -57,21 +55,14 @@ fun DocsPageRouteScreen(
                 title = { Text(content?.page?.title ?: "Documentation") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = MeshtasticIcons.ArrowBack,
-                            contentDescription = "Navigate back",
-                        )
+                        Icon(imageVector = MeshtasticIcons.ArrowBack, contentDescription = "Navigate back")
                     }
                 },
             )
         },
         modifier = modifier,
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-        ) {
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             when {
                 isLoading -> {
                     Column(
@@ -89,10 +80,7 @@ fun DocsPageRouteScreen(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text(
-                            text = "Page not found: $pageId",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
+                        Text(text = "Page not found: $pageId", style = MaterialTheme.typography.bodyLarge)
                         Text(
                             text = "This page may have been moved or removed.",
                             style = MaterialTheme.typography.bodyMedium,
@@ -105,15 +93,10 @@ fun DocsPageRouteScreen(
                     val markdownText = content.markdown ?: "No content available."
                     Markdown(
                         content = markdownText,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
                     )
                 }
             }
         }
     }
 }
-
-

@@ -48,9 +48,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocSection
 
-/**
- * Main documentation browser screen showing a grouped TOC.
- */
+/** Main documentation browser screen showing a grouped TOC. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocsBrowserScreen(
@@ -58,7 +56,7 @@ fun DocsBrowserScreen(
     isLoading: Boolean,
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
-    onPageSelected: (String) -> Unit,
+    onSelectPage: (String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -68,27 +66,18 @@ fun DocsBrowserScreen(
                 title = { Text("Help & Documentation") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = MeshtasticIcons.ArrowBack,
-                            contentDescription = "Navigate back",
-                        )
+                        Icon(imageVector = MeshtasticIcons.ArrowBack, contentDescription = "Navigate back")
                     }
                 },
             )
         },
         modifier = modifier,
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-        ) {
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             DocsSearchBar(
                 query = searchQuery,
                 onQueryChange = onSearchQueryChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             )
 
             when {
@@ -121,10 +110,7 @@ fun DocsBrowserScreen(
                 }
 
                 else -> {
-                    DocsTocList(
-                        pages = pages,
-                        onPageSelected = onPageSelected,
-                    )
+                    DocsTocList(pages = pages, onSelectPage = onSelectPage)
                 }
             }
         }
@@ -132,37 +118,22 @@ fun DocsBrowserScreen(
 }
 
 @Composable
-private fun DocsTocList(
-    pages: List<DocPage>,
-    onPageSelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val userGuidePages = remember(pages) {
-        pages.filter { it.section == DocSection.UserGuide }
-            .sortedBy { it.navOrder }
-    }
-    val devGuidePages = remember(pages) {
-        pages.filter { it.section == DocSection.DeveloperGuide }
-            .sortedBy { it.navOrder }
-    }
+private fun DocsTocList(pages: List<DocPage>, onSelectPage: (String) -> Unit, modifier: Modifier = Modifier) {
+    val userGuidePages =
+        remember(pages) { pages.filter { it.section == DocSection.UserGuide }.sortedBy { it.navOrder } }
+    val devGuidePages =
+        remember(pages) { pages.filter { it.section == DocSection.DeveloperGuide }.sortedBy { it.navOrder } }
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 16.dp),
-    ) {
+    LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
         if (userGuidePages.isNotEmpty()) {
             item {
                 Text(
                     text = "User Guide",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .semantics { heading() },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).semantics { heading() },
                 )
             }
-            items(userGuidePages, key = { it.id }) { page ->
-                DocPageListItem(page = page, onPageSelected = onPageSelected)
-            }
+            items(userGuidePages, key = { it.id }) { page -> DocPageListItem(page = page, onSelectPage = onSelectPage) }
         }
 
         if (devGuidePages.isNotEmpty()) {
@@ -171,28 +142,18 @@ private fun DocsTocList(
                 Text(
                     text = "Developer Guide",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .semantics { heading() },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).semantics { heading() },
                 )
             }
-            items(devGuidePages, key = { it.id }) { page ->
-                DocPageListItem(page = page, onPageSelected = onPageSelected)
-            }
+            items(devGuidePages, key = { it.id }) { page -> DocPageListItem(page = page, onSelectPage = onSelectPage) }
         }
     }
 }
 
 @Composable
-private fun DocPageListItem(
-    page: DocPage,
-    onPageSelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun DocPageListItem(page: DocPage, onSelectPage: (String) -> Unit, modifier: Modifier = Modifier) {
     ListItem(
         headlineContent = { Text(page.title) },
-        modifier = modifier
-            .clickable { onPageSelected(page.id) }
-            .semantics { contentDescription = "Open ${page.title}" },
+        modifier = modifier.clickable { onSelectPage(page.id) }.semantics { contentDescription = "Open ${page.title}" },
     )
 }

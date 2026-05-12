@@ -99,5 +99,3 @@ class KeywordSearchEngineTest {
         assertEquals(lower.map { it.page.id }, upper.map { it.page.id })
     }
 }
-
-

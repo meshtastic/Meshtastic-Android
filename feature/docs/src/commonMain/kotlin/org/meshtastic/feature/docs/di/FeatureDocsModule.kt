@@ -22,4 +22,3 @@ import org.koin.core.annotation.Module
 @Module
 @ComponentScan("org.meshtastic.feature.docs")
 class FeatureDocsModule
-

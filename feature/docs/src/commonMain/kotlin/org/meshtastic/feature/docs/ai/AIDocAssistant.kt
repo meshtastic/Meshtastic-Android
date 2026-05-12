@@ -27,14 +27,9 @@ import org.meshtastic.feature.docs.model.AIDocAssistantResult
  * - Desktop/iOS: keyword-search fallback
  */
 interface AIDocAssistant {
-    /**
-     * Whether the AI assistant is available on the current platform/device.
-     */
+    /** Whether the AI assistant is available on the current platform/device. */
     suspend fun isSupported(): Boolean
 
-    /**
-     * Answer a user question about Meshtastic using bundled documentation context.
-     */
+    /** Answer a user question about Meshtastic using bundled documentation context. */
     suspend fun answer(question: String): AIDocAssistantResult
 }
-

@@ -26,6 +26,8 @@ Configure your radio hardware and user identity parameters.
 
 After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
 
+![Settings appearance section](assets/screenshots/settings-radio-user_lora_config.png)
+
 ## Radio Configuration
 
 ### Device Config
@@ -122,7 +124,13 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Admin Channel Enabled | Allow admin commands via channel |
 | Managed Mode | Restrict non-admin channel changes |
 
----
+Settings use standard preference controls — dropdowns, toggles, and sliders:
 
-*Screenshots will be added when the screenshot automation pipeline is operational.*
+| Control | Screenshot |
+|---------|------------|
+| Dropdown | ![Dropdown](assets/screenshots/settings_dropdown.png) |
+| Toggle | ![Toggle](assets/screenshots/settings_switch.png) |
+| Slider | ![Slider](assets/screenshots/settings_slider.png) |
+
+---
 

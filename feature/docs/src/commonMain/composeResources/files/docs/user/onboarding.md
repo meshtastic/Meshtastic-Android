@@ -24,6 +24,8 @@ The welcome screen introduces Meshtastic and its core capabilities:
 
 Tap **Get Started** to proceed.
 
+![Welcome screen](assets/screenshots/onboarding_welcome.png)
+
 ## Permissions
 
 The app requires several permissions to operate correctly:
@@ -65,6 +67,4 @@ Once connected, explore:
 - [Settings](settings-radio-user.md) — configure your radio
 
 ---
-
-*Screenshots will be added when the screenshot automation pipeline is operational.*
 

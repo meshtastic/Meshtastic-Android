@@ -37,17 +37,11 @@ import org.meshtastic.feature.docs.model.DocPageContent
 import org.meshtastic.feature.docs.ui.DocsBrowserScreen
 import org.meshtastic.feature.docs.ui.DocsPageRouteScreen
 
-/**
- * Registers docs navigation entries into the Settings navigation graph.
- */
+/** Registers docs navigation entries into the Settings navigation graph. */
 fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
-    entry<SettingsRoute.HelpDocs> {
-        DocsHelpScreen(backStack = backStack)
-    }
+    entry<SettingsRoute.HelpDocs> { DocsHelpScreen(backStack = backStack) }
 
-    entry<SettingsRoute.HelpDocPage> { route ->
-        DocsPageScreen(pageId = route.pageId, backStack = backStack)
-    }
+    entry<SettingsRoute.HelpDocPage> { route -> DocsPageScreen(pageId = route.pageId, backStack = backStack) }
 }
 
 @Composable
@@ -76,19 +70,14 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>) {
     }
 
     val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
-    NavigationBackHandler(
-        state = backHandlerState,
-        onBackCompleted = { backStack.removeLastOrNull() },
-    )
+    NavigationBackHandler(state = backHandlerState, onBackCompleted = { backStack.removeLastOrNull() })
 
     DocsBrowserScreen(
         pages = pages,
         isLoading = isLoading,
         searchQuery = searchQuery,
         onSearchQueryChange = { searchQuery = it },
-        onPageSelected = { pageId ->
-            backStack.add(SettingsRoute.HelpDocPage(pageId))
-        },
+        onSelectPage = { pageId -> backStack.add(SettingsRoute.HelpDocPage(pageId)) },
         onBack = { backStack.removeLastOrNull() },
     )
 }
@@ -106,10 +95,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>) {
     }
 
     val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
-    NavigationBackHandler(
-        state = backHandlerState,
-        onBackCompleted = { backStack.removeLastOrNull() },
-    )
+    NavigationBackHandler(state = backHandlerState, onBackCompleted = { backStack.removeLastOrNull() })
 
     DocsPageRouteScreen(
         pageId = pageId,

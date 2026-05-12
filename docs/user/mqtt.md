@@ -86,5 +86,3 @@ Configure per-channel which directions are active to control message flow.
 
 ---
 
-*Screenshots will be added when the screenshot automation pipeline is operational.*
-

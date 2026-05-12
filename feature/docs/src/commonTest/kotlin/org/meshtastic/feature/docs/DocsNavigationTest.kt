@@ -41,4 +41,3 @@ class DocsNavigationTest {
         assertEquals(route1, route2)
     }
 }
-

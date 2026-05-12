@@ -22,23 +22,50 @@ import org.meshtastic.feature.docs.model.DocSearchQuery
 import org.meshtastic.feature.docs.model.DocSearchResult
 
 /**
- * Keyword-based search engine for the docs corpus.
- * Provides search functionality without AI, working on all platforms.
+ * Keyword-based search engine for the docs corpus. Provides search functionality without AI, working on all platforms.
  */
 @Single
-class KeywordSearchEngine(
-    private val bundleLoader: DocBundleLoader,
-) {
-    private val stopWords = setOf(
-        "the", "a", "an", "is", "are", "was", "were", "be", "been",
-        "to", "of", "in", "for", "on", "with", "at", "by", "from",
-        "it", "this", "that", "how", "what", "where", "when", "do",
-        "does", "can", "will", "my", "i", "me", "and", "or",
-    )
+class KeywordSearchEngine(private val bundleLoader: DocBundleLoader) {
+    private val stopWords =
+        setOf(
+            "the",
+            "a",
+            "an",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "to",
+            "of",
+            "in",
+            "for",
+            "on",
+            "with",
+            "at",
+            "by",
+            "from",
+            "it",
+            "this",
+            "that",
+            "how",
+            "what",
+            "where",
+            "when",
+            "do",
+            "does",
+            "can",
+            "will",
+            "my",
+            "i",
+            "me",
+            "and",
+            "or",
+        )
 
-    /**
-     * Search the docs corpus with the given query text.
-     */
+    /** Search the docs corpus with the given query text. */
+    @Suppress("ReturnCount")
     suspend fun search(queryText: String): List<DocSearchResult> {
         if (queryText.isBlank()) return emptyList()
 
@@ -52,9 +79,7 @@ class KeywordSearchEngine(
             .sortedWith(compareByDescending<DocSearchResult> { it.score }.thenBy { it.page.navOrder })
     }
 
-    /**
-     * Select top pages within a token budget for AI retrieval context.
-     */
+    /** Select top pages within a token budget for AI retrieval context. */
     suspend fun selectForTokenBudget(queryText: String, maxChars: Int): List<DocPage> {
         val results = search(queryText)
         val selected = mutableListOf<DocPage>()
@@ -70,16 +95,18 @@ class KeywordSearchEngine(
     }
 
     fun normalize(queryText: String): DocSearchQuery {
-        val terms = queryText
-            .lowercase()
-            .replace(Regex("[^a-z0-9\\s-]"), " ")
-            .split(Regex("\\s+"))
-            .filter { it.length >= 2 && it !in stopWords }
-            .distinct()
+        val terms =
+            queryText
+                .lowercase()
+                .replace(Regex("[^a-z0-9\\s-]"), " ")
+                .split(Regex("\\s+"))
+                .filter { it.length >= 2 && it !in stopWords }
+                .distinct()
 
         return DocSearchQuery(rawText = queryText, normalizedTerms = terms)
     }
 
+    @Suppress("LoopWithTooManyJumpStatements")
     private fun score(page: DocPage, query: DocSearchQuery): DocSearchResult {
         var totalScore = 0
         val matchedTerms = mutableListOf<String>()
@@ -131,4 +158,3 @@ class KeywordSearchEngine(
         const val ID_MATCH_SCORE = 3
     }
 }
-

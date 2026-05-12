@@ -38,10 +38,7 @@ class DocBundleLoaderTest {
     @Test
     fun `page index keys match page ids`() = runTest {
         val bundle = loader.load()
-        assertEquals(
-            bundle.pages.map { it.id }.toSet(),
-            bundle.pageIndex.keys,
-        )
+        assertEquals(bundle.pages.map { it.id }.toSet(), bundle.pageIndex.keys)
     }
 
     @Test
@@ -90,4 +87,3 @@ class DocBundleLoaderTest {
         assertTrue(bundle.pages.all { it.keywords.isNotEmpty() })
     }
 }
-

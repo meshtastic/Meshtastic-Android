@@ -69,5 +69,3 @@ Once configured:
 
 ---
 
-*Screenshots will be added when the screenshot automation pipeline is operational.*
-

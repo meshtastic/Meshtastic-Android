@@ -29,38 +29,22 @@ import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 
-/**
- * Search bar for filtering documentation pages by keywords.
- */
+/** Search bar for filtering documentation pages by keywords. */
 @Composable
-fun DocsSearchBar(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun DocsSearchBar(query: String, onQueryChange: (String) -> Unit, modifier: Modifier = Modifier) {
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
         placeholder = { Text("Search documentation...") },
-        leadingIcon = {
-            Icon(
-                imageVector = MeshtasticIcons.Search,
-                contentDescription = null,
-            )
-        },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.Search, contentDescription = null) },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(
-                        imageVector = MeshtasticIcons.Close,
-                        contentDescription = "Clear search",
-                    )
+                    Icon(imageVector = MeshtasticIcons.Close, contentDescription = "Clear search")
                 }
             }
         },
         singleLine = true,
-        modifier = modifier
-            .fillMaxWidth()
-            .semantics { contentDescription = "Search documentation" },
+        modifier = modifier.fillMaxWidth().semantics { contentDescription = "Search documentation" },
     )
 }

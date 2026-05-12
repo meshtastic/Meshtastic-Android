@@ -64,6 +64,10 @@ Pre-configured messages for rapid communication:
 - Access via the Quick Chat button in the message input area
 - Customize quick chat messages in **Settings → Quick Chat**
 
+![Quick chat option](assets/screenshots/messages_quick_chat.png)
+
+![Message input area](assets/screenshots/messages-and-channels_channel_list.png)
+
 ### Message Priority
 
 Messages are queued and transmitted based on priority:
@@ -84,6 +88,4 @@ Messages are queued and transmitted based on priority:
 - Configure encryption for sensitive communications
 
 ---
-
-*Screenshots will be added when the screenshot automation pipeline is operational.*
 

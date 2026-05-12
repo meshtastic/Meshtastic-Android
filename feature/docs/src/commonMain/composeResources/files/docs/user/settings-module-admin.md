@@ -143,5 +143,3 @@ View detailed diagnostic information:
 
 ---
 
-*Screenshots will be added when the screenshot automation pipeline is operational.*
-

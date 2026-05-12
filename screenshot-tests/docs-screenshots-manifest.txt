@@ -25,3 +25,6 @@
 
 # Feature: WiFi Provision
 **/WifiProvisionScreenshotTestsKt/Screenshot*_Light_*.png
+
+# Feature: Docs
+**/DocsScreenshotTestsKt/Screenshot*_Light_*.png
