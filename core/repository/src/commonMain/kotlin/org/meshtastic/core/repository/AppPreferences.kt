@@ -250,6 +250,39 @@ interface TakPrefs {
     fun setTakServerEnabled(enabled: Boolean)
 }
 
+/** Reactive interface for watch preferences. */
+interface WatchPrefs {
+    /** Whether data should be pushed to the watch. */
+    val pushToWatchEnabled: StateFlow<Boolean>
+
+    fun setPushToWatchEnabled(enabled: Boolean)
+
+    /** Whether the node list should be synced to the watch. */
+    val syncNodesEnabled: StateFlow<Boolean>
+
+    fun setSyncNodesEnabled(enabled: Boolean)
+
+    /** Whether messages should be synced to the watch. */
+    val syncMessagesEnabled: StateFlow<Boolean>
+
+    fun setSyncMessagesEnabled(enabled: Boolean)
+
+    /** Whether phone notifications should be mirrored to the watch. */
+    val mirrorNotificationsEnabled: StateFlow<Boolean>
+
+    fun setMirrorNotificationsEnabled(enabled: Boolean)
+
+    /** Whether high contrast mode is enabled (pure black background). */
+    val highContrastModeEnabled: StateFlow<Boolean>
+
+    fun setHighContrastModeEnabled(enabled: Boolean)
+
+    /** Triggers a manual sync. Incrementing this value triggers a new sync event. */
+    val syncRequest: StateFlow<Long>
+
+    fun requestSync()
+}
+
 /** Consolidated interface for all application preferences. */
 interface AppPreferences {
     val analytics: AnalyticsPrefs
@@ -264,4 +297,5 @@ interface AppPreferences {
     val radio: RadioPrefs
     val mesh: MeshPrefs
     val tak: TakPrefs
+    val watch: WatchPrefs
 }

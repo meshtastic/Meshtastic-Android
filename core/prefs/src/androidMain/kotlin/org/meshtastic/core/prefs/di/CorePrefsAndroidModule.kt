@@ -146,4 +146,13 @@ class CorePrefsAndroidModule {
             scope = CoroutineScope(dispatchers.io + SupervisorJob()),
             produceFile = { context.preferencesDataStoreFile("filter_ds") },
         )
+
+    @Single
+    @Named("WatchDataStore")
+    fun provideWatchDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            migrations = listOf(SharedPreferencesMigration(context, "watch-prefs")),
+            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
+            produceFile = { context.preferencesDataStoreFile("watch_ds") },
+        )
 }

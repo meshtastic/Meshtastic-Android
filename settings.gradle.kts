@@ -114,6 +114,7 @@ include(
     ":feature:firmware",
     ":feature:wifi-provision",
     ":desktop",
+    ":wear",
 )
 
 if (!desktopOnly) {

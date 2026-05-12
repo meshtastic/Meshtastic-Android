@@ -64,12 +64,15 @@ import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Upload
 import org.meshtastic.feature.settings.component.ExpressiveSection
+import androidx.compose.runtime.remember
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 
 @Composable
 fun RadioConfigItemList(
     state: RadioConfigState,
     isManaged: Boolean,
+    excludedModulesUnlocked: Boolean,
     isOtaCapable: Boolean = false,
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
@@ -80,8 +83,8 @@ fun RadioConfigItemList(
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         RadioConfigSection(isManaged, enabled, onRouteClick)
-        DeviceConfigSection(isManaged, enabled, onNavigate)
-        ModuleSettingsSection(isManaged, enabled, onNavigate)
+        DeviceConfigSection(state, isManaged, enabled, onNavigate)
+        ModuleSettingsSection(state, excludedModulesUnlocked, isManaged, enabled, onNavigate)
 
         if (state.isLocal) {
             BackupRestoreSection(isManaged, enabled, onImport, onExport)
@@ -114,35 +117,56 @@ private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClic
 }
 
 @Composable
-private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
+private fun DeviceConfigSection(
+    state: RadioConfigState,
+    isManaged: Boolean,
+    enabled: Boolean,
+    onNavigate: (Route) -> Unit,
+) {
     ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
         if (isManaged) {
             ManagedMessage()
         }
-        ListItem(
-            text = stringResource(Res.string.device_configuration),
-            leadingIcon = MeshtasticIcons.AppSettingsAlt,
-            trailingIcon = MeshtasticIcons.ChevronRight,
-            enabled = enabled,
-        ) {
-            onNavigate(SettingsRoute.DeviceConfiguration)
+        ConfigRoute.deviceConfigRoutes(state.metadata).forEach {
+            ListItem(
+                text = stringResource(it.title),
+                leadingIcon = it.icon?.let { res -> vectorResource(res) },
+                enabled = enabled,
+            ) {
+                onNavigate(it.route)
+            }
         }
     }
 }
 
 @Composable
-private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
+private fun ModuleSettingsSection(
+    state: RadioConfigState,
+    excludedModulesUnlocked: Boolean,
+    isManaged: Boolean,
+    enabled: Boolean,
+    onNavigate: (Route) -> Unit,
+) {
+    val modules =
+        remember(state.metadata, excludedModulesUnlocked) {
+            if (excludedModulesUnlocked) {
+                ModuleRoute.entries
+            } else {
+                ModuleRoute.filterExcludedFrom(state.metadata, state.userConfig.role)
+            }
+        }
     ExpressiveSection(title = stringResource(Res.string.module_settings)) {
         if (isManaged) {
             ManagedMessage()
         }
-        ListItem(
-            text = stringResource(Res.string.module_settings),
-            leadingIcon = MeshtasticIcons.Settings,
-            trailingIcon = MeshtasticIcons.ChevronRight,
-            enabled = enabled,
-        ) {
-            onNavigate(SettingsRoute.ModuleConfiguration)
+        modules.forEach {
+            ListItem(
+                text = stringResource(it.title),
+                leadingIcon = it.icon?.let { res -> vectorResource(res) },
+                enabled = enabled,
+            ) {
+                onNavigate(it.route)
+            }
         }
     }
 }

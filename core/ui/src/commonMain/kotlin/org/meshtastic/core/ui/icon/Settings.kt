@@ -70,3 +70,5 @@ val MeshtasticIcons.SettingsRemote: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_settings_remote)
 val MeshtasticIcons.Storage: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_storage)
+val MeshtasticIcons.Watch: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_app_settings_alt)

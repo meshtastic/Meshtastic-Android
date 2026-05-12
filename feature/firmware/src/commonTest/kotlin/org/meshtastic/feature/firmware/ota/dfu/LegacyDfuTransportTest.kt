@@ -22,7 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnection
@@ -521,10 +521,10 @@ class LegacyDfuTransportTest {
         override val device: BleDevice?
             get() = delegate.device
 
-        override val deviceFlow: StateFlow<BleDevice?>
+        override val deviceFlow: SharedFlow<BleDevice?>
             get() = delegate.deviceFlow
 
-        override val connectionState: StateFlow<BleConnectionState>
+        override val connectionState: SharedFlow<BleConnectionState>
             get() = delegate.connectionState
 
         override suspend fun connect(device: BleDevice) = delegate.connect(device)

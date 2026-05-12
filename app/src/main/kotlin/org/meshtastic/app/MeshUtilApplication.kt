@@ -42,6 +42,7 @@ import org.meshtastic.app.di.AndroidKoinApp
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.repository.MeshPrefs
+import org.meshtastic.core.service.WearableSyncService
 import org.meshtastic.core.service.worker.MeshLogCleanupWorker
 import org.meshtastic.feature.widget.LocalStatsWidgetReceiver
 import kotlin.time.Duration.Companion.hours
@@ -70,6 +71,9 @@ open class MeshUtilApplication :
 
         // Schedule periodic MeshLog cleanup
         scheduleMeshLogCleanup()
+
+        // Eagerly initialize wearable sync service
+        get<WearableSyncService>()
 
         // Generate and publish widget preview for Android 15+ widget picker
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {

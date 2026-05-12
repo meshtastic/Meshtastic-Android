@@ -28,7 +28,9 @@ import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.WatchPrefs
 
 class FakeAnalyticsPrefs : AnalyticsPrefs {
     override val analyticsAllowed = MutableStateFlow(true)
@@ -284,9 +286,43 @@ class FakeAppPreferences : AppPreferences {
     override val radio = FakeRadioPrefs()
     override val mesh = FakeMeshPrefs()
     override val tak = FakeTakPrefs()
+    override val watch = FakeWatchPrefs()
 }
 
-class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
+class FakeWatchPrefs : WatchPrefs {
+    override val pushToWatchEnabled = MutableStateFlow(false)
+    override val syncNodesEnabled = MutableStateFlow(false)
+    override val syncMessagesEnabled = MutableStateFlow(false)
+    override val mirrorNotificationsEnabled = MutableStateFlow(false)
+    override val highContrastModeEnabled = MutableStateFlow(false)
+    override val syncRequest = MutableStateFlow(0L)
+
+    override fun setPushToWatchEnabled(enabled: Boolean) {
+        pushToWatchEnabled.value = enabled
+    }
+
+    override fun setSyncNodesEnabled(enabled: Boolean) {
+        syncNodesEnabled.value = enabled
+    }
+
+    override fun setSyncMessagesEnabled(enabled: Boolean) {
+        syncMessagesEnabled.value = enabled
+    }
+
+    override fun setMirrorNotificationsEnabled(enabled: Boolean) {
+        mirrorNotificationsEnabled.value = enabled
+    }
+
+    override fun setHighContrastModeEnabled(enabled: Boolean) {
+        highContrastModeEnabled.value = enabled
+    }
+
+    override fun requestSync() {
+        syncRequest.value++
+    }
+}
+
+class FakeTakPrefs : TakPrefs {
     override val isTakServerEnabled = MutableStateFlow(false)
 
     override fun setTakServerEnabled(enabled: Boolean) {

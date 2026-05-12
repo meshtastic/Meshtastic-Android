@@ -25,6 +25,7 @@ import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.channels
 import org.meshtastic.core.resources.device
 import org.meshtastic.core.resources.display
+import org.meshtastic.core.resources.ic_app_settings_alt
 import org.meshtastic.core.resources.ic_bluetooth
 import org.meshtastic.core.resources.ic_cell_tower
 import org.meshtastic.core.resources.ic_display_settings
@@ -41,6 +42,7 @@ import org.meshtastic.core.resources.position
 import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.security
 import org.meshtastic.core.resources.user
+import org.meshtastic.core.resources.watch
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.DeviceMetadata
 
@@ -90,6 +92,7 @@ enum class ConfigRoute(
         Res.drawable.ic_security,
         AdminMessage.ConfigType.SECURITY_CONFIG.value,
     ),
+    WATCH(Res.string.watch, SettingsRoute.Watch, Res.drawable.ic_app_settings_alt, 0),
     ;
 
     companion object {
@@ -109,6 +112,6 @@ enum class ConfigRoute(
         val radioConfigRoutes = listOf(USER, LORA, CHANNELS, SECURITY)
 
         fun deviceConfigRoutes(metadata: DeviceMetadata?): List<ConfigRoute> =
-            filterExcludedFrom(metadata) - radioConfigRoutes
+            (filterExcludedFrom(metadata) - radioConfigRoutes).filter { it != WATCH }
     }
 }
