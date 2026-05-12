@@ -96,6 +96,7 @@ import org.meshtastic.core.takserver.di.module as coreTakServerModule
 import org.meshtastic.core.ui.di.module as coreUiModule
 import org.meshtastic.desktop.di.module as desktopDiModule
 import org.meshtastic.feature.connections.di.module as featureConnectionsModule
+import org.meshtastic.feature.docs.di.module as featureDocsModule
 import org.meshtastic.feature.firmware.di.module as featureFirmwareModule
 import org.meshtastic.feature.intro.di.module as featureIntroModule
 import org.meshtastic.feature.map.di.module as featureMapModule
@@ -137,6 +138,7 @@ fun desktopModule() = module {
         org.meshtastic.feature.connections.di.FeatureConnectionsModule().featureConnectionsModule(),
         org.meshtastic.feature.map.di.FeatureMapModule().featureMapModule(),
         org.meshtastic.feature.firmware.di.FeatureFirmwareModule().featureFirmwareModule(),
+        org.meshtastic.feature.docs.di.FeatureDocsModule().featureDocsModule(),
         org.meshtastic.feature.intro.di.FeatureIntroModule().featureIntroModule(),
         org.meshtastic.feature.wifiprovision.di.FeatureWifiProvisionModule().featureWifiProvisionModule(),
         org.meshtastic.desktop.di.DesktopDiModule().desktopDiModule(),

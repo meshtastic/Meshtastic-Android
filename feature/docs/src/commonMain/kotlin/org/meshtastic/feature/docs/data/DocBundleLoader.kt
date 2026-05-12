@@ -36,7 +36,7 @@ interface DocBundleLoader {
 /**
  * Default implementation that loads docs from bundled markdown files packaged as Compose Resources under `files/docs/`.
  */
-@Single
+@Single(binds = [DocBundleLoader::class])
 class DefaultDocBundleLoader : DocBundleLoader {
 
     private var cachedBundle: DocBundle? = null
