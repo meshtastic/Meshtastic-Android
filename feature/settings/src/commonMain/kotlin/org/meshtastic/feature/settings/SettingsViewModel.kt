@@ -191,4 +191,36 @@ class SettingsViewModel(
         val myNodeNum = myNodeNum ?: return
         exportDataUseCase(writer, myNodeNum, filterPortnum)
     }
+
+    // Node list layout preferences
+    val nodeListDensity = uiPrefs.nodeListDensity
+    val shouldShowPower = uiPrefs.shouldShowPower
+    val shouldShowLastHeard = uiPrefs.shouldShowLastHeard
+    val lastHeardIsRelative = uiPrefs.lastHeardIsRelative
+    val shouldShowLocation = uiPrefs.shouldShowLocation
+    val shouldShowHops = uiPrefs.shouldShowHops
+    val shouldShowSignal = uiPrefs.shouldShowSignal
+    val shouldShowChannel = uiPrefs.shouldShowChannel
+    val shouldShowRole = uiPrefs.shouldShowRole
+    val shouldShowTelemetry = uiPrefs.shouldShowTelemetry
+
+    fun setNodeListDensity(value: String) = uiPrefs.setNodeListDensity(value)
+
+    fun setShouldShowPower(value: Boolean) = uiPrefs.setShouldShowPower(value)
+
+    fun setShouldShowLastHeard(value: Boolean) = uiPrefs.setShouldShowLastHeard(value)
+
+    fun setLastHeardIsRelative(value: Boolean) = uiPrefs.setLastHeardIsRelative(value)
+
+    fun setShouldShowLocation(value: Boolean) = uiPrefs.setShouldShowLocation(value)
+
+    fun setShouldShowHops(value: Boolean) = uiPrefs.setShouldShowHops(value)
+
+    fun setShouldShowSignal(value: Boolean) = uiPrefs.setShouldShowSignal(value)
+
+    fun setShouldShowChannel(value: Boolean) = uiPrefs.setShouldShowChannel(value)
+
+    fun setShouldShowRole(value: Boolean) = uiPrefs.setShouldShowRole(value)
+
+    fun setShouldShowTelemetry(value: Boolean) = uiPrefs.setShouldShowTelemetry(value)
 }

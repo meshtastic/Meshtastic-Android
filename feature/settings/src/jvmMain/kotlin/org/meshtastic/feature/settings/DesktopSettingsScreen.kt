@@ -71,6 +71,7 @@ import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.HomoglyphSetting
+import org.meshtastic.feature.settings.component.NodeLayoutSettings
 import org.meshtastic.feature.settings.component.NotificationSection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -201,6 +202,33 @@ fun DesktopSettingsScreen(
                         summary = stringResource(Res.string.device_db_cache_limit_summary),
                     )
                 }
+
+                val densityName by settingsViewModel.nodeListDensity.collectAsStateWithLifecycle()
+                val density =
+                    org.meshtastic.core.model.NodeListDensity.entries.firstOrNull { it.name == densityName }
+                        ?: org.meshtastic.core.model.NodeListDensity.COMPLETE
+                NodeLayoutSettings(
+                    density = density,
+                    onDensityChange = { settingsViewModel.setNodeListDensity(it.name) },
+                    showPower = settingsViewModel.shouldShowPower.collectAsStateWithLifecycle().value,
+                    onShowPowerChange = { settingsViewModel.setShouldShowPower(it) },
+                    showLastHeard = settingsViewModel.shouldShowLastHeard.collectAsStateWithLifecycle().value,
+                    onShowLastHeardChange = { settingsViewModel.setShouldShowLastHeard(it) },
+                    lastHeardIsRelative = settingsViewModel.lastHeardIsRelative.collectAsStateWithLifecycle().value,
+                    onLastHeardIsRelativeChange = { settingsViewModel.setLastHeardIsRelative(it) },
+                    showLocation = settingsViewModel.shouldShowLocation.collectAsStateWithLifecycle().value,
+                    onShowLocationChange = { settingsViewModel.setShouldShowLocation(it) },
+                    showHops = settingsViewModel.shouldShowHops.collectAsStateWithLifecycle().value,
+                    onShowHopsChange = { settingsViewModel.setShouldShowHops(it) },
+                    showSignal = settingsViewModel.shouldShowSignal.collectAsStateWithLifecycle().value,
+                    onShowSignalChange = { settingsViewModel.setShouldShowSignal(it) },
+                    showChannel = settingsViewModel.shouldShowChannel.collectAsStateWithLifecycle().value,
+                    onShowChannelChange = { settingsViewModel.setShouldShowChannel(it) },
+                    showRole = settingsViewModel.shouldShowRole.collectAsStateWithLifecycle().value,
+                    onShowRoleChange = { settingsViewModel.setShouldShowRole(it) },
+                    showTelemetry = settingsViewModel.shouldShowTelemetry.collectAsStateWithLifecycle().value,
+                    onShowTelemetryChange = { settingsViewModel.setShouldShowTelemetry(it) },
+                )
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {

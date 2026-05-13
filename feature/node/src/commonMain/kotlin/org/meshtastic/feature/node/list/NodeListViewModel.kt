@@ -29,6 +29,7 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
@@ -69,6 +70,21 @@ class NodeListViewModel(
         radioInterfaceService.currentDeviceAddressFlow
             .map { address -> address?.let { DeviceType.fromAddress(it) } }
             .stateInWhileSubscribed(initialValue = null)
+
+    val nodeListDensity: StateFlow<NodeListDensity> =
+        nodeFilterPreferences.nodeListDensity
+            .map { name -> NodeListDensity.entries.firstOrNull { it.name == name } ?: NodeListDensity.COMPLETE }
+            .stateInWhileSubscribed(initialValue = NodeListDensity.COMPLETE)
+
+    val shouldShowPower = nodeFilterPreferences.shouldShowPower
+    val shouldShowLastHeard = nodeFilterPreferences.shouldShowLastHeard
+    val lastHeardIsRelative = nodeFilterPreferences.lastHeardIsRelative
+    val shouldShowLocation = nodeFilterPreferences.shouldShowLocation
+    val shouldShowHops = nodeFilterPreferences.shouldShowHops
+    val shouldShowSignal = nodeFilterPreferences.shouldShowSignal
+    val shouldShowChannel = nodeFilterPreferences.shouldShowChannel
+    val shouldShowRole = nodeFilterPreferences.shouldShowRole
+    val shouldShowTelemetry = nodeFilterPreferences.shouldShowTelemetry
 
     private val nodeSortOption = nodeFilterPreferences.nodeSortOption
 

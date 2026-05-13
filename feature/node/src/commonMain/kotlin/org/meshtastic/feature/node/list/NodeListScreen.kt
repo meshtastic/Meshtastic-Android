@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -60,9 +61,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.resources.node_count_template
+import org.meshtastic.core.resources.node_list_help_title
 import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.nodes_empty_disconnected_hint
 import org.meshtastic.core.resources.nodes_empty_disconnected_title
@@ -73,12 +76,15 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
+import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
+import org.meshtastic.feature.node.component.NodeItemCompact
+import org.meshtastic.feature.node.component.NodeListHelp
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -118,8 +124,24 @@ fun NodeListScreen(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val deviceType by viewModel.deviceType.collectAsStateWithLifecycle()
 
+    val density by viewModel.nodeListDensity.collectAsStateWithLifecycle()
+    val showPower by viewModel.shouldShowPower.collectAsStateWithLifecycle()
+    val showLastHeard by viewModel.shouldShowLastHeard.collectAsStateWithLifecycle()
+    val lastHeardIsRelative by viewModel.lastHeardIsRelative.collectAsStateWithLifecycle()
+    val showLocation by viewModel.shouldShowLocation.collectAsStateWithLifecycle()
+    val showHops by viewModel.shouldShowHops.collectAsStateWithLifecycle()
+    val showSignal by viewModel.shouldShowSignal.collectAsStateWithLifecycle()
+    val showChannel by viewModel.shouldShowChannel.collectAsStateWithLifecycle()
+    val showRole by viewModel.shouldShowRole.collectAsStateWithLifecycle()
+    val showTelemetry by viewModel.shouldShowTelemetry.collectAsStateWithLifecycle()
+
     val isScrollInProgress by remember {
         derivedStateOf { listState.isScrollInProgress && (listState.canScrollForward || listState.canScrollBackward) }
+    }
+
+    var showHelpSheet by remember { mutableStateOf(false) }
+    if (showHelpSheet) {
+        NodeListHelp(onDismiss = { showHelpSheet = false })
     }
 
     Scaffold(
@@ -131,7 +153,14 @@ fun NodeListScreen(
                 showNodeChip = false,
                 canNavigateUp = false,
                 onNavigateUp = {},
-                actions = {},
+                actions = {
+                    IconButton(onClick = { showHelpSheet = true }) {
+                        Icon(
+                            imageVector = MeshtasticIcons.Info,
+                            contentDescription = stringResource(Res.string.node_list_help_title),
+                        )
+                    }
+                },
                 onClickChip = {},
             )
         },
@@ -198,18 +227,42 @@ fun NodeListScreen(
 
                         val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
 
-                        NodeItem(
-                            modifier = Modifier.animateItem(),
-                            thisNode = ourNode,
-                            thatNode = node,
-                            distanceUnits = state.distanceUnits,
-                            tempInFahrenheit = state.tempInFahrenheit,
-                            onClick = { navigateToNodeDetails(node.num) },
-                            onLongClick = longClick,
-                            connectionState = connectionState,
-                            deviceType = deviceType,
-                            isActive = isActive,
-                        )
+                        when (density) {
+                            NodeListDensity.COMPLETE ->
+                                NodeItem(
+                                    modifier = Modifier.animateItem(),
+                                    thisNode = ourNode,
+                                    thatNode = node,
+                                    distanceUnits = state.distanceUnits,
+                                    tempInFahrenheit = state.tempInFahrenheit,
+                                    onClick = { navigateToNodeDetails(node.num) },
+                                    onLongClick = longClick,
+                                    connectionState = connectionState,
+                                    deviceType = deviceType,
+                                    isActive = isActive,
+                                )
+
+                            NodeListDensity.COMPACT ->
+                                NodeItemCompact(
+                                    modifier = Modifier.animateItem(),
+                                    thisNode = ourNode,
+                                    thatNode = node,
+                                    distanceUnits = state.distanceUnits,
+                                    onClick = { navigateToNodeDetails(node.num) },
+                                    onLongClick = longClick,
+                                    connectionState = connectionState,
+                                    deviceType = deviceType,
+                                    isActive = isActive,
+                                    showPower = showPower,
+                                    showLastHeard = showLastHeard,
+                                    showLocation = showLocation,
+                                    showHops = showHops,
+                                    showSignal = showSignal,
+                                    showChannel = showChannel,
+                                    showRole = showRole,
+                                    showTelemetry = showTelemetry,
+                                )
+                        }
                         val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {
                             NodeContextMenu(

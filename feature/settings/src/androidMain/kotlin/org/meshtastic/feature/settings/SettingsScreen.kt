@@ -62,6 +62,7 @@ import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
 import org.meshtastic.feature.settings.component.ExpressiveSection
+import org.meshtastic.feature.settings.component.NodeLayoutSettings
 import org.meshtastic.feature.settings.component.PersistenceSection
 import org.meshtastic.feature.settings.component.PrivacySection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
@@ -238,6 +239,33 @@ fun SettingsScreen(
                 AppearanceSection(
                     onShowLanguagePicker = { showLanguagePickerDialog = true },
                     onShowThemePicker = { showThemePickerDialog = true },
+                )
+
+                val densityName by settingsViewModel.nodeListDensity.collectAsStateWithLifecycle()
+                val density =
+                    org.meshtastic.core.model.NodeListDensity.entries.firstOrNull { it.name == densityName }
+                        ?: org.meshtastic.core.model.NodeListDensity.COMPLETE
+                NodeLayoutSettings(
+                    density = density,
+                    onDensityChange = { settingsViewModel.setNodeListDensity(it.name) },
+                    showPower = settingsViewModel.shouldShowPower.collectAsStateWithLifecycle().value,
+                    onShowPowerChange = { settingsViewModel.setShouldShowPower(it) },
+                    showLastHeard = settingsViewModel.shouldShowLastHeard.collectAsStateWithLifecycle().value,
+                    onShowLastHeardChange = { settingsViewModel.setShouldShowLastHeard(it) },
+                    lastHeardIsRelative = settingsViewModel.lastHeardIsRelative.collectAsStateWithLifecycle().value,
+                    onLastHeardIsRelativeChange = { settingsViewModel.setLastHeardIsRelative(it) },
+                    showLocation = settingsViewModel.shouldShowLocation.collectAsStateWithLifecycle().value,
+                    onShowLocationChange = { settingsViewModel.setShouldShowLocation(it) },
+                    showHops = settingsViewModel.shouldShowHops.collectAsStateWithLifecycle().value,
+                    onShowHopsChange = { settingsViewModel.setShouldShowHops(it) },
+                    showSignal = settingsViewModel.shouldShowSignal.collectAsStateWithLifecycle().value,
+                    onShowSignalChange = { settingsViewModel.setShouldShowSignal(it) },
+                    showChannel = settingsViewModel.shouldShowChannel.collectAsStateWithLifecycle().value,
+                    onShowChannelChange = { settingsViewModel.setShouldShowChannel(it) },
+                    showRole = settingsViewModel.shouldShowRole.collectAsStateWithLifecycle().value,
+                    onShowRoleChange = { settingsViewModel.setShouldShowRole(it) },
+                    showTelemetry = settingsViewModel.shouldShowTelemetry.collectAsStateWithLifecycle().value,
+                    onShowTelemetryChange = { settingsViewModel.setShouldShowTelemetry(it) },
                 )
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {

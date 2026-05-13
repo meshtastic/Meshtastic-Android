@@ -40,6 +40,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -89,6 +93,7 @@ import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
+import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
@@ -151,7 +156,29 @@ fun NodeItem(
             }
         }
 
-    Card(modifier = modifier.fillMaxWidth(), colors = cardColors) {
+    val nodeDescription =
+        buildNodeDescription(
+            name = originalLongName,
+            isOnline = thatNode.isOnline,
+            isFavorite = isFavorite,
+            lastHeard = thatNode.lastHeard,
+            role = thatNode.user.role.name,
+            hopsAway = thatNode.hopsAway,
+            batteryLevel = thatNode.batteryLevel,
+            distance = distance,
+            snr = thatNode.snr,
+            rssi = thatNode.rssi,
+            viaMqtt = thatNode.viaMqtt,
+        )
+
+    Card(
+        modifier =
+        modifier.fillMaxWidth().semantics(mergeDescendants = true) {
+            contentDescription = nodeDescription
+            role = Role.Button
+        },
+        colors = cardColors,
+    ) {
         Column(
             modifier =
             Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(12.dp),
@@ -457,5 +484,34 @@ private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
         HardwareInfo(hwModel = thatNode.user.hw_model.name, contentColor = contentColor)
         RoleInfo(role = thatNode.user.role, contentColor = contentColor)
         NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
+    }
+}
+
+/** Builds a TalkBack-friendly description aggregating node state. Shared between [NodeItem] and `NodeItemCompact`. */
+@Suppress("LongParameterList")
+fun buildNodeDescription(
+    name: String,
+    isOnline: Boolean,
+    isFavorite: Boolean,
+    lastHeard: Int,
+    role: String,
+    hopsAway: Int,
+    batteryLevel: Int?,
+    distance: String?,
+    snr: Float,
+    rssi: Int,
+    viaMqtt: Boolean,
+): String = buildString {
+    append(name)
+    append(if (isOnline) ", online" else ", offline")
+    if (isFavorite) append(", favorite")
+    if (lastHeard > 0) append(", last heard ${formatAgo(lastHeard)}")
+    append(", role $role")
+    if (hopsAway > 0) append(", $hopsAway hops away")
+    batteryLevel?.let { if (it in 1..100) append(", battery $it%") }
+    distance?.let { append(", $it away") }
+    if (hopsAway == 0 && !viaMqtt && snr < 100f && rssi < 0) {
+        val quality = determineSignalQuality(snr, rssi)
+        append(", signal ${quality.name.lowercase()}")
     }
 }
