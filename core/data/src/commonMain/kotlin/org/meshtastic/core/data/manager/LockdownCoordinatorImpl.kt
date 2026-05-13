@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,18 @@ import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.LockdownStatus
+import kotlin.concurrent.Volatile
 
+/**
+ * Lockdown authentication state machine. Processes `LockdownStatus` messages from the firmware, drives the
+ * `LockdownState` exposed to the UI, and manages auto-replay of cached passphrases.
+ *
+ * **Threading**: All public methods are called from the BLE/radio dispatcher (single-threaded). `@Volatile` fields
+ * ensure visibility if a coroutine resumes on a different thread, but compound read-modify sequences assume no
+ * concurrent callers.
+ */
 @Single(binds = [LockdownCoordinator::class])
+@Suppress("TooManyFunctions")
 class LockdownCoordinatorImpl(
     private val serviceRepository: ServiceRepository,
     private val commandSender: CommandSender,
@@ -37,31 +47,29 @@ class LockdownCoordinatorImpl(
     private val connectionManager: MeshConnectionManager,
 ) : LockdownCoordinator {
     @Volatile private var wasAutoAttempt = false
+
     @Volatile private var wasLockNow = false
+
     @Volatile private var pendingPassphrase: String? = null
+
     @Volatile private var pendingBoots: Int = LockdownPassphraseStore.DEFAULT_BOOTS
+
     @Volatile private var pendingHours: Int = 0
 
     override fun onConnect() {
         serviceRepository.setSessionAuthorized(false)
-        wasAutoAttempt = false
-        wasLockNow = false
-        pendingPassphrase = null
-        pendingBoots = LockdownPassphraseStore.DEFAULT_BOOTS
-        pendingHours = 0
+        resetTransientState()
     }
 
     override fun onDisconnect() {
         serviceRepository.setSessionAuthorized(false)
         serviceRepository.setLockdownTokenInfo(null)
         serviceRepository.setLockdownState(LockdownState.None)
-        wasAutoAttempt = false
-        wasLockNow = false
-        pendingPassphrase = null
+        resetTransientState()
     }
 
     override fun onConfigComplete() {
-        if (serviceRepository.sessionAuthorized.value) return
+        // No-op once authorized; retained for lifecycle symmetry.
     }
 
     override fun handleLockdownStatus(status: LockdownStatus) {
@@ -70,20 +78,19 @@ class LockdownCoordinatorImpl(
             LockdownStatus.State.LOCKED -> handleLocked(status.lock_reason)
             LockdownStatus.State.UNLOCKED -> handleUnlocked(status)
             LockdownStatus.State.UNLOCK_FAILED -> handleUnlockFailed(status.backoff_seconds)
-            LockdownStatus.State.STATE_UNSPECIFIED -> Unit
+            LockdownStatus.State.STATE_UNSPECIFIED -> Logger.w { "Lockdown: Received STATE_UNSPECIFIED from firmware" }
         }
     }
 
     private fun handleLockNowAcknowledged() {
         Logger.i { "Lockdown: Lock Now acknowledged — resetting session authorization" }
         serviceRepository.setSessionAuthorized(false)
-        wasAutoAttempt = false
-        wasLockNow = false
-        pendingPassphrase = null
+        resetTransientState()
         connectionManager.clearRadioConfig()
         serviceRepository.setLockdownState(LockdownState.LockNowAcknowledged)
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun handleLocked(lockReason: String) {
         if (wasLockNow) {
             handleLockNowAcknowledged()
@@ -91,7 +98,13 @@ class LockdownCoordinatorImpl(
         }
         val deviceAddress = radioInterfaceService.getDeviceAddress()
         if (deviceAddress != null) {
-            val stored = passphraseStore.getPassphrase(deviceAddress)
+            val stored =
+                try {
+                    passphraseStore.getPassphrase(deviceAddress)
+                } catch (e: Exception) {
+                    Logger.e(e) { "Lockdown: Failed to read stored passphrase" }
+                    null
+                }
             if (stored != null) {
                 Logger.i { "Lockdown: Auto-unlocking with stored passphrase" }
                 wasAutoAttempt = true
@@ -106,18 +119,24 @@ class LockdownCoordinatorImpl(
         serviceRepository.setLockdownState(LockdownState.NeedsProvision)
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun handleUnlocked(status: LockdownStatus) {
         val deviceAddress = radioInterfaceService.getDeviceAddress()
         val passphrase = pendingPassphrase
+        // Only save on manual submit — auto-unlock already has a stored passphrase.
         if (deviceAddress != null && passphrase != null) {
-            passphraseStore.savePassphrase(deviceAddress, passphrase, pendingBoots, pendingHours)
-            Logger.i { "Lockdown: Saved passphrase for device" }
+            try {
+                passphraseStore.savePassphrase(deviceAddress, passphrase, pendingBoots, pendingHours)
+                Logger.i { "Lockdown: Saved passphrase for device" }
+            } catch (e: Exception) {
+                Logger.e(e) { "Lockdown: Failed to persist passphrase (session still unlocked)" }
+            }
         }
         pendingPassphrase = null
         serviceRepository.setLockdownTokenInfo(
             LockdownTokenInfo(
                 bootsRemaining = status.boots_remaining,
-                expiryEpoch = status.valid_until_epoch.toLong() and UINT32_MASK,
+                expiryEpoch = status.valid_until_epoch.toUInt().toLong(),
             ),
         )
         serviceRepository.setLockdownState(LockdownState.Unlocked)
@@ -125,6 +144,7 @@ class LockdownCoordinatorImpl(
         connectionManager.startConfigOnly()
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun handleUnlockFailed(backoffSeconds: Int) {
         pendingPassphrase = null
         if (wasAutoAttempt) {
@@ -135,8 +155,12 @@ class LockdownCoordinatorImpl(
             } else {
                 val deviceAddress = radioInterfaceService.getDeviceAddress()
                 if (deviceAddress != null) {
-                    passphraseStore.clearPassphrase(deviceAddress)
-                    Logger.i { "Lockdown: Auto-unlock failed, cleared stored passphrase" }
+                    try {
+                        passphraseStore.clearPassphrase(deviceAddress)
+                        Logger.i { "Lockdown: Auto-unlock failed, cleared stored passphrase" }
+                    } catch (e: Exception) {
+                        Logger.e(e) { "Lockdown: Auto-unlock failed AND could not clear stored passphrase" }
+                    }
                 }
                 serviceRepository.setLockdownState(LockdownState.Locked())
             }
@@ -165,7 +189,11 @@ class LockdownCoordinatorImpl(
         commandSender.sendLockNow()
     }
 
-    private companion object {
-        private const val UINT32_MASK = 0xFFFFFFFFL
+    private fun resetTransientState() {
+        wasAutoAttempt = false
+        wasLockNow = false
+        pendingPassphrase = null
+        pendingBoots = LockdownPassphraseStore.DEFAULT_BOOTS
+        pendingHours = 0
     }
 }

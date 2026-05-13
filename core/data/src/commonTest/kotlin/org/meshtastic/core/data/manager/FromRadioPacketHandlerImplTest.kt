@@ -28,6 +28,7 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -65,6 +66,7 @@ class FromRadioPacketHandlerImplTest {
                 mqttManager,
                 packetHandler,
                 notificationManager,
+                FakeLockdownCoordinator(),
             )
     }
 

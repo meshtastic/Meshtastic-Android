@@ -8,9 +8,9 @@
 
 **Purpose**: Establish baseline from Nick's working proof-of-concept before refactoring
 
-- [ ] T000a Fetch Nick's `features/lockdown-v2` branch and cherry-pick/rebase onto `feat/lockdown-mode` (resolve conflicts against current `origin/main`)
-- [ ] T000b Verify cherry-picked code compiles: `./gradlew assembleDebug` (expect lint/detekt issues — fix in later phases)
-- [ ] T000c Inventory PR files for subsequent refactoring: identify which files stay as-is, which move modules, which need interface extraction
+- [X] T000a Fetch Nick's `features/lockdown-v2` branch and cherry-pick/rebase onto `feat/lockdown-mode` (resolve conflicts against current `origin/main`)
+- [X] T000b Verify cherry-picked code compiles: `./gradlew assembleDebug` (expect lint/detekt issues — fix in later phases)
+- [X] T000c Inventory PR files for subsequent refactoring: identify which files stay as-is, which move modules, which need interface extraction
 
 ---
 
@@ -18,9 +18,9 @@
 
 **Purpose**: Establish module structure and dependencies for lockdown feature
 
-- [ ] T001 Create `core/model/src/commonMain/kotlin/org/meshtastic/core/model/lockdown/` package directory
-- [ ] T002 [P] Verify `androidx.security:security-crypto` dependency exists in `core/datastore/build.gradle.kts` (already added by PR — confirm in correct module)
-- [ ] T003 [P] Verify proto submodule contains `LockdownAuth` and `LockdownStatus` generated classes in `core/proto/build/generated/source/wire/org/meshtastic/proto/`
+- [X] T001 Create `core/model/src/commonMain/kotlin/org/meshtastic/core/model/lockdown/` package directory
+- [X] T002 [P] Verify `androidx.security:security-crypto` dependency exists in `core/datastore/build.gradle.kts` (already added by PR — confirm in correct module)
+- [X] T003 [P] Verify proto submodule contains `LockdownAuth` and `LockdownStatus` generated classes in `core/proto/build/generated/source/wire/org/meshtastic/proto/`
 
 ---
 
@@ -32,19 +32,19 @@
 
 **Note**: Nick's PR contains working implementations for most of these. Tasks below specify what to **port/refactor** from the PR rather than creating from scratch.
 
-- [ ] T004 Port `LockdownState` sealed class from PR's `core/model/.../LockdownState.kt` → refactor to add `Locked(lockReason: LockdownStatus.State)` (use proto enum directly, not Int), verify 8 variants match spec: NotApplicable, NeedsProvision, Locked, Unlocking, Unlocked(bootsRemaining, validUntilEpoch), UnlockFailed(backoffSeconds), LockNowPending, LockNowAcknowledged
-- [ ] T005 [P] Extract `LockdownCoordinator` interface from PR's concrete class to `core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/LockdownCoordinator.kt` — add lifecycle hooks from PR: `onConnect(nodeId: Int)`, `onConfigComplete()`, `onDisconnect()` alongside `state`, `isAuthorized`, `handleStatus()`, `submitPassphrase()`, `lockNow()`
-- [ ] T006 [P] Extract `LockdownPassphraseStore` interface from PR's concrete class to `core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/LockdownPassphraseStore.kt` with get(nodeId), put(nodeId, passphrase), clear(nodeId)
-- [ ] T007 Move PR's `LockdownPassphraseStore` impl from `core/service/src/androidMain/` to `core/datastore/src/androidMain/kotlin/org/meshtastic/core/datastore/LockdownPassphraseStoreImpl.kt` — keep EncryptedSharedPreferences logic, implement extracted interface
-- [ ] T008 [P] Create `LockdownPassphraseStoreImpl` no-op stub for JVM in `core/datastore/src/jvmMain/kotlin/org/meshtastic/core/datastore/LockdownPassphraseStoreImpl.kt`
-- [ ] T009 [P] Create `LockdownPassphraseStoreImpl` no-op stub for iOS in `core/datastore/src/iosMain/kotlin/org/meshtastic/core/datastore/LockdownPassphraseStoreImpl.kt`
-- [ ] T010 Extract state machine logic from PR's `LockdownHandlerImpl` (currently in `core/service/src/androidMain/`) to `core/data/src/commonMain/kotlin/org/meshtastic/core/data/manager/LockdownCoordinatorImpl.kt` — keep auto-replay, wasLockNow flag, pending passphrase tracking. Remove Android/AIDL dependencies so it compiles in commonMain.
-- [ ] T010b Keep thin AIDL adapter in `core/service/src/androidMain/` that delegates to `LockdownCoordinatorImpl` for `MeshService` IPC calls (`sendLockdownPassphrase`, `sendLockNow`)
-- [ ] T011 Verify PR's `FromRadioPacketHandlerImpl` `lockdown_status` dispatch is intact; add `coordinator.onConfigComplete()` call from config completion handler if not already present
-- [ ] T012 Verify PR's `CommandSenderImpl` extensions (`sendLockdownPassphrase`/`sendLockNow`) are intact; adapt method signatures if coordinator interface changed
-- [ ] T012b Wire `LockdownCoordinator.onConnect(nodeId)`/`onDisconnect()` into `MeshConnectionManagerImpl` connection lifecycle callbacks (port from PR's existing wiring)
-- [ ] T012c Expose `lockdownState: StateFlow<LockdownState>` and `sessionAuthorized: StateFlow<Boolean>` via `ServiceRepository` (port from PR's existing exposure)
-- [ ] T013 Register `LockdownCoordinator` and `LockdownPassphraseStore` bindings in Koin DI — use `@Single` annotation on impl classes (`LockdownCoordinatorImpl`, `LockdownPassphraseStoreImpl`) and `@Module` on containing Koin module per project convention
+- [X] T004 Port `LockdownState` sealed class from PR's `core/model/.../LockdownState.kt` → refactor to add `Locked(lockReason: LockdownStatus.State)` (use proto enum directly, not Int), verify 8 variants match spec: NotApplicable, NeedsProvision, Locked, Unlocking, Unlocked(bootsRemaining, validUntilEpoch), UnlockFailed(backoffSeconds), LockNowPending, LockNowAcknowledged
+- [X] T005 [P] Extract `LockdownCoordinator` interface from PR's concrete class to `core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/LockdownCoordinator.kt` — add lifecycle hooks from PR: `onConnect(nodeId: Int)`, `onConfigComplete()`, `onDisconnect()` alongside `state`, `isAuthorized`, `handleStatus()`, `submitPassphrase()`, `lockNow()`
+- [X] T006 [P] Extract `LockdownPassphraseStore` interface from PR's concrete class to `core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/LockdownPassphraseStore.kt` with get(nodeId), put(nodeId, passphrase), clear(nodeId)
+- [X] T007 Move PR's `LockdownPassphraseStore` impl from `core/service/src/androidMain/` to `core/datastore/src/androidMain/kotlin/org/meshtastic/core/datastore/LockdownPassphraseStoreImpl.kt` — keep EncryptedSharedPreferences logic, implement extracted interface
+- [X] T008 [P] Create `LockdownPassphraseStoreImpl` no-op stub for JVM in `core/datastore/src/jvmMain/kotlin/org/meshtastic/core/datastore/LockdownPassphraseStoreImpl.kt`
+- [X] T009 [P] Create `LockdownPassphraseStoreImpl` no-op stub for iOS in `core/datastore/src/iosMain/kotlin/org/meshtastic/core/datastore/LockdownPassphraseStoreImpl.kt`
+- [X] T010 Extract state machine logic from PR's `LockdownHandlerImpl` (currently in `core/service/src/androidMain/`) to `core/data/src/commonMain/kotlin/org/meshtastic/core/data/manager/LockdownCoordinatorImpl.kt` — keep auto-replay, wasLockNow flag, pending passphrase tracking. Remove Android/AIDL dependencies so it compiles in commonMain.
+- [X] T010b Keep thin AIDL adapter in `core/service/src/androidMain/` that delegates to `LockdownCoordinatorImpl` for `MeshService` IPC calls (`sendLockdownPassphrase`, `sendLockNow`)
+- [X] T011 Verify PR's `FromRadioPacketHandlerImpl` `lockdown_status` dispatch is intact; add `coordinator.onConfigComplete()` call from config completion handler if not already present
+- [X] T012 Verify PR's `CommandSenderImpl` extensions (`sendLockdownPassphrase`/`sendLockNow`) are intact; adapt method signatures if coordinator interface changed
+- [X] T012b Wire `LockdownCoordinator.onConnect(nodeId)`/`onDisconnect()` into `MeshConnectionManagerImpl` connection lifecycle callbacks (port from PR's existing wiring)
+- [X] T012c Expose `lockdownState: StateFlow<LockdownState>` and `sessionAuthorized: StateFlow<Boolean>` via `ServiceRepository` (port from PR's existing exposure)
+- [X] T013 Register `LockdownCoordinator` and `LockdownPassphraseStore` bindings in Koin DI — use `@Single` annotation on impl classes (`LockdownCoordinatorImpl`, `LockdownPassphraseStoreImpl`) and `@Module` on containing Koin module per project convention
 
 **Checkpoint**: Foundation ready — coordinator processes lockdown status, sends auth, manages state. AIDL layer delegates to coordinator. User story UI can begin.
 
@@ -58,12 +58,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T014 [US1] Move and refactor Nick's `LockdownUnlockDialog` from `app/src/main/.../ui/` to `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/lockdown/LockdownDialog.kt` — adapt to non-dismissable AlertDialog composable with passphrase field, submit button, error display, and disconnect option (`onDismissRequest = {}` + `BackHandler`)
-- [ ] T015 [US1] Implement unlock flow in `LockdownDialog`: passphrase entry → call `coordinator.submitPassphrase()` → show loading state → handle UNLOCKED/UNLOCK_FAILED transitions
-- [ ] T016 [US1] Implement backoff enforcement in `LockdownDialog`: when `UnlockFailed(backoffSeconds > 0)`, show countdown timer and disable Submit button until backoff expires
-- [ ] T017 [US1] Integrate `LockdownDialog` in app shell composable — expose `lockdownState` from ViewModel (port PR's `UIViewModel.lockdownState` pattern), observe state, show dialog when state is Locked/NeedsProvision/Unlocking/UnlockFailed, dismiss when Unlocked/NotApplicable
-- [ ] T018 [US1] Add string resources for lockdown UI: "Unlock Device", "Enter passphrase", "Incorrect passphrase", "Retry in %d seconds", "Disconnect" in `core/resources/src/commonMain/composeResources/values/strings.xml`
-- [ ] T019 [US1] Run `python3 scripts/sort-strings.py` after adding string resources
+- [X] T014 [US1] Move and refactor Nick's `LockdownUnlockDialog` from `app/src/main/.../ui/` to `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/lockdown/LockdownDialog.kt` — adapt to non-dismissable AlertDialog composable with passphrase field, submit button, error display, and disconnect option (`onDismissRequest = {}` + `BackHandler`)
+- [X] T015 [US1] Implement unlock flow in `LockdownDialog`: passphrase entry → call `coordinator.submitPassphrase()` → show loading state → handle UNLOCKED/UNLOCK_FAILED transitions
+- [X] T016 [US1] Implement backoff enforcement in `LockdownDialog`: when `UnlockFailed(backoffSeconds > 0)`, show countdown timer and disable Submit button until backoff expires
+- [X] T017 [US1] Integrate `LockdownDialog` in app shell composable — expose `lockdownState` from ViewModel (port PR's `UIViewModel.lockdownState` pattern), observe state, show dialog when state is Locked/NeedsProvision/Unlocking/UnlockFailed, dismiss when Unlocked/NotApplicable
+- [X] T018 [US1] Add string resources for lockdown UI: "Unlock Device", "Enter passphrase", "Incorrect passphrase", "Retry in %d seconds", "Disconnect" in `core/resources/src/commonMain/composeResources/values/strings.xml`
+- [X] T019 [US1] Run `python3 scripts/sort-strings.py` after adding string resources
 
 **Checkpoint**: User Story 1 complete — locked nodes can be unlocked via non-dismissable dialog.
 
@@ -77,11 +77,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T020 [US2] Add provision mode to `LockdownDialog`: when state is `NeedsProvision`, show "Set Passphrase" title, passphrase + confirm fields, optional "Boots remaining" and "Hours until expiry" number inputs
-- [ ] T021 [US2] Implement passphrase validation: non-empty, 1-32 bytes, confirm field matches, empty TTL fields send 0
-- [ ] T022 [US2] Convert "hours until expiry" user input to `valid_until_epoch` (current Unix time + hours * 3600) before sending to coordinator
-- [ ] T023 [US2] Add string resources for provision mode: "Set Passphrase", "Confirm passphrase", "Passphrases do not match", "Boots remaining (optional)", "Hours until expiry (optional)" in `core/resources/src/commonMain/composeResources/values/strings.xml`
-- [ ] T024 [US2] Run `python3 scripts/sort-strings.py` after adding string resources
+- [X] T020 [US2] Add provision mode to `LockdownDialog`: when state is `NeedsProvision`, show "Set Passphrase" title, passphrase + confirm fields, optional "Boots remaining" and "Hours until expiry" number inputs
+- [X] T021 [US2] Implement passphrase validation: non-empty, 1-32 bytes, confirm field matches, empty TTL fields send 0
+- [X] T022 [US2] Convert "hours until expiry" user input to `valid_until_epoch` (current Unix time + hours * 3600) before sending to coordinator
+- [X] T023 [US2] Add string resources for provision mode: "Set Passphrase", "Confirm passphrase", "Passphrases do not match", "Boots remaining (optional)", "Hours until expiry (optional)" in `core/resources/src/commonMain/composeResources/values/strings.xml`
+- [X] T024 [US2] Run `python3 scripts/sort-strings.py` after adding string resources
 
 **Checkpoint**: User Story 2 complete — unprovisioned nodes can be set up with a passphrase.
 
@@ -95,12 +95,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T025 [US3] Create `LockNowButton` composable in `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/lockdown/LockNowButton.kt` — visible when `coordinator.state != NotApplicable` (firmware supports lockdown), enabled only when state is `Unlocked`, hidden/disabled with hint when locked or not applicable
-- [ ] T026 [US3] Wire `LockNowButton` into existing `SecurityConfigItemList.kt` (port PR's integration point in `feature/settings/src/commonMain/kotlin/.../radio/component/SecurityConfigItemList.kt`)
-- [ ] T027 [US3] Implement explicit disconnect in `LockdownCoordinatorImpl` after `LockNowAcknowledged` state: delay 500ms → call connection manager disconnect
-- [ ] T028 [US3] Handle `LockNowPending` and `LockNowAcknowledged` states in `LockdownDialog` overlay: show "Locking device..." spinner and "Device locked" confirmation
-- [ ] T029 [US3] Add string resources: "Lock Now", "Locking device...", "Device locked", "Device is locked" in `core/resources/src/commonMain/composeResources/values/strings.xml`
-- [ ] T030 [US3] Run `python3 scripts/sort-strings.py` after adding string resources
+- [X] T025 [US3] Create `LockNowButton` composable in `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/lockdown/LockNowButton.kt` — visible when `coordinator.state != NotApplicable` (firmware supports lockdown), enabled only when state is `Unlocked`, hidden/disabled with hint when locked or not applicable
+- [X] T026 [US3] Wire `LockNowButton` into existing `SecurityConfigItemList.kt` (port PR's integration point in `feature/settings/src/commonMain/kotlin/.../radio/component/SecurityConfigItemList.kt`)
+- [X] T027 [US3] Implement explicit disconnect in `LockdownCoordinatorImpl` after `LockNowAcknowledged` state: delay 500ms → call connection manager disconnect
+- [X] T028 [US3] Handle `LockNowPending` and `LockNowAcknowledged` states in `LockdownDialog` overlay: show "Locking device..." spinner and "Device locked" confirmation
+- [X] T029 [US3] Add string resources: "Lock Now", "Locking device...", "Device locked", "Device is locked" in `core/resources/src/commonMain/composeResources/values/strings.xml`
+- [X] T030 [US3] Run `python3 scripts/sort-strings.py` after adding string resources
 
 **Checkpoint**: User Story 3 complete — users can actively re-lock devices.
 
@@ -114,10 +114,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T031 [US4] Implement auto-replay in `LockdownCoordinatorImpl`: on `Locked` state entry, check `passphraseStore.get(nodeId)`, if non-null call `submitPassphrase(cached, 0, 0)` automatically
-- [ ] T032 [US4] Implement cache-on-success in `LockdownCoordinatorImpl`: on transition to `Unlocked` after user-entered passphrase (not auto-replay), call `passphraseStore.put(nodeId, passphrase)`
-- [ ] T033 [US4] Implement cache-clear-on-failure: on `UnlockFailed` after auto-replay attempt, call `passphraseStore.clear(nodeId)` and transition to `Locked` (prompting user)
-- [ ] T034 [US4] Add visual indicator in `LockdownDialog` for auto-replay in progress: show "Authenticating..." with spinner instead of passphrase fields while auto-replay is attempted
+- [X] T031 [US4] Implement auto-replay in `LockdownCoordinatorImpl`: on `Locked` state entry, check `passphraseStore.get(nodeId)`, if non-null call `submitPassphrase(cached, 0, 0)` automatically
+- [X] T032 [US4] Implement cache-on-success in `LockdownCoordinatorImpl`: on transition to `Unlocked` after user-entered passphrase (not auto-replay), call `passphraseStore.put(nodeId, passphrase)`
+- [X] T033 [US4] Implement cache-clear-on-failure: on `UnlockFailed` after auto-replay attempt, call `passphraseStore.clear(nodeId)` and transition to `Locked` (prompting user)
+- [X] T034 [US4] Add visual indicator in `LockdownDialog` for auto-replay in progress: show "Authenticating..." with spinner instead of passphrase fields while auto-replay is attempted
 
 **Checkpoint**: User Story 4 complete — reconnections are seamless for cached passphrases.
 
@@ -131,10 +131,10 @@
 
 ### Implementation for User Story 5
 
-- [ ] T035 [US5] Create `LockdownSessionStatus` composable in `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/lockdown/LockdownSessionStatus.kt` displaying boots remaining and formatted expiry time
-- [ ] T036 [US5] Wire `LockdownSessionStatus` into `SecurityConfigScreen` above `LockNowButton` — visible only when coordinator state is `Unlocked`
-- [ ] T037 [US5] Add string resources: "Session: %d reboots remaining", "expires %s", "no time limit", "no expiry configured" in `core/resources/src/commonMain/composeResources/values/strings.xml`
-- [ ] T038 [US5] Run `python3 scripts/sort-strings.py` after adding string resources
+- [X] T035 [US5] Create `LockdownSessionStatus` composable in `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/lockdown/LockdownSessionStatus.kt` displaying boots remaining and formatted expiry time
+- [X] T036 [US5] Wire `LockdownSessionStatus` into `SecurityConfigScreen` above `LockNowButton` — visible only when coordinator state is `Unlocked`
+- [X] T037 [US5] Add string resources: "Session: %d reboots remaining", "expires %s", "no time limit", "no expiry configured" in `core/resources/src/commonMain/composeResources/values/strings.xml`
+- [X] T038 [US5] Run `python3 scripts/sort-strings.py` after adding string resources
 
 **Checkpoint**: User Story 5 complete — session TTL info visible in settings.
 
@@ -144,15 +144,15 @@
 
 **Purpose**: Banner gating, privacy audit, lint, and final validation
 
-- [ ] T039 [P] Gate all action-prompting banners (Region Unset, config warnings) on `lockdownCoordinator.isAuthorized` — suppress when not authorized
-- [ ] T040 [P] Audit `LockdownCoordinatorImpl` and `LockdownPassphraseStoreImpl` logs: ensure no passphrase bytes are logged; redact device addresses to last 4 hex chars
-- [ ] T041 [P] Review lockdown UI against Meshtastic design standards: M3 components, accessibility (TalkBack semantics, touch targets), typography hierarchy
-- [ ] T042 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto`
-- [ ] T043 [P] Verify `LockdownCoordinator.onDisconnect()` is called on connection disconnect (already wired in T012b) to ensure clean state for next connection
-- [ ] T043b [P] Write unit tests for `LockdownCoordinatorImpl` state machine: cover all 8 state transitions, auto-replay success/failure, lock-now flow with wasLockNow flag, onDisconnect reset, and backoff enforcement
-- [ ] T044 Run `./gradlew spotlessApply spotlessCheck detekt` for all touched modules
-- [ ] T045 Run `./gradlew assembleDebug test allTests` to verify compilation and tests pass
-- [ ] T046 Verify build with `./gradlew :core:model:allTests :core:repository:allTests :core:data:allTests :core:datastore:allTests :feature:settings:allTests`
+- [X] T039 [P] Gate all action-prompting banners (Region Unset, config warnings) on `lockdownCoordinator.isAuthorized` — suppress when not authorized
+- [X] T040 [P] Audit `LockdownCoordinatorImpl` and `LockdownPassphraseStoreImpl` logs: ensure no passphrase bytes are logged; redact device addresses to last 4 hex chars
+- [X] T041 [P] Review lockdown UI against Meshtastic design standards: M3 components, accessibility (TalkBack semantics, touch targets), typography hierarchy
+- [X] T042 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto`
+- [X] T043 [P] Verify `LockdownCoordinator.onDisconnect()` is called on connection disconnect (already wired in T012b) to ensure clean state for next connection
+- [X] T043b [P] Write unit tests for `LockdownCoordinatorImpl` state machine: cover all 8 state transitions, auto-replay success/failure, lock-now flow with wasLockNow flag, onDisconnect reset, and backoff enforcement
+- [X] T044 Run `./gradlew spotlessApply spotlessCheck detekt` for all touched modules
+- [X] T045 Run `./gradlew assembleDebug test allTests` to verify compilation and tests pass
+- [X] T046 Verify build with `./gradlew :core:model:allTests :core:repository:allTests :core:data:allTests :core:datastore:allTests :feature:settings:allTests`
 
 ---
 

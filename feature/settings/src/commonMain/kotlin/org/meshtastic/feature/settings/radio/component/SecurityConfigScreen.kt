@@ -47,6 +47,7 @@ import org.meshtastic.core.resources.config_security_serial_enabled
 import org.meshtastic.core.resources.debug_log_api_enabled
 import org.meshtastic.core.resources.direct_message_key
 import org.meshtastic.core.resources.legacy_admin_channel
+import org.meshtastic.core.resources.lockdown_lock_now
 import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.managed_mode
 import org.meshtastic.core.resources.private_key
@@ -214,7 +215,6 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                // TODO(lockdown): Re-implement Lock Now button with KMP-compatible UI (Phase 5, T025-T026)
                 val tokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
                 val authorized by viewModel.sessionAuthorized.collectAsStateWithLifecycle()
                 if (authorized) {
@@ -222,7 +222,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 }
                 NodeActionButton(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    title = "Lock Now",
+                    title = stringResource(Res.string.lockdown_lock_now),
                     enabled = state.connected && authorized,
                     onClick = { viewModel.sendLockNow() },
                 )

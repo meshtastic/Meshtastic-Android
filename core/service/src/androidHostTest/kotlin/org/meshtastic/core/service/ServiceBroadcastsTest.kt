@@ -28,6 +28,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.service.LockdownState
+import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.ServiceRepository
@@ -130,6 +132,28 @@ class ServiceBroadcastsTest {
 
         override suspend fun onServiceAction(action: ServiceAction) {
             serviceActions.emit(action)
+        }
+
+        override val lockdownState = MutableStateFlow<LockdownState>(LockdownState.None)
+
+        override fun setLockdownState(state: LockdownState) {
+            lockdownState.value = state
+        }
+
+        override fun clearLockdownState() {
+            lockdownState.value = LockdownState.None
+        }
+
+        override val lockdownTokenInfo = MutableStateFlow<LockdownTokenInfo?>(null)
+
+        override fun setLockdownTokenInfo(info: LockdownTokenInfo?) {
+            lockdownTokenInfo.value = info
+        }
+
+        override val sessionAuthorized = MutableStateFlow(false)
+
+        override fun setSessionAuthorized(authorized: Boolean) {
+            sessionAuthorized.value = authorized
         }
     }
 }

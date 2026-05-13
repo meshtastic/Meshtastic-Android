@@ -585,6 +585,24 @@ local_stats_uptime
 local_stats_utilization
 location_disabled
 location_sharing
+### LOCKDOWN ###
+lockdown_backoff
+lockdown_boots_remaining
+lockdown_confirm_passphrase
+lockdown_enter_passphrase
+lockdown_hide_passphrase
+lockdown_hours_until_expiry
+lockdown_incorrect_passphrase
+lockdown_lock_now
+lockdown_lock_reason
+lockdown_passphrase
+lockdown_passphrases_do_not_match
+lockdown_session_boots_remaining
+lockdown_session_expires
+lockdown_session_no_time_limit
+lockdown_set_passphrase
+lockdown_show_passphrase
+lockdown_submit
 locked
 ### LOG ###
 log_retention_days

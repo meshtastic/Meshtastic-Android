@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import org.meshtastic.proto.LockdownStatus
 /**
  * Coordinates lockdown (TAK passphrase) authentication for TAK-locked devices.
  *
- * Implementations handle the full authentication lifecycle: auto-unlock with a stored
- * passphrase, manual passphrase submission, lock-now, and session lifecycle hooks.
+ * Implementations handle the full authentication lifecycle: auto-unlock with a stored passphrase, manual passphrase
+ * submission, lock-now, and session lifecycle hooks.
  */
 interface LockdownCoordinator {
     /** Called when a BLE connection is established, before the first config request. */
@@ -32,8 +32,8 @@ interface LockdownCoordinator {
     fun onDisconnect()
 
     /**
-     * Called on every config_complete_id from the device.
-     * After session is authorized this is a no-op to prevent re-triggering lockdown logic.
+     * Called on every config_complete_id from the device. After session is authorized this is a no-op to prevent
+     * re-triggering lockdown logic.
      */
     fun onConfigComplete()
 

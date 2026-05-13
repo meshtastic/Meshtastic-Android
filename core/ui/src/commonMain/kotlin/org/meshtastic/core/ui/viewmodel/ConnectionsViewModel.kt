@@ -68,6 +68,7 @@ class ConnectionsViewModel(
 
     val connectionState = serviceRepository.connectionState
     val lockdownState = serviceRepository.lockdownState
+    val sessionAuthorized = serviceRepository.sessionAuthorized
 
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 

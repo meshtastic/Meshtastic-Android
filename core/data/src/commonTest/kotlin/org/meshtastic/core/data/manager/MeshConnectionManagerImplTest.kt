@@ -52,6 +52,7 @@ import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
@@ -133,6 +134,7 @@ class MeshConnectionManagerImplTest {
         workerManager,
         appWidgetUpdater,
         DataLayerHeartbeatSender(packetHandler),
+        FakeLockdownCoordinator(),
         scope,
     )
 

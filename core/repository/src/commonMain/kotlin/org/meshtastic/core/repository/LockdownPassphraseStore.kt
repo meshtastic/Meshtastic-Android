@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,15 @@
  */
 package org.meshtastic.core.repository
 
-/**
- * Stored passphrase entry with associated TTL parameters.
- */
-data class StoredPassphrase(
-    val passphrase: String,
-    val boots: Int,
-    val hours: Int,
-)
+/** Stored passphrase entry with associated TTL parameters. */
+data class StoredPassphrase(val passphrase: String, val boots: Int, val hours: Int)
 
 /**
  * Encrypted per-device storage for lockdown passphrases.
  *
- * Platform implementations should use secure storage (e.g., EncryptedSharedPreferences on
- * Android, Keychain on iOS). Passphrase access is NOT gated behind biometric authentication
- * so that auto-unlock can run in the background without user interaction.
+ * Platform implementations should use secure storage (e.g., EncryptedSharedPreferences on Android, Keychain on iOS).
+ * Passphrase access is NOT gated behind biometric authentication so that auto-unlock can run in the background without
+ * user interaction.
  */
 interface LockdownPassphraseStore {
     /** Retrieves the stored passphrase for the given device address, or null if not stored. */

@@ -377,7 +377,11 @@ class CommandSenderImpl(
 
     override fun sendLockdownPassphrase(passphrase: String, boots: Int, hours: Int) {
         val validUntilEpoch =
-            if (hours > 0) (nowMillis / 1000L + hours.toLong() * SECONDS_PER_HOUR).toInt() else 0
+            if (hours > 0) {
+                (nowMillis / MILLIS_PER_SECOND + hours.toLong() * SECONDS_PER_HOUR).toInt()
+            } else {
+                0
+            }
         val lockdownAuth =
             LockdownAuth(
                 passphrase = passphrase.encodeToByteArray().toByteString(),
@@ -497,6 +501,7 @@ class CommandSenderImpl(
 
         private const val DEFAULT_HOP_LIMIT = 3
 
+        private const val MILLIS_PER_SECOND = 1000L
         private const val SECONDS_PER_HOUR = 3600
     }
 }

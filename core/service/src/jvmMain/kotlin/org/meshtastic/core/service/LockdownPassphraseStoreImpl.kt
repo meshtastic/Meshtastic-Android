@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,16 @@ import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.StoredPassphrase
 
 /**
- * No-op passphrase store for JVM/Desktop. Desktop lockdown passphrase storage
- * is not yet implemented — passphrases are not persisted across sessions.
+ * No-op passphrase store for JVM/Desktop. Desktop lockdown passphrase storage is not yet implemented — passphrases are
+ * not persisted across sessions.
+ *
+ * TODO: Implement file-backed encrypted store for Desktop (e.g. Java KeyStore or OS keychain via jna-keychain).
  */
 @Single(binds = [LockdownPassphraseStore::class])
 class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
     override fun getPassphrase(deviceAddress: String): StoredPassphrase? = null
+
     override fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int) = Unit
+
     override fun clearPassphrase(deviceAddress: String) = Unit
 }

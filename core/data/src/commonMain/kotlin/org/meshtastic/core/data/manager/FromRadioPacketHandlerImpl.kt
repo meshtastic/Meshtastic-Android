@@ -86,6 +86,7 @@ class FromRadioPacketHandlerImpl(
                 router.value.configFlowManager.handleNodeInfo(nodeInfo)
                 serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
             }
+
             configCompleteId != null -> {
                 router.value.configFlowManager.handleConfigComplete(configCompleteId)
                 lockdownCoordinator.onConfigComplete()

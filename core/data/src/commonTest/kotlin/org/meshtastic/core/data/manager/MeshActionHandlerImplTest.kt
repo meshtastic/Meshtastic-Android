@@ -48,6 +48,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.testing.FakeLockdownCoordinator
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -107,6 +108,7 @@ class MeshActionHandlerImplTest {
         notificationManager = notificationManager,
         messageProcessor = lazy { messageProcessor },
         radioConfigRepository = radioConfigRepository,
+        lockdownCoordinator = FakeLockdownCoordinator(),
         scope = scope,
     )
 

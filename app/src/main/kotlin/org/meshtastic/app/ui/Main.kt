@@ -72,9 +72,7 @@ fun MainScreen() {
     val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
     LockdownDialog(
         lockdownState = lockdownState,
-        onSubmit = { passphrase, boots, hours ->
-            viewModel.sendLockdownUnlock(passphrase, boots, hours)
-        },
+        onSubmit = { passphrase, boots, hours -> viewModel.sendLockdownUnlock(passphrase, boots, hours) },
         onDisconnect = { viewModel.setDeviceAddress("n") },
     )
     // Auto-disconnect when firmware acknowledges Lock Now

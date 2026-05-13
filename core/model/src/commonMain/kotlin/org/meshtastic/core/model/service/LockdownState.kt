@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,13 @@ sealed class LockdownState {
     /**
      * Device is locked or this client is not yet authorized.
      *
-     * @param lockReason machine-readable reason from firmware (e.g. "needs_auth",
-     *   "token_missing", "token_expired"). Empty string when unknown.
+     * @param lockReason machine-readable reason from firmware (e.g. "needs_auth", "token_missing", "token_expired").
+     *   Empty string when unknown.
      */
     data class Locked(val lockReason: String = "") : LockdownState()
 
     data object NeedsProvision : LockdownState()
+
     data object Unlocked : LockdownState()
 
     /** Lock Now ACK received — client should disconnect immediately, no dialog. */
@@ -47,7 +48,4 @@ sealed class LockdownState {
  * @param bootsRemaining Number of reboots before the token expires.
  * @param expiryEpoch Unix epoch seconds; 0 means no time-based expiry.
  */
-data class LockdownTokenInfo(
-    val bootsRemaining: Int,
-    val expiryEpoch: Long,
-)
+data class LockdownTokenInfo(val bootsRemaining: Int, val expiryEpoch: Long)
