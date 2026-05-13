@@ -2,13 +2,15 @@
 // scripts/sync-android-docs.js
 // Transforms Android in-app docs for publishing on the meshtastic.org Docusaurus site.
 //
-// Usage:  node scripts/sync-android-docs.js [--convert-webp] [--dry-run]
+// Usage:  node scripts/sync-android-docs.js <android-repo-path> [--convert-webp] [--dry-run]
 //
-// --convert-webp  Convert PNG/JPG/JPEG/GIF images to WebP via cwebp and rewrite
-//                 all image references in Markdown to use .webp. Requires cwebp on PATH.
-// --dry-run       Print what would be written without actually writing files.
+// <android-repo-path>  Path to a clone of meshtastic/Meshtastic-Android (or omit to
+//                      auto-detect from this script's location in the repo).
+// --convert-webp       Convert PNG/JPG/JPEG/GIF images to WebP via cwebp and rewrite
+//                      all image references in Markdown to use .webp. Requires cwebp on PATH.
+// --dry-run            Print what would be written without actually writing files.
 //
-// Output structure (relative to the meshtastic/meshtastic repo root):
+// Output structure (relative to CWD, typically the meshtastic/meshtastic repo root):
 //   docs/software/android/user/*.md
 //   docs/software/android/developer/*.md
 //   docs/software/android/index.md
@@ -25,13 +27,23 @@ const { execSync } = require("child_process");
 const args = process.argv.slice(2);
 const CONVERT_WEBP = args.includes("--convert-webp");
 const DRY_RUN = args.includes("--dry-run");
+const positionalArgs = args.filter(a => !a.startsWith("--"));
 
 const WEBP_CONVERTIBLE = new Set([".png", ".jpg", ".jpeg", ".gif"]);
 const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"]);
 
-const REPO_ROOT = path.resolve(__dirname, "..");
-const SRC_DOCS_DIR = path.join(REPO_ROOT, "docs");
+// Resolve source: explicit path argument, or auto-detect from script location
+const ANDROID_REPO_ROOT = positionalArgs.length > 0
+    ? path.resolve(positionalArgs[0])
+    : path.resolve(__dirname, "..");
+const SRC_DOCS_DIR = path.join(ANDROID_REPO_ROOT, "docs");
 const SRC_SCREENSHOTS_DIR = path.join(SRC_DOCS_DIR, "assets", "screenshots");
+
+if (!fs.existsSync(SRC_DOCS_DIR)) {
+    console.error(`Error: docs directory not found at ${SRC_DOCS_DIR}`);
+    console.error("Usage: node sync-android-docs.js <android-repo-path> [--convert-webp] [--dry-run]");
+    process.exit(1);
+}
 
 // Output directories (relative to CWD, which should be the meshtastic/meshtastic repo)
 const DEST_DOCS_DIR = path.join("docs", "software", "android");
