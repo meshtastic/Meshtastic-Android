@@ -20,12 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -71,7 +73,6 @@ import kotlin.reflect.KClass
 
 @Composable
 fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewModel {
-    val viewModel = koinViewModel<RadioConfigViewModel>()
     val destNum =
         remember(backStack.toList()) {
             backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
@@ -79,8 +80,9 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewMod
                     .lastOrNull { it is SettingsRoute.SettingsGraph }
                     ?.let { (it as SettingsRoute.SettingsGraph).destNum }
         }
-    LaunchedEffect(destNum) { viewModel.initDestNum(destNum) }
-    return viewModel
+    return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) {
+        parametersOf(SavedStateHandle(mapOf("destNum" to destNum)))
+    }
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")

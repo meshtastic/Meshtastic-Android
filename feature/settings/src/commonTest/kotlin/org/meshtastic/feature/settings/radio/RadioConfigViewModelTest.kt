@@ -402,19 +402,34 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `initDestNum updates value correctly including null`() = runTest {
-        viewModel = createViewModel()
-
-        // Initial setup should take the flow value, but let's just force update it
-        viewModel.initDestNum(123)
-        assertEquals(
-            123,
-            viewModel.destNode.value?.num ?: 123,
-        ) // the flow combine might need yielding, but we can just check it doesn't crash
-
-        // The bug was that null was ignored. Here we test we can pass null
-        // Since we can't easily read destNumFlow directly, we can just call it to ensure no crashes
-        viewModel.initDestNum(null)
+    fun `destNum from SavedStateHandle resolves destNode`() = runTest {
+        val node = Node(num = 456, user = User(id = "!456"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel =
+            RadioConfigViewModel(
+                savedStateHandle = SavedStateHandle(mapOf("destNum" to 456)),
+                radioConfigRepository = radioConfigRepository,
+                packetRepository = packetRepository,
+                serviceRepository = serviceRepository,
+                nodeRepository = nodeRepository,
+                locationRepository = locationRepository,
+                mapConsentPrefs = mapConsentPrefs,
+                analyticsPrefs = analyticsPrefs,
+                homoglyphEncodingPrefs = homoglyphEncodingPrefs,
+                toggleAnalyticsUseCase = toggleAnalyticsUseCase,
+                toggleHomoglyphEncodingUseCase = toggleHomoglyphEncodingUseCase,
+                importProfileUseCase = importProfileUseCase,
+                exportProfileUseCase = exportProfileUseCase,
+                exportSecurityConfigUseCase = exportSecurityConfigUseCase,
+                installProfileUseCase = installProfileUseCase,
+                radioConfigUseCase = radioConfigUseCase,
+                adminActionsUseCase = adminActionsUseCase,
+                processRadioResponseUseCase = processRadioResponseUseCase,
+                locationService = locationService,
+                fileService = fileService,
+                mqttManager = mqttManager,
+            )
+        assertEquals(456, viewModel.destNode.value?.num)
     }
 
     @Test
