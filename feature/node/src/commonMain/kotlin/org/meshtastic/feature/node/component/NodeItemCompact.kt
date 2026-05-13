@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -82,10 +81,7 @@ import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
-private const val LINE_COUNT_BASE = 1
-private const val CHIP_MIN_DP = 36
-private const val CHIP_MAX_DP = 70
-private const val CHIP_PER_LINE_DP = 24
+private const val CHIP_SIZE_DP = 48
 private const val COMPACT_ICON_SIZE_DP = 16
 
 @Composable
@@ -125,11 +121,6 @@ fun NodeItemCompact(
                 else -> thatNode.user.role.isUnmessageableRole()
             }
         }
-
-    // Adaptive chip sizing based on active row count
-    val hasCombinedRow = showLocation || showHops || showSignal || showChannel || showRole || showTelemetry
-    val lineCount = LINE_COUNT_BASE + (if (showLastHeard) 1 else 0) + (if (hasCombinedRow) 1 else 0)
-    val chipHeight = maxOf(CHIP_MIN_DP.dp, minOf(CHIP_MAX_DP.dp, (CHIP_PER_LINE_DP * lineCount).dp))
 
     var contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors =
@@ -190,7 +181,7 @@ fun NodeItemCompact(
         ) {
             // Column 1: NodeChip + optional battery
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                NodeChip(node = thatNode, modifier = Modifier.defaultMinSize(minHeight = chipHeight))
+                NodeChip(node = thatNode, modifier = Modifier.size(CHIP_SIZE_DP.dp))
                 if (showPower && thatNode.batteryLevel != null) {
                     MaterialBatteryInfo(
                         level = thatNode.batteryLevel ?: 0,
