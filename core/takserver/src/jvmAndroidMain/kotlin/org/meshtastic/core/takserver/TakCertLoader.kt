@@ -108,6 +108,7 @@ internal object TakCertLoader {
     }
 
     /** Returns the raw bytes of the bundled `server.p12`. Used by the data package generator. */
+    @Synchronized
     fun getServerP12Bytes(): ByteArray? {
         cachedServerP12?.let { return it }
         val bytes = loadResourceBytes(RESOURCE_SERVER_P12)
@@ -116,6 +117,7 @@ internal object TakCertLoader {
     }
 
     /** Returns the raw bytes of the bundled `client.p12`. Used by the data package generator. */
+    @Synchronized
     fun getClientP12Bytes(): ByteArray? {
         cachedClientP12?.let { return it }
         val bytes = loadResourceBytes(RESOURCE_CLIENT_P12)
@@ -124,6 +126,7 @@ internal object TakCertLoader {
     }
 
     /** Returns the raw bytes of the bundled `ca.pem`. */
+    @Synchronized
     fun getCaPemBytes(): ByteArray? {
         cachedCaPem?.let { return it }
         val bytes = loadResourceBytes(RESOURCE_CA_PEM)

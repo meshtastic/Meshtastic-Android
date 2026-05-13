@@ -117,9 +117,4 @@ object RouteDataPackageGenerator {
 
         return zipFileName to zipBytes
     }
-
-    private fun String.xmlEscaped(): String = replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace("\"", "&quot;")
 }

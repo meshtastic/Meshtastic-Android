@@ -328,7 +328,7 @@ internal class TAKClientConnection(
             // in-flight sendXml coroutine. Any write blocked in the syscall will throw
             // on the next iteration because we close the socket next.
             connectionScope.cancel()
-            runCatching { socket.close() }
+            try { socket.close() } catch (_: Exception) { }
         }
     }
 }

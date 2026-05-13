@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.CommandSender
@@ -47,6 +48,9 @@ class TakMeshTestRunner(
 
     private val _currentFixture = MutableStateFlow<String?>(null)
     val currentFixture: StateFlow<String?> = _currentFixture.asStateFlow()
+
+    // Prevents concurrent invocations from racing the _isRunning check-then-set.
+    private val runMutex = Mutex()
 
     companion object {
         /** Delay between sends to let the radio transmit and receive ACK. */
@@ -102,30 +106,38 @@ class TakMeshTestRunner(
      * Updates [results] and [currentFixture] as each fixture is processed.
      */
     suspend fun runAll() {
-        if (_isRunning.value) return
-        _isRunning.value = true
-        _results.value = emptyList()
+        // Use tryLock to prevent concurrent test runs: if another coroutine is already
+        // inside runAll(), tryLock returns false and we bail immediately. This is safer
+        // than the check-then-set pattern which has a TOCTOU race in multi-threaded
+        // coroutine dispatch.
+        if (!runMutex.tryLock()) return
+        try {
+            _isRunning.value = true
+            _results.value = emptyList()
 
-        val allResults = mutableListOf<TakTestResult>()
+            val allResults = mutableListOf<TakTestResult>()
 
-        for (name in FIXTURE_NAMES) {
-            _currentFixture.value = name
-            val result = runSingleFixture(name)
-            allResults.add(result)
-            _results.value = allResults.toList()
+            for (name in FIXTURE_NAMES) {
+                _currentFixture.value = name
+                val result = runSingleFixture(name)
+                allResults.add(result)
+                _results.value = allResults.toList()
 
-            if (result.passed) {
-                // Wait for radio airtime + ACK before next send
-                delay(SEND_DELAY_MS)
+                if (result.passed) {
+                    // Wait for radio airtime + ACK before next send
+                    delay(SEND_DELAY_MS)
+                }
             }
+
+            _currentFixture.value = null
+
+            val passed = allResults.count { it.passed }
+            val failed = allResults.size - passed
+            Logger.i { "TAK Mesh Test complete: $passed/${allResults.size} passed, $failed failed" }
+        } finally {
+            _isRunning.value = false
+            runMutex.unlock()
         }
-
-        _currentFixture.value = null
-        _isRunning.value = false
-
-        val passed = allResults.count { it.passed }
-        val failed = allResults.size - passed
-        Logger.i { "TAK Mesh Test complete: $passed/${allResults.size} passed, $failed failed" }
     }
 
     private suspend fun runSingleFixture(name: String): TakTestResult {

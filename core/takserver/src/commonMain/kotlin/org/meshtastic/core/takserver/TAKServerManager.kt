@@ -76,11 +76,13 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     }
 
     override fun start(scope: CoroutineScope) {
-        this.scope = scope
         if (_isRunning.value) {
             Logger.w { "TAKServerManager already running" }
             return
         }
+        // Assign scope AFTER the guard so a second concurrent start() can never
+        // overwrite the active scope without actually restarting the server.
+        this.scope = scope
 
         scope.launch {
             // Wire up inbound message handler BEFORE starting so no messages are lost.
@@ -107,14 +109,19 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     }
 
     override fun stop() {
-        takServer.stop()
-        takServer.onMessage = null
+        // Flip the running flag and null out the scope BEFORE stopping the server so
+        // any broadcast()/drainOfflineQueue() that races stop() sees _isRunning=false
+        // and exits early instead of launching coroutines on a scope that is about to
+        // be discarded.
         _isRunning.value = false
         scope = null
+        takServer.onMessage = null
+        takServer.stop()
         Logger.i { "TAK Server stopped" }
     }
 
     override fun broadcast(cotMessage: CoTMessage) {
+        if (!_isRunning.value) return
         scope?.launch {
             if (takServer.hasConnections()) {
                 takServer.broadcast(cotMessage)
@@ -137,12 +144,14 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     }
 
     override fun broadcastRawXml(xml: String) {
+        if (!_isRunning.value) return
         scope?.launch { takServer.broadcastRawXml(xml) }
     }
 
     /** Drain any queued messages to the newly connected TAK client. Called by the server
      *  when a TAK client connects (Connected event). */
     internal fun drainOfflineQueue() {
+        if (!_isRunning.value) return
         scope?.launch {
             val messages = offlineQueueMutex.withLock {
                 val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL

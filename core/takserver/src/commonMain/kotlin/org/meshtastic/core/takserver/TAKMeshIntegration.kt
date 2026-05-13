@@ -76,9 +76,10 @@ class TAKMeshIntegration(
     private val nodeRepository: NodeRepository,
 ) {
     @Volatile private var isRunning = false
-    private val jobs = mutableListOf<Job>()
-    private var currentTeam: Team = Team.Unspecifed_Color
-    private var currentRole: MemberRole = MemberRole.Unspecifed
+    // Guarded by @Volatile for cross-thread visibility between start()/stop() calls.
+    @Volatile private var jobs: List<Job> = emptyList()
+    @Volatile private var currentTeam: Team = Team.Unspecifed_Color
+    @Volatile private var currentRole: MemberRole = MemberRole.Unspecifed
 
     fun start(scope: CoroutineScope) {
         if (isRunning) return
@@ -131,7 +132,7 @@ class TAKMeshIntegration(
             },
         )
 
-        jobs.addAll(newJobs)
+        jobs = newJobs
         val fw = nodeRepository.myNodeInfo.value?.firmwareVersion
         val proto = if (Capabilities(fw).supportsTakV2) "v2 (port 78, zstd)" else "v1 (port 72, legacy)"
         Logger.i { "TAK Mesh Integration started — firmware=$fw, outbound=$proto" }
@@ -140,8 +141,8 @@ class TAKMeshIntegration(
     fun stop() {
         if (!isRunning) return
         isRunning = false
-        val toCancel = jobs.toList()
-        jobs.clear()
+        val toCancel = jobs
+        jobs = emptyList()
         toCancel.forEach(Job::cancel)
         takServerManager.stop()
         Logger.i { "TAK Mesh Integration stopped" }

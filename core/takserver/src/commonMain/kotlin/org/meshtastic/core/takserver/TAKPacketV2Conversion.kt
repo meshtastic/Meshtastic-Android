@@ -61,6 +61,13 @@ object TAKPacketV2Conversion {
                 latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt(),
                 longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt(),
                 altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt(),
+                // V2 encodes speed as cm/s (m/s × 100) and course as deg×100.
+                // V1 (legacy TAKPacket, port 72) uses raw integers with no scaling.
+                // These two paths are ALWAYS separate (different portnums) and must
+                // never cross-feed: a V1 packet decoded in TAKMeshIntegration goes
+                // through convertV1ToCoT() → CoTMessage.pli() → toXml(), NOT through
+                // toTAKPacketV2(). If this invariant is ever broken, speed/course
+                // would be silently off by ×100.
                 speed = (track?.speed?.coerceAtLeast(0.0)?.times(100))?.toInt() ?: 0, // m/s -> cm/s
                 course = (track?.course?.coerceAtLeast(0.0)?.times(100))?.toInt() ?: 0, // deg -> deg*100
                 battery = battery,

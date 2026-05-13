@@ -35,6 +35,7 @@ import java.net.Socket
 import java.util.concurrent.locks.ReentrantLock
 import javax.net.ssl.SSLServerSocket
 import kotlin.concurrent.withLock
+import kotlin.concurrent.Volatile
 import kotlin.random.Random
 import kotlinx.coroutines.isActive as coroutineIsActive
 
@@ -59,7 +60,7 @@ internal class TAKServerJvm(
 ) : TAKServer {
 
     private var serverSocket: ServerSocket? = null
-    private var running = false
+    @Volatile private var running = false
     private var serverScope: CoroutineScope? = null
     private var acceptJob: Job? = null
     private val connectionsLock = ReentrantLock()
@@ -106,7 +107,7 @@ internal class TAKServerJvm(
         } catch (e: Exception) {
             Logger.e(e) { "Failed to bind TAK Server to 127.0.0.1:$port" }
             running = false
-            serverSocket?.runCatching { close() }
+            try { serverSocket?.close() } catch (_: Exception) { }
             serverSocket = null
             Result.failure(e)
         }
@@ -153,7 +154,7 @@ internal class TAKServerJvm(
 
         if (clientSocket.inetAddress?.isLoopbackAddress != true) {
             Logger.w { "TAK server rejected non-loopback connection from $endpoint" }
-            runCatching { clientSocket.close() }
+            try { clientSocket.close() } catch (_: Exception) { }
             return
         }
 
@@ -230,7 +231,7 @@ internal class TAKServerJvm(
         }
         toClose.forEach { it.close() }
 
-        serverSocket?.runCatching { close() }
+        try { serverSocket?.close() } catch (_: Exception) { }
         serverSocket = null
         serverScope = null
         Logger.i { "TAK Server stopped" }
