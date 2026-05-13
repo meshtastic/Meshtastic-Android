@@ -34,8 +34,8 @@ import javax.crypto.spec.GCMParameterSpec
  * File-backed encrypted passphrase store for JVM/Desktop.
  *
  * Uses a PKCS12 KeyStore to hold an AES-256 master key and AES-256-GCM to encrypt each passphrase entry. Entries are
- * stored as individual `.enc` files under `$MESHTASTIC_DATA_DIR/lockdown/` (default: `~/.meshtastic/lockdown/`),
- * keyed by a sanitized device address.
+ * stored as individual `.enc` files under `$MESHTASTIC_DATA_DIR/lockdown/` (default: `~/.meshtastic/lockdown/`), keyed
+ * by a sanitized device address.
  *
  * The keystore password is fixed because the threat model mirrors Android's `EncryptedSharedPreferences`: file-system
  * permission is the primary access control; the encryption layer protects data at rest against casual file browsing or
@@ -117,6 +117,7 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
     private fun serialize(passphrase: String, boots: Int, hours: Int): ByteArray =
         "$boots\n$hours\n$passphrase".encodeToByteArray()
 
+    @Suppress("ReturnCount")
     private fun deserialize(plaintext: ByteArray): StoredPassphrase? {
         val text = plaintext.decodeToString()
         val lines = text.split("\n", limit = 3)
@@ -163,6 +164,7 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
         private const val KEYSTORE_FILE = "keystore.p12"
         private const val KEYSTORE_TYPE = "PKCS12"
         private const val KEY_ALIAS = "lockdown_master"
+
         // Intentional: this mirrors the documented desktop threat model for at-rest protection only.
         private val KEYSTORE_PASSWORD = "meshtastic-lockdown".toCharArray()
         private const val AES_ALGORITHM = "AES"

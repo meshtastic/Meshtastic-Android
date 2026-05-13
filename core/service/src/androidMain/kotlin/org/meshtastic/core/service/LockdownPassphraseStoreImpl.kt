@@ -52,8 +52,7 @@ class LockdownPassphraseStoreImpl(app: Application) : LockdownPassphraseStore {
         }
     }
 
-    private fun requirePrefs(): SharedPreferences =
-        prefs ?: error("Encrypted passphrase store unavailable")
+    private fun requirePrefs(): SharedPreferences = prefs ?: error("Encrypted passphrase store unavailable")
 
     @Suppress("ReturnCount")
     override fun getPassphrase(deviceAddress: String): StoredPassphrase? {
