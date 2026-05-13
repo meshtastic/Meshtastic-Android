@@ -93,8 +93,10 @@ import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
+import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
+import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
@@ -471,7 +473,10 @@ private fun NodeItemHeader(
                     modifier = Modifier.size(16.dp),
                 )
             }
-            LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = contentColor)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (!isThisNode) OnlineStatusIcon(isOnline = thatNode.isOnline)
+                LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = contentColor)
+            }
         }
 
         NodeStatusIcons(
@@ -497,4 +502,14 @@ private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
         RoleInfo(role = thatNode.user.role, contentColor = contentColor)
         NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
     }
+}
+
+@Composable
+private fun OnlineStatusIcon(isOnline: Boolean, modifier: Modifier = Modifier) {
+    Icon(
+        imageVector = if (isOnline) MeshtasticIcons.Success else MeshtasticIcons.DeviceSleep,
+        contentDescription = null,
+        modifier = modifier.size(16.dp),
+        tint = if (isOnline) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline,
+    )
 }
