@@ -34,6 +34,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -62,13 +64,18 @@ fun NodeListHelp(onDismiss: () -> Unit) {
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(text = stringResource(Res.string.node_list_help_title), style = MaterialTheme.typography.headlineSmall)
+            Text(
+                text = stringResource(Res.string.node_list_help_title),
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.semantics { heading() },
+            )
 
             HorizontalDivider()
 
             Text(
                 text = stringResource(Res.string.node_list_help_node_details),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
 
             SignalQualityEntry(Quality.GOOD, stringResource(Res.string.node_layout_help_signal_good))
@@ -81,6 +88,7 @@ fun NodeListHelp(onDismiss: () -> Unit) {
             Text(
                 text = stringResource(Res.string.node_layout_signal_quality_indicator),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
             Text(
                 text = stringResource(Res.string.node_layout_help_signal_indicator),

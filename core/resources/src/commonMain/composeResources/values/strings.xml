@@ -859,8 +859,10 @@
     <string name="node_layout_section_title">Node Layout</string>
     <string name="node_layout_signal_direct_only">Signal (Direct Only)</string>
     <string name="node_layout_signal_quality_indicator">Signal Quality Indicator</string>
+    <string name="node_list_click_label">Open node details</string>
     <string name="node_list_help_node_details">Node Details</string>
     <string name="node_list_help_title">Node List Help</string>
+    <string name="node_list_long_click_label">Node options</string>
     <string name="node_number">Node Number</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Node sorting options</string>

@@ -61,6 +61,8 @@ import org.meshtastic.core.resources.air_utilization
 import org.meshtastic.core.resources.channel_utilization
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.elevation_suffix
+import org.meshtastic.core.resources.node_list_click_label
+import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.voltage
@@ -182,7 +184,14 @@ fun NodeItem(
     ) {
         Column(
             modifier =
-            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(12.dp),
+            Modifier.combinedClickable(
+                onClickLabel = stringResource(Res.string.node_list_click_label),
+                onClick = onClick,
+                onLongClickLabel = stringResource(Res.string.node_list_long_click_label),
+                onLongClick = onLongClick,
+            )
+                .fillMaxWidth()
+                .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             NodeItemHeader(

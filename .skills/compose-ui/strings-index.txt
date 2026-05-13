@@ -829,8 +829,10 @@ node_layout_relative_last_heard
 node_layout_section_title
 node_layout_signal_direct_only
 node_layout_signal_quality_indicator
+node_list_click_label
 node_list_help_node_details
 node_list_help_title
+node_list_long_click_label
 node_number
 node_sort_alpha
 node_sort_button

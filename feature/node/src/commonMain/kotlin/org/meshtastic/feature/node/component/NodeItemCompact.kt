@@ -55,6 +55,8 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.node_list_click_label
+import org.meshtastic.core.resources.node_list_long_click_label
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.component.ChannelInfo
 import org.meshtastic.core.ui.component.DistanceInfo
@@ -171,7 +173,12 @@ fun NodeItemCompact(
     ) {
         Row(
             modifier =
-            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            Modifier.combinedClickable(
+                onClickLabel = stringResource(Res.string.node_list_click_label),
+                onClick = onClick,
+                onLongClickLabel = stringResource(Res.string.node_list_long_click_label),
+                onLongClick = onLongClick,
+            )
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
