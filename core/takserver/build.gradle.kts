@@ -73,7 +73,17 @@ kotlin {
             //
             // zstd-jni's @aar variant is still declared explicitly in the
             // androidMain source set below so Android gets the .so files.
-            implementation("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk-jvm:v0.1.3") {
+            implementation("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk-jvm:v0.2.1") {
+                // Issue #5: pre-0.2.1 the SDK JAR bundled `org.meshtastic.proto.*`
+                // (Wire-generated TAKPacketV2 + friends) inside the same JAR as
+                // `org.meshtastic.tak.*`. Our own `:core:proto` module runs its
+                // own Wire codegen against the same protobufs submodule and emits
+                // the identical classes, so R8 hit "Type is defined multiple
+                // times" errors during release builds. v0.2.1 strips the proto
+                // classes from the JAR entirely — the SDK's bytecode still
+                // REFERENCES them, but they come from `:core:proto` on our
+                // classpath. No exclude needed; the SDK simply doesn't ship them.
+
                 // The SDK's jvmMain declares zstd-jni as a runtime dep (standard
                 // JAR with desktop native libs). Android needs the @aar variant
                 // instead (ships arm/arm64/x86/x86_64 .so files). Both packaging
