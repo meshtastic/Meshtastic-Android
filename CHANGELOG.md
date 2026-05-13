@@ -9,14 +9,19 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* Flatpak: Add Maven/Gradle mirror URLs (#5433) by @Austin in [`ada16f4f5`](https://github.com/meshtastic/Meshtastic-Android/commit/ada16f4f5f2e859624ad8588ff07cdbff945aac0)
+* fix: update screenshots (#5435) by @James Rich in [`cf0a7cdab`](https://github.com/meshtastic/Meshtastic-Android/commit/cf0a7cdabff85e97accf4522709dfcb0fd5d4298)
+* chore: clean up brownfield specs and migrate to timestamp naming (#5432) by @James Rich in [`73469b415`](https://github.com/meshtastic/Meshtastic-Android/commit/73469b415e742a6601790b9574e1cf8a4a43a52c)
+* revert: Update retry settings in gradle-wrapper.properties (#5430) by @James Rich in [`ff9d6881c`](https://github.com/meshtastic/Meshtastic-Android/commit/ff9d6881c01b8e9ec7654179bfa559e93bea9974)
+
+### Internal (v2.7.14-internal.90)
+Changes since [`v2.7.14-open.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.8):
+
+* docs: update CHANGELOG.md (#5427) by @github-actions[bot] in [`1b902ba07`](https://github.com/meshtastic/Meshtastic-Android/commit/1b902ba07c7a6f5b41bba9f4cb439e7de0925e4c)
 * chore(deps): update gradle to v9.5.1 (#5429) by @renovate[bot] in [`010ff358d`](https://github.com/meshtastic/Meshtastic-Android/commit/010ff358d0cf5c586b557af186ffdd1ef719be81)
 * fix: clarify position precision as ± radius (#5428) by @James Rich in [`dcb147163`](https://github.com/meshtastic/Meshtastic-Android/commit/dcb147163c3a5c8dada885ee6e84790fcc24f651)
 * fix(desktop): keep Vico package to prevent bytecode verification errors (#5424) by @James Rich in [`ab4589c06`](https://github.com/meshtastic/Meshtastic-Android/commit/ab4589c06a849743268f926bbe52723c833add3d)
 * build: conditionalize JitPack repository for desktop-only builds (#5426) by @James Rich in [`fcf0b5074`](https://github.com/meshtastic/Meshtastic-Android/commit/fcf0b507461796ff2e84265de728283ed5537073)
-
-### Internal (v2.7.14-internal.89)
-Changes since [`v2.7.14-open.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.8):
-
 * docs: update CHANGELOG.md (#5422) by @github-actions[bot] in [`3bfc66eb2`](https://github.com/meshtastic/Meshtastic-Android/commit/3bfc66eb29c438c3f2d68a9225eba9fb3d2c2e25)
 * fix: enhance uniqueness check for Flatpak source files in release workflow. (#5423) by @Austin in [`a2dd4d18a`](https://github.com/meshtastic/Meshtastic-Android/commit/a2dd4d18aab2ed1a9000e4ac3ed53260658a4734)
 * chore(deps): update core/proto/src/main/proto digest to 1c62540 (#5421) by @renovate[bot] in [`05b1ea918`](https://github.com/meshtastic/Meshtastic-Android/commit/05b1ea918ef3f14b48f1777402e645df900dd337)
