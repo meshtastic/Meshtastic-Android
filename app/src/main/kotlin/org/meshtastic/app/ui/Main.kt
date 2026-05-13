@@ -47,6 +47,7 @@ import org.meshtastic.feature.firmware.navigation.firmwareGraph
 import org.meshtastic.feature.map.navigation.mapGraph
 import org.meshtastic.feature.messaging.navigation.contactsGraph
 import org.meshtastic.feature.node.navigation.nodesGraph
+import org.meshtastic.feature.settings.lockdown.LockdownDialog
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 import org.meshtastic.feature.wifiprovision.navigation.wifiProvisionGraph
@@ -66,6 +67,15 @@ fun MainScreen() {
     val backStack = multiBackstack.activeBackStack
 
     AndroidAppVersionCheck(viewModel)
+
+    val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
+    LockdownDialog(
+        lockdownState = lockdownState,
+        onSubmit = { passphrase, boots, hours ->
+            viewModel.sendLockdownUnlock(passphrase, boots, hours)
+        },
+        onDisconnect = { viewModel.setDeviceAddress("n") },
+    )
 
     MeshtasticAppShell(multiBackstack = multiBackstack, uiViewModel = viewModel, hostModifier = Modifier) {
         MeshtasticNavigationSuite(
