@@ -29,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -41,7 +40,6 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.m3.Markdown
 import org.meshtastic.core.ui.icon.ArrowBack
-import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.DocPageContent
 
@@ -54,7 +52,6 @@ fun DocsPageRouteScreen(
     isLoading: Boolean,
     onBack: () -> Unit,
     onNavigateToPage: (String) -> Unit = {},
-    onDeepLink: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -64,19 +61,6 @@ fun DocsPageRouteScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = MeshtasticIcons.ArrowBack, contentDescription = "Navigate back")
-                    }
-                },
-                actions = {
-                    val deepLink = content?.page?.deepLink
-                    if (deepLink != null) {
-                        TextButton(onClick = { onDeepLink(deepLink) }) {
-                            Icon(
-                                imageVector = MeshtasticIcons.ChevronRight,
-                                contentDescription = null,
-                                modifier = Modifier.padding(end = 4.dp),
-                            )
-                            Text("Open in App")
-                        }
                     }
                 },
             )
@@ -114,12 +98,8 @@ fun DocsPageRouteScreen(
                     val markdownText = content.markdown ?: "No content available."
                     val platformUriHandler = LocalUriHandler.current
                     val docsUriHandler =
-                        remember(platformUriHandler, onDeepLink) {
-                            DocsLinkUriHandler(
-                                onNavigateToPage = onNavigateToPage,
-                                onDeepLink = onDeepLink,
-                                fallback = platformUriHandler,
-                            )
+                        remember(platformUriHandler) {
+                            DocsLinkUriHandler(onNavigateToPage = onNavigateToPage, fallback = platformUriHandler)
                         }
                     CompositionLocalProvider(LocalUriHandler provides docsUriHandler) {
                         Markdown(
@@ -135,26 +115,16 @@ fun DocsPageRouteScreen(
 }
 
 /**
- * Custom [UriHandler] that intercepts relative doc links and `meshtastic://` deep links.
+ * Custom [UriHandler] that intercepts relative doc links and navigates in-app.
  *
- * - Relative links like `connections`, `../developer/architecture`, or anchor-only `#section` are resolved to a page ID
- *   and dispatched via [onNavigateToPage].
- * - `meshtastic://` deep links are dispatched via [onDeepLink] for in-app navigation to the target screen.
- * - External `http(s)://` URLs are forwarded to the [fallback] platform handler.
+ * Relative links like `connections`, `../developer/architecture`, or anchor-only `#section` are resolved to a page ID
+ * and dispatched via [onNavigateToPage]. External `http(s)://` URLs are forwarded to the [fallback] platform handler.
  */
-private class DocsLinkUriHandler(
-    private val onNavigateToPage: (String) -> Unit,
-    private val onDeepLink: (String) -> Unit,
-    private val fallback: UriHandler,
-) : UriHandler {
+private class DocsLinkUriHandler(private val onNavigateToPage: (String) -> Unit, private val fallback: UriHandler) :
+    UriHandler {
     override fun openUri(uri: String) {
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
             fallback.openUri(uri)
-            return
-        }
-        // meshtastic:// deep links navigate to the corresponding app screen
-        if (uri.startsWith("meshtastic://")) {
-            onDeepLink(uri)
             return
         }
         // Anchor-only links (e.g. "#permissions") — ignore, stay on current page

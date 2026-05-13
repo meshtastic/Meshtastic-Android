@@ -61,8 +61,6 @@ data class DocPage(
     val charCount: Int,
     /** Icon identifier for TOC display (maps to MeshtasticIcons). */
     val iconId: String? = null,
-    /** Deep link URI to open the corresponding app screen (e.g. `meshtastic://meshtastic/nodes`). */
-    val deepLink: String? = null,
 )
 
 /** Content wrapper that decouples metadata from rendered content. */
@@ -94,7 +92,6 @@ data class KeywordIndexEntry(
     val aliases: List<String> = emptyList(),
     val charCount: Int,
     val iconId: String? = null,
-    val deepLink: String? = null,
 )
 
 /** Normalized user search query. */

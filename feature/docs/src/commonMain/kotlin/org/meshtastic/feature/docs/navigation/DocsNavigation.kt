@@ -22,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -98,13 +97,11 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>) {
     val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
     NavigationBackHandler(state = backHandlerState, onBackCompleted = { backStack.removeLastOrNull() })
 
-    val uriHandler = LocalUriHandler.current
     DocsPageRouteScreen(
         pageId = pageId,
         content = content,
         isLoading = isLoading,
         onBack = { backStack.removeLastOrNull() },
         onNavigateToPage = { targetPageId -> backStack.add(SettingsRoute.HelpDocPage(targetPageId)) },
-        onDeepLink = { deepLinkUri -> uriHandler.openUri(deepLinkUri) },
     )
 }

@@ -3,7 +3,6 @@ title: Nodes
 nav_order: 4
 last_updated: 2026-05-13
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
-deep_link: meshtastic://meshtastic/nodes
 aliases:
   - node-list
   - mesh-nodes

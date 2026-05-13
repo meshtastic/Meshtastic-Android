@@ -3,7 +3,6 @@ title: Settings — Modules & Admin
 nav_order: 8
 last_updated: 2026-05-13
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
-deep_link: meshtastic://meshtastic/settings/module-config
 aliases:
   - modules
   - module-config

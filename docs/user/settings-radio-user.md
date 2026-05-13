@@ -3,7 +3,6 @@ title: Settings — Radio & User
 nav_order: 7
 last_updated: 2026-05-13
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
-deep_link: meshtastic://meshtastic/settings
 aliases:
   - settings
   - radio-config

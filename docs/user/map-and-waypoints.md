@@ -3,7 +3,6 @@ title: Map & Waypoints
 nav_order: 6
 last_updated: 2026-05-13
 description: View node positions on the map, create and share waypoints, and manage position sharing and privacy.
-deep_link: meshtastic://meshtastic/map
 aliases:
   - map
   - waypoints
