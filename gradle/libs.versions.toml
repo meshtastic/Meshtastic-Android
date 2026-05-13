@@ -36,7 +36,7 @@ turbine = "1.2.1"
 compose-screenshot = "0.0.1-alpha14"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0-rc01"
+compose-multiplatform = "1.11.0"
 compose-multiplatform-material3 = "1.11.0-alpha07"
 # `androidx-compose-bom-aligned` tracks androidx.compose.{runtime,ui,foundation,animation}
 # artifacts that ship in lockstep with CMP. Kept as a separate version ref so Renovate
