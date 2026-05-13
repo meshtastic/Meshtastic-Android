@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.component
 
 import androidx.compose.animation.AnimatedVisibility
@@ -23,7 +25,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -168,7 +171,7 @@ private fun RemoteAdminListItem(
         )
         AnimatedVisibility(visible = isEnsuringSession) {
             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
                 androidx.compose.material3.Text(
                     text = stringResource(Res.string.establishing_session),
                     style = MaterialTheme.typography.bodySmall,

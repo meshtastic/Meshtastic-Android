@@ -81,6 +81,7 @@ enum class SwipeDirection {
  */
 @Stable
 class SwipeToRevealState(initialAnchor: SwipeAnchor, confirmValueChange: (SwipeAnchor) -> Boolean) {
+    @Suppress("DEPRECATION")
     internal val anchoredDraggableState =
         AnchoredDraggableState(
             initialValue = initialAnchor,

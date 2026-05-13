@@ -25,6 +25,7 @@ import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
@@ -52,7 +53,7 @@ fun MenuFAB(
         expanded = expanded,
         button = {
             TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                 tooltip = { contentDescription?.let { PlainTooltip { Text(it) } } },
                 state = rememberTooltipState(),
             ) {

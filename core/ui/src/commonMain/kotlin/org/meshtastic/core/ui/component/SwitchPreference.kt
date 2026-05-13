@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.AnimatedContent
@@ -21,7 +23,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Switch
@@ -70,7 +73,7 @@ fun SwitchPreference(
         trailingContent = {
             AnimatedContent(targetState = loading) { loading ->
                 if (loading) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
                 } else {
                     Switch(enabled = enabled, checked = checked, onCheckedChange = null)
                 }
