@@ -8,79 +8,58 @@
 ```kotlin
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.model.lockdown.LockdownState
+import org.meshtastic.proto.LockdownStatus
 
 /**
- * Single owner of lockdown lifecycle. Receives firmware status reports,
- * manages state transitions, drives auto-replay, and exposes observable
- * state for UI consumption.
+ * Single owner of lockdown lifecycle. Receives firmware LockdownStatus messages,
+ * manages state transitions, drives auto-replay of cached passphrases, and updates
+ * ServiceRepository state flows for UI consumption.
+ *
+ * Threading: All public methods are called from the BLE/radio dispatcher
+ * (single-threaded). @Volatile fields ensure visibility if a coroutine resumes
+ * on a different thread, but compound read-modify sequences assume no concurrent
+ * callers.
  */
 interface LockdownCoordinator {
 
-    /** Current lockdown state. Observed by UI to render blocking modal or session info. */
-    val state: StateFlow<LockdownState>
+    /** Called when a new BLE/radio connection is established. Clears session authorization. */
+    fun onConnect()
 
-    /**
-     * Whether the current connection is authorized (unlocked or lockdown not applicable).
-     * Convenience derived from [state] for banner/UI gating.
-     */
-    val isAuthorized: StateFlow<Boolean>
+    /** Called on connection disconnect. Resets all lockdown state for next connection. */
+    fun onDisconnect()
 
-    /**
-     * Called by [FromRadioPacketHandler] when a LockdownStatus proto arrives.
-     * Drives state transitions and may trigger auto-replay.
-     */
-    fun handleStatus(status: org.meshtastic.proto.LockdownStatus)
-
-    /**
-     * Called when a new connection is established. Stores nodeId for
-     * passphrase cache lookups during auto-replay.
-     *
-     * @param nodeId The connected node's mesh number
-     */
-    fun onConnect(nodeId: Int)
-
-    /**
-     * Called when config-complete is received from the device.
-     * Triggers initial lockdown state evaluation (auto-replay if cached passphrase exists).
-     */
+    /** Called when config-complete is received. Retained for lifecycle symmetry (currently no-op). */
     fun onConfigComplete()
 
     /**
-     * Called on connection disconnect. Resets state to [LockdownState.NotApplicable]
-     * so next connection starts fresh. Replaces the standalone `reset()` method.
+     * Called by FromRadioPacketHandler when a LockdownStatus proto arrives.
+     * Drives state transitions and may trigger auto-replay.
      */
-    fun onDisconnect()
+    fun handleLockdownStatus(status: LockdownStatus)
 
     /**
      * Submit a passphrase for unlock or provision.
-     * Transitions state to [LockdownState.Unlocking] and sends AdminMessage.
+     * Stores pending passphrase for cache-on-success, sends via CommandSender.
      *
-     * @param passphrase Raw passphrase bytes (1-32)
-     * @param bootsRemaining Optional boot-count TTL; 0 = firmware default
-     * @param validUntilEpoch Optional wall-clock expiry; 0 = no time limit
+     * @param passphrase Passphrase string (1-64 UTF-8 bytes on wire)
+     * @param boots Boot-count TTL; default 50
+     * @param hours Hours until expiry; 0 = no time limit
      */
-    suspend fun submitPassphrase(
-        passphrase: ByteArray,
-        bootsRemaining: UInt = 0u,
-        validUntilEpoch: UInt = 0u,
-    )
+    fun submitPassphrase(passphrase: String, boots: Int, hours: Int)
 
-    /**
-     * Send lock-now command. Transitions to [LockdownState.LockNowPending],
-     * then disconnects after firmware ACK.
-     */
-    suspend fun lockNow()
+    /** Send lock-now command. Sets wasLockNow flag so next LOCKED routes to LockNowAcknowledged. */
+    fun lockNow()
 }
 ```
 
 ## Behavioral Contract
 
-1. **Initial state**: `LockdownState.NotApplicable` until first `handleStatus()` call
-2. **Lifecycle**: `onConnect(nodeId)` stores the node ID → `onConfigComplete()` evaluates initial state → `onDisconnect()` resets to `NotApplicable`
-3. **Auto-replay**: When transitioning to `Locked` and `LockdownPassphraseStore.get(nodeId)` returns non-null, automatically call `submitPassphrase()` with cached bytes (boots=0, epoch=0)
-4. **Cache management**: On `Unlocked` after user-entered passphrase → `store.put(nodeId, passphrase)`. On `UnlockFailed` after auto-replay → `store.clear(nodeId)`
-5. **Lock-now flow**: `lockNow()` → send `LockdownAuth(lock_now=true)` → set `wasLockNow=true` → on next `LOCKED` status: transition to `LockNowAcknowledged` → delay 500ms → disconnect
-6. **Thread safety**: All state mutations on a single coroutine dispatcher (no race between handleStatus and user actions)
-6. **Logging**: MUST NOT log passphrase bytes. May log state transitions and node IDs (redacted to last 4 hex chars for device addresses).
+1. **Initial state**: `LockdownState.None` — lockdown not active until first `handleLockdownStatus()` call
+2. **Lifecycle**: `onConnect()` clears session auth → firmware sends `LockdownStatus` → `onDisconnect()` resets to `None`
+3. **State management**: Coordinator updates `ServiceRepository.lockdownState`, `sessionAuthorized`, and `lockdownTokenInfo` flows. UI observes these via ViewModel.
+4. **Auto-replay**: When `LOCKED` received and `LockdownPassphraseStore.getPassphrase(deviceAddress)` returns non-null, automatically sends stored passphrase via `CommandSender.sendLockdownPassphrase()`. Sets `wasAutoAttempt=true` to distinguish from manual entry.
+5. **Cache management**: On `UNLOCKED` after manual submit (pendingPassphrase != null) → `store.savePassphrase()`. On `UNLOCK_FAILED` after auto-replay with no backoff → `store.clearPassphrase()`.
+6. **Lock-now flow**: `lockNow()` → `CommandSender.sendLockNow()` → set `wasLockNow=true` → on next `LOCKED`: route to `handleLockNowAcknowledged()` → clear auth, clear radio config, set `LockdownState.LockNowAcknowledged`
+7. **Error resilience**: All `passphraseStore` calls wrapped in try/catch. Store failures don't crash sessions. Save failure during unlock still authorizes session.
+8. **Thread safety**: `@Volatile` fields for cross-thread visibility. Single-threaded dispatcher contract documented on impl class.
+9. **Logging**: MUST NOT log passphrase content. Logs state transitions and lock reasons.

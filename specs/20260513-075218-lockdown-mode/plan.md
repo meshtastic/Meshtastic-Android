@@ -11,13 +11,13 @@ Implement client-side support for firmware lockdown mode using the typed `Lockdo
 
 **Language/Version**: Kotlin 2.3+ (JDK 21)  
 **Primary Dependencies**: Compose Multiplatform, Koin 4.2+, Wire (protobuf), Kable (BLE), Okio  
-**Storage**: EncryptedSharedPreferences (Android), Keychain (iOS), Java KeyStore (Desktop)  
+**Storage**: EncryptedSharedPreferences (Android), PKCS12 KeyStore + AES-256-GCM (Desktop)  
 **Testing**: `./gradlew test allTests` (KMP modules use `:allTests`, Android-only use `:testFdroidDebugUnitTest`)  
 **Target Platform**: Android (primary), Desktop (JVM), iOS (future)  
 **Project Type**: Mobile/Desktop KMP app  
 **Performance Goals**: Unlock flow < 5s user-perceived latency on BLE  
-**Constraints**: Passphrase 1-32 bytes, no logging of sensitive data, offline-capable  
-**Scale/Scope**: 3 new files in commonMain, 1 expect/actual per platform, UI additions to `feature/settings`
+**Constraints**: Passphrase 1-64 UTF-8 bytes, no logging of sensitive data, offline-capable  
+**Scale/Scope**: Interfaces in `core/repository`, impl in `core/data` + `core/service`, UI in `feature/settings`
 
 ## Constitution Check
 
@@ -70,34 +70,34 @@ specs/20260513-075218-lockdown-mode/
 ### Source Code (repository root)
 
 ```text
-core/model/src/commonMain/kotlin/org/meshtastic/core/model/
-└── lockdown/
-    └── LockdownState.kt                    # Sealed class for lockdown states
+core/model/src/commonMain/kotlin/org/meshtastic/core/model/service/
+└── LockdownState.kt                        # Sealed class: None, Locked, NeedsProvision, Unlocked, etc.
 
 core/repository/src/commonMain/kotlin/org/meshtastic/core/repository/
 ├── LockdownCoordinator.kt                  # Interface: lockdown lifecycle owner
-└── LockdownPassphraseStore.kt              # Interface: encrypted per-node cache
+└── LockdownPassphraseStore.kt              # Interface + StoredPassphrase data class
 
 core/data/src/commonMain/kotlin/org/meshtastic/core/data/manager/
-└── LockdownCoordinatorImpl.kt              # Implementation: state machine, auto-replay
+└── LockdownCoordinatorImpl.kt              # State machine, auto-replay, error-resilient store calls
 
-core/datastore/src/androidMain/kotlin/org/meshtastic/core/datastore/
-└── LockdownPassphraseStoreImpl.kt          # EncryptedSharedPreferences impl
+core/data/src/commonTest/kotlin/org/meshtastic/core/data/manager/
+└── LockdownCoordinatorImplTest.kt          # 15+ test cases covering all transitions
 
-core/datastore/src/jvmMain/kotlin/org/meshtastic/core/datastore/
-└── LockdownPassphraseStoreImpl.kt          # Java KeyStore impl
+core/service/src/androidMain/kotlin/org/meshtastic/core/service/
+└── LockdownPassphraseStoreImpl.kt          # EncryptedSharedPreferences impl (nullable prefs)
 
-core/datastore/src/iosMain/kotlin/org/meshtastic/core/datastore/
-└── LockdownPassphraseStoreImpl.kt          # Keychain impl (stub)
+core/service/src/jvmMain/kotlin/org/meshtastic/core/service/
+└── LockdownPassphraseStoreImpl.kt          # PKCS12 KeyStore + AES-256-GCM file-backed impl
 
-feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/
-└── lockdown/
-    ├── LockdownDialog.kt                   # Non-dismissable AlertDialog passphrase entry/provision modal
-    ├── LockdownSessionStatus.kt            # Session TTL display composable
-    └── LockNowButton.kt                    # Lock Now action in Security settings
+core/testing/src/commonMain/kotlin/org/meshtastic/core/testing/
+└── FakeLockdownCoordinator.kt              # Test fake with tracking vars
+
+feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/lockdown/
+├── LockdownDialog.kt                       # Non-dismissable AlertDialog (provision/unlock/backoff)
+└── LockdownSessionStatus.kt                # Session TTL display composable
 ```
 
-**Structure Decision**: KMP multi-module with existing module boundaries. New code distributed across `core/model`, `core/repository`, `core/data`, `core/datastore`, and `feature/settings`. No new Gradle modules needed.
+**Structure Decision**: KMP multi-module with existing module boundaries. New code distributed across `core/model`, `core/repository`, `core/data`, `core/service`, `core/testing`, and `feature/settings`. No new Gradle modules needed. Lock Now button integrated directly into `SecurityConfigScreen` rather than a standalone composable.
 
 ## Complexity Tracking
 

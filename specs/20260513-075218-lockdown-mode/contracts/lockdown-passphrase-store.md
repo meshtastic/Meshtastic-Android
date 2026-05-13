@@ -1,95 +1,85 @@
 # Contract: LockdownPassphraseStore
 
-**Module**: `core/repository` (interface) / `core/datastore` (platform implementations)  
-**Source set**: `commonMain` (interface), `androidMain` / `jvmMain` / `iosMain` (implementations)
+**Module**: `core/repository` (interface) / `core/service` (platform implementations)  
+**Source set**: `commonMain` (interface), `androidMain` / `jvmMain` (implementations)
 
 ## Interface
 
 ```kotlin
 package org.meshtastic.core.repository
 
+/** Stored passphrase entry with associated TTL parameters. */
+data class StoredPassphrase(val passphrase: String, val boots: Int, val hours: Int)
+
 /**
- * Encrypted per-node passphrase cache for lockdown auto-replay.
+ * Encrypted per-device storage for lockdown passphrases.
  *
- * Implementations MUST store passphrases using platform-appropriate
- * encryption (EncryptedSharedPreferences on Android, Keychain on iOS,
- * KeyStore-backed file on JVM). Passphrase bytes MUST NOT appear in
- * logs, crash reports, or unencrypted storage.
+ * Platform implementations should use secure storage (e.g., EncryptedSharedPreferences
+ * on Android, KeyStore-backed AES-GCM on Desktop). Passphrase access is NOT gated
+ * behind biometric authentication so that auto-unlock can run in the background
+ * without user interaction.
  */
 interface LockdownPassphraseStore {
+    /** Retrieves the stored passphrase for the given device address, or null if not stored. */
+    fun getPassphrase(deviceAddress: String): StoredPassphrase?
 
-    /**
-     * Retrieve the cached passphrase for a node.
-     * @param nodeId Mesh node number
-     * @return Raw passphrase bytes, or null if none cached
-     */
-    suspend fun get(nodeId: Int): ByteArray?
+    /** Saves the passphrase and TTL parameters for the given device address. */
+    fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int)
 
-    /**
-     * Store a passphrase for a node, overwriting any previous value.
-     * @param nodeId Mesh node number
-     * @param passphrase Raw passphrase bytes (1-32)
-     */
-    suspend fun put(nodeId: Int, passphrase: ByteArray)
+    /** Clears the stored passphrase for the given device address. */
+    fun clearPassphrase(deviceAddress: String)
 
-    /**
-     * Remove the cached passphrase for a node.
-     * @param nodeId Mesh node number
-     */
-    suspend fun clear(nodeId: Int)
+    companion object {
+        const val DEFAULT_BOOTS = 50
+    }
 }
 ```
 
 ## Platform Implementations
 
-### Android (`androidMain`)
+### Android (`core/service/androidMain`)
 
 ```kotlin
-@Single
-class LockdownPassphraseStoreImpl(
-    private val context: Context,
-) : LockdownPassphraseStore {
-    private val prefs: SharedPreferences by lazy {
-        EncryptedSharedPreferences.create(
-            "lockdown_passphrases",
-            MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
-            context,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-        )
+@Single(binds = [LockdownPassphraseStore::class])
+class LockdownPassphraseStoreImpl(app: Application) : LockdownPassphraseStore {
+    private val prefs: SharedPreferences? by lazy {
+        try {
+            val masterKey = MasterKey.Builder(app).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
+            EncryptedSharedPreferences.create(app, PREFS_FILE_NAME, masterKey, ...)
+        } catch (e: Exception) {
+            Logger.e(e) { "Failed to initialize encrypted passphrase store" }
+            null  // Graceful degradation — auto-unlock disabled
+        }
     }
-
-    override suspend fun get(nodeId: Int): ByteArray? =
-        prefs.getString(nodeId.toKey(), null)?.let { Base64.decode(it) }
-
-    override suspend fun put(nodeId: Int, passphrase: ByteArray) =
-        prefs.edit().putString(nodeId.toKey(), Base64.encode(passphrase)).apply()
-
-    override suspend fun clear(nodeId: Int) =
-        prefs.edit().remove(nodeId.toKey()).apply()
-
-    private fun Int.toKey(): String = "lockdown_${toUInt().toString(16)}"
+    // All methods use `val p = prefs ?: return null/Unit` pattern
 }
 ```
 
-### JVM / iOS (stubs)
+- **Storage**: `EncryptedSharedPreferences` with AES-256-GCM MasterKey (hardware keystore when available)
+- **Key format**: `"${sanitizedDeviceAddress}_passphrase"`, `"..._boots"`, `"..._hours"`
+- **Error resilience**: `prefs` is nullable — crypto init failure makes store silently no-op with logging
+
+### JVM/Desktop (`core/service/jvmMain`)
 
 ```kotlin
-@Single
+@Single(binds = [LockdownPassphraseStore::class])
 class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
-    // No-op: passphrase never cached on this platform.
-    // User is always prompted on reconnection.
-    override suspend fun get(nodeId: Int): ByteArray? = null
-    override suspend fun put(nodeId: Int, passphrase: ByteArray) { /* no-op */ }
-    override suspend fun clear(nodeId: Int) { /* no-op */ }
+    private val masterKey: SecretKey? by lazy { loadOrCreateMasterKey() }
+    // AES-256-GCM encryption per device entry
 }
 ```
+
+- **Storage**: PKCS12 KeyStore at `~/.meshtastic/lockdown/keystore.p12` + per-device `.enc` files
+- **Key management**: Generates random AES-256 key on first use, stores in PKCS12 keystore
+- **Encryption**: AES-256-GCM with random IV per write; format `[1B IV len][IV][ciphertext]`
+- **Data format**: Line-based `"boots\nhours\npassphrase"` (avoids kotlinx-serialization dependency)
+- **Error resilience**: Same nullable master key pattern as Android
 
 ## Behavioral Contract
 
-1. **Encryption at rest**: Android impl MUST use AES-256-GCM via EncryptedSharedPreferences. Passphrase bytes are Base64-encoded for SharedPreferences string storage.
-2. **Key format**: `"lockdown_${nodeId.toUInt().toString(16)}"` — hex representation avoids negative-int issues.
-3. **No logging**: Implementations MUST NOT log passphrase content or full node addresses.
-4. **Thread safety**: `SharedPreferences.edit().apply()` is async-safe on Android. Suspend modifier allows IO dispatcher usage.
-5. **Lifecycle**: Store persists across app restarts. Cleared only on explicit `clear()` call (auth failure) or app data wipe.
-6. **Stubs**: JVM/iOS stubs are intentionally no-op. This means auto-replay won't work on those platforms until real implementations are added. This is acceptable per spec (Android is primary target).
+1. **Encryption at rest**: Both platforms encrypt passphrase data. Android via EncryptedSharedPreferences, Desktop via AES-256-GCM with KeyStore-managed key.
+2. **Key format**: Device addresses sanitized to `[a-zA-Z0-9_-]` for file/key safety.
+3. **No logging**: Implementations MUST NOT log passphrase content or full device addresses.
+4. **Thread safety**: Android `SharedPreferences.edit().apply()` is async-safe. JVM file I/O is synchronous (called from single-threaded radio dispatcher).
+5. **Lifecycle**: Store persists across app restarts. Cleared only on explicit `clearPassphrase()` call (auth failure) or app data wipe.
+6. **DEFAULT_BOOTS**: Companion constant (50) used as default by both UI and store implementations.
