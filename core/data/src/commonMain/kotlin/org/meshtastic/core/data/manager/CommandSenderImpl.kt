@@ -392,7 +392,7 @@ class CommandSenderImpl(
     }
 
     private fun sendLockdownAdmin(adminMessage: AdminMessage) {
-        val myNum = nodeManager.myNodeNum ?: return
+        val myNum = nodeManager.myNodeNum.value ?: return
         val packet =
             MeshPacket(
                 to = myNum,

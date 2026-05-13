@@ -25,9 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,6 +45,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.service.LockdownTokenInfo
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Visibility
+import org.meshtastic.core.ui.icon.VisibilityOff
 
 @Suppress("LongMethod")
 @Composable
@@ -124,7 +124,7 @@ fun LockdownUnlockDialog(
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
                             Icon(
                                 imageVector =
-                                    if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                    if (passwordVisible) MeshtasticIcons.VisibilityOff else MeshtasticIcons.Visibility,
                                 contentDescription = if (passwordVisible) "Hide" else "Show",
                             )
                         }

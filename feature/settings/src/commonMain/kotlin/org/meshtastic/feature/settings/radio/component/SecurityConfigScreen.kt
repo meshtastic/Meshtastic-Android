@@ -195,7 +195,6 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
             }
         }
         item {
-            val lockdownTokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
             TitledCard(title = stringResource(Res.string.administration)) {
                 SwitchPreference(
                     title = stringResource(Res.string.managed_mode),
@@ -214,20 +213,10 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                val lockNowTitle = lockdownTokenInfo?.let { info ->
-                    val parts = mutableListOf("boots: ${info.bootsRemaining}")
-                    if (info.expiryEpoch > 0L) {
-                        val dateText = java.text.DateFormat.getDateTimeInstance(
-                            java.text.DateFormat.SHORT,
-                            java.text.DateFormat.SHORT,
-                        ).format(java.util.Date(info.expiryEpoch * 1000L))
-                        parts += "until: $dateText"
-                    }
-                    "Lock Now (${parts.joinToString(", ")})"
-                } ?: "Lock Now"
+                // TODO(lockdown): Re-implement Lock Now button with KMP-compatible UI (Phase 5, T025-T026)
                 NodeActionButton(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    title = lockNowTitle,
+                    title = "Lock Now",
                     enabled = state.connected,
                     onClick = { viewModel.sendLockNow() },
                 )
