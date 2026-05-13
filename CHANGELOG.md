@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* refactor: use immutable destNum in RadioConfigViewModel (#5436) by @James Rich in [`1976808a3`](https://github.com/meshtastic/Meshtastic-Android/commit/1976808a361942f2c358329807d3605b8898e36d)
+* docs: update CHANGELOG.md (#5431) by @github-actions[bot] in [`57b0200b6`](https://github.com/meshtastic/Meshtastic-Android/commit/57b0200b6123e87f5037b12128411b69eee2ad23)
 * Flatpak: Add Maven/Gradle mirror URLs (#5433) by @Austin in [`ada16f4f5`](https://github.com/meshtastic/Meshtastic-Android/commit/ada16f4f5f2e859624ad8588ff07cdbff945aac0)
 * fix: update screenshots (#5435) by @James Rich in [`cf0a7cdab`](https://github.com/meshtastic/Meshtastic-Android/commit/cf0a7cdabff85e97accf4522709dfcb0fd5d4298)
 * chore: clean up brownfield specs and migrate to timestamp naming (#5432) by @James Rich in [`73469b415`](https://github.com/meshtastic/Meshtastic-Android/commit/73469b415e742a6601790b9574e1cf8a4a43a52c)
