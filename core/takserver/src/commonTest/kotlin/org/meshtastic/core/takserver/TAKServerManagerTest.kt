@@ -175,7 +175,7 @@ class TAKServerManagerTest {
         override var onClientConnected: (() -> Unit)? = null
 
         override suspend fun start(scope: CoroutineScope): Result<Unit> =
-            Result.failure(java.net.BindException("Address already in use: port 8089"))
+            Result.failure(IllegalStateException("Address already in use: port 8089"))
 
         override fun stop() {}
 

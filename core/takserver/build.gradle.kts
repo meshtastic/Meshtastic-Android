@@ -83,7 +83,6 @@ kotlin {
                 // classes from the JAR entirely — the SDK's bytecode still
                 // REFERENCES them, but they come from `:core:proto` on our
                 // classpath. No exclude needed; the SDK simply doesn't ship them.
-
                 // The SDK's jvmMain declares zstd-jni as a runtime dep (standard
                 // JAR with desktop native libs). Android needs the @aar variant
                 // instead (ships arm/arm64/x86/x86_64 .so files). Both packaging
@@ -92,12 +91,20 @@ kotlin {
                 // Exclude here; androidMain re-adds it as @aar below, and jvmMain
                 // re-adds the JAR for desktop.
                 exclude(group = "com.github.luben", module = "zstd-jni")
+                // xpp3 bundles org.xmlpull.v1.XmlPullParser which Android provides
+                // as a platform class (android.content.res.XmlResourceParser
+                // implements it). R8 fails when both the library and program
+                // classpaths define the same type.
+                exclude(group = "org.ogce", module = "xpp3")
             }
         }
 
         jvmMain.dependencies {
             // Desktop JVM: standard JAR bundles native libs for desktop archs.
             implementation("com.github.luben:zstd-jni:1.5.7-7")
+            // xpp3 is excluded from jvmAndroidMain (Android ships it as a
+            // platform class), but Desktop JVM still needs it for XmlPullParser.
+            implementation("org.ogce:xpp3:1.1.6")
         }
 
         androidMain.dependencies {
