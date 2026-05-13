@@ -156,6 +156,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
         val aliases: List<String>,
         val charCount: Int,
         val iconId: String,
+        val deepLink: String? = null,
     )
 
     @Suppress("MagicNumber")
@@ -180,6 +181,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("bluetooth", "usb", "tcp", "pairing"),
                 4100,
                 "connections",
+                deepLink = "meshtastic://meshtastic/connections",
             ),
             UserPageDef(
                 "messages-and-channels",
@@ -190,6 +192,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("channels", "direct-messages", "messaging", "conversations"),
                 4500,
                 "messages",
+                deepLink = "meshtastic://meshtastic/messages",
             ),
             UserPageDef(
                 "nodes",
@@ -200,6 +203,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("node-list", "mesh-nodes", "peers"),
                 3800,
                 "nodes",
+                deepLink = "meshtastic://meshtastic/nodes",
             ),
             UserPageDef(
                 "node-metrics",
@@ -220,6 +224,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("map", "waypoints", "gps", "location"),
                 3600,
                 "map",
+                deepLink = "meshtastic://meshtastic/map",
             ),
             UserPageDef(
                 "settings-radio-user",
@@ -230,6 +235,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("settings", "radio-config", "user-config", "lora"),
                 6800,
                 "settings-radio",
+                deepLink = "meshtastic://meshtastic/settings",
             ),
             UserPageDef(
                 "settings-module-admin",
@@ -240,6 +246,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("modules", "module-config", "administration"),
                 5500,
                 "settings-module",
+                deepLink = "meshtastic://meshtastic/settings/module-config",
             ),
             UserPageDef(
                 "telemetry-and-sensors",
@@ -290,6 +297,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 listOf("firmware", "update", "ota", "flash"),
                 3400,
                 "firmware",
+                deepLink = "meshtastic://meshtastic/firmware",
             ),
             UserPageDef(
                 "desktop",
@@ -344,6 +352,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
             aliases = def.aliases,
             charCount = def.charCount,
             iconId = def.iconId,
+            deepLink = def.deepLink,
         )
     }
 
@@ -464,5 +473,6 @@ class DefaultDocBundleLoader : DocBundleLoader {
         aliases = aliases,
         charCount = charCount,
         iconId = iconId,
+        deepLink = deepLink,
     )
 }

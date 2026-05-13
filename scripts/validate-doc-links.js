@@ -36,7 +36,7 @@ forEachDocPage(DOCS_DIR, (filePath, slug, section) => {
         while ((match = linkRe.exec(line)) !== null) {
             const target = match[2];
 
-            if (/^(https?:|mailto:|#)/.test(target)) continue;
+            if (/^(https?:|mailto:|#|meshtastic:)/.test(target)) continue;
 
             const ext = path.extname(target).toLowerCase();
             if (IMAGE_EXTS.has(ext)) continue;

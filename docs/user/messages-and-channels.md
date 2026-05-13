@@ -3,6 +3,7 @@ title: Messages & Channels
 nav_order: 3
 last_updated: 2026-05-13
 description: Send and receive messages, manage channels, configure encryption, and use quick chat, reactions, and message actions.
+deep_link: meshtastic://meshtastic/messages
 aliases:
   - channels
   - direct-messages

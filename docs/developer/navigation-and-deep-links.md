@@ -54,14 +54,19 @@ meshtastic://meshtastic/{path}
 
 | URI Path | Route | Notes |
 |----------|-------|-------|
+| `/connections` | `ConnectionsRoute.ConnectionsGraph` | Connections screen |
 | `/settings` | `SettingsRoute.SettingsGraph(null)` | Settings root |
+| `/settings/module-config` | `SettingsRoute.ModuleConfiguration` | Module config |
 | `/settings/helpDocs` | `SettingsRoute.HelpDocs` | Docs browser |
 | `/settings/helpDocs/{pageId}` | `SettingsRoute.HelpDocPage(pageId)` | Specific doc page |
 | `/settings/help-docs` | `SettingsRoute.HelpDocs` | Compatibility alias |
-| `/nodes` | `NodesRoute.Nodes` | Node list |
+| `/nodes` | `NodesRoute.NodesGraph` | Node list |
 | `/nodes/{destNum}` | `NodesRoute.NodeDetail(destNum)` | Node detail |
+| `/messages` | `ContactsRoute.ContactsGraph` | Conversation list |
 | `/messages/{contactKey}` | `ContactsRoute.Messages(contactKey)` | Conversation |
 | `/map` | `MapRoute.Map(null)` | Map view |
+| `/firmware` | `FirmwareRoute.FirmwareGraph` | Firmware screen |
+| `/channels` | `ChannelsRoute.ChannelsGraph` | Channel editor |
 
 ### Backstack Synthesis
 
@@ -116,6 +121,47 @@ fun `help docs deep link routes correctly`() {
     )
 }
 ```
+
+## Self-Referential Deep Links in Docs
+
+User guide documentation pages can include a `deep_link` frontmatter field that maps the doc page to its corresponding app screen. When present, the in-app docs viewer shows an **"Open in App"** button in the top bar, allowing users to jump directly from documentation to the live feature.
+
+### How It Works
+
+1. The `deep_link` field in frontmatter specifies the target `meshtastic://` URI.
+2. `DocBundleLoader` populates `DocPage.deepLink` from the page definition.
+3. `DocsPageRouteScreen` renders a `TextButton` in the top app bar when `deepLink` is non-null.
+4. Tapping the button fires the URI through the platform `UriHandler`, which routes back through `UIViewModel.handleDeepLink()` → `DeepLinkRouter`.
+
+### Pages with Deep Links
+
+| Doc Page | Deep Link | Target Screen |
+|----------|-----------|---------------|
+| Connections | `meshtastic://meshtastic/connections` | Connections |
+| Messages & Channels | `meshtastic://meshtastic/messages` | Conversations |
+| Nodes | `meshtastic://meshtastic/nodes` | Node list |
+| Map & Waypoints | `meshtastic://meshtastic/map` | Map |
+| Settings — Radio & User | `meshtastic://meshtastic/settings` | Settings root |
+| Settings — Modules & Admin | `meshtastic://meshtastic/settings/module-config` | Module config |
+| Firmware Updates | `meshtastic://meshtastic/firmware` | Firmware |
+
+### Adding a Deep Link to a Doc Page
+
+1. Add `deep_link: meshtastic://meshtastic/{path}` to the page's YAML frontmatter.
+2. Add the matching `deepLink` parameter to the page's `UserPageDef` in `DocBundleLoader`.
+3. The in-app docs viewer picks up the deep link automatically — no further UI changes needed.
+
+> **Note:** Deep links in frontmatter are ignored by Jekyll and Docusaurus, ensuring no broken links on external doc sites. The `meshtastic://` URI scheme is only active in-app.
+
+### Inline Deep Links in Markdown
+
+The `DocsLinkUriHandler` also intercepts `meshtastic://` URIs in markdown content. Authors can use inline deep links for contextual "try it now" actions:
+
+```markdown
+Configure your LoRa preset in [Settings](meshtastic://meshtastic/settings/lora).
+```
+
+These links only work in the in-app docs viewer. On Jekyll/Docusaurus, they render as non-functional links. Use sparingly and always provide equivalent text instructions.
 
 ---
 
