@@ -90,9 +90,20 @@ All user-facing UI MUST conform to the Meshtastic Client Design Standards:
 
 ### VI. Documentation Freshness
 
-In-app documentation MUST remain accurate and current as the codebase evolves:
+In-app documentation MUST remain accurate and current as the codebase evolves.
+Documentation changes propagate to **three consumers** — all three MUST be considered:
+
+1. **In-app docs browser** — `syncDocsToComposeResources` copies `docs/` into Compose
+   Resources at build time. Changes are bundled into the app automatically.
+2. **Jekyll site** (GitHub Pages) — `docs/` is served directly. The `docs-deploy.yml`
+   workflow rebuilds on push to `main`.
+3. **Docusaurus site** (meshtastic.org) — `scripts/sync-android-docs.js` transforms
+   `docs/` for the external site. Runs weekly via the `meshtastic/meshtastic` repo.
+
+Governance rules:
 
 - Every doc page MUST include a `last_updated` frontmatter field (YYYY-MM-DD).
+  Update this field whenever page content changes.
 - PRs that modify user-facing UI source files MUST update the corresponding doc page(s)
   or apply the `skip-docs-check` label with justification. The docs staleness check is a
   **blocking** CI gate.
@@ -101,8 +112,15 @@ In-app documentation MUST remain accurate and current as the codebase evolves:
 - Every user-facing feature module MUST have corresponding documentation in `docs/user/`
   or `docs/developer/`. Coverage is checked by `scripts/check-doc-coverage.js`.
 - Pages older than 180 days without updates trigger an advisory freshness warning.
+- New doc pages MUST be registered in `DocBundleLoader.kt` (in-app index), and added to
+  the `KNOWN_*_SLUGS` sets in `sync-android-docs.js` (Docusaurus link resolution).
+  Jekyll picks up new pages automatically via `_config.yml` scope-based defaults.
+- Image references MUST use root-relative paths (`/assets/screenshots/filename.png`) so
+  they resolve correctly in both Jekyll and the in-app renderer. The sync script rewrites
+  these to Docusaurus paths automatically.
 - Rationale: Documentation that drifts from the implementation misleads users, increases
-  support burden, and undermines the in-app help experience.
+  support burden, and undermines the in-app help experience. Three distinct consumers
+  means a single source change must be verified across all delivery channels.
 
 ### VII. Verify Before Push
 

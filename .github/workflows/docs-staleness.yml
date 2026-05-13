@@ -61,9 +61,11 @@ jobs:
           script: |
             const viewsChanged = `${{ steps.changed.outputs.views_changed }}`.trim();
             const body = [
-              '## 📄 Docs staleness warning',
+              '## 📄 Docs staleness check — BLOCKING',
               '',
               'This PR modifies user-facing UI source files but does not update any page under `docs/user/` or `docs/developer/`.',
+              '',
+              '> ⚠️ Doc changes propagate to **3 consumers**: in-app docs browser, Jekyll site (GitHub Pages), and meshtastic.org (Docusaurus sync). Updating a page in `docs/` automatically flows to all three.',
               '',
               '**Changed source files:**',
               '```',
@@ -84,7 +86,13 @@ jobs:
               '| `feature/docs/` | Internal docs infrastructure |',
               '| `core/ui/` | `docs/developer/codebase.md` or component-specific user pages |',
               '',
-              'If this PR does **not** require a doc update (e.g., internal refactor, bug fix, test change), add the **`skip-docs-check`** label to dismiss this warning.',
+              '**New page checklist** (if adding a new doc page):',
+              '1. Create the `.md` file in `docs/user/` or `docs/developer/` with `last_updated` frontmatter',
+              '2. Register in `DocBundleLoader.kt` with string resources (in-app browser)',
+              '3. Add slug to `KNOWN_*_SLUGS` in `scripts/sync-android-docs.js` (Docusaurus link resolution)',
+              '4. Jekyll picks up new pages automatically — no config change needed',
+              '',
+              'If this PR does **not** require a doc update (e.g., internal refactor, bug fix, test change), add the **`skip-docs-check`** label to dismiss this check.',
             ].join('\n');
 
             // Find and update an existing bot comment, or create a new one
@@ -95,7 +103,7 @@ jobs:
             });
             const existing = comments.find(c =>
               c.user.login === 'github-actions[bot]' &&
-              c.body.includes('Docs staleness warning')
+              c.body.includes('Docs staleness check')
             );
             if (existing) {
               await github.rest.issues.updateComment({
@@ -125,7 +133,7 @@ jobs:
             });
             const existing = comments.find(c =>
               c.user.login === 'github-actions[bot]' &&
-              c.body.includes('Docs staleness warning')
+              c.body.includes('Docs staleness check')
             );
             if (existing) {
               await github.rest.issues.updateComment({

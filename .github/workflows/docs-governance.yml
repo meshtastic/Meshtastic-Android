@@ -40,6 +40,51 @@ jobs:
       - name: Check doc coverage
         run: node scripts/check-doc-coverage.js .
 
+      - name: Validate sync script slug registry
+        run: |
+          # Ensure every doc page slug is registered in sync-android-docs.js KNOWN_*_SLUGS
+          missing=0
+          for f in docs/user/*.md; do
+            slug=$(basename "$f" .md)
+            if ! grep -q "\"$slug\"" scripts/sync-android-docs.js; then
+              echo "ERROR: docs/user/$slug.md not in KNOWN_USER_SLUGS (sync-android-docs.js)"
+              missing=$((missing + 1))
+            fi
+          done
+          for f in docs/developer/*.md; do
+            slug=$(basename "$f" .md)
+            if ! grep -q "\"$slug\"" scripts/sync-android-docs.js; then
+              echo "ERROR: docs/developer/$slug.md not in KNOWN_DEV_SLUGS (sync-android-docs.js)"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo ""
+            echo "FAILED: $missing page(s) missing from sync script slug registry."
+            echo "Add them to KNOWN_USER_SLUGS or KNOWN_DEV_SLUGS in scripts/sync-android-docs.js"
+            exit 1
+          fi
+          echo "All doc page slugs registered in sync script."
+
+      - name: Validate DocBundleLoader registry
+        run: |
+          # Ensure every doc page slug appears in the in-app DocBundleLoader index
+          loader="feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
+          missing=0
+          for f in docs/user/*.md docs/developer/*.md; do
+            slug=$(basename "$f" .md)
+            if ! grep -q "\"$slug\"" "$loader"; then
+              echo "ERROR: $slug not registered in DocBundleLoader.kt"
+              missing=$((missing + 1))
+            fi
+          done
+          if [ "$missing" -gt 0 ]; then
+            echo ""
+            echo "FAILED: $missing page(s) missing from DocBundleLoader.kt in-app index."
+            exit 1
+          fi
+          echo "All doc pages registered in DocBundleLoader."
+
       - name: Check doc freshness
         # Advisory — warns on stale pages but does not block PRs
         continue-on-error: true
