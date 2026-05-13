@@ -243,26 +243,35 @@ fun SettingsScreen(
 
                 val densityName by settingsViewModel.nodeListDensity.collectAsStateWithLifecycle()
                 val density = org.meshtastic.core.model.NodeListDensity.fromName(densityName)
+                val showPower by settingsViewModel.shouldShowPower.collectAsStateWithLifecycle()
+                val showLastHeard by settingsViewModel.shouldShowLastHeard.collectAsStateWithLifecycle()
+                val lastHeardRelative by settingsViewModel.lastHeardIsRelative.collectAsStateWithLifecycle()
+                val showLocation by settingsViewModel.shouldShowLocation.collectAsStateWithLifecycle()
+                val showHops by settingsViewModel.shouldShowHops.collectAsStateWithLifecycle()
+                val showSignal by settingsViewModel.shouldShowSignal.collectAsStateWithLifecycle()
+                val showChannel by settingsViewModel.shouldShowChannel.collectAsStateWithLifecycle()
+                val showRole by settingsViewModel.shouldShowRole.collectAsStateWithLifecycle()
+                val showTelemetry by settingsViewModel.shouldShowTelemetry.collectAsStateWithLifecycle()
                 NodeLayoutSettings(
                     density = density,
                     onDensityChange = { settingsViewModel.setNodeListDensity(it.name) },
-                    showPower = settingsViewModel.shouldShowPower.collectAsStateWithLifecycle().value,
+                    showPower = showPower,
                     onShowPowerChange = { settingsViewModel.setShouldShowPower(it) },
-                    showLastHeard = settingsViewModel.shouldShowLastHeard.collectAsStateWithLifecycle().value,
+                    showLastHeard = showLastHeard,
                     onShowLastHeardChange = { settingsViewModel.setShouldShowLastHeard(it) },
-                    lastHeardIsRelative = settingsViewModel.lastHeardIsRelative.collectAsStateWithLifecycle().value,
+                    lastHeardIsRelative = lastHeardRelative,
                     onLastHeardIsRelativeChange = { settingsViewModel.setLastHeardIsRelative(it) },
-                    showLocation = settingsViewModel.shouldShowLocation.collectAsStateWithLifecycle().value,
+                    showLocation = showLocation,
                     onShowLocationChange = { settingsViewModel.setShouldShowLocation(it) },
-                    showHops = settingsViewModel.shouldShowHops.collectAsStateWithLifecycle().value,
+                    showHops = showHops,
                     onShowHopsChange = { settingsViewModel.setShouldShowHops(it) },
-                    showSignal = settingsViewModel.shouldShowSignal.collectAsStateWithLifecycle().value,
+                    showSignal = showSignal,
                     onShowSignalChange = { settingsViewModel.setShouldShowSignal(it) },
-                    showChannel = settingsViewModel.shouldShowChannel.collectAsStateWithLifecycle().value,
+                    showChannel = showChannel,
                     onShowChannelChange = { settingsViewModel.setShouldShowChannel(it) },
-                    showRole = settingsViewModel.shouldShowRole.collectAsStateWithLifecycle().value,
+                    showRole = showRole,
                     onShowRoleChange = { settingsViewModel.setShouldShowRole(it) },
-                    showTelemetry = settingsViewModel.shouldShowTelemetry.collectAsStateWithLifecycle().value,
+                    showTelemetry = showTelemetry,
                     onShowTelemetryChange = { settingsViewModel.setShouldShowTelemetry(it) },
                 )
 

@@ -50,7 +50,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -94,13 +93,11 @@ import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
-import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
 private const val GRID_COLUMNS = 3
-private const val MILLIS_PER_SECOND = 1000L
 
 @Composable
 @Suppress("LongMethod")
@@ -488,43 +485,5 @@ private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
         HardwareInfo(hwModel = thatNode.user.hw_model.name, contentColor = contentColor)
         RoleInfo(role = thatNode.user.role, contentColor = contentColor)
         NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
-    }
-}
-
-/** Builds a TalkBack-friendly description aggregating node state. Shared between [NodeItem] and `NodeItemCompact`. */
-@Suppress("LongParameterList")
-fun buildNodeDescription(
-    name: String,
-    isOnline: Boolean,
-    isFavorite: Boolean,
-    lastHeard: Int,
-    role: String,
-    hopsAway: Int,
-    batteryLevel: Int?,
-    distance: String?,
-    snr: Float,
-    rssi: Int,
-    viaMqtt: Boolean,
-    lastHeardIsRelative: Boolean = true,
-): String = buildString {
-    append(name)
-    append(if (isOnline) ", online" else ", offline")
-    if (isFavorite) append(", favorite")
-    if (lastHeard > 0) {
-        val timeText =
-            if (lastHeardIsRelative) {
-                formatAgo(lastHeard)
-            } else {
-                DateFormatter.formatDateTime(lastHeard.toLong() * MILLIS_PER_SECOND)
-            }
-        append(", last heard $timeText")
-    }
-    append(", role $role")
-    if (hopsAway > 0) append(", $hopsAway hops away")
-    batteryLevel?.let { if (it in 1..100) append(", battery $it%") }
-    distance?.let { append(", $it away") }
-    if (hopsAway == 0 && !viaMqtt && snr < 100f && rssi < 0) {
-        val quality = determineSignalQuality(snr, rssi)
-        append(", signal ${quality.name.lowercase()}")
     }
 }
