@@ -1,7 +1,8 @@
 ---
 title: Desktop App
 nav_order: 14
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
   - linux
@@ -96,9 +97,7 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 ### Notification Preferences
 
-The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts:
-
-<!-- TODO: Add screenshot settings_notifications.png -->
+The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
 
 ## Building from Source
 

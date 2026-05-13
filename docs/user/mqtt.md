@@ -1,7 +1,8 @@
 ---
 title: MQTT
 nav_order: 11
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, JSON output, and map reporting.
 aliases:
   - mqtt
   - internet-bridge
@@ -106,6 +107,26 @@ Understanding the layered encryption model:
 - Use a private broker for sensitive deployments
 - Be mindful of airtime when downlinking messages from busy MQTT topics — every downlinked message consumes radio airtime on your local mesh
 - Consider enabling uplink-only if you only need to monitor your mesh remotely without injecting messages back
+
+## Troubleshooting
+
+### MQTT Not Connecting
+
+- **Check WiFi** — the gateway node must have an active internet connection (WiFi or Ethernet). MQTT does not work over the LoRa radio link itself.
+- **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
+- **Firewall** — port 1883 (MQTT) or 8883 (MQTT+TLS) must be open. Some networks block non-standard ports.
+- **DNS resolution** — if using a custom broker hostname, verify the node can resolve it. Try the broker's IP address directly.
+
+### Messages Not Bridging
+
+- **Check uplink/downlink settings** — if only uplink is enabled, messages flow from mesh to MQTT but not back. Enable downlink on the receiving gateway.
+- **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
+- **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
+
+## Related Topics
+
+- [Settings — Modules & Admin](settings-module-admin) — MQTT module configuration reference
+- [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
 
 ---
 

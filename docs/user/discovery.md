@@ -1,82 +1,114 @@
 ---
 title: Discovery
 nav_order: 12
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Explore your mesh network — traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - mesh-discovery
   - local-discovery
   - network-scan
+  - traceroute
+  - neighbor-info
 ---
 
 # Discovery
 
-Local Mesh Discovery helps you explore and understand your mesh network topology.
+Discovery tools help you understand **how** your mesh network is connected — which nodes can hear each other, what paths messages take, and where bottlenecks or weak links exist.
 
-## Overview
+> 💡 **Tip:** You don't need a dedicated "discovery mode" to start exploring your mesh. The tools below are available right now from the node list and node detail screens.
 
-> 💡 **Note:** The Local Mesh Discovery feature (Feature 001) is currently in development. This page provides a concept overview and will be updated with detailed UI guidance once the feature reaches its UI implementation milestones.
+---
 
-Discovery provides tools to:
-- Visualize the mesh network topology
-- Identify which nodes can hear each other
-- Understand signal paths and relay chains
-- Discover new nodes joining the mesh
+## Traceroute
 
-## Planned Capabilities
+Traceroute reveals the exact path a message takes from your node to any other node on the mesh. It's the single most useful tool for debugging connectivity problems.
 
-### Network Topology View
+### Running a Traceroute
 
-A visual representation of how nodes are connected:
-- Direct connections (single hop)
-- Relay paths (multi-hop routes)
-- Signal quality between pairs
+1. Navigate to **Nodes** and tap the node you want to trace.
+2. On the node detail screen, tap **Traceroute**.
+3. The app sends a traceroute request and waits for the response.
+4. Results display each hop in order, with signal quality at every step.
 
-### Node Discovery
+### Reading the Results
 
-Automatic detection of:
-- New nodes appearing on the mesh
-- Nodes coming online/offline
-- Changes in network topology
+A traceroute result looks like this:
 
-### Signal Mapping
+```
+You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Target
+```
 
-Understanding RF coverage:
-- Which nodes can hear which other nodes
-- Signal strength between node pairs
-- Optimal positioning recommendations
+Each hop represents a relay node that forwarded the message. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
 
-## Current Discovery Tools
+| What to look for | What it means |
+|------------------|---------------|
+| All hops show Good SNR (> 5 dB) | Healthy path — messages flow reliably |
+| One hop shows Bad SNR (< 0 dB) | Weak link — this relay segment is fragile |
+| Many hops (4+) | Long path — consider repositioning a node to shorten it |
+| Different path on retry | Mesh is adapting — multiple routes exist (this is good!) |
 
-While the dedicated Discovery feature is under development, you can use these existing tools:
+> 💡 **Tip:** Run traceroute several times over a few minutes. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
-### Traceroute
+### Troubleshooting with Traceroute
 
-Available from any node's detail screen:
-- Shows the exact path packets take
-- Reports signal quality at each hop
-- Helps identify relay bottlenecks
+- **"No route found"** — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.
+- **Traceroute times out** — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in **Settings → LoRa Config**.
+- **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.
 
-### Neighbor Info
+---
 
-When the Neighbor Info module is enabled:
-- Each node broadcasts its directly-heard neighbors
-- Useful for understanding local mesh topology
-- Available in the node detail metrics
+## Neighbor Info
 
-### Node List Filtering
+The Neighbor Info module lets each node broadcast a list of the nodes it can **directly hear** (single-hop). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
 
-The current node list provides discovery-like information:
-- Sort by last heard time to see recently active nodes
-- Sort by signal quality to assess connectivity
-- Filter by distance to find nearby nodes
+### Enabling Neighbor Info
 
-## Future Updates
+1. Navigate to **Settings → Module Config → Neighbor Info**.
+2. Enable the module.
+3. Set the broadcast interval (default: 900 seconds / 15 minutes).
 
-This page will be expanded with:
-- Detailed UI screenshots and workflows
-- Network map visualization guide
-- Recommendations engine usage
-- Discovery automation settings
+Once enabled, your node periodically broadcasts its neighbor table. Other nodes with Neighbor Info enabled do the same.
+
+### Viewing Neighbor Data
+
+- Open any node's detail screen and look for the **Neighbors** section.
+- Each neighbor entry shows the node that was directly heard and its signal quality.
+- Combine neighbor data from multiple nodes to understand the full mesh topology.
+
+> ⚠️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.
+
+---
+
+## Node List as a Discovery Tool
+
+The node list itself is a powerful discovery tool when you use its filtering and sorting features effectively.
+
+### Finding New Nodes
+
+- Sort by **Last heard** to see the most recently active nodes at the top.
+- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.
+
+### Assessing Connectivity
+
+- Sort by **Hops away** to see which nodes are directly reachable (0 hops) versus relayed.
+- Sort by **Distance** to find nearby nodes and verify they're reachable.
+- Use **Exclude MQTT** to focus on nodes reachable over radio (not via internet bridge).
+
+### Infrastructure Audit
+
+- Disable **Exclude infrastructure** to see Router, Repeater, and Router Client nodes.
+- Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
+
+See [Nodes](nodes) for full details on filtering and sorting options.
+
+---
+
+## Tips for Mesh Exploration
+
+- **Start with traceroute** — it gives you immediate, actionable information about a specific path.
+- **Enable Neighbor Info on key nodes** — especially routers and repeaters, to build a picture of the backbone.
+- **Check the map** — node positions on the [Map](map-and-waypoints) combined with signal data help you understand why some links are strong and others are weak.
+- **Compare signal over time** — use the [Signal Meter](signal-meter) guide to interpret SNR and RSSI values correctly.
 
 ---
 

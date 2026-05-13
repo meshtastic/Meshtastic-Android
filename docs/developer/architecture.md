@@ -1,7 +1,7 @@
 ---
 title: Architecture
 nav_order: 1
-last_updated: 2026-05-12
+last_updated: 2026-05-13
 aliases:
   - layers
   - module-architecture

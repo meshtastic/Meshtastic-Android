@@ -1,7 +1,8 @@
 ---
 title: Telemetry & Sensors
 nav_order: 9
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
 aliases:
   - sensors
   - environment
@@ -100,6 +101,18 @@ Useful for monitoring solar charging or battery health on remote nodes.
 3. Historical graphs show trends over time.
 
 ![Telemetry actions](/assets/screenshots/node-metrics_telemetric_actions.png)
+
+## Troubleshooting
+
+- **No environment data showing?** The remote node needs a physical sensor connected (e.g., BME280 on I2C). Device telemetry (battery, uptime) is always available, but environment metrics require hardware.
+- **Stale readings?** Check the reporting interval — very long intervals (7200s+) mean data updates infrequently. Also verify the remote node is still online.
+- **Sensor conflict on I2C bus?** Some sensors share I2C addresses. If you have multiple sensors on the same bus, check for address collisions in the radio's serial debug output.
+
+## Related Topics
+
+- [Node Metrics](node-metrics) — view telemetry data on the node detail screen
+- [Settings — Modules & Admin](settings-module-admin) — telemetry module configuration
+- [Units & Locale](units-and-locale) — temperature and pressure display units
 
 ---
 

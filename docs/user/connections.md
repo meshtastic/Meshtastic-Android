@@ -1,7 +1,8 @@
 ---
 title: Connections
 nav_order: 2
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
   - usb
@@ -98,6 +99,14 @@ On Desktop (Linux/macOS/Windows), the app supports:
 - **USB Serial** — primary connection method
 - **TCP/IP** — for network-connected radios
 - Bluetooth is **not** currently supported on Desktop
+
+See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
+
+## Related Topics
+
+- [Getting Started](onboarding) — first-launch setup and permissions
+- [Settings — Radio & User](settings-radio-user) — Bluetooth and network configuration
+- [Desktop App](desktop) — desktop-specific connection details
 
 ---
 

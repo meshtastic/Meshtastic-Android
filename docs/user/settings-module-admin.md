@@ -1,7 +1,8 @@
 ---
 title: Settings — Modules & Admin
 nav_order: 8
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
   - module-config
@@ -10,15 +11,15 @@ aliases:
 
 # Settings — Modules & Admin
 
-Configure optional feature modules and perform device administration.
+Configure optional feature modules and perform device administration. Modules extend Meshtastic with specialized capabilities — each can be independently enabled or disabled.
+
+> 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration.
 
 ## Module Configuration
 
-Modules extend Meshtastic with additional capabilities. Each module can be independently enabled or disabled.
-
 ### MQTT Module
 
-Bridges mesh messages to/from an MQTT broker for internet connectivity.
+Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.
 
 | Setting | Description |
 |---------|-------------|
@@ -32,44 +33,63 @@ Bridges mesh messages to/from an MQTT broker for internet connectivity.
 | Root Topic | Base MQTT topic path |
 | Map Report | Publish position for public map |
 
-See [MQTT](mqtt) for detailed usage guide.
+See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
 
 ### Serial Module
 
-Enables serial port communication for external integrations.
+Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate serial communication |
+| Echo | Echo received serial data back |
+| Mode | Text, Protobuf, or NMEA output |
+| RX/TX Pins | GPIO pins for serial connection |
+| Baud Rate | Serial communication speed |
 
 ### External Notification Module
 
-Controls buzzer, LED, or vibration alerts:
+Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
 
 | Setting | Description |
 |---------|-------------|
 | Enabled | Activate notifications |
-| Alert Message | Notify on messages |
+| Alert Message | Notify on incoming messages |
+| Alert Message Buzzer | Use buzzer for messages |
+| Alert Message Vibra | Use vibration for messages |
 | Alert Bell | Notify on bell character |
 | Output (GPIO) | Pin for notification output |
 | Active | High or Low active |
 | Duration (ms) | Notification length |
+| Use I2S as Buzzer | Use I2S audio output |
 
 ### Store & Forward Module
 
-Buffers messages for nodes that were temporarily offline:
+Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
 | Setting | Description |
 |---------|-------------|
-| Enabled | Activate store & forward |
+| Enabled | Activate store and forward |
 | Heartbeat (s) | Announcement interval |
 | Records | Maximum stored messages |
 | History Return (max) | Max messages to replay |
 | History Return (window) | Time window for replay |
 
+> 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
+
 ### Range Test Module
 
-Automated range testing tool for evaluating link quality.
+Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate range testing |
+| Sender Interval (s) | Time between test transmissions |
+| Save CSV | Log received test data to SD card |
 
 ### Telemetry Module
 
-Controls what telemetry data your node shares:
+Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
 
 | Setting | Description |
 |---------|-------------|
@@ -78,37 +98,94 @@ Controls what telemetry data your node shares:
 | Air Quality Enabled | Report particulate sensor data |
 | Power Metrics Enabled | Report power usage |
 
+See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
+
 ### Canned Message Module
 
-Pre-configured messages accessible from the device buttons (for devices with input hardware).
+Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate canned messages |
+| Messages | Newline-separated list of messages |
+| Send Bell | Play bell sound on send |
+| Rotary Encoder | Enable rotary encoder input |
+| Up/Down/Press Pins | GPIO pin assignments for input |
 
 ### Audio Module
 
-Codec2 audio support for voice communication (experimental).
+Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate audio module |
+| Codec2 Rate | Audio quality/bandwidth tradeoff |
+| I2S Word Select | GPIO pin for I2S WS |
+| I2S Data In | GPIO pin for I2S DIN |
+| I2S Data Out | GPIO pin for I2S DOUT |
+
+> ⚠️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
 ### Remote Hardware Module
 
-GPIO control over the mesh network.
+GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate remote GPIO access |
+| Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
+
+> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
 
 ### Neighbor Info Module
 
-Broadcasts information about directly heard neighbors for topology mapping.
+Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate neighbor broadcasting |
+| Update Interval (s) | How often to broadcast neighbor list |
+
+See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
 ### Ambient Lighting Module
 
-Controls onboard RGB LEDs.
+Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate LED control |
+| LED State | On, Off, or set specific color |
+| Red / Green / Blue | Individual color channel values (0–255) |
 
 ### Detection Sensor Module
 
-Motion/door sensor alerts transmitted over the mesh.
+Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate detection sensor |
+| Monitor Pin | GPIO pin connected to sensor |
+| Detection Triggered High | Trigger when pin goes high (vs. low) |
+| Minimum Broadcast (s) | Minimum time between alert broadcasts |
+| State Broadcast (s) | Periodic state broadcast interval |
+| Send Bell | Include bell character in alerts |
+| Friendly Name | Custom name for this sensor |
 
 ### Paxcounter Module
 
-People counter using WiFi/BLE probe requests (ESP32 devices).
+People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Activate people counting |
+| Update Interval (s) | How often to report counts |
+
+> 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 
 ### TAK Module
 
-Team Awareness Kit integration. See [TAK](tak) for details.
+Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [TAK Integration](tak) for detailed setup and usage.
 
 ## Administration
 

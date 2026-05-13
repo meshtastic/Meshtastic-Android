@@ -1,7 +1,7 @@
 ---
 title: Contributing
 nav_order: 8
-last_updated: 2026-05-12
+last_updated: 2026-05-13
 aliases:
   - contributing
   - pull-request

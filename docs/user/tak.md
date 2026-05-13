@@ -1,7 +1,8 @@
 ---
 title: TAK Integration
 nav_order: 10
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
 aliases:
   - tak
   - atak
@@ -74,6 +75,12 @@ Once configured:
 - TAK data shares your position and callsign information
 - Ensure your channel encryption is configured when using TAK in sensitive environments
 - The TAK module respects the same channel encryption as other Meshtastic messages
+
+## Related Topics
+
+- [Settings — Modules & Admin](settings-module-admin) — TAK module configuration
+- [Nodes](nodes) — TAK and TAK Tracker roles in the node list
+- [Map & Waypoints](map-and-waypoints) — node positions on the map
 
 ---
 

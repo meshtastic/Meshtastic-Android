@@ -1,7 +1,8 @@
 ---
 title: Messages & Channels
 nav_order: 3
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Send and receive messages, manage channels, configure encryption, and use quick chat, reactions, and message actions.
 aliases:
   - channels
   - direct-messages
@@ -75,9 +76,7 @@ The channel list shows each channel with its latest message preview:
 
 ### Message Bubbles
 
-Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted original:
-
-<!-- TODO: Add screenshot messages_message_items.png -->
+Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.
 
 ### Reactions
 
@@ -119,6 +118,12 @@ Messages are queued and transmitted based on priority:
 - Use direct messages for private person-to-person communication
 - Keep messages short — mesh bandwidth is limited
 - Configure encryption for sensitive communications
+
+## Related Topics
+
+- [Nodes](nodes) — tap a node to start a direct message
+- [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
+- [MQTT](mqtt) — bridge channel messages to the internet
 
 ---
 

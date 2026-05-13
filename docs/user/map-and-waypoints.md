@@ -1,7 +1,8 @@
 ---
 title: Map & Waypoints
 nav_order: 6
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: View node positions on the map, create and share waypoints, and manage position sharing and privacy.
 aliases:
   - map
   - waypoints
@@ -37,9 +38,7 @@ Node markers on the map indicate:
 - **Center** — select the location button to center on your position
 - **Node tap** — tap a node marker to view details
 
-The floating toolbar provides quick access to compass, filters, refresh, and location tracking:
-
-<!-- TODO: Add screenshot map_controls_overlay.png -->
+The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
 
 ## Waypoints
 
@@ -98,6 +97,13 @@ The app supports multiple map tile sources:
 - OpenStreetMap (default)
 - Satellite imagery (where available)
 - Offline tiles (download map areas for offline use)
+
+## Related Topics
+
+- [Nodes](nodes) — view and filter your node list
+- [Node Metrics](node-metrics) — signal quality and position history for individual nodes
+- [Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
+- [Units & Locale](units-and-locale) — distance and coordinate display formats
 
 ---
 

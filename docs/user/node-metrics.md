@@ -1,7 +1,8 @@
 ---
 title: Node Metrics
 nav_order: 5
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Telemetry dashboards for each mesh node — device health, environment sensors, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
   - telemetry
@@ -25,9 +26,9 @@ Basic operating information reported by each node:
 | Airtime | Transmission time used by this node |
 | Uptime | Time since last reboot |
 
-Device metrics are displayed as individual cards showing battery, voltage, channel utilization, airtime, and uptime:
+Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.
 
-<!-- TODO: Add screenshot nodes_device_metrics_card.png -->
+> 💡 **Tip:** Tap any metric card to expand it into a full chart with historical data points. Pinch to zoom the time axis.
 
 ## Environment Metrics
 
@@ -41,11 +42,9 @@ Environmental sensor data (requires compatible hardware):
 | Gas Resistance | BME680 |
 | IAQ (Air Quality) | BME680 |
 
-Environment metrics are charted over time for easy trend analysis:
+Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
 
-<!-- TODO: Add screenshot nodes_environment_metrics.png -->
-
-> 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data.
+> 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See [Telemetry & Sensors](telemetry-and-sensors) for a full list of supported sensors.
 
 ## Signal Metrics
 
@@ -117,6 +116,14 @@ The position tab shows location data for nodes that share GPS:
 ![Position inline content](/assets/screenshots/nodes_position.png)
 
 > ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+
+## Related Topics
+
+- [Nodes](nodes) — node list, filtering, and sorting
+- [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
+- [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
+- [Discovery](discovery) — traceroute details and neighbor info
+- [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
 
 ---
 

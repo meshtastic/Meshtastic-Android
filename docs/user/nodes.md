@@ -1,7 +1,8 @@
 ---
 title: Nodes
 nav_order: 4
-last_updated: 2026-05-12
+last_updated: 2026-05-13
+description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
   - mesh-nodes
@@ -107,6 +108,14 @@ Inline status indicators show key metrics at a glance:
 | Hop count | ![Hops](/assets/screenshots/nodes_hops_info.png) |
 | Last heard | ![Last heard](/assets/screenshots/nodes_last_heard.png) |
 | Distance | ![Distance](/assets/screenshots/nodes_distance_info.png) |
+
+## Related Topics
+
+- [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
+- [Messages & Channels](messages-and-channels) — send a direct message to a node
+- [Map & Waypoints](map-and-waypoints) — view node positions geographically
+- [Discovery](discovery) — traceroute and neighbor info for topology exploration
+- [Signal Meter](signal-meter) — understand what the signal bars mean
 
 ---
 
