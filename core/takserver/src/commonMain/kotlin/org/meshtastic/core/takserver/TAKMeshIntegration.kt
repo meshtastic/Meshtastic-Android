@@ -76,7 +76,9 @@ class TAKMeshIntegration(
     private val nodeRepository: NodeRepository,
 ) {
     @Volatile private var isRunning = false
-    // Guarded by @Volatile for cross-thread visibility between start()/stop() calls.
+    // Immutable list reference replaced atomically in start()/stop(); never mutated in-place.
+    // @Volatile only guarantees visibility of the reference itself — any in-place mutation
+    // would bypass the visibility guarantee and must not be added.
     @Volatile private var jobs: List<Job> = emptyList()
     @Volatile private var currentTeam: Team = Team.Unspecifed_Color
     @Volatile private var currentRole: MemberRole = MemberRole.Unspecifed
