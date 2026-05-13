@@ -34,8 +34,10 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
+import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
@@ -50,8 +52,10 @@ class NodeListViewModel(
     private val radioController: RadioController,
     private val radioInterfaceService: RadioInterfaceService,
     val nodeManagementActions: NodeManagementActions,
+    private val nodeRequestActions: NodeRequestActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
+    private val uiPrefs: UiPrefs,
 ) : ViewModel() {
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
@@ -148,6 +152,23 @@ class NodeListViewModel(
     fun muteNode(node: Node) = nodeManagementActions.requestMuteNode(viewModelScope, node)
 
     fun removeNode(node: Node) = nodeManagementActions.requestRemoveNode(viewModelScope, node)
+
+    fun requestPosition(node: Node) = nodeRequestActions.requestPosition(viewModelScope, node.num, node.user.long_name)
+
+    /** Whether the user has ever completed a swipe action (permanent dismissal). */
+    val hasCompletedSwipeAction: StateFlow<Boolean> = uiPrefs.hasCompletedSwipeAction
+
+    /** Transient per-session flag: has the hint already been shown this session? */
+    private val _hasShownHintThisSession = kotlinx.coroutines.flow.MutableStateFlow(false)
+    val hasShownHintThisSession: StateFlow<Boolean> = _hasShownHintThisSession
+
+    fun markHintShownThisSession() {
+        _hasShownHintThisSession.value = true
+    }
+
+    fun markSwipeActionCompleted() {
+        uiPrefs.setHasCompletedSwipeAction(true)
+    }
 
     companion object {
         private const val KEY_FILTER_TEXT = "filter_text"

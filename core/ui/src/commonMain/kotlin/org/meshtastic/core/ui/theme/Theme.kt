@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("MatchingDeclarationName")
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package org.meshtastic.core.ui.theme
 
@@ -25,6 +26,7 @@ import androidx.compose.material3.MotionScheme.Companion.expressive
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
@@ -127,12 +129,11 @@ fun AppTheme(
             null
         } ?: if (darkTheme) darkScheme else lightScheme
 
-    MaterialExpressiveTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        motionScheme = expressive(),
-        content = content,
-    )
+    val reduceMotion = reduceMotionEnabled()
+
+    MaterialExpressiveTheme(colorScheme = colorScheme, typography = AppTypography, motionScheme = expressive()) {
+        CompositionLocalProvider(LocalReduceMotion provides reduceMotion) { content() }
+    }
 }
 
 const val MODE_DYNAMIC = 6969420

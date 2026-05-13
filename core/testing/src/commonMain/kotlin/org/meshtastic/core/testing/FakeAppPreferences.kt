@@ -182,6 +182,12 @@ class FakeUiPrefs : UiPrefs {
     override fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean) {
         nodeLocationEnabled.getOrPut(nodeNum) { MutableStateFlow(provide) }.value = provide
     }
+
+    override val hasCompletedSwipeAction = MutableStateFlow(false)
+
+    override fun setHasCompletedSwipeAction(completed: Boolean) {
+        hasCompletedSwipeAction.value = completed
+    }
 }
 
 class FakeMapPrefs : MapPrefs {

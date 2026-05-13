@@ -103,6 +103,9 @@ fun NodeListScreen(
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
+    val hasCompletedSwipeAction by viewModel.hasCompletedSwipeAction.collectAsStateWithLifecycle()
+    val hasShownHintThisSession by viewModel.hasShownHintThisSession.collectAsStateWithLifecycle()
+
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 

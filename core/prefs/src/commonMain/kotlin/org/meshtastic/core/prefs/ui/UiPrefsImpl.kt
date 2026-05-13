@@ -179,6 +179,13 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[booleanPreferencesKey(provideLocationKey(nodeNum))] = provide } }
     }
 
+    override val hasCompletedSwipeAction: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_HAS_COMPLETED_SWIPE_ACTION] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setHasCompletedSwipeAction(completed: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_HAS_COMPLETED_SWIPE_ACTION] = completed } }
+    }
+
     private fun provideLocationKey(nodeNum: Int) = "provide-location-$nodeNum"
 
     companion object {
@@ -200,5 +207,6 @@ class UiPrefsImpl(
         val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")
         val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
         val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
+        val KEY_HAS_COMPLETED_SWIPE_ACTION = booleanPreferencesKey("has-completed-swipe-action")
     }
 }
