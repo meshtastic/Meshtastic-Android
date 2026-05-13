@@ -36,7 +36,7 @@ turbine = "1.2.1"
 compose-screenshot = "0.0.1-alpha14"
 
 # Compose Multiplatform
-compose-multiplatform = "1.11.0-rc01"
+compose-multiplatform = "1.11.0"
 compose-multiplatform-material3 = "1.11.0-alpha07"
 # `androidx-compose-bom-aligned` tracks androidx.compose.{runtime,ui,foundation,animation}
 # artifacts that ship in lockstep with CMP. Kept as a separate version ref so Renovate
@@ -73,7 +73,7 @@ datadog-gradle = "1.26.0"
 dd-sdk-android = "3.9.1"
 detekt = "2.0.0-alpha.3"
 dokka = "2.2.0"
-devtools-ksp = "2.3.7"
+devtools-ksp = "2.3.8"
 firebase-crashlytics-gradle = "3.0.7"
 google-services-gradle = "4.4.4"
 markdownRenderer = "0.40.2"
@@ -81,7 +81,7 @@ okio = "3.17.0"
 uri-kmp = "0.0.21"
 osmdroid-android = "6.1.20"
 spotless = "8.4.0"
-wire = "6.2.0"
+wire = "6.3.0"
 vico = "3.2.0-next.4"
 kable = "0.42.0"
 mqttastic = "0.3.6"
@@ -228,7 +228,7 @@ dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-doc
 markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
-material = { module = "com.google.android.material:material", version = "1.13.0" }
+material = { module = "com.google.android.material:material", version = "1.14.0" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 meshtastic-mqtt-client = { module = "org.meshtastic:mqtt-client", version.ref = "mqttastic" }
