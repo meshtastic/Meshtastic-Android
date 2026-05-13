@@ -40,6 +40,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -87,6 +88,7 @@ class MeshConnectionManagerImpl(
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
     private val heartbeatSender: DataLayerHeartbeatSender,
+    private val lockdownCoordinator: LockdownCoordinator,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConnectionManager {
     /**
@@ -202,6 +204,7 @@ class MeshConnectionManagerImpl(
         }
         serviceBroadcasts.broadcastConnection()
         connectTimeMsec = nowMillis
+        lockdownCoordinator.onConnect()
 
         // Send a wake-up heartbeat before the config request. The firmware may be in a
         // power-saving state where the NimBLE callback context needs warming up. The 100ms
@@ -282,6 +285,7 @@ class MeshConnectionManagerImpl(
 
     private fun handleDisconnected() {
         serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        lockdownCoordinator.onDisconnect()
         tearDownConnection()
 
         analytics.track(
@@ -298,6 +302,14 @@ class MeshConnectionManagerImpl(
         val action = { packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE)) }
         startHandshakeStallGuard(1, HANDSHAKE_TIMEOUT_STAGE1, action)
         action()
+    }
+
+    override fun clearRadioConfig() {
+        scope.handledLaunch {
+            radioConfigRepository.clearLocalConfig()
+            radioConfigRepository.clearChannelSet()
+            radioConfigRepository.clearLocalModuleConfig()
+        }
     }
 
     override fun startNodeInfoOnly() {

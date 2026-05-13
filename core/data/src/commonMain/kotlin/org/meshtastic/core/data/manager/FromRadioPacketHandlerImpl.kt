@@ -23,6 +23,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.Notification
@@ -48,6 +49,7 @@ class FromRadioPacketHandlerImpl(
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val notificationManager: NotificationManager,
+    private val lockdownCoordinator: LockdownCoordinator,
 ) : FromRadioPacketHandler {
 
     // Application-scoped coroutine context for suspend work (e.g. getStringSuspend).
@@ -69,6 +71,7 @@ class FromRadioPacketHandlerImpl(
         val deviceUIConfig = proto.deviceuiConfig
         val fileInfo = proto.fileInfo
         val xmodemPacket = proto.xmodemPacket
+        val lockdownStatus = proto.lockdown_status
 
         when {
             myInfo != null -> router.value.configFlowManager.handleMyInfo(myInfo)
@@ -83,8 +86,10 @@ class FromRadioPacketHandlerImpl(
                 router.value.configFlowManager.handleNodeInfo(nodeInfo)
                 serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
             }
-
-            configCompleteId != null -> router.value.configFlowManager.handleConfigComplete(configCompleteId)
+            configCompleteId != null -> {
+                router.value.configFlowManager.handleConfigComplete(configCompleteId)
+                lockdownCoordinator.onConfigComplete()
+            }
 
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
 
@@ -99,6 +104,8 @@ class FromRadioPacketHandlerImpl(
             fileInfo != null -> router.value.configFlowManager.handleFileInfo(fileInfo)
 
             xmodemPacket != null -> router.value.xmodemManager.handleIncomingXModem(xmodemPacket)
+
+            lockdownStatus != null -> lockdownCoordinator.handleLockdownStatus(lockdownStatus)
 
             clientNotification != null -> handleClientNotification(clientNotification)
 

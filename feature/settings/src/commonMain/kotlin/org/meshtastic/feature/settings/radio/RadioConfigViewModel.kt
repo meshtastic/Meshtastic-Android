@@ -39,6 +39,7 @@ import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -136,7 +137,13 @@ open class RadioConfigViewModel(
     private val locationService: LocationService,
     private val fileService: FileService,
     private val mqttManager: MqttManager,
+    private val lockdownCoordinator: LockdownCoordinator,
 ) : ViewModel() {
+
+    fun sendLockNow() {
+        viewModelScope.launch { lockdownCoordinator.lockNow() }
+    }
+
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {

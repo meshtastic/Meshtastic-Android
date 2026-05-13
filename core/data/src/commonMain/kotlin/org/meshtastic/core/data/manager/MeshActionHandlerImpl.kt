@@ -35,6 +35,7 @@ import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshMessageProcessor
@@ -69,6 +70,7 @@ class MeshActionHandlerImpl(
     private val notificationManager: NotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     private val radioConfigRepository: RadioConfigRepository,
+    private val lockdownCoordinator: LockdownCoordinator,
     @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshActionHandler {
 
@@ -400,5 +402,13 @@ class MeshActionHandlerImpl(
                 nodeManager.loadCachedNodeDB()
             }
         }
+    }
+
+    override fun handleSendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int) {
+        lockdownCoordinator.submitPassphrase(passphrase, bootTtl, hourTtl)
+    }
+
+    override fun handleSendLockNow() {
+        lockdownCoordinator.lockNow()
     }
 }

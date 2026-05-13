@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
@@ -134,6 +135,21 @@ class UIViewModel(
     fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
         notificationManager.cancel(notification.toString().hashCode())
+    }
+
+    val lockdownState = serviceRepository.lockdownState
+    val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
+
+    fun sendLockdownUnlock(passphrase: String, bootTtl: Int = DEFAULT_BOOT_TTL, hourTtl: Int = 0) {
+        viewModelScope.launch { radioController.sendLockdownUnlock(passphrase, bootTtl, hourTtl) }
+    }
+
+    fun sendLockNow() {
+        viewModelScope.launch { radioController.sendLockNow() }
+    }
+
+    fun clearLockdownState() {
+        serviceRepository.clearLockdownState()
     }
 
     /** Emits events for mesh network send/receive activity. */
@@ -293,5 +309,9 @@ class UIViewModel(
 
     fun onAppIntroCompleted() {
         uiPrefs.setAppIntroCompleted(true)
+    }
+
+    companion object {
+        private const val DEFAULT_BOOT_TTL = 50
     }
 }

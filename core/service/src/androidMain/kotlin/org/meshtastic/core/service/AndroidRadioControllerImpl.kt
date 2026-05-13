@@ -220,4 +220,12 @@ class AndroidRadioControllerImpl(
         val intent = Intent().apply { setClassName("com.geeksville.mesh", "org.meshtastic.core.service.MeshService") }
         context.startForegroundService(intent)
     }
+
+    override suspend fun sendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int) {
+        serviceRepository.meshService?.sendLockdownUnlock(passphrase, bootTtl, hourTtl)
+    }
+
+    override suspend fun sendLockNow() {
+        serviceRepository.meshService?.sendLockNow()
+    }
 }

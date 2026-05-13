@@ -67,6 +67,7 @@ class ConnectionsViewModel(
         radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
     val connectionState = serviceRepository.connectionState
+    val lockdownState = serviceRepository.lockdownState
 
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 

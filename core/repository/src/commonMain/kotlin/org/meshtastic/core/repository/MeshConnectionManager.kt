@@ -37,4 +37,7 @@ interface MeshConnectionManager {
 
     /** Updates the current status notification. */
     fun updateStatusNotification(telemetry: Telemetry? = null)
+
+    /** Clears the cached radio configuration (local config, channel set, module config). */
+    fun clearRadioConfig()
 }

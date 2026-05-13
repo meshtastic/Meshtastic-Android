@@ -20,6 +20,8 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.service.LockdownState
+import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
@@ -170,4 +172,25 @@ interface ServiceRepository {
      * @param action The [ServiceAction] to perform.
      */
     suspend fun onServiceAction(action: ServiceAction)
+
+    /** Reactive flow of the current lockdown authentication state. */
+    val lockdownState: StateFlow<LockdownState>
+
+    /** Updates the lockdown state. */
+    fun setLockdownState(state: LockdownState)
+
+    /** Resets lockdown state to [LockdownState.None]. */
+    fun clearLockdownState()
+
+    /** Reactive flow of the most recent lockdown session token info. */
+    val lockdownTokenInfo: StateFlow<LockdownTokenInfo?>
+
+    /** Sets the lockdown token info from a successful UNLOCKED status. */
+    fun setLockdownTokenInfo(info: LockdownTokenInfo?)
+
+    /** True once the passphrase was accepted for the current BLE connection. */
+    val sessionAuthorized: StateFlow<Boolean>
+
+    /** Updates the session authorization flag. */
+    fun setSessionAuthorized(authorized: Boolean)
 }
