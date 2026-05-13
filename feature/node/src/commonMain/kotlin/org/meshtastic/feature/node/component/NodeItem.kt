@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -99,6 +100,7 @@ import org.meshtastic.proto.Config
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
 private const val GRID_COLUMNS = 3
+private const val MILLIS_PER_SECOND = 1000L
 
 @Composable
 @Suppress("LongMethod")
@@ -501,11 +503,20 @@ fun buildNodeDescription(
     snr: Float,
     rssi: Int,
     viaMqtt: Boolean,
+    lastHeardIsRelative: Boolean = true,
 ): String = buildString {
     append(name)
     append(if (isOnline) ", online" else ", offline")
     if (isFavorite) append(", favorite")
-    if (lastHeard > 0) append(", last heard ${formatAgo(lastHeard)}")
+    if (lastHeard > 0) {
+        val timeText =
+            if (lastHeardIsRelative) {
+                formatAgo(lastHeard)
+            } else {
+                DateFormatter.formatDateTime(lastHeard.toLong() * MILLIS_PER_SECOND)
+            }
+        append(", last heard $timeText")
+    }
     append(", role $role")
     if (hopsAway > 0) append(", $hopsAway hops away")
     batteryLevel?.let { if (it in 1..100) append(", battery $it%") }

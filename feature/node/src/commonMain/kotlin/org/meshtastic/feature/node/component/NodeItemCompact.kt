@@ -68,6 +68,7 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.RoleInfo
 import org.meshtastic.core.ui.component.determineSignalQuality
+import org.meshtastic.core.ui.icon.ElectricPower
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.icon.Temperature
@@ -94,6 +95,7 @@ fun NodeItemCompact(
     isActive: Boolean = false,
     showPower: Boolean = true,
     showLastHeard: Boolean = true,
+    lastHeardIsRelative: Boolean = true,
     showLocation: Boolean = true,
     showHops: Boolean = true,
     showSignal: Boolean = true,
@@ -153,6 +155,7 @@ fun NodeItemCompact(
             snr = thatNode.snr,
             rssi = thatNode.rssi,
             viaMqtt = thatNode.viaMqtt,
+            lastHeardIsRelative = lastHeardIsRelative,
         )
 
     Card(
@@ -201,7 +204,12 @@ fun NodeItemCompact(
 
                 // Row 2: Last heard (toggle-dependent)
                 if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
-                    LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = contentColor)
+                    LastHeardInfo(
+                        lastHeard = thatNode.lastHeard,
+                        showLabel = false,
+                        relative = lastHeardIsRelative,
+                        contentColor = contentColor,
+                    )
                 }
 
                 // Row 3: Combined icons (toggle-dependent)
@@ -356,10 +364,19 @@ private fun CompactTelemetryIcons(thatNode: Node, contentColor: Color) {
                 tint = contentColor,
             )
         }
+        if (thatNode.hasPowerMetrics) {
+            Icon(
+                imageVector = MeshtasticIcons.ElectricPower,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = contentColor,
+            )
+        }
     }
 }
 
-private fun hasTelemetryData(node: Node): Boolean = node.validPosition != null || node.hasEnvironmentMetrics
+private fun hasTelemetryData(node: Node): Boolean =
+    node.validPosition != null || node.hasEnvironmentMetrics || node.hasPowerMetrics
 
 private fun isFutureDate(lastHeard: Int): Boolean {
     val nowSeconds = org.meshtastic.core.common.util.nowSeconds.toInt()
