@@ -228,7 +228,7 @@ dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-doc
 markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
-material = { module = "com.google.android.material:material", version = "1.13.0" }
+material = { module = "com.google.android.material:material", version = "1.14.0" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 meshtastic-mqtt-client = { module = "org.meshtastic:mqtt-client", version.ref = "mqttastic" }
