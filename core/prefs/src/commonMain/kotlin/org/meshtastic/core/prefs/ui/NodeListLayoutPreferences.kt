@@ -18,13 +18,13 @@ package org.meshtastic.core.prefs.ui
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import org.meshtastic.core.model.NodeListDensity
 
 /**
  * DataStore preference keys for node list layout configuration. Key strings are used directly by DataStore — do not
  * change without migration.
  */
 enum class NodeListLayoutPreferences(val key: String, val defaultBoolean: Boolean = true) {
-    NODE_LIST_DENSITY("node-list-density", defaultBoolean = true),
     SHOULD_SHOW_POWER("node-layout-show-power", defaultBoolean = true),
     SHOULD_SHOW_LAST_HEARD("node-layout-show-last-heard", defaultBoolean = true),
     LAST_HEARD_IS_RELATIVE("node-layout-last-heard-relative", defaultBoolean = false),
@@ -37,7 +37,10 @@ enum class NodeListLayoutPreferences(val key: String, val defaultBoolean: Boolea
     ;
 
     companion object {
-        val KEY_DENSITY = stringPreferencesKey(NODE_LIST_DENSITY.key)
+        private const val DENSITY_KEY = "node-list-density"
+        val DEFAULT_DENSITY = NodeListDensity.COMPLETE.name
+
+        val KEY_DENSITY = stringPreferencesKey(DENSITY_KEY)
         val KEY_SHOW_POWER = booleanPreferencesKey(SHOULD_SHOW_POWER.key)
         val KEY_SHOW_LAST_HEARD = booleanPreferencesKey(SHOULD_SHOW_LAST_HEARD.key)
         val KEY_LAST_HEARD_RELATIVE = booleanPreferencesKey(LAST_HEARD_IS_RELATIVE.key)

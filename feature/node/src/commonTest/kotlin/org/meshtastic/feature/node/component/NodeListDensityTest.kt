@@ -23,33 +23,29 @@ import kotlin.test.assertNull
 
 class NodeListDensityTest {
 
-    /** Mirrors ViewModel mapping: `entries.firstOrNull { it.name == name } ?: COMPLETE` */
-    private fun parseDensity(name: String): NodeListDensity =
-        NodeListDensity.entries.firstOrNull { it.name == name } ?: NodeListDensity.COMPLETE
-
     @Test
     fun valid_complete_string_maps_to_complete() {
-        assertEquals(NodeListDensity.COMPLETE, parseDensity("COMPLETE"))
+        assertEquals(NodeListDensity.COMPLETE, NodeListDensity.fromName("COMPLETE"))
     }
 
     @Test
     fun valid_compact_string_maps_to_compact() {
-        assertEquals(NodeListDensity.COMPACT, parseDensity("COMPACT"))
+        assertEquals(NodeListDensity.COMPACT, NodeListDensity.fromName("COMPACT"))
     }
 
     @Test
     fun invalid_string_falls_back_to_complete() {
-        assertEquals(NodeListDensity.COMPLETE, parseDensity("GARBAGE"))
+        assertEquals(NodeListDensity.COMPLETE, NodeListDensity.fromName("GARBAGE"))
     }
 
     @Test
     fun empty_string_falls_back_to_complete() {
-        assertEquals(NodeListDensity.COMPLETE, parseDensity(""))
+        assertEquals(NodeListDensity.COMPLETE, NodeListDensity.fromName(""))
     }
 
     @Test
     fun lowercase_does_not_match_and_falls_back() {
-        assertEquals(NodeListDensity.COMPLETE, parseDensity("compact"))
+        assertEquals(NodeListDensity.COMPLETE, NodeListDensity.fromName("compact"))
     }
 
     @Test

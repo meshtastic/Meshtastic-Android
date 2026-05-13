@@ -23,4 +23,11 @@ enum class NodeListDensity {
 
     /** Condensed layout with user-configurable field toggles. */
     COMPACT,
+
+    ;
+
+    companion object {
+        /** Parses a persisted name back to [NodeListDensity], falling back to [COMPLETE]. */
+        fun fromName(name: String): NodeListDensity = entries.firstOrNull { it.name == name } ?: COMPLETE
+    }
 }

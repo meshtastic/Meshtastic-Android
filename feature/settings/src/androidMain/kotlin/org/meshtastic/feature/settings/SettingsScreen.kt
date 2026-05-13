@@ -242,9 +242,7 @@ fun SettingsScreen(
                 )
 
                 val densityName by settingsViewModel.nodeListDensity.collectAsStateWithLifecycle()
-                val density =
-                    org.meshtastic.core.model.NodeListDensity.entries.firstOrNull { it.name == densityName }
-                        ?: org.meshtastic.core.model.NodeListDensity.COMPLETE
+                val density = org.meshtastic.core.model.NodeListDensity.fromName(densityName)
                 NodeLayoutSettings(
                     density = density,
                     onDensityChange = { settingsViewModel.setNodeListDensity(it.name) },

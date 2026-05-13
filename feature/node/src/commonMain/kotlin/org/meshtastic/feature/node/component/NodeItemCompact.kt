@@ -143,20 +143,22 @@ fun NodeItemCompact(
     val style = if (thatNode.isUnknownUser) FontStyle.Italic else FontStyle.Normal
 
     val nodeDescription =
-        buildNodeDescription(
-            name = longName,
-            isOnline = thatNode.isOnline,
-            isFavorite = isFavorite,
-            lastHeard = thatNode.lastHeard,
-            role = thatNode.user.role.name,
-            hopsAway = thatNode.hopsAway,
-            batteryLevel = thatNode.batteryLevel,
-            distance = distance,
-            snr = thatNode.snr,
-            rssi = thatNode.rssi,
-            viaMqtt = thatNode.viaMqtt,
-            lastHeardIsRelative = lastHeardIsRelative,
-        )
+        remember(thatNode, lastHeardIsRelative) {
+            buildNodeDescription(
+                name = longName,
+                isOnline = thatNode.isOnline,
+                isFavorite = isFavorite,
+                lastHeard = thatNode.lastHeard,
+                role = thatNode.user.role.name,
+                hopsAway = thatNode.hopsAway,
+                batteryLevel = thatNode.batteryLevel,
+                distance = distance,
+                snr = thatNode.snr,
+                rssi = thatNode.rssi,
+                viaMqtt = thatNode.viaMqtt,
+                lastHeardIsRelative = lastHeardIsRelative,
+            )
+        }
 
     Card(
         modifier =

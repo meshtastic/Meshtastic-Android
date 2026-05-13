@@ -159,19 +159,21 @@ fun NodeItem(
         }
 
     val nodeDescription =
-        buildNodeDescription(
-            name = originalLongName,
-            isOnline = thatNode.isOnline,
-            isFavorite = isFavorite,
-            lastHeard = thatNode.lastHeard,
-            role = thatNode.user.role.name,
-            hopsAway = thatNode.hopsAway,
-            batteryLevel = thatNode.batteryLevel,
-            distance = distance,
-            snr = thatNode.snr,
-            rssi = thatNode.rssi,
-            viaMqtt = thatNode.viaMqtt,
-        )
+        remember(thatNode) {
+            buildNodeDescription(
+                name = originalLongName,
+                isOnline = thatNode.isOnline,
+                isFavorite = isFavorite,
+                lastHeard = thatNode.lastHeard,
+                role = thatNode.user.role.name,
+                hopsAway = thatNode.hopsAway,
+                batteryLevel = thatNode.batteryLevel,
+                distance = distance,
+                snr = thatNode.snr,
+                rssi = thatNode.rssi,
+                viaMqtt = thatNode.viaMqtt,
+            )
+        }
 
     Card(
         modifier =

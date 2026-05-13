@@ -185,8 +185,8 @@ class UiPrefsImpl(
 
     override val nodeListDensity: StateFlow<String> =
         dataStore.data
-            .map { it[NodeListLayoutPreferences.KEY_DENSITY] ?: "COMPLETE" }
-            .stateIn(scope, SharingStarted.Eagerly, "COMPLETE")
+            .map { it[NodeListLayoutPreferences.KEY_DENSITY] ?: NodeListLayoutPreferences.DEFAULT_DENSITY }
+            .stateIn(scope, SharingStarted.Eagerly, NodeListLayoutPreferences.DEFAULT_DENSITY)
 
     override fun setNodeListDensity(value: String) {
         scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_DENSITY] = value } }
