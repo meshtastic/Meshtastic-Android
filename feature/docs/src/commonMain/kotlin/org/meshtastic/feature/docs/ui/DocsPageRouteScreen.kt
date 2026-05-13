@@ -37,8 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.mikepenz.markdown.compose.components.markdownComponents
+import com.mikepenz.markdown.compose.elements.MarkdownTable
+import com.mikepenz.markdown.compose.elements.MarkdownTableHeader
+import com.mikepenz.markdown.compose.elements.MarkdownTableRow
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.model.markdownDimens
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.DocPageContent
@@ -105,6 +111,36 @@ fun DocsPageRouteScreen(
                         Markdown(
                             content = markdownText,
                             imageTransformer = ComposeResourceImageTransformer(),
+                            dimens = markdownDimens(tableCellWidth = 108.dp),
+                            components = markdownComponents(
+                                table = {
+                                    MarkdownTable(
+                                        content = it.content,
+                                        node = it.node,
+                                        style = it.typography.text,
+                                        headerBlock = { c, h, tw, s ->
+                                            MarkdownTableHeader(
+                                                content = c,
+                                                header = h,
+                                                tableWidth = tw,
+                                                style = s,
+                                                maxLines = Int.MAX_VALUE,
+                                                overflow = TextOverflow.Clip,
+                                            )
+                                        },
+                                        rowBlock = { c, r, tw, s ->
+                                            MarkdownTableRow(
+                                                content = c,
+                                                header = r,
+                                                tableWidth = tw,
+                                                style = s,
+                                                maxLines = Int.MAX_VALUE,
+                                                overflow = TextOverflow.Clip,
+                                            )
+                                        },
+                                    )
+                                },
+                            ),
                             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
                         )
                     }
