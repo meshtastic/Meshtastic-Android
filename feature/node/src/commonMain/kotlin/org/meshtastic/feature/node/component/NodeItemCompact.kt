@@ -77,6 +77,7 @@ import org.meshtastic.core.ui.icon.PinDrop
 import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.core.ui.icon.Unmessageable
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
@@ -199,7 +200,6 @@ fun NodeItemCompact(
                     style = style,
                     isIgnored = isIgnored,
                     isFavorite = isFavorite,
-                    contentColor = contentColor,
                 )
 
                 // Row 2: Last heard (toggle-dependent)
@@ -255,7 +255,6 @@ private fun CompactNameRow(
     style: FontStyle,
     isIgnored: Boolean,
     isFavorite: Boolean,
-    contentColor: Color,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -281,7 +280,7 @@ private fun CompactNameRow(
                 imageVector = MeshtasticIcons.Favorite,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
-                tint = contentColor,
+                tint = MaterialTheme.colorScheme.StatusYellow,
             )
         }
     }
