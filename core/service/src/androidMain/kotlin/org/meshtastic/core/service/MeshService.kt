@@ -174,10 +174,12 @@ class MeshService : Service() {
 
         return if (!wantForeground) {
             Logger.i { "Stopping mesh service because no device is selected" }
+            releaseWakeLock()
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             stopSelf()
             START_NOT_STICKY
         } else {
+            acquireWakeLock()
             START_STICKY
         }
     }
@@ -213,18 +215,6 @@ class MeshService : Service() {
             }
         } catch (ex: Exception) {
             Logger.e(ex) { "Error starting foreground service" }
-            return START_NOT_STICKY
-        }
-
-        return if (!wantForeground) {
-            Logger.i { "Stopping mesh service because no device is selected" }
-            releaseWakeLock()
-            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            stopSelf()
-            START_NOT_STICKY
-        } else {
-            acquireWakeLock()
-            START_STICKY
         }
     }
 

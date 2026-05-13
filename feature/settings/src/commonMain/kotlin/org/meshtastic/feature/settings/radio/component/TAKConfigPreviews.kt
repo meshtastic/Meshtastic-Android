@@ -25,7 +25,7 @@ import org.meshtastic.proto.Team
 
 @PreviewLightDark
 @Composable
-internal fun TakConfigCardPreview() {
+fun TakConfigCardPreview() {
     AppTheme {
         TakConfigCard(
             team = Team.Cyan,
@@ -39,19 +39,19 @@ internal fun TakConfigCardPreview() {
 
 @PreviewLightDark
 @Composable
-internal fun TakServerSectionDisabledPreview() {
+fun TakServerSectionDisabledPreview() {
     AppTheme { TakServerSection(isTakServerEnabled = false, onEnabledChange = {}, onExport = {}) }
 }
 
 @PreviewLightDark
 @Composable
-internal fun TakServerSectionEnabledPreview() {
+fun TakServerSectionEnabledPreview() {
     AppTheme { TakServerSection(isTakServerEnabled = true, onEnabledChange = {}, onExport = {}) }
 }
 
 @PreviewLightDark
 @Composable
-internal fun TakTestCardIdlePreview() {
+fun TakTestCardIdlePreview() {
     AppTheme {
         TakMeshTestCardContent(
             results = emptyList(),
@@ -65,7 +65,7 @@ internal fun TakTestCardIdlePreview() {
 
 @PreviewLightDark
 @Composable
-internal fun TakTestCardRunningPreview() {
+fun TakTestCardRunningPreview() {
     AppTheme {
         TakMeshTestCardContent(
             results =
@@ -83,7 +83,7 @@ internal fun TakTestCardRunningPreview() {
 
 @PreviewLightDark
 @Composable
-internal fun TakTestCardResultsPreview() {
+fun TakTestCardResultsPreview() {
     AppTheme {
         TakMeshTestCardContent(
             results =
