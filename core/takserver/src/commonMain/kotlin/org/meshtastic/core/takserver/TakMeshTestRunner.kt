@@ -51,7 +51,6 @@ class TakMeshTestRunner(
     companion object {
         /** Delay between sends to let the radio transmit and receive ACK. */
         private const val SEND_DELAY_MS = 5_000L
-        private const val MAX_TAK_WIRE_PAYLOAD_BYTES = 225
 
         /** All bundled fixture filenames. */
         val FIXTURE_NAMES = listOf(
@@ -130,9 +129,9 @@ class TakMeshTestRunner(
     }
 
     private suspend fun runSingleFixture(name: String): TakTestResult {
-        // Load fixture XML from bundled resources
+        // Load fixture XML from bundled resources via platform-specific loader
         val xml = try {
-            loadFixtureXml(name)
+            loadTakFixtureXml(name)
         } catch (e: Throwable) {
             Logger.w(e) { "Failed to load fixture $name" }
             return TakTestResult(name, 0, 0, false, "Load failed: ${e.message}")
@@ -173,11 +172,5 @@ class TakMeshTestRunner(
             Logger.w(e) { "TAK Test: $name send failed: ${e.message}" }
             return TakTestResult(name, xml.length, wirePayload.size, false, "Send failed: ${e.message}")
         }
-    }
-
-    private fun loadFixtureXml(name: String): String {
-        val stream = this::class.java.classLoader?.getResourceAsStream("tak_test_fixtures/$name")
-            ?: throw IllegalStateException("Fixture not found: tak_test_fixtures/$name")
-        return stream.bufferedReader().readText()
     }
 }

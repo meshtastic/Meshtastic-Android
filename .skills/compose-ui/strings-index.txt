@@ -1127,9 +1127,12 @@ tak_server
 tak_server_enabled
 tak_server_enabled_desc
 tak_server_export_data_package_desc
+tak_server_loading
 tak_server_section
 tak_server_test_card_title
 tak_server_test_idle
+tak_server_test_result_bytes
+tak_server_test_result_unknown_error
 tak_server_test_results
 tak_server_test_run
 tak_server_test_running

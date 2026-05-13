@@ -60,7 +60,7 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     // Mirror TAKServer's event-driven connection count — no polling needed
     override val connectionCount: StateFlow<Int> = takServer.connectionCount
 
-    private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>()
+    private val _inboundMessages = MutableSharedFlow<InboundCoTMessage>(extraBufferCapacity = 64)
     override val inboundMessages: SharedFlow<InboundCoTMessage> = _inboundMessages.asSharedFlow()
 
     // Offline message queue — buffers mesh-originated CoT messages when no TAK
@@ -83,9 +83,14 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
         }
 
         scope.launch {
-            // Wire up inbound message handler BEFORE starting so no messages are lost
+            // Wire up inbound message handler BEFORE starting so no messages are lost.
+            // Use tryEmit (non-suspending) with extraBufferCapacity to avoid launching a
+            // new coroutine per message, which would create unbounded coroutines under
+            // high message rates and could reorder messages.
             takServer.onMessage = { cotMessage, clientInfo ->
-                scope.launch { _inboundMessages.emit(InboundCoTMessage(cotMessage, clientInfo)) }
+                if (!_inboundMessages.tryEmit(InboundCoTMessage(cotMessage, clientInfo))) {
+                    Logger.w { "TAK inbound message buffer full; dropping message from ${clientInfo?.id}" }
+                }
             }
             takServer.onClientConnected = { drainOfflineQueue() }
 

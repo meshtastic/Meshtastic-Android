@@ -27,14 +27,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.di.CoroutineDispatchers
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.util.concurrent.locks.ReentrantLock
 import javax.net.ssl.SSLServerSocket
+import kotlin.concurrent.withLock
 import kotlin.random.Random
 import kotlinx.coroutines.isActive as coroutineIsActive
 
@@ -62,7 +62,7 @@ internal class TAKServerJvm(
     private var running = false
     private var serverScope: CoroutineScope? = null
     private var acceptJob: Job? = null
-    private val connectionsMutex = Mutex()
+    private val connectionsLock = ReentrantLock()
     private val connections = mutableMapOf<String, TAKClientConnection>()
 
     private val _connectionCount = MutableStateFlow(0)
@@ -172,7 +172,7 @@ internal class TAKServerJvm(
 
         // Launch on IO so socket reads/writes don't queue behind CPU work on Default
         scope.launch(dispatchers.io) {
-            connectionsMutex.withLock {
+            connectionsLock.withLock {
                 connections[connectionId] = connection
                 _connectionCount.value = connections.size
                 Logger.i { "TAK connection count now ${connections.size}" }
@@ -189,7 +189,7 @@ internal class TAKServerJvm(
             is TAKConnectionEvent.Disconnected -> {
                 Logger.i { "TAK client disconnected: id=$connectionId" }
                 serverScope?.launch(dispatchers.io) {
-                    connectionsMutex.withLock {
+                    connectionsLock.withLock {
                         connections.remove(connectionId)
                         _connectionCount.value = connections.size
                         Logger.i { "TAK connection count now ${connections.size}" }
@@ -199,7 +199,7 @@ internal class TAKServerJvm(
             is TAKConnectionEvent.Error -> {
                 Logger.w(event.error) { "TAK client connection error: $connectionId" }
                 serverScope?.launch(dispatchers.io) {
-                    connectionsMutex.withLock {
+                    connectionsLock.withLock {
                         connections.remove(connectionId)
                         _connectionCount.value = connections.size
                         Logger.i { "TAK connection count now ${connections.size}" }
@@ -220,12 +220,14 @@ internal class TAKServerJvm(
         acceptJob?.cancel()
         acceptJob = null
 
-        val toClose: List<TAKClientConnection>
-        // Non-suspending stop path — best-effort copy; any connection added concurrently
-        // will get closed when its socket is torn down by accept() returning null.
-        toClose = connections.values.toList()
-        connections.clear()
-        _connectionCount.value = 0
+        // Guard the snapshot+clear with the same lock used by the coroutine accept/disconnect
+        // paths to avoid concurrent modification or a stale connectionCount during shutdown.
+        val toClose = connectionsLock.withLock {
+            val snapshot = connections.values.toList()
+            connections.clear()
+            _connectionCount.value = 0
+            snapshot
+        }
         toClose.forEach { it.close() }
 
         serverSocket?.runCatching { close() }
@@ -235,7 +237,7 @@ internal class TAKServerJvm(
     }
 
     override suspend fun broadcast(cotMessage: CoTMessage) {
-        val currentConnections = connectionsMutex.withLock { connections.values.toList() }
+        val currentConnections = connectionsLock.withLock { connections.values.toList() }
         if (currentConnections.isEmpty()) {
             Logger.d { "broadcast ${cotMessage.type}: no TAK clients connected, dropping" }
             return
@@ -252,7 +254,7 @@ internal class TAKServerJvm(
     }
 
     override suspend fun broadcastRawXml(xml: String) {
-        val currentConnections = connectionsMutex.withLock { connections.values.toList() }
+        val currentConnections = connectionsLock.withLock { connections.values.toList() }
         if (currentConnections.isEmpty()) return
         Logger.d { "broadcastRawXml to ${currentConnections.size} TAK client(s)" }
         currentConnections.forEach { connection ->
@@ -266,7 +268,7 @@ internal class TAKServerJvm(
     }
 
     override suspend fun hasConnections(): Boolean =
-        connectionsMutex.withLock { connections.isNotEmpty() }
+        connectionsLock.withLock { connections.isNotEmpty() }
 }
 
 /**

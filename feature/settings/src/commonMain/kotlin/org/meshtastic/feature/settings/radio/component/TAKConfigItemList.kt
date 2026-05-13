@@ -62,6 +62,9 @@ import org.meshtastic.core.resources.tak_server_export_data_package_desc
 import org.meshtastic.core.resources.tak_server_section
 import org.meshtastic.core.resources.tak_server_test_card_title
 import org.meshtastic.core.resources.tak_server_test_idle
+import org.meshtastic.core.resources.tak_server_loading
+import org.meshtastic.core.resources.tak_server_test_result_bytes
+import org.meshtastic.core.resources.tak_server_test_result_unknown_error
 import org.meshtastic.core.resources.tak_server_test_results
 import org.meshtastic.core.resources.tak_server_test_run
 import org.meshtastic.core.resources.tak_server_test_running
@@ -237,6 +240,7 @@ private fun TakMeshTestCard() {
 
     val passed = results.count { it.passed }
     val failed = results.count { !it.passed }
+    val loadingLabel = stringResource(Res.string.tak_server_loading)
 
     TitledCard(title = stringResource(Res.string.tak_server_test_card_title)) {
         Row(
@@ -247,7 +251,7 @@ private fun TakMeshTestCard() {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = if (isRunning) {
-                        stringResource(Res.string.tak_server_test_running, currentFixture ?: "...")
+                        stringResource(Res.string.tak_server_test_running, currentFixture ?: loadingLabel)
                     } else {
                         stringResource(Res.string.tak_server_test_idle, TakMeshTestRunner.FIXTURE_NAMES.size)
                     },
@@ -291,7 +295,11 @@ private fun TakMeshTestCard() {
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = if (result.passed) "${result.compressedBytes}B ✓" else result.error ?: "✗",
+                    text = if (result.passed) {
+                        stringResource(Res.string.tak_server_test_result_bytes, result.compressedBytes)
+                    } else {
+                        result.error ?: stringResource(Res.string.tak_server_test_result_unknown_error)
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = if (result.passed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                 )
