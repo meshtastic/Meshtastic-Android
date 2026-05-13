@@ -9,6 +9,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { parseFrontmatter, forEachDocPage } = require("./lib/frontmatter");
 
 const args = process.argv.slice(2);
 const positional = args.filter(a => !a.startsWith("--"));
@@ -24,31 +25,25 @@ let totalCount = 0;
 console.log(`Checking doc freshness (max age: ${MAX_AGE_DAYS} days)...`);
 console.log("");
 
-for (const section of ["user", "developer"]) {
-    const dir = path.join(DOCS_DIR, section);
-    if (!fs.existsSync(dir)) continue;
+forEachDocPage(DOCS_DIR, (filePath, slug, section) => {
+    totalCount++;
+    const content = fs.readFileSync(filePath, "utf-8");
+    const { fields } = parseFrontmatter(content);
 
-    for (const file of fs.readdirSync(dir).filter(f => f.endsWith(".md")).sort()) {
-        totalCount++;
-        const content = fs.readFileSync(path.join(dir, file), "utf-8");
-
-        // Extract last_updated from frontmatter
-        const match = content.match(/^last_updated:\s*(\d{4}-\d{2}-\d{2})/m);
-        if (!match) {
-            console.log(`  ⚠  ${section}/${file} — missing last_updated field`);
-            staleCount++;
-            continue;
-        }
-
-        const lastUpdated = new Date(match[1]);
-        const ageDays = Math.floor((now - lastUpdated) / (1000 * 60 * 60 * 24));
-
-        if (ageDays > MAX_AGE_DAYS) {
-            console.log(`  ⚠  ${section}/${file} — ${ageDays} days old (last: ${match[1]})`);
-            staleCount++;
-        }
+    if (!fields.last_updated) {
+        console.log(`  ⚠  ${section}/${slug}.md — missing last_updated field`);
+        staleCount++;
+        return;
     }
-}
+
+    const lastUpdated = new Date(fields.last_updated);
+    const ageDays = Math.floor((now - lastUpdated) / (1000 * 60 * 60 * 24));
+
+    if (ageDays > MAX_AGE_DAYS) {
+        console.log(`  ⚠  ${section}/${slug}.md — ${ageDays} days old (last: ${fields.last_updated})`);
+        staleCount++;
+    }
+});
 
 console.log("");
 if (staleCount > 0) {

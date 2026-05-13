@@ -9,6 +9,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { forEachDocPage } = require("./lib/frontmatter");
 
 const REPO_ROOT = path.resolve(process.argv[2] || ".");
 const DOCS_DIR = path.join(REPO_ROOT, "docs");
@@ -30,13 +31,9 @@ const MODULE_TO_DOCS = {
 
 // Collect existing doc pages
 const existingPages = new Set();
-for (const section of ["user", "developer"]) {
-    const dir = path.join(DOCS_DIR, section);
-    if (!fs.existsSync(dir)) continue;
-    for (const f of fs.readdirSync(dir).filter(f => f.endsWith(".md"))) {
-        existingPages.add(`${section}/${f.replace(/\.md$/, "")}`);
-    }
-}
+forEachDocPage(DOCS_DIR, (_filePath, slug, section) => {
+    existingPages.add(`${section}/${slug}`);
+});
 
 console.log(`Checking doc coverage for ${Object.keys(MODULE_TO_DOCS).length} feature modules...`);
 console.log(`Found ${existingPages.size} doc pages.`);

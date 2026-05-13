@@ -21,7 +21,7 @@ Things that trip up first-time contributors — check these before requesting re
 - **All tests pass** — run `./gradlew test allTests` (both are needed: `test` covers Android-only modules, `allTests` covers KMP)
 - **Screenshot tests pass** — if you touched any Compose UI, run `./gradlew :screenshot-tests:validateFdroidDebugScreenshotTest` and update reference images if needed
 - **Proto submodule unchanged** — `core/proto/` is a read-only git submodule. Never modify proto files directly
-- **Docs updated** — if you changed user-visible UI, update the corresponding page under `docs/user/`. The `docs-staleness` CI check will flag the PR if you didn't. Add the `skip-docs-check` label if it genuinely isn't needed
+- **Docs updated** — if you changed user-visible UI, update the corresponding page under `docs/user/`. The `Docs Governance` CI workflow will flag the PR if you didn't. Add the `skip-docs-check` label if it genuinely isn't needed
 - **Branch naming** — branches must start with `feat/`, `fix/`, `chore/`, `docs/`, `build/`, `ci/`, `refactor/`, `test/`, or `deps/`
 
 ---
@@ -42,7 +42,7 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 
 **May 2026** — [Architecture](developer/architecture) — Documented KMP module layering, Navigation 3 patterns, and feature module conventions.
 
-**May 2026** — [Contributing](developer/contributing) — Established docs staleness CI check (`docs-staleness.yml`) for PRs that change UI without updating docs.
+**May 2026** — [Contributing](developer/contributing) — Established docs governance CI workflow for PRs that change UI without updating docs.
 
 <!-- DEV_WHATS_NEW_END -->
 

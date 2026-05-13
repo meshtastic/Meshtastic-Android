@@ -3,13 +3,7 @@ name: Docs Governance
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'docs/**'
-      - 'feature/docs/**'
-      - 'scripts/validate-doc-links.js'
-      - 'scripts/check-doc-freshness.js'
-      - 'scripts/check-doc-coverage.js'
-      - '.github/workflows/docs-governance.yml'
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   schedule:
     - cron: "0 6 * * 1" # Every Monday at 6 AM UTC
   workflow_dispatch:
@@ -19,6 +13,144 @@ permissions:
   pull-requests: write
 
 jobs:
+  # ── Job 1: Staleness — flag PRs that change UI without updating docs ────────
+  staleness:
+    name: Docs staleness check
+    runs-on: ubuntu-24.04-arm
+    if: >-
+      github.event_name == 'pull_request'
+      && !contains(github.event.pull_request.labels.*.name, 'skip-docs-check')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: changed
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+
+          views_changed=$(echo "$changed" | grep -E \
+            '^feature/.*/src/commonMain/.*/(ui|component|screen)/|^feature/.*/src/androidMain/.*/ui/|^core/ui/src/commonMain/' \
+            | grep -v 'Test\|Preview\|__Snapshots__' || true)
+
+          docs_changed=$(echo "$changed" | grep -E '^docs/(user|developer)/' || true)
+
+          echo "views_changed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$views_changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          echo "docs_changed<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$docs_changed" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          if [[ -n "$views_changed" && -z "$docs_changed" ]]; then
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post warning comment
+        if: steps.changed.outputs.stale == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const viewsChanged = `${{ steps.changed.outputs.views_changed }}`.trim();
+            const body = [
+              '## 📄 Docs staleness check — BLOCKING',
+              '',
+              'This PR modifies user-facing UI source files but does not update any page under `docs/user/` or `docs/developer/`.',
+              '',
+              '> ⚠️ Doc changes propagate to **3 consumers**: in-app docs browser, Jekyll site (GitHub Pages), and meshtastic.org (Docusaurus sync). Updating a page in `docs/` automatically flows to all three.',
+              '',
+              '**Changed source files:**',
+              '```',
+              viewsChanged,
+              '```',
+              '',
+              '**What to check:**',
+              '| Changed area | Likely doc page |',
+              '|---|---|',
+              '| `feature/messaging/` | `docs/user/messages-and-channels.md` |',
+              '| `feature/node/` | `docs/user/nodes.md` or `docs/user/node-metrics.md` |',
+              '| `feature/map/` | `docs/user/map-and-waypoints.md` |',
+              '| `feature/connections/` | `docs/user/connections.md` |',
+              '| `feature/settings/` | `docs/user/settings-radio-user.md` or `docs/user/settings-module-admin.md` |',
+              '| `feature/firmware/` | `docs/user/firmware.md` |',
+              '| `feature/intro/` | `docs/user/onboarding.md` |',
+              '| `feature/discovery/` | `docs/user/discovery.md` |',
+              '| `feature/docs/` | Internal docs infrastructure |',
+              '| `core/ui/` | `docs/developer/codebase.md` or component-specific user pages |',
+              '',
+              '**New page checklist** (if adding a new doc page):',
+              '1. Create the `.md` file in `docs/user/` or `docs/developer/` with `last_updated` frontmatter',
+              '2. Register in `DocBundleLoader.kt` with string resources (in-app browser)',
+              '3. Jekyll and Docusaurus sync pick up new pages automatically — no config change needed',
+              '',
+              'If this PR does **not** require a doc update (e.g., internal refactor, bug fix, test change), add the **`skip-docs-check`** label to dismiss this check.',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('Docs staleness check')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Dismiss stale comment when docs are updated
+        if: steps.changed.outputs.stale == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('Docs staleness check')
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: '## ✅ Docs staleness check passed\n\nThis PR includes updates to `docs/` alongside the source changes. Thank you!',
+              });
+            }
+
+      - name: Fail if stale
+        if: steps.changed.outputs.stale == 'true'
+        run: |
+          echo "::error::UI source files changed without corresponding docs/ updates."
+          echo "Add the 'skip-docs-check' label if this PR does not require a doc update."
+          exit 1
+
+  # ── Job 2: Quality gates — link validation, coverage, registry, freshness ───
   validate:
     name: Docs quality gates
     runs-on: ubuntu-24.04-arm
@@ -40,35 +172,8 @@ jobs:
       - name: Check doc coverage
         run: node scripts/check-doc-coverage.js .
 
-      - name: Validate sync script slug registry
-        run: |
-          # Ensure every doc page slug is registered in sync-android-docs.js KNOWN_*_SLUGS
-          missing=0
-          for f in docs/user/*.md; do
-            slug=$(basename "$f" .md)
-            if ! grep -q "\"$slug\"" scripts/sync-android-docs.js; then
-              echo "ERROR: docs/user/$slug.md not in KNOWN_USER_SLUGS (sync-android-docs.js)"
-              missing=$((missing + 1))
-            fi
-          done
-          for f in docs/developer/*.md; do
-            slug=$(basename "$f" .md)
-            if ! grep -q "\"$slug\"" scripts/sync-android-docs.js; then
-              echo "ERROR: docs/developer/$slug.md not in KNOWN_DEV_SLUGS (sync-android-docs.js)"
-              missing=$((missing + 1))
-            fi
-          done
-          if [ "$missing" -gt 0 ]; then
-            echo ""
-            echo "FAILED: $missing page(s) missing from sync script slug registry."
-            echo "Add them to KNOWN_USER_SLUGS or KNOWN_DEV_SLUGS in scripts/sync-android-docs.js"
-            exit 1
-          fi
-          echo "All doc page slugs registered in sync script."
-
       - name: Validate DocBundleLoader registry
         run: |
-          # Ensure every doc page slug appears in the in-app DocBundleLoader index
           loader="feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
           missing=0
           for f in docs/user/*.md docs/developer/*.md; do

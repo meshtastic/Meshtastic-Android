@@ -21,6 +21,7 @@
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
+const { discoverSlugs } = require("./lib/frontmatter");
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
@@ -49,18 +50,9 @@ if (!fs.existsSync(SRC_DOCS_DIR)) {
 const DEST_DOCS_DIR = path.join("docs", "software", "android");
 const DEST_IMAGES_DIR = path.join("static", "img", "android", "docs");
 
-// Known sibling page slugs for link resolution
-const KNOWN_USER_SLUGS = new Set([
-    "onboarding", "connections", "messages-and-channels", "nodes", "node-metrics",
-    "map-and-waypoints", "settings-radio-user", "settings-module-admin",
-    "telemetry-and-sensors", "tak", "mqtt", "discovery", "firmware", "desktop",
-    "signal-meter", "units-and-locale", "translate",
-]);
-const KNOWN_DEV_SLUGS = new Set([
-    "architecture", "codebase", "adding-a-feature-module",
-    "navigation-and-deep-links", "transport", "persistence",
-    "testing", "contributing", "measurement",
-]);
+// Derive sibling page slugs from the filesystem (no manual sync needed)
+const KNOWN_USER_SLUGS = discoverSlugs(SRC_DOCS_DIR, "user");
+const KNOWN_DEV_SLUGS = discoverSlugs(SRC_DOCS_DIR, "developer");
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

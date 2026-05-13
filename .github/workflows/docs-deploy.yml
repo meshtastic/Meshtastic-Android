@@ -13,7 +13,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  pull-requests: write
 
 concurrency:
   group: docs-deploy
@@ -43,14 +42,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Validate Doc Links
-        run: node scripts/validate-doc-links.js docs
 
       - name: Generate Docs Bundle
         run: ./gradlew generateDocsBundle -Pdocs.channel=beta -Pci=true
