@@ -172,7 +172,9 @@ fun LockdownDialog(
                     Spacer(modifier = Modifier.height(SPACING_DP.dp))
                     OutlinedTextField(
                         value = confirmPassphrase,
-                        onValueChange = { if (it.encodeToByteArray().size <= MAX_PASSPHRASE_LEN) confirmPassphrase = it },
+                        onValueChange = {
+                            if (it.encodeToByteArray().size <= MAX_PASSPHRASE_LEN) confirmPassphrase = it
+                        },
                         label = { Text(stringResource(Res.string.lockdown_confirm_passphrase)) },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
@@ -185,28 +187,26 @@ fun LockdownDialog(
                         },
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Spacer(modifier = Modifier.height(SPACING_DP.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        OutlinedTextField(
-                            value = boots.toString(),
-                            onValueChange = { str ->
-                                str.toIntOrNull()?.let { boots = it.coerceIn(1, MAX_BYTE_VALUE) }
-                            },
-                            label = { Text(stringResource(Res.string.lockdown_boots_remaining)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f),
-                        )
-                        Spacer(modifier = Modifier.width(SPACING_DP.dp))
-                        OutlinedTextField(
-                            value = hours.toString(),
-                            onValueChange = { str -> str.toIntOrNull()?.let { hours = it.coerceAtLeast(0) } },
-                            label = { Text(stringResource(Res.string.lockdown_hours_until_expiry)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
+                }
+                Spacer(modifier = Modifier.height(SPACING_DP.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    OutlinedTextField(
+                        value = boots.toString(),
+                        onValueChange = { str -> str.toIntOrNull()?.let { boots = it.coerceIn(1, MAX_BYTE_VALUE) } },
+                        label = { Text(stringResource(Res.string.lockdown_boots_remaining)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                    )
+                    Spacer(modifier = Modifier.width(SPACING_DP.dp))
+                    OutlinedTextField(
+                        value = hours.toString(),
+                        onValueChange = { str -> str.toIntOrNull()?.let { hours = it.coerceAtLeast(0) } },
+                        label = { Text(stringResource(Res.string.lockdown_hours_until_expiry)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                    )
                 }
             }
         },

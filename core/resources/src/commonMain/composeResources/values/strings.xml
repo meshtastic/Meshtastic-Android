@@ -610,7 +610,7 @@
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
     <string name="location_sharing">Location Sharing</string>
     <!-- LOCKDOWN -->
-    <string name="lockdown_backoff">Try again in %d seconds.</string>
+    <string name="lockdown_backoff">Try again in %1$d seconds.</string>
     <string name="lockdown_boots_remaining">Boots remaining</string>
     <string name="lockdown_confirm_passphrase">Confirm passphrase</string>
     <string name="lockdown_enter_passphrase">Enter Passphrase</string>
@@ -618,11 +618,11 @@
     <string name="lockdown_hours_until_expiry">Hours until expiry</string>
     <string name="lockdown_incorrect_passphrase">Incorrect passphrase.</string>
     <string name="lockdown_lock_now">Lock Now</string>
-    <string name="lockdown_lock_reason">Reason: %s</string>
+    <string name="lockdown_lock_reason">Reason: %1$s</string>
     <string name="lockdown_passphrase">Passphrase</string>
     <string name="lockdown_passphrases_do_not_match">Passphrases do not match</string>
-    <string name="lockdown_session_boots_remaining">Session: %d reboots remaining</string>
-    <string name="lockdown_session_expires">Expires %s</string>
+    <string name="lockdown_session_boots_remaining">Session: %1$d reboots remaining</string>
+    <string name="lockdown_session_expires">Expires %1$s</string>
     <string name="lockdown_session_no_time_limit">No time limit</string>
     <string name="lockdown_set_passphrase">Set Passphrase</string>
     <string name="lockdown_show_passphrase">Show</string>
