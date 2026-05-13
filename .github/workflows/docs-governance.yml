@@ -62,7 +62,7 @@ jobs:
           script: |
             const viewsChanged = `${{ steps.changed.outputs.views_changed }}`.trim();
             const body = [
-              '## 📄 Docs staleness check — BLOCKING',
+              '## 📄 Docs staleness check — advisory',
               '',
               'This PR modifies user-facing UI source files but does not update any page under `docs/user/` or `docs/developer/`.',
               '',
@@ -93,6 +93,8 @@ jobs:
               '3. Jekyll and Docusaurus sync pick up new pages automatically — no config change needed',
               '',
               'If this PR does **not** require a doc update (e.g., internal refactor, bug fix, test change), add the **`skip-docs-check`** label to dismiss this check.',
+              '',
+              '> **Cross-platform note:** This check is advisory while doc coverage matures. Both Android and Apple repos use the same `skip-docs-check` label and advisory severity. See `meshtastic/design` standards for shared conventions.',
             ].join('\n');
 
             const { data: comments } = await github.rest.issues.listComments({
@@ -143,12 +145,13 @@ jobs:
               });
             }
 
-      - name: Fail if stale
+      - name: Advisory status
         if: steps.changed.outputs.stale == 'true'
         run: |
-          echo "::error::UI source files changed without corresponding docs/ updates."
+          echo "::warning::UI source files changed without corresponding docs/ updates."
           echo "Add the 'skip-docs-check' label if this PR does not require a doc update."
-          exit 1
+          echo "NOTE: This check is advisory while docs coverage matures across platforms."
+          echo "To upgrade to blocking, change this step to 'exit 1'."
 
   # ── Job 2: Quality gates — link validation, coverage, registry, freshness ───
   validate:
