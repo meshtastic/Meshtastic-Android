@@ -51,8 +51,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
-import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
@@ -68,10 +66,15 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.RoleInfo
 import org.meshtastic.core.ui.component.determineSignalQuality
+import org.meshtastic.core.ui.icon.DeviceSleep
 import org.meshtastic.core.ui.icon.ElectricPower
+import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.PinDrop
+import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
@@ -87,11 +90,9 @@ fun NodeItemCompact(
     thisNode: Node?,
     thatNode: Node,
     distanceUnits: Int,
-    connectionState: ConnectionState,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
-    deviceType: DeviceType? = null,
     isActive: Boolean = false,
     showPower: Boolean = true,
     showLastHeard: Boolean = true,
@@ -193,25 +194,38 @@ fun NodeItemCompact(
                 // Row 1: Name (always visible)
                 CompactNameRow(
                     thatNode = thatNode,
-                    isThisNode = isThisNode,
                     longName = longName,
                     style = style,
                     isIgnored = isIgnored,
                     isFavorite = isFavorite,
-                    unmessageable = unmessageable,
-                    connectionState = connectionState,
-                    deviceType = deviceType,
                     contentColor = contentColor,
                 )
 
                 // Row 2: Last heard (toggle-dependent)
                 if (showLastHeard && thatNode.lastHeard > 0 && !isFutureDate(thatNode.lastHeard)) {
-                    LastHeardInfo(
-                        lastHeard = thatNode.lastHeard,
-                        showLabel = false,
-                        relative = lastHeardIsRelative,
-                        contentColor = contentColor,
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Icon(
+                            imageVector =
+                            if (thatNode.isOnline) MeshtasticIcons.Success else MeshtasticIcons.DeviceSleep,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint =
+                            if (thatNode.isOnline) {
+                                MaterialTheme.colorScheme.tertiary
+                            } else {
+                                MaterialTheme.colorScheme.outline
+                            },
+                        )
+                        LastHeardInfo(
+                            lastHeard = thatNode.lastHeard,
+                            showLabel = false,
+                            relative = lastHeardIsRelative,
+                            contentColor = contentColor,
+                        )
+                    }
                 }
 
                 // Row 3: Combined icons (toggle-dependent)
@@ -219,6 +233,7 @@ fun NodeItemCompact(
                     thatNode = thatNode,
                     isThisNode = isThisNode,
                     distance = distance,
+                    unmessageable = unmessageable,
                     showLocation = showLocation,
                     showHops = showHops,
                     showSignal = showSignal,
@@ -235,14 +250,10 @@ fun NodeItemCompact(
 @Composable
 private fun CompactNameRow(
     thatNode: Node,
-    isThisNode: Boolean,
     longName: String,
     style: FontStyle,
     isIgnored: Boolean,
     isFavorite: Boolean,
-    unmessageable: Boolean,
-    connectionState: ConnectionState,
-    deviceType: DeviceType?,
     contentColor: Color,
 ) {
     Row(
@@ -264,15 +275,14 @@ private fun CompactNameRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        NodeStatusIcons(
-            isThisNode = isThisNode,
-            isFavorite = isFavorite,
-            isMuted = thatNode.isMuted,
-            isUnmessageable = unmessageable,
-            connectionState = connectionState,
-            deviceType = deviceType,
-            contentColor = contentColor,
-        )
+        if (isFavorite) {
+            Icon(
+                imageVector = MeshtasticIcons.Favorite,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = contentColor,
+            )
+        }
     }
 }
 
@@ -282,6 +292,7 @@ private fun CompactCombinedRow(
     thatNode: Node,
     isThisNode: Boolean,
     distance: String?,
+    unmessageable: Boolean,
     showLocation: Boolean,
     showHops: Boolean,
     showSignal: Boolean,
@@ -321,9 +332,29 @@ private fun CompactCombinedRow(
         items.add { ChannelInfo(channel = thatNode.channel, contentColor = contentColor) }
     }
 
-    // Device Role
+    // Device Role with conditional icons (unmessageable, MQTT)
     if (showRole) {
-        items.add { RoleInfo(role = thatNode.user.role, contentColor = contentColor) }
+        items.add {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                RoleInfo(role = thatNode.user.role, contentColor = contentColor)
+                if (unmessageable) {
+                    Icon(
+                        imageVector = MeshtasticIcons.Unmessageable,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = contentColor,
+                    )
+                }
+                if (thatNode.viaMqtt) {
+                    Icon(
+                        imageVector = MeshtasticIcons.MqttConnected,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = contentColor,
+                    )
+                }
+            }
+        }
     }
 
     // Telemetry log icons

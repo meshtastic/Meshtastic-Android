@@ -250,8 +250,6 @@ fun NodeListScreen(
                                     distanceUnits = state.distanceUnits,
                                     onClick = { navigateToNodeDetails(node.num) },
                                     onLongClick = longClick,
-                                    connectionState = connectionState,
-                                    deviceType = deviceType,
                                     isActive = isActive,
                                     showPower = showPower,
                                     showLastHeard = showLastHeard,
