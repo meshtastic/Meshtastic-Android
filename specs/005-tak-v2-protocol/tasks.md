@@ -20,12 +20,12 @@
 
 **Purpose**: Create the `core:takserver` KMP module, configure dependencies, and establish project structure.
 
-- [ ] T001 Create `core/takserver/build.gradle.kts` with TAKPacket-SDK v0.1.3, xmlutil, zstd-jni 1.5.7-7, Ktor Network, Okio, Koin, and Kermit dependencies
-- [ ] T002 Register `:core:takserver` module in `settings.gradle.kts`
-- [ ] T003 [P] Create source set directory structure: `commonMain`, `commonTest`, `jvmAndroidMain`, `androidMain`, `jvmMain`, `iosMain` under `core/takserver/src/`
-- [ ] T004 [P] Add bundled mTLS certificates to `core/takserver/src/jvmAndroidMain/resources/tak_certs/`
-- [ ] T005 [P] Add 40 CoT XML test fixture files to `core/takserver/src/jvmAndroidMain/resources/tak_test_fixtures/`
-- [ ] T006 [P] Create Koin DI module in `core/takserver/src/commonMain/kotlin/org/meshtastic/core/takserver/di/CoreTakServerModule.kt`
+- [X] T001 Create `core/takserver/build.gradle.kts` with TAKPacket-SDK v0.1.3, xmlutil, zstd-jni 1.5.7-7, Ktor Network, Okio, Koin, and Kermit dependencies
+- [X] T002 Register `:core:takserver` module in `settings.gradle.kts`
+- [X] T003 [P] Create source set directory structure: `commonMain`, `commonTest`, `jvmAndroidMain`, `androidMain`, `jvmMain`, `iosMain` under `core/takserver/src/`
+- [X] T004 [P] Add bundled mTLS certificates to `core/takserver/src/jvmAndroidMain/resources/tak_certs/`
+- [X] T005 [P] Add 40 CoT XML test fixture files to `core/takserver/src/jvmAndroidMain/resources/tak_test_fixtures/`
+- [X] T006 [P] Create Koin DI module in `core/takserver/src/commonMain/kotlin/org/meshtastic/core/takserver/di/CoreTakServerModule.kt`
 
 ---
 
@@ -35,24 +35,24 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T007 Define domain models (CoTMessage, CoTContact, CoTGroup, CoTStatus, CoTTrack, CoTChat, TAKClientInfo, InboundCoTMessage) in `core/takserver/src/commonMain/kotlin/.../TAKModels.kt`
-- [ ] T008 [P] Define constants (DEFAULT_TAK_PORT, MAX_TAK_WIRE_PAYLOAD_BYTES, MAX_DECOMPRESSED_SIZE, TAK_COORDINATE_SCALE, DICT_IDs, OFFLINE_QUEUE_TTL, KEEPALIVE_INTERVAL, MIN_MESH_STALE_TTL) in `core/takserver/src/commonMain/kotlin/.../TAKDefaults.kt`
-- [ ] T009 [P] Implement XML escaping utilities (5 special characters: &, <, >, ", ') in `core/takserver/src/commonMain/kotlin/.../XmlUtils.kt`
-- [ ] T010 [P] Implement CoT XML data classes for serialization in `core/takserver/src/commonMain/kotlin/.../CoTXmlDataClasses.kt`
-- [ ] T011 [P] Implement ATAK preference XML schema classes in `core/takserver/src/commonMain/kotlin/.../TAKPrefXmlDataClasses.kt`
-- [ ] T012 [P] Implement shared coordinate scaling and conversion helpers in `core/takserver/src/commonMain/kotlin/.../TakConversionHelpers.kt`
-- [ ] T013 [P] Implement `TakV2TypeMapper` with 23 CoT types + 4 HOW types + CotType_Other fallback in `core/takserver/src/commonMain/kotlin/.../TakV2TypeMapper.kt`
-- [ ] T014 [P] Implement `CoTDetailStripper` to strip 16 bloat XML elements (regex-based) in `core/takserver/src/commonMain/kotlin/.../CoTDetailStripper.kt`
-- [ ] T015 [P] Implement streaming `CoTXmlParser` (XML → CoTMessage) in `core/takserver/src/commonMain/kotlin/.../CoTXmlParser.kt`
-- [ ] T016 [P] Implement `CoTXml` (CoTMessage → XML serialization) in `core/takserver/src/commonMain/kotlin/.../CoTXml.kt`
-- [ ] T017 [P] Implement TCP stream framing in `core/takserver/src/commonMain/kotlin/.../CoTXmlFrameBuffer.kt`
-- [ ] T018 [P] Implement shared conversion helpers in `core/takserver/src/commonMain/kotlin/.../CoTConversion.kt`
-- [ ] T019 [P] Add `supportsTakV2` capability flag (firmware >= 2.8.0 check) in `core/model/src/commonMain/kotlin/.../Capabilities.kt`
-- [ ] T020 [P] Define `AtakFileWriter` expect interface in `core/takserver/src/commonMain/kotlin/.../AtakFileWriter.kt`
-- [ ] T021 [P] Define `ZipArchiver` expect interface in `core/takserver/src/commonMain/kotlin/.../ZipArchiver.kt`
-- [ ] T022 [P] Define `TakFixtureLoader` expect interface in `core/takserver/src/commonMain/kotlin/.../TakFixtureLoader.kt`
-- [ ] T023 [P] Define `TakV2Compressor` expect interface in `core/takserver/src/commonMain/kotlin/.../TakV2Compressor.kt`
-- [ ] T024 [P] Define `TAKServer` expect interface in `core/takserver/src/commonMain/kotlin/.../TAKServer.kt`
+- [X] T007 Define domain models (CoTMessage, CoTContact, CoTGroup, CoTStatus, CoTTrack, CoTChat, TAKClientInfo, InboundCoTMessage) in `core/takserver/src/commonMain/kotlin/.../TAKModels.kt`
+- [X] T008 [P] Define constants (DEFAULT_TAK_PORT, MAX_TAK_WIRE_PAYLOAD_BYTES, MAX_DECOMPRESSED_SIZE, TAK_COORDINATE_SCALE, DICT_IDs, OFFLINE_QUEUE_TTL, KEEPALIVE_INTERVAL, MIN_MESH_STALE_TTL) in `core/takserver/src/commonMain/kotlin/.../TAKDefaults.kt`
+- [X] T009 [P] Implement XML escaping utilities (5 special characters: &, <, >, ", ') in `core/takserver/src/commonMain/kotlin/.../XmlUtils.kt`
+- [X] T010 [P] Implement CoT XML data classes for serialization in `core/takserver/src/commonMain/kotlin/.../CoTXmlDataClasses.kt`
+- [X] T011 [P] Implement ATAK preference XML schema classes in `core/takserver/src/commonMain/kotlin/.../TAKPrefXmlDataClasses.kt`
+- [X] T012 [P] Implement shared coordinate scaling and conversion helpers in `core/takserver/src/commonMain/kotlin/.../TakConversionHelpers.kt`
+- [X] T013 [P] Implement `TakV2TypeMapper` with 23 CoT types + 4 HOW types + CotType_Other fallback in `core/takserver/src/commonMain/kotlin/.../TakV2TypeMapper.kt`
+- [X] T014 [P] Implement `CoTDetailStripper` to strip 16 bloat XML elements (regex-based) in `core/takserver/src/commonMain/kotlin/.../CoTDetailStripper.kt`
+- [X] T015 [P] Implement streaming `CoTXmlParser` (XML → CoTMessage) in `core/takserver/src/commonMain/kotlin/.../CoTXmlParser.kt`
+- [X] T016 [P] Implement `CoTXml` (CoTMessage → XML serialization) in `core/takserver/src/commonMain/kotlin/.../CoTXml.kt`
+- [X] T017 [P] Implement TCP stream framing in `core/takserver/src/commonMain/kotlin/.../CoTXmlFrameBuffer.kt`
+- [X] T018 [P] Implement shared conversion helpers in `core/takserver/src/commonMain/kotlin/.../CoTConversion.kt`
+- [X] T019 [P] Add `supportsTakV2` capability flag (firmware >= 2.8.0 check) in `core/model/src/commonMain/kotlin/.../Capabilities.kt`
+- [X] T020 [P] Define `AtakFileWriter` expect interface in `core/takserver/src/commonMain/kotlin/.../AtakFileWriter.kt`
+- [X] T021 [P] Define `ZipArchiver` expect interface in `core/takserver/src/commonMain/kotlin/.../ZipArchiver.kt`
+- [X] T022 [P] Define `TakFixtureLoader` expect interface in `core/takserver/src/commonMain/kotlin/.../TakFixtureLoader.kt`
+- [X] T023 [P] Define `TakV2Compressor` expect interface in `core/takserver/src/commonMain/kotlin/.../TakV2Compressor.kt`
+- [X] T024 [P] Define `TAKServer` expect interface in `core/takserver/src/commonMain/kotlin/.../TAKServer.kt`
 
 **Checkpoint**: Foundation ready — all shared types, constants, and interfaces established.
 
@@ -66,30 +66,30 @@
 
 ### Tests for User Story 1
 
-- [ ] T025 [P] [US1] Implement `CoTXmlParserTest` (XML parsing for all 23 CoT types) in `core/takserver/src/commonTest/kotlin/.../CoTXmlParserTest.kt`
-- [ ] T026 [P] [US1] Implement `CoTXmlTest` (CoTMessage → XML round-trip) in `core/takserver/src/commonTest/kotlin/.../CoTXmlTest.kt`
-- [ ] T027 [P] [US1] Implement `CoTConversionTest` (conversion helper correctness) in `core/takserver/src/commonTest/kotlin/.../CoTConversionTest.kt`
-- [ ] T028 [P] [US1] Implement `CoTDetailStripperTest` (16-element stripping) in `core/takserver/src/commonTest/kotlin/.../CoTDetailStripperTest.kt`
-- [ ] T029 [P] [US1] Implement `TAKPacketV2RawDetailTest` (raw_detail round-trip for shapes/markers/routes) in `core/takserver/src/commonTest/kotlin/.../TAKPacketV2RawDetailTest.kt`
-- [ ] T030 [P] [US1] Implement `XmlUtilsTest` (escaping correctness for 5 special chars) in `core/takserver/src/commonTest/kotlin/.../XmlUtilsTest.kt`
-- [ ] T031 [P] [US1] Implement `TAKDefaultsTest` (constants validation) in `core/takserver/src/commonTest/kotlin/.../TAKDefaultsTest.kt`
+- [X] T025 [P] [US1] Implement `CoTXmlParserTest` (XML parsing for all 23 CoT types) in `core/takserver/src/commonTest/kotlin/.../CoTXmlParserTest.kt`
+- [X] T026 [P] [US1] Implement `CoTXmlTest` (CoTMessage → XML round-trip) in `core/takserver/src/commonTest/kotlin/.../CoTXmlTest.kt`
+- [X] T027 [P] [US1] Implement `CoTConversionTest` (conversion helper correctness) in `core/takserver/src/commonTest/kotlin/.../CoTConversionTest.kt`
+- [X] T028 [P] [US1] Implement `CoTDetailStripperTest` (16-element stripping) in `core/takserver/src/commonTest/kotlin/.../CoTDetailStripperTest.kt`
+- [X] T029 [P] [US1] Implement `TAKPacketV2RawDetailTest` (raw_detail round-trip for shapes/markers/routes) in `core/takserver/src/commonTest/kotlin/.../TAKPacketV2RawDetailTest.kt`
+- [X] T030 [P] [US1] Implement `XmlUtilsTest` (escaping correctness for 5 special chars) in `core/takserver/src/commonTest/kotlin/.../XmlUtilsTest.kt`
+- [X] T031 [P] [US1] Implement `TAKDefaultsTest` (constants validation) in `core/takserver/src/commonTest/kotlin/.../TAKDefaultsTest.kt`
 
 ### Implementation for User Story 1
 
-- [ ] T032 [US1] Implement `TAKPacketV2Conversion` (CoTMessage ↔ TAKPacketV2 for all CoT types including pli, chat, raw_detail payloads) in `core/takserver/src/commonMain/kotlin/.../TAKPacketV2Conversion.kt`
-- [ ] T033 [P] [US1] Implement `TakV2Compressor` actual (zstd dictionary compression via TAKPacket-SDK) in `core/takserver/src/jvmAndroidMain/kotlin/.../TakV2Compressor.kt`
-- [ ] T034 [P] [US1] Implement `TakV2Compressor` iOS stub (uncompressed, flags=0xFF) in `core/takserver/src/iosMain/kotlin/.../TakV2Compressor.kt`
-- [ ] T035 [US1] Implement `RouteDataPackageGenerator` (Route CoT → KML data package with MissionPackageManifest v2) in `core/takserver/src/commonMain/kotlin/.../RouteDataPackageGenerator.kt`
-- [ ] T036 [US1] Implement `TAKMeshIntegration` outbound path (TAK client → CoT parse → detail strip → compress → MTU check → port 78 send) in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
-- [ ] T037 [US1] Implement `TAKMeshIntegration` inbound path (port 78 receive → decompress → decode → broadcast to TAK clients) in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
-- [ ] T038 [P] [US1] Implement `TakFixtureLoader` actual (JVM resource loading for test fixtures) in `core/takserver/src/jvmAndroidMain/kotlin/.../TakFixtureLoader.kt`
-- [ ] T039 [P] [US1] Implement `TakFixtureLoader` iOS stub in `core/takserver/src/iosMain/kotlin/.../TakFixtureLoader.kt`
-- [ ] T040 [P] [US1] Implement `ZipArchiver` actual (java.util.zip) in `core/takserver/src/jvmAndroidMain/kotlin/.../ZipArchiver.kt`
-- [ ] T041 [P] [US1] Implement `ZipArchiver` iOS stub in `core/takserver/src/iosMain/kotlin/.../ZipArchiver.kt`
-- [ ] T042 [P] [US1] Implement `AtakFileWriter` actual (SAF/private directory) in `core/takserver/src/androidMain/kotlin/.../AtakFileWriter.kt`
-- [ ] T043 [P] [US1] Implement `AtakFileWriter` actual (desktop filesystem) in `core/takserver/src/jvmMain/kotlin/.../AtakFileWriter.kt`
-- [ ] T044 [P] [US1] Implement `AtakFileWriter` iOS stub in `core/takserver/src/iosMain/kotlin/.../AtakFileWriter.kt`
-- [ ] T045 [US1] Implement `TakMeshTestRunner` (in-app diagnostic runner for per-CoT-type byte size and round-trip verification) in `core/takserver/src/commonMain/kotlin/.../TakMeshTestRunner.kt`
+- [X] T032 [US1] Implement `TAKPacketV2Conversion` (CoTMessage ↔ TAKPacketV2 for all CoT types including pli, chat, raw_detail payloads) in `core/takserver/src/commonMain/kotlin/.../TAKPacketV2Conversion.kt`
+- [X] T033 [P] [US1] Implement `TakV2Compressor` actual (zstd dictionary compression via TAKPacket-SDK) in `core/takserver/src/jvmAndroidMain/kotlin/.../TakV2Compressor.kt`
+- [X] T034 [P] [US1] Implement `TakV2Compressor` iOS stub (uncompressed, flags=0xFF) in `core/takserver/src/iosMain/kotlin/.../TakV2Compressor.kt`
+- [X] T035 [US1] Implement `RouteDataPackageGenerator` (Route CoT → KML data package with MissionPackageManifest v2) in `core/takserver/src/commonMain/kotlin/.../RouteDataPackageGenerator.kt`
+- [X] T036 [US1] Implement `TAKMeshIntegration` outbound path (TAK client → CoT parse → detail strip → compress → MTU check → port 78 send) in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
+- [X] T037 [US1] Implement `TAKMeshIntegration` inbound path (port 78 receive → decompress → decode → broadcast to TAK clients) in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
+- [X] T038 [P] [US1] Implement `TakFixtureLoader` actual (JVM resource loading for test fixtures) in `core/takserver/src/jvmAndroidMain/kotlin/.../TakFixtureLoader.kt`
+- [X] T039 [P] [US1] Implement `TakFixtureLoader` iOS stub in `core/takserver/src/iosMain/kotlin/.../TakFixtureLoader.kt`
+- [X] T040 [P] [US1] Implement `ZipArchiver` actual (java.util.zip) in `core/takserver/src/jvmAndroidMain/kotlin/.../ZipArchiver.kt`
+- [X] T041 [P] [US1] Implement `ZipArchiver` iOS stub in `core/takserver/src/iosMain/kotlin/.../ZipArchiver.kt`
+- [X] T042 [P] [US1] Implement `AtakFileWriter` actual (SAF/private directory) in `core/takserver/src/androidMain/kotlin/.../AtakFileWriter.kt`
+- [X] T043 [P] [US1] Implement `AtakFileWriter` actual (desktop filesystem) in `core/takserver/src/jvmMain/kotlin/.../AtakFileWriter.kt`
+- [X] T044 [P] [US1] Implement `AtakFileWriter` iOS stub in `core/takserver/src/iosMain/kotlin/.../AtakFileWriter.kt`
+- [X] T045 [US1] Implement `TakMeshTestRunner` (in-app diagnostic runner for per-CoT-type byte size and round-trip verification) in `core/takserver/src/commonMain/kotlin/.../TakMeshTestRunner.kt`
 
 **Checkpoint**: All 28 CoT type mappings encode/decode correctly. Compressed PLI < 100 bytes. Shapes/markers/routes fit within 225-byte MTU after stripping + compression.
 
@@ -103,14 +103,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T046 [P] [US2] Implement `TAKPacketConversionTest` (v1 PLI + GeoChat encode/decode) in `core/takserver/src/commonTest/kotlin/.../TAKPacketConversionTest.kt`
+- [X] T046 [P] [US2] Implement `TAKPacketConversionTest` (v1 PLI + GeoChat encode/decode) in `core/takserver/src/commonTest/kotlin/.../TAKPacketConversionTest.kt`
 
 ### Implementation for User Story 2
 
-- [ ] T047 [US2] Implement `TAKPacketConversion` (CoTMessage ↔ TAKPacket v1 for PLI and GeoChat only) in `core/takserver/src/commonMain/kotlin/.../TAKPacketConversion.kt`
-- [ ] T048 [US2] Implement version-gating logic in `TAKMeshIntegration` — check `Capabilities.supportsTakV2` per-send to select port 72 vs port 78 path in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
-- [ ] T049 [US2] Implement dual-port inbound listener in `TAKMeshIntegration` — accept and decode packets from both port 72 and port 78 regardless of local firmware in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
-- [ ] T050 [US2] Implement CoT type filtering for legacy path — drop non-PLI/non-GeoChat types with logged warning on firmware < 2.8.0 in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
+- [X] T047 [US2] Implement `TAKPacketConversion` (CoTMessage ↔ TAKPacket v1 for PLI and GeoChat only) in `core/takserver/src/commonMain/kotlin/.../TAKPacketConversion.kt`
+- [X] T048 [US2] Implement version-gating logic in `TAKMeshIntegration` — check `Capabilities.supportsTakV2` per-send to select port 72 vs port 78 path in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
+- [X] T049 [US2] Implement dual-port inbound listener in `TAKMeshIntegration` — accept and decode packets from both port 72 and port 78 regardless of local firmware in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
+- [X] T050 [US2] Implement CoT type filtering for legacy path — drop non-PLI/non-GeoChat types with logged warning on firmware < 2.8.0 in `core/takserver/src/commonMain/kotlin/.../TAKMeshIntegration.kt`
 
 **Checkpoint**: Mixed-firmware mesh maintains PLI/GeoChat for legacy nodes. Advanced CoT types dropped cleanly with user-visible warning.
 
@@ -124,18 +124,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T051 [P] [US3] Implement `CoTXmlFrameBufferTest` (TCP stream framing correctness) in `core/takserver/src/commonTest/kotlin/.../CoTXmlFrameBufferTest.kt`
+- [X] T051 [P] [US3] Implement `CoTXmlFrameBufferTest` (TCP stream framing correctness) in `core/takserver/src/commonTest/kotlin/.../CoTXmlFrameBufferTest.kt`
 
 ### Implementation for User Story 3
 
-- [ ] T052 [US3] Implement `TAKServerJvm` actual (JSSE SSLServerSocket with mTLS on port 8089) in `core/takserver/src/jvmAndroidMain/kotlin/.../TAKServerJvm.kt`
-- [ ] T053 [P] [US3] Implement `TAKServerIos` actual (no-op stub) in `core/takserver/src/iosMain/kotlin/.../TAKServerIos.kt`
-- [ ] T054 [US3] Implement `TAKClientConnection` (per-client coroutine scope, SupervisorJob, BufferedOutputStream + writeMutex, XML stream framing) in `core/takserver/src/jvmAndroidMain/kotlin/.../TAKClientConnection.kt`
-- [ ] T055 [US3] Implement `TakCertLoader` (load bundled .p12/.pem certificates for mTLS) in `core/takserver/src/jvmAndroidMain/kotlin/.../TakCertLoader.kt`
-- [ ] T056 [US3] Implement `TAKServerManager` lifecycle (start/stop, client list, broadcast, 10-second keepalive interval, offline message queue: 50-msg cap, 5-min TTL) in `core/takserver/src/commonMain/kotlin/.../TAKServerManager.kt`
-- [ ] T057 [US3] Implement `TAKDataPackageGenerator` (export .zip with server certificates and connection config for ATAK/iTAK import) in `core/takserver/src/commonMain/kotlin/.../TAKDataPackageGenerator.kt`
-- [ ] T058 [US3] Add `PARTIAL_WAKE_LOCK` acquisition in `MeshService` when TAK server is active in `core/service/src/androidMain/kotlin/.../MeshService.kt`
-- [ ] T059 [US3] Wire `TAKMeshIntegration.start(scope)` call from `MeshService.onStartCommand()` in `core/service/src/androidMain/kotlin/.../MeshService.kt`
+- [X] T052 [US3] Implement `TAKServerJvm` actual (JSSE SSLServerSocket with mTLS on port 8089) in `core/takserver/src/jvmAndroidMain/kotlin/.../TAKServerJvm.kt`
+- [X] T053 [P] [US3] Implement `TAKServerIos` actual (no-op stub) in `core/takserver/src/iosMain/kotlin/.../TAKServerIos.kt`
+- [X] T054 [US3] Implement `TAKClientConnection` (per-client coroutine scope, SupervisorJob, BufferedOutputStream + writeMutex, XML stream framing) in `core/takserver/src/jvmAndroidMain/kotlin/.../TAKClientConnection.kt`
+- [X] T055 [US3] Implement `TakCertLoader` (load bundled .p12/.pem certificates for mTLS) in `core/takserver/src/jvmAndroidMain/kotlin/.../TakCertLoader.kt`
+- [X] T056 [US3] Implement `TAKServerManager` lifecycle (start/stop, client list, broadcast, 10-second keepalive interval, offline message queue: 50-msg cap, 5-min TTL) in `core/takserver/src/commonMain/kotlin/.../TAKServerManager.kt`
+- [X] T057 [US3] Implement `TAKDataPackageGenerator` (export .zip with server certificates and connection config for ATAK/iTAK import) in `core/takserver/src/commonMain/kotlin/.../TAKDataPackageGenerator.kt`
+- [X] T058 [US3] Add `PARTIAL_WAKE_LOCK` acquisition in `MeshService` when TAK server is active in `core/service/src/androidMain/kotlin/.../MeshService.kt`
+- [X] T059 [US3] Wire `TAKMeshIntegration.start(scope)` call from `MeshServiceOrchestrator` in `core/service/src/commonMain/kotlin/.../MeshServiceOrchestrator.kt`
 
 **Checkpoint**: TAK server starts on port 8089, accepts mTLS connections, maintains keepalive, survives screen-off. Data package exportable.
 
@@ -149,11 +149,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T060 [US4] Implement `TAKConfigItemList` Compose UI (SwitchPreference for server toggle, DropDownPreference for team/role, TitledCard for status, export button, test runner button) in `feature/settings/src/commonMain/kotlin/.../radio/component/TAKConfigItemList.kt`
-- [ ] T061 [P] [US4] Implement `TakPermissionUtil` expect interface in `feature/settings/src/commonMain/kotlin/.../tak/TakPermissionUtil.kt`
-- [ ] T062 [P] [US4] Implement `TakPermissionUtil` Android actual (ACCESS_LOCAL_NETWORK for API 37+) in `feature/settings/src/androidMain/kotlin/.../tak/TakPermissionUtil.kt`
-- [ ] T063 [P] [US4] Implement `TakPermissionUtil` JVM actual (no-op) in `feature/settings/src/jvmMain/kotlin/.../tak/TakPermissionUtil.kt`
-- [ ] T064 [P] [US4] Implement `TakPermissionUtil` iOS actual (no-op) in `feature/settings/src/iosMain/kotlin/.../tak/TakPermissionUtil.kt`
+- [X] T060 [US4] Implement `TAKConfigItemList` Compose UI (SwitchPreference for server toggle, DropDownPreference for team/role, TitledCard for status, export button, test runner button) in `feature/settings/src/commonMain/kotlin/.../radio/component/TAKConfigItemList.kt`
+- [X] T061 [P] [US4] Implement `TakPermissionUtil` expect interface in `feature/settings/src/commonMain/kotlin/.../tak/TakPermissionUtil.kt`
+- [X] T062 [P] [US4] Implement `TakPermissionUtil` Android actual (ACCESS_LOCAL_NETWORK for API 37+) in `feature/settings/src/androidMain/kotlin/.../tak/TakPermissionUtil.kt`
+- [X] T063 [P] [US4] Implement `TakPermissionUtil` JVM actual (no-op) in `feature/settings/src/jvmMain/kotlin/.../tak/TakPermissionUtil.kt`
+- [X] T064 [P] [US4] Implement `TakPermissionUtil` iOS actual (no-op) in `feature/settings/src/iosMain/kotlin/.../tak/TakPermissionUtil.kt`
 
 **Checkpoint**: TAK config screen functional — server toggle works, team/role persists, test runner shows per-CoT-type byte sizes.
 
@@ -167,8 +167,8 @@
 
 ### Implementation for User Story 5
 
-- [ ] T065 [US5] Verify inbound handler in `TAKMeshIntegration` correctly decodes port 72 legacy packets and broadcasts to TAK clients (implemented as part of T049, verify independently)
-- [ ] T066 [US5] Verify inbound handler in `TAKMeshIntegration` correctly decompresses port 78 packets (including 0xFF uncompressed from TAK_TRACKER) and broadcasts to TAK clients
+- [X] T065 [US5] Verify inbound handler in `TAKMeshIntegration` correctly decodes port 72 legacy packets and broadcasts to TAK clients (implemented as part of T049, verify independently)
+- [X] T066 [US5] Verify inbound handler in `TAKMeshIntegration` correctly decompresses port 78 packets (including 0xFF uncompressed from TAK_TRACKER) and broadcasts to TAK clients
 
 **Checkpoint**: No tactical data lost in mixed deployments. Both v1 and v2 inbound traffic decoded and forwarded correctly.
 
@@ -178,17 +178,17 @@
 
 **Purpose**: Verification, compliance, and documentation tasks that span all user stories.
 
-- [ ] T067 [P] Add TAK-related string resources to `core/resources/src/commonMain/composeResources/values/strings.xml`
-- [ ] T068 [P] Review `TAKConfigItemList.kt` against [Meshtastic design standards](https://raw.githubusercontent.com/meshtastic/design/refs/heads/master/standards/meshtastic_design_standards_latest.md) — verify M3 components, accessibility (TalkBack), touch targets
-- [ ] T069 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto` submodule
-- [ ] T070 [P] Run constitution-required verification: `./gradlew spotlessApply spotlessCheck detekt assembleDebug :core:takserver:allTests :feature:settings:allTests`
-- [ ] T071 [P] Verify all 9 test classes pass (65+ methods): `./gradlew :core:takserver:allTests`
-- [ ] T072 [P] Validate quickstart.md instructions produce successful build from clean checkout
-- [ ] T073 Run `gh pr checks 5434` to confirm CI passes all checks
-- [ ] T074 [P] [US3] Add test for offline message queue: verify FIFO eviction at 50-message cap, per-message TTL expiry after 5 minutes, and replay of queued messages on client reconnect
-- [ ] T075 [P] [US4] Add test for ACCESS_LOCAL_NETWORK permission denied on Android 17+: verify TAK server displays user-visible error and does not crash
-- [ ] T076 [P] [US3] Add test for TAKServerJvm port-conflict error: verify graceful failure with user-visible error when port 8089 is already in use
-- [ ] T077 [P] [US1] Add test for MAX_DECOMPRESSED_SIZE boundary: verify `TakV2Compressor` rejects payloads exceeding the decompression size limit
+- [X] T067 [P] Add TAK-related string resources to `core/resources/src/commonMain/composeResources/values/strings.xml`
+- [X] T068 [P] Review `TAKConfigItemList.kt` against [Meshtastic design standards](https://raw.githubusercontent.com/meshtastic/design/refs/heads/master/standards/meshtastic_design_standards_latest.md) — verify M3 components, accessibility (TalkBack), touch targets
+- [X] T069 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto` submodule
+- [X] T070 [P] Run constitution-required verification: `./gradlew spotlessApply spotlessCheck detekt assembleDebug :core:takserver:allTests :feature:settings:allTests`
+- [X] T071 [P] Verify all 9 test classes pass (65+ methods): `./gradlew :core:takserver:allTests`
+- [X] T072 [P] Validate quickstart.md instructions produce successful build from clean checkout
+- [X] T073 Run `gh pr checks 5434` to confirm CI passes all checks
+- [X] T074 [P] [US3] Add test for offline message queue: verify FIFO eviction at 50-message cap, per-message TTL expiry after 5 minutes, and replay of queued messages on client reconnect
+- [X] T075 [P] [US4] Add test for ACCESS_LOCAL_NETWORK permission denied on Android 17+: verify TAK server displays user-visible error and does not crash
+- [X] T076 [P] [US3] Add test for TAKServerJvm port-conflict error: verify graceful failure with user-visible error when port 8089 is already in use
+- [X] T077 [P] [US1] Add test for MAX_DECOMPRESSED_SIZE boundary: verify `TakV2Compressor` rejects payloads exceeding the decompression size limit
 
 ---
 

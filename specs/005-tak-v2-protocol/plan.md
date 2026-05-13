@@ -13,7 +13,7 @@ Upgrades Meshtastic Android's TAK integration from legacy v1 (port 72, PLI + Geo
 **Language/Version**: Kotlin 2.3+ targeting JDK 21 (KMP multi-target)
 **Primary Dependencies**: TAKPacket-SDK v0.1.3 (zstd compression), xmlutil (CoT XML parsing), Ktor Network (TCP), zstd-jni 1.5.7-7, Okio (I/O), Koin 4.2+ (DI), Kermit (logging)
 **Storage**: App-private filesystem for route KML data packages; bundled .p12/.pem certificates for TLS
-**Testing**: `commonTest` (9 test classes, 65+ test methods), 38 XML fixture files in `jvmAndroidMain/resources/tak_test_fixtures/`
+**Testing**: `commonTest` (9 test classes, 65+ test methods), 40 XML fixture files in `jvmAndroidMain/resources/tak_test_fixtures/`
 **Target Platform**: Android (primary), JVM Desktop (secondary), iOS (stubs only)
 **Project Type**: Mobile app — KMP module (`core:takserver`) + UI integration (`feature:settings`)
 **Performance Goals**: CoT processing < 100ms; compressed PLI < 100 bytes; fits within ~225-byte usable LoRa payload
@@ -113,7 +113,7 @@ core/takserver/
     │   └── ZipArchiver.kt                   # java.util.zip actual
     ├── jvmAndroidMain/resources/
     │   ├── tak_certs/                       # Bundled mTLS certificates
-    │   └── tak_test_fixtures/               # 38 CoT XML fixtures
+    │   └── tak_test_fixtures/               # 40 CoT XML fixtures
     ├── androidMain/kotlin/.../
     │   └── AtakFileWriter.kt                # SAF/private directory writer
     ├── jvmMain/kotlin/.../
