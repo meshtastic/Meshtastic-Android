@@ -153,7 +153,9 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **FR-042**: A `docs/developer/measurement.md` page MUST document the `MetricFormatter` API, locale-aware unit conversion patterns, and how to add new measurement types. This provides developer-facing guidance complementing the user-facing `units-and-locale.md`.
 - **FR-043**: Documentation governance MUST enforce a 3-consumer propagation model: every doc page automatically flows to (1) the in-app docs browser via `syncDocsToComposeResources`, (2) the Jekyll/GitHub Pages site via `docs-deploy.yml`, and (3) the Docusaurus meshtastic.org site via `sync-android-docs.js`. CI MUST validate that every `docs/**/*.md` page slug is registered in `DocBundleLoader.kt` for in-app discovery.
 - **FR-044**: Doc governance scripts MUST share a common frontmatter parsing library (`scripts/lib/frontmatter.js`) to avoid duplication across link validation, freshness checks, coverage checks, and sync scripts. Slug discovery MUST be filesystem-derived, not hardcoded.
-- **FR-045**: All docs CI checks (staleness, link validation, coverage, freshness, registry validation) MUST be consolidated into a single `docs-governance.yml` workflow with separate jobs for staleness detection and quality gates.
+- **FR-045**: All docs CI checks (staleness, link validation, coverage, freshness, registry validation) MUST be consolidated into a single governance workflow with separate jobs for staleness detection and quality gates.
+- **FR-046**: The governance workflow MUST include an advisory preview-staleness job that detects UI composable changes (`feature/*/ui/`, `core/ui/`) without corresponding `*Previews.kt` updates. The check MUST be bypassable via a `skip-preview-check` label.
+- **FR-047**: The governance workflow MUST include an advisory screenshot-reference-staleness job that detects `*Previews.kt` changes without updates to reference images in `screenshot-tests/src/screenshotTestDebug/reference/`. The advisory MUST include the `updateDebugScreenshotTest` command.
 - **FR-038**: The Compose Multiplatform markdown renderer (`multiplatform-markdown-renderer-m3`) used by `DocsPageRouteScreen` on non-WebView targets MUST be configured with a custom `ImageTransformer` that resolves relative image paths (e.g., `assets/screenshots/*.png`) to bundled Compose resource URIs via `Res.getUri()` and loads them asynchronously using Coil 3 (`rememberAsyncImagePainter`). The default `NoOpImageTransformerImpl` MUST NOT be used for docs rendering. The `syncDocsToComposeResources` task MUST include screenshot assets alongside markdown files so that images are available at runtime. The `copyDocsScreenshots` task from `screenshot-tests/` MUST be wired as a dependency of `syncDocsToComposeResources` to ensure generated screenshots are available before resource bundling.
 
 ### Key Entities
@@ -187,6 +189,8 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **SC-017**: A developer measurement/locale page exists documenting `MetricFormatter` internals and locale-aware patterns.
 - **SC-018**: All docs CI checks (staleness, links, coverage, freshness, registry) run in a single consolidated `docs-governance.yml` workflow with no duplicate validation steps across workflows.
 - **SC-019**: Sync script slug discovery is filesystem-derived — adding a new `.md` file under `docs/` requires no hardcoded string updates in scripts.
+- **SC-020**: PRs that modify UI composables without updating previews receive an advisory PR comment with a checklist. The check is bypassable via `skip-preview-check` label.
+- **SC-021**: PRs that modify previews without updating screenshot reference images receive an advisory PR comment with the regeneration command.
 
 ## Clarifications
 
@@ -262,3 +266,12 @@ Audit of docs infrastructure identified duplication across 4 JS scripts, 3 CI wo
 3. **Workflow consolidation** — `docs-staleness.yml` merged into `docs-governance.yml` as a parallel `staleness` job alongside the existing `validate` job. Duplicate link validation removed from `docs-deploy.yml` (FR-045).
 4. **3-consumer propagation** — Constitution principle VI updated to explicitly name in-app, Jekyll, and Docusaurus consumers with propagation rules. Staleness check comment includes new-page checklist (FR-043).
 5. **Duplicate script removal** — `sync-android-docs.js` copy removed from meshtastic/meshtastic PR #2405 since the workflow runs from the Android repo clone.
+
+**Implemented (Phase 11 continued — Preview & Screenshot Governance):**
+
+Extended governance to cover preview composables and screenshot testing:
+
+1. **Preview staleness advisory** — `preview-staleness` job detects UI composable changes without `*Previews.kt` updates. Posts advisory PR comment with checklist. Bypassable via `skip-preview-check` label (FR-046).
+2. **Screenshot reference staleness advisory** — Same job detects preview changes without reference image updates. Posts advisory with `updateDebugScreenshotTest` command (FR-047).
+3. **Workflow renamed** — `Docs Governance` → `UI & Docs Governance` to reflect expanded scope.
+4. **Contributing checklist** — `docs/developer.md` updated with preview/screenshot maintenance guidance.

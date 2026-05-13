@@ -301,3 +301,13 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T272 [US5] Verify all 4 scripts pass locally: `validate-doc-links`, `check-doc-freshness`, `check-doc-coverage`, `sync-android-docs --dry-run`.
 
 **Checkpoint**: Single docs governance workflow, shared frontmatter library, filesystem-derived slugs, 3-consumer propagation model enforced.
+
+### Preview & Screenshot Governance
+
+- [X] T280 [P] [US5] [FR-046] Add `preview-staleness` job to `docs-governance.yml` — detects UI composable changes without `*Previews.kt` updates. Posts advisory PR comment with checklist. Bypassable via `skip-preview-check` label.
+- [X] T281 [P] [US5] [FR-047] Add screenshot reference staleness detection to same job — detects `*Previews.kt` changes without reference image updates in `screenshot-tests/src/screenshotTestDebug/reference/`. Posts advisory with `updateDebugScreenshotTest` command.
+- [X] T282 [US5] Rename workflow `Docs Governance` → `UI & Docs Governance` to reflect expanded scope.
+- [X] T283 [US5] Update `docs/developer.md` contributing checklist with preview/screenshot maintenance guidance.
+- [X] T284 [US5] Add dismiss-on-resolve logic: clear preview/screenshot advisory comments when both conditions resolve.
+
+**Checkpoint**: Unified UI & Docs Governance workflow with advisory checks for docs, previews, and screenshot references.

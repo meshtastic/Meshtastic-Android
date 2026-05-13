@@ -410,7 +410,7 @@ Update `feature/settings/.../SettingsNavigation.kt` so Help & Documentation appe
 9. **Phase 8 – Polish**: accessibility, dark mode, edge cases, documentation cleanup.
 10. **Phase 9 – Apple alignment**: per-page TOC icons, signal-meter/units-locale pages, staleness CI.
 11. **Phase 10 – Docusaurus sync & content gaps**: meshtastic.org sync script + workflow, WebP optimization, translate page, developer measurement page.
-12. **Phase 11 – Governance consolidation**: shared frontmatter library, filesystem-derived slugs, workflow merge, 3-consumer propagation model.
+12. **Phase 11 – Governance consolidation**: shared frontmatter library, filesystem-derived slugs, workflow merge, 3-consumer propagation model, preview & screenshot staleness advisories.
 
 ## Validation Matrix
 
