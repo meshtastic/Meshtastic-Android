@@ -49,6 +49,7 @@ kotlin {
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.lifecycle.runtime.ktx)
             implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.androidx.security.crypto)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.workmanager)
         }

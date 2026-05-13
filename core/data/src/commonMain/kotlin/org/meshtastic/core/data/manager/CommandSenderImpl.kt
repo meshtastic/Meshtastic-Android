@@ -42,11 +42,13 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Constants
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LockdownAuth
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Neighbor
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.ToRadio
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
@@ -355,6 +357,38 @@ class CommandSenderImpl(
         }
     }
 
+    override fun sendLockdownPassphrase(passphrase: String, boots: Int, hours: Int) {
+        val validUntilEpoch =
+            if (hours > 0) (nowMillis / 1000L + hours.toLong() * SECONDS_PER_HOUR).toInt() else 0
+        val lockdownAuth =
+            LockdownAuth(
+                passphrase = passphrase.encodeToByteArray().toByteString(),
+                boots_remaining = boots.coerceAtLeast(0),
+                valid_until_epoch = validUntilEpoch,
+            )
+        sendLockdownAdmin(AdminMessage(lockdown_auth = lockdownAuth))
+    }
+
+    override fun sendLockNow() {
+        sendLockdownAdmin(AdminMessage(lockdown_auth = LockdownAuth(lock_now = true)))
+    }
+
+    private fun sendLockdownAdmin(adminMessage: AdminMessage) {
+        val myNum = nodeManager.myNodeNum ?: return
+        val packet =
+            MeshPacket(
+                to = myNum,
+                id = generatePacketId(),
+                channel = 0,
+                want_ack = true,
+                hop_limit = DEFAULT_HOP_LIMIT,
+                hop_start = DEFAULT_HOP_LIMIT,
+                priority = MeshPacket.Priority.RELIABLE,
+                decoded = Data(portnum = PortNum.ADMIN_APP, payload = adminMessage.encode().toByteString()),
+            )
+        packetHandler.sendToRadio(ToRadio(packet = packet))
+    }
+
     fun resolveNodeNum(toId: String): Int = when (toId) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
         else -> {
@@ -436,5 +470,7 @@ class CommandSenderImpl(
         private const val HEX_RADIX = 16
 
         private const val DEFAULT_HOP_LIMIT = 3
+
+        private const val SECONDS_PER_HOUR = 3600
     }
 }

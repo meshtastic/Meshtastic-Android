@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.Notification
@@ -37,6 +38,7 @@ class FromRadioPacketHandlerImpl(
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val notificationManager: NotificationManager,
+    private val lockdownCoordinator: LockdownCoordinator,
 ) : FromRadioPacketHandler {
     @Suppress("CyclomaticComplexMethod")
     override fun handleFromRadio(proto: FromRadio) {
@@ -50,6 +52,7 @@ class FromRadioPacketHandlerImpl(
         val moduleConfig = proto.moduleConfig
         val channel = proto.channel
         val clientNotification = proto.clientNotification
+        val lockdownStatus = proto.lockdown_status
 
         when {
             myInfo != null -> router.value.configFlowManager.handleMyInfo(myInfo)
@@ -58,12 +61,16 @@ class FromRadioPacketHandlerImpl(
                 router.value.configFlowManager.handleNodeInfo(nodeInfo)
                 serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
             }
-            configCompleteId != null -> router.value.configFlowManager.handleConfigComplete(configCompleteId)
+            configCompleteId != null -> {
+                router.value.configFlowManager.handleConfigComplete(configCompleteId)
+                lockdownCoordinator.onConfigComplete()
+            }
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
             queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
             config != null -> router.value.configHandler.handleDeviceConfig(config)
             moduleConfig != null -> router.value.configHandler.handleModuleConfig(moduleConfig)
             channel != null -> router.value.configHandler.handleChannel(channel)
+            lockdownStatus != null -> lockdownCoordinator.handleLockdownStatus(lockdownStatus)
             clientNotification != null -> {
                 serviceRepository.setClientNotification(clientNotification)
                 notificationManager.dispatch(

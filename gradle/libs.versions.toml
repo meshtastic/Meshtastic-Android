@@ -84,6 +84,7 @@ androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:view
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.18.0" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0-rc01" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version = "1.1.0-alpha06" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }

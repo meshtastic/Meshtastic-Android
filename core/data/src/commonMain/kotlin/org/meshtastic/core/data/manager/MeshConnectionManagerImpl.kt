@@ -38,6 +38,7 @@ import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -88,6 +89,7 @@ class MeshConnectionManagerImpl(
     private val packetRepository: PacketRepository,
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
+    private val lockdownCoordinator: LockdownCoordinator,
 ) : MeshConnectionManager {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var sleepTimeout: Job? = null
@@ -182,6 +184,7 @@ class MeshConnectionManagerImpl(
         serviceBroadcasts.broadcastConnection()
         Logger.i { "Starting mesh handshake (Stage 1)" }
         connectTimeMsec = nowMillis
+        lockdownCoordinator.onConnect()
         startConfigOnly()
     }
 
@@ -238,6 +241,7 @@ class MeshConnectionManagerImpl(
 
     private fun handleDisconnected() {
         serviceRepository.setConnectionState(ConnectionState.Disconnected)
+        lockdownCoordinator.onDisconnect()
         packetHandler.stopPacketQueue()
         locationManager.stop()
         mqttManager.stop()
@@ -256,6 +260,14 @@ class MeshConnectionManagerImpl(
         val action = { packetHandler.sendToRadio(ToRadio(want_config_id = CONFIG_ONLY_NONCE)) }
         startHandshakeStallGuard(1, action)
         action()
+    }
+
+    override fun clearRadioConfig() {
+        scope.handledLaunch {
+            radioConfigRepository.clearLocalConfig()
+            radioConfigRepository.clearChannelSet()
+            radioConfigRepository.clearLocalModuleConfig()
+        }
     }
 
     override fun startNodeInfoOnly() {
