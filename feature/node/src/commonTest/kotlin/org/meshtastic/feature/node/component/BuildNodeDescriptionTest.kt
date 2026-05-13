@@ -24,6 +24,19 @@ import kotlin.test.assertTrue
 @Suppress("MagicNumber")
 class BuildNodeDescriptionTest {
 
+    private val testStrings =
+        NodeDescriptionStrings(
+            online = "online",
+            offline = "offline",
+            favorite = "favorite",
+            lastHeard = "last heard %s",
+            role = "role %s",
+            hopsAway = "0 hops away",
+            battery = "battery 0%",
+            distanceAway = "%s away",
+            signal = "signal %s",
+        )
+
     private fun describe(
         name: String = "TestNode",
         isOnline: Boolean = true,
@@ -49,6 +62,7 @@ class BuildNodeDescriptionTest {
         snr = snr,
         rssi = rssi,
         viaMqtt = viaMqtt,
+        strings = testStrings,
         lastHeardIsRelative = lastHeardIsRelative,
     )
 

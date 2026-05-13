@@ -1,5 +1,15 @@
+### A11Y ###
 a11y_label_value
 a11y_message_from
+a11y_node_battery
+a11y_node_distance_away
+a11y_node_favorite
+a11y_node_hops_away
+a11y_node_last_heard
+a11y_node_offline
+a11y_node_online
+a11y_node_role
+a11y_node_signal
 accept
 acknowledgements
 ### ACTION ###

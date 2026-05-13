@@ -16,8 +16,18 @@
   -->
 
 <resources>
+    <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message from %1$s: %2$s</string>
+    <string name="a11y_node_battery">battery %1$d%%</string>
+    <string name="a11y_node_distance_away">%1$s away</string>
+    <string name="a11y_node_favorite">favorite</string>
+    <string name="a11y_node_hops_away">%1$d hops away</string>
+    <string name="a11y_node_last_heard">last heard %1$s</string>
+    <string name="a11y_node_offline">offline</string>
+    <string name="a11y_node_online">online</string>
+    <string name="a11y_node_role">role %1$s</string>
+    <string name="a11y_node_signal">signal %1$s</string>
     <string name="accept">Accept</string>
     <string name="acknowledgements">Acknowledgements</string>
     <!-- ACTION -->

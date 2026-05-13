@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,6 +86,7 @@ private const val LINE_COUNT_BASE = 1
 private const val CHIP_MIN_DP = 36
 private const val CHIP_MAX_DP = 70
 private const val CHIP_PER_LINE_DP = 24
+private const val COMPACT_ICON_SIZE_DP = 16
 
 @Composable
 @Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
@@ -145,8 +147,9 @@ fun NodeItemCompact(
 
     val style = if (thatNode.isUnknownUser) FontStyle.Italic else FontStyle.Normal
 
+    val a11yStrings = rememberNodeDescriptionStrings()
     val nodeDescription =
-        remember(thatNode, lastHeardIsRelative) {
+        remember(thatNode, lastHeardIsRelative, a11yStrings) {
             buildNodeDescription(
                 name = longName,
                 isOnline = thatNode.isOnline,
@@ -159,6 +162,7 @@ fun NodeItemCompact(
                 snr = thatNode.snr,
                 rssi = thatNode.rssi,
                 viaMqtt = thatNode.viaMqtt,
+                strings = a11yStrings,
                 lastHeardIsRelative = lastHeardIsRelative,
             )
         }
@@ -218,7 +222,7 @@ fun NodeItemCompact(
                             imageVector =
                             if (thatNode.isOnline) MeshtasticIcons.Success else MeshtasticIcons.DeviceSleep,
                             contentDescription = null,
-                            modifier = Modifier.size(14.dp),
+                            modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
                             tint =
                             if (thatNode.isOnline) {
                                 MaterialTheme.colorScheme.tertiary
@@ -308,66 +312,77 @@ private fun CompactCombinedRow(
     showTelemetry: Boolean,
     contentColor: Color,
 ) {
-    val items = mutableListOf<@Composable () -> Unit>()
+    val items =
+        buildList<Pair<String, @Composable () -> Unit>> {
+            // Distance + Bearing
+            if (showLocation && distance != null && !isThisNode) {
+                add("distance" to { DistanceInfo(distance = distance, contentColor = contentColor) })
+            }
 
-    // Distance + Bearing
-    if (showLocation && distance != null && !isThisNode) {
-        items.add { DistanceInfo(distance = distance, contentColor = contentColor) }
-    }
+            // Hops Away (only when hopsAway > 0)
+            if (showHops && thatNode.hopsAway > 0) {
+                add("hops" to { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) })
+            }
 
-    // Hops Away (only when hopsAway > 0)
-    if (showHops && thatNode.hopsAway > 0) {
-        items.add { HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor) }
-    }
+            // Signal (direct only: hopsAway == 0, snr valid, not via MQTT)
+            val hasDirectSignal =
+                thatNode.hopsAway == 0 && thatNode.snr < 100f && !thatNode.viaMqtt && thatNode.rssi < 0
+            if (showSignal && hasDirectSignal) {
+                val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+                add(
+                    "signal" to
+                        {
+                            IconInfo(
+                                icon = vectorResource(quality.icon),
+                                contentDescription = stringResource(quality.nameRes),
+                                contentColor = quality.color.invoke(),
+                                text = stringResource(quality.nameRes),
+                            )
+                        },
+                )
+            }
 
-    // Signal (direct only: hopsAway == 0, snr valid, not via MQTT)
-    val hasDirectSignal = thatNode.hopsAway == 0 && thatNode.snr < 100f && !thatNode.viaMqtt && thatNode.rssi < 0
-    if (showSignal && hasDirectSignal) {
-        val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
-        items.add {
-            IconInfo(
-                icon = vectorResource(quality.icon),
-                contentDescription = stringResource(quality.nameRes),
-                contentColor = quality.color.invoke(),
-                text = stringResource(quality.nameRes),
-            )
-        }
-    }
+            // Channel (only when > 0)
+            if (showChannel && thatNode.channel > 0) {
+                add("channel" to { ChannelInfo(channel = thatNode.channel, contentColor = contentColor) })
+            }
 
-    // Channel (only when > 0)
-    if (showChannel && thatNode.channel > 0) {
-        items.add { ChannelInfo(channel = thatNode.channel, contentColor = contentColor) }
-    }
+            // Device Role with conditional icons (unmessageable, MQTT)
+            if (showRole) {
+                add(
+                    "role" to
+                        {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                RoleInfo(role = thatNode.user.role, contentColor = contentColor)
+                                if (unmessageable) {
+                                    Icon(
+                                        imageVector = MeshtasticIcons.Unmessageable,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                                        tint = contentColor,
+                                    )
+                                }
+                                if (thatNode.viaMqtt) {
+                                    Icon(
+                                        imageVector = MeshtasticIcons.MqttConnected,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
+                                        tint = contentColor,
+                                    )
+                                }
+                            }
+                        },
+                )
+            }
 
-    // Device Role with conditional icons (unmessageable, MQTT)
-    if (showRole) {
-        items.add {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                RoleInfo(role = thatNode.user.role, contentColor = contentColor)
-                if (unmessageable) {
-                    Icon(
-                        imageVector = MeshtasticIcons.Unmessageable,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = contentColor,
-                    )
-                }
-                if (thatNode.viaMqtt) {
-                    Icon(
-                        imageVector = MeshtasticIcons.MqttConnected,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = contentColor,
-                    )
-                }
+            // Telemetry log icons
+            if (showTelemetry && hasTelemetryData(thatNode)) {
+                add("telemetry" to { CompactTelemetryIcons(thatNode = thatNode, contentColor = contentColor) })
             }
         }
-    }
-
-    // Telemetry log icons
-    if (showTelemetry && hasTelemetryData(thatNode)) {
-        items.add { CompactTelemetryIcons(thatNode = thatNode, contentColor = contentColor) }
-    }
 
     if (items.isNotEmpty()) {
         Row(
@@ -375,11 +390,11 @@ private fun CompactCombinedRow(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            items.forEachIndexed { index, item ->
+            items.forEachIndexed { index, (itemKey, content) ->
                 if (index > 0) {
                     VerticalDivider(modifier = Modifier.fillMaxHeight())
                 }
-                item()
+                key(itemKey) { content() }
             }
         }
     }
@@ -392,7 +407,7 @@ private fun CompactTelemetryIcons(thatNode: Node, contentColor: Color) {
             Icon(
                 imageVector = MeshtasticIcons.PinDrop,
                 contentDescription = null,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
                 tint = contentColor,
             )
         }
@@ -400,7 +415,7 @@ private fun CompactTelemetryIcons(thatNode: Node, contentColor: Color) {
             Icon(
                 imageVector = MeshtasticIcons.Temperature,
                 contentDescription = null,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
                 tint = contentColor,
             )
         }
@@ -408,7 +423,7 @@ private fun CompactTelemetryIcons(thatNode: Node, contentColor: Color) {
             Icon(
                 imageVector = MeshtasticIcons.ElectricPower,
                 contentDescription = null,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
                 tint = contentColor,
             )
         }

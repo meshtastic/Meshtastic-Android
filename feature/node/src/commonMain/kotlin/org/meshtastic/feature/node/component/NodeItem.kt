@@ -157,8 +157,9 @@ fun NodeItem(
             }
         }
 
+    val a11yStrings = rememberNodeDescriptionStrings()
     val nodeDescription =
-        remember(thatNode) {
+        remember(thatNode, a11yStrings) {
             buildNodeDescription(
                 name = originalLongName,
                 isOnline = thatNode.isOnline,
@@ -171,6 +172,7 @@ fun NodeItem(
                 snr = thatNode.snr,
                 rssi = thatNode.rssi,
                 viaMqtt = thatNode.viaMqtt,
+                strings = a11yStrings,
             )
         }
 
