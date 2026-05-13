@@ -151,7 +151,7 @@ class LockdownCoordinatorImplTest {
             commandSender = commandSender,
             passphraseStore = passphraseStore,
             radioInterfaceService = radioService,
-            connectionManager = connectionManager,
+            connectionManager = lazy { connectionManager },
         )
 
     private val testDeviceAddress = "AA:BB:CC:DD:EE:FF"

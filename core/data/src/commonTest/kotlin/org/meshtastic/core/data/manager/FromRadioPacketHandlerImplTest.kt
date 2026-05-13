@@ -34,6 +34,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.MyNodeInfo
@@ -42,7 +43,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 
 class FromRadioPacketHandlerImplTest {

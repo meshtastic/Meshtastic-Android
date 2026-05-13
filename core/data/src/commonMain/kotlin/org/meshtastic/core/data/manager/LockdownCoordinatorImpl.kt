@@ -44,7 +44,7 @@ class LockdownCoordinatorImpl(
     private val commandSender: CommandSender,
     private val passphraseStore: LockdownPassphraseStore,
     private val radioInterfaceService: RadioInterfaceService,
-    private val connectionManager: MeshConnectionManager,
+    private val connectionManager: Lazy<MeshConnectionManager>,
 ) : LockdownCoordinator {
     @Volatile private var wasAutoAttempt = false
 
@@ -86,7 +86,7 @@ class LockdownCoordinatorImpl(
         Logger.i { "Lockdown: Lock Now acknowledged — resetting session authorization" }
         serviceRepository.setSessionAuthorized(false)
         resetTransientState()
-        connectionManager.clearRadioConfig()
+        connectionManager.value.clearRadioConfig()
         serviceRepository.setLockdownState(LockdownState.LockNowAcknowledged)
     }
 
@@ -141,7 +141,7 @@ class LockdownCoordinatorImpl(
         )
         serviceRepository.setLockdownState(LockdownState.Unlocked)
         serviceRepository.setSessionAuthorized(true)
-        connectionManager.startConfigOnly()
+        connectionManager.value.startConfigOnly()
     }
 
     @Suppress("TooGenericExceptionCaught")
