@@ -44,20 +44,19 @@ data class CoTMessage(
     val remarks: String? = null,
     val rawDetailXml: String? = null,
     /**
-     * Inner XML content of `<detail>...</detail>` captured by [CoTXmlParser] when this message
-     * was parsed from an incoming ATAK client event. Used as the `raw_detail` fallback payload
-     * when converting to [org.meshtastic.proto.TAKPacketV2] for CoT types that don't fit any
-     * structured payload (PLI / GeoChat / Aircraft). Null for messages constructed in-app.
+     * Inner XML content of `<detail>...</detail>` captured by [CoTXmlParser] when this message was parsed from an
+     * incoming ATAK client event. Used as the `raw_detail` fallback payload when converting to
+     * [org.meshtastic.proto.TAKPacketV2] for CoT types that don't fit any structured payload (PLI / GeoChat /
+     * Aircraft). Null for messages constructed in-app.
      *
-     * Distinct from [rawDetailXml], which is an output-only passthrough used by [toXml] to
-     * append extension content during serialization.
+     * Distinct from [rawDetailXml], which is an output-only passthrough used by [toXml] to append extension content
+     * during serialization.
      */
     val parsedDetailXml: String? = null,
     /**
-     * The entire original `<event>...</event>` XML string as received from the ATAK client,
-     * captured by [CoTXmlParser]. Kept solely for diagnostic logging (e.g. when a packet
-     * exceeds the mesh MTU and is dropped) so the operator can see what the client actually
-     * sent. Null for messages constructed in-app.
+     * The entire original `<event>...</event>` XML string as received from the ATAK client, captured by [CoTXmlParser].
+     * Kept solely for diagnostic logging (e.g. when a packet exceeds the mesh MTU and is dropped) so the operator can
+     * see what the client actually sent. Null for messages constructed in-app.
      */
     val sourceEventXml: String? = null,
 ) {

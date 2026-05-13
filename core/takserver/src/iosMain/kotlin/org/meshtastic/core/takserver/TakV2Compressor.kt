@@ -5,8 +5,15 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.takserver
 
 import org.meshtastic.core.takserver.TAKPacketV2Conversion.toCoTMessage
@@ -14,6 +21,7 @@ import org.meshtastic.proto.TAKPacketV2
 
 /**
  * iOS stub for TakV2Compressor.
+ *
  * TODO: Replace with Swift SDK integration via interop.
  */
 internal actual object TakV2Compressor {
@@ -37,7 +45,7 @@ internal actual object TakV2Compressor {
         val packet = decompress(wirePayload)
         return packet.toCoTMessage()?.toXml()
             ?: throw UnsupportedOperationException(
-                "iOS stub: TAKPacketV2 could not be converted to CoT XML for packet: $packet"
+                "iOS stub: TAKPacketV2 could not be converted to CoT XML for packet: $packet",
             )
     }
 
@@ -50,7 +58,7 @@ internal actual object TakV2Compressor {
         // iOS stub: only support uncompressed (0xFF) payloads
         if (flagsByte != DICT_ID_UNCOMPRESSED) {
             throw UnsupportedOperationException(
-                "iOS zstd decompression not yet implemented. Received dict ID: ${flagsByte and 0x3F}"
+                "iOS zstd decompression not yet implemented. Received dict ID: ${flagsByte and 0x3F}",
             )
         }
 

@@ -19,7 +19,7 @@ package org.meshtastic.core.takserver
 /**
  * Platform-specific loader for TAK test fixture XML files bundled in test resources.
  *
- * On JVM/Android the resources are loaded via the classloader. On iOS the test runner is
- * not supported and this throws [UnsupportedOperationException].
+ * On JVM/Android the resources are loaded via the classloader. On iOS the test runner is not supported and this throws
+ * [UnsupportedOperationException].
  */
 internal expect fun loadTakFixtureXml(name: String): String

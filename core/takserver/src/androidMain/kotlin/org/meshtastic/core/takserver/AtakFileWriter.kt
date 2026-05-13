@@ -20,8 +20,8 @@ import co.touchlab.kermit.Logger
 import java.io.File
 
 /**
- * Android implementation — writes route data packages to ATAK's monitored
- * auto-import directory. Tries multiple locations in order of preference:
+ * Android implementation — writes route data packages to ATAK's monitored auto-import directory. Tries multiple
+ * locations in order of preference:
  * 1. `/sdcard/atak/tools/datapackage/` (ATAK monitors this)
  * 2. `/sdcard/Download/` (user can manually import from here)
  */
@@ -29,17 +29,16 @@ import java.io.File
 internal actual object AtakFileWriter {
 
     actual fun writeToImportDir(fileName: String, zipBytes: ByteArray): Boolean {
+        // Sanitize: fileName originates from untrusted mesh CoT uid attributes.
+        val safeName = fileName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
         // Use hardcoded paths — on Android /sdcard/ maps to external storage.
         // On JVM desktop these paths don't exist and the fallback returns false.
-        val targets = listOf(
-            File("/sdcard/atak/tools/datapackage"),
-            File("/sdcard/Download"),
-        )
+        val targets = listOf(File("/sdcard/atak/tools/datapackage"), File("/sdcard/Download"))
 
         for (dir in targets) {
             try {
                 if (!dir.exists()) dir.mkdirs()
-                val target = File(dir, fileName)
+                val target = File(dir, safeName)
                 target.writeBytes(zipBytes)
                 Logger.i { "Route data package written: $fileName (${zipBytes.size} bytes) → ${target.absolutePath}" }
                 return true

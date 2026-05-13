@@ -109,18 +109,11 @@ class TAKDefaultsTest {
     // ── keepalive / idle timeout constants ─────────────────────────────────────
 
     @Test
-    fun `keepalive stale window is wider than keepalive interval`() {
-        val staleMs = TAK_KEEPALIVE_INTERVAL_MS * TAK_KEEPALIVE_STALE_MULTIPLIER
+    fun `keepalive interval is below ATAK stale threshold`() {
+        // ATAK's default stale threshold is 15 seconds; our keepalive must be below that.
         assertTrue(
-            staleMs > TAK_KEEPALIVE_INTERVAL_MS,
-            "Stale window ($staleMs ms) must exceed keepalive interval ($TAK_KEEPALIVE_INTERVAL_MS ms)",
+            TAK_KEEPALIVE_INTERVAL_MS < 15_000L,
+            "Keepalive interval ($TAK_KEEPALIVE_INTERVAL_MS ms) must be below ATAK's 15s stale threshold",
         )
-    }
-
-    @Test
-    fun `idle timeout exceeds keepalive stale window`() {
-        val idleTimeoutMs = TAK_KEEPALIVE_INTERVAL_MS * TAK_READ_IDLE_TIMEOUT_MULTIPLIER
-        val staleMs = TAK_KEEPALIVE_INTERVAL_MS * TAK_KEEPALIVE_STALE_MULTIPLIER
-        assertTrue(idleTimeoutMs > staleMs, "Idle timeout ($idleTimeoutMs ms) must exceed stale window ($staleMs ms)")
     }
 }

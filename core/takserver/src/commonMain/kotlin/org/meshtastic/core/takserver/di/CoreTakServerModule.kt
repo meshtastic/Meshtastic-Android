@@ -22,7 +22,6 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
-
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServer
@@ -32,7 +31,8 @@ import org.meshtastic.core.takserver.createTAKServer
 
 @Module
 class CoreTakServerModule {
-    @Single fun provideTAKServer(dispatchers: CoroutineDispatchers): TAKServer = createTAKServer(dispatchers = dispatchers)
+    @Single
+    fun provideTAKServer(dispatchers: CoroutineDispatchers): TAKServer = createTAKServer(dispatchers = dispatchers)
 
     @Single fun provideTAKServerManager(takServer: TAKServer): TAKServerManager = TAKServerManagerImpl(takServer)
 
@@ -43,11 +43,6 @@ class CoreTakServerModule {
         serviceRepository: ServiceRepository,
         meshConfigHandler: MeshConfigHandler,
         nodeRepository: NodeRepository,
-    ): TAKMeshIntegration = TAKMeshIntegration(
-        takServerManager,
-        commandSender,
-        serviceRepository,
-        meshConfigHandler,
-        nodeRepository,
-    )
+    ): TAKMeshIntegration =
+        TAKMeshIntegration(takServerManager, commandSender, serviceRepository, meshConfigHandler, nodeRepository)
 }

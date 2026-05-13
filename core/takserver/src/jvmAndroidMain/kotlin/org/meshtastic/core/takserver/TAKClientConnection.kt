@@ -44,17 +44,17 @@ import kotlinx.coroutines.isActive as coroutineIsActive
 /**
  * Per-client state machine for a connected TAK client (ATAK / iTAK / WinTAK).
  *
- * This is the jvmAndroidMain implementation, using plain `java.net.Socket` (which is also
- * the base class of [javax.net.ssl.SSLSocket] from [TAKServerJvm]) with blocking
- * `InputStream`/`OutputStream` I/O wrapped in [Dispatchers.IO] coroutines.
+ * This is the jvmAndroidMain implementation, using plain `java.net.Socket` (which is also the base class of
+ * [javax.net.ssl.SSLSocket] from [TAKServerJvm]) with blocking `InputStream`/`OutputStream` I/O wrapped in
+ * [Dispatchers.IO] coroutines.
  *
  * Responsibilities:
- *  - TAK protocol negotiation handshake (`t-x-takp-v` / `-q` / `-r`)
- *  - Read loop that frames `<event>` elements off the stream via [CoTXmlFrameBuffer]
- *  - Keepalive loop that emits a `t-x-d-d` event every [TAK_KEEPALIVE_INTERVAL_MS]
- *  - Serializing writes under a mutex so interleaved broadcasts never corrupt the XML stream
- *  - Lifecycle reporting up to [TAKServerJvm] via [onEvent] (`Connected`, `Disconnected`,
- *    `Error`, `ClientInfoUpdated`, `Message`)
+ * - TAK protocol negotiation handshake (`t-x-takp-v` / `-q` / `-r`)
+ * - Read loop that frames `<event>` elements off the stream via [CoTXmlFrameBuffer]
+ * - Keepalive loop that emits a `t-x-d-d` event every [TAK_KEEPALIVE_INTERVAL_MS]
+ * - Serializing writes under a mutex so interleaved broadcasts never corrupt the XML stream
+ * - Lifecycle reporting up to [TAKServerJvm] via [onEvent] (`Connected`, `Disconnected`, `Error`, `ClientInfoUpdated`,
+ *   `Message`)
  */
 internal class TAKClientConnection(
     private val socket: Socket,
@@ -67,6 +67,7 @@ internal class TAKClientConnection(
     private val frameBuffer = CoTXmlFrameBuffer()
 
     private val inputStream: InputStream = socket.getInputStream()
+
     // Wrap the OutputStream in a BufferedOutputStream so that multiple small writes
     // (we emit a full XML event per write) coalesce into one syscall; flush() after
     // each event to push the bytes through TLS immediately.
@@ -74,23 +75,20 @@ internal class TAKClientConnection(
     private val writeMutex = Mutex()
 
     /**
-     * Per-connection child scope. Every coroutine this class launches — the read loop,
-     * the keepalive loop, and every single send — is attached to [connectionScope] so
-     * that [emitDisconnected] can tear the whole connection down with one
-     * `connectionScope.cancel()`.
+     * Per-connection child scope. Every coroutine this class launches — the read loop, the keepalive loop, and every
+     * single send — is attached to [connectionScope] so that [emitDisconnected] can tear the whole connection down with
+     * one `connectionScope.cancel()`.
      *
-     * Why this is critical: [broadcast] in [TAKServerJvm] fires `connection.send()` on
-     * **every** connected client for **every** CoT event coming off the mesh (and with
-     * a 56-node nodeDB each `nodeDBbyNum` emission fans out to ~56 broadcasts). If
-     * [sendXml] launched those writes on the server-level [scope] — as the previous
-     * implementation did — a single dead connection could accumulate hundreds of
-     * in-flight write coroutines before it was removed from [TAKServerJvm.connections],
-     * and every one of them would spin up, hit the closed TLS socket, and log
-     * `SocketException: Socket closed` from `BufferedOutputStream.flush()`. Scoping
-     * writes to [connectionScope] means cancelling the scope wipes the entire backlog.
+     * Why this is critical: [broadcast] in [TAKServerJvm] fires `connection.send()` on **every** connected client for
+     * **every** CoT event coming off the mesh (and with a 56-node nodeDB each `nodeDBbyNum` emission fans out to ~56
+     * broadcasts). If [sendXml] launched those writes on the server-level [scope] — as the previous implementation did
+     * — a single dead connection could accumulate hundreds of in-flight write coroutines before it was removed from
+     * [TAKServerJvm.connections], and every one of them would spin up, hit the closed TLS socket, and log
+     * `SocketException: Socket closed` from `BufferedOutputStream.flush()`. Scoping writes to [connectionScope] means
+     * cancelling the scope wipes the entire backlog.
      *
-     * Uses a [SupervisorJob] child of [scope]'s job so a single write failure doesn't
-     * cascade-cancel other connections on the same server.
+     * Uses a [SupervisorJob] child of [scope]'s job so a single write failure doesn't cascade-cancel other connections
+     * on the same server.
      */
     private val connectionScope: CoroutineScope =
         CoroutineScope(SupervisorJob(scope.coroutineContext[Job]) + ioDispatcher)
@@ -99,8 +97,8 @@ internal class TAKClientConnection(
     private val disconnectedEmitted = AtomicBoolean(false)
 
     /**
-     * Fail-fast flag checked at the top of [sendXml] so racing broadcasts against a
-     * dead connection don't even allocate a coroutine.
+     * Fail-fast flag checked at the top of [sendXml] so racing broadcasts against a dead connection don't even allocate
+     * a coroutine.
      */
     @Volatile private var closed = false
 
@@ -192,28 +190,31 @@ internal class TAKClientConnection(
         val parser = CoTXmlParser(xmlString)
         val result = parser.parse()
 
-        result.onSuccess { cotMessage ->
-            when {
-                cotMessage.type.startsWith("t-x-takp") -> {
-                    handleProtocolControl(cotMessage.type, xmlString)
-                    return
-                }
-                else -> {
-                    cotMessage.contact?.let { contact ->
-                        val updatedClientInfo =
-                            currentClientInfo.copy(
-                                callsign = currentClientInfo.callsign ?: contact.callsign,
-                                uid = currentClientInfo.uid ?: cotMessage.uid,
-                            )
-                        if (updatedClientInfo != currentClientInfo) {
-                            currentClientInfo = updatedClientInfo
-                            onEvent(TAKConnectionEvent.ClientInfoUpdated(updatedClientInfo))
-                        }
+        result
+            .onSuccess { cotMessage ->
+                when {
+                    cotMessage.type.startsWith("t-x-takp") -> {
+                        handleProtocolControl(cotMessage.type, xmlString)
+                        return
                     }
-                    onEvent(TAKConnectionEvent.Message(cotMessage, currentClientInfo))
+
+                    else -> {
+                        cotMessage.contact?.let { contact ->
+                            val updatedClientInfo =
+                                currentClientInfo.copy(
+                                    callsign = currentClientInfo.callsign ?: contact.callsign,
+                                    uid = currentClientInfo.uid ?: cotMessage.uid,
+                                )
+                            if (updatedClientInfo != currentClientInfo) {
+                                currentClientInfo = updatedClientInfo
+                                onEvent(TAKConnectionEvent.ClientInfoUpdated(updatedClientInfo))
+                            }
+                        }
+                        onEvent(TAKConnectionEvent.Message(cotMessage, currentClientInfo))
+                    }
                 }
             }
-        }
+            .onFailure { e -> Logger.w(e) { "Failed to parse CoT XML from TAK client ${currentClientInfo.id}" } }
     }
 
     private fun handleProtocolControl(type: String, xmlString: String) {
@@ -258,8 +259,10 @@ internal class TAKClientConnection(
             "</event>"
     }
 
-    /** Send raw XML directly to this client. Used for mesh-originated messages
-     *  that bypass CoTMessage parsing to preserve shape detail elements. */
+    /**
+     * Send raw XML directly to this client. Used for mesh-originated messages that bypass CoTMessage parsing to
+     * preserve shape detail elements.
+     */
     fun sendRawXml(xml: String) {
         // Logger.d { "RAW CoT OUT (TCP ${currentClientInfo.id}): [raw] $xml" }
         sendXmlInternal(xml)
@@ -304,18 +307,15 @@ internal class TAKClientConnection(
      * Emits [event] (expected to be [TAKConnectionEvent.Disconnected] or [TAKConnectionEvent.Error]) at most once
      * across all code paths, then tears down the per-connection coroutines and socket.
      *
-     * This is the ONLY place the connection's entire coroutine scope — keepalive loop,
-     * read loop, and any in-flight send coroutines — gets cancelled when the *remote*
-     * peer closes the TLS stream. Without this, Java's [Socket.isClosed] only reports
-     * whether *our* side called close(), so the keepalive loop's `!socket.isClosed`
-     * guard never fires, the broadcast fanout keeps launching writes onto the dead
-     * socket via [sendXml], and every iteration logs `SSLOutputStream / Socket closed`.
-     * Before [closed] + [connectionScope.cancel] were added, a single session with a
-     * few reconnects accumulated hundreds of zombie write coroutines each spamming
-     * errors in parallel.
+     * This is the ONLY place the connection's entire coroutine scope — keepalive loop, read loop, and any in-flight
+     * send coroutines — gets cancelled when the *remote* peer closes the TLS stream. Without this, Java's
+     * [Socket.isClosed] only reports whether *our* side called close(), so the keepalive loop's `!socket.isClosed`
+     * guard never fires, the broadcast fanout keeps launching writes onto the dead socket via [sendXml], and every
+     * iteration logs `SSLOutputStream / Socket closed`. Before [closed] + [connectionScope.cancel] were added, a single
+     * session with a few reconnects accumulated hundreds of zombie write coroutines each spamming errors in parallel.
      *
-     * Idempotent via [AtomicBoolean.compareAndSet], so racing calls from [readLoop],
-     * [keepaliveLoop], and [sendXml] all converge on a single teardown.
+     * Idempotent via [AtomicBoolean.compareAndSet], so racing calls from [readLoop], [keepaliveLoop], and [sendXml] all
+     * converge on a single teardown.
      */
     private fun emitDisconnected(event: TAKConnectionEvent) {
         if (disconnectedEmitted.compareAndSet(false, true)) {
@@ -328,7 +328,9 @@ internal class TAKClientConnection(
             // in-flight sendXml coroutine. Any write blocked in the syscall will throw
             // on the next iteration because we close the socket next.
             connectionScope.cancel()
-            try { socket.close() } catch (_: Exception) { }
+            try {
+                socket.close()
+            } catch (_: Exception) {}
         }
     }
 }

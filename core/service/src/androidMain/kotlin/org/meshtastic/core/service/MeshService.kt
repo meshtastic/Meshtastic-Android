@@ -93,12 +93,10 @@ class MeshService : Service() {
     private var isServiceInitialized = false
 
     /**
-     * Partial wake lock held while the foreground service is running. Prevents the CPU
-     * from being throttled while the TAK server's keepalive coroutines, socket writes,
-     * and mesh packet handlers need to run on a regular cadence. Without this, OEM
-     * battery optimizations can pause coroutines for long enough that connected TAK
-     * clients (ATAK/iTAK) time out waiting for data, even though the foreground
-     * service itself keeps the process alive.
+     * Partial wake lock held while the foreground service is running. Prevents the CPU from being throttled while the
+     * TAK server's keepalive coroutines, socket writes, and mesh packet handlers need to run on a regular cadence.
+     * Without this, OEM battery optimizations can pause coroutines for long enough that connected TAK clients
+     * (ATAK/iTAK) time out waiting for data, even though the foreground service itself keeps the process alive.
      */
     private var wakeLock: PowerManager.WakeLock? = null
 
@@ -121,6 +119,8 @@ class MeshService : Service() {
 
         val minDeviceVersion = DeviceVersion(DeviceVersion.MIN_FW_VERSION)
         val absoluteMinDeviceVersion = DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)
+
+        private const val WAKE_LOCK_TIMEOUT_MS = 30L * 60L * 1_000L // 30 minutes
     }
 
     override fun onCreate() {
@@ -222,13 +222,11 @@ class MeshService : Service() {
         if (wakeLock?.isHeld == true) return
         try {
             val powerManager = getSystemService(POWER_SERVICE) as PowerManager
-            val lock = powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK,
-                "Meshtastic::MeshServiceWakeLock",
-            ).apply {
-                setReferenceCounted(false)
-            }
-            lock.acquire()
+            val lock =
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Meshtastic::MeshServiceWakeLock").apply {
+                    setReferenceCounted(false)
+                }
+            lock.acquire(WAKE_LOCK_TIMEOUT_MS)
             wakeLock = lock
             Logger.i { "Acquired partial wake lock for mesh service" }
         } catch (e: SecurityException) {

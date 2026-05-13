@@ -18,7 +18,8 @@ package org.meshtastic.core.takserver
 
 /** JVM/Android: load fixture XML from bundled test resources via the classloader. */
 internal actual fun loadTakFixtureXml(name: String): String {
-    val stream = object {}::class.java.classLoader?.getResourceAsStream("tak_test_fixtures/$name")
-        ?: throw IllegalStateException("Fixture not found: tak_test_fixtures/$name")
+    val stream =
+        object {}::class.java.classLoader?.getResourceAsStream("tak_test_fixtures/$name")
+            ?: throw IllegalStateException("Fixture not found: tak_test_fixtures/$name")
     return stream.bufferedReader().readText()
 }

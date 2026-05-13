@@ -5,8 +5,16 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("CyclomaticComplexMethod", "ReturnCount")
+@file:Suppress("CyclomaticComplexMethod", "ReturnCount", "LongMethod", "MagicNumber")
 
 package org.meshtastic.core.takserver
 
@@ -24,9 +32,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * Conversion between CoTMessage and TAKPacketV2 (v2 wire protocol).
- */
+/** Conversion between CoTMessage and TAKPacketV2 (v2 wire protocol). */
 object TAKPacketV2Conversion {
 
     fun CoTMessage.toTAKPacketV2(): TAKPacketV2? {
@@ -34,9 +40,12 @@ object TAKPacketV2Conversion {
         val cotTypeStr = if (cotTypeEnum == CotType.CotType_Other) type else ""
         val howEnum = TakV2TypeMapper.cotHowFromString(how)
 
-        val teamEnum = group?.let { Team.fromValue(TakConversionHelpers.getTeamValue(it.name)) } ?: Team.Unspecifed_Color
+        val teamEnum =
+            group?.let { Team.fromValue(TakConversionHelpers.getTeamValue(it.name)) } ?: Team.Unspecifed_Color
 
-        val roleEnum = group?.let { MemberRole.fromValue(TakConversionHelpers.getMemberRoleValue(it.role)) } ?: MemberRole.Unspecifed
+        val roleEnum =
+            group?.let { MemberRole.fromValue(TakConversionHelpers.getMemberRoleValue(it.role)) }
+                ?: MemberRole.Unspecifed
 
         val battery = status?.battery?.coerceAtLeast(0) ?: 0
 
@@ -82,21 +91,21 @@ object TAKPacketV2Conversion {
             val localChat = chat ?: return null
             // ATAK GeoChat events often omit <contact callsign="..."/> — the
             // sender identity is only in <__chat senderCallsign="..."/>.
-            val callsign = contact?.callsign
-                ?: localChat.senderCallsign
-                ?: "UNKNOWN"
+            val callsign = contact?.callsign ?: localChat.senderCallsign ?: "UNKNOWN"
             val actualDeviceUid = uid.geoChatSenderUid()
-            val messageId = if (uid.startsWith("GeoChat.")) {
-                uid.geoChatMessageId()
-            } else {
-                Random.nextInt().toString(TAK_HEX_RADIX)
-            }
+            val messageId =
+                if (uid.startsWith("GeoChat.")) {
+                    uid.geoChatMessageId()
+                } else {
+                    Random.nextInt().toString(TAK_HEX_RADIX)
+                }
 
-            val smuggledCallsign = if (actualDeviceUid.isNotEmpty()) {
-                "$actualDeviceUid|$messageId"
-            } else {
-                contact?.endpoint ?: ""
-            }
+            val smuggledCallsign =
+                if (actualDeviceUid.isNotEmpty()) {
+                    "$actualDeviceUid|$messageId"
+                } else {
+                    contact?.endpoint ?: ""
+                }
 
             var toUid: String? = null
             var toCallsign: String? = null
@@ -120,7 +129,8 @@ object TAKPacketV2Conversion {
                 team = teamEnum,
                 role = roleEnum,
                 battery = battery,
-                chat = GeoChat(
+                chat =
+                GeoChat(
                     message = localChat.message,
                     to = toUid ?: if (toCallsign == null) "All Chat Rooms" else null,
                     to_callsign = toCallsign,
@@ -166,9 +176,8 @@ object TAKPacketV2Conversion {
             // Restore the original CoT type and how from the packet — pli() defaults to
             // DEFAULT_PLI_COT_TYPE/"m-g" but the sending node may have been hostile (a-h-*),
             // neutral (a-n-*), unknown (a-u-*), etc.
-            val resolvedType = cot_type_str.ifEmpty {
-                TakV2TypeMapper.cotTypeToString(cot_type_id) ?: DEFAULT_PLI_COT_TYPE
-            }
+            val resolvedType =
+                cot_type_str.ifEmpty { TakV2TypeMapper.cotTypeToString(cot_type_id) ?: DEFAULT_PLI_COT_TYPE }
             val resolvedHow = TakV2TypeMapper.cotHowToString(how) ?: "m-g"
             return CoTMessage.pli(
                 uid = senderUid.ifEmpty { uid },
@@ -182,7 +191,8 @@ object TAKPacketV2Conversion {
                 role = TakConversionHelpers.roleToName(role),
                 battery = battery,
                 staleMinutes = staleMinutes,
-            ).copy(type = resolvedType, how = resolvedHow)
+            )
+                .copy(type = resolvedType, how = resolvedHow)
         }
 
         // GeoChat
@@ -195,11 +205,13 @@ object TAKPacketV2Conversion {
             val chatroom = localChat.to ?: "All Chat Rooms"
 
             val msgId = messageId ?: Random.nextInt().toString(TAK_HEX_RADIX)
-            val staleTime = timeNow + if (stale_seconds > 0) {
-                stale_seconds.seconds
-            } else {
-                DEFAULT_TAK_STALE_MINUTES.minutes
-            }
+            val staleTime =
+                timeNow +
+                    if (stale_seconds > 0) {
+                        stale_seconds.seconds
+                    } else {
+                        DEFAULT_TAK_STALE_MINUTES.minutes
+                    }
 
             return CoTMessage(
                 uid = "GeoChat.$senderUid.$chatroom.$msgId",
@@ -211,13 +223,13 @@ object TAKPacketV2Conversion {
                 latitude = latitude_i.toDouble() / TAK_COORDINATE_SCALE,
                 longitude = longitude_i.toDouble() / TAK_COORDINATE_SCALE,
                 contact = CoTContact(callsign = senderCallsign, endpoint = DEFAULT_TAK_ENDPOINT),
-                group = CoTGroup(name = TakConversionHelpers.teamToColorName(team), role = TakConversionHelpers.roleToName(role)),
-                status = CoTStatus(battery = battery),
-                chat = CoTChat(
-                    chatroom = chatroom,
-                    senderCallsign = senderCallsign,
-                    message = localChat.message,
+                group =
+                CoTGroup(
+                    name = TakConversionHelpers.teamToColorName(team),
+                    role = TakConversionHelpers.roleToName(role),
                 ),
+                status = CoTStatus(battery = battery),
+                chat = CoTChat(chatroom = chatroom, senderCallsign = senderCallsign, message = localChat.message),
             )
         }
 
@@ -228,15 +240,16 @@ object TAKPacketV2Conversion {
         val rawDetail = raw_detail
         if (rawDetail != null) {
             val rawXml = rawDetail.utf8()
-            val resolvedType = cot_type_str.ifEmpty {
-                TakV2TypeMapper.cotTypeToString(cot_type_id) ?: DEFAULT_PLI_COT_TYPE
-            }
+            val resolvedType =
+                cot_type_str.ifEmpty { TakV2TypeMapper.cotTypeToString(cot_type_id) ?: DEFAULT_PLI_COT_TYPE }
             val resolvedHow = TakV2TypeMapper.cotHowToString(how) ?: "m-g"
-            val staleTime = timeNow + if (stale_seconds > 0) {
-                stale_seconds.seconds
-            } else {
-                DEFAULT_TAK_STALE_MINUTES.minutes
-            }
+            val staleTime =
+                timeNow +
+                    if (stale_seconds > 0) {
+                        stale_seconds.seconds
+                    } else {
+                        DEFAULT_TAK_STALE_MINUTES.minutes
+                    }
             return CoTMessage(
                 uid = uid.ifEmpty { senderUid.ifEmpty { "tak-raw" } },
                 type = resolvedType,

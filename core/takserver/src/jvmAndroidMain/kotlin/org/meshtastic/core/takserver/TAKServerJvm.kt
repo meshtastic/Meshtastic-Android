@@ -34,32 +34,29 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.util.concurrent.locks.ReentrantLock
 import javax.net.ssl.SSLServerSocket
-import kotlin.concurrent.withLock
 import kotlin.concurrent.Volatile
+import kotlin.concurrent.withLock
 import kotlin.random.Random
 import kotlinx.coroutines.isActive as coroutineIsActive
 
 /**
  * JSSE-backed TLS TAK server. Matches the Meshtastic-Apple (iOS) implementation:
+ * - Binds `127.0.0.1:8089` (loopback only — no remote device can reach the server)
+ * - TLS 1.2+ with the bundled server.p12 identity
+ * - Mutual TLS: clients MUST present a certificate chaining to the bundled ca.pem
+ * - `SO_REUSEADDR` on the listen socket so an app restart doesn't hit `BindException: Address already in use` while the
+ *   previous socket is in `TIME_WAIT`
+ * - Per-connection [TAKClientConnection] running on [CoroutineDispatchers.io]
  *
- *  - Binds `127.0.0.1:8089` (loopback only — no remote device can reach the server)
- *  - TLS 1.2+ with the bundled server.p12 identity
- *  - Mutual TLS: clients MUST present a certificate chaining to the bundled ca.pem
- *  - `SO_REUSEADDR` on the listen socket so an app restart doesn't hit
- *    `BindException: Address already in use` while the previous socket is in
- *    `TIME_WAIT`
- *  - Per-connection [TAKClientConnection] running on [CoroutineDispatchers.io]
- *
- * If the bundled certificates fail to load (e.g. packaging regression), the server
- * refuses to start rather than silently falling back to plain TCP — that failure mode
- * would produce exactly the symptom the user was debugging ("ATAK never connects").
+ * If the bundled certificates fail to load (e.g. packaging regression), the server refuses to start rather than
+ * silently falling back to plain TCP — that failure mode would produce exactly the symptom the user was debugging
+ * ("ATAK never connects").
  */
-internal class TAKServerJvm(
-    private val dispatchers: CoroutineDispatchers,
-    private val port: Int = DEFAULT_TAK_PORT,
-) : TAKServer {
+internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, private val port: Int = DEFAULT_TAK_PORT) :
+    TAKServer {
 
     private var serverSocket: ServerSocket? = null
+
     @Volatile private var running = false
     private var serverScope: CoroutineScope? = null
     private var acceptJob: Job? = null
@@ -78,26 +75,28 @@ internal class TAKServerJvm(
             return Result.success(Unit)
         }
 
-        val sslContext = TakCertLoader.getServerSslContext()
-            ?: return Result.failure(
-                IllegalStateException(
-                    "TAK Server: bundled TLS certificates could not be loaded; refusing to start",
+        val sslContext =
+            TakCertLoader.getServerSslContext()
+                ?: return Result.failure(
+                    IllegalStateException(
+                        "TAK Server: bundled TLS certificates could not be loaded" + "; refusing to start",
+                    ),
                 )
-            )
 
         return try {
             serverScope = scope
 
             // Bind on the IO dispatcher — bind() can briefly block.
-            val boundSocket = withContext(dispatchers.io) {
-                val factory = sslContext.serverSocketFactory
-                // Use the address-specific overload so we bind to loopback only.
-                val loopback = InetAddress.getByName("127.0.0.1")
-                // backlog of 4 is plenty for local TAK clients
-                val tls = factory.createServerSocket(port, 4, loopback) as SSLServerSocket
-                configureTlsServerSocket(tls)
-                tls
-            }
+            val boundSocket =
+                withContext(dispatchers.io) {
+                    val factory = sslContext.serverSocketFactory
+                    // Use the address-specific overload so we bind to loopback only.
+                    val loopback = InetAddress.getByName("127.0.0.1")
+                    // backlog of 4 is plenty for local TAK clients
+                    val tls = factory.createServerSocket(port, 4, loopback) as SSLServerSocket
+                    configureTlsServerSocket(tls)
+                    tls
+                }
             serverSocket = boundSocket
             running = true
             Logger.i { "TAK Server listening on 127.0.0.1:$port (TLS, mTLS enforced)" }
@@ -107,7 +106,9 @@ internal class TAKServerJvm(
         } catch (e: Exception) {
             Logger.e(e) { "Failed to bind TAK Server to 127.0.0.1:$port" }
             running = false
-            try { serverSocket?.close() } catch (_: Exception) { }
+            try {
+                serverSocket?.close()
+            } catch (_: Exception) {}
             serverSocket = null
             Result.failure(e)
         }
@@ -130,9 +131,7 @@ internal class TAKServerJvm(
         val scope = serverScope ?: return
         while (running && scope.coroutineIsActive) {
             try {
-                val clientSocket = withContext(dispatchers.io) {
-                    serverSocket?.accept()
-                }
+                val clientSocket = withContext(dispatchers.io) { serverSocket?.accept() }
                 if (clientSocket != null) {
                     handleConnection(clientSocket)
                 }
@@ -154,7 +153,9 @@ internal class TAKServerJvm(
 
         if (clientSocket.inetAddress?.isLoopbackAddress != true) {
             Logger.w { "TAK server rejected non-loopback connection from $endpoint" }
-            try { clientSocket.close() } catch (_: Exception) { }
+            try {
+                clientSocket.close()
+            } catch (_: Exception) {}
             return
         }
 
@@ -187,6 +188,7 @@ internal class TAKServerJvm(
             is TAKConnectionEvent.Message -> {
                 onMessage?.invoke(event.cotMessage, event.clientInfo)
             }
+
             is TAKConnectionEvent.Disconnected -> {
                 Logger.i { "TAK client disconnected: id=$connectionId" }
                 serverScope?.launch(dispatchers.io) {
@@ -197,6 +199,7 @@ internal class TAKServerJvm(
                     }
                 }
             }
+
             is TAKConnectionEvent.Error -> {
                 Logger.w(event.error) { "TAK client connection error: $connectionId" }
                 serverScope?.launch(dispatchers.io) {
@@ -207,9 +210,11 @@ internal class TAKServerJvm(
                     }
                 }
             }
+
             is TAKConnectionEvent.Connected -> {
                 onClientConnected?.invoke()
             }
+
             is TAKConnectionEvent.ClientInfoUpdated -> {
                 /* no-op: TAKClientConnection tracks updated info locally */
             }
@@ -223,15 +228,18 @@ internal class TAKServerJvm(
 
         // Guard the snapshot+clear with the same lock used by the coroutine accept/disconnect
         // paths to avoid concurrent modification or a stale connectionCount during shutdown.
-        val toClose = connectionsLock.withLock {
-            val snapshot = connections.values.toList()
-            connections.clear()
-            _connectionCount.value = 0
-            snapshot
-        }
+        val toClose =
+            connectionsLock.withLock {
+                val snapshot = connections.values.toList()
+                connections.clear()
+                _connectionCount.value = 0
+                snapshot
+            }
         toClose.forEach { it.close() }
 
-        try { serverSocket?.close() } catch (_: Exception) { }
+        try {
+            serverSocket?.close()
+        } catch (_: Exception) {}
         serverSocket = null
         serverScope = null
         Logger.i { "TAK Server stopped" }
@@ -268,18 +276,15 @@ internal class TAKServerJvm(
         }
     }
 
-    override suspend fun hasConnections(): Boolean =
-        connectionsLock.withLock { connections.isNotEmpty() }
+    override suspend fun hasConnections(): Boolean = connectionsLock.withLock { connections.isNotEmpty() }
 }
 
 /**
- * `actual` factory for the KMP `expect fun createTAKServer` declared in `commonMain`.
- * Both the Desktop JVM target and the Android target share this source set, so both
- * run the same JSSE-based TLS listener.
+ * `actual` factory for the KMP `expect fun createTAKServer` declared in `commonMain`. Both the Desktop JVM target and
+ * the Android target share this source set, so both run the same JSSE-based TLS listener.
  *
- * Also wires [TAKDataPackageGenerator]'s bundled-cert provider so that the exported
- * `.zip` data package contains the real `server.p12` / `client.p12` bytes from the
- * classpath rather than an empty fallback.
+ * Also wires [TAKDataPackageGenerator]'s bundled-cert provider so that the exported `.zip` data package contains the
+ * real `server.p12` / `client.p12` bytes from the classpath rather than an empty fallback.
  */
 actual fun createTAKServer(dispatchers: CoroutineDispatchers, port: Int): TAKServer {
     TAKDataPackageGenerator.bundledCertBytesProvider = TakCertBundledBytesProvider
@@ -289,5 +294,6 @@ actual fun createTAKServer(dispatchers: CoroutineDispatchers, port: Int): TAKSer
 /** Bridges [TakCertLoader] bytes into [TAKDataPackageGenerator] via the commonMain interface. */
 private object TakCertBundledBytesProvider : BundledCertBytesProvider {
     override fun serverP12Bytes(): ByteArray? = TakCertLoader.getServerP12Bytes()
+
     override fun clientP12Bytes(): ByteArray? = TakCertLoader.getClientP12Bytes()
 }

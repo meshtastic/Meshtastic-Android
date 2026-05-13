@@ -5,8 +5,15 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.takserver
 
 import org.meshtastic.proto.TAKPacketV2
@@ -14,9 +21,8 @@ import org.meshtastic.proto.TAKPacketV2
 /**
  * TAKPacket V2 wire format compressor/decompressor.
  *
- * Wire format: [1 byte flags][zstd-compressed TAKPacketV2 protobuf]
- * Flags byte bits 0-5 = dictionary ID, bits 6-7 = reserved.
- * Special value 0xFF = uncompressed raw protobuf (from TAK_TRACKER firmware).
+ * Wire format: [1 byte flags][zstd-compressed TAKPacketV2 protobuf] Flags byte bits 0-5 = dictionary ID, bits 6-7 =
+ * reserved. Special value 0xFF = uncompressed raw protobuf (from TAK_TRACKER firmware).
  *
  * Platform-specific implementations use zstd with pre-trained dictionaries.
  */
@@ -35,22 +41,22 @@ internal expect object TakV2Compressor {
     val DICT_ID_UNCOMPRESSED: Int
 
     /**
-     * Compress a TAKPacketV2 into wire payload: [flags byte][zstd compressed protobuf].
-     * Selects dictionary based on the CoT type classification.
+     * Compress a TAKPacketV2 into wire payload: [flags byte][zstd compressed protobuf]. Selects dictionary based on the
+     * CoT type classification.
      */
     fun compress(packet: TAKPacketV2): ByteArray
 
     /**
-     * Decompress a wire payload back to TAKPacketV2.
-     * Handles both compressed (dict-based) and uncompressed (0xFF) payloads.
+     * Decompress a wire payload back to TAKPacketV2. Handles both compressed (dict-based) and uncompressed (0xFF)
+     * payloads.
+     *
      * @throws IllegalArgumentException if payload is malformed or exceeds size limits.
      */
     fun decompress(wirePayload: ByteArray): TAKPacketV2
 
     /**
-     * Decompress a wire payload and reconstruct CoT XML via the SDK's CotXmlBuilder.
-     * Handles ALL payload types (DrawnShape, Marker, Route, etc.) without going
-     * through the Wire proto intermediate.
+     * Decompress a wire payload and reconstruct CoT XML via the SDK's CotXmlBuilder. Handles ALL payload types
+     * (DrawnShape, Marker, Route, etc.) without going through the Wire proto intermediate.
      */
     fun decompressToXml(wirePayload: ByteArray): String
 }

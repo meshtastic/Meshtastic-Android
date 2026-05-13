@@ -21,13 +21,12 @@ package org.meshtastic.core.takserver
 import kotlin.time.Instant
 
 /**
- * Serialize this [CoTMessage] to a single `<event>` XML element suitable for the CoT streaming
- * TCP protocol used by ATAK / iTAK / WinTAK clients.
+ * Serialize this [CoTMessage] to a single `<event>` XML element suitable for the CoT streaming TCP protocol used by
+ * ATAK / iTAK / WinTAK clients.
  *
- * **Important:** the output must NOT include an `<?xml ... ?>` declaration. The CoT stream
- * protocol is a continuous sequence of `<event>` elements concatenated together; an XML
- * declaration is only legal at the very start of a document and ATAK will drop the connection
- * as malformed the moment it sees a second declaration mid-stream.
+ * **Important:** the output must NOT include an `<?xml ... ?>` declaration. The CoT stream protocol is a continuous
+ * sequence of `<event>` elements concatenated together; an XML declaration is only legal at the very start of a
+ * document and ATAK will drop the connection as malformed the moment it sees a second declaration mid-stream.
  */
 fun CoTMessage.toXml(): String {
     val sb = StringBuilder()
@@ -75,10 +74,9 @@ fun CoTMessage.toXml(): String {
 /**
  * Format this [Instant] for CoT XML `time` / `start` / `stale` attributes.
  *
- * Always emits millisecond precision (`YYYY-MM-DDThh:mm:ss.SSSZ`). kotlinx-datetime's default
- * [Instant.toString] can emit up to nanosecond precision; some TAK implementations choke on
- * anything beyond milliseconds, so we truncate to ms and always include the millisecond field
- * even when it would otherwise be zero.
+ * Always emits millisecond precision (`YYYY-MM-DDThh:mm:ss.SSSZ`). kotlinx-datetime's default [Instant.toString] can
+ * emit up to nanosecond precision; some TAK implementations choke on anything beyond milliseconds, so we truncate to ms
+ * and always include the millisecond field even when it would otherwise be zero.
  */
 private fun Instant.toXmlString(): String {
     val millis = this.toEpochMilliseconds()

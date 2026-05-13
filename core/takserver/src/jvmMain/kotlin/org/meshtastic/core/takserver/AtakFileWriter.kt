@@ -17,9 +17,8 @@
 package org.meshtastic.core.takserver
 
 /**
- * Desktop JVM no-op — writing data packages to ATAK's monitored directory is
- * Android-only behaviour. On desktop, data packages are shared via the export
- * launcher (file chooser) instead.
+ * Desktop JVM no-op — writing data packages to ATAK's monitored directory is Android-only behaviour. On desktop, data
+ * packages are shared via the export launcher (file chooser) instead.
  */
 internal actual object AtakFileWriter {
     actual fun writeToImportDir(fileName: String, zipBytes: ByteArray): Boolean = false

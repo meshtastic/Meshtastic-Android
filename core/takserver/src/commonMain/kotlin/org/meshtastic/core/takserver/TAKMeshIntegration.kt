@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("ReturnCount", "TooGenericExceptionCaught")
+@file:Suppress("ReturnCount", "TooGenericExceptionCaught", "LongMethod")
 
 package org.meshtastic.core.takserver
 
@@ -24,7 +24,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-
 import kotlinx.coroutines.launch
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Capabilities
@@ -32,7 +31,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
-
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.takserver.TAKPacketConversion.toTAKPacket
 import org.meshtastic.core.takserver.TAKPacketV2Conversion.toTAKPacketV2
@@ -42,6 +40,8 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.TAKPacket
 import org.meshtastic.proto.Team
 import kotlin.concurrent.Volatile
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
@@ -49,90 +49,91 @@ import kotlin.time.Duration.Companion.minutes
 /**
  * Bidirectional bridge between the local TAK server and the Meshtastic mesh network.
  *
- * Outbound traffic (TAK client -> mesh) is version-gated on the connected radio's
- * firmware version, exposed via [Capabilities.supportsTakV2]:
+ * Outbound traffic (TAK client -> mesh) is version-gated on the connected radio's firmware version, exposed via
+ * [Capabilities.supportsTakV2]:
+ * - Firmware **>= 2.8.0**: TAKPacketV2 on port 78 (ATAK_PLUGIN_V2) with zstd dictionary compression via TAKPacket-SDK.
+ *   Supports all CoT payload types (PLI, GeoChat, DrawnShape, Marker, Route, Aircraft, Casevac, Emergency, Task) with
+ *   compact typed encodings that fit under the 237B LoRa MTU.
+ * - Firmware **<= 2.7.x**: Legacy [TAKPacket] on port 72 (ATAK_PLUGIN) with bare protobuf encoding. Supports only PLI
+ *   and GeoChat — shapes, markers, routes, and other typed CoT events are dropped (with a warning) because the legacy
+ *   schema cannot represent them.
  *
- *  - Firmware **>= 2.8.0**: TAKPacketV2 on port 78 (ATAK_PLUGIN_V2) with zstd
- *    dictionary compression via TAKPacket-SDK. Supports all CoT payload types
- *    (PLI, GeoChat, DrawnShape, Marker, Route, Aircraft, Casevac, Emergency, Task)
- *    with compact typed encodings that fit under the 237B LoRa MTU.
- *
- *  - Firmware **<= 2.7.x**: Legacy [TAKPacket] on port 72 (ATAK_PLUGIN) with bare
- *    protobuf encoding. Supports only PLI and GeoChat — shapes, markers, routes,
- *    and other typed CoT events are dropped (with a warning) because the legacy
- *    schema cannot represent them.
- *
- * Inbound traffic (mesh -> TAK client) is always dual-path tolerant — both port 72
- * and port 78 are dispatched regardless of the local radio's firmware version, so
- * a v2-capable node can still relay legacy v1 packets received from older nodes
- * in mixed-firmware mesh deployments.
+ * Inbound traffic (mesh -> TAK client) is always dual-path tolerant — both port 72 and port 78 are dispatched
+ * regardless of the local radio's firmware version, so a v2-capable node can still relay legacy v1 packets received
+ * from older nodes in mixed-firmware mesh deployments.
  */
+@OptIn(ExperimentalAtomicApi::class)
 class TAKMeshIntegration(
     private val takServerManager: TAKServerManager,
     private val commandSender: CommandSender,
-
     private val serviceRepository: ServiceRepository,
     private val meshConfigHandler: MeshConfigHandler,
     private val nodeRepository: NodeRepository,
 ) {
-    @Volatile private var isRunning = false
+    private val isRunning = AtomicBoolean(false)
+
     // Immutable list reference replaced atomically in start()/stop(); never mutated in-place.
     // @Volatile only guarantees visibility of the reference itself — any in-place mutation
     // would bypass the visibility guarantee and must not be added.
     @Volatile private var jobs: List<Job> = emptyList()
+
     @Volatile private var currentTeam: Team = Team.Unspecifed_Color
+
     @Volatile private var currentRole: MemberRole = MemberRole.Unspecifed
 
     fun start(scope: CoroutineScope) {
-        if (isRunning) return
-        isRunning = true
+        if (!isRunning.compareAndSet(expectedValue = false, newValue = true)) return
 
         takServerManager.start(scope)
 
-        val newJobs = listOf(
-            // Forward incoming CoT from TAK clients to mesh
-            scope.launch {
-                takServerManager.inboundMessages.collect { (cotMessage, clientInfo) ->
-                    // Enrich GeoChat messages with the originating TAK client's
-                    // callsign when the message itself lacks one. This only applies
-                    // to messages FROM the connected TAK client — mesh-originated
-                    // messages flow through handleMeshPacket() instead.
-                    val enriched = if (cotMessage.type == "b-t-f" &&
-                        cotMessage.contact?.callsign.isNullOrEmpty() &&
-                        clientInfo?.callsign != null
-                    ) {
-                        cotMessage.copy(
-                            contact = (cotMessage.contact ?: CoTContact(callsign = ""))
-                                .copy(callsign = clientInfo.callsign)
-                        )
-                    } else {
-                        cotMessage
+        val newJobs =
+            listOf(
+                // Forward incoming CoT from TAK clients to mesh
+                scope.launch {
+                    takServerManager.inboundMessages.collect { (cotMessage, clientInfo) ->
+                        // Enrich GeoChat messages with the originating TAK client's
+                        // callsign when the message itself lacks one. This only applies
+                        // to messages FROM the connected TAK client — mesh-originated
+                        // messages flow through handleMeshPacket() instead.
+                        val enriched =
+                            if (
+                                cotMessage.type == "b-t-f" &&
+                                cotMessage.contact?.callsign.isNullOrEmpty() &&
+                                clientInfo?.callsign != null
+                            ) {
+                                cotMessage.copy(
+                                    contact =
+                                    (cotMessage.contact ?: CoTContact(callsign = "")).copy(
+                                        callsign = clientInfo.callsign,
+                                    ),
+                                )
+                            } else {
+                                cotMessage
+                            }
+                        sendCoTToMesh(enriched)
                     }
-                    sendCoTToMesh(enriched)
-                }
-            },
+                },
 
-            // Forward incoming ATAK packets from mesh to TAK clients
-            scope.launch {
-                serviceRepository.meshPacketFlow
-                    .filter {
-                        it.decoded?.portnum == PortNum.ATAK_PLUGIN_V2 ||
-                            it.decoded?.portnum == PortNum.ATAK_PLUGIN
-                    }
-                    .collect { packet -> handleMeshPacket(packet) }
-            },
+                // Forward incoming ATAK packets from mesh to TAK clients
+                scope.launch {
+                    serviceRepository.meshPacketFlow
+                        .filter {
+                            it.decoded?.portnum == PortNum.ATAK_PLUGIN_V2 || it.decoded?.portnum == PortNum.ATAK_PLUGIN
+                        }
+                        .collect { packet -> handleMeshPacket(packet) }
+                },
 
-            // Track TAK config changes
-            scope.launch {
-                meshConfigHandler.moduleConfig
-                    .map { it.tak }
-                    .distinctUntilChanged()
-                    .collect { takConfig ->
-                        currentTeam = takConfig?.team ?: Team.Unspecifed_Color
-                        currentRole = takConfig?.role ?: MemberRole.Unspecifed
-                    }
-            },
-        )
+                // Track TAK config changes
+                scope.launch {
+                    meshConfigHandler.moduleConfig
+                        .map { it.tak }
+                        .distinctUntilChanged()
+                        .collect { takConfig ->
+                            currentTeam = takConfig?.team ?: Team.Unspecifed_Color
+                            currentRole = takConfig?.role ?: MemberRole.Unspecifed
+                        }
+                },
+            )
 
         jobs = newJobs
         val fw = nodeRepository.myNodeInfo.value?.firmwareVersion
@@ -141,8 +142,7 @@ class TAKMeshIntegration(
     }
 
     fun stop() {
-        if (!isRunning) return
-        isRunning = false
+        if (!isRunning.compareAndSet(expectedValue = true, newValue = false)) return
         val toCancel = jobs
         jobs = emptyList()
         toCancel.forEach(Job::cancel)
@@ -153,12 +153,10 @@ class TAKMeshIntegration(
     // ── Send: TAK client → mesh ─────────────────────────────────────────────
 
     /**
-     * Determine the outbound TAK protocol version based on the connected radio's
-     * firmware version. Evaluated per-send (not cached) so the bridge picks up
-     * firmware upgrades during a session without restart. If the firmware
-     * version is unavailable (radio not yet handshook), default to V2 — the
-     * v2 firmware was released widely enough that defaulting to legacy would
-     * be a regression for the common case.
+     * Determine the outbound TAK protocol version based on the connected radio's firmware version. Evaluated per-send
+     * (not cached) so the bridge picks up firmware upgrades during a session without restart. If the firmware version
+     * is unavailable (radio not yet handshook), default to V2 — the v2 firmware was released widely enough that
+     * defaulting to legacy would be a regression for the common case.
      */
     private fun useTakV2(): Boolean {
         val fw = nodeRepository.myNodeInfo.value?.firmwareVersion ?: return true
@@ -174,10 +172,9 @@ class TAKMeshIntegration(
     }
 
     /**
-     * v2 send path (firmware >= 2.8.0): SDK parser + zstd dictionary compression,
-     * full typed payload support (DrawnShape, Marker, Route, Aircraft, Casevac,
-     * Emergency, Task, plus PLI / GeoChat). Wire format: `[flags byte][zstd-compressed
-     * TAKPacketV2 protobuf]` on port 78 (ATAK_PLUGIN_V2).
+     * v2 send path (firmware >= 2.8.0): SDK parser + zstd dictionary compression, full typed payload support
+     * (DrawnShape, Marker, Route, Aircraft, Casevac, Emergency, Task, plus PLI / GeoChat). Wire format: `[flags
+     * byte][zstd-compressed TAKPacketV2 protobuf]` on port 78 (ATAK_PLUGIN_V2).
      */
     private suspend fun sendCoTToMeshV2(cotMessage: CoTMessage) {
         // Prefer the sourceEventXml for shape/marker/route types — the SDK's
@@ -202,67 +199,82 @@ class TAKMeshIntegration(
         // compressed packet fits under the LoRa MTU, and strips remarks
         // automatically if needed to fit. Returns null if even without
         // remarks the packet exceeds the limit.
-        val wirePayload: ByteArray = try {
-            val sdkParser = org.meshtastic.tak.CotXmlParser()
-            val sdkData = sdkParser.parse(xml)
-            val compressor = org.meshtastic.tak.TakCompressor()
-            compressor.compressWithRemarksFallback(sdkData, MAX_TAK_WIRE_PAYLOAD_BYTES) ?: run {
-                Logger.w {
-                    buildString {
-                        append("Dropping oversized TAK packet: type=${cotMessage.type} max=$MAX_TAK_WIRE_PAYLOAD_BYTES")
-                        cotMessage.sourceEventXml?.let { src ->
-                            append('\n')
-                            append("Source CoT event: ")
-                            append(if (src.length <= TAK_LOG_XML_MAX_CHARS) src else src.take(TAK_LOG_XML_MAX_CHARS) + "…")
-                        }
-                    }
-                }
-                return
-            }
-        } catch (e: Throwable) {
-            Logger.d(e) { "SDK parser/compressor failed for ${cotMessage.type}, trying app conversion" }
-            val takPacketV2 = cotMessage.toTAKPacketV2()
-            if (takPacketV2 == null) {
-                Logger.w { "Cannot convert CoT type ${cotMessage.type} to TAKPacketV2, dropping" }
-                return
-            }
+        val wirePayload: ByteArray =
             try {
-                TakV2Compressor.compress(takPacketV2)
-            } catch (e2: Throwable) {
-                Logger.w(e2) { "V2 compression failed for ${cotMessage.type}, using uncompressed wire format" }
-                encodeUncompressed(takPacketV2)
+                val sdkParser = org.meshtastic.tak.CotXmlParser()
+                val sdkData = sdkParser.parse(xml)
+                val compressor = org.meshtastic.tak.TakCompressor()
+                compressor.compressWithRemarksFallback(sdkData, MAX_TAK_WIRE_PAYLOAD_BYTES)
+                    ?: run {
+                        Logger.w {
+                            buildString {
+                                append(
+                                    "Dropping oversized TAK packet: " +
+                                        "type=${cotMessage.type} max=$MAX_TAK_WIRE_PAYLOAD_BYTES",
+                                )
+                                cotMessage.sourceEventXml?.let { src ->
+                                    append('\n')
+                                    append("Source CoT event: ")
+                                    append(
+                                        if (src.length <= TAK_LOG_XML_MAX_CHARS) {
+                                            src
+                                        } else {
+                                            src.take(TAK_LOG_XML_MAX_CHARS) + "…"
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                        return
+                    }
+            } catch (e: Exception) {
+                Logger.w(e) { "SDK parser/compressor failed for ${cotMessage.type}, trying app conversion" }
+                val takPacketV2 = cotMessage.toTAKPacketV2()
+                if (takPacketV2 == null) {
+                    Logger.w { "Cannot convert CoT type ${cotMessage.type} to TAKPacketV2, dropping" }
+                    return
+                }
+                try {
+                    TakV2Compressor.compress(takPacketV2)
+                } catch (e2: Exception) {
+                    Logger.w(e2) { "V2 compression failed for ${cotMessage.type}, using uncompressed wire format" }
+                    encodeUncompressed(takPacketV2)
+                }
             }
-        }
 
         try {
-            val dataPacket = DataPacket(
-                to = DataPacket.ID_BROADCAST,
-                bytes = wirePayload.toByteString(),
-                dataType = PortNum.ATAK_PLUGIN_V2.value,
-            )
+            val dataPacket =
+                DataPacket(
+                    to = DataPacket.ID_BROADCAST,
+                    bytes = wirePayload.toByteString(),
+                    dataType = PortNum.ATAK_PLUGIN_V2.value,
+                )
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V2 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             // Something other than size — radio not connected, queue full, etc.
-            Logger.e(e) { "Failed to send TAKPacketV2 to mesh (${cotMessage.type}, ${wirePayload.size} bytes): ${e.message}" }
+            Logger.e(e) {
+                "Failed to send TAKPacketV2 to mesh (${cotMessage.type}, ${wirePayload.size} bytes): ${e.message}"
+            }
         }
     }
 
     /**
-     * Legacy v1 send path (firmware <= 2.7.x): bare protobuf-encoded [TAKPacket]
-     * on port 72 (ATAK_PLUGIN), no zstd compression. Only PLI and GeoChat
-     * payloads are supported by the v1 schema — shapes, markers, routes,
-     * casevac, emergency, and task CoT events are dropped with a warning.
+     * Legacy v1 send path (firmware <= 2.7.x): bare protobuf-encoded [TAKPacket] on port 72 (ATAK_PLUGIN), no zstd
+     * compression. Only PLI and GeoChat payloads are supported by the v1 schema — shapes, markers, routes, casevac,
+     * emergency, and task CoT events are dropped with a warning.
      */
     private suspend fun sendCoTToMeshV1(cotMessage: CoTMessage) {
-        val takPacket = cotMessage.toTAKPacket() ?: run {
-            Logger.w {
-                "Dropping CoT for legacy v1 radio: type=${cotMessage.type} not representable " +
-                    "in v1 TAKPacket schema (only PLI and GeoChat are supported). " +
-                    "Upgrade radio firmware to >= 2.8.0 for full payload support."
-            }
-            return
-        }
+        val takPacket =
+            cotMessage.toTAKPacket()
+                ?: run {
+                    Logger.w {
+                        "Dropping CoT for legacy v1 radio: type=${cotMessage.type} not representable " +
+                            "in v1 TAKPacket schema (only PLI and GeoChat are supported). " +
+                            "Upgrade radio firmware to >= 2.8.0 for full payload support."
+                    }
+                    return
+                }
 
         val wirePayload = TAKPacket.ADAPTER.encode(takPacket)
         if (wirePayload.size > MAX_TAK_WIRE_PAYLOAD_BYTES) {
@@ -274,22 +286,24 @@ class TAKMeshIntegration(
         }
 
         try {
-            val dataPacket = DataPacket(
-                to = DataPacket.ID_BROADCAST,
-                bytes = wirePayload.toByteString(),
-                dataType = PortNum.ATAK_PLUGIN.value,
-            )
+            val dataPacket =
+                DataPacket(
+                    to = DataPacket.ID_BROADCAST,
+                    bytes = wirePayload.toByteString(),
+                    dataType = PortNum.ATAK_PLUGIN.value,
+                )
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V1 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
-        } catch (e: Throwable) {
-            Logger.e(e) { "Failed to send v1 TAKPacket to mesh (${cotMessage.type}, ${wirePayload.size} bytes): ${e.message}" }
+        } catch (e: Exception) {
+            Logger.e(e) {
+                "Failed to send v1 TAKPacket to mesh (${cotMessage.type}, ${wirePayload.size} bytes): ${e.message}"
+            }
         }
     }
 
     /**
-     * Wrap a [org.meshtastic.proto.TAKPacketV2] into the uncompressed v2 wire format:
-     * `[0xFF flag byte][raw protobuf]`. Used as a fallback when the zstd native lib
-     * isn't loaded.
+     * Wrap a [org.meshtastic.proto.TAKPacketV2] into the uncompressed v2 wire format: `[0xFF flag byte][raw protobuf]`.
+     * Used as a fallback when the zstd native lib isn't loaded.
      */
     private fun encodeUncompressed(takPacketV2: org.meshtastic.proto.TAKPacketV2): ByteArray {
         val protoBytes = org.meshtastic.proto.TAKPacketV2.ADAPTER.encode(takPacketV2)
@@ -322,10 +336,11 @@ class TAKMeshIntegration(
             // Strip the XML declaration and collapse whitespace — ATAK's TCP
             // streaming parser expects bare <event>...</event> on a single
             // line, not a formatted XML document with <?xml ...?> prologue.
-            val xml = rawXml
-                .replace("""<?xml version="1.0" encoding="UTF-8"?>""", "")
-                .replace(Regex("""\s*\n\s*"""), "")
-                .trim()
+            val xml =
+                rawXml
+                    .replace("""<?xml version="1.0" encoding="UTF-8"?>""", "")
+                    .replace(Regex("""\s*\n\s*"""), "")
+                    .trim()
             // Logger.d { "RAW CoT IN (mesh): $xml" }
             // Routes: ATAK ignores b-m-r CoT events over TCP streaming.
             // Convert to a KML data package and write to ATAK's auto-import dir.
@@ -338,13 +353,13 @@ class TAKMeshIntegration(
                     } else {
                         Logger.w { "Route data package generation failed — not enough waypoints?" }
                     }
-                } catch (e2: Throwable) {
+                } catch (e2: Exception) {
                     Logger.w(e2) { "Route data package write failed: ${e2.message}" }
                 }
             }
             takServerManager.broadcastRawXml(xml)
             Logger.d { "V2 → TAK clients (raw XML)" }
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             Logger.w(e) { "Failed to handle V2 packet: ${e.message}" }
         }
     }
@@ -356,7 +371,7 @@ class TAKMeshIntegration(
             val cotMessage = convertV1ToCoT(takPacket) ?: return
             takServerManager.broadcast(cotMessage)
             Logger.d { "V1 → TAK clients: ${cotMessage.type}" }
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             Logger.w(e) { "Failed to handle V1 packet: ${e.message}" }
         }
     }
@@ -405,11 +420,7 @@ class TAKMeshIntegration(
                 contact = CoTContact(callsign = callsign, endpoint = DEFAULT_TAK_ENDPOINT),
                 group = CoTGroup(name = teamName, role = roleName),
                 status = CoTStatus(battery = battery),
-                chat = CoTChat(
-                    chatroom = chatroom,
-                    senderCallsign = callsign,
-                    message = chat.message,
-                ),
+                chat = CoTChat(chatroom = chatroom, senderCallsign = callsign, message = chat.message),
             )
         }
 
@@ -418,14 +429,14 @@ class TAKMeshIntegration(
 
     companion object {
         /**
-         * Minimum stale TTL (5 min) for static CoT types sent over mesh.
-         * iTAK uses 2-min stale for routes/shapes; over LoRa mesh with
-         * multi-hop relay, these arrive past stale and ATAK discards them.
-         * PLI and GeoChat are left untouched — their stale is meaningful.
+         * Minimum stale TTL (5 min) for static CoT types sent over mesh. iTAK uses 2-min stale for routes/shapes; over
+         * LoRa mesh with multi-hop relay, these arrive past stale and ATAK discards them. PLI and GeoChat are left
+         * untouched — their stale is meaningful.
          */
         private val MIN_MESH_STALE_TTL = 15.minutes
         private val STATIC_COT_PREFIXES = listOf("b-m-r", "u-d-", "b-m-p-")
         private val EVENT_TYPE_RE = Regex("""<event\s[^>]*\btype="([^"]*)"""")
+
         // Matches the stale attribute ONLY within the <event> opening tag to avoid
         // accidentally matching a stale="..." on a <link> or other child element.
         private val EVENT_TAG_RE = Regex("""<event\b[^>]*>""")
@@ -439,15 +450,18 @@ class TAKMeshIntegration(
             val eventTag = eventTagMatch.value
             val staleInTag = STALE_ATTR_RE.find(eventTag) ?: return xml
             val staleStr = staleInTag.groupValues[1]
-            val staleInstant = try {
-                kotlin.time.Instant.parse(staleStr)
-            } catch (_: IllegalArgumentException) {
-                // Handle edge-case formats like missing "Z"
+            val staleInstant =
                 try {
-                    val cleaned = staleStr.replace(Regex("""\.\d+"""), "").replace("Z", "+00:00")
-                    kotlin.time.Instant.parse(cleaned)
-                } catch (_: IllegalArgumentException) { return xml }
-            }
+                    kotlin.time.Instant.parse(staleStr)
+                } catch (_: IllegalArgumentException) {
+                    // Handle edge-case formats like missing "Z"
+                    try {
+                        val cleaned = staleStr.replace(Regex("""\.\d+"""), "").replace("Z", "+00:00")
+                        kotlin.time.Instant.parse(cleaned)
+                    } catch (_: IllegalArgumentException) {
+                        return xml
+                    }
+                }
 
             val now = Clock.System.now()
             val remaining = staleInstant - now
@@ -455,53 +469,60 @@ class TAKMeshIntegration(
 
             val newStale = now + MIN_MESH_STALE_TTL
             val newStaleStr = newStale.toString().replace(Regex("""\.\d+"""), "") // strip fractional seconds
-            Logger.i { "Extended stale for $type: $staleStr → $newStaleStr (was ${remaining.inWholeSeconds}s remaining, now ${MIN_MESH_STALE_TTL.inWholeSeconds}s)" }
+            Logger.i {
+                "Extended stale for $type: $staleStr → $newStaleStr " +
+                    "(was ${remaining.inWholeSeconds}s remaining, now ${MIN_MESH_STALE_TTL.inWholeSeconds}s)"
+            }
             // Replace the stale value only within the event tag, then splice the patched tag back
             val newEventTag = eventTag.replaceRange(staleInTag.range, """stale="$newStaleStr"""")
             return xml.replaceRange(eventTagMatch.range, newEventTag)
         }
 
         /**
-         * Strip non-essential XML elements before mesh compression to save wire bytes.
-         * These elements add 100-200 bytes but aren't needed for rendering shapes,
-         * routes, chats, markers, PLI, or any other payload on the receiving end.
+         * Strip non-essential XML elements before mesh compression to save wire bytes. These elements add 100-200 bytes
+         * but aren't needed for rendering shapes, routes, chats, markers, PLI, or any other payload on the receiving
+         * end.
          */
-        private val STRIP_PATTERNS = listOf(
-            """<takv[^>]*/>""",                              // TAK version (self-closing)
-            """<takv[^>]*>.*?</takv>""",                     // TAK version (paired)
-            """<voice[^>]*/>""",                              // voice chat state
-            """<voice[^>]*>.*?</voice>""",
-            """<marti[^>]*/>""",                              // empty marti
-            """<marti[^>]*>.*?</marti>""",
-            """<__geofence[^>]*/>""",                         // geofence config
-            """<__geofence[^>]*>.*?</__geofence>""",
-            """<tog[^>]*/>""",                                // toggle state
-            """<archive[^>]*/>""",                            // archive marker
-            """<__shapeExtras[^>]*/>""",                      // shape extras
-            """<__shapeExtras[^>]*>.*?</__shapeExtras>""",
-            """<creator[^>]*/>""",                            // creator info
-            """<creator[^>]*>.*?</creator>""",
-            """<remarks[^>]*/>""",                            // empty remarks (self-closing)
-            """<remarks[^>]*></remarks>""",                   // empty remarks (paired)
-            """<strokeStyle[^>]*/>""",                        // stroke style (SDK uses color fields)
-            """<precisionlocation[^>]*/>""",                  // precision location metadata
-            """<precisionlocation[^>]*>.*?</precisionlocation>""",
-            """<precisionLocation[^>]*/>""",                  // iTAK camelCase variant
-            """<precisionLocation[^>]*>.*?</precisionLocation>""",
-        ).map { Regex(it, RegexOption.DOT_MATCHES_ALL) }
+        private val STRIP_PATTERNS =
+            listOf(
+                """<takv[^>]*/>""", // TAK version (self-closing)
+                """<takv[^>]*>.*?</takv>""", // TAK version (paired)
+                """<voice[^>]*/>""", // voice chat state
+                """<voice[^>]*>.*?</voice>""",
+                """<marti[^>]*/>""", // empty marti
+                """<marti[^>]*>.*?</marti>""",
+                """<__geofence[^>]*/>""", // geofence config
+                """<__geofence[^>]*>.*?</__geofence>""",
+                """<tog[^>]*/>""", // toggle state
+                """<archive[^>]*/>""", // archive marker
+                """<__shapeExtras[^>]*/>""", // shape extras
+                """<__shapeExtras[^>]*>.*?</__shapeExtras>""",
+                """<creator[^>]*/>""", // creator info
+                """<creator[^>]*>.*?</creator>""",
+                """<remarks[^>]*/>""", // empty remarks (self-closing)
+                """<remarks[^>]*></remarks>""", // empty remarks (paired)
+                """<strokeStyle[^>]*/>""", // stroke style (SDK uses color fields)
+                """<precisionlocation[^>]*/>""", // precision location metadata
+                """<precisionlocation[^>]*>.*?</precisionlocation>""",
+                """<precisionLocation[^>]*/>""", // iTAK camelCase variant
+                """<precisionLocation[^>]*>.*?</precisionLocation>""",
+            )
+                .map { Regex(it, RegexOption.DOT_MATCHES_ALL) }
 
         // Strip any attribute with value "???" — unknown/placeholder metadata
         private val UNKNOWN_ATTR_PATTERN = Regex("""\s+\w+\s*=\s*"[?]{3}"""")
 
         // Strip specific named attributes that the SDK doesn't use (display-only)
-        private val STRIP_ATTR_PATTERNS = listOf(
-            """\s+routetype\s*=\s*"[^"]*"""",      // route display type (SDK doesn't use)
-            """\s+order\s*=\s*"[^"]*"""",           // checkpoint order label (SDK doesn't use)
-            """\s+color\s*=\s*"[^"]*"""",           // link_attr color (SDK uses strokeColor instead)
-            """\s+access\s*=\s*"[^"]*"""",          // access control (not relevant for mesh)
-            """\s+callsign\s*=\s*""""",             // empty callsign attributes (e.g. checkpoints)
-            """\s+phone\s*=\s*""""",                // empty phone attributes
-        ).map { Regex(it) }
+        private val STRIP_ATTR_PATTERNS =
+            listOf(
+                """\s+routetype\s*=\s*"[^"]*"""", // route display type (SDK doesn't use)
+                """\s+order\s*=\s*"[^"]*"""", // checkpoint order label (SDK doesn't use)
+                """\s+color\s*=\s*"[^"]*"""", // link_attr color (SDK uses strokeColor instead)
+                """\s+access\s*=\s*"[^"]*"""", // access control (not relevant for mesh)
+                """\s+callsign\s*=\s*""""", // empty callsign attributes (e.g. checkpoints)
+                """\s+phone\s*=\s*""""", // empty phone attributes
+            )
+                .map { Regex(it) }
 
         // Route waypoint UID stripping — UIDs are full 36-char UUIDs that cost
         // ~40 bytes each in the proto wire format. The receiving TAK client derives

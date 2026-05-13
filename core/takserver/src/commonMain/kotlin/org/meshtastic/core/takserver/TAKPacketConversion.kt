@@ -34,16 +34,14 @@ import kotlin.time.Duration.Companion.minutes
 /**
  * Legacy v1 CoT <-> TAKPacket conversion for firmware <= 2.7.x.
  *
- * Wire format: bare protobuf-encoded [TAKPacket] on `ATAK_PLUGIN` port 72,
- * no zstd compression (the proto has an `is_compressed` flag but the firmware
- * doesn't act on it). Supports only PLI and GeoChat payloads — shape, marker,
+ * Wire format: bare protobuf-encoded [TAKPacket] on `ATAK_PLUGIN` port 72, no zstd compression (the proto has an
+ * `is_compressed` flag but the firmware doesn't act on it). Supports only PLI and GeoChat payloads — shape, marker,
  * route, casevac, emergency, and task CoT events return null and are dropped.
  *
- * For the SDK-backed path that handles all payload types with zstd dictionary
- * compression on `ATAK_PLUGIN_V2` port 78, see [TAKPacketV2Conversion].
+ * For the SDK-backed path that handles all payload types with zstd dictionary compression on `ATAK_PLUGIN_V2` port 78,
+ * see [TAKPacketV2Conversion].
  *
- * [TAKMeshIntegration] picks between the two paths based on
- * `Capabilities.supportsTakV2` (firmware >= 2.8.0).
+ * [TAKMeshIntegration] picks between the two paths based on `Capabilities.supportsTakV2` (firmware >= 2.8.0).
  */
 object TAKPacketConversion {
 
@@ -51,8 +49,8 @@ object TAKPacketConversion {
         val group =
             this.group?.let {
                 Group(
-                    role = MemberRole.fromValue(TakConversionHelpers.getMemberRoleValue(it.role))
-                        ?: MemberRole.Unspecifed,
+                    role =
+                    MemberRole.fromValue(TakConversionHelpers.getMemberRoleValue(it.role)) ?: MemberRole.Unspecifed,
                     team = Team.fromValue(TakConversionHelpers.getTeamValue(it.name)) ?: Team.Unspecifed_Color,
                 )
             }
@@ -175,7 +173,11 @@ object TAKPacketConversion {
                 latitude = 0.0,
                 longitude = 0.0,
                 contact = CoTContact(callsign = senderCallsign, endpoint = DEFAULT_TAK_ENDPOINT),
-                group = CoTGroup(name = TakConversionHelpers.teamToColorName(group?.team), role = TakConversionHelpers.roleToName(group?.role)),
+                group =
+                CoTGroup(
+                    name = TakConversionHelpers.teamToColorName(group?.team),
+                    role = TakConversionHelpers.roleToName(group?.role),
+                ),
                 status = CoTStatus(battery = status?.battery ?: DEFAULT_TAK_BATTERY),
                 chat = CoTChat(chatroom = chatroom, senderCallsign = senderCallsign, message = localChat.message),
             )

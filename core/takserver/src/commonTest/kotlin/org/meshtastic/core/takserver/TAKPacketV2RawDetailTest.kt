@@ -40,7 +40,8 @@ class TAKPacketV2RawDetailTest {
         // stripped by [CoTDetailStripper] before being placed in raw_detail, because
         // they blow up the wire size beyond the LoRa MTU. We keep `<contact>` here so
         // we have something non-trivial to verify round-tripped.
-        val shapeXml = """
+        val shapeXml =
+            """
             <event version="2.0" uid="circle-abc" type="u-d-c-c" time="2025-01-01T12:00:00.000Z" start="2025-01-01T12:00:00.000Z" stale="2025-01-01T13:00:00.000Z" how="h-e">
                 <point lat="45.5" lon="-90.25" hae="0" ce="10.0" le="10.0"/>
                 <detail>
@@ -52,7 +53,8 @@ class TAKPacketV2RawDetailTest {
                     <labels_on value="false"/>
                 </detail>
             </event>
-        """.trimIndent()
+            """
+                .trimIndent()
 
         // Parse → convert to TAKPacketV2
         val cotMessage = CoTXmlParser(shapeXml).parse().getOrNull()
@@ -91,7 +93,8 @@ class TAKPacketV2RawDetailTest {
     fun raw_detail_path_emits_only_the_raw_bytes_inside_detail_no_duplicate_structured_elements() {
         // If toCoTMessage populated contact/group/status on the raw_detail path, toXml would
         // double-emit them alongside the rawDetailXml content. Guard against that regression.
-        val xml = """
+        val xml =
+            """
             <event version="2.0" uid="marker-1" type="b-m-p-s-p-i" time="2025-01-01T12:00:00.000Z" start="2025-01-01T12:00:00.000Z" stale="2025-01-01T13:00:00.000Z" how="h-e">
                 <point lat="10.0" lon="20.0" hae="0" ce="0" le="0"/>
                 <detail>
@@ -100,7 +103,8 @@ class TAKPacketV2RawDetailTest {
                     <color argb="-65536"/>
                 </detail>
             </event>
-        """.trimIndent()
+            """
+                .trimIndent()
 
         val cotMessage = CoTXmlParser(xml).parse().getOrNull()!!
         val takPacketV2 = cotMessage.toTAKPacketV2()!!
@@ -117,16 +121,17 @@ class TAKPacketV2RawDetailTest {
     }
 
     @Test
-    fun CoTMessage_without_parsed_detail_returns_null() {
+    fun cotMessageWithoutParsedDetailReturnsNull() {
         // CoTMessage created in-app (no XML round trip) for an unmapped type has no parsed
         // detail to fall back on — conversion should return null.
-        val cot = CoTMessage(
-            uid = "manual-1",
-            type = "u-d-c-c",
-            stale = kotlin.time.Clock.System.now() + kotlin.time.Duration.parse("1h"),
-            latitude = 0.0,
-            longitude = 0.0,
-        )
+        val cot =
+            CoTMessage(
+                uid = "manual-1",
+                type = "u-d-c-c",
+                stale = kotlin.time.Clock.System.now() + kotlin.time.Duration.parse("1h"),
+                latitude = 0.0,
+                longitude = 0.0,
+            )
         assertNull(cot.toTAKPacketV2(), "no parsed detail → no raw_detail fallback possible")
     }
 }

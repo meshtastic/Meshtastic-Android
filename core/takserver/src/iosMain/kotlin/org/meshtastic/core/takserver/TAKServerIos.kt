@@ -23,13 +23,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.di.CoroutineDispatchers
 
 /**
- * iOS KMP stub. The real iOS TAK server lives in Meshtastic-Apple
- * (`Meshtastic/Helpers/TAK/TAKServerManager.swift`) and uses Apple's
- * `Network.framework` / `NWListener` + mTLS directly, not this KMP module.
+ * iOS KMP stub. The real iOS TAK server lives in Meshtastic-Apple (`Meshtastic/Helpers/TAK/TAKServerManager.swift`) and
+ * uses Apple's `Network.framework` / `NWListener` + mTLS directly, not this KMP module.
  *
- * We provide a no-op implementation here so that the shared `core:takserver`
- * module still compiles for the iOS KMP targets. Any iOS-side consumer of this
- * module would never actually call into this path — iOS bypasses the KMP
+ * We provide a no-op implementation here so that the shared `core:takserver` module still compiles for the iOS KMP
+ * targets. Any iOS-side consumer of this module would never actually call into this path — iOS bypasses the KMP
  * `TAKServer` interface entirely.
  */
 private class NoopTAKServer : TAKServer {
@@ -39,9 +37,13 @@ private class NoopTAKServer : TAKServer {
     override var onClientConnected: (() -> Unit)? = null
 
     override suspend fun start(scope: CoroutineScope): Result<Unit> = Result.success(Unit)
+
     override fun stop() = Unit
+
     override suspend fun broadcast(cotMessage: CoTMessage) = Unit
+
     override suspend fun broadcastRawXml(xml: String) = Unit
+
     override suspend fun hasConnections(): Boolean = false
 }
 

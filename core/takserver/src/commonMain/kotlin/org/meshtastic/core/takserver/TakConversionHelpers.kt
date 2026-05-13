@@ -20,11 +20,10 @@ import org.meshtastic.proto.MemberRole
 import org.meshtastic.proto.Team
 
 /**
- * Internal helpers shared by [TAKPacketConversion] (legacy v1, firmware <= 2.7.x)
- * and [TAKPacketV2Conversion] (firmware >= 2.8.x). Both paths map between the
- * SDK's [CoTMessage] model and Meshtastic's Wire-generated proto types using
- * identical logic for color/role lookup and the "<senderUid>|<messageId>"
- * smuggled-callsign format that survives the wire round trip.
+ * Internal helpers shared by [TAKPacketConversion] (legacy v1, firmware <= 2.7.x) and [TAKPacketV2Conversion]
+ * (firmware >= 2.8.x). Both paths map between the SDK's [CoTMessage] model and Meshtastic's Wire-generated proto types
+ * using identical logic for color/role lookup and the "<senderUid>|<messageId>" smuggled-callsign format that survives
+ * the wire round trip.
  */
 internal object TakConversionHelpers {
 
@@ -51,8 +50,7 @@ internal object TakConversionHelpers {
     }
 
     /** Reverse lookup from CoT color-name string to [Team] proto enum value (0 = Unspecified). */
-    fun getTeamValue(name: String): Int =
-        Team.entries.find { it.name.equals(name, ignoreCase = true) }?.value ?: 0
+    fun getTeamValue(name: String): Int = Team.entries.find { it.name.equals(name, ignoreCase = true) }?.value ?: 0
 
     /** Reverse lookup from CoT role-name string to [MemberRole] proto enum value (0 = Unspecified). */
     fun getMemberRoleValue(roleName: String): Int =

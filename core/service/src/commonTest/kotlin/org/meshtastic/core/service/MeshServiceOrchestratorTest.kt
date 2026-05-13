@@ -42,7 +42,6 @@ import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository

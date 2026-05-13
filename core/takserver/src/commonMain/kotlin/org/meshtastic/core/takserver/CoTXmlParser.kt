@@ -14,8 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("ReturnCount")
+
 package org.meshtastic.core.takserver
 
+import co.touchlab.kermit.Logger
 import nl.adaptivity.xmlutil.serialization.XML
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -70,10 +73,9 @@ class CoTXmlParser(private val xml: String) {
     }
 
     /**
-     * Extract the exact content between `<detail>` and `</detail>` from the original XML
-     * string. Used as the `raw_detail` fallback payload when we can't map the CoT type to
-     * a structured [org.meshtastic.proto.TAKPacketV2] payload. Preserves any extension
-     * elements the xmlutil parser discarded as "unknown children".
+     * Extract the exact content between `<detail>` and `</detail>` from the original XML string. Used as the
+     * `raw_detail` fallback payload when we can't map the CoT type to a structured [org.meshtastic.proto.TAKPacketV2]
+     * payload. Preserves any extension elements the xmlutil parser discarded as "unknown children".
      *
      * Returns null for self-closed `<detail/>` or when no detail element is present.
      */
@@ -136,7 +138,8 @@ class CoTXmlParser(private val xml: String) {
                 val cleaned = dateString.replace(Regex("""\.\d+"""), "").replace("Z", "+00:00")
                 Instant.parse(cleaned)
             } catch (ignoredInner: IllegalArgumentException) {
-                Clock.System.now() // Return now as fallback
+                Logger.w { "Unparseable CoT date '$dateString', falling back to now()" }
+                Clock.System.now()
             }
         }
     }
