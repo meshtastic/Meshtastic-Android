@@ -32,6 +32,8 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.model.service.LockdownTokenInfo
+import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -118,7 +120,15 @@ open class RadioConfigViewModel(
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase,
     private val locationService: LocationService,
     private val fileService: FileService,
+    private val lockdownCoordinator: LockdownCoordinator,
 ) : ViewModel() {
+
+    val lockdownTokenInfo: kotlinx.coroutines.flow.StateFlow<LockdownTokenInfo?> = serviceRepository.lockdownTokenInfo
+
+    fun sendLockNow() {
+        lockdownCoordinator.lockNow()
+    }
+
     var analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {

@@ -204,4 +204,12 @@ class AndroidRadioControllerImpl(
             }
         context.startForegroundService(intent)
     }
+
+    override suspend fun sendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int) {
+        serviceRepository.meshService?.sendLockdownUnlock(passphrase, bootTtl, hourTtl)
+    }
+
+    override suspend fun sendLockNow() {
+        serviceRepository.meshService?.sendLockNow()
+    }
 }
