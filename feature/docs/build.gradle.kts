@@ -95,22 +95,17 @@ val syncDocsToComposeResources by
 
 // Wire sync task to run before any resource generation
 tasks
-    .matching { it.name.contains("generateComposeResClass") || it.name.contains("copyNonXmlValueResources") }
+    .matching {
+        it.name.contains("generateComposeResClass") ||
+            it.name.contains("copyNonXmlValueResources") ||
+            it.name.contains("convertXmlValueResources")
+    }
     .configureEach { dependsOn(syncDocsToComposeResources) }
 
 // FR-038: Ensure screenshots are generated before syncing docs resources
 syncDocsToComposeResources.configure { dependsOn(":screenshot-tests:copyDocsScreenshots") }
 
-/**
- * Sync Crowdin-translated docs into locale-qualified composeResources directories.
- *
- * Crowdin outputs translations to `docs/{locale}/user/*.md`. CMP resolves locale-qualified resources from
- * `files-{locale}/` directories automatically (same system as `values-es/strings.xml`).
- *
- * Locale code mapping: Crowdin `es` → CMP `files-es`, Crowdin `pt-BR` → CMP `files-pt-rBR`.
- *
- * Usage: ./gradlew :feature:docs:syncTranslatedDocsToComposeResources
- */
+
 val syncTranslatedDocsToComposeResources by
     tasks.registering(Copy::class) {
         description = "Syncs Crowdin-translated docs into locale-qualified composeResources"
@@ -147,6 +142,10 @@ val syncTranslatedDocsToComposeResources by
 
 // Wire translated docs sync to resource generation alongside the primary sync
 tasks
-    .matching { it.name.contains("generateComposeResClass") || it.name.contains("copyNonXmlValueResources") }
+    .matching {
+        it.name.contains("generateComposeResClass") ||
+            it.name.contains("copyNonXmlValueResources") ||
+            it.name.contains("convertXmlValueResources")
+    }
     .configureEach { dependsOn(syncTranslatedDocsToComposeResources) }
 
