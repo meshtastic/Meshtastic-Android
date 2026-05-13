@@ -147,6 +147,10 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **FR-035**: Chirpy branding MUST use a shared SVG or vector drawable sourced from the Meshtastic design system and bundled as a scalable asset that renders crisply across Android, Desktop, and iOS.
 - **FR-036**: Connection-state icon captures and inline docs illustrations MUST use `MeshtasticIcons` equivalents and Material 3 semantic colors so they remain legible in both light and dark themes without relying on ad-hoc color inversion.
 - **FR-037**: Lock and security icon captures using `MeshtasticIcons.Lock`, `MeshtasticIcons.LockOpen`, `MeshtasticIcons.KeyOff`, or their final equivalents MUST preserve portrait aspect ratio at the shared 44dp reference height and MUST avoid canvas squashing in generated docs assets.
+- **FR-039**: A sync script and GitHub Actions workflow MUST exist to export Android in-app docs into the `meshtastic/meshtastic` Docusaurus site under `docs/software/android/`. The script MUST handle relative link resolution (sibling `.md` links, image paths) and produce Docusaurus-compatible frontmatter. The workflow MUST open a PR in `meshtastic/meshtastic` rather than pushing directly, matching the pattern established by Apple's `sync-apple-docs.yml`.
+- **FR-040**: The docs site sync pipeline SHOULD convert screenshot PNGs to WebP format before publishing to the Docusaurus site. A `--convert-webp` flag or equivalent MUST be supported. Original PNGs remain canonical in-repo; WebP is a site-publishing optimization only.
+- **FR-041**: A `docs/user/translate.md` page MUST explain how contributors can translate the Android app via Crowdin. The page MUST link to the Crowdin project, describe which resource files are translatable (composeResources strings, user guide markdown), and provide step-by-step contribution instructions. This is a contributor guide, not a runtime translation feature.
+- **FR-042**: A `docs/developer/measurement.md` page MUST document the `MetricFormatter` API, locale-aware unit conversion patterns, and how to add new measurement types. This provides developer-facing guidance complementing the user-facing `units-and-locale.md`.
 - **FR-038**: The Compose Multiplatform markdown renderer (`multiplatform-markdown-renderer-m3`) used by `DocsPageRouteScreen` on non-WebView targets MUST be configured with a custom `ImageTransformer` that resolves relative image paths (e.g., `assets/screenshots/*.png`) to bundled Compose resource URIs via `Res.getUri()` and loads them asynchronously using Coil 3 (`rememberAsyncImagePainter`). The default `NoOpImageTransformerImpl` MUST NOT be used for docs rendering. The `syncDocsToComposeResources` task MUST include screenshot assets alongside markdown files so that images are available at runtime. The `copyDocsScreenshots` task from `screenshot-tests/` MUST be wired as a dependency of `syncDocsToComposeResources` to ensure generated screenshots are available before resource bundling.
 
 ### Key Entities
@@ -175,6 +179,9 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **SC-012**: Icon/state screenshot coverage exists for connection state, security/lock state, node status, and at least one docs-browser rendering case.
 - **SC-013**: The Chirpy assistant appears as a chat interface with a bundled vector asset and preserves per-session message history while the browser is open.
 - **SC-014**: Connection and security icon assets remain legible in light and dark modes and preserve expected aspect ratio in generated docs output.
+- **SC-015**: Android docs are published on meshtastic.org under `docs/software/android/` and stay current via automated sync workflow.
+- **SC-016**: A "Translate the App" page exists in the User Guide and links to the Crowdin project with step-by-step contribution instructions.
+- **SC-017**: A developer measurement/locale page exists documenting `MetricFormatter` internals and locale-aware patterns.
 
 ## Clarifications
 
@@ -219,9 +226,24 @@ Gap analysis against `meshtastic-apple` identified these alignment items for And
 **Skipped (platform-specific to Apple):**
 - `docs/user/watch.md` — watchOS-only
 - `docs/user/carplay.md` — iOS CarPlay only
-- `docs/user/translate.md` — iOS Translate framework only
 - `docs/developer/carplay.md` — iOS CarPlay architecture only
 - `docs/developer/swiftdata.md` — Android has `persistence.md` (Room KMP)
 - `docs/developer/deep-links.md` — Android has `navigation-and-deep-links.md`
-- `docs/developer/measurement.md` — covered by `units-and-locale.md` user page
 - TipKit contextual tips — iOS TipKit has no direct KMP equivalent; contextual help is deferred
+
+**Corrected (previously skipped, now implemented or planned):**
+- `docs/user/translate.md` — Previously marked "iOS Translate framework only" but is actually a **Crowdin contribution guide** applicable to all platforms. Android equivalent planned as FR-041.
+- `docs/developer/measurement.md` — Previously marked "covered by user page" but Apple version provides developer-facing API guidance. Android equivalent planned as FR-042.
+
+### Session 2026-05-13
+
+Gap analysis against PR [meshtastic/meshtastic#2393](https://github.com/meshtastic/meshtastic/pull/2393) (Apple docs sync to Docusaurus) and `meshtastic-apple` `specs/003-app-docs-markdown/` identified these additional alignment items:
+
+**Planned (Phase 10):**
+1. **Docusaurus sync script + workflow** — Apple has `sync-apple-docs.js` + `sync-apple-docs.yml` syncing in-app docs to meshtastic.org under `docs/software/apple/`. Android needs an equivalent `sync-android-docs.js` publishing to `docs/software/android/` (FR-039).
+2. **WebP image optimization** — Apple converts PNGs to WebP for the docs site via `--convert-webp` flag. Android should add the same optimization (FR-040).
+3. **Translate the App page** — `docs/user/translate.md` contributor guide for Crowdin (FR-041).
+4. **Developer measurement page** — `docs/developer/measurement.md` for MetricFormatter API docs (FR-042).
+
+**Confirmed non-goals:**
+- `docs/user/watch.md`, `docs/user/carplay.md`, `docs/developer/carplay.md` — remain Apple-only.

@@ -232,3 +232,33 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 
 **Checkpoint**: Feature parity with Apple docs: per-page icons in TOC, two new user guide pages, and docs staleness CI check.
 
+---
+
+## Phase 10: Docusaurus Sync & Content Gaps (meshtastic.org Parity)
+
+**Purpose**: Close gaps identified by comparing with Apple's `sync-apple-docs.js` workflow (PR [meshtastic/meshtastic#2393](https://github.com/meshtastic/meshtastic/pull/2393)) and Apple in-app doc content. Ensures Android docs are published on meshtastic.org alongside Apple docs and addresses missing content pages.
+
+**Depends on**: Phases 1–9 (all content and CI must be in place before sync).
+
+### Content
+
+- [ ] T210 [P] [US1] [FR-041] Create `docs/user/translate.md` — "Translate the App" contributor guide explaining how to submit translations via Crowdin. Cover: link to Crowdin project, which files are translatable (composeResources `strings.xml`, `docs/user/*.md`), step-by-step workflow, and how to add a new locale. Add frontmatter with `nav_order: 17`. Add Crowdin string resources for title and keywords.
+- [ ] T211 [P] [US4] [FR-042] Create `docs/developer/measurement.md` — developer guide for the `MetricFormatter` API and locale-aware unit conversion. Cover: supported measurement types (temperature, distance, speed, wind, rainfall), how locale detection works, how to add a new measurement type, and testing patterns. Reference `core/common/src/commonMain/kotlin/org/meshtastic/core/common/util/` formatters.
+- [ ] T212 [P] [US2] Update `DocBundleLoader.kt` static index with new pages (`translate`, `measurement`), `iconId` mappings, and `KeywordIndexEntry` entries. Update nav ordering for existing pages to accommodate the two new entries.
+
+### Docusaurus Sync Script
+
+- [ ] T220 [P] [US5] [FR-039] Create `scripts/sync-android-docs.js` — Node.js script that reads `docs/user/*.md` and `docs/developer/*.md`, transforms them for Docusaurus compatibility (rewrite frontmatter to Docusaurus format, fix sibling `.md` links, rewrite image paths to `static/img/android/`), and writes output to a staging directory. Model after Apple's `scripts/sync-apple-docs.js` structure.
+- [ ] T221 [P] [US5] [FR-040] Add `--convert-webp` flag to `sync-android-docs.js` that converts PNG/JPG screenshots to WebP via `cwebp` and rewrites image references in markdown. Original PNGs remain canonical in-repo.
+- [ ] T222 [P] [US5] [FR-039] Create `.github/workflows/sync-android-docs.yml` — workflow triggered on push to `main` when `docs/**` files change. Steps: checkout, install Node.js and `webp`, run `sync-android-docs.js --convert-webp`, copy images to `static/img/android/`, and open a PR in `meshtastic/meshtastic` targeting `docs/software/android/`. Use `ubuntu-24.04` runner and `peter-evans/create-pull-request` or equivalent action.
+- [ ] T223 [US5] Dry-run the sync script locally: run `node scripts/sync-android-docs.js --convert-webp --dry-run` and verify output structure matches Docusaurus expectations (`docs/software/android/user/*.md`, `docs/software/android/developer/*.md`, `static/img/android/*.webp`).
+
+### Integration
+
+- [ ] T230 [P] [US2] Add Crowdin string resources for `translate.md` title (`doc_title_translate`) and keywords (`doc_keywords_translate`) in `core/resources/src/commonMain/composeResources/values/strings.xml`. Run `python3 scripts/sort-strings.py`.
+- [ ] T231 [P] [US2] Add Crowdin string resources for `measurement.md` title (`doc_title_measurement`) and keywords (`doc_keywords_measurement`). Run `python3 scripts/sort-strings.py`.
+- [ ] T232 [US1] Update `docs/_config.yml` navigation and sidebar to include `translate.md` in User Guide and `measurement.md` in Developer Guide. Validate local Jekyll build.
+- [ ] T233 [US5] Update `crowdin.yml` if needed to ensure `docs/user/translate.md` is included in the translatable source set.
+- [ ] T234 [US1] Run final verification: `./gradlew spotlessCheck detekt kmpSmokeCompile test allTests`.
+
+**Checkpoint**: Android docs published on meshtastic.org, translate contributor page live, developer measurement docs complete.

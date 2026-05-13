@@ -408,6 +408,8 @@ Update `feature/settings/.../SettingsNavigation.kt` so Help & Documentation appe
 7. **Phase 6 – AI assistant**: Android Google flavor Gemini implementation + fallbacks.
 8. **Phase 7 – CI automation**: deploy/release workflows, screenshot PR bot.
 9. **Phase 8 – Polish**: accessibility, dark mode, edge cases, documentation cleanup.
+10. **Phase 9 – Apple alignment**: per-page TOC icons, signal-meter/units-locale pages, staleness CI.
+11. **Phase 10 – Docusaurus sync & content gaps**: meshtastic.org sync script + workflow, WebP optimization, translate page, developer measurement page.
 
 ## Validation Matrix
 
@@ -428,3 +430,5 @@ Update `feature/settings/.../SettingsNavigation.kt` so Help & Documentation appe
 - Gemini Nano assistant works on supported Android Google devices and gracefully falls back everywhere else.
 - CI enforces schema, size, and deployment correctness.
 - Documentation and assets remain under the configured bundle-size ceiling.
+- Android docs are synced to meshtastic.org via automated workflow under `docs/software/android/`.
+- A "Translate the App" user page and a developer measurement page exist.
