@@ -120,7 +120,11 @@ fun ConnectionsScreen(
             .collectAsStateWithLifecycle(initialValue = connectionsViewModel.ourNodeInfo.value)
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
-    val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET
+    val lockdownState by connectionsViewModel.lockdownState.collectAsStateWithLifecycle()
+    val isLockdownAuthorized =
+        lockdownState is org.meshtastic.core.model.service.LockdownState.None ||
+            lockdownState is org.meshtastic.core.model.service.LockdownState.Unlocked
+    val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET && isLockdownAuthorized
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()

@@ -225,6 +225,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
         item {
+            val lockdownTokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
             TitledCard(title = stringResource(Res.string.administration)) {
                 SwitchPreference(
                     title = stringResource(Res.string.managed_mode),
@@ -241,6 +242,24 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(admin_channel_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                val lockNowTitle = lockdownTokenInfo?.let { info ->
+                    val parts = mutableListOf("boots: ${info.bootsRemaining}")
+                    if (info.expiryEpoch > 0L) {
+                        val dateText = java.text.DateFormat.getDateTimeInstance(
+                            java.text.DateFormat.SHORT,
+                            java.text.DateFormat.SHORT,
+                        ).format(java.util.Date(info.expiryEpoch * 1000L))
+                        parts += "until: $dateText"
+                    }
+                    "Lock Now (${parts.joinToString(", ")})"
+                } ?: "Lock Now"
+                NodeActionButton(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    title = lockNowTitle,
+                    enabled = state.connected,
+                    onClick = { viewModel.sendLockNow() },
                 )
             }
         }

@@ -131,6 +131,20 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
         }
     }
 
+    val lockdownState by uIViewModel.lockdownState.collectAsStateWithLifecycle()
+    val lockdownTokenInfo by uIViewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
+    LaunchedEffect(lockdownState) {
+        if (lockdownState is org.meshtastic.core.model.service.LockdownState.LockNowAcknowledged) {
+            uIViewModel.clearLockdownState()
+        }
+    }
+    LockdownUnlockDialog(
+        lockdownState = lockdownState,
+        lockdownTokenInfo = lockdownTokenInfo,
+        onSubmit = { pass, boots, hours -> uIViewModel.sendLockdownUnlock(pass, boots, hours) },
+        onDismiss = { uIViewModel.clearLockdownState() },
+    )
+
     VersionChecks(uIViewModel)
 
     val alertDialogState by uIViewModel.currentAlert.collectAsStateWithLifecycle()
