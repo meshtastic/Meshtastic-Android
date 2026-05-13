@@ -151,7 +151,7 @@ class TakMeshTestRunner(private val commandSender: CommandSender) {
         val xml =
             try {
                 loadTakFixtureXml(name)
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 Logger.w(e) { "Failed to load fixture $name" }
                 return TakTestResult(name, 0, 0, false, "Load failed: ${e.message}")
             }
@@ -163,16 +163,13 @@ class TakMeshTestRunner(private val commandSender: CommandSender) {
         // Parse and compress via SDK
         val wirePayload: ByteArray
         try {
-            val sdkParser = org.meshtastic.tak.CotXmlParser()
-            val sdkData = sdkParser.parse(strippedXml)
-            val compressor = org.meshtastic.tak.TakCompressor()
-            val compressed = compressor.compressWithRemarksFallback(sdkData, MAX_TAK_WIRE_PAYLOAD_BYTES)
+            val compressed = TakSdkCompressor.compressCoT(strippedXml, MAX_TAK_WIRE_PAYLOAD_BYTES)
             if (compressed == null) {
                 Logger.w { "TAK Test: $name oversized even without remarks (xml=${xml.length}B)" }
                 return TakTestResult(name, xml.length, 0, false, "Oversized (>${MAX_TAK_WIRE_PAYLOAD_BYTES}B)")
             }
             wirePayload = compressed
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             Logger.w(e) { "TAK Test: $name compression failed: ${e.message}" }
             return TakTestResult(name, xml.length, 0, false, "Compress failed: ${e.message}")
         }
@@ -188,7 +185,7 @@ class TakMeshTestRunner(private val commandSender: CommandSender) {
             commandSender.sendData(dataPacket)
             Logger.i { "TAK Test: $name → ${wirePayload.size}B (xml=${xml.length}B)" }
             return TakTestResult(name, xml.length, wirePayload.size, true)
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             Logger.w(e) { "TAK Test: $name send failed: ${e.message}" }
             return TakTestResult(name, xml.length, wirePayload.size, false, "Send failed: ${e.message}")
         }

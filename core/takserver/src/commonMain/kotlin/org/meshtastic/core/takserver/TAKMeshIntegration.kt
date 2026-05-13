@@ -201,10 +201,7 @@ class TAKMeshIntegration(
         // remarks the packet exceeds the limit.
         val wirePayload: ByteArray =
             try {
-                val sdkParser = org.meshtastic.tak.CotXmlParser()
-                val sdkData = sdkParser.parse(xml)
-                val compressor = org.meshtastic.tak.TakCompressor()
-                compressor.compressWithRemarksFallback(sdkData, MAX_TAK_WIRE_PAYLOAD_BYTES)
+                TakSdkCompressor.compressCoT(xml, MAX_TAK_WIRE_PAYLOAD_BYTES)
                     ?: run {
                         Logger.w {
                             buildString {

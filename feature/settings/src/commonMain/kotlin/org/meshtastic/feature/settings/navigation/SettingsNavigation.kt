@@ -234,9 +234,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         }
     }
 
-    entry<SettingsRoute.TakServer> {
-        TakServerScreen(onBack = { backStack.removeLastOrNull() })
-    }
+    entry<SettingsRoute.TakServer> { TakServerScreen(onBack = { backStack.removeLastOrNull() }) }
 
     entry<SettingsRoute.DebugPanel> {
         val viewModel: DebugViewModel = koinViewModel()
