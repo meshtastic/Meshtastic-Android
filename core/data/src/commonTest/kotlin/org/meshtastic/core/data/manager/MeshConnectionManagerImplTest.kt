@@ -83,6 +83,7 @@ class MeshConnectionManagerImplTest {
     private val packetRepository = mock<PacketRepository>(MockMode.autofill)
     private val workerManager = mock<MeshWorkerManager>(MockMode.autofill)
     private val appWidgetUpdater = mock<AppWidgetUpdater>(MockMode.autofill)
+    private val lockdownCoordinator = FakeLockdownCoordinator()
 
     private val dataPacket = DataPacket(id = 456, time = 0L, to = "0", from = "0", bytes = null, dataType = 0)
 
@@ -134,7 +135,7 @@ class MeshConnectionManagerImplTest {
         workerManager,
         appWidgetUpdater,
         DataLayerHeartbeatSender(packetHandler),
-        FakeLockdownCoordinator(),
+        lockdownCoordinator,
         scope,
     )
 
@@ -152,6 +153,7 @@ class MeshConnectionManagerImplTest {
             "State should be Connecting after radio Connected",
         )
         verify { serviceBroadcasts.broadcastConnection() }
+        assertEquals(true, lockdownCoordinator.connectCalled)
     }
 
     @Test
@@ -226,6 +228,7 @@ class MeshConnectionManagerImplTest {
         verify { packetHandler.stopPacketQueue() }
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
+        assertEquals(true, lockdownCoordinator.disconnectCalled)
     }
 
     @Test

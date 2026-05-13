@@ -33,4 +33,4 @@
 
 - All items pass. Spec is ready for `/speckit.clarify` or `/speckit.plan`.
 - Proto contract is well-defined in upstream `admin.proto` and `mesh.proto` — no ambiguity in the firmware interface.
-- Nick's PR #4703 provides implementation reference but this spec intentionally stays at the behavior level.
+- Nick's draft PR #5439 provides the implementation reference, but this spec intentionally stays at the behavior level.

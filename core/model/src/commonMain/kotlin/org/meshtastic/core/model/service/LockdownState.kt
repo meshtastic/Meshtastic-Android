@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.model.service
 
-/** Represents the lockdown authentication state for a TAK-locked device. */
+/** Represents the lockdown authentication state for a firmware-locked device. */
 sealed class LockdownState {
     data object None : LockdownState()
 
@@ -39,7 +39,11 @@ sealed class LockdownState {
     data object UnlockFailed : LockdownState()
 
     /** Too many attempts — must wait [backoffSeconds] before retrying. */
-    data class UnlockBackoff(val backoffSeconds: Int) : LockdownState()
+    data class UnlockBackoff(val backoffSeconds: Int) : LockdownState() {
+        init {
+            require(backoffSeconds > 0) { "backoffSeconds must be positive" }
+        }
+    }
 }
 
 /**

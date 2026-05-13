@@ -5,130 +5,73 @@
 
 ## Domain Entities
 
-### LockdownState (sealed class)
+### LockdownState
 
-The core state machine representing the current lockdown status of the connected node.
+The current implementation models lockdown UI state with a sealed class in `core/model`.
 
 | Variant | Fields | Description |
 |---------|--------|-------------|
-| `NotApplicable` | — | Node doesn't support lockdown (no `LockdownStatus` received) |
-| `NeedsProvision` | — | First-time setup; no passphrase ever set on this device |
-| `Locked` | `lockReason: LockdownStatus.State` | Storage locked or client not authenticated; uses proto enum directly |
-| `Unlocking` | — | Auth sent; awaiting firmware response |
-| `Unlocked` | `bootsRemaining: UInt`, `validUntilEpoch: UInt` | Authenticated; session active with TTL info |
-| `UnlockFailed` | `backoffSeconds: UInt` | Passphrase rejected; optional rate-limit |
-| `LockNowPending` | — | Lock-now command sent; awaiting firmware ACK |
-| `LockNowAcknowledged` | — | Firmware confirmed lock; will disconnect |
+| `None` | — | No active lockdown prompt for the current connection |
+| `NeedsProvision` | — | Node requires initial passphrase provisioning |
+| `Locked` | `lockReason: String` | Node is locked and awaiting authentication |
+| `Unlocked` | — | Current BLE session is authorized |
+| `UnlockFailed` | — | Firmware rejected the submitted passphrase and allows immediate retry |
+| `UnlockBackoff` | `backoffSeconds: Int` | Firmware rejected the passphrase and rate-limited retries |
+| `LockNowAcknowledged` | — | Lock-now was acknowledged; client should disconnect and clear session state |
 
-**State Transitions:**
+### LockdownTokenInfo
 
-```
-                    ┌─────────────────────┐
-                    │    NotApplicable     │ (no LockdownStatus ever received)
-                    └─────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────┐
-│  FromRadio.lockdown_status received                                  │
-└─────────────────────────────────────────────────────────────────────┘
-         │                    │                        │
-         ▼                    ▼                        ▼
-  ┌──────────────┐   ┌──────────────┐        ┌──────────────┐
-  │NeedsProvision│   │    Locked    │        │   Unlocked   │
-  └──────┬───────┘   └──────┬───────┘        └──────┬───────┘
-         │                   │                       │
-         │ user submits      │ user submits /        │ user presses
-         │ passphrase        │ auto-replay           │ "Lock Now"
-         ▼                   ▼                       ▼
-  ┌──────────────┐   ┌──────────────┐        ┌──────────────┐
-  │  Unlocking   │   │  Unlocking   │        │LockNowPending│
-  └──────┬───────┘   └──────┬───────┘        └──────┬───────┘
-         │                   │                       │
-         │ UNLOCKED          │ UNLOCK_FAILED         │ LOCKED (with
-         ▼                   ▼                       │ wasLockNow set)
-  ┌──────────────┐   ┌──────────────┐               ▼
-  │   Unlocked   │   │ UnlockFailed │        ┌────────────────────┐
-  └──────────────┘   └──────┬───────┘        │LockNowAcknowledged │
-                             │                └────────┬───────────┘
-                             │ retry                    │
-                             ▼                         │ disconnect
-                      ┌──────────────┐                ▼
-                      │    Locked    │          (connection closed)
-                      └──────────────┘
-```
-
-**Validation Rules:**
-- `passphrase`: 1-32 bytes (non-empty for provision/unlock, ignored for lock-now)
-- `bootsRemaining`: 0 = firmware default; any positive value accepted
-- `validUntilEpoch`: 0 = no time limit; positive = absolute Unix seconds
-- `backoffSeconds`: 0 = no backoff (immediate retry allowed); >0 = enforced wait
-
----
-
-### LockdownSession (data class)
-
-Represents the active session info displayed to the user after successful unlock.
+Session TTL metadata is stored separately from `LockdownState`.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `bootsRemaining` | `UInt` | Reboots before token expires (decrements per boot) |
-| `validUntilEpoch` | `UInt` | Unix epoch seconds when token expires; 0 = no time limit |
+| `bootsRemaining` | `Int` | Reboots remaining before the token expires |
+| `expiryEpoch` | `Long` | Unix epoch seconds when the token expires; `0` means no time limit |
 
-**Derived properties:**
-- `hasTimeLimit: Boolean` = `validUntilEpoch > 0u`
-- `isBootLimited: Boolean` = `bootsRemaining > 0u`
+### StoredPassphrase
 
----
-
-### CachedPassphrase (per-node storage)
+Encrypted cached passphrase metadata keyed by connected device address.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `nodeId` | `Int` | Node number (mesh address) used as storage key |
-| `passphrase` | `ByteArray` | Raw passphrase bytes (1-32), encrypted at rest |
+| `passphrase` | `String` | Non-empty passphrase string |
+| `boots` | `Int` | Provisioning boot TTL cached alongside the passphrase |
+| `hours` | `Int` | Provisioning hour TTL cached alongside the passphrase |
 
-**Storage key format:** `"lockdown_${nodeId.toUInt().toString(16)}"` (hex node ID)
-
-**Lifecycle:**
-- Created/updated on successful unlock (UNLOCKED received after user-entered passphrase)
-- Read on reconnection (LOCKED received → auto-replay attempt)
-- Deleted when auto-replay fails (UNLOCK_FAILED after cached passphrase sent)
-- Never logged or exposed in debug output
-
----
+**Storage key**: sanitized device address string, not mesh node number.
 
 ## Proto Mapping
 
-### FromRadio.lockdown_status → LockdownState
+### FromRadio.lockdown_status -> ServiceRepository state
 
-| Proto `LockdownStatus.State` | Maps to `LockdownState` |
-|------------------------------|-------------------------|
-| `NEEDS_PROVISION` | `NeedsProvision` |
-| `LOCKED` | `Locked(reason = status.lock_reason)` |
-| `UNLOCKED` | `Unlocked(bootsRemaining = status.boots_remaining, validUntilEpoch = status.valid_until_epoch)` |
-| `UNLOCK_FAILED` | `UnlockFailed(backoffSeconds = status.backoff_seconds)` |
-| `STATE_UNSPECIFIED` | Treated as `Locked(reason = "unknown")` |
+| Proto `LockdownStatus.State` | Result |
+|------------------------------|--------|
+| `NEEDS_PROVISION` | `lockdownState = NeedsProvision` |
+| `LOCKED` | auto-replay cached passphrase when available; otherwise `lockdownState = Locked(lockReason)` |
+| `UNLOCKED` | `lockdownState = Unlocked`, `sessionAuthorized = true`, `lockdownTokenInfo = LockdownTokenInfo(...)` |
+| `UNLOCK_FAILED` with `backoff_seconds > 0` | `lockdownState = UnlockBackoff(backoffSeconds)` |
+| `UNLOCK_FAILED` with `backoff_seconds == 0` | `lockdownState = UnlockFailed` for manual submits; `Locked()` after failed auto-replay |
+| `STATE_UNSPECIFIED` | No state change; warning logged |
 
-### LockdownAuth → AdminMessage (outgoing)
+### LockdownAuth -> AdminMessage (outgoing)
 
 | Operation | `passphrase` | `boots_remaining` | `valid_until_epoch` | `lock_now` |
-|-----------|-------------|-------------------|--------------------|-----------| 
-| Provision | user-entered (1-32 bytes) | user-entered or 0 | user-entered or 0 | `false` |
-| Unlock | user-entered (1-32 bytes) | 0 (firmware default) | 0 (no limit) | `false` |
-| Auto-replay | cached bytes | 0 | 0 | `false` |
-| Lock Now | empty/ignored | 0 | 0 | `true` |
-
----
+|-----------|-------------|-------------------|--------------------|-----------|
+| Provision | user-entered UTF-8 string (1-64 bytes) | UI-provided `boots` | UI-provided `hours` mapped by firmware/client contract | `false` |
+| Unlock | user-entered UTF-8 string | cached or submitted `boots` | cached or submitted `hours` | `false` |
+| Auto-replay | cached `StoredPassphrase.passphrase` | cached `boots` | cached `hours` | `false` |
+| Lock Now | empty / ignored | `0` | `0` | `true` |
 
 ## Relationships
 
-```
-LockdownCoordinator (1) ──owns──▶ LockdownState (1, current)
-LockdownCoordinator (1) ──uses──▶ LockdownPassphraseStore (1)
-LockdownCoordinator (1) ──uses──▶ CommandSender (1, for sending AdminMessage)
-LockdownCoordinator (1) ──uses──▶ ConnectionManager (1, for disconnect on lock-now)
-FromRadioPacketHandler (1) ──calls──▶ LockdownCoordinator.handleStatus()
-UI (LockdownDialog) ──observes──▶ LockdownCoordinator.state (StateFlow)
-UI (LockdownDialog) ──calls──▶ LockdownCoordinator.submitPassphrase()
-UI (LockNowButton) ──calls──▶ LockdownCoordinator.lockNow()
-SecurityConfigScreen ──observes──▶ LockdownCoordinator.state (for session info)
+```text
+FromRadioPacketHandlerImpl -> LockdownCoordinator.handleLockdownStatus()
+LockdownCoordinatorImpl -> LockdownPassphraseStore
+LockdownCoordinatorImpl -> CommandSender
+LockdownCoordinatorImpl -> ServiceRepository
+LockdownCoordinatorImpl -> MeshConnectionManager
+UIViewModel / ConnectionsViewModel -> ServiceRepository.lockdownState
+RadioConfigViewModel -> ServiceRepository.lockdownTokenInfo / sessionAuthorized
+LockdownDialog -> UIViewModel.sendLockdownUnlock() / disconnect callback
+SecurityConfigScreen -> RadioConfigViewModel.sendLockNow()
 ```

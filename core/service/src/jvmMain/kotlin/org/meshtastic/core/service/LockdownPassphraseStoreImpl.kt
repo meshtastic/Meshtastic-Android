@@ -34,7 +34,8 @@ import javax.crypto.spec.GCMParameterSpec
  * File-backed encrypted passphrase store for JVM/Desktop.
  *
  * Uses a PKCS12 KeyStore to hold an AES-256 master key and AES-256-GCM to encrypt each passphrase entry. Entries are
- * stored as individual `.enc` files under `~/.meshtastic/lockdown/`, keyed by a sanitized device address.
+ * stored as individual `.enc` files under `$MESHTASTIC_DATA_DIR/lockdown/` (default: `~/.meshtastic/lockdown/`),
+ * keyed by a sanitized device address.
  *
  * The keystore password is fixed because the threat model mirrors Android's `EncryptedSharedPreferences`: file-system
  * permission is the primary access control; the encryption layer protects data at rest against casual file browsing or
@@ -71,26 +72,16 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
     }
 
     override fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int) {
-        val key =
-            masterKey
-                ?: run {
-                    Logger.e { "Lockdown: Cannot save passphrase — keystore unavailable" }
-                    return
-                }
-        try {
-            val plaintext = serialize(passphrase, boots, hours)
-            val encrypted = encrypt(key, plaintext)
-            entryFile(deviceAddress).writeBytes(encrypted)
-        } catch (e: Exception) {
-            Logger.e(e) { "Lockdown: Failed to save passphrase for device" }
-        }
+        val key = masterKey ?: error("Lockdown: Cannot save passphrase - keystore unavailable")
+        val plaintext = serialize(passphrase, boots, hours)
+        val encrypted = encrypt(key, plaintext)
+        entryFile(deviceAddress).writeBytes(encrypted)
     }
 
     override fun clearPassphrase(deviceAddress: String) {
-        try {
-            entryFile(deviceAddress).delete()
-        } catch (e: Exception) {
-            Logger.e(e) { "Lockdown: Failed to clear passphrase for device" }
+        val file = entryFile(deviceAddress)
+        if (file.exists() && !file.delete()) {
+            Logger.w { "Lockdown: Passphrase file was not deleted for device" }
         }
     }
 
@@ -126,10 +117,20 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
     private fun serialize(passphrase: String, boots: Int, hours: Int): ByteArray =
         "$boots\n$hours\n$passphrase".encodeToByteArray()
 
-    private fun deserialize(plaintext: ByteArray): StoredPassphrase {
+    private fun deserialize(plaintext: ByteArray): StoredPassphrase? {
         val text = plaintext.decodeToString()
         val lines = text.split("\n", limit = 3)
-        return StoredPassphrase(passphrase = lines[2], boots = lines[0].toInt(), hours = lines[1].toInt())
+        if (lines.size < SERIALIZED_LINE_COUNT) {
+            Logger.w { "Lockdown: Invalid passphrase entry format" }
+            return null
+        }
+        val boots = lines[0].toIntOrNull()
+        val hours = lines[1].toIntOrNull()
+        if (boots == null || hours == null) {
+            Logger.w { "Lockdown: Invalid passphrase entry metadata" }
+            return null
+        }
+        return StoredPassphrase(passphrase = lines[2], boots = boots, hours = hours)
     }
 
     // endregion
@@ -162,11 +163,13 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
         private const val KEYSTORE_FILE = "keystore.p12"
         private const val KEYSTORE_TYPE = "PKCS12"
         private const val KEY_ALIAS = "lockdown_master"
+        // Intentional: this mirrors the documented desktop threat model for at-rest protection only.
         private val KEYSTORE_PASSWORD = "meshtastic-lockdown".toCharArray()
         private const val AES_ALGORITHM = "AES"
         private const val AES_GCM_TRANSFORM = "AES/GCM/NoPadding"
         private const val AES_KEY_BITS = 256
         private const val GCM_TAG_BITS = 128
         private const val BYTE_MASK = 0xFF
+        private const val SERIALIZED_LINE_COUNT = 3
     }
 }

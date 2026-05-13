@@ -1,11 +1,11 @@
 # Implementation Plan: Lockdown Mode
 
-**Branch**: `feat/lockdown-mode` | **Date**: 2026-05-13 | **Spec**: [spec.md](spec.md)
+**Branch**: `features/lockdown-v2` | **Date**: 2026-05-13 | **Spec**: [spec.md](spec.md)
 **Input**: Feature specification from `specs/20260513-075218-lockdown-mode/spec.md`
 
 ## Summary
 
-Implement client-side support for firmware lockdown mode using the typed `LockdownAuth` / `LockdownStatus` protobuf contract. The app detects locked nodes via `FromRadio.lockdown_status`, presents a non-dismissable blocking passphrase dialog, sends `AdminMessage.lockdown_auth` for provision/unlock/lock-now operations, caches passphrases in platform-encrypted storage, and auto-replays on reconnect. Architecture uses a `LockdownCoordinator` interface in `commonMain` with platform-specific passphrase store implementations via expect/actual.
+Implement client-side support for firmware lockdown mode using the typed `LockdownAuth` / `LockdownStatus` protobuf contract. The app detects locked nodes via `FromRadio.lockdown_status`, presents a non-dismissable blocking passphrase dialog, sends `AdminMessage.lockdown_auth` for provision/unlock/lock-now operations, caches passphrases in platform-encrypted storage, and auto-replays on reconnect. Architecture uses `LockdownCoordinator` and `LockdownPassphraseStore` interfaces in `commonMain` with platform-specific implementations wired through DI.
 
 ## Technical Context
 
@@ -13,7 +13,7 @@ Implement client-side support for firmware lockdown mode using the typed `Lockdo
 **Primary Dependencies**: Compose Multiplatform, Koin 4.2+, Wire (protobuf), Kable (BLE), Okio  
 **Storage**: EncryptedSharedPreferences (Android), PKCS12 KeyStore + AES-256-GCM (Desktop)  
 **Testing**: `./gradlew test allTests` (KMP modules use `:allTests`, Android-only use `:testFdroidDebugUnitTest`)  
-**Target Platform**: Android (primary), Desktop (JVM), iOS (future)  
+**Target Platform**: Android (primary), Desktop (JVM)  
 **Project Type**: Mobile/Desktop KMP app  
 **Performance Goals**: Unlock flow < 5s user-perceived latency on BLE  
 **Constraints**: Passphrase 1-64 UTF-8 bytes, no logging of sensitive data, offline-capable  
@@ -26,8 +26,7 @@ Implement client-side support for firmware lockdown mode using the typed `Lockdo
 - **I. Kotlin Multiplatform Core**: ✅ PASS
   - `commonMain`: `LockdownCoordinator` interface, `LockdownState` sealed class, `LockdownPassphraseStore` interface, UI composables (dialog, lock-now button, session status)
   - `androidMain`: `LockdownPassphraseStoreImpl` (EncryptedSharedPreferences)
-  - `jvmMain`: `LockdownPassphraseStoreImpl` (Java KeyStore file-backed)
-  - `iosMain`: `LockdownPassphraseStoreImpl` (Keychain) — stub for now
+  - `jvmMain`: `LockdownPassphraseStoreImpl` (PKCS12 KeyStore + AES-256-GCM file-backed)
   - No `java.*` or `android.*` imports in commonMain. All business logic in commonMain.
 
 - **II. Zero Lint Tolerance**: ✅ PASS
@@ -35,8 +34,8 @@ Implement client-side support for firmware lockdown mode using the typed `Lockdo
   - Modules touched: `:core:model`, `:core:repository`, `:core:data`, `:core:datastore`, `:feature:settings`
 
 - **III. Compose Multiplatform UI**: ✅ PASS
-  - Lockdown dialog is a non-dismissable `AlertDialog` composable in commonMain (`onDismissRequest = {}` + `BackHandler`)
-  - No `NavigationBackHandler` needed (dialog blocks all interaction; dismiss = disconnect)
+  - Lockdown dialog is a non-dismissable `AlertDialog` composable in commonMain (`onDismissRequest = {}`)
+  - No `NavigationBackHandler` needed (dialog blocks all interaction; disconnect is explicit)
   - No float formatting needed (TTL displayed as integer boot count / formatted date string)
 
 - **IV. Privacy First**: ✅ PASS
@@ -51,7 +50,7 @@ Implement client-side support for firmware lockdown mode using the typed `Lockdo
 
 - **VI. Verify Before Push**: ✅ PASS
   - Local: `./gradlew spotlessApply detekt assembleDebug test allTests`
-  - Post-push: `gh pr checks <PR>` or `gh run list --branch feat/lockdown-mode --limit 5`
+  - Post-push: `gh pr checks <PR>` or `gh run list --branch features/lockdown-v2 --limit 5`
 
 ## Project Structure
 

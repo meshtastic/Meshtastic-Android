@@ -52,9 +52,12 @@ class LockdownPassphraseStoreImpl(app: Application) : LockdownPassphraseStore {
         }
     }
 
+    private fun requirePrefs(): SharedPreferences =
+        prefs ?: error("Encrypted passphrase store unavailable")
+
     @Suppress("ReturnCount")
     override fun getPassphrase(deviceAddress: String): StoredPassphrase? {
-        val p = prefs ?: return null
+        val p = requirePrefs()
         val key = sanitizeKey(deviceAddress)
         val passphrase = p.getString("${key}_passphrase", null) ?: return null
         val boots = p.getInt("${key}_boots", LockdownPassphraseStore.DEFAULT_BOOTS)
@@ -63,7 +66,7 @@ class LockdownPassphraseStoreImpl(app: Application) : LockdownPassphraseStore {
     }
 
     override fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int) {
-        val p = prefs ?: return
+        val p = requirePrefs()
         val key = sanitizeKey(deviceAddress)
         p.edit()
             .putString("${key}_passphrase", passphrase)
@@ -73,7 +76,7 @@ class LockdownPassphraseStoreImpl(app: Application) : LockdownPassphraseStore {
     }
 
     override fun clearPassphrase(deviceAddress: String) {
-        val p = prefs ?: return
+        val p = requirePrefs()
         val key = sanitizeKey(deviceAddress)
         p.edit().remove("${key}_passphrase").remove("${key}_boots").remove("${key}_hours").apply()
     }

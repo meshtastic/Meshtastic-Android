@@ -58,6 +58,7 @@ import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -75,6 +76,7 @@ class MeshActionHandlerImplTest {
     private val notificationManager = mock<NotificationManager>(MockMode.autofill)
     private val messageProcessor = mock<MeshMessageProcessor>(MockMode.autofill)
     private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
+    private val lockdownCoordinator = FakeLockdownCoordinator()
 
     private val myNodeNumFlow = MutableStateFlow<Int?>(MY_NODE_NUM)
 
@@ -108,7 +110,7 @@ class MeshActionHandlerImplTest {
         notificationManager = notificationManager,
         messageProcessor = lazy { messageProcessor },
         radioConfigRepository = radioConfigRepository,
-        lockdownCoordinator = FakeLockdownCoordinator(),
+        lockdownCoordinator = lockdownCoordinator,
         scope = scope,
     )
 
@@ -311,6 +313,26 @@ class MeshActionHandlerImplTest {
 
         verify { commandSender.sendAdmin(any(), any(), any(), any()) }
         verify { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun handleSendLockdownUnlock_forwardsPassphraseAndTtl() {
+        handler = createHandler(testScope)
+
+        handler.handleSendLockdownUnlock(passphrase = "secret", bootTtl = 25, hourTtl = 12)
+
+        assertEquals("secret", lockdownCoordinator.lastPassphrase)
+        assertEquals(25, lockdownCoordinator.lastBoots)
+        assertEquals(12, lockdownCoordinator.lastHours)
+    }
+
+    @Test
+    fun handleSendLockNow_forwardsToLockdownCoordinator() {
+        handler = createHandler(testScope)
+
+        handler.handleSendLockNow()
+
+        assertTrue(lockdownCoordinator.lockNowCalled)
     }
 
     // ---- handleSetOwner ----

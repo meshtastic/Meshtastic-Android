@@ -17,7 +17,11 @@
 package org.meshtastic.core.repository
 
 /** Stored passphrase entry with associated TTL parameters. */
-data class StoredPassphrase(val passphrase: String, val boots: Int, val hours: Int)
+data class StoredPassphrase(val passphrase: String, val boots: Int, val hours: Int) {
+    init {
+        require(passphrase.isNotEmpty()) { "passphrase must not be empty" }
+    }
+}
 
 /**
  * Encrypted per-device storage for lockdown passphrases.

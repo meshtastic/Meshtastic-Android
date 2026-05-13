@@ -19,7 +19,7 @@ package org.meshtastic.core.repository
 import org.meshtastic.proto.LockdownStatus
 
 /**
- * Coordinates lockdown (TAK passphrase) authentication for TAK-locked devices.
+ * Coordinates lockdown passphrase authentication for firmware-locked devices.
  *
  * Implementations handle the full authentication lifecycle: auto-unlock with a stored passphrase, manual passphrase
  * submission, lock-now, and session lifecycle hooks.
@@ -32,8 +32,10 @@ interface LockdownCoordinator {
     fun onDisconnect()
 
     /**
-     * Called on every config_complete_id from the device. After session is authorized this is a no-op to prevent
-     * re-triggering lockdown logic.
+        * Lifecycle hook called on every config_complete_id from the device.
+        *
+        * Currently a no-op; retained so implementations can react to config-complete in the future without changing the
+        * public contract.
      */
     fun onConfigComplete()
 

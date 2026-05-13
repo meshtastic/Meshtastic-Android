@@ -14,7 +14,7 @@
 - Immediately after `config_complete_id` (initial connection state report)
 - In response to any `AdminMessage.lockdown_auth` sent by the client
 
-**Decision**: Add `proto.lockdown_status` as a new branch in the `when` block in `FromRadioPacketHandlerImpl`, routing to `LockdownCoordinator.handleStatus(status)`. Place after `configCompleteId` handling since that's the natural ordering.
+**Decision**: Add `proto.lockdown_status` as a new branch in the `when` block in `FromRadioPacketHandlerImpl`, routing to `LockdownCoordinator.handleLockdownStatus(status)`. Keep it alongside the existing `configCompleteId` lifecycle callback.
 
 **Alternatives considered**:
 - Handling inside `configFlowManager.handleConfigComplete()` — rejected because lockdown_status also arrives asynchronously after admin commands, not just during config flow.
@@ -28,21 +28,10 @@
 
 **Finding**: `CommandSender.sendAdmin()` takes a `destNum`, optional `requestId`, `wantResponse`, and a lambda `initFn: () -> AdminMessage`. The node number for the locally-connected node comes from `ServiceRepository` (myNodeNum). Example:
 
-```kotlin
-commandSender.sendAdmin(myNodeNum, wantResponse = true) {
-    AdminMessage(lockdown_auth = LockdownAuth(
-        passphrase = passphraseBytes,
-        boots_remaining = bootsRemaining,  // 0 = firmware default
-        valid_until_epoch = validUntilEpoch,  // 0 = no time limit
-        lock_now = false,
-    ))
-}
-```
-
-**Decision**: Add `sendLockdownAuth(passphrase: ByteArray, bootsRemaining: UInt, validUntilEpoch: UInt, lockNow: Boolean)` method to `LockdownCoordinator` which delegates to `commandSender.sendAdmin()`. Use `wantResponse = true` since firmware always replies with `LockdownStatus`.
+**Decision**: Expose `CommandSender.sendLockdownPassphrase(passphrase: String, boots: Int, hours: Int)` and `sendLockNow()` helpers. `LockdownCoordinatorImpl` stays synchronous and delegates to those methods; firmware responses still arrive asynchronously via `FromRadio.lockdown_status`.
 
 **Alternatives considered**:
-- `sendAdminAwait()` (suspend + await ACK) — rejected because the "response" is a `FromRadio.lockdown_status`, not a standard admin ACK. The coordinator processes it asynchronously via the `handleStatus()` callback.
+- `sendAdminAwait()` (suspend + await ACK) — rejected because the "response" is a `FromRadio.lockdown_status`, not a standard admin ACK. The coordinator processes it asynchronously via the `handleLockdownStatus()` callback.
 
 ---
 
@@ -51,20 +40,11 @@ commandSender.sendAdmin(myNodeNum, wantResponse = true) {
 **Question**: Best approach for per-node encrypted passphrase caching across platforms?
 
 **Finding**:
-- **Android**: `EncryptedSharedPreferences` from AndroidX Security Crypto. Key = node ID (hex string), value = Base64-encoded passphrase bytes. Already a dependency in the project.
-- **JVM/Desktop**: `java.security.KeyStore` with JCEKS type, or simpler: AES-encrypt a JSON file using a key derived from a fixed seed in the app's data directory. For stubs, a no-op (passphrase never cached) is acceptable.
-- **iOS**: Keychain Services via `Security` framework. For stubs, no-op is acceptable.
+- **Android**: `EncryptedSharedPreferences` from AndroidX Security Crypto, keyed by sanitized device address with cached passphrase + TTL metadata.
+- **JVM/Desktop**: PKCS12 KeyStore + AES-256-GCM encrypted files under the desktop data directory.
+- **iOS**: No implementation in this branch.
 
-**Decision**: Interface `LockdownPassphraseStore` in commonMain:
-```kotlin
-interface LockdownPassphraseStore {
-    suspend fun get(nodeId: Int): ByteArray?
-    suspend fun put(nodeId: Int, passphrase: ByteArray)
-    suspend fun clear(nodeId: Int)
-}
-```
-Android: real implementation with EncryptedSharedPreferences.  
-JVM/iOS: no-op stubs returning null/doing nothing (passphrase never cached, user always prompted).
+**Decision**: Interface `LockdownPassphraseStore` in commonMain with `getPassphrase(deviceAddress)`, `savePassphrase(...)`, and `clearPassphrase(deviceAddress)`. Android uses EncryptedSharedPreferences; JVM/Desktop uses PKCS12 + AES-GCM. There is no iOS implementation in this branch.
 
 **Alternatives considered**:
 - DataStore Proto with encryption — rejected; DataStore doesn't natively support encryption and adding custom serialization adds complexity for a simple key-value store.
@@ -78,10 +58,10 @@ JVM/iOS: no-op stubs returning null/doing nothing (passphrase never cached, user
 
 **Finding**: The current navigation uses `MeshtasticNavDisplay`. A non-dismissable dialog can be achieved by:
 1. Observing `LockdownCoordinator.state` as a `StateFlow<LockdownState>` in the top-level composable
-2. When state is `Locked` or `NeedsProvision`, rendering a non-dismissable `AlertDialog` with `onDismissRequest = {}` and `BackHandler {}` to intercept back presses
+2. When state is `Locked`, `NeedsProvision`, `UnlockFailed`, or `UnlockBackoff`, render a non-dismissable `AlertDialog` with `onDismissRequest = {}` and an explicit Disconnect action
 3. The dialog owns its own state (passphrase text, validation, backoff timer)
 
-**Decision**: Show a non-dismissable `AlertDialog` from the app's main content composition when lockdown is active. The `onDismissRequest = {}` prevents touch-outside dismiss, and `BackHandler {}` blocks back navigation. When not active (unlocked or no lockdown on this node), normal navigation proceeds.
+**Decision**: Show a non-dismissable `AlertDialog` from the app's main content composition when lockdown is active. `onDismissRequest = {}` prevents dismissal; when not active, normal navigation proceeds.
 
 **Alternatives considered**:
 - Full-screen Scaffold overlay — rejected; adds unnecessary complexity when AlertDialog achieves the same blocking behavior with `onDismissRequest = {}`.
@@ -95,19 +75,7 @@ JVM/iOS: no-op stubs returning null/doing nothing (passphrase never cached, user
 
 **Finding**: Based on the proto contract and spec requirements:
 
-```
-States:
-  NotApplicable       — Connected node doesn't use lockdown (no LockdownStatus received)
-  NeedsProvision      — NEEDS_PROVISION received; awaiting user passphrase creation
-  Locked              — LOCKED received; awaiting user passphrase entry or auto-replay
-  Unlocking           — Auth sent; waiting for firmware response
-  Unlocked(session)   — UNLOCKED received with boots_remaining + valid_until_epoch
-  UnlockFailed(info)  — UNLOCK_FAILED received with optional backoff
-  LockNowPending      — Lock-now sent; awaiting LOCKED ACK
-  LockNowAcknowledged — ACK received; will disconnect
-```
-
-**Decision**: Sealed class `LockdownState` with these variants. The coordinator manages transitions and exposes state as `StateFlow<LockdownState>`. Auto-replay triggers automatically when entering `Locked` state if a cached passphrase exists for the node.
+**Decision**: Use `LockdownState.None`, `NeedsProvision`, `Locked(lockReason: String)`, `Unlocked`, `UnlockFailed`, `UnlockBackoff(backoffSeconds)`, and `LockNowAcknowledged`, plus a separate `LockdownTokenInfo`. The coordinator writes these into `ServiceRepository`; ViewModels expose the flows to UI.
 
 **Alternatives considered**:
 - Simpler 3-state model (Locked/Unlocked/None) — rejected; insufficient for backoff enforcement, lock-now ACK tracking, and pending states.
@@ -134,7 +102,7 @@ States:
 
 **Finding**: Banners in the app are typically rendered conditionally in composables. The "Region Unset" banner is in the connections screen. Other potential banners: firmware update prompts, channel configuration warnings.
 
-**Decision**: Expose `isLockdownAuthorized: StateFlow<Boolean>` from `LockdownCoordinator`. This is `true` when state is `Unlocked` or `NotApplicable`, `false` otherwise. Banner composables that prompt user action gate their visibility on this flag. Since the full-screen modal blocks navigation anyway (FR-012), this is a defense-in-depth measure for any briefly-visible content during state transitions.
+**Decision**: Use `ServiceRepository.sessionAuthorized` as the canonical gating flag for actions that should only be available after lockdown authentication.
 
 **Alternatives considered**:
 - Per-banner individual gating logic — rejected; centralized flag is simpler and less error-prone.

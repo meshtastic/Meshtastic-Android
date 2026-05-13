@@ -185,6 +185,17 @@ class LockdownCoordinatorImplTest {
         assertIs<LockdownState.NeedsProvision>(serviceRepo.lockdownState.value)
     }
 
+    @Test
+    fun `STATE_UNSPECIFIED leaves current state unchanged`() {
+        serviceRepo.setLockdownState(LockdownState.Locked("needs_auth"))
+
+        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.STATE_UNSPECIFIED))
+
+        val state = serviceRepo.lockdownState.value
+        assertIs<LockdownState.Locked>(state)
+        assertEquals("needs_auth", state.lockReason)
+    }
+
     // endregion
 
     // region LOCKED — manual flow
@@ -332,6 +343,26 @@ class LockdownCoordinatorImplTest {
         val state = serviceRepo.lockdownState.value
         assertIs<LockdownState.UnlockBackoff>(state)
         assertEquals(30, state.backoffSeconds)
+    }
+
+    @Test
+    fun `submit after unlock failure saves the replacement passphrase on subsequent success`() {
+        radioService.setDeviceAddress(testDeviceAddress)
+
+        coordinator.submitPassphrase("wrong", boots = 10, hours = 0)
+        coordinator.handleLockdownStatus(
+            LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED, backoff_seconds = 0),
+        )
+
+        coordinator.submitPassphrase("correct", boots = 25, hours = 12)
+        coordinator.handleLockdownStatus(
+            LockdownStatus(state = LockdownStatus.State.UNLOCKED, boots_remaining = 24, valid_until_epoch = 1234),
+        )
+
+        val stored = passphraseStore.saved[testDeviceAddress]
+        assertEquals("correct", stored?.passphrase)
+        assertEquals(25, stored?.boots)
+        assertEquals(12, stored?.hours)
     }
 
     // endregion

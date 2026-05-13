@@ -25,6 +25,8 @@ class FakeLockdownCoordinator : LockdownCoordinator {
     var configCompleteCalled = false
     var lastStatus: LockdownStatus? = null
     var lastPassphrase: String? = null
+    var lastBoots: Int? = null
+    var lastHours: Int? = null
     var lockNowCalled = false
 
     override fun onConnect() {
@@ -45,6 +47,8 @@ class FakeLockdownCoordinator : LockdownCoordinator {
 
     override fun submitPassphrase(passphrase: String, boots: Int, hours: Int) {
         lastPassphrase = passphrase
+        lastBoots = boots
+        lastHours = hours
     }
 
     override fun lockNow() {

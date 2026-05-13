@@ -3,132 +3,60 @@
 **Module**: `feature/settings`  
 **Source set**: `commonMain`
 
-## LockdownDialog (non-dismissable blocking dialog)
+## LockdownDialog
 
 ```kotlin
-/**
- * Non-dismissable AlertDialog that blocks all app interaction when the connected
- * node is in a lockdown state requiring user action (LOCKED or NEEDS_PROVISION).
- *
- * Uses `onDismissRequest = {}` + `BackHandler` to prevent dismissal.
- * Shown when state requires auth; hidden when state transitions to Unlocked or NotApplicable.
- *
- * @param state Current lockdown state from LockdownCoordinator
- * @param onSubmitPassphrase Called with (passphrase, bootsRemaining, validUntilEpoch)
- * @param onDisconnect Called when user wants to disconnect instead of authenticating
- */
 @Composable
 fun LockdownDialog(
-    state: LockdownState,
-    onSubmitPassphrase: (ByteArray, UInt, UInt) -> Unit,
+    lockdownState: LockdownState,
+    onSubmit: (passphrase: String, boots: Int, hours: Int) -> Unit,
     onDisconnect: () -> Unit,
 )
 ```
 
-### UI States Rendered
+`LockdownDialog` is a non-dismissable `AlertDialog` shown while the connected device requires lockdown authentication. It uses `onDismissRequest = {}` and offers an explicit Disconnect button instead of allowing dismissal.
+
+### Rendered States
 
 | `LockdownState` | UI Rendering |
 |-----------------|-------------|
-| `NeedsProvision` | "Set Passphrase" title, passphrase field + confirm field, optional TTL fields, Submit button |
-| `Locked` | "Unlock Device" title, passphrase field, optional TTL fields (hidden for unlock), Submit button, lock_reason displayed |
-| `Unlocking` | Same as above with Submit disabled + loading indicator |
-| `UnlockFailed(backoff=0)` | Error text "Incorrect passphrase", Submit enabled for retry |
-| `UnlockFailed(backoff>0)` | Error text + countdown timer, Submit disabled until backoff expires |
-| `LockNowPending` | "Locking device..." with spinner |
-| `LockNowAcknowledged` | "Device locked" confirmation, auto-disconnect in progress |
+| `NeedsProvision` | "Set Passphrase" title, passphrase + confirm fields, editable `boots` / `hours` inputs, Submit button |
+| `Locked` | "Enter Passphrase" title, passphrase field, lock reason when present, Submit button |
+| `UnlockFailed` | Same as `Locked` plus incorrect-passphrase error text |
+| `UnlockBackoff` | Same as `Locked` plus backoff error text; Submit disabled |
+| `None` / `Unlocked` / `LockNowAcknowledged` | Dialog hidden |
 
 ### Component Details
 
-- **Passphrase field**: `OutlinedTextField` with `visualTransformation = PasswordVisualTransformation()`, trailing eye icon to toggle visibility
-- **Confirm field** (provision only): Second `OutlinedTextField` with match validation
-- **Boots remaining** (optional): `OutlinedTextField` with `keyboardType = KeyboardType.Number`, hint "Leave empty for default"
-- **Hours until expiry** (optional): `OutlinedTextField` with number input, converted to `valid_until_epoch` (current time + hours * 3600)
-- **Submit button**: `FilledTonalButton`, disabled during backoff or when passphrase empty
-- **Disconnect button**: `TextButton` "Disconnect" to allow user to bail without authenticating
-- **Error display**: `Text` with `MaterialTheme.colorScheme.error` color
+- **Passphrase field**: `OutlinedTextField` with password visibility toggle
+- **Confirm field**: shown only in provisioning mode
+- **Provisioning TTL fields**: integer `boots` and `hours`; current defaults are `50` and `0`
+- **Validation**: passphrase is required and limited to 64 UTF-8 bytes; confirm field must match in provisioning mode
+- **Disconnect button**: explicit escape hatch when the user does not want to authenticate
 
----
-
-## LockdownSessionStatus (session info row)
+## LockdownSessionStatus
 
 ```kotlin
-/**
- * Displays current session token TTL information in Security settings.
- * Only visible when node is in UNLOCKED state.
- *
- * @param session Active session info (boots remaining, expiry)
- */
 @Composable
-fun LockdownSessionStatus(
-    session: LockdownState.Unlocked,
-)
+fun LockdownSessionStatus(tokenInfo: LockdownTokenInfo?, modifier: Modifier = Modifier)
 ```
+
+`LockdownSessionStatus` is shown in `SecurityConfigScreen` only when `sessionAuthorized == true` and `tokenInfo` is non-null.
 
 ### Display Format
 
 | Condition | Displayed Text |
 |-----------|---------------|
-| `bootsRemaining > 0 && validUntilEpoch > 0` | "Session: N reboots remaining, expires [formatted date]" |
-| `bootsRemaining > 0 && validUntilEpoch == 0` | "Session: N reboots remaining, no time limit" |
-| `bootsRemaining == 0 && validUntilEpoch > 0` | "Session: expires [formatted date]" |
-| `bootsRemaining == 0 && validUntilEpoch == 0` | "Session: no expiry configured" |
+| `bootsRemaining > 0` | "Session: N reboots remaining" |
+| `expiryEpoch > 0` | "expires [formatted date]" |
+| `expiryEpoch == 0` | "no time limit" |
 
----
+## Lock Now Action
 
-## LockNowButton
+There is no standalone `LockNowButton` composable in the current implementation. The Lock Now action is a `NodeActionButton` embedded directly in `SecurityConfigScreen` and enabled only when the device is connected and `sessionAuthorized == true`.
 
-```kotlin
-/**
- * "Lock Now" button for Security settings. Only enabled when the node is
- * UNLOCKED and lockdown is applicable.
- *
- * @param isEnabled true when node is unlocked and user can issue lock-now
- * @param onClick Callback to trigger lock-now via LockdownCoordinator
- */
-@Composable
-fun LockNowButton(
-    isEnabled: Boolean,
-    onClick: () -> Unit,
-)
-```
+## Integration Points
 
-### Visibility Rules
-
-| Coordinator State | Button State |
-|-------------------|-------------|
-| `NotApplicable` | Hidden (node doesn't support lockdown) |
-| `Unlocked` | Visible + Enabled |
-| `Locked` / `NeedsProvision` | Visible + Disabled with "Device is locked" hint |
-| `LockNowPending` | Visible + Disabled + "Locking..." text |
-| `LockNowAcknowledged` | Hidden (disconnecting) |
-
----
-
-## Integration Point
-
-The `LockdownScreen` composable is placed at the app's top-level composition:
-
-```kotlin
-// In the main app content composable (after connection established):
-val lockdownState by lockdownCoordinator.state.collectAsStateWithLifecycle()
-
-Box {
-    // Normal navigation content
-    MeshtasticNavDisplay(...)
-    
-    // Lockdown overlay — blocks everything when active
-    when (val state = lockdownState) {
-        is LockdownState.NotApplicable,
-        is LockdownState.Unlocked -> { /* Normal operation, no overlay */ }
-        else -> {
-            LockdownScreen(
-                state = state,
-                onSubmitPassphrase = { pass, boots, epoch ->
-                    scope.launch { lockdownCoordinator.submitPassphrase(pass, boots, epoch) }
-                },
-                onDisconnect = { connectionManager.disconnect() },
-            )
-        }
-    }
-}
-```
+- `UIViewModel` and `ConnectionsViewModel` expose `lockdownState` from `ServiceRepository`
+- `RadioConfigViewModel` exposes `lockdownTokenInfo`, `sessionAuthorized`, and `sendLockNow()` for the security screen
+- `SecurityConfigScreen` renders `LockdownSessionStatus` above the Lock Now action when the current session is authorized

@@ -144,7 +144,7 @@ open class RadioConfigViewModel(
     val sessionAuthorized = serviceRepository.sessionAuthorized
 
     fun sendLockNow() {
-        viewModelScope.launch { lockdownCoordinator.lockNow() }
+        safeLaunch(tag = "sendLockNow") { lockdownCoordinator.lockNow() }
     }
 
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed

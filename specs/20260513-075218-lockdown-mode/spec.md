@@ -1,9 +1,9 @@
 # Feature Specification: Lockdown Mode
 
-**Feature Branch**: `feat/lockdown-mode`  
+**Feature Branch**: `features/lockdown-v2`  
 **Created**: 2026-05-13  
 **Status**: Draft  
-**Input**: User description: "Implement lockdown mode using new lockdown protobufs and Nick's previous proof of concept (PR #4703)"  
+**Input**: User description: "Implement lockdown mode using new lockdown protobufs and Nick's draft PR (#5439) as the baseline"  
 **Cross-Platform Spec**: N/A — platform-specific client implementation of firmware-driven lockdown protocol
 
 ## Summary
@@ -16,23 +16,20 @@ Lockdown mode protects unattended Meshtastic nodes from unauthorized physical ac
 
 - Q: Should lockdown block all navigation or only gate config screens? → A: Non-dismissable blocking dialog; user must unlock/provision before accessing any app functionality
 - Q: Should the app expose TTL fields (boots_remaining, valid_until_epoch) to the user or always use firmware defaults? → A: Optional fields — show "boots remaining" and "hours until expiry" as optional inputs, default to firmware values when left empty
-- Q: Should coordinator and passphrase store be full KMP (commonMain interface + expect/actual) or Android-only initially? → A: Full KMP — coordinator interface + passphrase store interface in commonMain; platform implementations via expect/actual
+- Q: Should coordinator and passphrase store be full KMP (commonMain interface + expect/actual) or Android-only initially? → A: Full KMP via commonMain interfaces plus platform-specific DI implementations in `androidMain` and `jvmMain`
 - Q: Should "Lock Now" use a client-side flag to await firmware ACK, or fire-and-disconnect immediately? → A: Client-side flag — track wasLockNow, route next LOCKED status to "Lock confirmed" state, then disconnect gracefully
 - Q: Should all action-prompting banners be gated on lockdown auth, or only the region-unset banner? → A: All action-prompting banners — suppress any banner that asks users to change config they cannot access while locked
 
-### Gap Analysis (PR #5439 review, 2026-05-13)
+### Implementation Sync (2026-05-13)
 
-Gaps identified between this spec and Nick's PR #5439 implementation. All spec requirements hold; PR should be updated to align:
+This spec is aligned to the implementation on `features/lockdown-v2`:
 
-1. ~~FR-012: Replace AlertDialog with full-screen blocking Scaffold~~ → Non-dismissable AlertDialog with `onDismissRequest = {}` + `BackHandler` is sufficient (already in PR)
-2. FR-013: Audit and gate all action-prompting banners (not just region-unset)
-3. FR-005: Make TTL inputs nullable; send 0 when empty (not hardcoded boots=50)
-4. KMP: Extract `LockdownPassphraseStore` interface to commonMain; Android actual impl; iOS/JVM no-op stubs. Move dialog to `feature/settings` commonMain.
-5. US3-AC2: Explicitly disconnect via RadioController after LockNowAcknowledged (don't rely on firmware reboot alone)
-6. US3-AC4: Hide/disable Lock Now button when `sessionAuthorized=false`
-7. US5: Add dedicated session status row above Lock Now button (not embedded in button label)
-8. NFR-002: Audit logs; redact device addresses to last 4 chars
-9. iOS/JVM: Provide no-op stub implementations of `LockdownPassphraseStore`
+1. `LockdownState` uses `None`, `NeedsProvision`, `Locked(lockReason: String)`, `Unlocked`, `UnlockFailed`, `UnlockBackoff`, and `LockNowAcknowledged`
+2. Session TTL metadata is exposed separately as `LockdownTokenInfo(bootsRemaining: Int, expiryEpoch: Long)`
+3. `LockdownCoordinator` is a synchronous commonMain interface; reactive state is exposed via `ServiceRepository`
+4. `LockdownPassphraseStore` is keyed by device address and stores `String` passphrases plus `boots` / `hours`
+5. Platform implementations currently exist for Android and JVM/Desktop in `core/service`; there is no iOS implementation in this branch
+6. The blocking UI is a non-dismissable `AlertDialog` using `onDismissRequest = {}` with an explicit Disconnect action
 
 ## Goals
 
@@ -80,7 +77,7 @@ A user connects to a hardened firmware node that has never been provisioned (no 
 **Acceptance Scenarios**:
 
 1. **Given** the app connects to a node reporting `LockdownStatus.State.NEEDS_PROVISION`, **When** the config complete is received, **Then** the app prompts the user to create a new passphrase
-2. **Given** the user enters and confirms a passphrase (1-32 bytes), **When** the `LockdownAuth` message is sent with `lock_now=false`, **Then** the firmware provisions the DEK and responds with `UNLOCKED`
+2. **Given** the user enters and confirms a passphrase (1-64 UTF-8 bytes), **When** the `LockdownAuth` message is sent with `lock_now=false`, **Then** the firmware provisions the DEK and responds with `UNLOCKED`
 3. **Given** the user is in the provisioning flow, **When** they attempt to set an empty passphrase, **Then** the app prevents submission and shows a validation message
 
 ---
@@ -150,7 +147,7 @@ A user with an unlocked session can view the remaining session lifetime (boots r
 | LockdownAuth sender | `core/data/` | Sends `AdminMessage.lockdown_auth` via `CommandSenderImpl` |
 | Lockdown UI (dialog) | `feature/settings/` | Passphrase entry/provisioning dialog and session status display |
 | Lock Now action | `feature/settings/` | Button in Security settings to trigger immediate re-lock |
-| Passphrase cache | `core/datastore/` | Encrypted local storage of per-node cached passphrases |
+| Passphrase cache | `core/service/` | Encrypted local storage of per-device cached passphrases |
 | Lockdown state model | `core/model/` | Domain model representing lockdown state for UI consumption |
 
 ## Requirements *(mandatory)*
@@ -161,19 +158,19 @@ A user with an unlocked session can view the remaining session lifetime (boots r
 - **FR-002**: App MUST display a passphrase entry dialog when the connected node reports `LOCKED` state
 - **FR-003**: App MUST display a passphrase creation dialog when the connected node reports `NEEDS_PROVISION` state
 - **FR-004**: App MUST send `LockdownAuth` admin messages with the user-supplied passphrase to unlock/provision
-- **FR-005**: App MUST present optional "boots remaining" and "hours until expiry" input fields in the passphrase dialog; when left empty, send 0 (0 = firmware defaults apply per `LockdownAuth` proto contract)
+- **FR-005**: App MUST allow configuring `boots` and `hours` when provisioning a passphrase; current UI defaults to `boots = 50` and `hours = 0`
 - **FR-006**: App MUST display error feedback when firmware reports `UNLOCK_FAILED`, including backoff countdown when `backoff_seconds > 0`
 - **FR-007**: App MUST provide a "Lock Now" action that sends `LockdownAuth(lock_now=true)` to the node
 - **FR-008**: App MUST cache passphrases in encrypted local storage, keyed per node
 - **FR-009**: App MUST auto-replay cached passphrase on reconnection to a previously-authenticated locked node
 - **FR-010**: App MUST clear cached passphrase when auto-replay results in `UNLOCK_FAILED`
 - **FR-011**: App MUST display session token TTL info (boots remaining, expiry) when the node is unlocked
-- **FR-012**: App MUST present a non-dismissable blocking dialog when in `LOCKED` or `NEEDS_PROVISION` state, preventing all navigation until the user resolves lockdown (non-dismissable AlertDialog with BackHandler is acceptable)
+- **FR-012**: App MUST present a non-dismissable blocking dialog when in `LOCKED`, `NEEDS_PROVISION`, `UNLOCK_FAILED`, or `UNLOCK_BACKOFF` states, preventing navigation until the user unlocks or disconnects
 - **FR-013**: App MUST suppress all action-prompting banners (e.g., "Region Unset", configuration warnings) when the connected node is lockdown-enabled but not yet authorized, since the user cannot act on them
 
 ### Non-Functional Requirements
 
-- **NFR-001**: Cached passphrases MUST be stored using platform-appropriate encrypted storage (EncryptedSharedPreferences on Android, Keychain on iOS, encrypted file on Desktop)
+- **NFR-001**: Cached passphrases MUST be stored using platform-appropriate encrypted storage (EncryptedSharedPreferences on Android, encrypted file + PKCS12/AES-GCM on Desktop)
 - **NFR-002**: Passphrase entry dialog MUST NOT log or expose passphrase bytes in debug output
 - **NFR-003**: Unlock flow MUST complete within 5 seconds on a standard BLE connection (user-perceived latency from submit to unlocked state)
 
@@ -183,7 +180,6 @@ A user with an unlocked session can view the remaining session lifetime (boots r
 |-----------|--------|---------------|
 | `commonMain` | LockdownCoordinator interface, LockdownState model, passphrase store interface, UI composables (unlock dialog, lock-now button, session status) | All business logic and UI per Constitution §I |
 | `androidMain` | `LockdownPassphraseStore` impl (EncryptedSharedPreferences), AIDL plumbing for sendLockdownUnlock/sendLockNow | Platform-specific secure storage + IPC |
-| `iosMain` | `LockdownPassphraseStore` impl (Keychain) | Platform-specific secure storage |
 | `jvmMain` | `LockdownPassphraseStore` impl (encrypted file or Java KeyStore) | Platform-specific secure storage |
 
 ## Design Standards Compliance
@@ -217,6 +213,6 @@ A user with an unlocked session can view the remaining session lifetime (boots r
 - Icons use `MeshtasticIcons` (from `core/ui/icon/`)
 - The firmware correctly implements the `LockdownAuth` / `LockdownStatus` protobuf contract as defined in `admin.proto` and `mesh.proto`
 - The existing `FromRadio` packet handling infrastructure can be extended to process the new `lockdown_status` field (field 18)
-- Passphrase is limited to 1-32 bytes as specified in the proto definition
+- Passphrase is limited to 1-64 UTF-8 bytes as enforced by the current UI and firmware contract
 - The app does not need to determine whether a node is "hardened" — it simply reacts to `LockdownStatus` presence
-- Token TTL parameters (boots_remaining, valid_until_epoch) use firmware defaults when not specified by the user
+- The current provisioning UI defaults TTL parameters to `boots = 50` and `hours = 0`

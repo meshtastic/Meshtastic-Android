@@ -40,6 +40,9 @@ import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.QueueStatus
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import org.meshtastic.proto.LockdownStatus
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 
 class FromRadioPacketHandlerImplTest {
@@ -51,6 +54,7 @@ class FromRadioPacketHandlerImplTest {
     private val configFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val router: MeshRouter = mock(MockMode.autofill)
+    private val lockdownCoordinator = FakeLockdownCoordinator()
 
     private lateinit var handler: FromRadioPacketHandlerImpl
 
@@ -66,7 +70,7 @@ class FromRadioPacketHandlerImplTest {
                 mqttManager,
                 packetHandler,
                 notificationManager,
-                FakeLockdownCoordinator(),
+                lockdownCoordinator,
             )
     }
 
@@ -111,6 +115,17 @@ class FromRadioPacketHandlerImplTest {
         handler.handleFromRadio(proto)
 
         verify { configFlowManager.handleConfigComplete(nonce) }
+        assertTrue(lockdownCoordinator.configCompleteCalled)
+    }
+
+    @Test
+    fun `handleFromRadio routes LOCKDOWN_STATUS to lockdownCoordinator`() {
+        val lockdownStatus = LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "token_missing")
+        val proto = FromRadio(lockdown_status = lockdownStatus)
+
+        handler.handleFromRadio(proto)
+
+        assertEquals(lockdownStatus, lockdownCoordinator.lastStatus)
     }
 
     @Test

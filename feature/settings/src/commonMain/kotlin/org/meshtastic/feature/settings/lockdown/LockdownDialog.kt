@@ -68,8 +68,8 @@ import org.meshtastic.core.ui.icon.VisibilityOff
  * Non-dismissable lockdown authentication dialog.
  *
  * Shown when the connected device requires passphrase authentication. The dialog blocks all interaction with the app
- * until the user either authenticates successfully or disconnects. Back gestures are intercepted and treated as
- * disconnect.
+ * until the user either authenticates successfully or disconnects. Back gestures are suppressed to prevent dismissing
+ * the dialog and bypassing authentication.
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -172,7 +172,7 @@ fun LockdownDialog(
                     Spacer(modifier = Modifier.height(SPACING_DP.dp))
                     OutlinedTextField(
                         value = confirmPassphrase,
-                        onValueChange = { if (it.length <= MAX_PASSPHRASE_LEN) confirmPassphrase = it },
+                        onValueChange = { if (it.encodeToByteArray().size <= MAX_PASSPHRASE_LEN) confirmPassphrase = it },
                         label = { Text(stringResource(Res.string.lockdown_confirm_passphrase)) },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),

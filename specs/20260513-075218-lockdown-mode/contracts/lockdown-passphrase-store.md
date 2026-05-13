@@ -48,16 +48,16 @@ class LockdownPassphraseStoreImpl(app: Application) : LockdownPassphraseStore {
             EncryptedSharedPreferences.create(app, PREFS_FILE_NAME, masterKey, ...)
         } catch (e: Exception) {
             Logger.e(e) { "Failed to initialize encrypted passphrase store" }
-            null  // Graceful degradation — auto-unlock disabled
+            null
         }
     }
-    // All methods use `val p = prefs ?: return null/Unit` pattern
+    private fun requirePrefs(): SharedPreferences = prefs ?: error("Encrypted passphrase store unavailable")
 }
 ```
 
 - **Storage**: `EncryptedSharedPreferences` with AES-256-GCM MasterKey (hardware keystore when available)
 - **Key format**: `"${sanitizedDeviceAddress}_passphrase"`, `"..._boots"`, `"..._hours"`
-- **Error resilience**: `prefs` is nullable — crypto init failure makes store silently no-op with logging
+- **Error resilience**: initialization failures are logged once; subsequent operations fail fast so callers can handle persistence errors explicitly
 
 ### JVM/Desktop (`core/service/jvmMain`)
 
@@ -69,17 +69,17 @@ class LockdownPassphraseStoreImpl : LockdownPassphraseStore {
 }
 ```
 
-- **Storage**: PKCS12 KeyStore at `~/.meshtastic/lockdown/keystore.p12` + per-device `.enc` files
+- **Storage**: PKCS12 KeyStore at `$MESHTASTIC_DATA_DIR/lockdown/keystore.p12` (default `~/.meshtastic/lockdown/keystore.p12`) + per-device `.enc` files
 - **Key management**: Generates random AES-256 key on first use, stores in PKCS12 keystore
 - **Encryption**: AES-256-GCM with random IV per write; format `[1B IV len][IV][ciphertext]`
 - **Data format**: Line-based `"boots\nhours\npassphrase"` (avoids kotlinx-serialization dependency)
-- **Error resilience**: Same nullable master key pattern as Android
+- **Error resilience**: read failures return `null`; write failures throw so the coordinator can log and keep the session unlocked
 
 ## Behavioral Contract
 
 1. **Encryption at rest**: Both platforms encrypt passphrase data. Android via EncryptedSharedPreferences, Desktop via AES-256-GCM with KeyStore-managed key.
-2. **Key format**: Device addresses sanitized to `[a-zA-Z0-9_-]` for file/key safety.
+2. **Key format**: Device addresses are sanitized for file/key safety.
 3. **No logging**: Implementations MUST NOT log passphrase content or full device addresses.
 4. **Thread safety**: Android `SharedPreferences.edit().apply()` is async-safe. JVM file I/O is synchronous (called from single-threaded radio dispatcher).
 5. **Lifecycle**: Store persists across app restarts. Cleared only on explicit `clearPassphrase()` call (auth failure) or app data wipe.
-6. **DEFAULT_BOOTS**: Companion constant (50) used as default by both UI and store implementations.
+6. **DEFAULT_BOOTS**: Companion constant (50) is the shared default for provisioning and cached TTL metadata.
