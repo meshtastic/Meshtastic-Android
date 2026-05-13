@@ -326,4 +326,10 @@ interface RadioController {
      * @param address The new device identifier.
      */
     fun setDeviceAddress(address: String)
+
+    /** Submits a lockdown passphrase to authenticate with a TAK-locked device. */
+    suspend fun sendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int)
+
+    /** Sends a Lock Now command to the connected TAK-enabled device. */
+    suspend fun sendLockNow()
 }

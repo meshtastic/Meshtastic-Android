@@ -86,4 +86,10 @@ interface CommandSender {
 
     /** Requests neighbor info from a specific node. */
     fun requestNeighborInfo(requestId: Int, destNum: Int)
+
+    /** Sends a lockdown passphrase to authenticate with a TAK-locked device. */
+    fun sendLockdownPassphrase(passphrase: String, boots: Int = 0, hours: Int = 0)
+
+    /** Sends a Lock Now command to immediately lock a TAK-enabled device. */
+    fun sendLockNow()
 }
