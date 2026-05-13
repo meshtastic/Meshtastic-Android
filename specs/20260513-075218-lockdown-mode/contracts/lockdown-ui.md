@@ -21,7 +21,7 @@ fun LockdownDialog(
 | `LockdownState` | UI Rendering |
 |-----------------|-------------|
 | `NeedsProvision` | "Set Passphrase" title, passphrase + confirm fields, editable `boots` / `hours` inputs, Submit button |
-| `Locked` | "Enter Passphrase" title, passphrase field, lock reason when present, Submit button |
+| `Locked` | "Enter Passphrase" title, passphrase field, lock reason when present, editable `boots` / `hours` inputs, Submit button |
 | `UnlockFailed` | Same as `Locked` plus incorrect-passphrase error text |
 | `UnlockBackoff` | Same as `Locked` plus backoff error text; Submit disabled |
 | `None` / `Unlocked` / `LockNowAcknowledged` | Dialog hidden |
@@ -30,7 +30,7 @@ fun LockdownDialog(
 
 - **Passphrase field**: `OutlinedTextField` with password visibility toggle
 - **Confirm field**: shown only in provisioning mode
-- **Provisioning TTL fields**: integer `boots` and `hours`; current defaults are `50` and `0`
+- **TTL fields**: integer `boots` and `hours` shown in both provisioning and unlock modes; defaults are `50` and `0`
 - **Validation**: passphrase is required and limited to 64 UTF-8 bytes; confirm field must match in provisioning mode
 - **Disconnect button**: explicit escape hatch when the user does not want to authenticate
 

@@ -69,7 +69,7 @@ FromRadioPacketHandlerImpl -> LockdownCoordinator.handleLockdownStatus()
 LockdownCoordinatorImpl -> LockdownPassphraseStore
 LockdownCoordinatorImpl -> CommandSender
 LockdownCoordinatorImpl -> ServiceRepository
-LockdownCoordinatorImpl -> MeshConnectionManager
+LockdownCoordinatorImpl -> Lazy<MeshConnectionManager>  (breaks DI cycle)
 UIViewModel / ConnectionsViewModel -> ServiceRepository.lockdownState
 RadioConfigViewModel -> ServiceRepository.lockdownTokenInfo / sessionAuthorized
 LockdownDialog -> UIViewModel.sendLockdownUnlock() / disconnect callback

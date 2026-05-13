@@ -186,6 +186,15 @@ class LockdownCoordinatorImplTest {
     }
 
     @Test
+    fun `NEEDS_PROVISION after lockNow does not trigger LockNowAcknowledged`() {
+        coordinator.lockNow()
+        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.NEEDS_PROVISION))
+
+        // wasLockNow is only checked in handleLocked, not handleNeedsProvision
+        assertIs<LockdownState.NeedsProvision>(serviceRepo.lockdownState.value)
+    }
+
+    @Test
     fun `STATE_UNSPECIFIED leaves current state unchanged`() {
         serviceRepo.setLockdownState(LockdownState.Locked("needs_auth"))
 
@@ -308,6 +317,18 @@ class LockdownCoordinatorImplTest {
         // Session should still be authorized even if save fails
         assertTrue(serviceRepo.sessionAuthorized.value)
         assertIs<LockdownState.Unlocked>(serviceRepo.lockdownState.value)
+    }
+
+    @Test
+    fun `UNLOCKED with no deviceAddress skips save but still authorizes`() {
+        radioService.setDeviceAddress(null)
+        coordinator.submitPassphrase("mypass", boots = 10, hours = 0)
+
+        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED, boots_remaining = 10))
+
+        assertTrue(serviceRepo.sessionAuthorized.value)
+        assertIs<LockdownState.Unlocked>(serviceRepo.lockdownState.value)
+        assertTrue(passphraseStore.saved.isEmpty())
     }
 
     @Test

@@ -31,7 +31,7 @@ Implement client-side support for firmware lockdown mode using the typed `Lockdo
 
 - **II. Zero Lint Tolerance**: ✅ PASS
   - Commands: `./gradlew spotlessApply spotlessCheck detekt`
-  - Modules touched: `:core:model`, `:core:repository`, `:core:data`, `:core:datastore`, `:feature:settings`
+  - Modules touched: `:core:model`, `:core:repository`, `:core:data`, `:core:service`, `:feature:settings`
 
 - **III. Compose Multiplatform UI**: ✅ PASS
   - Lockdown dialog is a non-dismissable `AlertDialog` composable in commonMain (`onDismissRequest = {}`)
