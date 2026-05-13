@@ -27,4 +27,3 @@ import org.meshtastic.feature.map.component.MapControlsOverlayPreview
 fun ScreenshotMapControlsOverlay() {
     MapControlsOverlayPreview()
 }
-

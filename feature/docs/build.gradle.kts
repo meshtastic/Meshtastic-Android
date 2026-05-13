@@ -105,7 +105,6 @@ tasks
 // FR-038: Ensure screenshots are generated before syncing docs resources
 syncDocsToComposeResources.configure { dependsOn(":screenshot-tests:copyDocsScreenshots") }
 
-
 val syncTranslatedDocsToComposeResources by
     tasks.registering(Copy::class) {
         description = "Syncs Crowdin-translated docs into locale-qualified composeResources"
@@ -148,4 +147,3 @@ tasks
             it.name.contains("convertXmlValueResources")
     }
     .configureEach { dependsOn(syncTranslatedDocsToComposeResources) }
-

@@ -36,6 +36,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 @PreviewLightDark
 @Composable
+@Suppress("PreviewPublic")
 fun MessageItemPreview() {
     val sent =
         Message(

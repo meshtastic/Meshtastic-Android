@@ -97,12 +97,10 @@ fun DocsPageRouteScreen(
                 else -> {
                     val markdownText = content.markdown ?: "No content available."
                     val platformUriHandler = LocalUriHandler.current
-                    val docsUriHandler = remember(platformUriHandler) {
-                        DocsLinkUriHandler(
-                            onNavigateToPage = onNavigateToPage,
-                            fallback = platformUriHandler,
-                        )
-                    }
+                    val docsUriHandler =
+                        remember(platformUriHandler) {
+                            DocsLinkUriHandler(onNavigateToPage = onNavigateToPage, fallback = platformUriHandler)
+                        }
                     CompositionLocalProvider(LocalUriHandler provides docsUriHandler) {
                         Markdown(
                             content = markdownText,
@@ -119,14 +117,11 @@ fun DocsPageRouteScreen(
 /**
  * Custom [UriHandler] that intercepts relative doc links and navigates in-app.
  *
- * Relative links like `connections`, `../developer/architecture`, or anchor-only `#section`
- * are resolved to a page ID and dispatched via [onNavigateToPage].
- * External `http(s)://` URLs are forwarded to the [fallback] platform handler.
+ * Relative links like `connections`, `../developer/architecture`, or anchor-only `#section` are resolved to a page ID
+ * and dispatched via [onNavigateToPage]. External `http(s)://` URLs are forwarded to the [fallback] platform handler.
  */
-private class DocsLinkUriHandler(
-    private val onNavigateToPage: (String) -> Unit,
-    private val fallback: UriHandler,
-) : UriHandler {
+private class DocsLinkUriHandler(private val onNavigateToPage: (String) -> Unit, private val fallback: UriHandler) :
+    UriHandler {
     override fun openUri(uri: String) {
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
             fallback.openUri(uri)
@@ -139,11 +134,11 @@ private class DocsLinkUriHandler(
         //   "connections"                    -> "connections"
         //   "../developer/architecture"      -> "architecture"
         //   "mqtt.html"                      -> "mqtt"
-        val cleaned = uri
-            .substringBefore('#')        // strip anchor
-            .substringAfterLast('/')     // take filename segment
-            .removeSuffix(".html")       // strip .html if present
-            .removeSuffix(".md")         // strip .md if present
+        val cleaned =
+            uri.substringBefore('#') // strip anchor
+                .substringAfterLast('/') // take filename segment
+                .removeSuffix(".html") // strip .html if present
+                .removeSuffix(".md") // strip .md if present
 
         if (cleaned.isNotBlank()) {
             onNavigateToPage(cleaned)

@@ -30,12 +30,11 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 @PreviewLightDark
 @Composable
+@Suppress("PreviewPublic")
 fun MapControlsOverlayPreview() {
     AppTheme {
         Box(
-            modifier = Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
             MapControlsOverlay(
@@ -51,4 +50,3 @@ fun MapControlsOverlayPreview() {
         }
     }
 }
-

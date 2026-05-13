@@ -123,4 +123,3 @@ fun ScreenshotEnvironmentMetricsContent() {
 fun ScreenshotNodeDetailContentMinimal() {
     NodeDetailContentMinimalPreview()
 }
-

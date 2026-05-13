@@ -28,6 +28,7 @@ import org.meshtastic.proto.User
 
 @PreviewLightDark
 @Composable
+@Suppress("PreviewPublic")
 fun ReactionItemPreview() {
     AppTheme {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
@@ -40,6 +41,7 @@ fun ReactionItemPreview() {
 
 @PreviewLightDark
 @Composable
+@Suppress("PreviewPublic")
 fun ReactionRowPreview() {
     AppTheme {
         ReactionRow(
