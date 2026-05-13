@@ -20,16 +20,17 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.wifiprovision"
         androidResources.enable = false
+        withHostTest {}
     }
 
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.ble)
             implementation(projects.core.common)
+            implementation(projects.core.di)
             implementation(projects.core.navigation)
             implementation(projects.core.resources)
             implementation(projects.core.ui)

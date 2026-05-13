@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
 import dev.mokkery.mock
+import kotlinx.coroutines.test.TestScope
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
@@ -44,12 +45,13 @@ class NodeManagerImplTest {
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val serviceBroadcasts: ServiceBroadcasts = mock(MockMode.autofill)
     private val notificationManager: NotificationManager = mock(MockMode.autofill)
+    private val testScope = TestScope()
 
     private lateinit var nodeManager: NodeManagerImpl
 
     @BeforeTest
     fun setUp() {
-        nodeManager = NodeManagerImpl(nodeRepository, serviceBroadcasts, notificationManager)
+        nodeManager = NodeManagerImpl(nodeRepository, serviceBroadcasts, notificationManager, testScope)
     }
 
     @Test

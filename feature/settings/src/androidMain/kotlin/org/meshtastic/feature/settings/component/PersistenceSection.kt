@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Output
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +36,8 @@ import org.meshtastic.core.resources.export_data_csv
 import org.meshtastic.core.resources.save_rangetest
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Output
 import org.meshtastic.core.ui.theme.AppTheme
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -81,7 +81,7 @@ fun PersistenceSection(
 
         ListItem(
             text = stringResource(Res.string.save_rangetest),
-            leadingIcon = Icons.Rounded.Output,
+            leadingIcon = MeshtasticIcons.Output,
             trailingIcon = null,
         ) {
             val intent =
@@ -95,7 +95,7 @@ fun PersistenceSection(
 
         ListItem(
             text = stringResource(Res.string.export_data_csv),
-            leadingIcon = Icons.Rounded.Output,
+            leadingIcon = MeshtasticIcons.Output,
             trailingIcon = null,
         ) {
             val intent =
@@ -111,6 +111,6 @@ fun PersistenceSection(
 
 @Preview(showBackground = true)
 @Composable
-private fun PersistenceSectionPreview() {
+fun PersistenceSectionPreview() {
     AppTheme { PersistenceSection(cacheLimit = 100, onSetCacheLimit = {}, nodeShortName = "TEST", onExportData = {}) }
 }

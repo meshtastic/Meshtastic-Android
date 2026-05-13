@@ -67,6 +67,7 @@ fun NodeDetailScreen(
 ) {
     LaunchedEffect(nodeId) { viewModel.start(nodeId) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) { viewModel.navigationEvents.collect { onNavigate(it) } }
     NodeDetailScaffold(
         modifier = modifier,
         uiState = uiState,
@@ -118,10 +119,12 @@ private fun NodeDetailScaffold(
             onAction = { action ->
                 when (action) {
                     is NodeDetailAction.ShareContact -> activeOverlay = NodeDetailOverlay.SharedContact
+
                     is NodeDetailAction.OpenCompass -> {
                         actualCompassViewModel?.start(action.node, action.displayUnits)
                         activeOverlay = NodeDetailOverlay.Compass
                     }
+
                     else ->
                         handleNodeAction(
                             action = action,
@@ -163,8 +166,10 @@ private fun NodeDetailOverlays(
 
     when (overlay) {
         is NodeDetailOverlay.SharedContact -> node?.let { SharedContactDialog(it, onDismiss) }
+
         is NodeDetailOverlay.FirmwareReleaseInfo ->
             NodeDetailBottomSheet(onDismiss) { FirmwareReleaseSheetContent(firmwareRelease = overlay.release) }
+
         is NodeDetailOverlay.Compass -> {
             DisposableEffect(Unit) { onDispose { compassViewModel?.stop() } }
             NodeDetailBottomSheet(
@@ -182,6 +187,7 @@ private fun NodeDetailOverlays(
                 )
             }
         }
+
         null -> {}
     }
 }

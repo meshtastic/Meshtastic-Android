@@ -15,7 +15,6 @@
 .externalNativeBuild
 .cxx
 /app/release
-/buildSrc/build
 **/debug/**
 **/release/**
 
@@ -28,6 +27,9 @@ keystore.properties
 
 # Kotlin compiler
 .kotlin
+
+# Generated docs screenshots (regenerated from reference images)
+docs/screenshots/
 
 # VS code
 .vscode/settings.json
@@ -53,3 +55,14 @@ wireless-install.sh
 .worktrees/
 /firebase-debug.log.jdk/
 firebase-debug.log
+.agent_plans/
+.agent_refs/
+.agent_artifacts/
+
+# Local library development clones
+/coil/
+/kable/
+.opencode/
+/desktop/bin/
+/build-logic/convention/bin/
+/.specify/extensions/.cache/

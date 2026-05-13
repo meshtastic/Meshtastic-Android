@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,31 +19,18 @@ package org.meshtastic.feature.settings.radio
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.AdminPanelSettings
-import androidx.compose.material.icons.rounded.AppSettingsAlt
-import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.CleaningServices
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.PowerSettingsNew
-import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material.icons.rounded.Restore
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Storage
-import androidx.compose.material.icons.rounded.SystemUpdate
-import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.navigation.FirmwareRoutes
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.advanced_title
@@ -54,6 +41,10 @@ import org.meshtastic.core.resources.device_configuration
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.factory_reset
 import org.meshtastic.core.resources.firmware_update_title
+import org.meshtastic.core.resources.ic_power_settings_new
+import org.meshtastic.core.resources.ic_restart_alt
+import org.meshtastic.core.resources.ic_restore
+import org.meshtastic.core.resources.ic_storage
 import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.message_device_managed
 import org.meshtastic.core.resources.module_settings
@@ -62,6 +53,16 @@ import org.meshtastic.core.resources.radio_configuration
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.AdminPanelSettings
+import org.meshtastic.core.ui.icon.AppSettingsAlt
+import org.meshtastic.core.ui.icon.BugReport
+import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.CleaningServices
+import org.meshtastic.core.ui.icon.Download
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Settings
+import org.meshtastic.core.ui.icon.SystemUpdate
+import org.meshtastic.core.ui.icon.Upload
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 
@@ -101,7 +102,13 @@ private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClic
             ManagedMessage()
         }
         ConfigRoute.radioConfigRoutes.forEach {
-            ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
+            ListItem(
+                text = stringResource(it.title),
+                leadingIcon = it.icon?.let { res -> vectorResource(res) },
+                enabled = enabled,
+            ) {
+                onRouteClick(it)
+            }
         }
     }
 }
@@ -114,11 +121,11 @@ private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate
         }
         ListItem(
             text = stringResource(Res.string.device_configuration),
-            leadingIcon = Icons.Rounded.AppSettingsAlt,
-            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.AppSettingsAlt,
+            trailingIcon = MeshtasticIcons.ChevronRight,
             enabled = enabled,
         ) {
-            onNavigate(SettingsRoutes.DeviceConfiguration)
+            onNavigate(SettingsRoute.DeviceConfiguration)
         }
     }
 }
@@ -131,11 +138,11 @@ private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNaviga
         }
         ListItem(
             text = stringResource(Res.string.module_settings),
-            leadingIcon = Icons.Rounded.Settings,
-            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.Settings,
+            trailingIcon = MeshtasticIcons.ChevronRight,
             enabled = enabled,
         ) {
-            onNavigate(SettingsRoutes.ModuleConfiguration)
+            onNavigate(SettingsRoute.ModuleConfiguration)
         }
     }
 }
@@ -149,13 +156,13 @@ private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport:
 
         ListItem(
             text = stringResource(Res.string.import_configuration),
-            leadingIcon = Icons.Rounded.Download,
+            leadingIcon = MeshtasticIcons.Download,
             enabled = enabled,
             onClick = onImport,
         )
         ListItem(
             text = stringResource(Res.string.export_configuration),
-            leadingIcon = Icons.Rounded.Upload,
+            leadingIcon = MeshtasticIcons.Upload,
             enabled = enabled,
             onClick = onExport,
         )
@@ -167,14 +174,14 @@ private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit)
     ExpressiveSection(title = stringResource(Res.string.administration)) {
         ListItem(
             text = stringResource(Res.string.administration),
-            leadingIcon = Icons.Rounded.AdminPanelSettings,
-            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.AdminPanelSettings,
+            trailingIcon = MeshtasticIcons.ChevronRight,
             leadingIconTint = MaterialTheme.colorScheme.error,
             textColor = MaterialTheme.colorScheme.error,
             trailingIconTint = MaterialTheme.colorScheme.error,
             enabled = enabled,
         ) {
-            onNavigate(SettingsRoutes.Administration)
+            onNavigate(SettingsRoute.Administration)
         }
     }
 }
@@ -189,17 +196,17 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
         if (isOtaCapable) {
             ListItem(
                 text = stringResource(Res.string.firmware_update_title),
-                leadingIcon = Icons.Rounded.SystemUpdate,
+                leadingIcon = MeshtasticIcons.SystemUpdate,
                 enabled = enabled,
-                onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+                onClick = { onNavigate(FirmwareRoute.FirmwareUpdate) },
             )
         }
 
         ListItem(
             text = stringResource(Res.string.clean_node_database_title),
-            leadingIcon = Icons.Rounded.CleaningServices,
+            leadingIcon = MeshtasticIcons.CleaningServices,
             enabled = enabled,
-            onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
+            onClick = { onNavigate(SettingsRoute.CleanNodeDb) },
         )
 
         ListItem(
@@ -211,18 +218,18 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
 
         ListItem(
             text = stringResource(Res.string.debug_panel),
-            leadingIcon = Icons.Rounded.BugReport,
+            leadingIcon = MeshtasticIcons.BugReport,
             enabled = enabled,
-            onClick = { onNavigate(SettingsRoutes.DebugPanel) },
+            onClick = { onNavigate(SettingsRoute.DebugPanel) },
         )
     }
 }
 
-enum class AdminRoute(val icon: ImageVector, val title: StringResource) {
-    REBOOT(Icons.Rounded.RestartAlt, Res.string.reboot),
-    SHUTDOWN(Icons.Rounded.PowerSettingsNew, Res.string.shutdown),
-    FACTORY_RESET(Icons.Rounded.Restore, Res.string.factory_reset),
-    NODEDB_RESET(Icons.Rounded.Storage, Res.string.nodedb_reset),
+enum class AdminRoute(val icon: DrawableResource, val title: StringResource) {
+    REBOOT(Res.drawable.ic_restart_alt, Res.string.reboot),
+    SHUTDOWN(Res.drawable.ic_power_settings_new, Res.string.shutdown),
+    FACTORY_RESET(Res.drawable.ic_restore, Res.string.factory_reset),
+    NODEDB_RESET(Res.drawable.ic_storage, Res.string.nodedb_reset),
 }
 
 @Composable

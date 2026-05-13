@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,15 +23,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.automirrored.outlined.VolumeMute
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.QrCode2
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -57,19 +48,30 @@ import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.share_contact
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.Favorite
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Message
+import org.meshtastic.core.ui.icon.NotFavorite
+import org.meshtastic.core.ui.icon.QrCode2
+import org.meshtastic.core.ui.icon.VolumeMute
+import org.meshtastic.core.ui.icon.VolumeOff
+import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.feature.node.model.LogsType
-import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
+import org.meshtastic.proto.Config
 
 @Composable
 fun DeviceActions(
     node: Node,
+    ourNode: Node?,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
-    metricsState: MetricsState,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
+    isFahrenheit: Boolean,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
 ) {
@@ -85,10 +87,12 @@ fun DeviceActions(
 
         TelemetricActionsSection(
             node = node,
+            ourNode = ourNode,
             availableLogs = availableLogs,
             lastTracerouteTime = lastTracerouteTime,
             lastRequestNeighborsTime = lastRequestNeighborsTime,
-            metricsState = metricsState,
+            displayUnits = displayUnits,
+            isFahrenheit = isFahrenheit,
             onAction = onAction,
             isLocal = isLocal,
         )
@@ -113,7 +117,7 @@ private fun PrimaryActionsRow(node: Node, isLocal: Boolean, onAction: (NodeDetai
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
             ) {
-                Icon(Icons.AutoMirrored.Filled.Message, contentDescription = null)
+                Icon(MeshtasticIcons.Message, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(Res.string.direct_message))
             }
@@ -124,7 +128,7 @@ private fun PrimaryActionsRow(node: Node, isLocal: Boolean, onAction: (NodeDetai
             modifier = if (node.isEffectivelyUnmessageable || isLocal) Modifier.weight(1f) else Modifier,
             shape = MaterialTheme.shapes.large,
         ) {
-            Icon(Icons.Rounded.QrCode2, contentDescription = null)
+            Icon(MeshtasticIcons.QrCode2, contentDescription = null)
             if (node.isEffectivelyUnmessageable || isLocal) {
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(Res.string.share_contact))
@@ -137,7 +141,7 @@ private fun PrimaryActionsRow(node: Node, isLocal: Boolean, onAction: (NodeDetai
                 onCheckedChange = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(node))) },
             ) {
                 Icon(
-                    imageVector = if (node.isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                    imageVector = if (node.isFavorite) MeshtasticIcons.Favorite else MeshtasticIcons.NotFavorite,
                     contentDescription = stringResource(Res.string.favorite),
                     tint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
                 )
@@ -153,9 +157,9 @@ private fun ManagementActions(node: Node, onAction: (NodeDetailAction) -> Unit) 
             text = stringResource(Res.string.ignore),
             leadingIcon =
             if (node.isIgnored) {
-                Icons.AutoMirrored.Outlined.VolumeMute
+                MeshtasticIcons.VolumeMute
             } else {
-                Icons.AutoMirrored.Default.VolumeUp
+                MeshtasticIcons.VolumeUp
             },
             checked = node.isIgnored,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(node))) },
@@ -166,9 +170,9 @@ private fun ManagementActions(node: Node, onAction: (NodeDetailAction) -> Unit) 
                 text = stringResource(Res.string.mute_notifications),
                 leadingIcon =
                 if (node.isMuted) {
-                    Icons.AutoMirrored.Filled.VolumeOff
+                    MeshtasticIcons.VolumeOff
                 } else {
-                    Icons.AutoMirrored.Default.VolumeUp
+                    MeshtasticIcons.VolumeUp
                 },
                 checked = node.isMuted,
                 onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Mute(node))) },
@@ -177,7 +181,7 @@ private fun ManagementActions(node: Node, onAction: (NodeDetailAction) -> Unit) 
 
         ListItem(
             text = stringResource(Res.string.remove),
-            leadingIcon = Icons.Rounded.Delete,
+            leadingIcon = MeshtasticIcons.Delete,
             trailingIcon = null,
             textColor = MaterialTheme.colorScheme.error,
             leadingIconTint = MaterialTheme.colorScheme.error,

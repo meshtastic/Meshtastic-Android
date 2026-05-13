@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,59 +17,100 @@
 package org.meshtastic.core.network.repository
 
 import co.touchlab.kermit.Logger
-import io.github.davidepianca98.MQTTClient
-import io.github.davidepianca98.mqtt.MQTTVersion
-import io.github.davidepianca98.mqtt.Subscription
-import io.github.davidepianca98.mqtt.packets.Qos
-import io.github.davidepianca98.mqtt.packets.mqttv5.SubscriptionOptions
-import io.github.davidepianca98.socket.tls.TLSClientSettings
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecodingException
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.mqtt.ConnectionState
+import org.meshtastic.mqtt.MqttClient
+import org.meshtastic.mqtt.MqttEndpoint
+import org.meshtastic.mqtt.MqttException
+import org.meshtastic.mqtt.MqttLogLevel
+import org.meshtastic.mqtt.MqttMessage
+import org.meshtastic.mqtt.QoS
+import org.meshtastic.mqtt.packet.Subscription
+import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
+import kotlin.concurrent.Volatile
 
 @Single(binds = [MQTTRepository::class])
 class MQTTRepositoryImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val nodeRepository: NodeRepository,
-    dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
+    private val buildConfigProvider: org.meshtastic.core.common.BuildConfigProvider,
+    dispatchers: CoroutineDispatchers,
 ) : MQTTRepository {
+
+    internal constructor(
+        radioConfigRepository: RadioConfigRepository,
+        nodeRepository: NodeRepository,
+        buildConfigProvider: org.meshtastic.core.common.BuildConfigProvider,
+        dispatchers: CoroutineDispatchers,
+        mqttClientFactory: (MqttClientSetup) -> MqttClientSession,
+    ) : this(
+        radioConfigRepository = radioConfigRepository,
+        nodeRepository = nodeRepository,
+        buildConfigProvider = buildConfigProvider,
+        dispatchers = dispatchers,
+    ) {
+        this.mqttClientFactory = mqttClientFactory
+    }
 
     companion object {
         private const val DEFAULT_TOPIC_ROOT = "msh"
         private const val DEFAULT_TOPIC_LEVEL = "/2/e/"
         private const val JSON_TOPIC_LEVEL = "/2/json/"
         private const val DEFAULT_SERVER_ADDRESS = "mqtt.meshtastic.org"
+        private const val INITIAL_RECONNECT_DELAY_MS = 1000L
+        private const val MAX_RECONNECT_DELAY_MS = 30_000L
+        private const val RECONNECT_BACKOFF_MULTIPLIER = 2
     }
 
-    private var client: MQTTClient? = null
-    private val json = Json { ignoreUnknownKeys = true }
+    @Volatile private var client: MqttClientSession? = null
+    private var mqttClientFactory: (MqttClientSetup) -> MqttClientSession = ::defaultMqttClientFactory
+
+    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
+    override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private val json = Json {
+        ignoreUnknownKeys = true
+        exceptionsWithDebugInfo = false
+    }
     private val scope = CoroutineScope(dispatchers.default + SupervisorJob())
-    private var clientJob: Job? = null
     private val publishSemaphore = Semaphore(20)
 
     override fun disconnect() {
         Logger.i { "MQTT Disconnecting" }
-        clientJob?.cancel()
-        clientJob = null
+        val c = client
         client = null
+        _connectionState.value = ConnectionState.Disconnected.Idle
+        scope.launch { safeCatching { c?.close() }.onFailure { e -> Logger.w(e) { "MQTT clean disconnect failed" } } }
     }
 
-    @OptIn(ExperimentalUnsignedTypes::class)
+    @OptIn(ExperimentalSerializationApi::class)
     override val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
         val ownerId = "MeshtasticAndroidMqttProxy-${nodeRepository.myId.value ?: "unknown"}"
         val channelSet = radioConfigRepository.channelSetFlow.first()
@@ -77,102 +118,261 @@ class MQTTRepositoryImpl(
 
         val rootTopic = mqttConfig?.root?.ifEmpty { DEFAULT_TOPIC_ROOT } ?: DEFAULT_TOPIC_ROOT
 
-        val (host, port) =
-            (mqttConfig?.address ?: DEFAULT_SERVER_ADDRESS).split(":", limit = 2).let {
-                it[0] to (it.getOrNull(1)?.toIntOrNull() ?: if (mqttConfig?.tls_enabled == true) 8883 else 1883)
-            }
+        val rawAddress = mqttConfig?.address?.ifEmpty { DEFAULT_SERVER_ADDRESS } ?: DEFAULT_SERVER_ADDRESS
+        val endpoint = resolveEndpoint(rawAddress, effectiveTlsEnabled(rawAddress, mqttConfig?.tls_enabled == true))
 
         val newClient =
-            MQTTClient(
-                mqttVersion = MQTTVersion.MQTT5,
-                address = host,
-                port = port,
-                tls = if (mqttConfig?.tls_enabled == true) TLSClientSettings() else null,
-                userName = mqttConfig?.username,
-                password = mqttConfig?.password?.encodeToByteArray()?.toUByteArray(),
-                clientId = ownerId,
-                publishReceived = { packet ->
-                    val topic = packet.topicName
-                    val payload = packet.payload?.toByteArray()
-                    Logger.d { "MQTT received message on topic $topic (size: ${payload?.size ?: 0} bytes)" }
-
-                    if (topic.contains("/json/")) {
-                        try {
-                            val jsonStr = payload?.decodeToString() ?: ""
-                            // Validate JSON by parsing it
-                            json.decodeFromString<MqttJsonPayload>(jsonStr)
-                            Logger.d { "MQTT parsed JSON payload successfully" }
-
-                            trySend(MqttClientProxyMessage(topic = topic, text = jsonStr, retained = packet.retain))
-                        } catch (e: kotlinx.serialization.SerializationException) {
-                            Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
-                        } catch (e: IllegalArgumentException) {
-                            Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
-                        }
-                    } else {
-                        trySend(
-                            MqttClientProxyMessage(
-                                topic = topic,
-                                data_ = payload?.toByteString() ?: okio.ByteString.EMPTY,
-                                retained = packet.retain,
-                            ),
-                        )
-                    }
-                },
+            mqttClientFactory(
+                MqttClientSetup(
+                    ownerId = ownerId,
+                    mqttConfig = mqttConfig,
+                    logLevel = if (buildConfigProvider.isDebug) MqttLogLevel.DEBUG else MqttLogLevel.WARN,
+                ),
             )
-
         client = newClient
 
-        clientJob = scope.launch {
-            try {
-                Logger.i { "MQTT Starting client loop for $host:$port" }
-                newClient.runSuspend()
-            } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
-                Logger.e(e) { "MQTT Client loop error (MQTT)" }
-                close(e)
-            } catch (e: io.github.davidepianca98.socket.IOException) {
-                Logger.e(e) { "MQTT Client loop error (IO)" }
-                close(e)
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                Logger.i { "MQTT Client loop cancelled" }
-                throw e
-            }
-        }
-
-        // Subscriptions
-        val subscriptions = mutableListOf<Subscription>()
-        channelSet.subscribeList.forEach { globalId ->
-            subscriptions.add(
-                Subscription("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)),
-            )
-            if (mqttConfig?.json_enabled == true) {
-                subscriptions.add(
-                    Subscription("$rootTopic$JSON_TOPIC_LEVEL$globalId/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)),
+        val subscriptions: List<Subscription> = buildList {
+            channelSet.subscribeList.forEach { globalId ->
+                add(
+                    Subscription(
+                        "$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+",
+                        maxQos = QoS.AT_LEAST_ONCE,
+                        noLocal = true,
+                    ),
                 )
+                if (mqttConfig?.json_enabled == true) {
+                    add(
+                        Subscription(
+                            "$rootTopic$JSON_TOPIC_LEVEL$globalId/+",
+                            maxQos = QoS.AT_LEAST_ONCE,
+                            noLocal = true,
+                        ),
+                    )
+                }
             }
+            add(Subscription("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+", maxQos = QoS.AT_LEAST_ONCE, noLocal = true))
         }
-        subscriptions.add(Subscription("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)))
 
-        if (subscriptions.isNotEmpty()) {
-            Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
-            newClient.subscribe(subscriptions)
+        // Collect from the SharedFlow before connecting to avoid missing retained messages
+        // that arrive immediately after SUBSCRIBE.
+        launch { newClient.messages.collect { msg -> processMessage(msg) } }
+
+        // Forward the client's connection state to the repo-level StateFlow for UI observation.
+        // Also emit structured log messages on transitions so reconnect attempt counts and
+        // disconnect reason codes are visible in Crashlytics/Datadog without any PII.
+        launch { newClient.connectionState.collect { state -> updateConnectionState(state) } }
+
+        // Retry the initial connect with exponential backoff. Once established,
+        // autoReconnect handles subsequent drops and re-subscribes internally.
+        launch {
+            var reconnectDelay = INITIAL_RECONNECT_DELAY_MS
+            while (true) {
+                val result = safeCatching {
+                    Logger.i {
+                        if (buildConfigProvider.isDebug) "MQTT Connecting to $endpoint" else "MQTT Connecting..."
+                    }
+                    newClient.connect(endpoint)
+                    if (subscriptions.isNotEmpty()) {
+                        Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
+                        newClient.subscribe(subscriptions)
+                    }
+                    Logger.i { "MQTT connected and subscribed" }
+                }
+                when {
+                    result.isSuccess -> return@launch
+
+                    result.exceptionOrNull() is MqttException.ConnectionRejected -> {
+                        Logger.e(result.exceptionOrNull()) { "MQTT connection rejected (unrecoverable), stopping" }
+                        close(result.exceptionOrNull()!!)
+                        return@launch
+                    }
+
+                    else -> {
+                        Logger.e(result.exceptionOrNull()) { "MQTT connect failed, retrying in ${reconnectDelay}ms" }
+                        delay(reconnectDelay)
+                        reconnectDelay =
+                            (reconnectDelay * RECONNECT_BACKOFF_MULTIPLIER).coerceAtMost(MAX_RECONNECT_DELAY_MS)
+                    }
+                }
+            }
         }
 
         awaitClose { disconnect() }
     }
 
-    @OptIn(ExperimentalUnsignedTypes::class)
-    override fun publish(topic: String, data: ByteArray, retained: Boolean) {
-        Logger.d { "MQTT publishing message to topic $topic (size: ${data.size} bytes, retained: $retained)" }
-        scope.launch {
-            publishSemaphore.withPermit {
-                client?.publish(
-                    retain = retained,
-                    qos = Qos.AT_LEAST_ONCE,
-                    topic = topic,
-                    payload = data.toUByteArray(),
-                )
+    internal fun updateConnectionState(state: ConnectionState) {
+        _connectionState.value = state
+        when (state) {
+            ConnectionState.Connecting -> Logger.i { "MQTT connecting" }
+
+            ConnectionState.Connected -> Logger.i { "MQTT connected" }
+
+            is ConnectionState.Reconnecting -> {
+                val errorDetail = state.lastError?.message?.let { ": $it" } ?: ""
+                Logger.w { "MQTT reconnecting (attempt ${state.attempt}$errorDetail)" }
+            }
+
+            is ConnectionState.Disconnected -> {
+                state.reason?.let { Logger.w { "MQTT disconnected: ${it.message}" } }
             }
         }
     }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private fun ProducerScope<MqttClientProxyMessage>.processMessage(msg: MqttMessage) {
+        val topic = msg.topic
+        val payload = msg.payload.toByteArray()
+
+        if (topic.contains("/json/")) {
+            try {
+                val jsonStr = payload.decodeToString()
+                json.decodeFromString<MqttJsonPayload>(jsonStr)
+                trySend(MqttClientProxyMessage(topic = topic, text = jsonStr, retained = msg.retain))
+            } catch (e: JsonDecodingException) {
+                Logger.e(e) { "Failed to parse MQTT JSON: ${e.shortMessage} (path: ${e.path})" }
+            } catch (e: SerializationException) {
+                Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
+            } catch (e: IllegalArgumentException) {
+                Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
+            }
+        } else {
+            trySend(MqttClientProxyMessage(topic = topic, data_ = payload.toByteString(), retained = msg.retain))
+        }
+    }
+
+    override fun publish(topic: String, data: ByteArray, retained: Boolean) {
+        val currentClient = client
+        if (currentClient == null) {
+            Logger.w {
+                if (buildConfigProvider.isDebug) {
+                    "MQTT publish to $topic dropped: client not connected"
+                } else {
+                    "MQTT publish dropped: client not connected"
+                }
+            }
+            return
+        }
+        scope.launch {
+            publishSemaphore.withPermit {
+                safeCatching {
+                    currentClient.publish(
+                        MqttMessage(topic = topic, payload = data, qos = QoS.AT_LEAST_ONCE, retain = retained),
+                    )
+                }
+                    .onFailure { e ->
+                        Logger.w(e) {
+                            if (buildConfigProvider.isDebug) {
+                                "MQTT publish to $topic failed"
+                            } else {
+                                "MQTT publish (${data.size} bytes) failed"
+                            }
+                        }
+                    }
+            }
+        }
+    }
+}
+
+internal data class MqttClientSetup(
+    val ownerId: String,
+    val mqttConfig: ModuleConfig.MQTTConfig?,
+    val logLevel: MqttLogLevel,
+)
+
+internal interface MqttClientSession {
+    val messages: Flow<MqttMessage>
+    val connectionState: StateFlow<ConnectionState>
+
+    suspend fun connect(endpoint: MqttEndpoint)
+
+    suspend fun subscribe(subscriptions: List<Subscription>)
+
+    suspend fun publish(message: MqttMessage)
+
+    suspend fun close()
+}
+
+private class DefaultMqttClientSession(private val delegate: MqttClient) : MqttClientSession {
+    override val messages: Flow<MqttMessage> = delegate.messages
+    override val connectionState: StateFlow<ConnectionState> = delegate.connectionState
+
+    override suspend fun connect(endpoint: MqttEndpoint) {
+        delegate.connect(endpoint)
+    }
+
+    override suspend fun subscribe(subscriptions: List<Subscription>) {
+        delegate.subscribe(subscriptions)
+    }
+
+    override suspend fun publish(message: MqttMessage) {
+        delegate.publish(message)
+    }
+
+    override suspend fun close() {
+        delegate.close()
+    }
+}
+
+private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession = DefaultMqttClientSession(
+    MqttClient(setup.ownerId) {
+        keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
+        autoReconnect = true
+        username = setup.mqttConfig?.username
+        setup.mqttConfig?.password?.let { password(it) }
+        logger = KermitMqttLogger()
+        // WARN for production: the library emits endpoint addresses and topic strings at
+        // INFO level. WARN messages (reconnect, timeout, retry) contain no PII and are
+        // exactly the signals needed for production diagnostics.
+        logLevel = setup.logLevel
+    },
+)
+
+private const val MQTT_KEEPALIVE_SECONDS = 30
+private const val MQTT_PORT_PLAIN = 1883
+private const val MQTT_PORT_TLS = 8883
+
+/**
+ * Resolve a user-supplied broker address into an [MqttEndpoint].
+ *
+ * Address resolution rules:
+ * - If [rawAddress] already contains a URI scheme (`scheme://…`), parse it directly via [MqttEndpoint.parse] and
+ *   respect whatever transport / port the user encoded.
+ * - Otherwise wrap it as a TCP endpoint using standard MQTT ports: port 8883 if [tlsEnabled] is `true`, port 1883
+ *   otherwise. This allows standard MQTT brokers to work out of the box.
+ *
+ * Extracted as a top-level function so [MQTTRepositoryImplTest] can exercise every branch without spinning up the full
+ * repository, and so `MqttManagerImpl` (in `:core:data`) can reuse the same parsing rules for the probe API. Visibility
+ * is `public` because Kotlin's `internal` is scoped per Gradle module.
+ */
+fun resolveEndpoint(rawAddress: String, tlsEnabled: Boolean): MqttEndpoint = if (rawAddress.contains("://")) {
+    MqttEndpoint.parse(rawAddress)
+} else {
+    val scheme = if (tlsEnabled) "ssl" else "tcp"
+    val defaultPort = if (tlsEnabled) MQTT_PORT_TLS else MQTT_PORT_PLAIN
+    // Preserve the user-supplied port (if any) instead of naively appending the default.
+    val hostAndPort = if (rawAddress.contains(":")) rawAddress else "$rawAddress:$defaultPort"
+    MqttEndpoint.parse("$scheme://$hostAndPort")
+}
+
+private const val DEFAULT_PUBLIC_SERVER = "mqtt.meshtastic.org"
+
+fun effectiveTlsEnabled(address: String, tlsEnabled: Boolean): Boolean =
+    tlsEnabled || extractHost(address).equals(DEFAULT_PUBLIC_SERVER, ignoreCase = true)
+
+/**
+ * Extracts the bare hostname from an address that may include a scheme, port, or path. Examples:
+ * - `mqtt.meshtastic.org` → `mqtt.meshtastic.org`
+ * - `mqtt.meshtastic.org:1883` → `mqtt.meshtastic.org`
+ * - `tcp://mqtt.meshtastic.org:1883` → `mqtt.meshtastic.org`
+ * - `ssl://mqtt.meshtastic.org` → `mqtt.meshtastic.org`
+ */
+internal fun extractHost(address: String): String {
+    val afterScheme =
+        if (address.contains("://")) {
+            address.substringAfter("://")
+        } else {
+            address
+        }
+    // Remove path (if any), then remove port
+    return afterScheme.substringBefore("/").substringBefore(":")
 }

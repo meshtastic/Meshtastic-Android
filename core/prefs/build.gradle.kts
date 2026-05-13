@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ kotlin {
     android {
         namespace = "org.meshtastic.core.prefs"
         androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
+        withHostTest {}
     }
 
     sourceSets {
@@ -39,9 +39,6 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
         }
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-        }
+        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

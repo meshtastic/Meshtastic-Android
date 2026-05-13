@@ -64,8 +64,8 @@ develocity {
 
             if (cacheUrl) {
                 def isLogic = settingsDir.name == "build-logic"
-                println "Meshtastic ${isLogic ? 'Build Logic' : 'Build'}: Remote cache URL found."
-                
+                logger.lifecycle "Meshtastic ${isLogic ? 'Build Logic' : 'Build'}: Remote cache URL found."
+
                 // Ensure trailing slash for Develocity/GE servers
                 url = cacheUrl.endsWith("/") ? cacheUrl : "${cacheUrl}/"
                 

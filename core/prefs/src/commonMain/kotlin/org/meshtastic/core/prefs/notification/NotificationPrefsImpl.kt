@@ -53,6 +53,13 @@ class NotificationPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_NODE_EVENTS_ENABLED] = enabled } }
     }
 
+    override val nodeEventsAutoDisabledForEvent: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_NODE_EVENTS_AUTO_DISABLED] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setNodeEventsAutoDisabledForEvent(disabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_NODE_EVENTS_AUTO_DISABLED] = disabled } }
+    }
+
     override val lowBatteryEnabled: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_LOW_BATTERY_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
 
@@ -63,6 +70,7 @@ class NotificationPrefsImpl(
     private companion object {
         val KEY_MESSAGES_ENABLED = booleanPreferencesKey("notif_messages_enabled")
         val KEY_NODE_EVENTS_ENABLED = booleanPreferencesKey("notif_node_events_enabled")
+        val KEY_NODE_EVENTS_AUTO_DISABLED = booleanPreferencesKey("notif_node_events_auto_disabled_event")
         val KEY_LOW_BATTERY_ENABLED = booleanPreferencesKey("notif_low_battery_enabled")
     }
 }

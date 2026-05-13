@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,29 +17,30 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import okio.IOException
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
-import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.NodeInfo
-import org.meshtastic.proto.ToRadio
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
@@ -54,14 +55,14 @@ class MeshConfigFlowManagerImpl(
     private val serviceBroadcasts: ServiceBroadcasts,
     private val analytics: PlatformAnalytics,
     private val commandSender: CommandSender,
-    private val packetHandler: PacketHandler,
+    private val heartbeatSender: DataLayerHeartbeatSender,
+    private val notificationPrefs: NotificationPrefs,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshConfigFlowManager {
-    private lateinit var scope: CoroutineScope
     private val wantConfigDelay = 100L
 
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
+    /** Monotonically increasing generation so async clears from a stale handshake are discarded. */
+    private val handshakeGeneration = atomic(0L)
 
     /**
      * Type-safe handshake state machine. Each state carries exactly the data that is valid during that phase,
@@ -80,7 +81,7 @@ class MeshConfigFlowManagerImpl(
          * [rawMyNodeInfo] arrives first (my_info packet); [metadata] may arrive shortly after. Both are consumed
          * together by [buildMyNodeInfo] at Stage 1 completion.
          */
-        data class ReceivingConfig(val rawMyNodeInfo: ProtoMyNodeInfo, var metadata: DeviceMetadata? = null) :
+        data class ReceivingConfig(val rawMyNodeInfo: ProtoMyNodeInfo, val metadata: DeviceMetadata? = null) :
             HandshakeState()
 
         /**
@@ -89,10 +90,8 @@ class MeshConfigFlowManagerImpl(
          * [myNodeInfo] was committed at the Stage 1→2 transition. [nodes] accumulates [NodeInfo] packets until
          * `config_complete_id` arrives.
          */
-        data class ReceivingNodeInfo(
-            val myNodeInfo: SharedMyNodeInfo,
-            val nodes: MutableList<NodeInfo> = mutableListOf(),
-        ) : HandshakeState()
+        data class ReceivingNodeInfo(val myNodeInfo: SharedMyNodeInfo, val nodes: List<NodeInfo> = emptyList()) :
+            HandshakeState()
 
         /** Both stages finished. The app is fully connected. */
         data class Complete(val myNodeInfo: SharedMyNodeInfo) : HandshakeState()
@@ -113,6 +112,7 @@ class MeshConfigFlowManagerImpl(
                 }
                 handleConfigOnlyComplete(state)
             }
+
             HandshakeConstants.NODE_INFO_NONCE -> {
                 if (state !is HandshakeState.ReceivingNodeInfo) {
                     Logger.w { "Ignoring Stage 2 config_complete in state=$state" }
@@ -120,6 +120,7 @@ class MeshConfigFlowManagerImpl(
                 }
                 handleNodeInfoComplete(state)
             }
+
             else -> Logger.w { "Config complete id mismatch: $configCompleteId" }
         }
     }
@@ -138,25 +139,28 @@ class MeshConfigFlowManagerImpl(
             return
         }
 
+        // Warn if firmware is below the absolute minimum supported version.
+        // The UI layer already enforces this via FirmwareVersionCheck, so we just log here
+        // for diagnostics rather than hard-disconnecting.
+        finalizedInfo.firmwareVersion?.let { fwVersion ->
+            if (DeviceVersion(fwVersion) < DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)) {
+                Logger.w {
+                    "Firmware $fwVersion is below minimum ${DeviceVersion.ABS_MIN_FW_VERSION} — " +
+                        "protocol incompatibilities may occur"
+                }
+            }
+        }
+
         handshakeState = HandshakeState.ReceivingNodeInfo(myNodeInfo = finalizedInfo)
         Logger.i { "myNodeInfo committed (nodeNum=${finalizedInfo.myNodeNum})" }
         connectionManager.value.onRadioConfigLoaded()
 
         scope.handledLaunch {
             delay(wantConfigDelay)
-            sendHeartbeat()
+            heartbeatSender.sendHeartbeat("inter-stage")
             delay(wantConfigDelay)
             Logger.i { "Requesting NodeInfo (Stage 2)" }
             connectionManager.value.startNodeInfoOnly()
-        }
-    }
-
-    private fun sendHeartbeat() {
-        try {
-            packetHandler.sendToRadio(ToRadio(heartbeat = Heartbeat()))
-            Logger.d { "Heartbeat sent between nonce stages" }
-        } catch (ex: IOException) {
-            Logger.w(ex) { "Failed to send heartbeat; proceeding with node-info stage" }
         }
     }
 
@@ -167,16 +171,12 @@ class MeshConfigFlowManagerImpl(
 
         // Transition state immediately (synchronously) to prevent duplicate handling.
         // The async work below (DB writes, broadcasts) proceeds without the guard.
+        // Because nodes is now immutable, no snapshot is needed — state.nodes IS the snapshot.
+        // Any stall-guard retry that re-enters handleNodeInfo will see Complete state and be ignored.
         handshakeState = HandshakeState.Complete(myNodeInfo = info)
 
-        // Snapshot and clear immediately so that a concurrent stall-guard retry (which
-        // resends want_config_id and causes the firmware to restart the node_info burst)
-        // starts accumulating into a fresh list rather than doubling this batch.
-        val nodesToProcess = state.nodes.toList()
-        state.nodes.clear()
-
         val entities =
-            nodesToProcess.mapNotNull { nodeInfo ->
+            state.nodes.mapNotNull { nodeInfo ->
                 nodeManager.installNodeInfo(nodeInfo, withBroadcast = false)
                 nodeManager.nodeDBbyNodeNum[nodeInfo.num]
                     ?: run {
@@ -202,6 +202,13 @@ class MeshConfigFlowManagerImpl(
         // Transition to Stage 1, discarding any stale data from a prior interrupted handshake.
         handshakeState = HandshakeState.ReceivingConfig(rawMyNodeInfo = myInfo)
         nodeManager.setMyNodeNum(myInfo.my_node_num)
+        nodeManager.setFirmwareEdition(myInfo.firmware_edition)
+        applyEventFirmwareNotificationDefaults(myInfo.firmware_edition)
+
+        // Bump the generation so that a pending clear from a prior (interrupted) handshake
+        // will see a stale snapshot and skip its writes, preventing it from wiping config
+        // that was saved by this (newer) handshake's incoming packets.
+        val gen = handshakeGeneration.incrementAndGet()
 
         // Clear persisted radio config so the new handshake starts from a clean slate.
         // DataStore serializes its own writes, so the clear will precede subsequent
@@ -209,6 +216,7 @@ class MeshConfigFlowManagerImpl(
         // session (handleFromRadio processes packets sequentially, so later dispatches always
         // occur after this one returns).
         scope.handledLaunch {
+            if (handshakeGeneration.value != gen) return@handledLaunch // Stale handshake; skip.
             radioConfigRepository.clearChannelSet()
             radioConfigRepository.clearLocalConfig()
             radioConfigRepository.clearLocalModuleConfig()
@@ -221,7 +229,7 @@ class MeshConfigFlowManagerImpl(
         Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
         val state = handshakeState
         if (state is HandshakeState.ReceivingConfig) {
-            state.metadata = metadata
+            handshakeState = state.copy(metadata = metadata)
             // Persist the metadata immediately — buildMyNodeInfo() reads it at Stage 1 complete,
             // but the DB write does not need to wait until then.
             if (metadata != DeviceMetadata()) {
@@ -235,7 +243,7 @@ class MeshConfigFlowManagerImpl(
     override fun handleNodeInfo(info: NodeInfo) {
         val state = handshakeState
         if (state is HandshakeState.ReceivingNodeInfo) {
-            state.nodes.add(info)
+            handshakeState = state.copy(nodes = state.nodes + info)
         } else {
             Logger.w { "Ignoring NodeInfo outside Stage 2 (state=$state)" }
         }
@@ -264,6 +272,7 @@ class MeshConfigFlowManagerImpl(
                     null,
                     HardwareModel.UNSET,
                     -> null
+
                     else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                 },
                 firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
@@ -283,5 +292,19 @@ class MeshConfigFlowManagerImpl(
     } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
         Logger.e(ex) { "Failed to build MyNodeInfo" }
         null
+    }
+
+    private fun applyEventFirmwareNotificationDefaults(edition: FirmwareEdition) {
+        if (edition != FirmwareEdition.VANILLA) {
+            if (!notificationPrefs.nodeEventsAutoDisabledForEvent.value) {
+                notificationPrefs.setNodeEventsEnabled(false)
+                notificationPrefs.setNodeEventsAutoDisabledForEvent(true)
+            }
+        } else {
+            if (notificationPrefs.nodeEventsAutoDisabledForEvent.value) {
+                notificationPrefs.setNodeEventsEnabled(true)
+                notificationPrefs.setNodeEventsAutoDisabledForEvent(false)
+            }
+        }
     }
 }

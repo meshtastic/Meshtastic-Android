@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,85 +48,135 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
+import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.snr
+import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.time.Duration.Companion.days
 
 object CommonCharts {
-    const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
     const val SCROLL_BIAS = 0.5f
 
-    /** Gets the Material 3 primary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3PrimaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
-
-    /** Gets the Material 3 secondary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3SecondaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha)
-
-    /** Gets the Material 3 tertiary color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3TertiaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.tertiary.copy(alpha = alpha)
-
-    /** Gets the Material 3 error color with optional opacity adjustment. */
-    @Composable
-    fun getMaterial3ErrorColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.error.copy(alpha = alpha)
-
-    /** A dynamic [CartesianValueFormatter] that adjusts the time format based on the visible X range. */
+    /**
+     * A dynamic [CartesianValueFormatter] that adjusts the time format based on the total data span
+     * ([CartesianRanges.xLength]).
+     *
+     * Since chart data is already filtered by [TimeFrame], `xLength` approximates the visible window. Vico's formatter
+     * receives [CartesianMeasuringContext] during measurement passes — **not** [CartesianDrawingContext] — so
+     * `context.zoom` is unavailable and we intentionally avoid it.
+     *
+     * | Data span | Format                 | Example          |
+     * |-----------|------------------------|------------------|
+     * | ≤ 1 hour  | Time with seconds      | 3:45:12 PM       |
+     * | ≤ 2 days  | Time only              | 3:45 PM          |
+     * | ≤ 14 days | Date + time (two-line) | 4/9/26 ↵ 3:45 PM |
+     * | > 14 days | Date only              | 4/9/26           |
+     */
     val dynamicTimeFormatter = CartesianValueFormatter { context, value, _ ->
         val timestampMillis = (value * MS_PER_SEC.toDouble()).toLong()
-        val xLength = context.ranges.xLength
-        val zoom = if (context is CartesianDrawingContext) context.zoom else 1f
-        val visibleSpan = xLength / zoom
+        val dataSpanSeconds = context.ranges.xLength
 
         when {
-            visibleSpan <= TimeConstants.ONE_HOUR.inWholeSeconds -> DateFormatter.formatTimeWithSeconds(timestampMillis)
-            visibleSpan <= 2.days.inWholeSeconds -> DateFormatter.formatTime(timestampMillis)
-            visibleSpan <= 14.days.inWholeSeconds -> {
-                // < 2 weeks visible: separate date and time with a newline
+            dataSpanSeconds <= TimeConstants.ONE_HOUR.inWholeSeconds ->
+                DateFormatter.formatTimeWithSeconds(timestampMillis)
+
+            dataSpanSeconds <= 2.days.inWholeSeconds -> DateFormatter.formatTime(timestampMillis)
+
+            dataSpanSeconds <= 14.days.inWholeSeconds -> {
                 val dateStr = DateFormatter.formatDate(timestampMillis)
                 val timeStr = DateFormatter.formatTime(timestampMillis)
                 "$dateStr\n$timeStr"
             }
+
             else -> DateFormatter.formatDate(timestampMillis)
         }
     }
 
-    fun formatDateTime(timestampMillis: Long): String = DateFormatter.formatDateTime(timestampMillis)
+    /**
+     * Shared bottom time axis used by all metric chart screens.
+     *
+     * Uses `spacing = 1` with `addExtremeLabelPadding = true` so Vico's built-in auto-thinning controls label density —
+     * it measures label widths and automatically skips labels when they would overlap, adapting to both zoom level and
+     * screen width.
+     */
+    @Composable
+    fun rememberBottomTimeAxis(): HorizontalAxis<Axis.Position.Horizontal.Bottom> = HorizontalAxis.rememberBottom(
+        label = ChartStyling.rememberAxisLabel(),
+        valueFormatter = dynamicTimeFormatter,
+        itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 1 }, addExtremeLabelPadding = true),
+        labelRotationDegrees = LABEL_ROTATION_DEGREES,
+    )
+
+    private const val LABEL_ROTATION_DEGREES = 45f
 }
 
 data class LegendData(
     val nameRes: StringResource,
     val color: Color,
     val isLine: Boolean = false,
-    val environmentMetric: Environment? = null,
+    val metricKey: Any? = null,
+    /** When non-null, overrides the resolved [nameRes] string in the legend label. */
+    val labelOverride: String? = null,
 )
 
 data class InfoDialogData(val titleRes: StringResource, val definitionRes: StringResource, val color: Color)
 
-/** Creates the legend that identifies the colors used for the graph. */
+/**
+ * Creates the legend that identifies the colors used for the graph.
+ *
+ * When [onToggle] is provided, each item renders as a Material 3 [FilterChip] so users can tap to show/hide chart
+ * series. This provides proper M3 affordance (selected state styling, ripple, accessibility semantics). When [onToggle]
+ * is null, a compact read-only legend is shown instead.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun Legend(legendData: List<LegendData>, modifier: Modifier = Modifier) {
+fun Legend(
+    legendData: List<LegendData>,
+    modifier: Modifier = Modifier,
+    hiddenSet: Set<Int> = emptySet(),
+    onToggle: ((Int) -> Unit)? = null,
+) {
     FlowRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().padding(vertical = 2.dp),
         horizontalArrangement = Arrangement.Center,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-        legendData.forEach { data ->
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
-                LegendLabel(text = stringResource(data.nameRes), color = data.color, isLine = data.isLine)
+        legendData.forEachIndexed { index, data ->
+            val isVisible = index !in hiddenSet
+            val label = data.labelOverride ?: stringResource(data.nameRes)
+            if (onToggle != null) {
+                FilterChip(
+                    selected = isVisible,
+                    onClick = { onToggle(index) },
+                    label = { Text(text = label, style = MaterialTheme.typography.labelSmall) },
+                    leadingIcon = { LegendIndicator(color = data.color, isLine = data.isLine) },
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                )
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
+                    LegendIndicator(color = data.color, isLine = data.isLine)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = label,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                    )
+                }
             }
         }
     }
@@ -137,7 +186,7 @@ fun Legend(legendData: List<LegendData>, modifier: Modifier = Modifier) {
 @Composable
 fun LegendInfoDialog(infoData: List<InfoDialogData>, onDismiss: () -> Unit) {
     AlertDialog(
-        icon = { Icon(imageVector = Icons.Rounded.Info, contentDescription = null) },
+        icon = { Icon(imageVector = MeshtasticIcons.Info, contentDescription = null) },
         title = {
             Text(
                 text = stringResource(Res.string.info),
@@ -180,8 +229,9 @@ fun LegendInfoDialog(infoData: List<InfoDialogData>, onDismiss: () -> Unit) {
     )
 }
 
+/** Draws a small colored line segment or circle to identify a chart series. */
 @Composable
-private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
+fun LegendIndicator(color: Color, isLine: Boolean = false) {
     Canvas(modifier = Modifier.size(height = 4.dp, width = if (isLine) 16.dp else 4.dp)) {
         if (isLine) {
             drawLine(
@@ -195,12 +245,6 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
             drawCircle(color = color)
         }
     }
-    Spacer(modifier = Modifier.width(4.dp))
-    Text(
-        text = text,
-        color = MaterialTheme.colorScheme.onSurface,
-        fontSize = MaterialTheme.typography.labelSmall.fontSize,
-    )
 }
 
 @Composable
@@ -208,13 +252,20 @@ fun MetricIndicator(color: Color, modifier: Modifier = Modifier) {
     Box(modifier = modifier.size(8.dp).clip(CircleShape).background(color))
 }
 
-@Suppress("UnusedPrivateMember") // Compose preview
+@PreviewLightDark
 @Composable
-private fun LegendPreview() {
+fun LegendPreview() {
     val data =
         listOf(
-            LegendData(nameRes = Res.string.rssi, color = Color.Red),
-            LegendData(nameRes = Res.string.snr, color = Color.Green),
+            LegendData(nameRes = Res.string.rssi, color = Color.Red, isLine = true),
+            LegendData(nameRes = Res.string.snr, color = Color.Green, isLine = true),
         )
-    Legend(legendData = data)
+    AppTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Read-only legend
+            Legend(legendData = data)
+            // Toggleable legend
+            Legend(legendData = data, hiddenSet = setOf(1), onToggle = {})
+        }
+    }
 }

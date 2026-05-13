@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,6 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -42,6 +39,9 @@ import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.last_position_update
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
+import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.LocationOn
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.rememberOpenMap
@@ -80,9 +80,9 @@ fun LinkedCoordinatesItem(
                 )
         },
         text = stringResource(Res.string.last_position_update),
-        leadingIcon = Icons.Rounded.LocationOn,
+        leadingIcon = MeshtasticIcons.LocationOn,
         supportingText = "$ago • $coordinates$elevationText",
-        trailingContent = Icons.AutoMirrored.Rounded.KeyboardArrowRight.icon(),
+        trailingContent = MeshtasticIcons.ChevronRight.icon(),
         onClick = { openMap(node.latitude, node.longitude, node.user.long_name) },
         onLongClick = { coroutineScope.launch { clipboard.setClipEntry(createClipEntry(coordinates, copyLabel)) } },
     )

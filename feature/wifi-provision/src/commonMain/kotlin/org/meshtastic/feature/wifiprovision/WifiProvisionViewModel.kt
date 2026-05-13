@@ -24,9 +24,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Factory
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.feature.wifiprovision.domain.NymeaWifiService
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
@@ -41,6 +42,8 @@ data class WifiProvisionUiState(
     val error: WifiProvisionError? = null,
     /** Name of the BLE device we connected to, shown in the DeviceFound confirmation. */
     val deviceName: String? = null,
+    /** IPv4 address reported by nymea after successful provisioning (if available). */
+    val ipAddress: String? = null,
     /** Provisioning outcome shown as inline status (matches web flasher pattern). */
     val provisionStatus: ProvisionStatus = ProvisionStatus.Idle,
 ) {
@@ -98,13 +101,15 @@ sealed interface WifiProvisionError {
 /**
  * ViewModel for the WiFi provisioning flow.
  *
- * Uses [Factory] scope so a fresh [NymeaWifiService] (and its own [BleConnectionFactory]-backed
- * [org.meshtastic.core.ble.BleConnection]) is created for each provisioning session.
+ * Uses [KoinViewModel] so the instance is scoped to the navigation entry's [ViewModelStoreOwner]. A fresh
+ * [NymeaWifiService] (and its own [BleConnectionFactory]-backed [org.meshtastic.core.ble.BleConnection]) is created
+ * lazily for each provisioning session and cleaned up via [onCleared].
  */
-@Factory
+@KoinViewModel
 class WifiProvisionViewModel(
     private val bleScanner: BleScanner,
     private val bleConnectionFactory: BleConnectionFactory,
+    private val dispatchers: CoroutineDispatchers,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WifiProvisionUiState())
@@ -126,7 +131,7 @@ class WifiProvisionViewModel(
         _uiState.update { it.copy(phase = WifiProvisionUiState.Phase.ConnectingBle, error = null) }
 
         viewModelScope.launch {
-            val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory)
+            val nymeaService = NymeaWifiService(bleScanner, bleConnectionFactory, dispatchers.default)
             service = nymeaService
 
             nymeaService
@@ -164,7 +169,7 @@ class WifiProvisionViewModel(
      * @param ssid The target network SSID.
      * @param password The network password (empty string for open networks).
      */
-    fun provisionWifi(ssid: String, password: String) {
+    fun provisionWifi(ssid: String, password: String, hidden: Boolean = false) {
         if (ssid.isBlank()) return
         val nymeaService = service ?: return
 
@@ -172,21 +177,24 @@ class WifiProvisionViewModel(
             it.copy(
                 phase = WifiProvisionUiState.Phase.Provisioning,
                 error = null,
+                ipAddress = null,
                 provisionStatus = WifiProvisionUiState.ProvisionStatus.Idle,
             )
         }
 
         viewModelScope.launch {
-            when (val result = nymeaService.provision(ssid, password)) {
+            when (val result = nymeaService.provision(ssid, password, hidden)) {
                 is ProvisionResult.Success -> {
                     Logger.i { "$TAG: Provisioned successfully" }
                     _uiState.update {
                         it.copy(
                             phase = WifiProvisionUiState.Phase.Connected,
+                            ipAddress = result.ipAddress,
                             provisionStatus = WifiProvisionUiState.ProvisionStatus.Success,
                         )
                     }
                 }
+
                 is ProvisionResult.Failure -> {
                     Logger.w { "$TAG: Provision failed: ${result.message}" }
                     _uiState.update {

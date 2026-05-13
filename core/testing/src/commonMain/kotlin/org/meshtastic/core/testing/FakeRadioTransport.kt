@@ -32,7 +32,7 @@ class FakeRadioTransport : RadioTransport {
         keepAliveCalled = true
     }
 
-    override fun close() {
+    override suspend fun close() {
         closeCalled = true
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ class UiPrefsImpl(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
-    private val provideNodeLocationFlows = atomic(persistentMapOf<Int, StateFlow<Boolean>>())
+    private val provideNodeLocationFlows = atomic(persistentMapOf<Int, Lazy<StateFlow<Boolean>>>())
 
     override val appIntroCompleted: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_APP_INTRO_COMPLETED] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
@@ -134,6 +134,41 @@ class UiPrefsImpl(
         scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = show } }
     }
 
+    override val bleAutoScan: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_BLE_AUTO_SCAN] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setBleAutoScan(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_BLE_AUTO_SCAN] = enabled } }
+    }
+
+    override val networkAutoScan: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_NETWORK_AUTO_SCAN] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setNetworkAutoScan(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_NETWORK_AUTO_SCAN] = enabled } }
+    }
+
+    override val showBleTransport: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_SHOW_BLE_TRANSPORT] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShowBleTransport(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_SHOW_BLE_TRANSPORT] = enabled } }
+    }
+
+    override val showNetworkTransport: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_SHOW_NETWORK_TRANSPORT] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShowNetworkTransport(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_SHOW_NETWORK_TRANSPORT] = enabled } }
+    }
+
+    override val showUsbTransport: StateFlow<Boolean> =
+        dataStore.data.map { it[KEY_SHOW_USB_TRANSPORT] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
+
+    override fun setShowUsbTransport(enabled: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_SHOW_USB_TRANSPORT] = enabled } }
+    }
+
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
         cachedFlow(provideNodeLocationFlows, nodeNum) {
             val key = booleanPreferencesKey(provideLocationKey(nodeNum))
@@ -160,5 +195,10 @@ class UiPrefsImpl(
         val KEY_ONLY_DIRECT = booleanPreferencesKey("only-direct")
         val KEY_SHOW_IGNORED = booleanPreferencesKey("show-ignored")
         val KEY_EXCLUDE_MQTT = booleanPreferencesKey("exclude-mqtt")
+        val KEY_BLE_AUTO_SCAN = booleanPreferencesKey("ble-auto-scan")
+        val KEY_NETWORK_AUTO_SCAN = booleanPreferencesKey("network-auto-scan")
+        val KEY_SHOW_BLE_TRANSPORT = booleanPreferencesKey("show-ble-transport")
+        val KEY_SHOW_NETWORK_TRANSPORT = booleanPreferencesKey("show-network-transport")
+        val KEY_SHOW_USB_TRANSPORT = booleanPreferencesKey("show-usb-transport")
     }
 }

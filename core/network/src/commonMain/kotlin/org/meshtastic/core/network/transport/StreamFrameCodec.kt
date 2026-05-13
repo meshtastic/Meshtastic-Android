@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,8 +84,11 @@ class StreamFrameCodec(
                     debugOut(c)
                     nextPtr = 0
                 }
+
             1 -> if (c != START2) lostSync()
+
             2 -> msb = c.toInt() and 0xff
+
             3 -> {
                 lsb = c.toInt() and 0xff
                 packetLen = (msb shl 8) or lsb
@@ -95,6 +98,7 @@ class StreamFrameCodec(
                     deliverPacket()
                 }
             }
+
             else -> {
                 rxPacket[ptr - HEADER_SIZE] = c
                 if (ptr - HEADER_SIZE + 1 == packetLen) {
@@ -137,10 +141,12 @@ class StreamFrameCodec(
     private fun debugOut(b: Byte) {
         when (val c = b.toInt().toChar()) {
             '\r' -> {}
+
             '\n' -> {
                 Logger.d { "$logTag DeviceLog: $debugLineBuf" }
                 debugLineBuf.clear()
             }
+
             else -> debugLineBuf.append(c)
         }
     }

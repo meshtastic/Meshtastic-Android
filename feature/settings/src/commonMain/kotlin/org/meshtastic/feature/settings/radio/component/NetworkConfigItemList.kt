@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,6 +48,7 @@ import org.meshtastic.core.resources.config_network_eth_enabled_summary
 import org.meshtastic.core.resources.config_network_udp_enabled_summary
 import org.meshtastic.core.resources.config_network_wifi_enabled_summary
 import org.meshtastic.core.resources.connection_status
+import org.meshtastic.core.resources.dns
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.ethernet_config
 import org.meshtastic.core.resources.ethernet_enabled
@@ -219,12 +222,19 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         onValueChanged = { formState.value = formState.value.copy(wifi_psk = it) },
                     )
                     HorizontalDivider()
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                    val mediumHeight = ButtonDefaults.MediumContainerHeight
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
                     Button(
                         onClick = { barcodeScanner.startScan() },
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(48.dp),
+                        shapes = ButtonDefaults.shapesFor(mediumHeight),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(mediumHeight),
                         enabled = state.connected,
                     ) {
-                        Text(text = stringResource(Res.string.wifi_qr_code_scan))
+                        Text(
+                            text = stringResource(Res.string.wifi_qr_code_scan),
+                            style = ButtonDefaults.textStyleFor(mediumHeight),
+                        )
                     }
                 }
             }
@@ -271,29 +281,31 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 SwitchPreference(
                     title = stringResource(Res.string.udp_enabled),
                     summary = stringResource(Res.string.config_network_udp_enabled_summary),
-                    checked = formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
-                    onCheckedChange = {
-                        formState.value =
-                            formState.value.copy(
-                                address_mode =
-                                if (it) {
-                                    Config.NetworkConfig.AddressMode.STATIC
-                                } else {
-                                    Config.NetworkConfig.AddressMode.DHCP
-                                },
-                            )
+                    checked =
+                    formState.value.enabled_protocols and Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value !=
+                        0,
+                    onCheckedChange = { enabled ->
+                        val flags =
+                            if (enabled) {
+                                formState.value.enabled_protocols or
+                                    Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value
+                            } else {
+                                formState.value.enabled_protocols and
+                                    Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value.inv()
+                            }
+                        formState.value = formState.value.copy(enabled_protocols = flags)
                     },
                     enabled = state.connected,
                 )
+                HorizontalDivider()
+                DropDownPreference(
+                    title = stringResource(Res.string.ipv4_mode),
+                    enabled = state.connected,
+                    selectedItem = formState.value.address_mode,
+                    onItemSelected = { formState.value = formState.value.copy(address_mode = it) },
+                    itemLabel = { it.name },
+                )
                 if (formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC) {
-                    HorizontalDivider()
-                    DropDownPreference(
-                        title = stringResource(Res.string.ipv4_mode),
-                        enabled = state.connected,
-                        selectedItem = formState.value.address_mode,
-                        onItemSelected = { formState.value = formState.value.copy(address_mode = it) },
-                        itemLabel = { it.name },
-                    )
                     HorizontalDivider()
                     val ipv4 = formState.value.ipv4_config ?: Config.NetworkConfig.IpV4Config()
                     EditIPv4Preference(
@@ -321,6 +333,14 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         onValueChanged = {
                             formState.value = formState.value.copy(ipv4_config = ipv4.copy(subnet = it))
                         },
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    )
+                    HorizontalDivider()
+                    EditIPv4Preference(
+                        title = stringResource(Res.string.dns),
+                        value = ipv4.dns,
+                        enabled = state.connected,
+                        onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(dns = it)) },
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     )
                 }

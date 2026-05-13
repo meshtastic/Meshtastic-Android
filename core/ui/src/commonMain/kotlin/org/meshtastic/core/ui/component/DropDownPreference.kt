@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.jvm.JvmName
 
 @Composable
@@ -62,12 +63,13 @@ fun <T : Enum<T>> DropDownPreference(
             enumEntriesOf(selectedItem).filter { it.name != "UNRECOGNIZED" && !it.isDeprecatedEnumEntry() }
         }
 
-    val items = enumConstants.map {
-        val label = itemLabel?.invoke(it) ?: it.name
-        val icon = itemIcon?.invoke(it)
-        val color = itemColor?.invoke(it)
-        DropDownItem(it, label, icon, color)
-    }
+    val items =
+        enumConstants.map {
+            val label = itemLabel?.invoke(it) ?: it.name
+            val icon = itemIcon?.invoke(it)
+            val color = itemColor?.invoke(it)
+            DropDownItem(it, label, icon, color)
+        }
 
     DropDownPreference(
         title = title,
@@ -206,13 +208,15 @@ internal expect fun Enum<*>.isDeprecatedEnumEntry(): Boolean
 
 @Preview(showBackground = true)
 @Composable
-private fun DropDownPreferencePreview() {
-    DropDownPreference(
-        title = "Settings",
-        summary = "Lorem ipsum dolor sit amet",
-        enabled = true,
-        items = listOf(DropDownItem("TEST1", "text1"), DropDownItem("TEST2", "text2")),
-        selectedItem = "TEST2",
-        onItemSelected = {},
-    )
+fun DropDownPreferencePreview() {
+    AppTheme {
+        DropDownPreference(
+            title = "Settings",
+            summary = "Lorem ipsum dolor sit amet",
+            enabled = true,
+            items = listOf(DropDownItem("TEST1", "text1"), DropDownItem("TEST2", "text2")),
+            selectedItem = "TEST2",
+            onItemSelected = {},
+        )
+    }
 }

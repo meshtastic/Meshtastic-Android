@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.database.dao.NodeInfoDao
+import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.toReaction
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ContactSettings
@@ -108,8 +110,9 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
             dao.upsertContactSettings(listOf(updated))
         }
 
-    override suspend fun getQueuedPackets(): List<DataPacket>? =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getQueuedPackets() }
+    override suspend fun getQueuedPackets(): List<DataPacket> = withContext(dispatchers.io) {
+        dbManager.currentDb.value.packetDao().getAllDataPackets().filter { it.status == MessageStatus.QUEUED }
+    }
 
     suspend fun insertRoomPacket(packet: RoomPacket) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().insert(packet) }
@@ -154,13 +157,14 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
                 else -> dao.getMessagesFrom(contact)
             }
         flow.mapLatest { packets ->
+            val cachedGetNode = memoize(getNode)
+            val replyIds = packets.mapNotNull { it.packet.data.replyId?.takeIf { id -> id != 0 } }.distinct()
+            val replyMap = batchGetPacketsByIds(replyIds)
             packets.map { packet ->
-                val message = packet.toMessage(getNode)
-                message.replyId
-                    .takeIf { it != null && it != 0 }
-                    ?.let { getPacketByPacketIdInternal(it) }
-                    ?.let { originalPacket -> originalPacket.toMessage(getNode) }
-                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+                val message = packet.toMessage(cachedGetNode)
+                val replyId = message.replyId?.takeIf { it != 0 }
+                val originalMessage = replyId?.let { replyMap[it] }?.toMessage(cachedGetNode)
+                if (originalMessage != null) message.copy(originalMessage = originalMessage) else message
             }
         }
     }
@@ -177,13 +181,16 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         )
             .flow
             .map { pagingData ->
+                val cachedGetNode = memoize(getNode)
+                val replyCache = mutableMapOf<Int, PacketEntity?>()
                 pagingData.map { packet ->
-                    val message = packet.toMessage(getNode)
-                    message.replyId
-                        .takeIf { it != null && it != 0 }
-                        ?.let { getPacketByPacketIdInternal(it) }
-                        ?.let { originalPacket -> originalPacket.toMessage(getNode) }
-                        ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+                    val message = packet.toMessage(cachedGetNode)
+                    val replyId = message.replyId?.takeIf { it != 0 }
+                    val originalMessage =
+                        replyId
+                            ?.let { id -> replyCache.getOrPut(id) { getPacketByPacketIdInternal(id) } }
+                            ?.toMessage(cachedGetNode)
+                    if (originalMessage != null) message.copy(originalMessage = originalMessage) else message
                 }
             }
 
@@ -204,13 +211,16 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
     )
         .flow
         .map { pagingData ->
+            val cachedGetNode = memoize(getNode)
+            val replyCache = mutableMapOf<Int, PacketEntity?>()
             pagingData.map { packet ->
-                val message = packet.toMessage(getNode)
-                message.replyId
-                    .takeIf { it != null && it != 0 }
-                    ?.let { getPacketByPacketIdInternal(it) }
-                    ?.let { originalPacket -> originalPacket.toMessage(getNode) }
-                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+                val message = packet.toMessage(cachedGetNode)
+                val replyId = message.replyId?.takeIf { it != 0 }
+                val originalMessage =
+                    replyId
+                        ?.let { id -> replyCache.getOrPut(id) { getPacketByPacketIdInternal(id) } }
+                        ?.toMessage(cachedGetNode)
+                if (originalMessage != null) message.copy(originalMessage = originalMessage) else message
             }
         }
 
@@ -229,6 +239,22 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
 
     private suspend fun getPacketByPacketIdInternal(packetId: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId) }
+
+    private suspend fun batchGetPacketsByIds(ids: List<Int>): Map<Int, PacketEntity> = if (ids.isEmpty()) {
+        emptyMap()
+    } else {
+        withContext(dispatchers.io) {
+            val dao = dbManager.currentDb.value.packetDao()
+            ids.chunked(NodeInfoDao.MAX_BIND_PARAMS)
+                .flatMap { dao.getPacketsByPacketIds(it) }
+                .associateBy { it.packet.packetId }
+        }
+    }
+
+    private fun memoize(getNode: suspend (String?) -> Node): suspend (String?) -> Node {
+        val cache = mutableMapOf<String?, Node>()
+        return { id -> cache.getOrPut(id) { getNode(id) } }
+    }
 
     override suspend fun insert(
         packet: DataPacket,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,15 +30,17 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -46,8 +48,15 @@ import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.DEFAULT_BLE_WRITE_VALUE_LENGTH
+import org.meshtastic.core.ble.MeshtasticBleDevice
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.firmware.ota.calculateMacPlusOne
 import org.meshtastic.feature.firmware.ota.scanForBleDevice
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 /**
  * Kable-based transport for the Nordic Secure DFU (Secure DFU over BLE) protocol.
@@ -63,8 +72,8 @@ class SecureDfuTransport(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
     private val address: String,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
-) {
+    dispatcher: CoroutineDispatcher,
+) : DfuUploadTransport {
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(transportScope, "Secure DFU")
 
@@ -88,57 +97,125 @@ class SecureDfuTransport(
      *
      * The caller must have already released the mesh-service BLE connection before calling this.
      */
-    suspend fun triggerButtonlessDfu(): Result<Unit> = runCatching {
-        Logger.i { "DFU: Scanning for device $address to trigger buttonless DFU..." }
-
-        val device =
-            scanForDevice { d -> d.address == address }
-                ?: throw DfuException.ConnectionFailed("Device $address not found for buttonless DFU trigger")
-
+    suspend fun triggerButtonlessDfu(): Result<Unit> = safeCatching {
+        // No scan needed: the address is already bonded with the OS, so we can connect directly the same way the
+        // Nordic Android DFU library does (BluetoothAdapter.getRemoteDevice(address).connectGatt). Scanning here is
+        // unreliable because the device may not have resumed advertising in the brief window after we released the
+        // mesh-service GATT.
         Logger.i { "DFU: Connecting to $address to trigger buttonless DFU..." }
-        bleConnection.connectAndAwait(device, CONNECT_TIMEOUT_MS)
+        bleConnection.connectAndAwait(MeshtasticBleDevice(address), CONNECT_TIMEOUT)
 
-        bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
-            val buttonlessChar = service.characteristic(SecureDfuUuids.BUTTONLESS_NO_BONDS)
-
-            // Enable indications by subscribing to the characteristic. The device-side firmware (BLEDfuSecure.cpp)
-            // checks that the CCCD is configured and returns ATTERR_CPS_CCCD_CONFIG_ERROR if not.
-            val indicationChannel = Channel<ByteArray>(Channel.UNLIMITED)
-            val indicationJob =
-                service
-                    .observe(buttonlessChar)
-                    .onEach { indicationChannel.trySend(it) }
-                    .catch { e -> Logger.d(e) { "DFU: Buttonless indication stream ended (expected on disconnect)" } }
-                    .launchIn(this)
-
-            delay(SUBSCRIPTION_SETTLE_MS)
-
-            Logger.i { "DFU: Writing buttonless DFU trigger..." }
-            service.write(buttonlessChar, byteArrayOf(0x01), BleWriteType.WITH_RESPONSE)
-
-            // Wait for the indication response (0x20-01-STATUS). The device may disconnect before we receive it —
-            // that's expected and treated as success, matching the Nordic DFU library's behavior.
-            try {
-                withTimeout(BUTTONLESS_RESPONSE_TIMEOUT_MS) {
-                    val response = indicationChannel.receive()
-                    if (response.size >= 3 && response[0] == BUTTONLESS_RESPONSE_CODE && response[2] != 0x01.toByte()) {
-                        Logger.w { "DFU: Buttonless DFU response indicates error: ${response.toHexString()}" }
-                    } else {
-                        Logger.i { "DFU: Buttonless DFU indication received successfully" }
-                    }
-                }
-            } catch (_: TimeoutCancellationException) {
-                Logger.d { "DFU: No buttonless indication received (device may have already disconnected)" }
-            } catch (_: Exception) {
-                Logger.d { "DFU: Buttonless indication wait interrupted (device disconnecting)" }
-            }
-
-            indicationJob.cancel()
+        // Try the Nordic Secure DFU service (FE59) first — used when the firmware is built with BLE_DFU_SECURE.
+        // If it isn't exposed, fall back to the Legacy DFU service (1530) used by Meshtastic builds that rely on
+        // Adafruit's stock BLEDfu helper. Both ultimately reboot the device into the same bootloader.
+        try {
+            triggerSecureButtonless()
+        } catch (e: NoSuchElementException) {
+            Logger.i(e) { "DFU: Secure DFU service (FE59) not present — falling back to legacy DFU service (1530)" }
+            triggerLegacyButtonless()
         }
 
         // Device will disconnect and reboot — expected, not an error.
         Logger.i { "DFU: Buttonless DFU triggered, device is rebooting..." }
         bleConnection.disconnect()
+    }
+
+    /** Nordic Secure DFU buttonless trigger — INDICATE + write 0x01, then wait for `0x20-01-STATUS` response. */
+    private suspend fun triggerSecureButtonless() {
+        triggerButtonless(
+            serviceUuid = SecureDfuUuids.SERVICE,
+            characteristicUuid = SecureDfuUuids.BUTTONLESS_NO_BONDS,
+            payload = byteArrayOf(BUTTONLESS_ENTER_BOOTLOADER),
+            profileTimeout = TRIGGER_TIMEOUT,
+            logLabel = "secure",
+            awaitResponse = { channel ->
+                try {
+                    withTimeout(BUTTONLESS_RESPONSE_TIMEOUT) {
+                        val response = channel.receive()
+                        if (
+                            response.size >= 3 &&
+                            response[0] == BUTTONLESS_RESPONSE_CODE &&
+                            response[2] != 0x01.toByte()
+                        ) {
+                            Logger.w { "DFU: Buttonless DFU response indicates error: ${response.toHexString()}" }
+                        } else {
+                            Logger.i { "DFU: Buttonless DFU indication received successfully" }
+                        }
+                    }
+                } catch (_: TimeoutCancellationException) {
+                    Logger.d { "DFU: No buttonless indication received (device may have already disconnected)" }
+                } catch (_: Exception) {
+                    Logger.d { "DFU: Buttonless indication wait interrupted (device disconnecting)" }
+                }
+            },
+        )
+    }
+
+    /**
+     * Nordic Legacy DFU buttonless trigger (Adafruit `BLEDfu`). Subscribe to NOTIFICATIONS on the control point
+     * (required to satisfy the device's CCCD check), then write `[0x01, 0x04]` (START_DFU + IMAGE_TYPE_APPLICATION, per
+     * Nordic's `LegacyButtonlessDfuImpl.java:53`). The device reboots into the bootloader immediately — no notification
+     * response is expected before disconnect.
+     */
+    private suspend fun triggerLegacyButtonless() {
+        triggerButtonless(
+            serviceUuid = LegacyDfuUuids.SERVICE,
+            characteristicUuid = LegacyDfuUuids.CONTROL_POINT,
+            payload = LEGACY_BUTTONLESS_ENTER_BOOTLOADER,
+            profileTimeout = TRIGGER_TIMEOUT,
+            logLabel = "legacy",
+            awaitResponse = null,
+        )
+    }
+
+    /**
+     * Shared scaffold for both Secure and Legacy buttonless triggers. The Adafruit/Nordic protocol is identical in
+     * shape: enable CCCD on a control characteristic, write a small opcode, optionally await an indication/notification
+     * response. The whole trigger is wrapped in [profileTimeout] and treats timeout as success — by the time we'd time
+     * out, the device has either rebooted (verified by [connectToDfuMode]) or never received the byte (which surfaces
+     * as a useful scan failure later). This escapes the well-known race where Kable's `WITH_RESPONSE` write blocks on
+     * an ATT ACK that never arrives because the device rebooted before sending it.
+     */
+    private suspend fun triggerButtonless(
+        serviceUuid: Uuid,
+        characteristicUuid: Uuid,
+        payload: ByteArray,
+        profileTimeout: Duration,
+        logLabel: String,
+        awaitResponse: (suspend CoroutineScope.(Channel<ByteArray>) -> Unit)?,
+    ) {
+        try {
+            withTimeout(profileTimeout) {
+                bleConnection.profile(serviceUuid, timeout = profileTimeout) { service ->
+                    val char = service.characteristic(characteristicUuid)
+
+                    val channel = Channel<ByteArray>(Channel.UNLIMITED)
+                    val observeJob =
+                        service
+                            .observe(char)
+                            .onEach { channel.trySend(it) }
+                            .catch { e ->
+                                Logger.d(e) { "DFU: $logLabel notification stream ended (expected on disconnect)" }
+                            }
+                            .launchIn(this)
+
+                    delay(SUBSCRIPTION_SETTLE)
+
+                    Logger.i { "DFU: Writing $logLabel buttonless DFU trigger..." }
+                    service.write(char, payload, BleWriteType.WITH_RESPONSE)
+
+                    awaitResponse?.invoke(this, channel)
+
+                    observeJob.cancel()
+                }
+            }
+        } catch (_: TimeoutCancellationException) {
+            Logger.w {
+                "DFU: $logLabel buttonless trigger timed out — likely cause: stale BLE bond (Meshtastic " +
+                    "BLEDfu requires SECMODE_ENC_WITH_MITM). User must Forget+Re-pair the device in Android " +
+                    "Bluetooth settings if the next DFU-mode scan also fails."
+            }
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -149,7 +226,7 @@ class SecureDfuTransport(
      * Scans for the device in DFU mode (address or address+1) and establishes the GATT connection, enabling
      * notifications on the Control Point.
      */
-    suspend fun connectToDfuMode(): Result<Unit> = runCatching {
+    override suspend fun connectToDfuMode(): Result<Unit> = safeCatching {
         val dfuAddress = calculateMacPlusOne(address)
         val targetAddresses = setOf(address, dfuAddress)
         Logger.i { "DFU: Scanning for DFU mode device at $targetAddresses..." }
@@ -162,7 +239,7 @@ class SecureDfuTransport(
 
         bleConnection.connectionState.onEach { Logger.d { "DFU: Connection state → $it" } }.launchIn(transportScope)
 
-        val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT_MS)
+        val connected = bleConnection.connectAndAwait(device, CONNECT_TIMEOUT)
         if (connected is BleConnectionState.Disconnected) {
             throw DfuException.ConnectionFailed("Failed to connect to DFU device ${device.address}")
         }
@@ -188,7 +265,7 @@ class SecureDfuTransport(
                 }
                 .launchIn(this)
 
-            delay(SUBSCRIPTION_SETTLE_MS)
+            delay(SUBSCRIPTION_SETTLE)
             if (!subscribed.isCompleted) subscribed.complete(Unit)
             subscribed.await()
 
@@ -207,7 +284,7 @@ class SecureDfuTransport(
      * PRN is explicitly disabled (set to 0) for the init packet per the Nordic DFU library convention — the init packet
      * is small (<512 bytes, fits in a single object) and does not benefit from flow control.
      */
-    suspend fun transferInitPacket(initPacket: ByteArray): Result<Unit> = runCatching {
+    override suspend fun transferInitPacket(initPacket: ByteArray): Result<Unit> = safeCatching {
         Logger.i { "DFU: Transferring init packet (${initPacket.size} bytes)..." }
         setPrn(0)
         transferObjectWithRetry(DfuObjectType.COMMAND, initPacket, onProgress = null)
@@ -228,12 +305,17 @@ class SecureDfuTransport(
      * @param firmware Raw bytes of the `.bin` file.
      * @param onProgress Callback receiving progress in [0.0, 1.0].
      */
-    suspend fun transferFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit): Result<Unit> = runCatching {
-        Logger.i { "DFU: Transferring firmware (${firmware.size} bytes)..." }
-        setPrn(PRN_INTERVAL)
-        transferObjectWithRetry(DfuObjectType.DATA, firmware, onProgress)
-        Logger.i { "DFU: Firmware transferred and executed." }
-    }
+    override suspend fun transferFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit): Result<Unit> =
+        safeCatching {
+            Logger.i { "DFU: Transferring firmware (${firmware.size} bytes)..." }
+            // Bump BLE link to high-throughput mode (~7.5 ms interval) before streaming.
+            // Default Android intervals (~30-50 ms) starve the link during sustained DFU and trigger LSTO.
+            val highPriorityRequested = bleConnection.requestHighConnectionPriority()
+            Logger.i { "Secure DFU: requestHighConnectionPriority -> $highPriorityRequested" }
+            setPrn(PRN_INTERVAL)
+            transferObjectWithRetry(DfuObjectType.DATA, firmware, onProgress)
+            Logger.i { "DFU: Firmware transferred and executed." }
+        }
 
     // ---------------------------------------------------------------------------
     // Abort & teardown
@@ -246,8 +328,8 @@ class SecureDfuTransport(
      * Call this before [close] when cancelling or recovering from an error so the device doesn't need a power cycle to
      * accept a fresh DFU session.
      */
-    suspend fun abort() {
-        runCatching {
+    override suspend fun abort() {
+        safeCatching {
             bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
                 val controlChar = service.characteristic(SecureDfuUuids.CONTROL_POINT)
                 service.write(controlChar, byteArrayOf(DfuOpcode.ABORT), BleWriteType.WITH_RESPONSE)
@@ -258,8 +340,8 @@ class SecureDfuTransport(
     }
 
     /** Disconnect from the DFU target and cancel the transport coroutine scope. */
-    suspend fun close() {
-        runCatching { bleConnection.disconnect() }.onFailure { Logger.w(it) { "DFU: Error during disconnect" } }
+    override suspend fun close() {
+        safeCatching { bleConnection.disconnect() }.onFailure { Logger.w(it) { "DFU: Error during disconnect" } }
         transportScope.cancel()
     }
 
@@ -286,7 +368,7 @@ class SecureDfuTransport(
             } catch (e: Throwable) {
                 lastError = e
                 Logger.w(e) { "DFU: Object transfer failed (attempt ${attempt + 1}/$OBJECT_RETRY_COUNT): ${e.message}" }
-                if (attempt < OBJECT_RETRY_COUNT - 1) delay(RETRY_DELAY_MS)
+                if (attempt < OBJECT_RETRY_COUNT - 1) delay(RETRY_DELAY)
             }
         }
         throw lastError ?: DfuException.TransferFailed("Object transfer failed after $OBJECT_RETRY_COUNT attempts")
@@ -347,7 +429,7 @@ class SecureDfuTransport(
             // First-chunk delay: some older bootloaders need time to prepare flash after Create.
             // The Nordic DFU library uses 400ms for the first chunk.
             if (isFirstChunk) {
-                delay(FIRST_CHUNK_DELAY_MS)
+                delay(FIRST_CHUNK_DELAY)
                 isFirstChunk = false
             }
 
@@ -399,7 +481,7 @@ class SecureDfuTransport(
             } catch (e: DfuException.ProtocolError) {
                 if (e.resultCode == DfuResultCode.INVALID_OBJECT && offset + objectSize >= totalBytes) {
                     Logger.w { "DFU: Execute returned INVALID_OBJECT on final object, retrying once..." }
-                    delay(RETRY_DELAY_MS)
+                    delay(RETRY_DELAY)
                     sendExecute()
                 } else {
                     throw e
@@ -425,31 +507,41 @@ class SecureDfuTransport(
      */
     private suspend fun writePackets(data: ByteArray, from: Int, until: Int, prnInterval: Int) {
         val mtu = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE) ?: DEFAULT_BLE_WRITE_VALUE_LENGTH
-        var packetsSincePrn = 0
+        var pos = from
 
-        bleConnection.profile(SecureDfuUuids.SERVICE) { service ->
-            val packetChar = service.characteristic(SecureDfuUuids.PACKET)
-            var pos = from
+        coroutineScope {
+            // Trip-wire: cancels the streaming coroutine the moment Kable observes a disconnect.
+            val watcher = launch {
+                val state = bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+                Logger.w { "Secure DFU: Link dropped mid-stream at offset $pos/$until (state=$state)" }
+                throw DfuException.ConnectionFailed("BLE link dropped mid-upload at byte $pos/$until")
+            }
 
-            while (pos < until) {
-                val chunkEnd = minOf(pos + mtu, until)
-                service.write(packetChar, data.copyOfRange(pos, chunkEnd), BleWriteType.WITHOUT_RESPONSE)
-                pos = chunkEnd
-                packetsSincePrn++
+            try {
+                var packetsSincePrn = 0
+                bleConnection.profile(SecureDfuUuids.SERVICE, timeout = STREAM_TIMEOUT) { service ->
+                    val packetChar = service.characteristic(SecureDfuUuids.PACKET)
+                    while (pos < until) {
+                        val chunkEnd = minOf(pos + mtu, until)
+                        service.write(packetChar, data.copyOfRange(pos, chunkEnd), BleWriteType.WITHOUT_RESPONSE)
+                        pos = chunkEnd
+                        packetsSincePrn++
 
-                // Wait for the device's PRN receipt notification, then validate CRC.
-                // Skip the wait on the last packet — the final CALCULATE_CHECKSUM covers it.
-                if (prnInterval > 0 && packetsSincePrn >= prnInterval && pos < until) {
-                    val response = awaitNotification(COMMAND_TIMEOUT_MS)
-                    if (response is DfuResponse.ChecksumResult) {
-                        val expectedCrc = DfuCrc32.calculate(data, length = pos)
-                        if (response.offset != pos || response.crc32 != expectedCrc) {
-                            throw DfuException.ChecksumMismatch(expected = expectedCrc, actual = response.crc32)
+                        if (prnInterval > 0 && packetsSincePrn >= prnInterval && pos < until) {
+                            val response = awaitNotification(COMMAND_TIMEOUT)
+                            if (response is DfuResponse.ChecksumResult) {
+                                val expectedCrc = DfuCrc32.calculate(data, length = pos)
+                                if (response.offset != pos || response.crc32 != expectedCrc) {
+                                    throw DfuException.ChecksumMismatch(expected = expectedCrc, actual = response.crc32)
+                                }
+                                Logger.d { "DFU: PRN checksum OK at offset $pos" }
+                            }
+                            packetsSincePrn = 0
                         }
-                        Logger.d { "DFU: PRN checksum OK at offset $pos" }
                     }
-                    packetsSincePrn = 0
                 }
+            } finally {
+                watcher.cancel()
             }
         }
     }
@@ -459,7 +551,7 @@ class SecureDfuTransport(
             val controlChar = service.characteristic(SecureDfuUuids.CONTROL_POINT)
             service.write(controlChar, payload, BleWriteType.WITH_RESPONSE)
         }
-        return awaitNotification(COMMAND_TIMEOUT_MS)
+        return awaitNotification(COMMAND_TIMEOUT)
     }
 
     private suspend fun setPrn(value: Int) {
@@ -473,8 +565,10 @@ class SecureDfuTransport(
         val response = sendCommand(byteArrayOf(DfuOpcode.SELECT, objectType))
         return when (response) {
             is DfuResponse.SelectResult -> response
+
             is DfuResponse.Failure ->
                 throw DfuException.ProtocolError(DfuOpcode.SELECT, response.resultCode, response.extendedError)
+
             else -> throw DfuException.TransferFailed("Unexpected response to SELECT: $response")
         }
     }
@@ -490,12 +584,14 @@ class SecureDfuTransport(
         val response = sendCommand(byteArrayOf(DfuOpcode.CALCULATE_CHECKSUM))
         return when (response) {
             is DfuResponse.ChecksumResult -> response
+
             is DfuResponse.Failure ->
                 throw DfuException.ProtocolError(
                     DfuOpcode.CALCULATE_CHECKSUM,
                     response.resultCode,
                     response.extendedError,
                 )
+
             else -> throw DfuException.TransferFailed("Unexpected response to CALCULATE_CHECKSUM: $response")
         }
     }
@@ -506,13 +602,13 @@ class SecureDfuTransport(
         Logger.d { "DFU: Object executed." }
     }
 
-    private suspend fun awaitNotification(timeoutMs: Long): DfuResponse = try {
-        withTimeout(timeoutMs) {
+    private suspend fun awaitNotification(timeout: Duration): DfuResponse = try {
+        withTimeout(timeout) {
             val bytes = notificationChannel.receive()
             DfuResponse.parse(bytes).also { Logger.d { "DFU: Notification → $it" } }
         }
     } catch (_: TimeoutCancellationException) {
-        throw DfuException.Timeout("No response from Control Point after ${timeoutMs}ms")
+        throw DfuException.Timeout("No response from Control Point after $timeout")
     }
 
     private fun DfuResponse.requireSuccess(expectedOpcode: Byte) {
@@ -524,7 +620,9 @@ class SecureDfuTransport(
                             "got 0x${opcode.toUByte().toString(16)}",
                     )
                 }
+
             is DfuResponse.Failure -> throw DfuException.ProtocolError(opcode, resultCode, extendedError)
+
             else ->
                 throw DfuException.TransferFailed(
                     "Unexpected response for opcode 0x${expectedOpcode.toUByte().toString(16)}: $this",
@@ -541,7 +639,7 @@ class SecureDfuTransport(
         tag = "DFU",
         serviceUuid = SecureDfuUuids.SERVICE,
         retryCount = SCAN_RETRY_COUNT,
-        retryDelayMs = SCAN_RETRY_DELAY_MS,
+        retryDelay = SCAN_RETRY_DELAY,
         predicate = predicate,
     )
 
@@ -550,14 +648,31 @@ class SecureDfuTransport(
     // ---------------------------------------------------------------------------
 
     companion object {
-        private const val CONNECT_TIMEOUT_MS = 15_000L
-        private const val COMMAND_TIMEOUT_MS = 30_000L
-        private const val SUBSCRIPTION_SETTLE_MS = 500L
-        private const val BUTTONLESS_RESPONSE_TIMEOUT_MS = 3_000L
+        private val CONNECT_TIMEOUT = 15.seconds
+        private val COMMAND_TIMEOUT = 30.seconds
+        private val SUBSCRIPTION_SETTLE = 500.milliseconds
+        private val BUTTONLESS_RESPONSE_TIMEOUT = 3.seconds
+
+        /**
+         * Tight wall-clock cap on the buttonless trigger phase (Secure or Legacy). After we send the opcode, the device
+         * reboots into the bootloader and disconnects — but Kable's `WITH_RESPONSE` write blocks on an ATT ACK that
+         * never arrives in this race. If we don't see the disconnect propagate within this window, the device almost
+         * certainly didn't receive the byte, so failing fast lets the caller surface a useful error (or retry) instead
+         * of waiting on the default 30s `profile()` timeout. Comfortably exceeds the secure-path indication wait
+         * ([BUTTONLESS_RESPONSE_TIMEOUT]) plus settle/write overhead.
+         */
+        private val TRIGGER_TIMEOUT = 5.seconds
         private const val SCAN_RETRY_COUNT = 3
-        private const val SCAN_RETRY_DELAY_MS = 2_000L
-        private const val RETRY_DELAY_MS = 2_000L
-        private const val FIRST_CHUNK_DELAY_MS = 400L
+        private val SCAN_RETRY_DELAY = 2.seconds
+        private val RETRY_DELAY = 2.seconds
+        private val FIRST_CHUNK_DELAY = 400.milliseconds
+
+        /**
+         * Wall-clock budget for a single firmware-object streaming session. Must comfortably exceed the upload duration
+         * for the largest expected image at the slowest realistic Secure DFU throughput. Per-PRN/per-write watchdogs
+         * inside the loop detect real stalls; this is just a safety net so a hung profile block can't sit forever.
+         */
+        private val STREAM_TIMEOUT = 15.minutes
 
         /** Response code prefix for Buttonless DFU indications (0x20 = response). */
         private const val BUTTONLESS_RESPONSE_CODE: Byte = 0x20

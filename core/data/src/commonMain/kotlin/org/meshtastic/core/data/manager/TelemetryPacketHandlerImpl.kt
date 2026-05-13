@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -49,15 +51,11 @@ class TelemetryPacketHandlerImpl(
     private val nodeManager: NodeManager,
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val notificationManager: NotificationManager,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : TelemetryPacketHandler {
-    private lateinit var scope: CoroutineScope
 
     private val batteryMutex = Mutex()
     private val batteryPercentCooldowns = mutableMapOf<Int, Long>()
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
@@ -119,12 +117,14 @@ class TelemetryPacketHandlerImpl(
                         }
                     }
                 }
+
                 environment != null -> nextNode = nextNode.copy(environmentMetrics = environment)
+
                 power != null -> nextNode = nextNode.copy(powerMetrics = power)
             }
 
             val telemetryTime = if (t.time != 0) t.time else nextNode.lastHeard
-            val newLastHeard = maxOf(nextNode.lastHeard, telemetryTime)
+            val newLastHeard = clampTimestampToNow(maxOf(nextNode.lastHeard, telemetryTime))
             nextNode.copy(lastHeard = newLastHeard)
         }
     }
@@ -143,6 +143,7 @@ class TelemetryPacketHandlerImpl(
             }
 
             batteryLevel == BATTERY_PERCENT_LOW_THRESHOLD -> shouldDisplay = true
+
             batteryLevel.mod(BATTERY_PERCENT_LOW_DIVISOR) == 0 && !isRemote -> shouldDisplay = true
 
             isRemote -> shouldDisplay = true

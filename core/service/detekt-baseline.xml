@@ -2,7 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>TooGenericExceptionCaught:AndroidFileService.kt$AndroidFileService$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:JvmFileService.kt$JvmFileService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:AndroidFileService.kt:AndroidFileService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:JvmFileService.kt:JvmFileService$e: Exception</ID>
   </CurrentIssues>
 </SmellBaseline>

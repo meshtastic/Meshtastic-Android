@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,9 +62,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.util.TimeConstants
@@ -84,6 +86,7 @@ import org.meshtastic.core.resources.mute_1_week
 import org.meshtastic.core.resources.mute_8_hours
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.mute_notifications
+import org.meshtastic.core.resources.mute_selected
 import org.meshtastic.core.resources.mute_status_always
 import org.meshtastic.core.resources.mute_status_muted_for_days
 import org.meshtastic.core.resources.mute_status_muted_for_hours
@@ -91,6 +94,7 @@ import org.meshtastic.core.resources.mute_status_unmuted
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.select_all
 import org.meshtastic.core.resources.unmute
+import org.meshtastic.core.resources.unmute_selected
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
@@ -102,8 +106,8 @@ import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MarkChatRead
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
-import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
-import org.meshtastic.core.ui.icon.VolumeUpTwoTone
+import org.meshtastic.core.ui.icon.VolumeMute
+import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.proto.ChannelSet
@@ -116,7 +120,7 @@ fun ContactsScreen(
     onNavigateToShare: () -> Unit,
     sharedContactRequested: SharedContact?,
     requestChannelSet: ChannelSet?,
-    onHandleDeepLink: (MeshtasticUri, onInvalid: () -> Unit) -> Unit,
+    onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
     onClearSharedContactRequested: () -> Unit,
     onClearRequestChannelUrl: () -> Unit,
     viewModel: ContactsViewModel,
@@ -130,8 +134,8 @@ fun ContactsScreen(
     val scope = rememberCoroutineScope()
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    var showMuteDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showMuteDialog by rememberSaveable { mutableStateOf(false) }
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
     // State for managing selected contacts
     val selectedContactKeys = remember { mutableStateListOf<String>() }
@@ -232,7 +236,7 @@ fun ContactsScreen(
             MainAppBar(
                 title = stringResource(Res.string.conversations),
                 ourNode = ourNode,
-                showNodeChip = ourNode != null && connectionState.isConnected(),
+                showNodeChip = ourNode != null && connectionState is ConnectionState.Connected,
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {
@@ -250,11 +254,11 @@ fun ContactsScreen(
             )
         },
         floatingActionButton = {
-            if (connectionState.isConnected()) {
+            if (connectionState is ConnectionState.Connected) {
                 MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
                     onImport = { uriString ->
-                        onHandleDeepLink(MeshtasticUri(uriString)) {
+                        onHandleDeepLink(CommonUri.parse(uriString)) {
                             scope.launch { showToast(Res.string.channel_invalid) }
                         }
                     },
@@ -379,7 +383,9 @@ private fun MuteNotificationsDialog(
                                         stringResource(Res.string.mute_status_unmuted)
                                     }
                                 }
+
                                 settings.muteUntil == Long.MAX_VALUE -> stringResource(Res.string.mute_status_always)
+
                                 else -> stringResource(Res.string.mute_status_unmuted)
                             }
                         Text(
@@ -455,16 +461,18 @@ private fun SelectionToolbar(
                 Icon(
                     imageVector =
                     if (isAllMuted) {
-                        MeshtasticIcons.VolumeUpTwoTone
+                        MeshtasticIcons.VolumeUp
                     } else {
-                        MeshtasticIcons.VolumeMuteTwoTone
+                        MeshtasticIcons.VolumeMute
                     },
                     contentDescription =
-                    if (isAllMuted) {
-                        "Unmute selected"
-                    } else {
-                        "Mute selected"
-                    },
+                    stringResource(
+                        if (isAllMuted) {
+                            Res.string.unmute_selected
+                        } else {
+                            Res.string.mute_selected
+                        },
+                    ),
                 )
             }
             IconButton(onClick = onDeleteSelected) {
@@ -528,8 +536,8 @@ private fun ContactListContentInternal(
     val visiblePlaceholders = rememberVisiblePlaceholders(contacts, channelPlaceholders)
 
     LazyColumn(state = listState, modifier = modifier.fillMaxSize()) {
-        contactListPlaceholdersItems(
-            placeholders = visiblePlaceholders,
+        contactListPagedItems(
+            contacts = contacts,
             selectedList = selectedList,
             activeContactKey = activeContactKey,
             onClick = onClick,
@@ -539,8 +547,8 @@ private fun ContactListContentInternal(
             haptic = haptic,
         )
 
-        contactListPagedItems(
-            contacts = contacts,
+        contactListPlaceholdersItems(
+            placeholders = visiblePlaceholders,
             selectedList = selectedList,
             activeContactKey = activeContactKey,
             onClick = onClick,

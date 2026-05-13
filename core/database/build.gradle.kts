@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.koin")
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
@@ -49,20 +50,16 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
-            implementation(libs.turbine)
         }
 
         val androidHostTest by getting {
             dependencies {
                 implementation(libs.androidx.sqlite.bundled)
                 implementation(libs.androidx.room.testing)
-                implementation(libs.androidx.test.core)
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.junit)
-                implementation(libs.robolectric)
             }
         }
         val androidDeviceTest by getting {
@@ -78,6 +75,29 @@ kotlin {
 dependencies {
     "kspJvm"(libs.androidx.room.compiler)
     "kspJvmTest"(libs.androidx.room.compiler)
+    // KSP resolves this via a detached configuration at task execution time,
+    // so we declare it explicitly to ensure offline/Flatpak builds can resolve it.
+    "kspJvm"("com.google.devtools.ksp:symbol-processing-aa-embeddable:${libs.versions.devtools.ksp.get()}")
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-database.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidRuntimeClasspath",
+            "androidMainLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestCompileClasspath",
+            "androidDeviceTestRuntimeClasspath",
+            "androidDeviceTestLintChecksClasspath",
+            "androidDeviceTestCompileClasspath",
+            "androidCompileClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }

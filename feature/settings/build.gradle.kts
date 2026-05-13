@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,13 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    id("meshtastic.kmp.jvm.android")
 }
 
 kotlin {
-    jvm()
-
     android {
         namespace = "org.meshtastic.feature.settings"
         androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets {
@@ -38,6 +36,7 @@ kotlin {
             implementation(projects.core.domain)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
+            implementation(projects.core.network)
             implementation(projects.core.proto)
             implementation(projects.core.repository)
             implementation(projects.core.service)
@@ -58,21 +57,10 @@ kotlin {
         }
 
         commonTest.dependencies {
-            implementation(project(":core:testing"))
-            implementation(project(":core:datastore"))
+            implementation(projects.core.datastore)
+            implementation(libs.compose.multiplatform.ui.test)
         }
 
-        val androidHostTest by getting {
-            dependencies {
-                implementation(project(":core:datastore"))
-                implementation(libs.junit)
-                implementation(libs.robolectric)
-                implementation(libs.turbine)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.compose.ui.test.junit4)
-                implementation(libs.androidx.compose.ui.test.manifest)
-                implementation(libs.androidx.test.ext.junit)
-            }
-        }
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }

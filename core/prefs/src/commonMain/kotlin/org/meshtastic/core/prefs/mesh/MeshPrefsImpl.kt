@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package org.meshtastic.core.prefs.mesh
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -33,6 +32,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.normalizeAddress
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.repository.MeshPrefs
@@ -44,8 +44,7 @@ class MeshPrefsImpl(
 ) : MeshPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    private val locationFlows = atomic(persistentMapOf<Int?, StateFlow<Boolean>>())
-    private val storeForwardFlows = atomic(persistentMapOf<String?, StateFlow<Int>>())
+    private val storeForwardFlows = atomic(persistentMapOf<String?, Lazy<StateFlow<Int>>>())
 
     override val deviceAddress: StateFlow<String?> =
         dataStore.data
@@ -62,15 +61,6 @@ class MeshPrefsImpl(
                 }
             }
         }
-    }
-
-    override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> = cachedFlow(locationFlows, nodeNum) {
-        val key = booleanPreferencesKey(provideLocationKey(nodeNum))
-        dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
-    }
-
-    override fun setShouldProvideNodeLocation(nodeNum: Int?, provide: Boolean) {
-        scope.launch { dataStore.edit { prefs -> prefs[booleanPreferencesKey(provideLocationKey(nodeNum))] = provide } }
     }
 
     override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> = cachedFlow(storeForwardFlows, address) {
@@ -91,18 +81,7 @@ class MeshPrefsImpl(
         }
     }
 
-    private fun provideLocationKey(nodeNum: Int?) = "provide-location-$nodeNum"
-
     private fun storeForwardKey(address: String?): String = "store-forward-last-request-${normalizeAddress(address)}"
-
-    private fun normalizeAddress(address: String?): String {
-        val raw = address?.trim()?.takeIf { it.isNotEmpty() }
-        return when {
-            raw == null -> "DEFAULT"
-            raw.equals(NO_DEVICE_SELECTED, ignoreCase = true) -> "DEFAULT"
-            else -> raw.uppercase().replace(":", "")
-        }
-    }
 
     companion object {
         val KEY_DEVICE_ADDRESS_PREF = stringPreferencesKey("device_address")

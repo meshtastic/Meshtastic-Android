@@ -50,7 +50,7 @@ class PreferencesDataStoreModule {
     @Named("CorePreferencesDataStore")
     fun providePreferencesDataStore(
         context: Context,
-        @Named("DataStoreScope") scope: CoroutineScope,
+        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
     ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
         migrations =
@@ -66,7 +66,7 @@ class LocalConfigDataStoreModule {
     @Named("CoreLocalConfigDataStore")
     fun provideLocalConfigDataStore(
         context: Context,
-        @Named("DataStoreScope") scope: CoroutineScope,
+        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
     ): DataStore<LocalConfig> = DataStoreFactory.create(
         storage =
         OkioStorage(
@@ -85,7 +85,7 @@ class ModuleConfigDataStoreModule {
     @Named("CoreModuleConfigDataStore")
     fun provideModuleConfigDataStore(
         context: Context,
-        @Named("DataStoreScope") scope: CoroutineScope,
+        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
     ): DataStore<LocalModuleConfig> = DataStoreFactory.create(
         storage =
         OkioStorage(
@@ -104,7 +104,7 @@ class ChannelSetDataStoreModule {
     @Named("CoreChannelSetDataStore")
     fun provideChannelSetDataStore(
         context: Context,
-        @Named("DataStoreScope") scope: CoroutineScope,
+        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
     ): DataStore<ChannelSet> = DataStoreFactory.create(
         storage =
         OkioStorage(
@@ -123,7 +123,7 @@ class LocalStatsDataStoreModule {
     @Named("CoreLocalStatsDataStore")
     fun provideLocalStatsDataStore(
         context: Context,
-        @Named("DataStoreScope") scope: CoroutineScope,
+        @Named(DATASTORE_SCOPE) scope: CoroutineScope,
     ): DataStore<LocalStats> = DataStoreFactory.create(
         storage =
         OkioStorage(

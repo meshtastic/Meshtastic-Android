@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,25 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.ui.graphics.Color
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.ui.theme.GraphColors.Amber
 import org.meshtastic.core.ui.theme.GraphColors.Blue
+import org.meshtastic.core.ui.theme.GraphColors.Chartreuse
+import org.meshtastic.core.ui.theme.GraphColors.Coral
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
+import org.meshtastic.core.ui.theme.GraphColors.DeepOrange
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
+import org.meshtastic.core.ui.theme.GraphColors.Indigo
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
+import org.meshtastic.core.ui.theme.GraphColors.LightGreen
+import org.meshtastic.core.ui.theme.GraphColors.Lime
+import org.meshtastic.core.ui.theme.GraphColors.Magenta
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
+import org.meshtastic.core.ui.theme.GraphColors.SkyBlue
+import org.meshtastic.core.ui.theme.GraphColors.Teal
 import org.meshtastic.proto.Telemetry
 
 @Suppress("MagicNumber")
@@ -59,6 +69,44 @@ enum class Environment(val color: Color) {
     },
     UV_LUX(Orange) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.uv_lux
+    },
+    WIND_SPEED(Teal) {
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.wind_speed
+    },
+    RADIATION(Lime) {
+        override fun getValue(telemetry: Telemetry): Float? = telemetry.environment_metrics?.radiation
+    },
+    ONE_WIRE_TEMP_1(Amber) {
+        override fun getValue(telemetry: Telemetry): Float? =
+            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(0)
+    },
+    ONE_WIRE_TEMP_2(DeepOrange) {
+        override fun getValue(telemetry: Telemetry): Float? =
+            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(1)
+    },
+    ONE_WIRE_TEMP_3(Indigo) {
+        override fun getValue(telemetry: Telemetry): Float? =
+            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(2)
+    },
+    ONE_WIRE_TEMP_4(LightGreen) {
+        override fun getValue(telemetry: Telemetry): Float? =
+            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(3)
+    },
+    ONE_WIRE_TEMP_5(Magenta) {
+        override fun getValue(telemetry: Telemetry): Float? =
+            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(4)
+    },
+    ONE_WIRE_TEMP_6(SkyBlue) {
+        override fun getValue(telemetry: Telemetry): Float? =
+            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(5)
+    },
+    ONE_WIRE_TEMP_7(Chartreuse) {
+        override fun getValue(telemetry: Telemetry): Float? =
+            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(6)
+    },
+    ONE_WIRE_TEMP_8(Coral) {
+        override fun getValue(telemetry: Telemetry): Float? =
+            telemetry.environment_metrics?.one_wire_temperature?.getOrNull(7)
     }, ;
 
     abstract fun getValue(telemetry: Telemetry): Float?
@@ -114,9 +162,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Relative Humidity
-        val humidities = telemetries.mapNotNull {
-            it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f }
-        }
+        val humidities =
+            telemetries.mapNotNull { it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f } }
         if (humidities.isNotEmpty()) {
             minValues.add(humidities.minOf { it })
             maxValues.add(humidities.maxOf { it })
@@ -124,9 +171,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Soil Temperature
-        val soilTemperatures = telemetries.mapNotNull {
-            it.environment_metrics?.soil_temperature?.takeIf { !it.isNaN() }
-        }
+        val soilTemperatures =
+            telemetries.mapNotNull { it.environment_metrics?.soil_temperature?.takeIf { !it.isNaN() } }
         if (soilTemperatures.isNotEmpty()) {
             var minSoilTemperatureValue = soilTemperatures.minOf { it }
             var maxSoilTemperatureValue = soilTemperatures.maxOf { it }
@@ -140,9 +186,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Soil Moisture
-        val soilMoistures = telemetries.mapNotNull {
-            it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE }
-        }
+        val soilMoistures =
+            telemetries.mapNotNull { it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE } }
         if (soilMoistures.isNotEmpty()) {
             minValues.add(soilMoistures.minOf { it.toFloat() })
             maxValues.add(soilMoistures.maxOf { it.toFloat() })
@@ -181,6 +226,50 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
             minValues.add(uvLuxValues.minOf { it })
             maxValues.add(uvLuxValues.maxOf { it })
             shouldPlot[Environment.UV_LUX.ordinal] = true
+        }
+
+        // Wind Speed
+        val windSpeeds = telemetries.mapNotNull { it.environment_metrics?.wind_speed?.takeIf { !it.isNaN() } }
+        if (windSpeeds.isNotEmpty()) {
+            minValues.add(windSpeeds.minOf { it })
+            maxValues.add(windSpeeds.maxOf { it })
+            shouldPlot[Environment.WIND_SPEED.ordinal] = true
+        }
+
+        // Radiation (uses separate fixed axis with minY=0 per Oscar's guidance)
+        val radiationValues =
+            telemetries.mapNotNull { it.environment_metrics?.radiation?.takeIf { !it.isNaN() && it > 0f } }
+        if (radiationValues.isNotEmpty()) {
+            minValues.add(radiationValues.minOf { it })
+            maxValues.add(radiationValues.maxOf { it })
+            shouldPlot[Environment.RADIATION.ordinal] = true
+        }
+
+        // 1-Wire temperature sensors (up to 8 channels, Fahrenheit-aware)
+        val oneWireEntries =
+            listOf(
+                Environment.ONE_WIRE_TEMP_1,
+                Environment.ONE_WIRE_TEMP_2,
+                Environment.ONE_WIRE_TEMP_3,
+                Environment.ONE_WIRE_TEMP_4,
+                Environment.ONE_WIRE_TEMP_5,
+                Environment.ONE_WIRE_TEMP_6,
+                Environment.ONE_WIRE_TEMP_7,
+                Environment.ONE_WIRE_TEMP_8,
+            )
+        oneWireEntries.forEach { entry ->
+            val values = telemetries.mapNotNull { entry.getValue(it)?.takeIf { v -> !v.isNaN() } }
+            if (values.isNotEmpty()) {
+                var minVal = values.minOf { it }
+                var maxVal = values.maxOf { it }
+                if (useFahrenheit) {
+                    minVal = UnitConversions.celsiusToFahrenheit(minVal)
+                    maxVal = UnitConversions.celsiusToFahrenheit(maxVal)
+                }
+                minValues.add(minVal)
+                maxValues.add(maxVal)
+                shouldPlot[entry.ordinal] = true
+            }
         }
 
         val min = if (minValues.isEmpty()) 0f else minValues.minOf { it }

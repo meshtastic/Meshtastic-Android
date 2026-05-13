@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,16 @@ package org.meshtastic.desktop.stub
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.emptyFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MessageStatus
@@ -36,15 +40,12 @@ import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MeshWorkerManager
-import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MqttClientProxyMessage
-import org.meshtastic.proto.Telemetry
+import org.meshtastic.mqtt.ConnectionState as MqttConnectionState
 import org.meshtastic.proto.Position as ProtoPosition
 
 /**
@@ -66,23 +67,31 @@ private fun logWarn(message: String) {
 // region Transport / Radio Stubs (Android BLE/USB — no commonMain impl)
 
 class NoopRadioInterfaceService : RadioInterfaceService {
-    override val supportedDeviceTypes: List<org.meshtastic.core.model.DeviceType> = emptyList()
+    override val supportedDeviceTypes: List<DeviceType> = emptyList()
 
     override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val currentDeviceAddressFlow = MutableStateFlow<String?>(null)
 
-    override fun isMockInterface(): Boolean = false
+    override fun isMockTransport(): Boolean = false
 
     override val receivedData = MutableSharedFlow<ByteArray>()
-    override val meshActivity = MutableSharedFlow<MeshActivity>()
-    override val connectionError = MutableSharedFlow<String>()
+    override val meshActivity: Flow<MeshActivity> = MutableSharedFlow<MeshActivity>().asFlow()
+    override val connectionError: Flow<String> = MutableSharedFlow<String>().asFlow()
 
     override fun sendToRadio(bytes: ByteArray) {
         logWarn("NoopRadioInterfaceService.sendToRadio(${bytes.size} bytes)")
     }
 
+    override fun resetReceivedBuffer() {
+        // No-op: this stub never buffers bytes.
+    }
+
     override fun connect() {
         logWarn("NoopRadioInterfaceService.connect()")
+    }
+
+    override suspend fun disconnect() {
+        logWarn("NoopRadioInterfaceService.disconnect()")
     }
 
     override fun getDeviceAddress(): String? = null
@@ -98,65 +107,12 @@ class NoopRadioInterfaceService : RadioInterfaceService {
     override fun handleFromRadio(bytes: ByteArray) {}
 
     @Suppress("InjectDispatcher")
-    override val serviceScope: CoroutineScope
-        get() = CoroutineScope(kotlinx.coroutines.Dispatchers.Default)
+    override val serviceScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 }
 
 // endregion
 
 // region Notification / Platform Stubs (Android-only)
-
-@Suppress("TooManyFunctions")
-class NoopMeshServiceNotifications : MeshServiceNotifications {
-    override fun clearNotifications() {}
-
-    override fun initChannels() {}
-
-    override fun updateServiceStateNotification(
-        state: org.meshtastic.core.model.ConnectionState,
-        telemetry: Telemetry?,
-    ): Any = Unit
-
-    override suspend fun updateMessageNotification(
-        contactKey: String,
-        name: String,
-        message: String,
-        isBroadcast: Boolean,
-        channelName: String?,
-        isSilent: Boolean,
-    ) {}
-
-    override suspend fun updateWaypointNotification(
-        contactKey: String,
-        name: String,
-        message: String,
-        waypointId: Int,
-        isSilent: Boolean,
-    ) {}
-
-    override suspend fun updateReactionNotification(
-        contactKey: String,
-        name: String,
-        emoji: String,
-        isBroadcast: Boolean,
-        channelName: String?,
-        isSilent: Boolean,
-    ) {}
-
-    override fun showAlertNotification(contactKey: String, name: String, alert: String) {}
-
-    override fun showNewNodeSeenNotification(node: Node) {}
-
-    override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {}
-
-    override fun showClientNotification(clientNotification: ClientNotification) {}
-
-    override fun cancelMessageNotification(contactKey: String) {}
-
-    override fun cancelLowBatteryNotification(node: Node) {}
-
-    override fun clearClientNotification(notification: ClientNotification) {}
-}
 
 class NoopPlatformAnalytics : PlatformAnalytics {
     override fun track(event: String, vararg properties: DataPair) {}
@@ -190,10 +146,6 @@ class NoopMeshWorkerManager : MeshWorkerManager {
     override fun enqueueSendMessage(packetId: Int) {}
 }
 
-class NoopMessageQueue : MessageQueue {
-    override suspend fun enqueue(packetId: Int) {}
-}
-
 class NoopMeshLocationManager : MeshLocationManager {
     override fun start(scope: CoroutineScope, sendPositionFn: (ProtoPosition) -> Unit) {}
 
@@ -216,6 +168,8 @@ class NoopMQTTRepository : MQTTRepository {
     override val proxyMessageFlow: Flow<MqttClientProxyMessage> = emptyFlow()
 
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {}
+
+    override val connectionState = MutableStateFlow<MqttConnectionState>(MqttConnectionState.Disconnected.Idle)
 }
 
 // endregion

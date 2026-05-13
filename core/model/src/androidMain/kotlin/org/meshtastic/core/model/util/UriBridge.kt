@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,13 @@
 package org.meshtastic.core.model.util
 
 import android.net.Uri
+import com.eygraber.uri.toKmpUri
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
 
 /** Extension to bridge android.net.Uri to CommonUri for shared dispatch logic. */
-fun Uri.toCommonUri(): CommonUri = CommonUri.parse(this.toString())
+fun Uri.toCommonUri(): CommonUri = this.toKmpUri()
 
 /** Bridge extension for Android clients. */
 fun Uri.dispatchMeshtasticUri(

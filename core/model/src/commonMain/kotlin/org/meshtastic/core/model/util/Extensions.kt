@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,11 @@
 
 package org.meshtastic.core.model.util
 
+import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.Telemetry
 
 /**
@@ -32,7 +35,7 @@ val Any?.anonymize: String
     get() = this.anonymize()
 
 /** A version of anonymize that allows passing in a custom minimum length */
-fun Any?.anonymize(maxLen: Int = 3) = if (this != null) ("..." + this.toString().takeLast(maxLen)) else "null"
+fun Any?.anonymize(maxLen: Int = 3) = if (this != null) "...${this.toString().takeLast(maxLen)}" else "null"
 
 // A toString that makes sure all newlines are removed (for nice logging).
 fun Any.toOneLineString() = this.toString().replace('\n', ' ')
@@ -45,6 +48,24 @@ fun Config.toOneLineString(): String {
 
 fun MeshPacket.toOneLineString(): String {
     val redactedFields = """(public_key|private_key|admin_key)=[^,}]+""" // Redact keys
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
+fun Channel.toOneLineString(): String {
+    // Redact the channel preshared key (psk) from logs.
+    val redactedFields = """(psk)=[^,}]+"""
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
+fun ModuleConfig.toOneLineString(): String {
+    // Redact MQTT credentials from logs.
+    val redactedFields = """(password|username)=[^,}]+"""
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
+fun MyNodeInfo.toOneLineString(): String {
+    // Redact the hardware unique identifier from logs.
+    val redactedFields = """(device_id)=[^,}]+"""
     return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
 }
 

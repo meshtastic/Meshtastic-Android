@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.FakeRadioInterfaceService
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
@@ -45,6 +46,7 @@ class NodeListViewModelTest {
     private lateinit var viewModel: NodeListViewModel
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var radioController: FakeRadioController
+    private lateinit var radioInterfaceService: FakeRadioInterfaceService
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val nodeFilterPreferences: NodeFilterPreferences = mock(MockMode.autofill)
@@ -55,6 +57,7 @@ class NodeListViewModelTest {
     fun setUp() {
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
+        radioInterfaceService = FakeRadioInterfaceService()
 
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(org.meshtastic.proto.LocalConfig())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(org.meshtastic.proto.DeviceProfile())
@@ -79,6 +82,7 @@ class NodeListViewModelTest {
         radioConfigRepository = radioConfigRepository,
         serviceRepository = serviceRepository,
         radioController = radioController,
+        radioInterfaceService = radioInterfaceService,
         nodeManagementActions = nodeManagementActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,
         nodeFilterPreferences = nodeFilterPreferences,

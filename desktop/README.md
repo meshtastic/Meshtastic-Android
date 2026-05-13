@@ -25,14 +25,18 @@ A Compose Desktop application target — the first full non-Android target for t
 
 ## ProGuard / Minification
 
-Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source.
+Release builds use ProGuard for tree-shaking (unused code removal), significantly reducing distribution size. Obfuscation is disabled since the project is open-source. Rules are aligned with the Android R8 rules in `app/proguard-rules.pro` — both targets share the same anti-class-merging philosophy.
 
 **Configuration:**
 - `build.gradle.kts` — `buildTypes.release.proguard` block enables ProGuard with `optimize.set(true)` and `obfuscate.set(false)`.
-- `proguard-rules.pro` — Comprehensive keep-rules for all reflection/JNI-sensitive dependencies (Koin, kotlinx-serialization, Wire protobuf, Room KMP, Ktor, Kable BLE, Coil, SQLite JNI, Compose Multiplatform resources).
+- `proguard-rules.pro` — Keep-rules for reflection/JNI-sensitive dependencies (Koin, kotlinx-serialization, Wire protobuf, Room KMP `androidx.room3`, Ktor, Kable BLE, Coil, SQLite JNI, Compose Multiplatform resources) and an anti-merge rule for Compose animation classes.
+
+**Key rules:**
+- **Compose animation anti-merge** (`-keep class androidx.compose.animation.** { *; }`) — Prevents ProGuard's optimizer from incorrectly tree-shaking or merging animation class hierarchies (e.g. `EnterTransition`/`ExitTransition` into `*Impl`), which causes animations to silently snap. Same rule as Android.
+- **Room KMP** — Uses `androidx.room3` package path (Room KMP 3.x).
 
 **Troubleshooting ProGuard issues:**
-- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule in `proguard-rules.pro`.
+- If the release build crashes at runtime with `ClassNotFoundException` or `NoSuchMethodError`, a library is loading classes via reflection that ProGuard stripped. Add a `-keep` rule in `proguard-rules.pro` **and** the corresponding rule in `app/proguard-rules.pro` to keep both targets aligned.
 - To debug which classes ProGuard removes, temporarily add `-printusage proguard-usage.txt` to the rules file and inspect the output in `desktop/proguard-usage.txt`.
 - To see the full mapping of optimizations applied, add `-printseeds proguard-seeds.txt`.
 - Run `./gradlew :desktop:runRelease` for a quick smoke-test of the minified app before packaging.
@@ -51,9 +55,9 @@ The module depends on the JVM variants of KMP modules:
 
 **DI:** A Koin DI graph is bootstrapped in `Main.kt` with platform-specific implementations injected.
 
-**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop acts as a thin host shell, delegating almost entirely to fully shared KMP UI modules. Includes native macOS notification support (via `TrayState` and `bundleID` identification) and a monochrome SVG tray icon for a native look and feel.
+**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop acts as a thin host shell, delegating almost entirely to fully shared KMP UI modules. Includes native OS notifications (macOS `UNUserNotificationCenter`, Linux libnotify, Windows toast) and a monochrome SVG tray icon for a native look and feel.
 
-**Notifications:** Implements the common `NotificationManager` interface via `DesktopNotificationManager`. Repository-level notifications (messages, node events, alerts) are collected in `Main.kt` and forwarded to the system tray. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) and the `NSUserNotificationAlertStyle` key in `Info.plist` for notifications to appear correctly in the distributable.
+**Notifications:** Implements the common `NotificationManager` interface via `DesktopNotificationManager`. Repository-level notifications (messages, node events, alerts) are collected in `Main.kt` and forwarded to platform-native senders; the app falls back to Compose `TrayState` notifications only if native delivery fails. macOS requires a consistent `bundleID` (configured in `build.gradle.kts`) for proper app attribution.
 
 **Localization:** Desktop exposes a language picker, persisting the selected BCP-47 tag in `UiPreferencesDataSource.locale`. `Main.kt` applies the override to the JVM default `Locale` and uses a `staticCompositionLocalOf`-backed recomposition trigger so Compose Multiplatform `stringResource()` calls update immediately without recreating the Navigation 3 backstack.
 

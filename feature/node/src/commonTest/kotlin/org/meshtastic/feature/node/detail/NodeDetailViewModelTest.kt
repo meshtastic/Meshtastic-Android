@@ -16,23 +16,38 @@
  */
 package org.meshtastic.feature.node.detail
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
+import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
+import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.connect_radio_for_remote_admin
+import org.meshtastic.core.resources.remote_admin_unreachable
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.proto.User
@@ -51,12 +66,29 @@ class NodeDetailViewModelTest {
     private val nodeRequestActions: NodeRequestActions = mock()
     private val serviceRepository: ServiceRepository = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
+    private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
+    private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
+    private val snackbarManager = RecordingSnackbarManager()
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
         every { getNodeDetailsUseCase(any()) } returns emptyFlow()
+        every { observeRemoteAdminSessionStatus(any()) } returns flowOf(SessionStatus.NoSession)
+        snackbarManager.messages.clear()
+        NodeDetailUiTextResolver.resolve = { text ->
+            when (text) {
+                is UiText.DynamicString -> text.value
+
+                is UiText.Resource ->
+                    when (text.res) {
+                        Res.string.connect_radio_for_remote_admin -> "Connect to a radio to administer remote nodes."
+                        Res.string.remote_admin_unreachable -> "Could not reach node — try again or move closer."
+                        else -> error("Unexpected UiText resource in test: ${text.res}")
+                    }
+            }
+        }
 
         viewModel = createViewModel(1234)
     }
@@ -67,10 +99,28 @@ class NodeDetailViewModelTest {
         nodeRequestActions = nodeRequestActions,
         serviceRepository = serviceRepository,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
+        ensureRemoteAdminSession = ensureRemoteAdminSession,
+        observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
+        snackbarManager = snackbarManager,
     )
+
+    private class RecordingSnackbarManager : SnackbarManager() {
+        val messages = mutableListOf<String>()
+
+        override fun showSnackbar(
+            message: String,
+            actionLabel: String?,
+            withDismissAction: Boolean,
+            duration: SnackbarDuration,
+            onAction: (() -> Unit)?,
+        ) {
+            messages += message
+        }
+    }
 
     @AfterTest
     fun tearDown() {
+        NodeDetailUiTextResolver.resolve = { it.resolve() }
         Dispatchers.resetMain()
     }
 
@@ -113,5 +163,43 @@ class NodeDetailViewModelTest {
         viewModel.handleNodeMenuAction(NodeMenuAction.TraceRoute(node))
 
         verify { nodeRequestActions.requestTraceroute(any(), 1234, "Test Node") }
+    }
+
+    @Test
+    fun `openRemoteAdmin navigates to settings when session is already active`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } returns EnsureSessionResult.AlreadyActive
+
+        viewModel.navigationEvents.test {
+            viewModel.openRemoteAdmin(1234)
+
+            assertEquals(SettingsRoute.Settings(1234), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        verifySuspend { ensureRemoteAdminSession(1234) }
+    }
+
+    @Test
+    fun `openRemoteAdmin shows disconnected snackbar when radio is disconnected`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } returns EnsureSessionResult.Disconnected
+        val expectedMessage = "Connect to a radio to administer remote nodes."
+
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+
+        assertEquals(listOf(expectedMessage), snackbarManager.messages)
+        verifySuspend { ensureRemoteAdminSession(1234) }
+    }
+
+    @Test
+    fun `openRemoteAdmin shows timeout snackbar when node is unreachable`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } returns EnsureSessionResult.Timeout
+        val expectedMessage = "Could not reach node — try again or move closer."
+
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+
+        assertEquals(listOf(expectedMessage), snackbarManager.messages)
+        verifySuspend { ensureRemoteAdminSession(1234) }
     }
 }

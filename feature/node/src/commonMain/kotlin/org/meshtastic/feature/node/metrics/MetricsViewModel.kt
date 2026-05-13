@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -31,23 +30,23 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.ByteString.Companion.decodeBase64
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
+import org.meshtastic.core.model.util.GeoConstants
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
@@ -60,12 +59,13 @@ import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.toMessageRes
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import kotlin.time.Instant
@@ -104,7 +104,7 @@ open class MetricsViewModel(
                 if (nodeId == null) return@flatMapLatest flowOf(MetricsState.Empty)
                 getNodeDetailsUseCase(nodeId).map { it.metricsState }
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MetricsState.Empty)
+            .stateInWhileSubscribed(initialValue = MetricsState.Empty)
 
     private val environmentState: StateFlow<EnvironmentMetricsState> =
         activeNodeId
@@ -112,7 +112,7 @@ open class MetricsViewModel(
                 if (nodeId == null) return@flatMapLatest flowOf(EnvironmentMetricsState())
                 getNodeDetailsUseCase(nodeId).map { it.environmentState }
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), EnvironmentMetricsState())
+            .stateInWhileSubscribed(initialValue = EnvironmentMetricsState())
 
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
 
@@ -148,6 +148,8 @@ open class MetricsViewModel(
                             temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
                             soil_temperature =
                             em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
+                            one_wire_temperature =
+                            em.one_wire_temperature.map { UnitConversions.celsiusToFahrenheit(it) },
                         ),
                     )
                 }
@@ -181,7 +183,8 @@ open class MetricsViewModel(
 
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
-    fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
+    fun deleteLog(uuid: String) =
+        safeLaunch(context = dispatchers.io, tag = "deleteLog") { meshLogRepository.deleteLog(uuid) }
 
     fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
         val cached = tracerouteOverlayCache.value[requestId]
@@ -216,7 +219,7 @@ open class MetricsViewModel(
     private fun List<Node>.numSet(): Set<Int> = map { it.num }.toSet()
 
     init {
-        viewModelScope.launch {
+        safeLaunch(tag = "tracerouteCollector") {
             serviceRepository.tracerouteResponse.filterNotNull().collect { response ->
                 val overlay =
                     TracerouteOverlay(
@@ -232,7 +235,7 @@ open class MetricsViewModel(
         Logger.d { "MetricsViewModel created" }
     }
 
-    fun clearPosition() = viewModelScope.launch(dispatchers.io) {
+    fun clearPosition() = safeLaunch(context = dispatchers.io, tag = "clearPosition") {
         (manualNodeId.value ?: nodeIdFromRoute)?.let {
             meshLogRepository.deleteLogs(it, PortNum.POSITION_APP.value)
         }
@@ -275,9 +278,8 @@ open class MetricsViewModel(
         responseLogUuid: String,
         overlay: TracerouteOverlay?,
         onViewOnMap: (Int, String) -> Unit,
-        onShowError: (StringResource) -> Unit,
     ) {
-        viewModelScope.launch {
+        safeLaunch(tag = "showTracerouteDetail") {
             val snapshotPositions = tracerouteSnapshotRepository.getSnapshotPositions(responseLogUuid).first()
             alertManager.showAlert(
                 titleRes = Res.string.traceroute,
@@ -298,7 +300,11 @@ open class MetricsViewModel(
                         )
                     val errorRes = availability.toMessageRes()
                     if (errorRes != null) {
-                        onShowError(errorRes)
+                        // Post the error alert after the current alert is dismissed to avoid
+                        // the wrapping dismissAlert() in AlertManager immediately clearing it.
+                        safeLaunch(tag = "tracerouteError") {
+                            alertManager.showAlert(titleRes = Res.string.traceroute, messageRes = errorRes)
+                        }
                     } else {
                         onViewOnMap(requestId, responseLogUuid)
                     }
@@ -319,34 +325,113 @@ open class MetricsViewModel(
         Logger.d { "MetricsViewModel cleared" }
     }
 
-    fun savePositionCSV(uri: MeshtasticUri) {
-        viewModelScope.launch(dispatchers.main) {
-            val positions = state.value.positionLogs
+    // region --- CSV Export ---
+
+    /**
+     * Shared CSV export helper. Writes [header] then iterates [rows], converting each item to a CSV line via
+     * [rowMapper]. The mapper returns only the data columns; date and time columns are prepended automatically from the
+     * epoch-seconds timestamp extracted by [epochSeconds].
+     */
+    private fun <T> exportCsv(
+        uri: CommonUri,
+        header: String,
+        rows: List<T>,
+        epochSeconds: (T) -> Long,
+        rowMapper: (T) -> String,
+    ) {
+        safeLaunch(context = dispatchers.io, tag = "exportCsv") {
             fileService.write(uri) { sink ->
-                sink.writeUtf8(
-                    "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n",
-                )
-
-                positions.forEach { position ->
-                    val localDateTime =
-                        Instant.fromEpochSeconds(position.time.toLong())
-                            .toLocalDateTime(TimeZone.currentSystemDefault())
-                    val rxDateTime = "\"${localDateTime.date}\",\"${localDateTime.time}\""
-
-                    val latitude = (position.latitude_i ?: 0) * 1e-7
-                    val longitude = (position.longitude_i ?: 0) * 1e-7
-                    val altitude = position.altitude
-                    val satsInView = position.sats_in_view
-                    val speed = position.ground_speed
-                    val heading = formatString("%.2f", (position.ground_track ?: 0) * 1e-5)
-
-                    sink.writeUtf8(
-                        "$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n",
-                    )
+                sink.writeUtf8(header)
+                rows.forEach { item ->
+                    val dt =
+                        Instant.fromEpochSeconds(epochSeconds(item)).toLocalDateTime(TimeZone.currentSystemDefault())
+                    sink.writeUtf8("\"${dt.date}\",\"${dt.time}\",${rowMapper(item)}\n")
                 }
             }
         }
     }
+
+    fun savePositionCSV(uri: CommonUri, data: List<org.meshtastic.proto.Position>) {
+        exportCsv(
+            uri = uri,
+            header = "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { pos ->
+            val lat = (pos.latitude_i ?: 0) * GeoConstants.DEG_D
+            val lon = (pos.longitude_i ?: 0) * GeoConstants.DEG_D
+            val heading = formatString("%.2f", (pos.ground_track ?: 0) * GeoConstants.HEADING_DEG)
+            "\"$lat\",\"$lon\",\"${pos.altitude}\",\"${pos.sats_in_view}\",\"${pos.ground_speed}\",\"$heading\""
+        }
+    }
+
+    fun saveDeviceMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"batteryLevel\",\"voltage\",\"channelUtilization\"," +
+                "\"airUtilTx\",\"uptimeSeconds\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { t ->
+            val dm = t.device_metrics
+            "\"${dm?.battery_level ?: ""}\",\"${dm?.voltage ?: ""}\"," +
+                "\"${dm?.channel_utilization ?: ""}\",\"${dm?.air_util_tx ?: ""}\"," +
+                "\"${dm?.uptime_seconds ?: ""}\""
+        }
+    }
+
+    fun saveEnvironmentMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
+        val oneWireHeaders = (1..ONE_WIRE_SENSOR_COUNT).joinToString(",") { "\"oneWireTemp$it\"" }
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\"," +
+                "\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\"," +
+                "\"soilMoisture\",$oneWireHeaders\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { t ->
+            val em = t.environment_metrics
+            val owt = em?.one_wire_temperature ?: emptyList()
+            val oneWireValues =
+                (0 until ONE_WIRE_SENSOR_COUNT).joinToString(",") { i -> "\"${owt.getOrNull(i) ?: ""}\"" }
+            "\"${em?.temperature ?: ""}\",\"${em?.relative_humidity ?: ""}\"," +
+                "\"${em?.barometric_pressure ?: ""}\",\"${em?.gas_resistance ?: ""}\"," +
+                "\"${em?.iaq ?: ""}\",\"${em?.wind_speed ?: ""}\"," +
+                "\"${em?.wind_direction ?: ""}\",\"${em?.soil_temperature ?: ""}\"," +
+                "\"${em?.soil_moisture ?: ""}\",$oneWireValues"
+        }
+    }
+
+    fun saveSignalMetricsCSV(uri: CommonUri, data: List<MeshPacket>) {
+        exportCsv(
+            uri = uri,
+            header = "\"date\",\"time\",\"rssi\",\"snr\"\n",
+            rows = data,
+            epochSeconds = { it.rx_time.toLong() },
+        ) { p ->
+            "\"${p.rx_rssi}\",\"${p.rx_snr}\""
+        }
+    }
+
+    fun savePowerMetricsCSV(uri: CommonUri, data: List<Telemetry>) {
+        exportCsv(
+            uri = uri,
+            header =
+            "\"date\",\"time\",\"ch1Voltage\",\"ch1Current\",\"ch2Voltage\",\"ch2Current\"," +
+                "\"ch3Voltage\",\"ch3Current\"\n",
+            rows = data,
+            epochSeconds = { it.time.toLong() },
+        ) { t ->
+            val pm = t.power_metrics
+            "\"${pm?.ch1_voltage ?: ""}\",\"${pm?.ch1_current ?: ""}\"," +
+                "\"${pm?.ch2_voltage ?: ""}\",\"${pm?.ch2_current ?: ""}\"," +
+                "\"${pm?.ch3_voltage ?: ""}\",\"${pm?.ch3_current ?: ""}\""
+        }
+    }
+
+    // endregion
 
     @Suppress("MagicNumber", "CyclomaticComplexMethod", "ReturnCount")
     fun decodePaxFromLog(log: MeshLog): ProtoPaxcount? {
@@ -377,4 +462,8 @@ open class MetricsViewModel(
     }
 
     protected fun decodeBase64(base64: String): ByteArray = base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
+
+    companion object {
+        private const val ONE_WIRE_SENSOR_COUNT = 8
+    }
 }

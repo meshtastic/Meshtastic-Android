@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -39,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +62,7 @@ import org.meshtastic.core.resources.new_channel_rcvd
 import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.replace_channels_and_settings_description
 import org.meshtastic.core.ui.component.ChannelSelection
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ChannelSet
 
 @Composable
@@ -88,7 +91,7 @@ fun ScannedQrCodeDialog(
     onDismiss: () -> Unit,
     onConfirm: (ChannelSet) -> Unit,
 ) {
-    var shouldReplace by remember { mutableStateOf(incoming.lora_config != null) }
+    var shouldReplace by rememberSaveable { mutableStateOf(incoming.lora_config != null) }
 
     val channelSet =
         remember(shouldReplace, channels, incoming) {
@@ -240,21 +243,33 @@ fun ScannedQrCodeDialog(
                         val unselectedColors =
                             ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
 
+                        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                        val mediumHeight = ButtonDefaults.MediumContainerHeight
+                        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
                         OutlinedButton(
                             onClick = { shouldReplace = false },
-                            modifier = Modifier.height(48.dp).weight(1f),
+                            shapes = ButtonDefaults.shapesFor(mediumHeight),
+                            modifier = Modifier.height(mediumHeight).weight(1f),
                             colors = if (!shouldReplace) selectedColors else unselectedColors,
                         ) {
-                            Text(text = stringResource(Res.string.add))
+                            Text(
+                                text = stringResource(Res.string.add),
+                                style = ButtonDefaults.textStyleFor(mediumHeight),
+                            )
                         }
 
+                        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
                         OutlinedButton(
                             onClick = { shouldReplace = true },
-                            modifier = Modifier.height(48.dp).weight(1f),
+                            shapes = ButtonDefaults.shapesFor(mediumHeight),
+                            modifier = Modifier.height(mediumHeight).weight(1f),
                             enabled = incoming.lora_config != null,
                             colors = if (shouldReplace) selectedColors else unselectedColors,
                         ) {
-                            Text(text = stringResource(Res.string.replace))
+                            Text(
+                                text = stringResource(Res.string.replace),
+                                style = ButtonDefaults.textStyleFor(mediumHeight),
+                            )
                         }
                     }
                 }
@@ -300,10 +315,14 @@ fun ScannedQrCodeDialog(
 @PreviewLightDark
 @Composable
 private fun ScannedQrCodeDialogPreview() {
-    ScannedQrCodeDialog(
-        channels = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
-        incoming = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
-        onDismiss = {},
-        onConfirm = {},
-    )
+    AppTheme {
+        ScannedQrCodeDialog(
+            channels =
+            ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+            incoming =
+            ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+            onDismiss = {},
+            onConfirm = {},
+        )
+    }
 }

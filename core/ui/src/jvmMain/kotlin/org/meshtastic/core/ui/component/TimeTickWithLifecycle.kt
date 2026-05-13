@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.runtime.Composable
+import org.meshtastic.core.common.util.nowMillis
 
-/** JVM implementation — returns System.currentTimeMillis() (no lifecycle-based updates on Desktop). */
-@Composable actual fun rememberTimeTickWithLifecycle(): Long = System.currentTimeMillis()
+/** JVM implementation — returns the current epoch millis (no lifecycle-based updates on Desktop). */
+@Composable actual fun rememberTimeTickWithLifecycle(): Long = nowMillis

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import co.touchlab.kermit.Logger
 import org.koin.android.annotation.KoinWorker
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.service.startService
 
@@ -80,7 +81,7 @@ class ServiceKeepAliveWorker(
         // We use "my_service" which matches NotificationType.ServiceState.channelId in MeshServiceNotificationsImpl
 
         return NotificationCompat.Builder(applicationContext, "my_service")
-            .setSmallIcon(applicationContext.applicationInfo.icon)
+            .setSmallIcon(drawable.meshtastic_ic_notification)
             .setContentTitle("Resuming Mesh Service")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)

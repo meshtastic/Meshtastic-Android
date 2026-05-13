@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,23 @@
 package org.meshtastic.core.network.repository
 
 import app.cash.turbine.test
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.di.CoroutineDispatchers
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class JvmServiceDiscoveryTest {
 
+    private val testDispatchers =
+        UnconfinedTestDispatcher().let { dispatcher ->
+            CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher)
+        }
+
     @Test
     fun `resolvedServices emits initial empty list immediately`() = runTest {
-        val discovery = JvmServiceDiscovery()
+        val discovery = JvmServiceDiscovery(testDispatchers)
         discovery.resolvedServices.test {
             val first = awaitItem()
             assertNotNull(first, "First emission should not be null")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,21 +21,29 @@ import android.content.Context
 import android.content.Intent
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.ServiceRepository
 
+/**
+ * Handles inline emoji reaction actions from message notifications.
+ *
+ * Uses [goAsync] to keep the process alive while the coroutine dispatches the reaction through [ServiceRepository],
+ * matching the pattern used by [ReplyReceiver] and [MarkAsReadReceiver].
+ */
 class ReactionReceiver :
     BroadcastReceiver(),
     KoinComponent {
 
     private val serviceRepository: ServiceRepository by inject()
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val dispatchers: CoroutineDispatchers by inject()
+
+    private val scope by lazy { CoroutineScope(SupervisorJob() + dispatchers.io) }
 
     @Suppress("TooGenericExceptionCaught", "ReturnCount")
     override fun onReceive(context: Context, intent: Intent) {
@@ -45,11 +53,14 @@ class ReactionReceiver :
         val reaction = intent.getStringExtra(EXTRA_EMOJI) ?: intent.getStringExtra(EXTRA_REACTION) ?: return
         val replyId = intent.getIntExtra(EXTRA_REPLY_ID, intent.getIntExtra(EXTRA_PACKET_ID, 0))
 
+        val pendingResult = goAsync()
         scope.launch {
             try {
                 serviceRepository.onServiceAction(ServiceAction.Reaction(reaction, replyId, contactKey))
             } catch (e: Exception) {
                 Logger.e(e) { "Error sending reaction" }
+            } finally {
+                pendingResult.finish()
             }
         }
     }

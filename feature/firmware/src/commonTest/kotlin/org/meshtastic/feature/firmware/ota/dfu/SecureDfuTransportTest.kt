@@ -21,7 +21,7 @@ package org.meshtastic.feature.firmware.ota.dfu
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.ble.BleCharacteristic
 import org.meshtastic.core.ble.BleConnection
@@ -80,9 +80,35 @@ class SecureDfuTransportTest {
         assertEquals(1, connection.disconnectCalls)
     }
 
-    // -----------------------------------------------------------------------
-    // Phase 2: Connect to DFU mode
-    // -----------------------------------------------------------------------
+    @Test
+    fun `triggerButtonlessDfu falls back to legacy DFU service when secure FE59 is missing`() = runTest {
+        val scanner = FakeBleScanner()
+        val connection = FakeBleConnection().apply { missingServices += SecureDfuUuids.SERVICE }
+        val transport =
+            SecureDfuTransport(
+                scanner = scanner,
+                connectionFactory = FakeBleConnectionFactory(connection),
+                address = address,
+                dispatcher = kotlinx.coroutines.Dispatchers.Unconfined,
+            )
+
+        scanner.emitDevice(FakeBleDevice(address))
+
+        val result = transport.triggerButtonlessDfu()
+
+        assertTrue(result.isSuccess, "Legacy fallback should succeed when FE59 is absent")
+        // No write should have hit the secure characteristic.
+        assertTrue(
+            connection.service.writes.none { it.characteristic.uuid == SecureDfuUuids.BUTTONLESS_NO_BONDS },
+            "Should not write to secure buttonless characteristic when FE59 is missing",
+        )
+        // Exactly one write of 0x01 (START_DFU) should have hit the legacy control point.
+        val legacyWrites = connection.service.writes.filter { it.characteristic.uuid == LegacyDfuUuids.CONTROL_POINT }
+        assertEquals(1, legacyWrites.size, "Should have exactly one legacy DFU trigger write")
+        assertContentEquals(byteArrayOf(0x01, 0x04), legacyWrites.single().data)
+        assertEquals(BleWriteType.WITH_RESPONSE, legacyWrites.single().writeType)
+        assertEquals(1, connection.disconnectCalls)
+    }
 
     @Test
     fun `connectToDfuMode succeeds using shared BleService observation`() = runTest {
@@ -606,16 +632,16 @@ class SecureDfuTransportTest {
         override val device: BleDevice?
             get() = delegate.device
 
-        override val deviceFlow: SharedFlow<BleDevice?>
+        override val deviceFlow: StateFlow<BleDevice?>
             get() = delegate.deviceFlow
 
-        override val connectionState: SharedFlow<BleConnectionState>
+        override val connectionState: StateFlow<BleConnectionState>
             get() = delegate.connectionState
 
         override suspend fun connect(device: BleDevice) = delegate.connect(device)
 
-        override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long) =
-            delegate.connectAndAwait(device, timeoutMs)
+        override suspend fun connectAndAwait(device: BleDevice, timeout: Duration) =
+            delegate.connectAndAwait(device, timeout)
 
         override suspend fun disconnect() = delegate.disconnect()
 
@@ -651,16 +677,22 @@ class SecureDfuTransportTest {
 
             return when (opcode) {
                 DfuOpcode.SET_PRN -> buildDfuSuccess(DfuOpcode.SET_PRN)
+
                 DfuOpcode.SELECT -> buildSelectResponse(maxObjectSize, selectOffset, selectCrc)
+
                 DfuOpcode.CREATE -> buildDfuSuccess(DfuOpcode.CREATE)
+
                 DfuOpcode.CALCULATE_CHECKSUM -> {
                     val crc =
                         firmwareData?.let { DfuCrc32.calculate(it, length = minOf(accumulatedPacketBytes, it.size)) }
                             ?: totalCrc
                     buildChecksumResponse(accumulatedPacketBytes, crc)
                 }
+
                 DfuOpcode.EXECUTE -> buildDfuSuccess(DfuOpcode.EXECUTE)
+
                 DfuOpcode.ABORT -> buildDfuSuccess(DfuOpcode.ABORT)
+
                 else -> null
             }
         }

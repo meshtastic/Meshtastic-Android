@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.launch
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.traceroute
@@ -52,6 +55,7 @@ fun TracerouteAlertHandler(
     val traceRouteResponse by uiViewModel.tracerouteResponse.collectAsStateWithLifecycle(null)
     var dismissedTracerouteRequestId by remember { mutableStateOf<Int?>(null) }
     val colorScheme = MaterialTheme.colorScheme
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(traceRouteResponse, dismissedTracerouteRequestId) {
         val response = traceRouteResponse
@@ -83,8 +87,17 @@ fun TracerouteAlertHandler(
                         dismissedTracerouteRequestId = response.requestId
                         onNavigateToMap(response.destinationNodeNum, response.requestId, response.logUuid)
                     } else {
-                        uiViewModel.showAlert(titleRes = Res.string.traceroute, messageRes = errorRes)
                         uiViewModel.clearTracerouteResponse()
+                        // Post the error alert after the current alert is dismissed to avoid
+                        // the wrapping dismissAlert() in AlertManager immediately clearing it.
+                        @Suppress("TooGenericExceptionCaught")
+                        scope.launch {
+                            try {
+                                uiViewModel.showAlert(titleRes = Res.string.traceroute, messageRes = errorRes)
+                            } catch (e: Exception) {
+                                Logger.e(e) { "[TracerouteAlertHandler] Failed to show error alert" }
+                            }
+                        }
                     }
                 },
                 dismissTextRes = Res.string.okay,

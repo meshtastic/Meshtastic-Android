@@ -19,6 +19,7 @@ package org.meshtastic.feature.settings.radio
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -28,6 +29,7 @@ import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -46,6 +48,7 @@ import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.FileService
@@ -53,6 +56,7 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -99,6 +103,7 @@ class RadioConfigViewModelTest {
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase = mock(MockMode.autofill)
     private val locationService: LocationService = mock(MockMode.autofill)
     private val fileService: FileService = mock(MockMode.autofill)
+    private val mqttManager: MqttManager = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
 
     private lateinit var viewModel: RadioConfigViewModel
@@ -120,6 +125,9 @@ class RadioConfigViewModelTest {
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { serviceRepository.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+
+        every { mqttManager.mqttConnectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.MqttConnectionState.Inactive)
 
         every { uiPrefs.showQuickChat } returns MutableStateFlow(false)
 
@@ -152,6 +160,7 @@ class RadioConfigViewModelTest {
         processRadioResponseUseCase = processRadioResponseUseCase,
         locationService = locationService,
         fileService = fileService,
+        mqttManager = mqttManager,
     )
 
     @Test
@@ -216,6 +225,68 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `probeMqttConnection updates status for success`() = runTest {
+        everySuspend { mqttManager.probe("mqtt.example.com", true, "user", "pass") }
+            .calls {
+                delay(1)
+                MqttProbeStatus.Success(serverInfo = "client=test")
+            }
+
+        viewModel.probeMqttConnection("mqtt.example.com", true, "user", "pass")
+
+        assertEquals(MqttProbeStatus.Probing, viewModel.mqttProbeStatus.value)
+
+        advanceTimeBy(1)
+        runCurrent()
+
+        assertEquals(MqttProbeStatus.Success(serverInfo = "client=test"), viewModel.mqttProbeStatus.value)
+        verifySuspend { mqttManager.probe("mqtt.example.com", true, "user", "pass") }
+    }
+
+    @Test
+    fun `probeMqttConnection updates status for timeout`() = runTest {
+        everySuspend { mqttManager.probe("mqtt.example.com", false, null, null) } returns MqttProbeStatus.Timeout(5_000)
+
+        viewModel.probeMqttConnection("mqtt.example.com", false, null, null)
+        runCurrent()
+
+        assertEquals(MqttProbeStatus.Timeout(5_000), viewModel.mqttProbeStatus.value)
+        verifySuspend { mqttManager.probe("mqtt.example.com", false, null, null) }
+    }
+
+    @Test
+    fun `probeMqttConnection converts thrown exception to other status`() = runTest {
+        everySuspend { mqttManager.probe("mqtt.example.com", true, null, null) }
+            .calls { throw IllegalStateException("boom") }
+
+        viewModel.probeMqttConnection("mqtt.example.com", true, null, null)
+        runCurrent()
+
+        assertEquals(MqttProbeStatus.Other(message = "boom"), viewModel.mqttProbeStatus.value)
+        verifySuspend { mqttManager.probe("mqtt.example.com", true, null, null) }
+    }
+
+    @Test
+    fun `clearMqttProbeStatus resets probe state`() = runTest {
+        everySuspend { mqttManager.probe("mqtt.example.com", false, null, null) }
+            .calls {
+                delay(1)
+                MqttProbeStatus.Success(serverInfo = "client=test")
+            }
+
+        viewModel.probeMqttConnection("mqtt.example.com", false, null, null)
+        assertEquals(MqttProbeStatus.Probing, viewModel.mqttProbeStatus.value)
+
+        viewModel.clearMqttProbeStatus()
+        assertEquals(null, viewModel.mqttProbeStatus.value)
+
+        advanceTimeBy(1)
+        runCurrent()
+
+        assertEquals(null, viewModel.mqttProbeStatus.value)
+    }
+
+    @Test
     fun `updateChannels calls useCase for each changed channel`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
@@ -233,13 +304,15 @@ class RadioConfigViewModelTest {
     }
 
     @Test
-    fun `setResponseStateLoading for REBOOT calls useCase after packet response`() = runTest {
+    fun `setResponseStateLoading for REBOOT calls useCase after config response`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
+        // AdminRoute first sends a session key config request; the admin action fires
+        // only after the actual ConfigResponse (not a routing ACK / Success).
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config())
 
         viewModel = createViewModel()
 
@@ -247,20 +320,22 @@ class RadioConfigViewModelTest {
 
         viewModel.setResponseStateLoading(AdminRoute.REBOOT)
 
-        // Emit a packet to trigger processPacketResponse -> sendAdminRequest
+        // Emit a config response packet to trigger processPacketResponse -> sendAdminRequest
         packetFlow.emit(MeshPacket())
 
         verifySuspend { adminActionsUseCase.reboot(123) }
     }
 
     @Test
-    fun `setResponseStateLoading for FACTORY_RESET calls useCase after packet response`() = runTest {
+    fun `setResponseStateLoading for FACTORY_RESET calls useCase after config response`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
+        // AdminRoute first sends a session key config request; the admin action fires
+        // only after the actual ConfigResponse (not a routing ACK / Success).
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config())
 
         viewModel = createViewModel()
 
@@ -268,7 +343,7 @@ class RadioConfigViewModelTest {
 
         viewModel.setResponseStateLoading(AdminRoute.FACTORY_RESET)
 
-        // Emit a packet to trigger processPacketResponse -> sendAdminRequest
+        // Emit a config response packet to trigger processPacketResponse -> sendAdminRequest
         packetFlow.emit(MeshPacket())
 
         verifySuspend { adminActionsUseCase.factoryReset(123, any()) }
@@ -449,7 +524,6 @@ class RadioConfigViewModelTest {
         nodeRepository.setNodes(listOf(node))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
 
         viewModel = createViewModel()
 
@@ -461,13 +535,16 @@ class RadioConfigViewModelTest {
         packetFlow.emit(MeshPacket())
 
         viewModel.setResponseStateLoading(AdminRoute.SHUTDOWN)
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
+        // AdminRoute fires sendAdminRequest after receiving ConfigResponse (session key),
+        // not after a routing ACK (Success).
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(Config())
         packetFlow.emit(MeshPacket())
         verifySuspend { adminActionsUseCase.shutdown(123) }
 
         // NODEDB_RESET
         everySuspend { adminActionsUseCase.nodedbReset(any(), any(), any()) } returns 42
         viewModel.setResponseStateLoading(AdminRoute.NODEDB_RESET)
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(Config())
         packetFlow.emit(MeshPacket())
         verifySuspend { adminActionsUseCase.nodedbReset(123, any(), any()) }
     }

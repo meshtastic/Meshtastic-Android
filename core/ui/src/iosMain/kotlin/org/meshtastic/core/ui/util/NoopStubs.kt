@@ -22,7 +22,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLinkStyles
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.MeshtasticUri
 
 actual fun createClipEntry(text: String, label: String): ClipEntry =
     throw UnsupportedOperationException("ClipEntry instantiation not supported on iOS stub")
@@ -41,7 +40,7 @@ actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): A
 
 @Composable
 actual fun rememberSaveFileLauncher(
-    onUriReceived: (MeshtasticUri) -> Unit,
+    onUriReceived: (CommonUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit = { _, _ -> }
 
 @Composable
@@ -51,10 +50,22 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun KeepScreenOn(enabled: Boolean) {}
 
-@Composable actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) {}
-
 @Composable actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
 
 @Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}
+
+@Composable actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
+
+@Composable
+actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
+
+@Composable actual fun isLocalNetworkPermissionGranted(): Boolean = true
+
+@Composable
+actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {}
+
+@Composable actual fun isLocationPermissionGranted(): Boolean = true
+
+@Composable actual fun isGpsDisabled(): Boolean = false
 
 @Composable actual fun SetScreenBrightness(brightness: Float) {}

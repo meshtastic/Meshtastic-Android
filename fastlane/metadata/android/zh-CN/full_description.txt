@@ -4,7 +4,7 @@ Meshtastic 是一款将安卓设备与开源、无互联网、基于多跳网状
 
 <b>社区和支持</b>
 
-此项目目前处于测试阶段， 我们非常乐意听取您的建议和意见！ 如果您有任何疑问，反馈或遇到任何问题，请加入我们友好和活跃的社区：
+此项目目前处于测试阶段。 我们非常乐意听取您的建议和意见！ 如果您有任何疑问，反馈或遇到任何问题，请加入我们友好和活跃的社区：
 
 • <b>论坛:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
 • <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>

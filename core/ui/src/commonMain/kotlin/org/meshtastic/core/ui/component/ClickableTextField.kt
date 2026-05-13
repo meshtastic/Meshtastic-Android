@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ fun ClickableTextField(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
+    trailingIconContentDescription: String? = null,
 ) {
     val source = remember { MutableInteractionSource() }
     val isPressed by source.collectIsPressedAsState()
@@ -49,7 +50,7 @@ fun ClickableTextField(
         enabled = enabled,
         readOnly = true,
         label = { Text(stringResource(label)) },
-        trailingIcon = { Icon(trailingIcon, null) },
+        trailingIcon = { Icon(trailingIcon, trailingIconContentDescription) },
         isError = isError,
         interactionSource = source,
         modifier = modifier,

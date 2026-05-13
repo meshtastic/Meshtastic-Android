@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 internal const val DEFAULT_SCAN_RETRY_COUNT = 3
-internal const val DEFAULT_SCAN_RETRY_DELAY_MS = 2_000L
+internal val DEFAULT_SCAN_RETRY_DELAY: Duration = 2.seconds
 internal val DEFAULT_SCAN_TIMEOUT: Duration = 10.seconds
 
 private const val MAC_PARTS_COUNT = 6
@@ -45,7 +45,7 @@ internal fun calculateMacPlusOne(macAddress: String): String {
     if (parts.size != MAC_PARTS_COUNT) return macAddress
     val lastByte = parts[MAC_PARTS_COUNT - 1].toIntOrNull(HEX_RADIX) ?: return macAddress
     val incremented = ((lastByte + 1) and BYTE_MASK).toString(HEX_RADIX).uppercase().padStart(2, '0')
-    return parts.take(MAC_PARTS_COUNT - 1).joinToString(":") + ":" + incremented
+    return "${parts.take(MAC_PARTS_COUNT - 1).joinToString(":")}:$incremented"
 }
 
 /**
@@ -59,7 +59,7 @@ internal suspend fun scanForBleDevice(
     tag: String,
     serviceUuid: kotlin.uuid.Uuid,
     retryCount: Int = DEFAULT_SCAN_RETRY_COUNT,
-    retryDelayMs: Long = DEFAULT_SCAN_RETRY_DELAY_MS,
+    retryDelay: Duration = DEFAULT_SCAN_RETRY_DELAY,
     scanTimeout: Duration = DEFAULT_SCAN_TIMEOUT,
     predicate: (BleDevice) -> Boolean,
 ): BleDevice? {
@@ -80,7 +80,7 @@ internal suspend fun scanForBleDevice(
             return device
         }
         Logger.w { "$tag: Target not in ${foundDevices.size} devices found" }
-        if (attempt < retryCount - 1) delay(retryDelayMs)
+        if (attempt < retryCount - 1) delay(retryDelay)
     }
     return null
 }

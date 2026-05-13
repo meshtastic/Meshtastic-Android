@@ -18,41 +18,54 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.repository.RadioInterfaceService
 
-/** A test double for [RadioInterfaceService] that provides an in-memory implementation. */
+/**
+ * A test double for [RadioInterfaceService] that provides an in-memory implementation.
+ *
+ * The [connectionState] here mirrors the transport-level semantics of the real implementation. In production, only
+ * [MeshConnectionManager][org.meshtastic.core.repository.MeshConnectionManager] observes this flow; tests should verify
+ * that bridging behavior rather than consuming it directly from UI/feature test code (use
+ * [FakeServiceRepository.connectionState] instead).
+ */
 @Suppress("TooManyFunctions")
 class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = MainScope()) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<DeviceType> = emptyList()
 
+    /** Transport-level connection state (raw hardware link status). */
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState
 
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(null)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow
 
-    private val _receivedData = MutableSharedFlow<ByteArray>()
-    override val receivedData: SharedFlow<ByteArray> = _receivedData
+    // Use an unbounded Channel to mirror SharedRadioInterfaceService semantics. A MutableSharedFlow would
+    // hide the stop/start backlog bug that motivated the resetReceivedBuffer() API.
+    private val _receivedData = Channel<ByteArray>(Channel.UNLIMITED)
+    override val receivedData: Flow<ByteArray> = _receivedData.receiveAsFlow()
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>()
-    override val meshActivity: SharedFlow<MeshActivity> = _meshActivity
+    override val meshActivity: Flow<MeshActivity> = _meshActivity.asFlow()
 
     private val _connectionError = MutableSharedFlow<String>()
-    override val connectionError: SharedFlow<String> = _connectionError
+    override val connectionError: Flow<String> = _connectionError.asFlow()
 
     val sentToRadio = mutableListOf<ByteArray>()
     var connectCalled = false
 
-    override fun isMockInterface(): Boolean = true
+    override fun isMockTransport(): Boolean = true
 
     override fun sendToRadio(bytes: ByteArray) {
         sentToRadio.add(bytes)
@@ -60,6 +73,10 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
 
     override fun connect() {
         connectCalled = true
+    }
+
+    override suspend fun disconnect() {
+        connectCalled = false
     }
 
     override fun getDeviceAddress(): String? = _currentDeviceAddressFlow.value
@@ -80,13 +97,18 @@ class FakeRadioInterfaceService(override val serviceScope: CoroutineScope = Main
     }
 
     override fun handleFromRadio(bytes: ByteArray) {
-        // In a real implementation, this would emit to receivedData
+        _receivedData.trySend(bytes)
+    }
+
+    override fun resetReceivedBuffer() {
+        @Suppress("EmptyWhileBlock", "ControlFlowWithEmptyBody")
+        while (_receivedData.tryReceive().isSuccess) Unit
     }
 
     // --- Helper methods for testing ---
 
-    suspend fun emitFromRadio(bytes: ByteArray) {
-        _receivedData.emit(bytes)
+    fun emitFromRadio(bytes: ByteArray) {
+        _receivedData.trySend(bytes)
     }
 
     fun setConnectionState(state: ConnectionState) {

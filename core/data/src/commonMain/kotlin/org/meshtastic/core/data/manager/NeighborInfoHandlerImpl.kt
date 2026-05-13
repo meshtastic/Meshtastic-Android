@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@ import co.touchlab.kermit.Logger
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.collections.immutable.persistentMapOf
-import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
@@ -36,16 +36,12 @@ class NeighborInfoHandlerImpl(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
+    private val nodeRepository: NodeRepository,
 ) : NeighborInfoHandler {
-    private lateinit var scope: CoroutineScope
 
     private val startTimes = atomic(persistentMapOf<Int, Long>())
 
     override var lastNeighborInfo: NeighborInfo? = null
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     override fun recordStartTime(requestId: Int) {
         startTimes.update { it.put(requestId, nowMillis) }
@@ -72,12 +68,13 @@ class NeighborInfoHandlerImpl(
 
         val neighbors =
             ni.neighbors.joinToString("\n") { n ->
-                val node = nodeManager.nodeDBbyNodeNum[n.node_id]
-                val name = node?.let { "${it.user.long_name} (${it.user.short_name})" } ?: "Unknown"
+                val user = nodeRepository.getUser(n.node_id)
+                val name = "${user.long_name} (${user.short_name})"
                 "• $name (SNR: ${n.snr})"
             }
 
-        val formatted = "Neighbors of ${nodeManager.nodeDBbyNodeNum[from]?.user?.long_name ?: "Unknown"}:\n$neighbors"
+        val fromUser = nodeRepository.getUser(from)
+        val formatted = "Neighbors of ${fromUser.long_name}:\n$neighbors"
 
         val responseText =
             if (start != null) {

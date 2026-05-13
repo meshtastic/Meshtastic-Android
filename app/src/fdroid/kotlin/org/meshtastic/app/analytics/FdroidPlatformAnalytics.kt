@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,26 +31,21 @@ import org.meshtastic.core.repository.PlatformAnalytics
 class FdroidPlatformAnalytics : PlatformAnalytics {
     init {
         // For F-Droid builds we don't initialize external analytics services.
-        // In debug builds we attach a DebugTree for convenient local logging, but
-        // release builds rely on system logging only.
-        if (BuildConfig.DEBUG) {
-            Logger.setMinSeverity(Severity.Debug)
-            Logger.i { "F-Droid platform no-op analytics initialized (Debug mode)." }
-        } else {
-            Logger.setMinSeverity(Severity.Info)
-            Logger.i { "F-Droid platform no-op analytics initialized." }
+        // Configure Kermit logging: Debug level for debug builds, Info level for release builds.
+        Logger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Debug else Severity.Info)
+        Logger.i {
+            "F-Droid platform no-op analytics initialized (${if (BuildConfig.DEBUG) "Debug" else "Info"} logging)."
         }
     }
 
     override fun setDeviceAttributes(firmwareVersion: String, model: String) {
-        // No-op for F-Droid
-        Logger.d { "Set device attributes called: firmwareVersion=$firmwareVersion, deviceHardware=$model" }
+        if (BuildConfig.DEBUG) Logger.d { "setDeviceAttributes: firmwareVersion=$firmwareVersion, model=$model" }
     }
 
     override val isPlatformServicesAvailable: Boolean
         get() = false
 
     override fun track(event: String, vararg properties: DataPair) {
-        Logger.d { "Track called: event=$event, properties=${properties.toList()}" }
+        // No-op for F-Droid
     }
 }

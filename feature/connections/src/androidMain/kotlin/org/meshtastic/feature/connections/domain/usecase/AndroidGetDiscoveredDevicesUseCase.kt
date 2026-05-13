@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.DiscoveredService
-import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -43,10 +42,9 @@ import org.meshtastic.feature.connections.model.getMeshtasticShortName
 import java.util.Locale
 
 @Suppress("LongParameterList")
-@Single
+@Single(binds = [GetDiscoveredDevicesUseCase::class])
 class AndroidGetDiscoveredDevicesUseCase(
     private val bluetoothRepository: BluetoothRepository,
-    private val networkRepository: NetworkRepository,
     private val recentAddressesDataSource: RecentAddressesDataSource,
     private val nodeRepository: NodeRepository,
     private val databaseManager: DatabaseManager,
@@ -57,16 +55,20 @@ class AndroidGetDiscoveredDevicesUseCase(
     private val macSuffixLength = 8
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
-    override fun invoke(showMock: Boolean): Flow<DiscoveredDevices> {
+    override fun invoke(showMock: Boolean, resolvedList: Flow<List<DiscoveredService>>): Flow<DiscoveredDevices> {
         val nodeDb = nodeRepository.nodeDBbyNum
 
-        val bondedBleFlow = bluetoothRepository.state.map { ble -> ble.bondedDevices.map { DeviceListEntry.Ble(it) } }
+        // Filter out non-Meshtastic peripherals (headphones, cars, watches, etc.).
+        // BluetoothAdapter.bondedDevices returns every bonded device on the phone, so we
+        // must restrict the picker to entries whose advertised name matches the
+        // Meshtastic firmware pattern (see MeshtasticBleConstants.BLE_NAME_PATTERN).
+        val bondedBleFlow =
+            bluetoothRepository.state.map { ble ->
+                ble.bondedDevices.filter { it.getMeshtasticShortName() != null }.map { DeviceListEntry.Ble(it) }
+            }
 
         val processedTcpFlow =
-            combine(networkRepository.resolvedList, recentAddressesDataSource.recentAddresses) {
-                    tcpServices,
-                    recentList,
-                ->
+            combine(resolvedList, recentAddressesDataSource.recentAddresses) { tcpServices, recentList ->
                 val defaultName = getString(Res.string.meshtastic)
                 processTcpServices(tcpServices, recentList, defaultName)
             }
@@ -92,7 +94,7 @@ class AndroidGetDiscoveredDevicesUseCase(
             bondedBleFlow,
             processedTcpFlow,
             usbDevicesFlow,
-            networkRepository.resolvedList,
+            resolvedList,
             recentAddressesDataSource.recentAddresses,
         ) { args: Array<Any> ->
             @Suppress("UNCHECKED_CAST", "MagicNumber")
@@ -113,40 +115,9 @@ class AndroidGetDiscoveredDevicesUseCase(
             @Suppress("UNCHECKED_CAST", "MagicNumber")
             val recentList = args[5] as List<RecentAddress>
 
-            // Android-specific: BLE node matching by MAC suffix and Meshtastic short name
-            val bleForUi =
-                bondedBle
-                    .map { entry ->
-                        val matchingNode =
-                            if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                                db.values.find { node ->
-                                    val macSuffix =
-                                        entry.device.address
-                                            .replace(":", "")
-                                            .takeLast(macSuffixLength)
-                                            .lowercase(Locale.ROOT)
-                                    val nameSuffix = entry.device.getMeshtasticShortName()?.lowercase(Locale.ROOT)
-                                    node.user.id.lowercase(Locale.ROOT).endsWith(macSuffix) ||
-                                        (nameSuffix != null && node.user.id.lowercase(Locale.ROOT).endsWith(nameSuffix))
-                                }
-                            } else {
-                                null
-                            }
-                        entry.copy(node = matchingNode)
-                    }
-                    .sortedBy { it.name }
+            val bleForUi = matchBleNodes(bondedBle, db)
+            val usbForUi = matchUsbNodes(usbDevices, showMock, db)
 
-            // Android-specific: USB node matching via shared helper
-            val usbForUi =
-                (
-                    usbDevices +
-                        if (showMock) listOf(DeviceListEntry.Mock(getString(Res.string.demo_mode))) else emptyList()
-                    )
-                    .map { entry ->
-                        entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
-                    }
-
-            // Shared TCP logic via helpers
             val discoveredTcpForUi = matchDiscoveredTcpNodes(processedTcp, db, resolved, databaseManager)
             val discoveredTcpAddresses = processedTcp.map { it.fullAddress }.toSet()
             val recentTcpForUi = buildRecentTcpEntries(recentList, discoveredTcpAddresses, db, databaseManager)
@@ -159,4 +130,33 @@ class AndroidGetDiscoveredDevicesUseCase(
             )
         }
     }
+
+    private fun matchBleNodes(bondedBle: List<DeviceListEntry.Ble>, db: Map<Int, Node>): List<DeviceListEntry.Ble> =
+        bondedBle
+            .map { entry ->
+                val matchingNode =
+                    if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
+                        db.values.find { node ->
+                            val macSuffix =
+                                entry.device.address.replace(":", "").takeLast(macSuffixLength).lowercase(Locale.ROOT)
+                            val nameSuffix = entry.device.getMeshtasticShortName()?.lowercase(Locale.ROOT)
+                            node.user.id.lowercase(Locale.ROOT).endsWith(macSuffix) ||
+                                (nameSuffix != null && node.user.id.lowercase(Locale.ROOT).endsWith(nameSuffix))
+                        }
+                    } else {
+                        null
+                    }
+                entry.copy(node = matchingNode)
+            }
+            .sortedBy { it.name }
+
+    private suspend fun matchUsbNodes(
+        usbDevices: List<DeviceListEntry.Usb>,
+        showMock: Boolean,
+        db: Map<Int, Node>,
+    ): List<DeviceListEntry> =
+        (usbDevices + if (showMock) listOf(DeviceListEntry.Mock(getString(Res.string.demo_mode))) else emptyList())
+            .map { entry ->
+                entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, db, databaseManager))
+            }
 }

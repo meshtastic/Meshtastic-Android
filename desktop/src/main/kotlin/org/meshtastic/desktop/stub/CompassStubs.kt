@@ -24,15 +24,18 @@ import org.meshtastic.feature.node.compass.MagneticFieldProvider
 import org.meshtastic.feature.node.compass.PhoneLocationProvider
 import org.meshtastic.feature.node.compass.PhoneLocationState
 
+/** No-op [CompassHeadingProvider] — desktop has no compass sensor. */
 class NoopCompassHeadingProvider : CompassHeadingProvider {
     override fun headingUpdates(): Flow<HeadingState> = flowOf(HeadingState(hasSensor = false))
 }
 
+/** No-op [PhoneLocationProvider] — desktop has no GPS provider. */
 class NoopPhoneLocationProvider : PhoneLocationProvider {
     override fun locationUpdates(): Flow<PhoneLocationState> =
         flowOf(PhoneLocationState(permissionGranted = false, providerEnabled = false))
 }
 
+/** No-op [MagneticFieldProvider] — always returns zero declination. */
 class NoopMagneticFieldProvider : MagneticFieldProvider {
     override fun getDeclination(latitude: Double, longitude: Double, altitude: Double, timeMillis: Long): Float = 0f
 }

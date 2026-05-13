@@ -19,51 +19,52 @@ package org.meshtastic.core.network.radio
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 
 /**
- * Tests the exponential backoff schedule used by [BleRadioInterface] when consecutive connection attempts fail. The
+ * Tests the exponential backoff schedule used by [BleRadioTransport] when consecutive connection attempts fail. The
  * schedule is: failure #1 → 5 s failure #2 → 10 s failure #3 → 20 s failure #4 → 40 s failure #5+ → 60 s (capped)
  */
 class ReconnectBackoffTest {
 
     @Test
     fun `zero failures yields base delay`() {
-        assertEquals(5_000L, computeReconnectBackoffMs(0))
+        assertEquals(5.seconds, computeReconnectBackoff(0))
     }
 
     @Test
     fun `first failure yields 5s`() {
-        assertEquals(5_000L, computeReconnectBackoffMs(1))
+        assertEquals(5.seconds, computeReconnectBackoff(1))
     }
 
     @Test
     fun `second failure yields 10s`() {
-        assertEquals(10_000L, computeReconnectBackoffMs(2))
+        assertEquals(10.seconds, computeReconnectBackoff(2))
     }
 
     @Test
     fun `third failure yields 20s`() {
-        assertEquals(20_000L, computeReconnectBackoffMs(3))
+        assertEquals(20.seconds, computeReconnectBackoff(3))
     }
 
     @Test
     fun `fourth failure yields 40s`() {
-        assertEquals(40_000L, computeReconnectBackoffMs(4))
+        assertEquals(40.seconds, computeReconnectBackoff(4))
     }
 
     @Test
     fun `fifth failure is capped at 60s`() {
-        assertEquals(60_000L, computeReconnectBackoffMs(5))
+        assertEquals(60.seconds, computeReconnectBackoff(5))
     }
 
     @Test
     fun `large failure count stays capped at 60s`() {
-        assertEquals(60_000L, computeReconnectBackoffMs(100))
+        assertEquals(60.seconds, computeReconnectBackoff(100))
     }
 
     @Test
     fun `backoff is strictly increasing up to the cap`() {
-        val values = (1..5).map { computeReconnectBackoffMs(it) }
+        val values = (1..5).map { computeReconnectBackoff(it) }
         for (i in 0 until values.size - 1) {
             assertTrue(
                 values[i] < values[i + 1],

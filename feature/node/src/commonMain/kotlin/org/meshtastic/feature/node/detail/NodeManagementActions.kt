@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,11 +50,14 @@ constructor(
     private val radioController: RadioController,
     private val alertManager: AlertManager,
 ) {
-    open fun requestRemoveNode(scope: CoroutineScope, node: Node) {
+    open fun requestRemoveNode(scope: CoroutineScope, node: Node, onAfterRemove: () -> Unit = {}) {
         alertManager.showAlert(
             titleRes = Res.string.remove,
             messageRes = Res.string.remove_node_text,
-            onConfirm = { removeNode(scope, node.num) },
+            onConfirm = {
+                removeNode(scope, node.num)
+                onAfterRemove()
+            },
         )
     }
 

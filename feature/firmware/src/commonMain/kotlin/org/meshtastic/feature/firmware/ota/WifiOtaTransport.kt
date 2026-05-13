@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.safeCatching
 
 /**
  * WiFi/TCP transport implementation for ESP32 Unified OTA protocol.
@@ -54,7 +55,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
 
     /** Connect to the device via TCP using Ktor raw sockets. */
     override suspend fun connect(): Result<Unit> = withContext(ioDispatcher) {
-        runCatching {
+        safeCatching {
             Logger.i { "WiFi OTA: Connecting to $deviceIpAddress:$port" }
 
             val selector = SelectorManager(ioDispatcher)
@@ -82,7 +83,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         sizeBytes: Long,
         sha256Hash: String,
         onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = safeCatching {
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
         sendCommand(command)
 
@@ -91,6 +92,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
             val response = readResponse(ERASING_TIMEOUT_MS)
             when (val parsed = OtaResponse.parse(response)) {
                 is OtaResponse.Ok -> handshakeComplete = true
+
                 is OtaResponse.Erasing -> {
                     Logger.i { "WiFi OTA: Device erasing flash..." }
                     onHandshakeStatus(OtaHandshakeStatus.Erasing)
@@ -116,7 +118,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         chunkSize: Int,
         onProgress: suspend (Float) -> Unit,
     ): Result<Unit> = withContext(ioDispatcher) {
-        runCatching {
+        safeCatching {
             if (!isConnected) {
                 throw OtaProtocolException.TransferFailed("Not connected")
             }
@@ -149,7 +151,10 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
                 val finalResponse = readResponse(VERIFICATION_TIMEOUT_MS)
                 when (val parsed = OtaResponse.parse(finalResponse)) {
                     is OtaResponse.Ok -> finalHandshakeComplete = true
-                    is OtaResponse.Ack -> {} // Ignore late ACKs
+
+                    is OtaResponse.Ack -> {}
+
+                    // Ignore late ACKs
                     is OtaResponse.Error -> {
                         if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
                             throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
@@ -166,7 +171,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
 
     override suspend fun close() {
         withContext(ioDispatcher) {
-            runCatching {
+            safeCatching {
                 socket?.close()
                 selectorManager?.close()
             }

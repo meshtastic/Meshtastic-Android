@@ -21,10 +21,10 @@ import dev.mokkery.mock
 import dev.mokkery.verify
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -42,7 +42,7 @@ class AdminPacketHandlerImplTest {
     private val nodeManager = mock<NodeManager>(MockMode.autofill)
     private val configHandler = mock<MeshConfigHandler>(MockMode.autofill)
     private val configFlowManager = mock<MeshConfigFlowManager>(MockMode.autofill)
-    private val commandSender = mock<CommandSender>(MockMode.autofill)
+    private val sessionManager = mock<SessionManager>(MockMode.autofill)
 
     private lateinit var handler: AdminPacketHandlerImpl
 
@@ -55,7 +55,7 @@ class AdminPacketHandlerImplTest {
                 nodeManager = nodeManager,
                 configHandler = lazy { configHandler },
                 configFlowManager = lazy { configFlowManager },
-                commandSender = commandSender,
+                sessionManager = sessionManager,
             )
     }
 
@@ -74,16 +74,16 @@ class AdminPacketHandlerImplTest {
 
         handler.handleAdminMessage(packet, myNodeNum)
 
-        verify { commandSender.setSessionPasskey(passkey) }
+        verify { sessionManager.recordSession(myNodeNum, passkey) }
     }
 
     @Test
-    fun `empty session passkey does not clear existing passkey`() {
+    fun `empty session passkey does not record refresh`() {
         val adminMsg = AdminMessage(session_passkey = ByteString.EMPTY)
         val packet = makePacket(myNodeNum, adminMsg)
 
         handler.handleAdminMessage(packet, myNodeNum)
-        // setSessionPasskey should NOT be called for empty passkey
+        // recordSession should NOT be called for empty passkey
     }
 
     // ---------- get_config_response ----------
@@ -218,7 +218,7 @@ class AdminPacketHandlerImplTest {
 
         handler.handleAdminMessage(packet, myNodeNum)
 
-        verify { commandSender.setSessionPasskey(passkey) }
+        verify { sessionManager.recordSession(myNodeNum, passkey) }
         verify { configHandler.handleDeviceConfig(config) }
     }
 }

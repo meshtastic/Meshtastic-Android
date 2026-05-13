@@ -20,7 +20,3 @@ package org.meshtastic.core.model.util
 actual fun getShortDateTime(time: Long): String = ""
 
 actual fun platformRandomBytes(size: Int): ByteArray = ByteArray(size)
-
-actual object SfppHasher {
-    actual fun computeMessageHash(encryptedPayload: ByteArray, to: Int, from: Int, id: Int): ByteArray = ByteArray(32)
-}

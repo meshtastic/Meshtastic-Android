@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material.icons.rounded.Clear
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +50,11 @@ import org.meshtastic.core.resources.debug_logs_export
 import org.meshtastic.core.resources.debug_search_clear
 import org.meshtastic.core.resources.debug_search_next
 import org.meshtastic.core.resources.debug_search_prev
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.FileDownload
+import org.meshtastic.core.ui.icon.KeyboardArrowDown
+import org.meshtastic.core.ui.icon.KeyboardArrowUp
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState
 
@@ -77,14 +77,14 @@ fun DebugSearchNavigation(
         )
         IconButton(onClick = onPreviousMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
-                imageVector = Icons.Rounded.KeyboardArrowUp,
+                imageVector = MeshtasticIcons.KeyboardArrowUp,
                 contentDescription = stringResource(Res.string.debug_search_prev),
                 modifier = Modifier.size(16.dp),
             )
         }
         IconButton(onClick = onNextMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
-                imageVector = Icons.Rounded.KeyboardArrowDown,
+                imageVector = MeshtasticIcons.KeyboardArrowDown,
                 contentDescription = stringResource(Res.string.debug_search_next),
                 modifier = Modifier.size(16.dp),
             )
@@ -130,7 +130,7 @@ fun DebugSearchBar(
                 if (searchState.searchText.isNotEmpty()) {
                     IconButton(onClick = onClearSearch, modifier = Modifier.size(32.dp)) {
                         Icon(
-                            imageVector = Icons.Rounded.Clear,
+                            imageVector = MeshtasticIcons.Close,
                             contentDescription = stringResource(Res.string.debug_search_clear),
                             modifier = Modifier.size(16.dp),
                         )
@@ -158,7 +158,7 @@ fun DebugSearchState(
     onExportLogs: (() -> Unit)? = null,
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    var customFilterText by remember { mutableStateOf("") }
+    var customFilterText by rememberSaveable { mutableStateOf("") }
 
     Column(modifier = modifier.background(color = colorScheme.background.copy(alpha = 1.0f)).padding(8.dp)) {
         Row(
@@ -186,7 +186,7 @@ fun DebugSearchState(
             onExportLogs?.let { onExport ->
                 IconButton(onClick = onExport, modifier = Modifier) {
                     Icon(
-                        imageVector = Icons.Outlined.FileDownload,
+                        imageVector = MeshtasticIcons.FileDownload,
                         contentDescription = stringResource(Res.string.debug_logs_export),
                         modifier = Modifier.size(24.dp),
                     )

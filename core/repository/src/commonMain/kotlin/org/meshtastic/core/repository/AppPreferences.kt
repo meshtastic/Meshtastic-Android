@@ -120,6 +120,31 @@ interface UiPrefs {
 
     fun setShowQuickChat(show: Boolean)
 
+    /** Whether BLE scanning should auto-start when the Connections screen is opened. */
+    val bleAutoScan: StateFlow<Boolean>
+
+    fun setBleAutoScan(enabled: Boolean)
+
+    /** Whether NSD network scanning should auto-start when the Connections screen is opened. */
+    val networkAutoScan: StateFlow<Boolean>
+
+    fun setNetworkAutoScan(enabled: Boolean)
+
+    /** Whether the BLE transport section is visible in the Connections device list. */
+    val showBleTransport: StateFlow<Boolean>
+
+    fun setShowBleTransport(enabled: Boolean)
+
+    /** Whether the network (TCP/NSD) transport section is visible in the Connections device list. */
+    val showNetworkTransport: StateFlow<Boolean>
+
+    fun setShowNetworkTransport(enabled: Boolean)
+
+    /** Whether the USB transport section is visible in the Connections device list. */
+    val showUsbTransport: StateFlow<Boolean>
+
+    fun setShowUsbTransport(enabled: Boolean)
+
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)
@@ -134,6 +159,10 @@ interface NotificationPrefs {
     val nodeEventsEnabled: StateFlow<Boolean>
 
     fun setNodeEventsEnabled(enabled: Boolean)
+
+    val nodeEventsAutoDisabledForEvent: StateFlow<Boolean>
+
+    fun setNodeEventsAutoDisabledForEvent(disabled: Boolean)
 
     val lowBatteryEnabled: StateFlow<Boolean>
 
@@ -208,10 +237,6 @@ interface MeshPrefs {
     val deviceAddress: StateFlow<String?>
 
     fun setDeviceAddress(address: String?)
-
-    fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean>
-
-    fun setShouldProvideNodeLocation(nodeNum: Int?, provide: Boolean)
 
     fun getStoreForwardLastRequest(address: String?): StateFlow<Int>
 

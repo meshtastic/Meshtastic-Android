@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions", "LongMethod")
+
 package org.meshtastic.feature.wifiprovision.ui
 
 import androidx.compose.animation.AnimatedVisibility
@@ -43,13 +45,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.Visibility
-import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -59,6 +54,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -69,6 +65,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,31 +78,38 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.action_select_network
 import org.meshtastic.core.resources.apply
 import org.meshtastic.core.resources.back
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.hide_password
 import org.meshtastic.core.resources.img_mpwrd_logo
+import org.meshtastic.core.resources.mpwrd_os
 import org.meshtastic.core.resources.password
+import org.meshtastic.core.resources.retry
 import org.meshtastic.core.resources.show_password
 import org.meshtastic.core.resources.wifi_provision_available_networks
 import org.meshtastic.core.resources.wifi_provision_connect_failed
 import org.meshtastic.core.resources.wifi_provision_description
 import org.meshtastic.core.resources.wifi_provision_device_found
 import org.meshtastic.core.resources.wifi_provision_device_found_detail
+import org.meshtastic.core.resources.wifi_provision_hidden_network
 import org.meshtastic.core.resources.wifi_provision_mpwrd_disclaimer
 import org.meshtastic.core.resources.wifi_provision_no_networks
 import org.meshtastic.core.resources.wifi_provision_scan_failed
@@ -115,8 +120,35 @@ import org.meshtastic.core.resources.wifi_provision_sending_credentials
 import org.meshtastic.core.resources.wifi_provision_signal_strength
 import org.meshtastic.core.resources.wifi_provision_ssid_label
 import org.meshtastic.core.resources.wifi_provision_ssid_placeholder
+import org.meshtastic.core.resources.wifi_provision_success_description
+import org.meshtastic.core.resources.wifi_provision_success_device_connected
+import org.meshtastic.core.resources.wifi_provision_success_done
+import org.meshtastic.core.resources.wifi_provision_success_ip_address
+import org.meshtastic.core.resources.wifi_provision_success_missing_ip
+import org.meshtastic.core.resources.wifi_provision_success_open_ssh
+import org.meshtastic.core.resources.wifi_provision_success_open_ssh_fallback
+import org.meshtastic.core.resources.wifi_provision_success_password_value
+import org.meshtastic.core.resources.wifi_provision_success_setup_description
+import org.meshtastic.core.resources.wifi_provision_success_setup_title
+import org.meshtastic.core.resources.wifi_provision_success_ssh_command
+import org.meshtastic.core.resources.wifi_provision_success_ssh_label
+import org.meshtastic.core.resources.wifi_provision_success_ssh_unavailable
+import org.meshtastic.core.resources.wifi_provision_success_username
+import org.meshtastic.core.resources.wifi_provision_success_username_value
 import org.meshtastic.core.resources.wifi_provisioning
 import org.meshtastic.core.ui.component.AutoLinkText
+import org.meshtastic.core.ui.component.CopyIconButton
+import org.meshtastic.core.ui.icon.ArrowBack
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.CheckCircle
+import org.meshtastic.core.ui.icon.Lock
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Serial
+import org.meshtastic.core.ui.icon.Visibility
+import org.meshtastic.core.ui.icon.VisibilityOff
+import org.meshtastic.core.ui.icon.Wifi
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.feature.wifiprovision.WifiProvisionError
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState
 import org.meshtastic.feature.wifiprovision.WifiProvisionUiState.Phase
@@ -142,7 +174,9 @@ fun WifiProvisionScreen(
             when (error) {
                 is WifiProvisionError.ConnectFailed ->
                     stringResource(Res.string.wifi_provision_connect_failed, error.detail)
+
                 is WifiProvisionError.ScanFailed -> stringResource(Res.string.wifi_provision_scan_failed, error.detail)
+
                 is WifiProvisionError.ProvisionFailed -> error.detail
             }
         }
@@ -156,7 +190,7 @@ fun WifiProvisionScreen(
                 title = { Text(stringResource(Res.string.wifi_provisioning)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                        Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
             )
@@ -175,18 +209,26 @@ fun WifiProvisionScreen(
 
             Crossfade(targetState = screenKey(uiState), label = "wifi_provision") { key ->
                 when (key) {
-                    ScreenKey.ConnectingBle -> ScanningBleContent()
+                    ScreenKey.ConnectingBle ->
+                        ScanningBleContent(
+                            error = uiState.error as? WifiProvisionError.ConnectFailed,
+                            onRetry = { viewModel.connectToDevice(address) },
+                        )
+
                     ScreenKey.DeviceFound ->
                         DeviceFoundContent(
                             deviceName = uiState.deviceName,
                             onProceed = viewModel::scanNetworks,
                             onCancel = onNavigateUp,
                         )
+
                     ScreenKey.LoadingNetworks -> ScanningNetworksContent()
+
                     ScreenKey.Connected ->
                         ConnectedContent(
                             networks = uiState.networks,
                             provisionStatus = uiState.provisionStatus,
+                            ipAddress = uiState.ipAddress,
                             isProvisioning = uiState.phase == Phase.Provisioning,
                             isScanning = uiState.phase == Phase.LoadingNetworks,
                             onScanNetworks = viewModel::scanNetworks,
@@ -217,8 +259,11 @@ private fun screenKey(state: WifiProvisionUiState): ScreenKey = when (state.phas
     Phase.Idle,
     Phase.ConnectingBle,
     -> ScreenKey.ConnectingBle
+
     Phase.DeviceFound -> ScreenKey.DeviceFound
+
     Phase.LoadingNetworks -> if (state.networks.isEmpty()) ScreenKey.LoadingNetworks else ScreenKey.Connected
+
     Phase.Connected,
     Phase.Provisioning,
     -> ScreenKey.Connected
@@ -234,11 +279,29 @@ private val Phase.isLoading: Boolean
 /** BLE scanning spinner — shown while searching for a device. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun ScanningBleContent() {
+internal fun ScanningBleContent(error: WifiProvisionError.ConnectFailed? = null, onRetry: () -> Unit = {}) {
     CenteredStatusContent {
-        LoadingIndicator(modifier = Modifier.size(48.dp))
-        Spacer(Modifier.height(24.dp))
-        Text(stringResource(Res.string.wifi_provision_scanning_ble), style = MaterialTheme.typography.bodyLarge)
+        if (error != null) {
+            Icon(
+                MeshtasticIcons.Bluetooth,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.error,
+            )
+            Spacer(Modifier.height(24.dp))
+            Text(
+                stringResource(Res.string.wifi_provision_connect_failed, error.detail),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(16.dp))
+            FilledTonalButton(onClick = onRetry) { Text(stringResource(Res.string.retry)) }
+        } else {
+            LoadingIndicator(modifier = Modifier.size(48.dp))
+            Spacer(Modifier.height(24.dp))
+            Text(stringResource(Res.string.wifi_provision_scanning_ble), style = MaterialTheme.typography.bodyLarge)
+        }
     }
 }
 
@@ -251,7 +314,7 @@ internal fun ScanningBleContent() {
 internal fun DeviceFoundContent(deviceName: String?, onProceed: () -> Unit, onCancel: () -> Unit) {
     CenteredStatusContent {
         Icon(
-            Icons.Rounded.Bluetooth,
+            MeshtasticIcons.Bluetooth,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.primary,
@@ -307,15 +370,22 @@ internal fun ScanningNetworksContent() {
 internal fun ConnectedContent(
     networks: List<WifiNetwork>,
     provisionStatus: ProvisionStatus,
+    ipAddress: String?,
     isProvisioning: Boolean,
     isScanning: Boolean,
     onScanNetworks: () -> Unit,
-    onProvision: (ssid: String, password: String) -> Unit,
+    onProvision: (ssid: String, password: String, hidden: Boolean) -> Unit,
     onDisconnect: () -> Unit,
 ) {
+    if (provisionStatus == ProvisionStatus.Success) {
+        ProvisionSuccessContent(ipAddress = ipAddress, onDone = onDisconnect)
+        return
+    }
+
     var ssid by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var hiddenNetwork by rememberSaveable { mutableStateOf(false) }
 
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(provisionStatus) {
@@ -344,7 +414,7 @@ internal fun ConnectedContent(
             if (isScanning) {
                 LoadingIndicator(modifier = Modifier.size(18.dp))
             } else {
-                Icon(Icons.Rounded.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(MeshtasticIcons.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
             }
             Spacer(Modifier.width(8.dp))
             Text(
@@ -414,9 +484,10 @@ internal fun ConnectedContent(
             singleLine = true,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
-                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                IconToggleButton(checked = passwordVisible, onCheckedChange = { passwordVisible = it }) {
                     Icon(
-                        imageVector = if (passwordVisible) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                        imageVector =
+                        if (passwordVisible) MeshtasticIcons.VisibilityOff else MeshtasticIcons.Visibility,
                         contentDescription =
                         if (passwordVisible) {
                             stringResource(Res.string.hide_password)
@@ -427,9 +498,19 @@ internal fun ConnectedContent(
                 }
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { onProvision(ssid, password) }),
+            keyboardActions = KeyboardActions(onDone = { onProvision(ssid, password, hiddenNetwork) }),
             modifier = Modifier.fillMaxWidth(),
         )
+
+        // Hidden network toggle
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable(role = Role.Switch) { hiddenNetwork = !hiddenNetwork },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(stringResource(Res.string.wifi_provision_hidden_network), style = MaterialTheme.typography.bodyMedium)
+            Switch(checked = hiddenNetwork, onCheckedChange = { hiddenNetwork = it })
+        }
 
         // Inline provision status (matches web flasher's status chip) — animated entrance
         AnimatedVisibility(
@@ -444,7 +525,7 @@ internal fun ConnectedContent(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(onClick = onDisconnect) { Text(stringResource(Res.string.cancel)) }
             Button(
-                onClick = { onProvision(ssid, password) },
+                onClick = { onProvision(ssid, password, hiddenNetwork) },
                 enabled = ssid.isNotBlank() && !isProvisioning,
                 modifier = Modifier.weight(1f),
             ) {
@@ -453,13 +534,128 @@ internal fun ConnectedContent(
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(Res.string.wifi_provision_sending_credentials))
                 } else {
-                    Icon(Icons.Rounded.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(MeshtasticIcons.Wifi, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(Res.string.apply))
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ProvisionSuccessContent(ipAddress: String?, onDone: () -> Unit) {
+    val openUrl = rememberOpenUrl()
+    val defaultUsername = stringResource(Res.string.wifi_provision_success_username_value)
+    val defaultPassword = stringResource(Res.string.wifi_provision_success_password_value)
+    val resolvedIp = ipAddress ?: stringResource(Res.string.wifi_provision_success_missing_ip)
+    val sshCommand =
+        ipAddress?.let { stringResource(Res.string.wifi_provision_success_ssh_command, defaultUsername, it) }
+            ?: stringResource(Res.string.wifi_provision_success_ssh_unavailable)
+    val sshUri = ipAddress?.let { "ssh://$defaultUsername@$it" }
+
+    Column(
+        modifier =
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Icon(
+            imageVector = MeshtasticIcons.CheckCircle,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(72.dp).align(Alignment.CenterHorizontally),
+        )
+        Text(
+            text = stringResource(Res.string.wifi_provision_success_device_connected),
+            style = MaterialTheme.typography.headlineMediumEmphasized,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+        )
+        Text(
+            text = stringResource(Res.string.wifi_provision_success_description),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+        )
+
+        Card(
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        ) {
+            ProvisionInfoItem(
+                label = stringResource(Res.string.wifi_provision_success_ip_address),
+                value = resolvedIp,
+                copyEnabled = ipAddress != null,
+            )
+        }
+
+        Card(
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        ) {
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+                Text(
+                    text = stringResource(Res.string.wifi_provision_success_setup_title),
+                    style = MaterialTheme.typography.titleLargeEmphasized,
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp),
+                )
+                Text(
+                    text = stringResource(Res.string.wifi_provision_success_setup_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 8.dp),
+                )
+                ProvisionInfoItem(
+                    label = stringResource(Res.string.wifi_provision_success_username),
+                    value = defaultUsername,
+                )
+                ProvisionInfoItem(label = stringResource(Res.string.password), value = defaultPassword)
+                ProvisionInfoItem(
+                    label = stringResource(Res.string.wifi_provision_success_ssh_label),
+                    value = sshCommand,
+                    copyEnabled = ipAddress != null,
+                )
+
+                FilledTonalButton(
+                    onClick = { sshUri?.let(openUrl) },
+                    enabled = sshUri != null,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp, bottom = 12.dp),
+                ) {
+                    Icon(
+                        imageVector = MeshtasticIcons.Serial,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(Res.string.wifi_provision_success_open_ssh))
+                }
+                Text(
+                    text = stringResource(Res.string.wifi_provision_success_open_ssh_fallback),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
+        }
+
+        Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(Res.string.wifi_provision_success_done))
+        }
+    }
+}
+
+@Composable
+private fun ProvisionInfoItem(label: String, value: String, copyEnabled: Boolean = true) {
+    ListItem(
+        overlineContent = { Text(text = label, style = MaterialTheme.typography.labelLarge) },
+        headlineContent = { Text(text = value, style = MaterialTheme.typography.bodyLargeEmphasized) },
+        trailingContent = {
+            if (copyEnabled) {
+                CopyIconButton(valueToCopy = value)
+            }
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    )
 }
 
 @Composable
@@ -474,19 +670,24 @@ internal fun NetworkRow(network: WifiNetwork, isSelected: Boolean, onClick: () -
         headlineContent = { Text(network.ssid) },
         supportingContent = { Text(stringResource(Res.string.wifi_provision_signal_strength, network.signalStrength)) },
         leadingContent = {
-            Icon(Icons.Rounded.Wifi, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(MeshtasticIcons.Wifi, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         },
         trailingContent = {
             if (network.isProtected) {
                 Icon(
-                    Icons.Rounded.Lock,
+                    MeshtasticIcons.Lock,
                     contentDescription = stringResource(Res.string.password),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         },
         colors = ListItemDefaults.colors(containerColor = containerColor),
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier =
+        Modifier.clickable(
+            onClickLabel = stringResource(Res.string.action_select_network),
+            role = Role.Button,
+            onClick = onClick,
+        ),
     )
 }
 
@@ -511,7 +712,7 @@ internal fun MpwrdDisclaimerBanner() {
         ) {
             Image(
                 painter = painterResource(Res.drawable.img_mpwrd_logo),
-                contentDescription = "mPWRD-OS",
+                contentDescription = stringResource(Res.string.mpwrd_os),
                 modifier = Modifier.size(MPWRD_LOGO_SIZE_DP.dp).clip(RoundedCornerShape(8.dp)),
             )
             AutoLinkText(
@@ -537,4 +738,10 @@ private fun CenteredStatusContent(content: @Composable () -> Unit) {
     ) {
         content()
     }
+}
+
+@PreviewLightDark
+@Composable
+private fun ProvisionSuccessContentPreview() {
+    AppTheme { Surface { ProvisionSuccessContent(ipAddress = "192.168.1.100", onDone = {}) } }
 }

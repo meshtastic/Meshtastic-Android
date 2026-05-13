@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ class DirectRadioControllerImpl(
     private val myNodeNum: Int
         get() = nodeManager.myNodeNum.value ?: 0
 
+    /** Delegates to [ServiceRepository.connectionState] — the canonical app-level source of truth. */
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState
 

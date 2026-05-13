@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,9 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,9 +40,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
@@ -57,17 +51,24 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ble_devices
 import org.meshtastic.core.resources.no_pax_metrics_logs
 import org.meshtastic.core.resources.pax
+import org.meshtastic.core.resources.pax_ble_format
+import org.meshtastic.core.resources.pax_ble_marker
 import org.meshtastic.core.resources.pax_metrics_log
+import org.meshtastic.core.resources.pax_total_format
+import org.meshtastic.core.resources.pax_total_marker
+import org.meshtastic.core.resources.pax_wifi_format
+import org.meshtastic.core.resources.pax_wifi_marker
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.IconInfo
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Paxcount
+import org.meshtastic.core.ui.icon.PeopleCount
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
@@ -80,14 +81,13 @@ private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
-        LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color, environmentMetric = null),
-        LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color, environmentMetric = null),
+        LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color),
+        LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color),
+        LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color),
     )
 
 @Suppress("LongMethod")
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PaxMetricsChart(
     modifier: Modifier = Modifier,
     totalSeries: List<Pair<Int, Int>>,
@@ -97,10 +97,10 @@ private fun PaxMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    Column(modifier = modifier) {
-        if (totalSeries.isEmpty()) return@Column
-
-        val modelProducer = remember { CartesianChartModelProducer() }
+    MetricChartScaffold(isEmpty = totalSeries.isEmpty(), legendData = LEGEND_DATA, modifier = modifier) {
+            modelProducer,
+            chartModifier,
+        ->
         val paxColor = PaxSeries.PAX.color
         val bleColor = PaxSeries.BLE.color
         val wifiColor = PaxSeries.WIFI.color
@@ -116,22 +116,26 @@ private fun PaxMetricsChart(
         }
 
         val axisLabel = ChartStyling.rememberAxisLabel()
+        val bleMarkerTemplate = stringResource(Res.string.pax_ble_marker)
+        val wifiMarkerTemplate = stringResource(Res.string.pax_wifi_marker)
+        val paxMarkerTemplate = stringResource(Res.string.pax_total_marker)
         val marker =
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(alpha = 1f)) {
-                        bleColor -> formatString("BLE: %.0f", value)
-                        wifiColor -> formatString("WiFi: %.0f", value)
-                        paxColor -> formatString("PAX: %.0f", value)
-                        else -> formatString("%.0f", value)
+                    val formatted = formatString("%.0f", value)
+                    when (color) {
+                        bleColor -> bleMarkerTemplate.replace("%1\$s", formatted)
+                        wifiColor -> wifiMarkerTemplate.replace("%1\$s", formatted)
+                        paxColor -> paxMarkerTemplate.replace("%1\$s", formatted)
+                        else -> formatted
                     }
                 },
             )
 
         GenericMetricChart(
             modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            modifier = chartModifier,
             layers =
             listOf(
                 rememberLineCartesianLayer(
@@ -139,34 +143,27 @@ private fun PaxMetricsChart(
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createGradientLine(
                             lineColor = bleColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                            interpolator = LineCartesianLayer.Interpolator.Sharp,
                         ),
                         ChartStyling.createGradientLine(
                             lineColor = wifiColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                            interpolator = LineCartesianLayer.Interpolator.Sharp,
                         ),
                         ChartStyling.createBoldLine(
                             lineColor = paxColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                            interpolator = LineCartesianLayer.Interpolator.Sharp,
                         ),
                     ),
+                    rangeProvider = CartesianLayerRangeProvider.auto(),
                 ),
             ),
             startAxis = VerticalAxis.rememberStart(label = axisLabel),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = axisLabel,
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-                labelRotationDegrees = 45f,
-            ),
+            bottomAxis = CommonCharts.rememberBottomTimeAxis(),
             marker = marker,
             selectedX = selectedX,
             onPointSelected = onPointSelected,
             vicoScrollState = vicoScrollState,
         )
-
-        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 4.dp))
     }
 }
 
@@ -183,7 +180,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
         remember(paxMetrics) {
             paxMetrics
                 .map {
-                    val t = (it.first.received_date / CommonCharts.MS_PER_SEC).toInt()
+                    val t = (it.first.received_date / MS_PER_SEC).toInt()
                     Triple(t, it.second.ble, it.second.wifi)
                 }
                 .sortedBy { it.first }
@@ -198,7 +195,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
         titleRes = Res.string.pax_metrics_log,
         nodeName = state.node?.user?.long_name ?: "",
         data = paxMetrics,
-        timeProvider = { (it.first.received_date / CommonCharts.MS_PER_SEC).toDouble() },
+        timeProvider = { (it.first.received_date / MS_PER_SEC).toDouble() },
         onRequestTelemetry = { metricsViewModel.requestTelemetry(TelemetryType.PAX) },
         controlPart = {
             TimeFrameSelector(
@@ -238,8 +235,8 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
                         PaxMetricsItem(
                             log = log,
                             pax = pax,
-                            isSelected = (log.received_date / CommonCharts.MS_PER_SEC).toDouble() == selectedX,
-                            onClick = { onCardClick((log.received_date / CommonCharts.MS_PER_SEC).toDouble()) },
+                            isSelected = (log.received_date / MS_PER_SEC).toDouble() == selectedX,
+                            onClick = { onCardClick((log.received_date / MS_PER_SEC).toDouble()) },
                         )
                     }
                 }
@@ -256,7 +253,7 @@ fun PaxcountInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = MeshtasticIcons.Paxcount,
+        icon = MeshtasticIcons.PeopleCount,
         contentDescription = stringResource(Res.string.pax_metrics_log),
         text = pax,
         contentColor = contentColor,
@@ -264,21 +261,8 @@ fun PaxcountInfo(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onClick() },
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        colors =
-        CardDefaults.cardColors(
-            containerColor =
-            if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-        ),
-    ) {
+    SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Text(
                 text = DateFormatter.formatDateTime(log.received_date),
@@ -292,17 +276,20 @@ fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClic
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                    MetricIndicator(PaxSeries.PAX.color)
-                    Spacer(Modifier.width(4.dp))
-                    Text(text = "PAX: ${pax.ble + pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                    MetricValueRow(
+                        color = PaxSeries.PAX.color,
+                        text = stringResource(Res.string.pax_total_format, pax.ble + pax.wifi),
+                    )
                     Spacer(Modifier.width(8.dp))
-                    MetricIndicator(PaxSeries.BLE.color)
-                    Spacer(Modifier.width(4.dp))
-                    Text(text = "B:${pax.ble}", style = MaterialTheme.typography.bodyLarge)
+                    MetricValueRow(
+                        color = PaxSeries.BLE.color,
+                        text = stringResource(Res.string.pax_ble_format, pax.ble),
+                    )
                     Spacer(Modifier.width(8.dp))
-                    MetricIndicator(PaxSeries.WIFI.color)
-                    Spacer(Modifier.width(4.dp))
-                    Text(text = "W:${pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                    MetricValueRow(
+                        color = PaxSeries.WIFI.color,
+                        text = stringResource(Res.string.pax_wifi_format, pax.wifi),
+                    )
                 }
 
                 Text(

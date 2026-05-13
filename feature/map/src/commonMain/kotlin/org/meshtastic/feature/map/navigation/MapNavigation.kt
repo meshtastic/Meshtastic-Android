@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,15 @@ package org.meshtastic.feature.map.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import org.meshtastic.core.navigation.MapRoutes
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.MapRoute
+import org.meshtastic.core.navigation.NodesRoute
 
 fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
-    entry<MapRoutes.Map> { args ->
+    entry<MapRoute.Map> { args ->
         val mapScreen = org.meshtastic.core.ui.util.LocalMapMainScreenProvider.current
         mapScreen(
-            { backStack.add(NodesRoutes.NodeDetail(it)) }, // onClickNodeChip
-            { backStack.add(NodesRoutes.NodeDetail(it)) }, // navigateToNodeDetails
+            { id -> backStack.add(NodesRoute.NodeDetail(id)) }, // onClickNodeChip
+            { id -> backStack.add(NodesRoute.NodeDetail(id)) }, // navigateToNodeDetails
             args.waypointId,
         )
     }

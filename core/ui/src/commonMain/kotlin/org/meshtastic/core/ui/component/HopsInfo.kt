@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.hops_away
-import org.meshtastic.core.ui.icon.Hops
+import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
@@ -32,7 +32,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 fun HopsInfo(hops: Int, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
-        icon = MeshtasticIcons.Hops,
+        icon = MeshtasticIcons.HopCount,
         contentDescription = stringResource(Res.string.hops_away),
         label = stringResource(Res.string.hops_away),
         text = hops.toString(),
@@ -42,6 +42,6 @@ fun HopsInfo(hops: Int, modifier: Modifier = Modifier, contentColor: Color = Mat
 
 @PreviewLightDark
 @Composable
-private fun HopsInfoPreview() {
+fun HopsInfoPreview() {
     AppTheme { HopsInfo(hops = 3) }
 }

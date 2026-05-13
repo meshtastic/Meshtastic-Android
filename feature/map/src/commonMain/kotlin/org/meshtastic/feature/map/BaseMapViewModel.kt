@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,19 +17,19 @@
 package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -39,11 +39,17 @@ import org.meshtastic.core.resources.eight_hours
 import org.meshtastic.core.resources.one_day
 import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.two_days
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 
+/**
+ * Shared base ViewModel for the map feature, providing node data, waypoints, map filter preferences, and traceroute
+ * overlay state.
+ *
+ * Platform-specific map ViewModels (fdroid/google) extend this to add flavor-specific map provider logic.
+ */
 @Suppress("TooManyFunctions")
 open class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,
@@ -82,6 +88,7 @@ open class BaseMapViewModel(
             .getWaypoints()
             .mapLatest { list ->
                 list
+                    .filter { it.waypoint != null }
                     .associateBy { packet -> packet.waypoint!!.id }
                     .filterValues {
                         val expire = it.waypoint?.expire ?: 0
@@ -91,7 +98,7 @@ open class BaseMapViewModel(
             .stateInWhileSubscribed(initialValue = emptyMap())
 
     private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites.value)
-    val showOnlyFavoritesOnMap = showOnlyFavorites
+    val showOnlyFavoritesOnMap: StateFlow<Boolean> = showOnlyFavorites.asStateFlow()
 
     fun toggleOnlyFavorites() {
         val newValue = !showOnlyFavorites.value
@@ -100,7 +107,7 @@ open class BaseMapViewModel(
     }
 
     private val showWaypoints = MutableStateFlow(mapPrefs.showWaypointsOnMap.value)
-    val showWaypointsOnMap = showWaypoints
+    val showWaypointsOnMap: StateFlow<Boolean> = showWaypoints.asStateFlow()
 
     fun toggleShowWaypointsOnMap() {
         val newValue = !showWaypoints.value
@@ -109,7 +116,7 @@ open class BaseMapViewModel(
     }
 
     private val showPrecisionCircle = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap.value)
-    val showPrecisionCircleOnMap = showPrecisionCircle
+    val showPrecisionCircleOnMap: StateFlow<Boolean> = showPrecisionCircle.asStateFlow()
 
     fun toggleShowPrecisionCircleOnMap() {
         val newValue = !showPrecisionCircle.value
@@ -118,7 +125,7 @@ open class BaseMapViewModel(
     }
 
     private val lastHeardFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter.value))
-    val lastHeardFilter = lastHeardFilterValue
+    val lastHeardFilter: StateFlow<LastHeardFilter> = lastHeardFilterValue.asStateFlow()
 
     fun setLastHeardFilter(filter: LastHeardFilter) {
         lastHeardFilterValue.value = filter
@@ -127,7 +134,7 @@ open class BaseMapViewModel(
 
     private val lastHeardTrackFilterValue =
         MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter.value))
-    val lastHeardTrackFilter = lastHeardTrackFilterValue
+    val lastHeardTrackFilter: StateFlow<LastHeardFilter> = lastHeardTrackFilterValue.asStateFlow()
 
     fun setLastHeardTrackFilter(filter: LastHeardFilter) {
         lastHeardTrackFilterValue.value = filter
@@ -139,7 +146,8 @@ open class BaseMapViewModel(
 
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
-    fun deleteWaypoint(id: Int) = viewModelScope.launch(ioDispatcher) { packetRepository.deleteWaypoint(id) }
+    fun deleteWaypoint(id: Int) =
+        safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
 
     fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
@@ -151,7 +159,7 @@ open class BaseMapViewModel(
     }
 
     private fun sendDataPacket(p: DataPacket) {
-        viewModelScope.launch(ioDispatcher) { radioController.sendMessage(p) }
+        safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
     }
 
     fun generatePacketId(): Int = radioController.getPacketId()
@@ -186,16 +194,42 @@ open class BaseMapViewModel(
             )
 }
 
+/**
+ * Result of resolving a [TracerouteOverlay]'s node nums into displayable [Node] instances.
+ *
+ * @property overlayNodeNums All unique node nums referenced by the traceroute.
+ * @property nodesForMarkers Nodes to render as map markers (with snapshot positions when available).
+ * @property nodeLookup Node-num-keyed map for polyline coordinate resolution.
+ */
 data class TracerouteNodeSelection(
     val overlayNodeNums: Set<Int>,
     val nodesForMarkers: List<Node>,
     val nodeLookup: Map<Int, Node>,
 )
 
+/** Convenience extension that delegates to [tracerouteNodeSelection] using the VM's [getNodeOrFallback]. */
 fun BaseMapViewModel.tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
     nodes: List<Node>,
+): TracerouteNodeSelection = tracerouteNodeSelection(
+    tracerouteOverlay = tracerouteOverlay,
+    tracerouteNodePositions = tracerouteNodePositions,
+    nodes = nodes,
+    getNodeOrFallback = ::getNodeOrFallback,
+)
+
+/**
+ * Resolves traceroute overlay node nums into displayable [Node] instances. Snapshot positions (recorded at traceroute
+ * time) take priority over live positions from the node database.
+ *
+ * @param getNodeOrFallback Provides a [Node] for a given num, falling back to a stub if not in the DB.
+ */
+fun tracerouteNodeSelection(
+    tracerouteOverlay: TracerouteOverlay?,
+    tracerouteNodePositions: Map<Int, Position>,
+    nodes: List<Node>,
+    getNodeOrFallback: (Int) -> Node,
 ): TracerouteNodeSelection {
     val overlayNodeNums = tracerouteOverlay?.relatedNodeNums ?: emptySet()
     val tracerouteSnapshotNodes =

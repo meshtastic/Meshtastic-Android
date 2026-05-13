@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.connections"
         androidResources.enable = false
@@ -49,12 +48,5 @@ kotlin {
         }
 
         androidMain.dependencies { implementation(libs.usb.serial.android) }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.androidx.test.core)
-                implementation(libs.robolectric)
-            }
-        }
     }
 }

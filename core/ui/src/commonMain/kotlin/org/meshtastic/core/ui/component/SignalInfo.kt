@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.formatString
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.signal_quality
@@ -58,13 +59,16 @@ fun SignalInfo(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Icon(
-                imageVector = quality.imageVector,
+                imageVector = vectorResource(quality.icon),
                 contentDescription = stringResource(Res.string.signal_quality),
                 modifier = Modifier.size(16.dp),
                 tint = signalColor,
             )
             Text(
-                text = formatString("%.1fdB · %ddBm · %s", node.snr, node.rssi, stringResource(quality.nameRes)),
+                text =
+                "${MetricFormatter.snr(
+                    node.snr,
+                )} · ${MetricFormatter.rssi(node.rssi)} · ${stringResource(quality.nameRes)}",
                 style =
                 MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,

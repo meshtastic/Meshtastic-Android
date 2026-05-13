@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.DateFormatter
@@ -47,6 +45,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_clear_logs_confirm
 import org.meshtastic.core.ui.util.AlertManager
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
@@ -61,15 +60,6 @@ import org.meshtastic.proto.StoreForwardPlusPlus
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
-
-data class SearchMatch(val logIndex: Int, val start: Int, val end: Int, val field: String)
-
-data class SearchState(
-    val searchText: String = "",
-    val currentMatchIndex: Int = -1,
-    val allMatches: List<SearchMatch> = emptyList(),
-    val hasMatches: Boolean = false,
-)
 
 enum class FilterMode {
     AND,
@@ -142,7 +132,7 @@ class LogSearchManager {
         return filteredLogs
             .flatMapIndexed { logIndex, log ->
                 searchText.split(" ").flatMap { term ->
-                    val escapedTerm = term // Simple regex escape or just use contains
+                    val escapedTerm = Regex.escape(term)
                     val regex = escapedTerm.toRegex(RegexOption.IGNORE_CASE)
                     val messageMatches =
                         regex.findAll(log.logMessage).map {
@@ -265,16 +255,18 @@ class DebugViewModel(
         val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
         meshLogPrefs.setRetentionDays(clamped)
         _retentionDays.value = clamped
-        viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(clamped) }
+        safeLaunch(tag = "setRetentionDays") { meshLogRepository.deleteLogsOlderThan(clamped) }
     }
 
     fun setLoggingEnabled(enabled: Boolean) {
         meshLogPrefs.setLoggingEnabled(enabled)
         _loggingEnabled.value = enabled
         if (!enabled) {
-            viewModelScope.launch { meshLogRepository.deleteAll() }
+            safeLaunch(tag = "disableLogging") { meshLogRepository.deleteAll() }
         } else {
-            viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value) }
+            safeLaunch(tag = "enableLogging") {
+                meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value)
+            }
         }
     }
 
@@ -286,7 +278,7 @@ class DebugViewModel(
 
     init {
         Logger.d { "DebugViewModel created" }
-        viewModelScope.launch {
+        safeLaunch(tag = "searchMatchUpdater") {
             combine(searchManager.searchText, filterManager.filteredLogs) { searchText, logs ->
                 searchManager.findSearchMatches(searchText, logs)
             }
@@ -316,13 +308,17 @@ class DebugViewModel(
     /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
     private fun annotateMeshLogMessage(meshLog: MeshLog): String = when (meshLog.message_type) {
         "LogRecord" -> meshLog.fromRadio.log_record.toString().replace("\\n\"", "\"")
+
         "Packet" -> meshLog.meshPacket?.let { packet -> annotatePacketLog(packet) } ?: meshLog.raw_message
+
         "NodeInfo" ->
             meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }
                 ?: meshLog.raw_message
+
         "MyNodeInfo" ->
             meshLog.myNodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.my_node_num) }
                 ?: meshLog.raw_message
+
         else -> meshLog.raw_message
     }
 
@@ -386,17 +382,15 @@ class DebugViewModel(
         val nodeIdStr = nodeId.toUInt().toString()
         // Only match if whitespace before and after
         val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""")
-        regex.find(this)?.let { _ ->
-            regex.findAll(this).toList().asReversed().forEach {
-                val idx = it.range.last + 1
-                insert(idx, " (${nodeId.toHex(8)})")
-            }
-            return true
+        if (!regex.containsMatchIn(this)) return false
+        regex.findAll(this).toList().asReversed().forEach {
+            val idx = it.range.last + 1
+            insert(idx, " (${nodeId.toHex(8)})")
         }
-        return false
+        return true
     }
 
-    private fun Int.toHex(length: Int): String = "!" + this.toUInt().toString(16).padStart(length, '0')
+    private fun Int.toHex(length: Int): String = "!${this.toUInt().toString(16).padStart(length, '0')}"
 
     fun requestDeleteAllLogs() {
         alertManager.showAlert(
@@ -406,7 +400,7 @@ class DebugViewModel(
         )
     }
 
-    fun deleteAllLogs() = viewModelScope.launch(ioDispatcher) { meshLogRepository.deleteAll() }
+    fun deleteAllLogs() = safeLaunch(context = ioDispatcher, tag = "deleteAllLogs") { meshLogRepository.deleteAll() }
 
     @Immutable
     data class UiMeshLog(
@@ -459,36 +453,48 @@ class DebugViewModel(
                 PortNum.TEXT_MESSAGE_APP.value,
                 PortNum.ALERT_APP.value,
                 -> payload.decodeToString()
+
                 PortNum.POSITION_APP.value ->
                     Position.ADAPTER.decodeOrNull(payload)?.let { Position.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Position"
+
                 PortNum.WAYPOINT_APP.value ->
                     Waypoint.ADAPTER.decodeOrNull(payload)?.let { Waypoint.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Waypoint"
+
                 PortNum.NODEINFO_APP.value ->
                     User.ADAPTER.decodeOrNull(payload)?.let { User.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode User"
+
                 PortNum.TELEMETRY_APP.value ->
                     Telemetry.ADAPTER.decodeOrNull(payload)?.let { Telemetry.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Telemetry"
+
                 PortNum.ROUTING_APP.value ->
                     Routing.ADAPTER.decodeOrNull(payload)?.let { Routing.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Routing"
+
                 PortNum.ADMIN_APP.value ->
                     AdminMessage.ADAPTER.decodeOrNull(payload)?.let { AdminMessage.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode AdminMessage"
+
                 PortNum.PAXCOUNTER_APP.value ->
                     Paxcount.ADAPTER.decodeOrNull(payload)?.let { Paxcount.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Paxcount"
+
                 PortNum.STORE_FORWARD_APP.value ->
                     StoreAndForward.ADAPTER.decodeOrNull(payload)?.let { StoreAndForward.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode StoreAndForward"
+
                 PortNum.STORE_FORWARD_PLUSPLUS_APP.value ->
                     StoreForwardPlusPlus.ADAPTER.decodeOrNull(payload)?.let {
                         StoreForwardPlusPlus.ADAPTER.toReadableString(it)
                     } ?: "Failed to decode StoreForwardPlusPlus"
+
                 PortNum.NEIGHBORINFO_APP.value -> decodeNeighborInfo(payload)
+
                 PortNum.TRACEROUTE_APP.value -> decodeTraceroute(packet, payload)
+
                 else -> payload.joinToString(" ") { it.toHex() }
             }
         } catch (e: Exception) {

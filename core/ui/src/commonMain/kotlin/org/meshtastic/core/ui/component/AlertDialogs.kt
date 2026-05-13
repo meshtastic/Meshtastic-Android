@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,20 +90,21 @@ fun MeshtasticDialog(
     val confirmButtonText = confirmText ?: confirmTextRes?.let { stringResource(it) }
     val dismissButtonText = dismissText ?: dismissTextRes?.let { stringResource(it) }
 
-    val htmlAnnotated = html?.let {
-        annotatedStringFromHtml(
-            it,
-            linkStyles =
-            TextLinkStyles(
-                style =
-                SpanStyle(
-                    textDecoration = TextDecoration.Underline,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.primary,
+    val htmlAnnotated =
+        html?.let {
+            annotatedStringFromHtml(
+                it,
+                linkStyles =
+                TextLinkStyles(
+                    style =
+                    SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.primary,
+                    ),
                 ),
-            ),
-        )
-    }
+            )
+        }
 
     AlertDialog(
         onDismissRequest = { if (dismissable) onDismiss?.invoke() },

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.network"
         androidResources.enable = false
@@ -40,11 +39,11 @@ kotlin {
             implementation(projects.core.ble)
 
             implementation(libs.okio)
-            implementation(libs.kmqtt.client)
-            implementation(libs.kmqtt.common)
+            api(libs.meshtastic.mqtt.client)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.logging)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kermit)
             implementation(libs.jetbrains.lifecycle.runtime)
@@ -63,9 +62,6 @@ kotlin {
         commonTest.dependencies {
             implementation(projects.core.testing)
             implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.turbine)
-            implementation(libs.kotest.assertions)
-            implementation(libs.kotest.property)
         }
     }
 }

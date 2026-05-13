@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,23 +32,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.rounded.SpeakerNotes
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.ArrowDownward
-import androidx.compose.material.icons.rounded.ChatBubbleOutline
-import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material.icons.rounded.FilterListOff
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material.icons.rounded.SpeakerNotesOff
-import androidx.compose.material.icons.rounded.Visibility
-import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -63,7 +46,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,7 +67,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alert_bell_text
 import org.meshtastic.core.resources.cancel_reply
 import org.meshtastic.core.resources.clear_selection
-import org.meshtastic.core.resources.conversations
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.delete_messages
@@ -93,8 +74,8 @@ import org.meshtastic.core.resources.delete_messages_title
 import org.meshtastic.core.resources.filter_disable_for_contact
 import org.meshtastic.core.resources.filter_enable_for_contact
 import org.meshtastic.core.resources.filter_hide_count
+import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.filter_show_count
-import org.meshtastic.core.resources.message_input_label
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.resources.new_messages_below
 import org.meshtastic.core.resources.overflow_menu
@@ -105,15 +86,27 @@ import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.replying_to
 import org.meshtastic.core.resources.scroll_to_bottom
 import org.meshtastic.core.resources.select_all
-import org.meshtastic.core.resources.send
-import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown
-import org.meshtastic.core.ui.component.EmptyDetailPlaceholder
 import org.meshtastic.core.ui.component.MeshtasticTextDialog
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
-import org.meshtastic.core.ui.icon.Conversations
+import org.meshtastic.core.ui.icon.ArrowBack
+import org.meshtastic.core.ui.icon.ArrowDownward
+import org.meshtastic.core.ui.icon.ChatBubbleOutline
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.Copy
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.FilterList
+import org.meshtastic.core.ui.icon.FilterListOff
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.More
+import org.meshtastic.core.ui.icon.Muted
+import org.meshtastic.core.ui.icon.Reply
+import org.meshtastic.core.ui.icon.SelectAll
+import org.meshtastic.core.ui.icon.Settings
+import org.meshtastic.core.ui.icon.Unmuted
+import org.meshtastic.core.ui.icon.Visibility
+import org.meshtastic.core.ui.icon.VisibilityOff
 import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.proto.ChannelSet
 
@@ -136,13 +129,13 @@ fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState: LazyLi
         if (unreadCount > 0) {
             BadgedBox(badge = { Badge { Text(unreadCount.toString()) } }) {
                 Icon(
-                    imageVector = Icons.Rounded.ArrowDownward,
+                    imageVector = MeshtasticIcons.ArrowDownward,
                     contentDescription = stringResource(Res.string.scroll_to_bottom),
                 )
             }
         } else {
             Icon(
-                imageVector = Icons.Rounded.ArrowDownward,
+                imageVector = MeshtasticIcons.ArrowDownward,
                 contentDescription = stringResource(Res.string.scroll_to_bottom),
             )
         }
@@ -178,7 +171,7 @@ fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ourNode: N
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.Reply,
+                    imageVector = MeshtasticIcons.Reply,
                     contentDescription = stringResource(Res.string.reply),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -194,7 +187,7 @@ fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ourNode: N
                     overflow = TextOverflow.Ellipsis,
                 )
                 IconButton(onClick = onClearReply) {
-                    Icon(Icons.Filled.Close, contentDescription = stringResource(Res.string.cancel_reply))
+                    Icon(MeshtasticIcons.Close, contentDescription = stringResource(Res.string.cancel_reply))
                 }
             }
         }
@@ -253,20 +246,23 @@ fun ActionModeTopBar(selectedCount: Int, onAction: (MessageMenuAction) -> Unit) 
     navigationIcon = {
         IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = MeshtasticIcons.ArrowBack,
                 contentDescription = stringResource(Res.string.clear_selection),
             )
         }
     },
     actions = {
         IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
-            Icon(imageVector = Icons.Rounded.ContentCopy, contentDescription = stringResource(Res.string.copy))
+            Icon(imageVector = MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy))
         }
         IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
-            Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete))
+            Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
         }
         IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
-            Icon(imageVector = Icons.Rounded.SelectAll, contentDescription = stringResource(Res.string.select_all))
+            Icon(
+                imageVector = MeshtasticIcons.SelectAll,
+                contentDescription = stringResource(Res.string.select_all),
+            )
         }
     },
 )
@@ -302,6 +298,7 @@ fun MessageTopBar(
     filteredCount: Int = 0,
     showFiltered: Boolean = false,
     onToggleShowFiltered: () -> Unit = {},
+    onNavigateToFilterSettings: () -> Unit = {},
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -316,7 +313,7 @@ fun MessageTopBar(
     navigationIcon = {
         IconButton(onClick = onNavigateBack) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = MeshtasticIcons.ArrowBack,
                 contentDescription = stringResource(Res.string.navigate_back),
             )
         }
@@ -333,6 +330,7 @@ fun MessageTopBar(
             filteredCount = filteredCount,
             showFiltered = showFiltered,
             onToggleShowFiltered = onToggleShowFiltered,
+            onNavigateToFilterSettings = onNavigateToFilterSettings,
         )
     },
 )
@@ -349,6 +347,7 @@ private fun MessageTopBarActions(
     filteredCount: Int,
     showFiltered: Boolean,
     onToggleShowFiltered: () -> Unit,
+    onNavigateToFilterSettings: () -> Unit,
 ) {
     if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
         NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
@@ -356,7 +355,7 @@ private fun MessageTopBarActions(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }, enabled = true) {
-            Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.overflow_menu))
+            Icon(imageVector = MeshtasticIcons.More, contentDescription = stringResource(Res.string.overflow_menu))
         }
         OverFlowMenu(
             expanded = expanded,
@@ -369,6 +368,7 @@ private fun MessageTopBarActions(
             filteredCount = filteredCount,
             showFiltered = showFiltered,
             onToggleShowFiltered = onToggleShowFiltered,
+            onNavigateToFilterSettings = onNavigateToFilterSettings,
         )
     }
 }
@@ -385,6 +385,7 @@ private fun OverFlowMenu(
     filteredCount: Int,
     showFiltered: Boolean,
     onToggleShowFiltered: () -> Unit,
+    onNavigateToFilterSettings: () -> Unit,
 ) {
     if (expanded) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
@@ -394,6 +395,7 @@ private fun OverFlowMenu(
                 FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
             }
             FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
+            FilterSettingsMenuItem(onDismiss, onNavigateToFilterSettings)
         }
     }
 }
@@ -409,8 +411,7 @@ private fun QuickChatToggleMenuItem(showQuickChat: Boolean, onDismiss: () -> Uni
         },
         leadingIcon = {
             Icon(
-                imageVector =
-                if (showQuickChat) Icons.Rounded.SpeakerNotesOff else Icons.AutoMirrored.Rounded.SpeakerNotes,
+                imageVector = if (showQuickChat) MeshtasticIcons.Muted else MeshtasticIcons.Unmuted,
                 contentDescription = title,
             )
         },
@@ -426,7 +427,7 @@ private fun QuickChatOptionsMenuItem(onDismiss: () -> Unit, onNavigate: () -> Un
             onDismiss()
             onNavigate()
         },
-        leadingIcon = { Icon(imageVector = Icons.Rounded.ChatBubbleOutline, contentDescription = title) },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.ChatBubbleOutline, contentDescription = title) },
     )
 }
 
@@ -441,7 +442,7 @@ private fun FilteredMessagesMenuItem(showFiltered: Boolean, count: Int, onDismis
         },
         leadingIcon = {
             Icon(
-                imageVector = if (showFiltered) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
+                imageVector = if (showFiltered) MeshtasticIcons.VisibilityOff else MeshtasticIcons.Visibility,
                 contentDescription = title,
             )
         },
@@ -462,10 +463,23 @@ private fun FilterToggleMenuItem(filteringDisabled: Boolean, onDismiss: () -> Un
         },
         leadingIcon = {
             Icon(
-                imageVector = if (filteringDisabled) Icons.Rounded.FilterList else Icons.Rounded.FilterListOff,
+                imageVector = if (filteringDisabled) MeshtasticIcons.FilterList else MeshtasticIcons.FilterListOff,
                 contentDescription = title,
             )
         },
+    )
+}
+
+@Composable
+private fun FilterSettingsMenuItem(onDismiss: () -> Unit, onNavigate: () -> Unit) {
+    val title = stringResource(Res.string.filter_settings)
+    DropdownMenuItem(
+        text = { Text(title) },
+        onClick = {
+            onDismiss()
+            onNavigate()
+        },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.Settings, contentDescription = title) },
     )
 }
 
@@ -569,28 +583,12 @@ fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
 // region ── MessageStatusDialog ──
 
 @Composable
-fun MessageStatusDialog(
-    message: Message,
-    nodes: List<Node>,
-    ourNode: Node?,
-    resendOption: Boolean,
-    onResend: () -> Unit,
-    onDismiss: () -> Unit,
-) {
+fun MessageStatusDialog(message: Message, resendOption: Boolean, onResend: () -> Unit, onDismiss: () -> Unit) {
     val (title, text) = message.getStatusStringRes()
-    val relayNodeName by
-        remember(message.relayNode, nodes, ourNode) {
-            derivedStateOf {
-                message.relayNode?.let { relayNodeId ->
-                    Node.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
-                }
-            }
-        }
     DeliveryInfo(
         title = title,
         resendOption = resendOption,
         text = text,
-        relayNodeName = relayNodeName,
         relays = message.relays,
         onConfirm = onResend,
         onDismiss = onDismiss,
@@ -599,98 +597,7 @@ fun MessageStatusDialog(
 
 // endregion
 
-// region ── EmptyConversationsPlaceholder ──
-
-@Composable
-fun EmptyConversationsPlaceholder(modifier: Modifier = Modifier) {
-    EmptyDetailPlaceholder(
-        icon = MeshtasticIcons.Conversations,
-        title = stringResource(Res.string.conversations),
-        modifier = modifier,
-    )
-}
-
-// endregion
-
-// region ── MessageInput ──
-
-/**
- * Shared message input field with send button, byte counter, and homoglyph encoding support.
- *
- * @param messageText The current message text.
- * @param onMessageChange Callback when the text changes.
- * @param onSendMessage Callback when the send button is pressed.
- * @param isEnabled Whether the input field should be enabled.
- * @param isHomoglyphEncodingEnabled Whether to optimize text using homoglyph encoding.
- * @param maxByteSize The maximum allowed size of the message in bytes.
- */
-@Composable
-fun MessageInput(
-    messageText: String,
-    onMessageChange: (String) -> Unit,
-    onSendMessage: () -> Unit,
-    isEnabled: Boolean,
-    modifier: Modifier = Modifier,
-    isHomoglyphEncodingEnabled: Boolean = false,
-    maxByteSize: Int = MESSAGE_CHARACTER_LIMIT_BYTES,
-) {
-    val currentText =
-        if (isHomoglyphEncodingEnabled) {
-            org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(
-                messageText,
-            )
-        } else {
-            messageText
-        }
-
-    val currentByteLength = remember(currentText) { currentText.encodeToByteArray().size }
-
-    val isOverLimit = currentByteLength > maxByteSize
-    val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
-
-    androidx.compose.material3.OutlinedTextField(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-        value = messageText,
-        onValueChange = onMessageChange,
-        maxLines = MAX_INPUT_LINES,
-        label = { Text(stringResource(Res.string.message_input_label)) },
-        enabled = isEnabled,
-        shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
-        isError = isOverLimit,
-        placeholder = { Text(stringResource(Res.string.type_a_message)) },
-        supportingText = {
-            if (isEnabled) {
-                Text(
-                    text = "$currentByteLength/$maxByteSize",
-                    style = MaterialTheme.typography.bodySmall,
-                    color =
-                    if (isOverLimit) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.End,
-                )
-            }
-        },
-        trailingIcon = {
-            IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(Res.string.send))
-            }
-        },
-    )
-}
-
-// endregion
-
 // region ── Utility Functions ──
-
-/** Maximum number of lines for the message input field. */
-private const val MAX_INPUT_LINES = 3
-
-/** Corner radius percentage for the message input field. */
-private const val ROUNDED_CORNER_PERCENT = 100
 
 /** The maximum number of characters to display in the reply snippet. */
 internal const val SNIPPET_CHARACTER_LIMIT = 50

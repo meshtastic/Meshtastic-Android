@@ -27,12 +27,15 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.Waypoint
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -46,6 +49,7 @@ class BaseMapViewModelTest {
     private lateinit var viewModel: BaseMapViewModel
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var radioController: FakeRadioController
+    private lateinit var waypointPacketsFlow: MutableStateFlow<List<DataPacket>>
     private val mapPrefs: MapPrefs = mock()
     private val packetRepository: PacketRepository = mock()
 
@@ -62,7 +66,8 @@ class BaseMapViewModelTest {
         every { mapPrefs.lastHeardFilter } returns MutableStateFlow(0L)
         every { mapPrefs.lastHeardTrackFilter } returns MutableStateFlow(0L)
 
-        every { packetRepository.getWaypoints() } returns MutableStateFlow(emptyList())
+        waypointPacketsFlow = MutableStateFlow(emptyList())
+        every { packetRepository.getWaypoints() } returns waypointPacketsFlow
 
         viewModel =
             BaseMapViewModel(
@@ -121,4 +126,78 @@ class BaseMapViewModelTest {
 
         assertEquals(3, nodeRepository.nodeDBbyNum.value.size)
     }
+
+    @Test
+    fun testWaypointsIncludeFutureExpirations() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        val futureWaypoint = waypointPacket(id = 1, expire = now + 60)
+
+        viewModel.waypoints.test {
+            assertEquals(emptyMap(), awaitItem())
+
+            waypointPacketsFlow.value = listOf(futureWaypoint)
+
+            assertEquals(mapOf(1 to futureWaypoint), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun testWaypointsExcludeBoundaryExpirations() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        val expiredAtNowWaypoint = waypointPacket(id = 2, expire = now)
+
+        viewModel.waypoints.test {
+            assertEquals(emptyMap(), awaitItem())
+
+            waypointPacketsFlow.value = listOf(expiredAtNowWaypoint)
+
+            expectNoEvents()
+            assertEquals(emptyMap(), viewModel.waypoints.value)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun testWaypointsIncludeNeverExpiringWaypoints() = runTest(testDispatcher) {
+        val neverExpiresWaypoint = waypointPacket(id = 3, expire = 0)
+
+        viewModel.waypoints.test {
+            assertEquals(emptyMap(), awaitItem())
+
+            waypointPacketsFlow.value = listOf(neverExpiresWaypoint)
+
+            assertEquals(mapOf(3 to neverExpiresWaypoint), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun testWaypointsFilterMixedExpiredAndActiveWaypoints() = runTest(testDispatcher) {
+        val now = nowSeconds.toInt()
+        val expiredWaypoint = waypointPacket(id = 4, expire = now - 1)
+        val activeWaypoint = waypointPacket(id = 5, expire = now + 60)
+        val neverExpiresWaypoint = waypointPacket(id = 6, expire = 0)
+
+        viewModel.waypoints.test {
+            assertEquals(emptyMap(), awaitItem())
+
+            waypointPacketsFlow.value = listOf(expiredWaypoint, activeWaypoint, neverExpiresWaypoint)
+
+            assertEquals(
+                mapOf(
+                    activeWaypoint.waypoint!!.id to activeWaypoint,
+                    neverExpiresWaypoint.waypoint!!.id to neverExpiresWaypoint,
+                ),
+                awaitItem(),
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    private fun waypointPacket(id: Int, expire: Int): DataPacket = DataPacket(
+        to = DataPacket.ID_BROADCAST,
+        channel = 0,
+        waypoint = Waypoint(id = id, name = "Waypoint $id", expire = expire),
+    )
 }

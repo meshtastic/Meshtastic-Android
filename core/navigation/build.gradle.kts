@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
@@ -33,6 +34,26 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        commonTest.dependencies { implementation(kotlin("test")) }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-navigation.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidRuntimeClasspath",
+            "androidMainLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestCompileClasspath",
+            "androidDeviceTestRuntimeClasspath",
+            "androidDeviceTestLintChecksClasspath",
+            "androidDeviceTestCompileClasspath",
+            "androidCompileClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }

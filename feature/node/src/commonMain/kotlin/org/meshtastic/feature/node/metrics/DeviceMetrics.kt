@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
 
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,10 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,21 +43,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_util_definition
@@ -84,7 +81,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
-import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
+import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
 
 private enum class Device(val color: Color) {
@@ -106,20 +103,10 @@ private enum class Device(val color: Color) {
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = Res.string.battery, color = Device.BATTERY.color, isLine = true, environmentMetric = null),
-        LegendData(nameRes = Res.string.voltage, color = Device.VOLTAGE.color, isLine = true, environmentMetric = null),
-        LegendData(
-            nameRes = Res.string.channel_utilization,
-            color = Device.CH_UTIL.color,
-            isLine = false,
-            environmentMetric = null,
-        ),
-        LegendData(
-            nameRes = Res.string.air_utilization,
-            color = Device.AIR_UTIL.color,
-            isLine = false,
-            environmentMetric = null,
-        ),
+        LegendData(nameRes = Res.string.battery, color = Device.BATTERY.color, isLine = true),
+        LegendData(nameRes = Res.string.voltage, color = Device.VOLTAGE.color, isLine = true),
+        LegendData(nameRes = Res.string.channel_utilization, color = Device.CH_UTIL.color, isLine = true),
+        LegendData(nameRes = Res.string.air_utilization, color = Device.AIR_UTIL.color, isLine = true),
     )
 
 @Suppress("LongMethod")
@@ -129,6 +116,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.deviceMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
+
+    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.saveDeviceMetricsCSV(uri, data) }
 
     val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
     val hasVoltage = remember(data) { data.any { it.device_metrics?.voltage != null } }
@@ -181,6 +170,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         timeProvider = { it.time.toDouble() },
         infoData = infoItems,
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.DEVICE) },
+        onExportCsv = { exportLauncher("device_metrics.csv", "text/csv") },
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
@@ -215,7 +205,6 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
@@ -224,10 +213,10 @@ private fun DeviceMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    Column(modifier = modifier) {
-        if (telemetries.isEmpty()) return@Column
-
-        val modelProducer = remember { CartesianChartModelProducer() }
+    MetricChartScaffold(isEmpty = telemetries.isEmpty(), legendData = legendData, modifier = modifier) {
+            modelProducer,
+            chartModifier,
+        ->
         val batteryColor = Device.BATTERY.color
         val voltageColor = Device.VOLTAGE.color
         val chUtilColor = Device.CH_UTIL.color
@@ -243,12 +232,13 @@ private fun DeviceMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(alpha = 1f)) {
-                        batteryColor -> formatString(percentValueTemplate, batteryLabel, value)
-                        voltageColor -> formatString(voltageValueTemplate, voltageLabel, value)
-                        chUtilColor -> formatString(percentValueTemplate, channelUtilizationLabel, value)
-                        airUtilColor -> formatString(percentValueTemplate, airUtilizationLabel, value)
-                        else -> formatString(numericValueTemplate, value)
+                    val formatted = NumberFormatter.format(value, 1)
+                    when (color) {
+                        batteryColor -> formatString(percentValueTemplate, batteryLabel, formatted)
+                        voltageColor -> formatString(voltageValueTemplate, voltageLabel, formatted)
+                        chUtilColor -> formatString(percentValueTemplate, channelUtilizationLabel, formatted)
+                        airUtilColor -> formatString(percentValueTemplate, airUtilizationLabel, formatted)
+                        else -> formatString(numericValueTemplate, formatted)
                     }
                 },
             )
@@ -260,19 +250,19 @@ private fun DeviceMetricsChart(
 
         val batteryStyle =
             if (batteryData.isNotEmpty()) {
-                ChartStyling.createBoldLine(batteryColor, ChartStyling.MEDIUM_POINT_SIZE_DP)
+                ChartStyling.createBoldLine(batteryColor)
             } else {
                 null
             }
         val chUtilStyle =
             if (chUtilData.isNotEmpty()) {
-                ChartStyling.createPointOnlyLine(chUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+                ChartStyling.createSubtleLine(chUtilColor)
             } else {
                 null
             }
         val airUtilStyle =
             if (airUtilData.isNotEmpty()) {
-                ChartStyling.createPointOnlyLine(airUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+                ChartStyling.createDashedLine(airUtilColor)
             } else {
                 null
             }
@@ -317,44 +307,41 @@ private fun DeviceMetricsChart(
             }
         }
 
+        val percentRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 0.0, maxY = 100.0) }
         val leftLayer =
-            if (leftLayerSeriesStyles.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = leftLayerSeriesStyles.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+                rangeProvider = percentRangeProvider,
+            )
 
         val rightLayer =
-            if (voltageData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(
-                            lineColor = voltageColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                        ),
-                    ),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = voltageData.isNotEmpty(),
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(lineColor = voltageColor)),
+                verticalAxisPosition = Axis.Position.Vertical.End,
+            )
 
         val layers = remember(leftLayer, rightLayer) { listOfNotNull(leftLayer, rightLayer) }
 
         if (layers.isNotEmpty()) {
+            val decorations = buildList {
+                if (leftLayer != null) {
+                    add(ChartStyling.rememberThresholdLine(y = 20.0, color = batteryColor, label = "20%"))
+                }
+            }
+
             GenericMetricChart(
                 modelProducer = modelProducer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                modifier = chartModifier,
                 layers = layers,
                 startAxis =
                 if (leftLayer != null) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = batteryColor),
-                        valueFormatter = { _, value, _ -> formatString("%.0f%%", value) },
+                        valueFormatter = { _, value, _ -> MetricFormatter.percent(value.toFloat(), 0) },
                     )
                 } else {
                     null
@@ -363,32 +350,25 @@ private fun DeviceMetricsChart(
                 if (rightLayer != null) {
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                        valueFormatter = { _, value, _ -> formatString("%.1f V", value) },
+                        valueFormatter = { _, value, _ -> "${NumberFormatter.format(value.toFloat(), 1)} V" },
                     )
                 } else {
                     null
                 },
-                bottomAxis =
-                HorizontalAxis.rememberBottom(
-                    label = ChartStyling.rememberAxisLabel(),
-                    valueFormatter = CommonCharts.dynamicTimeFormatter,
-                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-                    labelRotationDegrees = 45f,
-                ),
+                bottomAxis = CommonCharts.rememberBottomTimeAxis(),
                 marker = marker,
+                decorations = decorations,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,
                 vicoScrollState = vicoScrollState,
             )
         }
-
-        Legend(legendData = legendData, modifier = Modifier.padding(top = 0.dp))
     }
 }
 
-@Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
+@PreviewLightDark
+@Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsChartPreview() {
     val now = nowSeconds.toInt()
     val telemetries =
@@ -419,7 +399,6 @@ private fun DeviceMetricsChartPreview() {
 
 @Composable
 @Suppress("LongMethod")
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val deviceMetrics = telemetry.device_metrics
     val time = telemetry.time.toLong() * MS_PER_SEC
@@ -428,103 +407,77 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
     val uptimeLabel = stringResource(Res.string.uptime)
     val percentValueTemplate = stringResource(Res.string.device_metrics_percent_value)
     val labelValueTemplate = stringResource(Res.string.device_metrics_label_value)
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        colors =
-        CardDefaults.cardColors(
-            containerColor =
-            if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-        ),
-    ) {
-        Surface(color = Color.Transparent) {
-            SelectionContainer {
-                Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                    /* Time, Battery, and Voltage */
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text(
-                            text = CommonCharts.formatDateTime(time),
-                            style = MaterialTheme.typography.titleMediumEmphasized,
-                            fontWeight = FontWeight.Bold,
-                        )
+    SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+            /* Time, Battery, and Voltage */
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    text = DateFormatter.formatDateTime(time),
+                    style = MaterialTheme.typography.titleMediumEmphasized,
+                    fontWeight = FontWeight.Bold,
+                )
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (deviceMetrics?.battery_level != null) {
-                                MetricIndicator(Device.BATTERY.color)
-                                Spacer(Modifier.width(4.dp))
-                            }
-                            if (deviceMetrics?.voltage != null) {
-                                MetricIndicator(Device.VOLTAGE.color)
-                                Spacer(Modifier.width(8.dp))
-                            }
-                            MaterialBatteryInfo(
-                                level = deviceMetrics?.battery_level ?: 0,
-                                voltage = deviceMetrics?.voltage ?: 0f,
-                            )
-                        }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (deviceMetrics?.battery_level != null) {
+                        MetricIndicator(Device.BATTERY.color)
+                        Spacer(Modifier.width(4.dp))
                     }
+                    if (deviceMetrics?.voltage != null) {
+                        MetricIndicator(Device.VOLTAGE.color)
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    MaterialBatteryInfo(
+                        level = deviceMetrics?.battery_level ?: 0,
+                        voltage = deviceMetrics?.voltage ?: 0f,
+                    )
+                }
+            }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                    /* Channel Utilization and Air Utilization Tx */
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (deviceMetrics?.channel_utilization != null) {
-                                MetricIndicator(Device.CH_UTIL.color)
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    text =
-                                    formatString(
-                                        percentValueTemplate,
-                                        channelUtilizationLabel,
-                                        deviceMetrics.channel_utilization ?: 0f,
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                )
-                                Spacer(Modifier.width(12.dp))
-                            }
-                            if (deviceMetrics?.air_util_tx != null) {
-                                MetricIndicator(Device.AIR_UTIL.color)
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    text =
-                                    formatString(
-                                        percentValueTemplate,
-                                        airUtilizationLabel,
-                                        deviceMetrics.air_util_tx ?: 0f,
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                )
-                            }
-                        }
-                        Text(
+            /* Channel Utilization and Air Utilization Tx */
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (deviceMetrics?.channel_utilization != null) {
+                        MetricValueRow(
+                            color = Device.CH_UTIL.color,
                             text =
                             formatString(
-                                labelValueTemplate,
-                                uptimeLabel,
-                                formatUptime(deviceMetrics?.uptime_seconds ?: 0),
+                                percentValueTemplate,
+                                channelUtilizationLabel,
+                                NumberFormatter.format(deviceMetrics.channel_utilization ?: 0f, 1),
                             ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        )
+                        Spacer(Modifier.width(12.dp))
+                    }
+                    if (deviceMetrics?.air_util_tx != null) {
+                        MetricValueRow(
+                            color = Device.AIR_UTIL.color,
+                            text =
+                            formatString(
+                                percentValueTemplate,
+                                airUtilizationLabel,
+                                NumberFormatter.format(deviceMetrics.air_util_tx ?: 0f, 1),
+                            ),
                         )
                     }
                 }
+                Text(
+                    text =
+                    formatString(labelValueTemplate, uptimeLabel, formatUptime(deviceMetrics?.uptime_seconds ?: 0)),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                )
             }
         }
     }
 }
 
-@Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
+@PreviewLightDark
+@Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-private fun DeviceMetricsCardPreview() {
-    val now = nowSeconds.toInt()
+fun DeviceMetricsCardPreview() {
+    val now = 1700000000
     val telemetry =
         Telemetry(
             time = now,
@@ -540,9 +493,9 @@ private fun DeviceMetricsCardPreview() {
     AppTheme { DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {}) }
 }
 
-@Suppress("detekt:MagicNumber", "UnusedPrivateMember") // Compose preview with fake data
+@PreviewLightDark
+@Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun DeviceMetricsScreenPreview() {
     val now = nowSeconds.toInt()
     val telemetries =

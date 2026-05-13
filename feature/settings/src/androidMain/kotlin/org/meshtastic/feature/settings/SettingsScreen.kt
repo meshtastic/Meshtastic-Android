@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,29 +25,28 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.eygraber.uri.toKmpUri
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
-import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.navigation.WifiProvisionRoutes
+import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.export_configuration
+import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
@@ -55,6 +54,9 @@ import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.FilterList
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
 import org.meshtastic.feature.settings.component.ExpressiveSection
@@ -72,7 +74,6 @@ import org.meshtastic.proto.DeviceProfile
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun SettingsScreen(
@@ -80,6 +81,7 @@ fun SettingsScreen(
     viewModel: RadioConfigViewModel,
     onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
+    onBack: (() -> Unit)? = null,
 ) {
     val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
@@ -97,7 +99,7 @@ fun SettingsScreen(
             if (it.resultCode == Activity.RESULT_OK) {
                 showEditDeviceProfileDialog = true
                 it.data?.data?.let { uri ->
-                    viewModel.importProfile(uri.toMeshtasticUri()) { profile -> deviceProfile = profile }
+                    viewModel.importProfile(uri.toKmpUri()) { profile -> deviceProfile = profile }
                 }
             }
         }
@@ -105,7 +107,7 @@ fun SettingsScreen(
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toMeshtasticUri(), deviceProfile!!) }
+                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toKmpUri(), deviceProfile!!) }
             }
         }
 
@@ -144,12 +146,15 @@ fun SettingsScreen(
         )
     }
 
-    var showLanguagePickerDialog by remember { mutableStateOf(false) }
+    var showLanguagePickerDialog by rememberSaveable { mutableStateOf(false) }
     if (showLanguagePickerDialog) {
-        LanguagePickerDialog { showLanguagePickerDialog = false }
+        LanguagePickerDialog(
+            onDismiss = { showLanguagePickerDialog = false },
+            onSelect = { languageTag -> settingsViewModel.setLocale(languageTag) },
+        )
     }
 
-    var showThemePickerDialog by remember { mutableStateOf(false) }
+    var showThemePickerDialog by rememberSaveable { mutableStateOf(false) }
     if (showThemePickerDialog) {
         ThemePickerDialog(
             onClickTheme = { settingsViewModel.setTheme(it) },
@@ -159,6 +164,8 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
+            // Show back arrow when remotely administering (caller supplies onBack and we're not on the local node).
+            val showBack = onBack != null && !state.isLocal
             MainAppBar(
                 title = stringResource(Res.string.bottom_nav_settings),
                 subtitle =
@@ -170,8 +177,8 @@ fun SettingsScreen(
                 },
                 ourNode = ourNode,
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
-                canNavigateUp = false,
-                onNavigateUp = {},
+                canNavigateUp = showBack,
+                onNavigateUp = { onBack?.invoke() },
                 actions = {},
                 onClickChip = { node -> onClickNodeChip(node.num) },
             )
@@ -232,8 +239,17 @@ fun SettingsScreen(
                 )
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
-                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = Icons.Rounded.Wifi) {
-                        onNavigate(WifiProvisionRoutes.WifiProvision())
+                    ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
+                        onNavigate(WifiProvisionRoute.WifiProvision())
+                    }
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.filter_settings)) {
+                    ListItem(
+                        text = stringResource(Res.string.filter_settings),
+                        leadingIcon = MeshtasticIcons.FilterList,
+                    ) {
+                        onNavigate(SettingsRoute.FilterSettings)
                     }
                 }
 
@@ -241,7 +257,7 @@ fun SettingsScreen(
                     cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
                     onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                     nodeShortName = ourNode?.user?.short_name ?: "",
-                    onExportData = { settingsViewModel.saveDataCsv(it.toMeshtasticUri()) },
+                    onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
                 )
 
                 AppInfoSection(
@@ -249,7 +265,7 @@ fun SettingsScreen(
                     excludedModulesUnlocked = excludedModulesUnlocked,
                     onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
                     onShowAppIntro = { settingsViewModel.showAppIntro() },
-                    onNavigateToAbout = { onNavigate(SettingsRoutes.About) },
+                    onNavigateToAbout = { onNavigate(SettingsRoute.About) },
                 )
             }
         }
@@ -257,7 +273,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun LanguagePickerDialog(onDismiss: () -> Unit) {
+private fun LanguagePickerDialog(onDismiss: () -> Unit, onSelect: (String) -> Unit) {
     MeshtasticDialog(
         title = stringResource(Res.string.preferences_language),
         onDismiss = onDismiss,
@@ -266,6 +282,7 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
                 languageMap().forEach { (languageTag, languageName) ->
                     ListItem(text = languageName, trailingIcon = null) {
                         LanguageUtils.setAppLocale(languageTag)
+                        onSelect(languageTag)
                         onDismiss()
                     }
                 }

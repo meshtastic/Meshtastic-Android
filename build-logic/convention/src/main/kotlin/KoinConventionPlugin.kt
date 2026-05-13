@@ -29,11 +29,12 @@ class KoinConventionPlugin : Plugin<Project> {
 
             // Configure Koin K2 Compiler Plugin (0.4.0+)
             extensions.configure(KoinGradleExtension::class.java) {
-                // Meshtastic heavily utilizes dependency inversion across KMP modules. Koin's A1
-                // per-module safety checks strictly enforce that all dependencies must be explicitly
-                // provided or included locally. This breaks decoupled Clean Architecture designs.
-                // We disable compile safety globally to properly rely on Koin's A3 full-graph
-                // validation which perfectly handles inverted dependencies at the composition root.
+                // Meshtastic uses dependency inversion across KMP modules — interfaces in
+                // commonMain, implementations wired at the composition root. Koin's compileSafety
+                // flag enables A1 per-module checks that treat every module as self-contained,
+                // which breaks this pattern. There is no separate flag for A3 full-graph
+                // validation. Until Koin exposes granular safety levels we keep this disabled;
+                // runtime graph verification is handled by KoinVerificationTest instead.
                 compileSafety.set(false)
             }
 

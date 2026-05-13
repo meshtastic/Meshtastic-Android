@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import okio.ByteString
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
@@ -94,14 +96,8 @@ class MeshDataHandlerImpl(
     private val storeForwardHandler: StoreForwardPacketHandler,
     private val telemetryHandler: TelemetryPacketHandler,
     private val adminPacketHandler: AdminPacketHandler,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshDataHandler {
-    private lateinit var scope: CoroutineScope
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-        storeForwardHandler.start(scope)
-        telemetryHandler.start(scope)
-    }
 
     private val rememberDataType =
         setOf(
@@ -136,12 +132,19 @@ class MeshDataHandlerImpl(
         val decoded = packet.decoded ?: return shouldBroadcast
         when (decoded.portnum) {
             PortNum.TEXT_MESSAGE_APP -> handleTextMessage(packet, dataPacket, myNodeNum)
+
             PortNum.NODE_STATUS_APP -> handleNodeStatus(packet, dataPacket, myNodeNum)
+
             PortNum.ALERT_APP -> rememberDataPacket(dataPacket, myNodeNum)
+
             PortNum.WAYPOINT_APP -> handleWaypoint(packet, dataPacket, myNodeNum)
+
             PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum)
+
             PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet)
+
             PortNum.TELEMETRY_APP -> telemetryHandler.handleTelemetry(packet, dataPacket, myNodeNum)
+
             else ->
                 shouldBroadcast =
                     handleSpecializedDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
@@ -164,6 +167,7 @@ class MeshDataHandlerImpl(
                 tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
                 shouldBroadcast = false
             }
+
             PortNum.ROUTING_APP -> {
                 handleRouting(packet, dataPacket)
                 shouldBroadcast = true
@@ -252,8 +256,14 @@ class MeshDataHandlerImpl(
         val payload = packet.decoded?.payload ?: return
         val u =
             User.ADAPTER.decode(payload)
-                .let { if (it.is_licensed == true) it.copy(public_key = okio.ByteString.EMPTY) else it }
-                .let { if (packet.via_mqtt == true) it.copy(long_name = "${it.long_name} (MQTT)") else it }
+                .let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
+                .let {
+                    if (packet.via_mqtt == true && !it.long_name.endsWith(" (MQTT)")) {
+                        it.copy(long_name = "${it.long_name} (MQTT)")
+                    } else {
+                        it
+                    }
+                }
         nodeManager.handleReceivedUser(packet.from, u, packet.channel)
     }
 

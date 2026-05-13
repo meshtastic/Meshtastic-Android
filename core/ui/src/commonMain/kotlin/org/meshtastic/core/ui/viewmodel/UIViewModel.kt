@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,17 @@ package org.meshtastic.core.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -34,15 +37,19 @@ import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.asDeviceVersion
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.EventEdition
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.model.toEventEdition
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
+import org.meshtastic.core.navigation.DeepLinkRouter
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -84,7 +91,7 @@ class UIViewModel(
     val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
-    private val _navigationDeepLink = MutableSharedFlow<List<androidx.navigation3.runtime.NavKey>>(replay = 1)
+    private val _navigationDeepLink = MutableSharedFlow<List<NavKey>>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
     /**
@@ -96,18 +103,16 @@ class UIViewModel(
      * 2. **Data Import:** If navigation fails, falls back to legacy contact/channel parsing via
      *    [dispatchMeshtasticUri]. This triggers import dialogs for shared nodes or channel configurations.
      */
-    fun handleDeepLink(uri: MeshtasticUri, onInvalid: () -> Unit = {}) {
-        val commonUri = org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
-
+    fun handleDeepLink(uri: CommonUri, onInvalid: () -> Unit = {}) {
         // Try navigation routing first
-        val navKeys = org.meshtastic.core.navigation.DeepLinkRouter.route(commonUri)
+        val navKeys = DeepLinkRouter.route(uri)
         if (navKeys != null) {
             _navigationDeepLink.tryEmit(navKeys)
             return
         }
 
         // Fallback to channel/contact importing
-        commonUri.dispatchMeshtasticUri(
+        uri.dispatchMeshtasticUri(
             onContact = { setSharedContactRequested(it) },
             onChannel = { setRequestChannelSet(it) },
             onInvalid = onInvalid,
@@ -117,6 +122,12 @@ class UIViewModel(
     val theme: StateFlow<Int> = uiPrefs.theme
 
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
+
+    val eventEdition: StateFlow<EventEdition?> =
+        combine(firmwareEdition, connectionState) { edition, state ->
+            if (state is ConnectionState.Connected) edition?.toEventEdition() else null
+        }
+            .stateInWhileSubscribed(initialValue = null)
 
     val clientNotification: StateFlow<ClientNotification?> = serviceRepository.clientNotification
 
@@ -132,7 +143,7 @@ class UIViewModel(
 
     private val _scrollToTopEventFlow =
         MutableSharedFlow<ScrollToTopEvent>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val scrollToTopEventFlow: Flow<ScrollToTopEvent> = _scrollToTopEventFlow.asSharedFlow()
+    val scrollToTopEventFlow: Flow<ScrollToTopEvent> = _scrollToTopEventFlow.asFlow()
 
     fun emitScrollToTopEvent(event: ScrollToTopEvent) {
         _scrollToTopEventFlow.tryEmit(event)
@@ -236,12 +247,12 @@ class UIViewModel(
         _sharedContactRequested.value = contact
     }
 
-    /** Called immediately after activity observes requestChannelUrl */
+    /** Clears the pending shared contact request. */
     fun clearSharedContactRequested() {
         _sharedContactRequested.value = null
     }
 
-    // Connection state to our radio device
+    /** Canonical app-level connection state, sourced from [ServiceRepository.connectionState]. */
     val connectionState
         get() = serviceRepository.connectionState
 
@@ -255,7 +266,7 @@ class UIViewModel(
 
     val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
 
-    /** Called immediately after activity observes requestChannelUrl */
+    /** Clears the pending channel set import request. */
     fun clearRequestChannelUrl() {
         _requestChannelSet.value = null
     }

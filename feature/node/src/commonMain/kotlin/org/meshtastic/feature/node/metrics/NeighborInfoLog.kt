@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ import org.meshtastic.core.model.getNeighborInfoResponse
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.routing_error_no_response
+import org.meshtastic.core.resources.success
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Groups
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -102,7 +103,12 @@ fun NeighborInfoLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewM
                     }
 
                 val time = DateFormatter.formatDateTime(log.received_date)
-                val text = if (result != null) "Success" else stringResource(Res.string.routing_error_no_response)
+                val text =
+                    if (result != null) {
+                        stringResource(Res.string.success)
+                    } else {
+                        stringResource(Res.string.routing_error_no_response)
+                    }
                 val icon = if (result != null) MeshtasticIcons.Groups else MeshtasticIcons.PersonOff
                 val header = stringResource(Res.string.neighbor_info)
                 var expanded by remember { mutableStateOf(false) }

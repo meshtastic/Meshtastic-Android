@@ -20,9 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -36,13 +34,15 @@ import org.meshtastic.core.ble.BleService
 import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.BluetoothState
+import org.meshtastic.core.ble.DisconnectReason
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
 class FakeBleDevice(
     override val address: String,
     override val name: String? = "Fake Device",
-    initialState: BleConnectionState = BleConnectionState.Disconnected,
+    initialState: BleConnectionState = BleConnectionState.Disconnected(),
+    override val rssi: Int? = null,
 ) : BaseFake(),
     BleDevice {
     private val _state = mutableStateFlow(initialState)
@@ -75,8 +75,16 @@ class FakeBleScanner :
     BleScanner {
     private val foundDevices = mutableSharedFlow<BleDevice>(replay = 10)
 
-    override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> = flow {
-        emitAll(foundDevices)
+    var lastScanServiceUuid: Uuid? = null
+        private set
+
+    var lastScanAddress: String? = null
+        private set
+
+    override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
+        lastScanServiceUuid = serviceUuid
+        lastScanAddress = address
+        return flow { emitAll(foundDevices) }
     }
 
     fun emitDevice(device: BleDevice) {
@@ -91,11 +99,10 @@ class FakeBleConnection :
     override val device: BleDevice?
         get() = _device.value
 
-    private val _deviceFlow = mutableSharedFlow<BleDevice?>(replay = 1)
-    override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
+    override val deviceFlow: StateFlow<BleDevice?> = _device.asStateFlow()
 
-    private val _connectionState = mutableSharedFlow<BleConnectionState>(replay = 1)
-    override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
+    private val _connectionState = mutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected())
+    override val connectionState: StateFlow<BleConnectionState> = _connectionState.asStateFlow()
 
     /** When > 0, the next [failNextN] calls to [connectAndAwait] return [BleConnectionState.Disconnected]. */
     var failNextN: Int = 0
@@ -109,26 +116,37 @@ class FakeBleConnection :
     /** Number of times [disconnect] has been invoked. */
     var disconnectCalls: Int = 0
 
+    /** Number of times [connectAndAwait] has been invoked (including failures). */
+    var connectAndAwaitCalls: Int = 0
+
+    /** Externally simulate a remote disconnect (e.g. node power-cycle) for tests that exercise reconnect. */
+    fun simulateRemoteDisconnect(reason: DisconnectReason = DisconnectReason.Timeout) {
+        _connectionState.value = BleConnectionState.Disconnected(reason)
+    }
+
+    /** Service UUIDs that should appear missing — `profile()` throws `NoSuchElementException` for these. */
+    val missingServices: MutableSet<Uuid> = mutableSetOf()
+
     val service = FakeBleService()
 
     override suspend fun connect(device: BleDevice) {
         _device.value = device
-        _deviceFlow.emit(device)
-        _connectionState.emit(BleConnectionState.Connecting)
+        _connectionState.value = BleConnectionState.Connecting
         if (device is FakeBleDevice) {
             device.setState(BleConnectionState.Connecting)
         }
-        _connectionState.emit(BleConnectionState.Connected)
+        _connectionState.value = BleConnectionState.Connected
         if (device is FakeBleDevice) {
             device.setState(BleConnectionState.Connected)
         }
     }
 
-    override suspend fun connectAndAwait(device: BleDevice, timeoutMs: Long): BleConnectionState {
+    override suspend fun connectAndAwait(device: BleDevice, timeout: Duration): BleConnectionState {
+        connectAndAwaitCalls++
         connectException?.let { throw it }
         if (failNextN > 0) {
             failNextN--
-            return BleConnectionState.Disconnected
+            return BleConnectionState.Disconnected()
         }
         connect(device)
         return BleConnectionState.Connected
@@ -137,19 +155,23 @@ class FakeBleConnection :
     override suspend fun disconnect() {
         disconnectCalls++
         val currentDevice = _device.value
-        _connectionState.emit(BleConnectionState.Disconnected)
+        _connectionState.value = BleConnectionState.Disconnected()
         if (currentDevice is FakeBleDevice) {
-            currentDevice.setState(BleConnectionState.Disconnected)
+            currentDevice.setState(BleConnectionState.Disconnected())
         }
         _device.value = null
-        _deviceFlow.emit(null)
     }
 
     override suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: Duration,
         setup: suspend CoroutineScope.(BleService) -> T,
-    ): T = CoroutineScope(Dispatchers.Unconfined).setup(service)
+    ): T {
+        if (serviceUuid in missingServices) {
+            throw NoSuchElementException("Service $serviceUuid not found")
+        }
+        return CoroutineScope(Dispatchers.Unconfined).setup(service)
+    }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = maxWriteValueLength
 }

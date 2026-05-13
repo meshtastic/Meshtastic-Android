@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 
-@Single
+@Single(binds = [ServiceDiscovery::class])
 class AndroidServiceDiscovery(private val nsdManager: NsdManager) : ServiceDiscovery {
     override val resolvedServices: Flow<List<DiscoveredService>> =
         nsdManager.serviceList(NetworkConstants.SERVICE_TYPE).map { list ->

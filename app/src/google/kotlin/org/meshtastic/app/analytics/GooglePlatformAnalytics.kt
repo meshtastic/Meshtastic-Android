@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Severity
 import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
-import com.datadog.android.compose.enableComposeActionTracking
 import com.datadog.android.core.configuration.Configuration
 import com.datadog.android.log.Logger
 import com.datadog.android.log.Logs
@@ -38,7 +37,7 @@ import com.datadog.android.rum.RumActionType
 import com.datadog.android.rum.RumConfiguration
 import com.datadog.android.sessionreplay.SessionReplay
 import com.datadog.android.sessionreplay.SessionReplayConfiguration
-import com.datadog.android.sessionreplay.SessionReplayPrivacy
+import com.datadog.android.sessionreplay.TextAndInputPrivacy
 import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
 import com.datadog.android.trace.opentelemetry.DatadogOpenTelemetry
@@ -160,7 +159,6 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
                 .trackFrustrations(false) // Disable click-tracking based frustration detection
                 .trackLongTasks()
                 .trackNonFatalAnrs(true)
-                .enableComposeActionTracking() // Required: activates runtime consumption of Compose semantics tags
                 .setSessionSampleRate(sampleRate)
                 .build()
         Rum.enable(rumConfiguration)
@@ -175,7 +173,9 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         // Masks all text inputs to protect message content.
         if (BuildConfig.DEBUG) {
             val sessionReplayConfig =
-                SessionReplayConfiguration.Builder(sampleRate).setPrivacy(SessionReplayPrivacy.MASK_USER_INPUT).build()
+                SessionReplayConfiguration.Builder(sampleRate)
+                    .setTextAndInputPrivacy(TextAndInputPrivacy.MASK_ALL_INPUTS)
+                    .build()
             SessionReplay.enable(sessionReplayConfig)
         }
 
@@ -330,13 +330,26 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
             val value = it.value
             when (value) {
                 is Double -> bundle.putDouble(it.name, value)
-                is Int -> bundle.putLong(it.name, value.toLong()) // Firebase expects Long for integer values in bundles
+
+                is Int -> bundle.putLong(it.name, value.toLong())
+
+                // Firebase expects Long for integer values in bundles
                 is Long -> bundle.putLong(it.name, value)
+
                 is Float -> bundle.putDouble(it.name, value.toDouble())
-                is String -> bundle.putString(it.name, value) // Explicitly handle String
+
+                is String -> bundle.putString(it.name, value)
+
+                // Explicitly handle String
                 else -> bundle.putString(it.name, value.toString()) // Fallback for other types
             }
-            KermitLogger.withTag(TAG).d { "Analytics: track $event (${it.name} : $value)" }
+            KermitLogger.withTag(TAG).d {
+                if (BuildConfig.DEBUG) {
+                    "Analytics: track $event (${it.name} : $value)"
+                } else {
+                    "Analytics: track $event (${it.name})"
+                }
+            }
         }
         Firebase.analytics.logEvent(event, bundle)
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.meshtastic.buildlogic.isDesktopOnly
 import org.meshtastic.buildlogic.library
 import org.meshtastic.buildlogic.libs
 
@@ -49,7 +50,10 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
                 extensions.configure<KotlinMultiplatformExtension> {
                     sourceSets.getByName("commonMain").dependencies { implementation(roomRuntime) }
                 }
-                dependencies { add("kspAndroid", roomCompiler) }
+                if (!isDesktopOnly) {
+                    dependencies { add("kspAndroid", roomCompiler) }
+                }
+                dependencies { add("kspJvm", roomCompiler) }
             }
 
             pluginManager.withPlugin("org.jetbrains.kotlin.android") {

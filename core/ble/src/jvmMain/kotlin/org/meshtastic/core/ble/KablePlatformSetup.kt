@@ -27,5 +27,10 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
 internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     com.juul.kable.Peripheral(address.toIdentifier(), builderAction)
 
-// JVM/desktop Kable does not expose an MTU StateFlow; fall back to null so callers use their default.
-internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
+// JVM/desktop Kable does not expose an MTU StateFlow; return a reasonable default (512)
+// so callers can size their writes without falling back to an overly conservative minimum.
+internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = DEFAULT_JVM_MTU
+
+internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false
+
+private const val DEFAULT_JVM_MTU = 512

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,14 +21,16 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.ContactsRoutes
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.ContactsRoute
+import org.meshtastic.core.navigation.NodesRoute
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.replaceLast
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.QuickChatScreen
@@ -43,15 +45,15 @@ fun EntryProviderScope<NavKey>.contactsGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
 ) {
-    entry<ContactsRoutes.ContactsGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
+    entry<ContactsRoute.ContactsGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
         ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
     }
 
-    entry<ContactsRoutes.Contacts>(metadata = { ListDetailSceneStrategy.listPane() }) {
+    entry<ContactsRoute.Contacts>(metadata = { ListDetailSceneStrategy.listPane() }) {
         ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
     }
 
-    entry<ContactsRoutes.Messages>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
+    entry<ContactsRoute.Messages>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
         val contactKey = args.contactKey
         val messageViewModel: org.meshtastic.feature.messaging.MessageViewModel =
             koinViewModel(key = "messages-$contactKey")
@@ -61,25 +63,27 @@ fun EntryProviderScope<NavKey>.contactsGraph(
             contactKey = contactKey,
             message = args.message,
             viewModel = messageViewModel,
-            navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetail(it)) },
-            navigateToQuickChatOptions = { backStack.add(org.meshtastic.core.navigation.ContactsRoutes.QuickChat) },
-            onNavigateBack = { backStack.removeLastOrNull() },
+            navigateToNodeDetails = { id -> backStack.add(NodesRoute.NodeDetail(id)) },
+            navigateToQuickChatOptions =
+            dropUnlessResumed { backStack.add(org.meshtastic.core.navigation.ContactsRoute.QuickChat) },
+            navigateToFilterSettings = dropUnlessResumed { backStack.add(SettingsRoute.FilterSettings) },
+            onNavigateBack = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
-    entry<ContactsRoutes.Share>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
+    entry<ContactsRoute.Share>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val message = args.message
         val viewModel = koinViewModel<ContactsViewModel>()
         ShareScreen(
             viewModel = viewModel,
-            onConfirm = { contactKey -> backStack.replaceLast(ContactsRoutes.Messages(contactKey, message)) },
-            onNavigateUp = { backStack.removeLastOrNull() },
+            onConfirm = { contactKey -> backStack.replaceLast(ContactsRoute.Messages(contactKey, message)) },
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
-    entry<ContactsRoutes.QuickChat>(metadata = { ListDetailSceneStrategy.extraPane() }) {
+    entry<ContactsRoute.QuickChat>(metadata = { ListDetailSceneStrategy.extraPane() }) {
         val viewModel = koinViewModel<QuickChatViewModel>()
-        QuickChatScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
+        QuickChatScreen(viewModel = viewModel, onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() })
     }
 }
 

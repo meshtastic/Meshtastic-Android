@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun EditIPv4Preference(
@@ -68,12 +69,14 @@ fun EditIPv4Preference(
 
 @Preview(showBackground = true)
 @Composable
-private fun EditIPv4PreferencePreview() {
-    EditIPv4Preference(
-        title = "IP Address",
-        value = 16820416,
-        enabled = true,
-        keyboardActions = KeyboardActions {},
-        onValueChanged = {},
-    )
+fun EditIPv4PreferencePreview() {
+    AppTheme {
+        EditIPv4Preference(
+            title = "IP Address",
+            value = 16820416,
+            enabled = true,
+            keyboardActions = KeyboardActions {},
+            onValueChanged = {},
+        )
+    }
 }

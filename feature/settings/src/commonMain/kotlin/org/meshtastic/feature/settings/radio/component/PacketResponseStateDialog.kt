@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.close
@@ -46,6 +43,9 @@ import org.meshtastic.core.resources.delivery_confirmed
 import org.meshtastic.core.resources.delivery_confirmed_reboot_warning
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.Error
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Success
 import org.meshtastic.feature.settings.radio.ResponseState
 
 private const val AUTO_DISMISS_DELAY_MS = 1500L
@@ -79,12 +79,15 @@ fun <T> PacketResponseStateDialog(
                     is ResponseState.Loading -> {
                         LoadingContent(state = state, onComplete = onComplete)
                     }
+
                     is ResponseState.Success -> {
                         SuccessContent()
                     }
+
                     is ResponseState.Error -> {
                         ErrorContent(state = state)
                     }
+
                     ResponseState.Empty -> {}
                 }
             }
@@ -111,7 +114,7 @@ private fun LoadingContent(state: ResponseState.Loading, onComplete: () -> Unit)
     val progress by animateFloatAsState(targetValue = clampedProgress, label = "progress")
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = formatString("%.0f%%", progress * 100f),
+            text = MetricFormatter.percent(progress * 100f, decimalPlaces = 0),
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.secondary,
         )
@@ -135,7 +138,7 @@ private fun LoadingContent(state: ResponseState.Loading, onComplete: () -> Unit)
 @Composable
 private fun SuccessContent() {
     Icon(
-        imageVector = Icons.Filled.CheckCircle,
+        imageVector = MeshtasticIcons.Success,
         contentDescription = null,
         modifier = Modifier.size(84.dp),
         tint = MaterialTheme.colorScheme.primary,
@@ -158,7 +161,7 @@ private fun SuccessContent() {
 @Composable
 private fun ErrorContent(state: ResponseState.Error) {
     Icon(
-        imageVector = Icons.Filled.Error,
+        imageVector = MeshtasticIcons.Error,
         contentDescription = null,
         modifier = Modifier.size(84.dp),
         tint = MaterialTheme.colorScheme.error,

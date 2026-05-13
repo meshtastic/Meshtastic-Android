@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
-import okio.ByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
 import org.meshtastic.proto.AdminMessage
@@ -27,9 +25,6 @@ import org.meshtastic.proto.LocalConfig
 /** Interface for sending commands and packets to the mesh network. */
 @Suppress("TooManyFunctions")
 interface CommandSender {
-    /** Starts the command sender with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Returns the current packet ID. */
     fun getCurrentPacketId(): Long
 
@@ -41,9 +36,6 @@ interface CommandSender {
 
     /** Generates a new unique packet ID. */
     fun generatePacketId(): Int
-
-    /** Sets the session passkey for admin messages. */
-    fun setSessionPasskey(key: ByteString)
 
     /** Sends a data packet to the mesh. */
     fun sendData(p: DataPacket)

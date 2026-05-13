@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
     jvm()
 
-    @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = false
         withHostTest { isIncludeAndroidResources = true }
@@ -37,12 +37,25 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)
             api(libs.okio)
+            api(libs.uri.kmp)
             implementation(libs.kermit)
         }
         androidMain.dependencies { api(libs.androidx.core.ktx) }
 
-        val androidHostTest by getting { dependencies { implementation(libs.robolectric) } }
-
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-common.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidHostTestCompileClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }

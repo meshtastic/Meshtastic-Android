@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,9 @@ fun LazyListState.smartScrollToIndex(coroutineScope: CoroutineScope, targetIndex
             when {
                 difference > FAST_SCROLL_THRESHOLD ->
                     (clampedTarget + FAST_SCROLL_THRESHOLD).coerceAtMost(totalItems - 1)
+
                 difference < -FAST_SCROLL_THRESHOLD -> (clampedTarget - FAST_SCROLL_THRESHOLD).coerceAtLeast(0)
+
                 else -> null
             }
         jumpIndex?.let { scrollToItem(it) }

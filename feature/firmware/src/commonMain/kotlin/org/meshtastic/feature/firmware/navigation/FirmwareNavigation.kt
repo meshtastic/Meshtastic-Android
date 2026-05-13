@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,18 +17,23 @@
 package org.meshtastic.feature.firmware.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.FirmwareRoutes
+import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.feature.firmware.FirmwareUpdateScreen
 import org.meshtastic.feature.firmware.FirmwareUpdateViewModel
 
 /** Registers the firmware update screen entries into the Navigation 3 entry provider. */
 fun EntryProviderScope<NavKey>.firmwareGraph(backStack: NavBackStack<NavKey>) {
-    entry<FirmwareRoutes.FirmwareGraph> { FirmwareScreen(onNavigateUp = { backStack.removeLastOrNull() }) }
-    entry<FirmwareRoutes.FirmwareUpdate> { FirmwareScreen(onNavigateUp = { backStack.removeLastOrNull() }) }
+    entry<FirmwareRoute.FirmwareGraph> {
+        FirmwareScreen(onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
+    entry<FirmwareRoute.FirmwareUpdate> {
+        FirmwareScreen(onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() })
+    }
 }
 
 @Composable

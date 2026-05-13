@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,9 +79,7 @@ object HomoglyphCharacterStringTransformer {
      * @param value original string value.
      * @return optimized string value.
      */
-    fun optimizeUtf8StringWithHomoglyphs(value: String): String {
-        val stringBuilder = StringBuilder()
-        for (c in value.toCharArray()) stringBuilder.append(homoglyphCharactersSubstitutionMapping[c] ?: c)
-        return stringBuilder.toString()
+    fun optimizeUtf8StringWithHomoglyphs(value: String): String = buildString {
+        for (c in value) append(homoglyphCharactersSubstitutionMapping[c] ?: c)
     }
 }

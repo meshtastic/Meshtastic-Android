@@ -24,9 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.ioDispatcher
 
 @Composable
 actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteArray): (fileName: String) -> Unit {
@@ -41,7 +41,7 @@ actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteAr
     return { fileName -> exportLauncher.launch(fileName) }
 }
 
-private suspend fun exportZipToUri(context: Context, targetUri: Uri, data: ByteArray) = withContext(Dispatchers.IO) {
+private suspend fun exportZipToUri(context: Context, targetUri: Uri, data: ByteArray) = withContext(ioDispatcher) {
     try {
         context.contentResolver.openOutputStream(targetUri)?.use { os -> os.write(data) }
         Logger.i { "TAK data package exported successfully to $targetUri" }

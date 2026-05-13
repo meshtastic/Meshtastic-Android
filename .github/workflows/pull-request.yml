@@ -3,10 +3,6 @@ name: Pull Request CI
 on:
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.gitignore'
 
 permissions:
   contents: read
@@ -39,7 +35,7 @@ jobs:
               - 'desktop/**'
               - 'core/**'
               - 'feature/**'
-              - 'mesh_service_example/**'
+              - 'screenshot-tests/**'
               # Shared build infrastructure
               - 'build-logic/**'
               - 'config/**'
@@ -99,7 +95,9 @@ jobs:
           PY
 
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
-  # We disable instrumented tests and coverage for PRs to keep feedback fast (< 10 mins).
+  # We disable coverage and desktop builds for PRs to keep feedback fast
+  # (< 10 mins). Desktop compilation is already covered by the :desktop:test
+  # task in the shard-app test shard.
   validate-and-build:
     needs: check-changes
     if: needs.check-changes.outputs.android == 'true'
@@ -107,9 +105,8 @@ jobs:
     with:
       run_lint: true
       run_unit_tests: true
-      run_instrumented_tests: false
       run_coverage: false
-      api_levels: '[35]'
+      run_desktop_builds: false
       upload_artifacts: true
     secrets: inherit
 

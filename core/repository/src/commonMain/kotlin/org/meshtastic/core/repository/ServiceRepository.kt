@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package org.meshtastic.core.repository
 
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.ServiceAction
@@ -31,14 +30,39 @@ import org.meshtastic.proto.MeshPacket
  *
  * This repository acts as the primary data bridge between the long-running mesh service and the UI/Feature layers. It
  * maintains reactive flows for connection status, error messages, and incoming mesh traffic.
+ *
+ * **Connection state contract:** [connectionState] is the **canonical, app-level** connection state that all UI,
+ * feature modules, and ViewModels should observe. It incorporates handshake progress, light-sleep policy, and transport
+ * reconciliation — unlike [RadioInterfaceService.connectionState], which only reflects the raw hardware link status.
+ * The [MeshConnectionManager] is the sole writer of this state; it bridges [RadioInterfaceService.connectionState]
+ * changes into app-level transitions via [setConnectionState].
+ *
+ * @see RadioInterfaceService.connectionState
  */
 @Suppress("TooManyFunctions")
 interface ServiceRepository {
-    /** Reactive flow of the current connection state. */
+    /**
+     * Canonical app-level connection state.
+     *
+     * This is the **single source of truth** for connection status across the entire application. All UI components,
+     * feature modules, and ViewModels should observe this flow — never [RadioInterfaceService.connectionState].
+     *
+     * State transitions are managed exclusively by [MeshConnectionManager], which reconciles transport-level events
+     * with handshake progress and device sleep policy:
+     * - [ConnectionState.Disconnected] — no active connection to a radio
+     * - [ConnectionState.Connecting] — transport is up, mesh handshake (config + node-info) in progress
+     * - [ConnectionState.Connected] — handshake complete, radio fully operational
+     * - [ConnectionState.DeviceSleep] — radio entered light-sleep (transient disconnect)
+     *
+     * @see RadioInterfaceService.connectionState
+     */
     val connectionState: StateFlow<ConnectionState>
 
     /**
-     * Updates the current connection state.
+     * Updates the canonical app-level connection state.
+     *
+     * **This should only be called by [MeshConnectionManager].** Direct mutation from other components would bypass the
+     * transport-to-app reconciliation logic and create state inconsistencies.
      *
      * @param connectionState The new [ConnectionState].
      */
@@ -96,9 +120,11 @@ interface ServiceRepository {
     /**
      * Flow of all raw [MeshPacket] objects received from the mesh.
      *
-     * Subscribing to this flow allows components to react to any incoming traffic.
+     * Subscribing to this flow allows components to react to any incoming traffic. The underlying implementation may be
+     * backed by a hot shared flow, but this API intentionally exposes only the [Flow] interface. That implementation
+     * detail is hidden via [kotlinx.coroutines.flow.SharedFlow.asFlow] (kotlinx.coroutines 1.11+).
      */
-    val meshPacketFlow: SharedFlow<MeshPacket>
+    val meshPacketFlow: Flow<MeshPacket>
 
     /**
      * Emits a mesh packet into the flow.

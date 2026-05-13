@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,13 +103,15 @@ fun BitwisePreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun BitwisePreferencePreview() {
-    BitwisePreference(
-        title = "Settings",
-        value = 3,
-        summary = "This is a summary",
-        enabled = true,
-        items = listOf(1 to "TEST1", 2 to "TEST2"),
-        onItemSelected = {},
-    )
+fun BitwisePreferencePreview() {
+    AppTheme {
+        BitwisePreference(
+            title = "Settings",
+            value = 3,
+            summary = "This is a summary",
+            enabled = true,
+            items = listOf(1 to "TEST1", 2 to "TEST2"),
+            onItemSelected = {},
+        )
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package org.meshtastic.core.ui.component
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.internal
@@ -26,9 +27,9 @@ import org.meshtastic.core.resources.via_api
 import org.meshtastic.core.resources.via_mqtt
 import org.meshtastic.core.resources.via_udp
 import org.meshtastic.core.ui.icon.Api
-import org.meshtastic.core.ui.icon.Cloud
 import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Udp
 import org.meshtastic.proto.MeshPacket
 
@@ -37,14 +38,18 @@ fun TransportIcon(transport: Int, viaMqtt: Boolean, modifier: Modifier = Modifie
     val (icon, description) =
         when {
             viaMqtt || transport == MeshPacket.TransportMechanism.TRANSPORT_MQTT.value ->
-                MeshtasticIcons.Cloud to stringResource(Res.string.via_mqtt)
+                MeshtasticIcons.MqttConnected to stringResource(Res.string.via_mqtt)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_MULTICAST_UDP.value ->
                 MeshtasticIcons.Udp to stringResource(Res.string.via_udp)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_API.value ->
                 MeshtasticIcons.Api to stringResource(Res.string.via_api)
+
             transport == MeshPacket.TransportMechanism.TRANSPORT_INTERNAL.value ->
                 MeshtasticIcons.Device to stringResource(Res.string.internal)
+
             else -> return
         }
-    Icon(icon, contentDescription = description, modifier = modifier)
+    Icon(icon, contentDescription = description, modifier = modifier, tint = Color.White)
 }

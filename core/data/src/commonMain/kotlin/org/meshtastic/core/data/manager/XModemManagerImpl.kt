@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asFlow
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.XModemFile
 import org.meshtastic.core.repository.XModemManager
@@ -47,7 +48,7 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
             extraBufferCapacity = 4,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
-    override val fileTransferFlow = _fileTransferFlow.asSharedFlow()
+    override val fileTransferFlow = _fileTransferFlow.asFlow()
 
     // --- mutable state ---
     // Thread-safety contract: [handleIncomingXModem] is called sequentially from
@@ -59,6 +60,8 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
     @Volatile private var transferName = ""
 
     @Volatile private var expectedSeq = INITIAL_SEQ
+
+    @Volatile private var lastActivityMillis = 0L
     private val blocks = mutableListOf<ByteArray>()
 
     override fun setTransferName(name: String) {
@@ -66,15 +69,29 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
     }
 
     override fun handleIncomingXModem(packet: XModem) {
+        // If blocks have accumulated but no activity for INACTIVITY_TIMEOUT_MS,
+        // the previous transfer is stale (firmware crash, BLE disconnect, etc.).
+        if (blocks.isNotEmpty() && lastActivityMillis > 0L) {
+            val elapsed = nowMillis - lastActivityMillis
+            if (elapsed > INACTIVITY_TIMEOUT_MS) {
+                Logger.w { "XModem: inactivity timeout (${elapsed}ms) — resetting stale transfer" }
+                reset()
+            }
+        }
+        lastActivityMillis = nowMillis
+
         when (packet.control) {
             XModem.Control.SOH,
             XModem.Control.STX,
             -> handleDataBlock(packet)
+
             XModem.Control.EOT -> handleEot()
+
             XModem.Control.CAN -> {
                 Logger.w { "XModem: CAN received — transfer cancelled" }
                 reset()
             }
+
             else -> Logger.w { "XModem: unexpected control byte ${packet.control}, ignoring" }
         }
     }
@@ -96,11 +113,13 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
                 Logger.d { "XModem: block $seq OK, total=${blocks.size} blocks" }
                 sendControl(XModem.Control.ACK)
             }
+
             // Duplicate: sender did not receive our previous ACK; re-ACK without buffering again.
             (expectedSeq - 1 + MAX_SEQ_PLUS_ONE) % MAX_SEQ_PLUS_ONE -> {
                 Logger.d { "XModem: duplicate block $seq — re-ACK" }
                 sendControl(XModem.Control.ACK)
             }
+
             else -> {
                 Logger.w { "XModem: unexpected seq $seq (expected $expectedSeq) — NAK" }
                 sendControl(XModem.Control.NAK)
@@ -135,6 +154,7 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
         expectedSeq = INITIAL_SEQ
         blocks.clear()
         transferName = ""
+        lastActivityMillis = 0L
     }
 
     // CRC-CCITT: polynomial 0x1021, initial value 0x0000 (XModem variant)
@@ -157,5 +177,6 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
         private const val CTRLZ = 0x1A.toByte()
         private const val CRC_POLY = 0x1021
         private const val BITS_PER_BYTE = 8
+        private const val INACTIVITY_TIMEOUT_MS = 30_000L
     }
 }

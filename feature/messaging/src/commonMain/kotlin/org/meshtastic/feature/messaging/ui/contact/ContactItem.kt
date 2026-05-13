@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.VolumeOff
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -53,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.proto.ChannelSet
 
 @Suppress("LongMethod")
@@ -175,7 +175,7 @@ private fun ChatMetadata(contact: Contact, modifier: Modifier = Modifier) {
         AnimatedVisibility(visible = contact.isMuted) {
             Icon(
                 modifier = Modifier.padding(start = 4.dp).size(20.dp),
-                imageVector = Icons.AutoMirrored.TwoTone.VolumeOff,
+                imageVector = MeshtasticIcons.VolumeOff,
                 contentDescription = null,
             )
         }

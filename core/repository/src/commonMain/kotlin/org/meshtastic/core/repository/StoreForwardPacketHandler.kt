@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,11 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 
 /** Interface for handling Store & Forward (legacy) and SF++ packets. */
 interface StoreForwardPacketHandler {
-    /** Starts the handler with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /**
      * Handles a legacy Store & Forward packet.
      *

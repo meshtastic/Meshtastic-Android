@@ -23,12 +23,12 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.di.CoroutineDispatchers
 
 @Module
 @ComponentScan("org.meshtastic.app.map")
@@ -36,9 +36,10 @@ class GoogleMapsKoinModule {
 
     @Single
     @Named("GoogleMapsDataStore")
-    fun provideGoogleMapsDataStore(context: Context): DataStore<Preferences> = PreferenceDataStoreFactory.create(
-        migrations = listOf(SharedPreferencesMigration(context, "google_maps_prefs")),
-        scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-        produceFile = { context.preferencesDataStoreFile("google_maps_ds") },
-    )
+    fun provideGoogleMapsDataStore(context: Context, dispatchers: CoroutineDispatchers): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            migrations = listOf(SharedPreferencesMigration(context, "google_maps_prefs")),
+            scope = CoroutineScope(dispatchers.io + SupervisorJob()),
+            produceFile = { context.preferencesDataStoreFile("google_maps_ds") },
+        )
 }

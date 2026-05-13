@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MatchingDeclarationName")
+
 package org.meshtastic.buildlogic
 
 import org.gradle.api.DefaultTask
@@ -95,7 +97,7 @@ internal enum class PluginType(val id: String, val ref: String, val style: Strin
 }
 
 /** Optimized and Isolated Projects compatible graph configuration. */
-internal fun Project.configureGraphTasks() {
+fun Project.configureGraphTasks() {
     if (!buildFile.exists()) return
 
     val supportedConfigurations =
@@ -134,9 +136,13 @@ internal fun Project.configureGraphTasks() {
                             pluginManager.hasPlugin("meshtastic.android.application") ||
                                 pluginManager.hasPlugin("meshtastic.android.application.compose") ->
                                 PluginType.AndroidApplication
+
                             targetProjectPath.startsWith(":desktop") -> PluginType.ComposeDesktopApplication
+
                             pluginManager.hasPlugin("meshtastic.kmp.feature") -> PluginType.KmpFeature
+
                             targetProjectPath.startsWith(":feature:") -> PluginType.AndroidFeature
+
                             else -> PluginType.entries.firstOrNull { pluginManager.hasPlugin(it.id) } ?: Unknown
                         }
                     projectPlugins[targetProjectPath] = type

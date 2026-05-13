@@ -16,10 +16,6 @@
  */
 package org.meshtastic.feature.settings.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Message
-import androidx.compose.material.icons.rounded.BatteryAlert
-import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
@@ -28,6 +24,10 @@ import org.meshtastic.core.resources.meshtastic_low_battery_notifications
 import org.meshtastic.core.resources.meshtastic_messages_notifications
 import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.core.ui.icon.BatteryAlert
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Message
+import org.meshtastic.core.ui.icon.PersonAdd
 
 /**
  * Notification settings section with in-app toggles. Primarily used on platforms without system notification channels.
@@ -44,19 +44,19 @@ fun NotificationSection(
     ExpressiveSection(title = stringResource(Res.string.app_notifications)) {
         SwitchListItem(
             text = stringResource(Res.string.meshtastic_messages_notifications),
-            leadingIcon = Icons.AutoMirrored.Rounded.Message,
+            leadingIcon = MeshtasticIcons.Message,
             checked = messagesEnabled,
             onClick = { onToggleMessages(!messagesEnabled) },
         )
         SwitchListItem(
             text = stringResource(Res.string.meshtastic_new_nodes_notifications),
-            leadingIcon = Icons.Rounded.PersonAdd,
+            leadingIcon = MeshtasticIcons.PersonAdd,
             checked = nodeEventsEnabled,
             onClick = { onToggleNodeEvents(!nodeEventsEnabled) },
         )
         SwitchListItem(
             text = stringResource(Res.string.meshtastic_low_battery_notifications),
-            leadingIcon = Icons.Rounded.BatteryAlert,
+            leadingIcon = MeshtasticIcons.BatteryAlert,
             checked = lowBatteryEnabled,
             onClick = { onToggleLowBattery(!lowBatteryEnabled) },
         )

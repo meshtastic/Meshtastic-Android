@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,9 +68,9 @@ class CapabilitiesTest {
     }
 
     @Test
-    fun supportsStatusMessage_requires_V2_7_17() {
-        assertFalse(caps("2.7.16").supportsStatusMessage)
-        assertTrue(caps("2.7.17").supportsStatusMessage)
+    fun supportsStatusMessage_requires_V2_8_0() {
+        assertFalse(caps("2.7.21").supportsStatusMessage)
+        assertTrue(caps("2.8.0").supportsStatusMessage)
     }
 
     @Test

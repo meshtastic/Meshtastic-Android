@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +23,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
@@ -45,6 +48,7 @@ class NodeListViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
+    private val radioInterfaceService: RadioInterfaceService,
     val nodeManagementActions: NodeManagementActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
@@ -57,6 +61,11 @@ class NodeListViewModel(
     val totalNodeCount = nodeRepository.totalNodeCount.stateInWhileSubscribed(initialValue = 0)
 
     val connectionState = serviceRepository.connectionState
+
+    val deviceType: StateFlow<DeviceType?> =
+        radioInterfaceService.currentDeviceAddressFlow
+            .map { address -> address?.let { DeviceType.fromAddress(it) } }
+            .stateInWhileSubscribed(initialValue = null)
 
     private val nodeSortOption = nodeFilterPreferences.nodeSortOption
 
@@ -160,7 +169,11 @@ data class NodeFilterState(
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
     val excludeMqtt: Boolean = false,
-)
+) {
+    /** True if any user-applied filter is narrowing the visible node set. */
+    val isActive: Boolean
+        get() = filterText.isNotEmpty() || excludeInfrastructure || onlyOnline || onlyDirect || excludeMqtt
+}
 
 data class NodeFilterToggles(
     val includeUnknown: Boolean = false,

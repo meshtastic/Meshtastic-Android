@@ -18,8 +18,6 @@ jobs:
     with:
       run_lint: true
       run_unit_tests: true
-      run_instrumented_tests: true
-      api_levels: '[26, 35]' # Comprehensive testing for Merge Queue
       upload_artifacts: false
     secrets: inherit
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,12 @@ sealed interface NodeDetailAction {
     data class TriggerServiceAction(val action: ServiceAction) : NodeDetailAction
 
     data class HandleNodeMenuAction(val action: NodeMenuAction) : NodeDetailAction
+
+    /** Open the remote-administration screen, ensuring a fresh session passkey first. */
+    data class OpenRemoteAdmin(val nodeNum: Int) : NodeDetailAction
+
+    /** Force-refresh device metadata (firmware version, edition, role) for the given node. */
+    data class RefreshMetadata(val nodeNum: Int) : NodeDetailAction
 
     data object ShareContact : NodeDetailAction
 

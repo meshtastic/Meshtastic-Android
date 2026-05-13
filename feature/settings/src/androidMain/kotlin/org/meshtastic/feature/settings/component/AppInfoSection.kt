@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,6 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.AppSettingsAlt
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Memory
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +43,13 @@ import org.meshtastic.core.resources.modules_already_unlocked
 import org.meshtastic.core.resources.modules_unlocked
 import org.meshtastic.core.resources.system_settings
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.icon.AppSettingsAlt
+import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.Info
+import org.meshtastic.core.ui.icon.Memory
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Notifications
+import org.meshtastic.core.ui.icon.WavingHand
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
 import kotlin.time.Duration.Companion.seconds
@@ -70,7 +70,7 @@ fun AppInfoSection(
     ExpressiveSection(title = stringResource(Res.string.info)) {
         ListItem(
             text = stringResource(Res.string.intro_show),
-            leadingIcon = Icons.Rounded.WavingHand,
+            leadingIcon = MeshtasticIcons.WavingHand,
             trailingIcon = null,
         ) {
             onShowAppIntro()
@@ -78,7 +78,7 @@ fun AppInfoSection(
 
         ListItem(
             text = stringResource(Res.string.app_notifications),
-            leadingIcon = Icons.Rounded.Notifications,
+            leadingIcon = MeshtasticIcons.Notifications,
             trailingIcon = null,
         ) {
             val intent =
@@ -90,7 +90,7 @@ fun AppInfoSection(
 
         ListItem(
             text = stringResource(Res.string.system_settings),
-            leadingIcon = Icons.Rounded.AppSettingsAlt,
+            leadingIcon = MeshtasticIcons.AppSettingsAlt,
             trailingIcon = null,
         ) {
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -100,8 +100,8 @@ fun AppInfoSection(
 
         ListItem(
             text = stringResource(Res.string.acknowledgements),
-            leadingIcon = Icons.Rounded.Info,
-            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIcon = MeshtasticIcons.Info,
+            trailingIcon = MeshtasticIcons.ChevronRight,
         ) {
             onNavigateToAbout()
         }
@@ -137,7 +137,7 @@ private fun AppVersionButton(
 
     ListItem(
         text = stringResource(Res.string.app_version),
-        leadingIcon = Icons.Rounded.Memory,
+        leadingIcon = MeshtasticIcons.Memory,
         supportingText = appVersionName,
         trailingIcon = null,
     ) {
@@ -160,7 +160,7 @@ private fun AppVersionButton(
 
 @Preview(showBackground = true)
 @Composable
-private fun AppInfoSectionPreview() {
+fun AppInfoSectionPreview() {
     AppTheme {
         AppInfoSection(
             appVersionName = "2.5.0",

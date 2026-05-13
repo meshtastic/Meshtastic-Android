@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.intro"
         androidResources.enable = false
@@ -38,16 +37,6 @@ kotlin {
 
             implementation(libs.jetbrains.navigation3.ui)
         }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.robolectric)
-                implementation(project.dependencies.platform(libs.androidx.compose.bom))
-                implementation(libs.androidx.test.core)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.compose.ui.test.junit4)
-            }
-        }
+        androidMain.dependencies { implementation(projects.core.service) }
     }
 }

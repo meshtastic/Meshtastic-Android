@@ -1,4 +1,8 @@
 # .github/release.yml - GitHub Release Notes Configuration
+#
+# Labels here must match actual repo labels. Run `gh label list` to verify.
+# Auto-labeler: .github/workflows/pull-request-target.yml
+# AI classifier: .github/workflows/models_pr_triage.yml
 
 changelog:
   exclude:
@@ -12,10 +16,9 @@ changelog:
       - ci
       - build
       - testing
-      - test
       - refactor
       - documentation
-      - translation
+      - l10n
     authors:
       - renovate[bot]
       - dependabot[bot]
@@ -25,12 +28,13 @@ changelog:
     - title: 🏗️ Features
       labels:
         - enhancement
-        - feature
+    - title: 🖥️ Desktop
+      labels:
+        - desktop
     - title: 🛠️ Fixes
       labels:
         - bug
         - bugfix
-        - fix
     - title: 📝 Other Changes
       labels:
         - '*'

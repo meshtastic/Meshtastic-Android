@@ -23,6 +23,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verifySuspend
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -60,20 +61,20 @@ class MeshConfigHandlerImplTest {
     fun setUp() {
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
-
-        handler =
-            MeshConfigHandlerImpl(
-                radioConfigRepository = radioConfigRepository,
-                serviceRepository = serviceRepository,
-                nodeManager = nodeManager,
-            )
     }
+
+    private fun createHandler(scope: CoroutineScope): MeshConfigHandlerImpl = MeshConfigHandlerImpl(
+        radioConfigRepository = radioConfigRepository,
+        serviceRepository = serviceRepository,
+        nodeManager = nodeManager,
+        scope = scope,
+    )
 
     // ---------- start and flow wiring ----------
 
     @Test
     fun `start wires localConfig flow from repository`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val config = LocalConfig(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER))
         localConfigFlow.value = config
         advanceUntilIdle()
@@ -83,7 +84,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `start wires moduleConfig flow from repository`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val config = LocalModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
         moduleConfigFlow.value = config
         advanceUntilIdle()
@@ -95,7 +96,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleDeviceConfig persists config and updates progress`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT))
         handler.handleDeviceConfig(config)
         advanceUntilIdle()
@@ -106,7 +107,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleDeviceConfig handles all config variants`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val configs =
             listOf(
                 Config(position = Config.PositionConfig()),
@@ -131,7 +132,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleModuleConfig persists config and updates progress`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val config = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
         handler.handleModuleConfig(config)
         advanceUntilIdle()
@@ -142,7 +143,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleModuleConfig with statusmessage updates node status`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val myNum = 123
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNum)
 
@@ -155,7 +156,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleModuleConfig with statusmessage skipped when myNodeNum is null`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(null)
 
         val config = ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Active"))
@@ -168,7 +169,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleChannel persists channel settings`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val channel = Channel(index = 0)
         handler.handleChannel(channel)
         advanceUntilIdle()
@@ -178,7 +179,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleChannel shows progress with max channels when myNodeInfo available`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         every { nodeManager.getMyNodeInfo() } returns
             MyNodeInfo(
                 myNodeNum = 123,
@@ -206,7 +207,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleChannel shows progress without max channels when myNodeInfo unavailable`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         every { nodeManager.getMyNodeInfo() } returns null
 
         val channel = Channel(index = 0)
@@ -220,7 +221,7 @@ class MeshConfigHandlerImplTest {
 
     @Test
     fun `handleDeviceUIConfig persists config`() = runTest(testDispatcher) {
-        handler.start(backgroundScope)
+        handler = createHandler(backgroundScope)
         val config = DeviceUIConfig()
         handler.handleDeviceUIConfig(config)
         advanceUntilIdle()

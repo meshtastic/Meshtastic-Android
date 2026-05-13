@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,10 @@ import org.meshtastic.core.database.entity.MeshLog
 @Dao
 interface MeshLogDao {
 
-    @Query("SELECT * FROM log ORDER BY received_date DESC LIMIT 0,:maxItem")
+    @Query("SELECT * FROM log ORDER BY received_date DESC LIMIT :maxItem")
     fun getAllLogs(maxItem: Int): Flow<List<MeshLog>>
 
-    @Query("SELECT * FROM log ORDER BY received_date ASC LIMIT 0,:maxItem")
+    @Query("SELECT * FROM log ORDER BY received_date ASC LIMIT :maxItem")
     fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>>
 
     /**
@@ -40,7 +40,7 @@ interface MeshLogDao {
         """
         SELECT * FROM log 
         WHERE from_num = :fromNum AND (:portNum = -1 OR port_num = :portNum)
-        ORDER BY received_date DESC LIMIT 0,:maxItem
+        ORDER BY received_date DESC LIMIT :maxItem
         """,
     )
     fun getLogsFrom(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>

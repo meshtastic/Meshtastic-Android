@@ -1212,7 +1212,7 @@
       "Heltec"
     ],
     "requiresDfu": true,
-    "hasMui": false,
+    "hasMui": true,
     "partitionScheme": "16MB",
     "images": [
       "heltec_v4.svg"
@@ -1241,7 +1241,7 @@
     "hwModelSlug": "M5STACK_CARDPUTER_ADV",
     "platformioTarget": "m5stack-cardputer-adv",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Cardputer Mesh Kit",
     "tags": [
@@ -1257,7 +1257,7 @@
     "hwModelSlug": "HELTEC_WIRELESS_TRACKER_V2",
     "platformioTarget": "heltec-wireless-tracker-v2",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec Wireless Tracker V2",
     "tags": [
@@ -1380,7 +1380,7 @@
     "hasMui": false,
     "partitionScheme": "8MB",
     "images": [
-      "t5s3-epaper-pro.svg"
+      "t5s3_epaper.svg"
     ]
   },
   {

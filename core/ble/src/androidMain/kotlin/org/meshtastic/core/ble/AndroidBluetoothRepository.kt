@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -49,7 +50,7 @@ class AndroidBluetoothRepository(
     private val _state = MutableStateFlow(BluetoothState(hasPermissions = hasBluetoothPermissions()))
     override val state: StateFlow<BluetoothState> = _state.asStateFlow()
 
-    private val deviceCache = mutableMapOf<String, DirectBleDevice>()
+    private val deviceCache = mutableMapOf<String, MeshtasticBleDevice>()
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) { updateBluetoothState() }
@@ -86,7 +87,7 @@ class AndroidBluetoothRepository(
             return
         }
 
-        kotlinx.coroutines.suspendCancellableCoroutine<Unit> { cont ->
+        suspendCancellableCoroutine<Unit> { cont ->
             val receiver =
                 object : android.content.BroadcastReceiver() {
                     @SuppressLint("MissingPermission")
@@ -180,14 +181,15 @@ class AndroidBluetoothRepository(
         // user renamed the device in firmware since the cache was populated.
         deviceCache.keys.retainAll(bondedAddresses)
         return bonded.map { device ->
-            deviceCache
-                .getOrPut(device.address) { DirectBleDevice(device.address, device.name) }
-                .also { cached ->
-                    // Refresh name if it changed (firmware rename, etc.)
-                    if (cached.name != device.name) {
-                        deviceCache[device.address] = DirectBleDevice(device.address, device.name)
-                    }
-                }
+            val cached = deviceCache.getOrPut(device.address) { MeshtasticBleDevice(device.address, device.name) }
+            // If the name changed (firmware rename, etc.), replace the cached entry and return the new one.
+            if (cached.name != device.name) {
+                val updated = MeshtasticBleDevice(device.address, device.name)
+                deviceCache[device.address] = updated
+                updated
+            } else {
+                cached
+            }
         }
     }
 

@@ -17,7 +17,6 @@
 package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.BufferedSink
 import okio.BufferedSource
@@ -25,17 +24,18 @@ import okio.buffer
 import okio.sink
 import okio.source
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FileService
 import java.io.File
 
 @Single
-class JvmFileService : FileService {
-    override suspend fun write(uri: MeshtasticUri, block: suspend (BufferedSink) -> Unit): Boolean =
-        withContext(Dispatchers.IO) {
+class JvmFileService(private val dispatchers: CoroutineDispatchers) : FileService {
+    override suspend fun write(uri: CommonUri, block: suspend (BufferedSink) -> Unit): Boolean =
+        withContext(dispatchers.io) {
             try {
-                // Treat uriString as a local file path
-                val file = File(uri.uriString)
+                // Treat URI string as a local file path
+                val file = File(uri.toString())
                 file.parentFile?.mkdirs()
                 file.sink().buffer().use { sink -> block(sink) }
                 true
@@ -45,10 +45,10 @@ class JvmFileService : FileService {
             }
         }
 
-    override suspend fun read(uri: MeshtasticUri, block: suspend (BufferedSource) -> Unit): Boolean =
-        withContext(Dispatchers.IO) {
+    override suspend fun read(uri: CommonUri, block: suspend (BufferedSource) -> Unit): Boolean =
+        withContext(dispatchers.io) {
             try {
-                val file = File(uri.uriString)
+                val file = File(uri.toString())
                 file.source().buffer().use { source -> block(source) }
                 true
             } catch (e: Exception) {

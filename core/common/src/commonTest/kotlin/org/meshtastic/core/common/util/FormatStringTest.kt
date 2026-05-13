@@ -93,4 +93,48 @@ class FormatStringTest {
     fun sequentialFloatSubstitution() {
         assertEquals("1.2 3.5", formatString("%.1f %.1f", 1.23, 3.45))
     }
+
+    // Hex format tests
+
+    @Test
+    fun lowercaseHex() {
+        assertEquals("ff", formatString("%x", 255))
+    }
+
+    @Test
+    fun uppercaseHex() {
+        assertEquals("FF", formatString("%X", 255))
+    }
+
+    @Test
+    fun zeroPaddedHex() {
+        assertEquals("000000ff", formatString("%08x", 255))
+    }
+
+    @Test
+    fun zeroPaddedHexNodeId() {
+        assertEquals("!deadbeef", formatString("!%08x", 0xDEADBEEF.toInt()))
+    }
+
+    @Test
+    fun hexZeroValue() {
+        assertEquals("00000000", formatString("%08x", 0))
+    }
+
+    @Test
+    fun positionalHex() {
+        assertEquals("Node ff id 42", formatString("Node %1\$x id %2\$d", 255, 42))
+    }
+
+    // Edge case tests
+
+    @Test
+    fun trailingPercent() {
+        assertEquals("hello", formatString("hello%"))
+    }
+
+    @Test
+    fun outOfBoundsArgIndex() {
+        assertEquals("null", formatString("%3\$s", "only_one"))
+    }
 }

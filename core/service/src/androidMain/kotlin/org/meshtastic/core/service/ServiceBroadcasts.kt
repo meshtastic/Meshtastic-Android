@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,10 @@ import org.meshtastic.core.repository.ServiceBroadcasts as SharedServiceBroadcas
 @Single
 class ServiceBroadcasts(private val context: Context, private val serviceRepository: ServiceRepository) :
     SharedServiceBroadcasts {
-    // A mapping of receiver class name to package name - used for explicit broadcasts
-    private val clientPackages = mutableMapOf<String, String>()
+    // A mapping of receiver class name to package name - used for explicit broadcasts.
+    // ConcurrentHashMap because subscribeReceiver() is called from AIDL binder threads
+    // while explicitBroadcast() iterates from coroutine contexts.
+    private val clientPackages = java.util.concurrent.ConcurrentHashMap<String, String>()
 
     override fun subscribeReceiver(receiverName: String, packageName: String) {
         clientPackages[receiverName] = packageName
@@ -131,7 +133,7 @@ class ServiceBroadcasts(private val context: Context, private val serviceReposit
             explicitBroadcast(Intent(ACTION_MESH_DISCONNECTED))
         }
 
-        // Restore legacy action for other consumers (e.g. mesh_service_example)
+        // Restore legacy action for other consumers (e.g. ATAK plugins)
         val legacyIntent =
             Intent(ACTION_CONNECTION_CHANGED).apply {
                 putExtra(EXTRA_CONNECTED, stateStr)
@@ -153,7 +155,7 @@ class ServiceBroadcasts(private val context: Context, private val serviceReposit
     private fun explicitBroadcast(intent: Intent) {
         context.sendBroadcast(
             intent,
-        ) // We also do a regular (not explicit broadcast) so any context-registered rceivers will work
+        ) // We also do a regular (not explicit broadcast) so any context-registered receivers will work
         clientPackages.forEach {
             intent.setClassName(it.value, it.key)
             context.sendBroadcast(intent)

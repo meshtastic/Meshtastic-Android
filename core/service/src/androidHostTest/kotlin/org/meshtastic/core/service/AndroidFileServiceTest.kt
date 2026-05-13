@@ -16,9 +16,11 @@
  */
 package org.meshtastic.core.service
 
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
@@ -27,10 +29,15 @@ import kotlin.test.assertNotNull
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class AndroidFileServiceTest {
+    private val testDispatchers =
+        UnconfinedTestDispatcher().let { dispatcher ->
+            CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher)
+        }
+
     @Test
     fun testInitialization() = runTest {
         val context = RuntimeEnvironment.getApplication()
-        val service = AndroidFileService(context)
+        val service = AndroidFileService(context, testDispatchers)
         assertNotNull(service)
     }
 }

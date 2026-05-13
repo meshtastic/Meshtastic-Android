@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,7 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room3.Dao
-import androidx.room3.Insert
 import androidx.room3.MapColumn
-import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Transaction
 import androidx.room3.Upsert
@@ -37,6 +35,9 @@ interface NodeInfoDao {
 
     companion object {
         const val KEY_SIZE = 32
+
+        /** SQLite has a limit of ~999 bind parameters per query. */
+        const val MAX_BIND_PARAMS = 999
     }
 
     /**
@@ -121,8 +122,11 @@ interface NodeInfoDao {
                     incomingKey
                 }
             }
+
             existingHasKey -> existingKey
+
             incomingNode.user.is_licensed -> ByteString.EMPTY
+
             else -> existingKey
         }
     }
@@ -168,8 +172,7 @@ interface NodeInfoDao {
     @Query("SELECT * FROM my_node")
     fun getMyNodeInfo(): Flow<MyNodeEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun setMyNodeInfo(myInfo: MyNodeEntity)
+    @Upsert suspend fun setMyNodeInfo(myInfo: MyNodeEntity)
 
     @Query("DELETE FROM my_node")
     suspend fun clearMyNodeInfo()
@@ -284,27 +287,99 @@ interface NodeInfoDao {
     @Transaction
     suspend fun getNodeByNum(num: Int): NodeWithRelations?
 
+    @Query("SELECT * FROM nodes WHERE num IN (:nodeNums)")
+    suspend fun getNodeEntitiesByNums(nodeNums: List<Int>): List<NodeEntity>
+
     @Query("SELECT * FROM nodes WHERE public_key = :publicKey LIMIT 1")
     suspend fun findNodeByPublicKey(publicKey: ByteString?): NodeEntity?
 
+    @Query("SELECT * FROM nodes WHERE public_key IN (:publicKeys)")
+    suspend fun findNodesByPublicKeys(publicKeys: List<ByteString>): List<NodeEntity>
+
     @Upsert suspend fun doUpsert(node: NodeEntity)
 
+    @Transaction
     suspend fun upsert(node: NodeEntity) {
         val verifiedNode = getVerifiedNodeForUpsert(node)
         doUpsert(verifiedNode)
     }
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun putAll(nodes: List<NodeEntity>)
+    @Upsert suspend fun putAll(nodes: List<NodeEntity>)
 
     @Query("UPDATE nodes SET notes = :notes WHERE num = :num")
     suspend fun setNodeNotes(num: Int, notes: String)
+
+    /**
+     * Batch version of [getVerifiedNodeForUpsert]. Pre-fetches all existing nodes and public-key conflicts in two
+     * queries instead of N individual queries, then processes each node in memory.
+     */
+    @Suppress("NestedBlockDepth")
+    private suspend fun getVerifiedNodesForUpsert(incomingNodes: List<NodeEntity>): List<NodeEntity> {
+        // Prepare all incoming nodes (populate denormalized fields)
+        incomingNodes.forEach { node ->
+            node.publicKey = node.user.public_key
+            if (node.user.hw_model != HardwareModel.UNSET) {
+                node.longName = node.user.long_name
+                node.shortName = node.user.short_name
+            } else {
+                node.longName = null
+                node.shortName = null
+            }
+        }
+
+        // Batch fetch all existing nodes by num (chunked for SQLite bind-param limit)
+        val existingNodesMap =
+            incomingNodes
+                .map { it.num }
+                .chunked(MAX_BIND_PARAMS)
+                .flatMap { getNodeEntitiesByNums(it) }
+                .associateBy { it.num }
+
+        // Partition into updates vs. inserts and resolve existing nodes in-memory
+        val result = mutableListOf<NodeEntity>()
+        val newNodes = mutableListOf<NodeEntity>()
+        for (incoming in incomingNodes) {
+            val existing = existingNodesMap[incoming.num]
+            if (existing != null) {
+                result.add(handleExistingNodeUpsertValidation(existing, incoming))
+            } else {
+                newNodes.add(incoming)
+            }
+        }
+
+        // Batch validate new nodes' public keys (one query instead of N)
+        val publicKeysToCheck = newNodes.mapNotNull { node -> node.publicKey?.takeIf { it.size > 0 } }.distinct()
+        val pkConflicts =
+            if (publicKeysToCheck.isNotEmpty()) {
+                publicKeysToCheck
+                    .chunked(MAX_BIND_PARAMS)
+                    .flatMap { findNodesByPublicKeys(it) }
+                    .associateBy { it.publicKey }
+            } else {
+                emptyMap()
+            }
+
+        for (newNode in newNodes) {
+            if ((newNode.publicKey?.size ?: 0) > 0) {
+                val conflicting = pkConflicts[newNode.publicKey]
+                if (conflicting != null && conflicting.num != newNode.num) {
+                    result.add(conflicting)
+                } else {
+                    result.add(newNode)
+                }
+            } else {
+                result.add(newNode)
+            }
+        }
+
+        return result
+    }
 
     @Transaction
     suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {
         clearMyNodeInfo()
         setMyNodeInfo(mi)
-        putAll(nodes.map { getVerifiedNodeForUpsert(it) })
+        putAll(getVerifiedNodesForUpsert(nodes))
     }
 
     /**

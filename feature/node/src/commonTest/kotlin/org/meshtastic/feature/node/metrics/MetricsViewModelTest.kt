@@ -35,7 +35,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import okio.Buffer
 import okio.BufferedSink
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
@@ -47,7 +47,11 @@ import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
+import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.Telemetry
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -210,8 +214,8 @@ class MetricsViewModelTest {
             awaitItem() // Empty
             awaitItem() // with position
 
-            val uri = MeshtasticUri("content://test")
-            vm.savePositionCSV(uri)
+            val uri = CommonUri.parse("content://test")
+            vm.savePositionCSV(uri, listOf(testPosition))
             runCurrent()
 
             verifySuspend { fileService.write(uri, any()) }
@@ -221,6 +225,205 @@ class MetricsViewModelTest {
             assertTrue(csvOutput.contains("12.3456789"))
             assertTrue(csvOutput.contains("-98.7654321"))
             assertTrue(csvOutput.contains("\"100\",\"5\",\"10\",\"1.23\""))
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `saveDeviceMetricsCSV writes correct data`() = runTest(testDispatcher) {
+        val testTelemetry =
+            Telemetry(
+                time = 1700000000,
+                device_metrics =
+                DeviceMetrics(
+                    battery_level = 80,
+                    voltage = 4.1f,
+                    channel_utilization = 12.5f,
+                    air_util_tx = 3.25f,
+                    uptime_seconds = 3600,
+                ),
+            )
+
+        val nodeDetailFlow =
+            MutableStateFlow(NodeDetailUiState(metricsState = MetricsState(deviceMetrics = listOf(testTelemetry))))
+        every { getNodeDetailsUseCase(1234) } returns nodeDetailFlow.asStateFlow()
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val vm = createViewModel()
+        vm.state.test {
+            awaitItem()
+            awaitItem()
+
+            val uri = CommonUri.parse("content://test")
+            vm.saveDeviceMetricsCSV(uri, listOf(testTelemetry))
+            runCurrent()
+
+            verifySuspend { fileService.write(uri, any()) }
+
+            val csvOutput = buffer.readUtf8()
+            assertTrue(
+                csvOutput.startsWith(
+                    "\"date\",\"time\",\"batteryLevel\",\"voltage\",\"channelUtilization\",\"airUtilTx\",\"uptimeSeconds\"",
+                ),
+            )
+            assertTrue(csvOutput.contains("\"80\",\"4.1\",\"12.5\",\"3.25\",\"3600\""))
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `saveEnvironmentMetricsCSV writes correct data`() = runTest(testDispatcher) {
+        val testTelemetry =
+            Telemetry(
+                time = 1700000000,
+                environment_metrics =
+                EnvironmentMetrics(
+                    temperature = 21.5f,
+                    relative_humidity = 55.5f,
+                    barometric_pressure = 1013.25f,
+                    gas_resistance = 12.3f,
+                    iaq = 42,
+                    wind_speed = 5.5f,
+                    wind_direction = 180,
+                    soil_temperature = 18.75f,
+                    soil_moisture = 65,
+                    one_wire_temperature = listOf(1f, 2f, 3f),
+                ),
+            )
+
+        val nodeDetailFlow =
+            MutableStateFlow(
+                NodeDetailUiState(
+                    metricsState = MetricsState(deviceMetrics = emptyList()),
+                    environmentState = EnvironmentMetricsState(environmentMetrics = listOf(testTelemetry)),
+                ),
+            )
+        every { getNodeDetailsUseCase(1234) } returns nodeDetailFlow.asStateFlow()
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val vm = createViewModel()
+        vm.state.test {
+            awaitItem()
+
+            val uri = CommonUri.parse("content://test")
+            vm.saveEnvironmentMetricsCSV(uri, listOf(testTelemetry))
+            runCurrent()
+
+            verifySuspend { fileService.write(uri, any()) }
+
+            val csvOutput = buffer.readUtf8()
+            assertTrue(
+                csvOutput.startsWith(
+                    "\"date\",\"time\",\"temperature\",\"relativeHumidity\",\"barometricPressure\",\"gasResistance\",\"iaq\",\"windSpeed\",\"windDirection\",\"soilTemperature\",\"soilMoisture\",\"oneWireTemp1\",\"oneWireTemp2\",\"oneWireTemp3\",\"oneWireTemp4\",\"oneWireTemp5\",\"oneWireTemp6\",\"oneWireTemp7\",\"oneWireTemp8\"",
+                ),
+            )
+            assertTrue(
+                csvOutput.contains(
+                    "\"21.5\",\"55.5\",\"1013.25\",\"12.3\",\"42\",\"5.5\",\"180\",\"18.75\",\"65\",\"1.0\",\"2.0\",\"3.0\",\"\",\"\",\"\",\"\",\"\"",
+                ),
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `saveSignalMetricsCSV writes correct data`() = runTest(testDispatcher) {
+        val testPacket = MeshPacket(rx_time = 1700000000, rx_rssi = -105, rx_snr = 7.5f)
+
+        val nodeDetailFlow =
+            MutableStateFlow(NodeDetailUiState(metricsState = MetricsState(signalMetrics = listOf(testPacket))))
+        every { getNodeDetailsUseCase(1234) } returns nodeDetailFlow.asStateFlow()
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val vm = createViewModel()
+        vm.state.test {
+            awaitItem()
+            awaitItem()
+
+            val uri = CommonUri.parse("content://test")
+            vm.saveSignalMetricsCSV(uri, listOf(testPacket))
+            runCurrent()
+
+            verifySuspend { fileService.write(uri, any()) }
+
+            val csvOutput = buffer.readUtf8()
+            assertTrue(csvOutput.startsWith("\"date\",\"time\",\"rssi\",\"snr\""))
+            assertTrue(csvOutput.contains("\"-105\",\"7.5\""))
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `savePowerMetricsCSV writes correct data`() = runTest(testDispatcher) {
+        val testTelemetry =
+            Telemetry(
+                time = 1700000000,
+                power_metrics =
+                PowerMetrics(
+                    ch1_voltage = 3.3f,
+                    ch1_current = 0.1f,
+                    ch2_voltage = 5.0f,
+                    ch2_current = 0.2f,
+                    ch3_voltage = 12.0f,
+                    ch3_current = 0.3f,
+                ),
+            )
+
+        val nodeDetailFlow =
+            MutableStateFlow(NodeDetailUiState(metricsState = MetricsState(powerMetrics = listOf(testTelemetry))))
+        every { getNodeDetailsUseCase(1234) } returns nodeDetailFlow.asStateFlow()
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val vm = createViewModel()
+        vm.state.test {
+            awaitItem()
+            awaitItem()
+
+            val uri = CommonUri.parse("content://test")
+            vm.savePowerMetricsCSV(uri, listOf(testTelemetry))
+            runCurrent()
+
+            verifySuspend { fileService.write(uri, any()) }
+
+            val csvOutput = buffer.readUtf8()
+            assertTrue(
+                csvOutput.startsWith(
+                    "\"date\",\"time\",\"ch1Voltage\",\"ch1Current\",\"ch2Voltage\",\"ch2Current\",\"ch3Voltage\",\"ch3Current\"",
+                ),
+            )
+            assertTrue(csvOutput.contains("\"3.3\",\"0.1\",\"5.0\",\"0.2\",\"12.0\",\"0.3\""))
 
             cancelAndIgnoreRemainingEvents()
         }

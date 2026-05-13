@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Ability to mute notifications from specific nodes via admin messages. */
     val canMuteNode = atLeast(V2_7_18)
 
-    /** FIXME: Ability to request neighbor information from other nodes. Disabled until working better. */
+    /** Ability to request neighbor information from other nodes. Gated to [UNRELEASED] until working reliably. */
     val canRequestNeighborInfo = atLeast(UNRELEASED)
 
     /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */
@@ -49,8 +49,8 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for sharing contact information via QR codes. Supported since firmware v2.6.8. */
     val supportsQrCodeSharing = atLeast(V2_6_8)
 
-    /** Support for Status Message module. Supported since firmware v2.7.17. */
-    val supportsStatusMessage = atLeast(V2_7_17)
+    /** Support for Status Message module. Supported since firmware v2.8.0. */
+    val supportsStatusMessage = atLeast(V2_8_0)
 
     /** Support for Traffic Management module. Supported since firmware v3.0.0. */
     val supportsTrafficManagementConfig = atLeast(V3_0_0)
@@ -77,7 +77,6 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_6_9 = DeviceVersion("2.6.9")
         private val V2_6_10 = DeviceVersion("2.6.10")
         private val V2_7_12 = DeviceVersion("2.7.12")
-        private val V2_7_17 = DeviceVersion("2.7.17")
         private val V2_7_18 = DeviceVersion("2.7.18")
         private val V2_7_19 = DeviceVersion("2.7.19")
         private val V2_8_0 = DeviceVersion("2.8.0")

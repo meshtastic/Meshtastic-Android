@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,6 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -38,6 +35,9 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.meshtastic.core.ui.icon.Android
+import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
 
@@ -55,7 +55,7 @@ fun ListItem(
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
     leadingIconTint: Color = LocalContentColor.current,
-    trailingIcon: ImageVector? = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+    trailingIcon: ImageVector? = MeshtasticIcons.ChevronRight,
     trailingIconTint: Color = LocalContentColor.current,
     onClick: (() -> Unit)? = null,
 ) {
@@ -115,7 +115,6 @@ fun SwitchListItem(
  *
  * @see [LinkedCoordinatesItem] for example usage
  */
-@Suppress("UnusedParameter")
 @Composable
 fun BasicListItem(
     text: String,
@@ -153,26 +152,26 @@ fun ImageVector?.icon(tint: Color = LocalContentColor.current): @Composable (() 
 
 @Preview(showBackground = true)
 @Composable
-private fun ListItemPreview() {
-    AppTheme { ListItem(text = "Text", leadingIcon = Icons.Rounded.Android, enabled = true) {} }
+fun ListItemPreview() {
+    AppTheme { ListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, enabled = true) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ListItemDisabledPreview() {
-    AppTheme { ListItem(text = "Text", leadingIcon = Icons.Rounded.Android, enabled = false) {} }
+fun ListItemDisabledPreview() {
+    AppTheme { ListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, enabled = false) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SwitchListItemPreview() {
-    AppTheme { SwitchListItem(text = "Text", leadingIcon = Icons.Rounded.Android, checked = true, onClick = {}) }
+fun SwitchListItemPreview() {
+    AppTheme { SwitchListItem(text = "Text", leadingIcon = MeshtasticIcons.Android, checked = true, onClick = {}) }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ListItemPreviewSupportingText() {
     AppTheme {
-        ListItem(text = "Text 1", leadingIcon = Icons.Rounded.Android, supportingText = "Text2", trailingIcon = null)
+        ListItem(text = "Text 1", leadingIcon = MeshtasticIcons.Android, supportingText = "Text2", trailingIcon = null)
     }
 }

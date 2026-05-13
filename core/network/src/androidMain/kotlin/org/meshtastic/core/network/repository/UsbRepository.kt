@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,18 +54,20 @@ class UsbRepository(
         _serialDevices
             .mapLatest { serialDevices ->
                 val serialProber = usbSerialProberLazy.value
-                buildMap {
-                    serialDevices.forEach { (k, v) -> serialProber.probeDevice(v)?.let { driver -> put(k, driver) } }
-                }
+                buildMap { serialDevices.forEach { (k, v) -> serialProber.probeDevice(v)?.let { put(k, it) } } }
             }
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            refreshStateInternal()
+            // Register the attach/detach receiver first so that events fired while we are
+            // scanning the current device list are not dropped. The receiver resolution must
+            // happen off the construction thread to avoid a Koin cycle
+            // (UsbRepository <-> UsbBroadcastReceiver).
             usbBroadcastReceiverLazy.value.let { receiver ->
                 application.registerReceiverCompat(receiver, receiver.intentFilter)
             }
+            refreshStateInternal()
         }
     }
 
@@ -83,6 +85,8 @@ class UsbRepository(
         processLifecycle.coroutineScope.launch(dispatchers.default) { refreshStateInternal() }
     }
 
-    private suspend fun refreshStateInternal() =
-        withContext(dispatchers.default) { _serialDevices.emit(usbManagerLazy.value?.deviceList ?: emptyMap()) }
+    private suspend fun refreshStateInternal() = withContext(dispatchers.default) {
+        val devices = usbManagerLazy.value?.deviceList ?: emptyMap()
+        _serialDevices.emit(devices)
+    }
 }

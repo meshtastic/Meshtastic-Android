@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.model
 
+import org.meshtastic.core.model.TracerouteOverlay
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,9 +38,23 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.dokka)
     alias(libs.plugins.test.retry) apply false
+    alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.meshtastic.root)
 }
 
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("flatpak-sources-root.json")
+    downloadDirectory = "./offline-repository"
+    excludeConfigurations.set(
+        listOf(
+            "dokkaHtmlModuleOutputDirectoriesResolver~internal",
+            "koverExternalArtifacts",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        )
+    )
 }

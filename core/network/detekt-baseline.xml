@@ -1,8 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues>
-    <ID>MagicNumber:BleRadioInterface.kt$4</ID>
-    <ID>MagicNumber:BleRadioInterface.kt$BleRadioInterface$2_000L</ID>
-  </CurrentIssues>
+  <CurrentIssues/>
 </SmellBaseline>

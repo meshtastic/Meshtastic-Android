@@ -124,6 +124,7 @@ class FirmwareUpdateViewModelTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
+        TestApplicationCoroutineScope(testDispatcher),
     )
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,22 +16,14 @@
  */
 package org.meshtastic.core.common.util
 
-/** Platform-agnostic URI representation to decouple core logic from android.net.Uri. */
-expect class CommonUri {
-    val host: String?
-    val fragment: String?
-    val pathSegments: List<String>
+import com.eygraber.uri.Uri
 
-    fun getQueryParameter(key: String): String?
-
-    fun getBooleanQueryParameter(key: String, defaultValue: Boolean): Boolean
-
-    override fun toString(): String
-
-    companion object {
-        fun parse(uriString: String): CommonUri
-    }
-}
-
-/** Extension to convert platform Uri to CommonUri in Android source sets. */
-expect fun CommonUri.toPlatformUri(): Any
+/**
+ * Platform-agnostic URI representation backed by [uri-kmp](https://github.com/eygraber/uri-kmp).
+ *
+ * This typealias replaces the former `expect/actual` class, providing a concrete pure-Kotlin implementation that works
+ * identically on Android, JVM, and iOS without platform stubs.
+ *
+ * On Android, use `com.eygraber.uri.toAndroidUri()` to convert to `android.net.Uri`.
+ */
+typealias CommonUri = Uri

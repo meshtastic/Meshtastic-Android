@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,28 +16,29 @@
  */
 package org.meshtastic.feature.settings.radio.channel
 
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.ChannelsRoutes
+import org.meshtastic.core.navigation.ChannelsRoute
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
-/** Navigation graph for for the top level ChannelScreen - [ChannelsRoutes.Channels]. */
+/** Navigation graph for for the top level ChannelScreen - [ChannelsRoute.Channels]. */
 fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
-    entry<ChannelsRoutes.ChannelsGraph> {
+    entry<ChannelsRoute.ChannelsGraph> {
         ChannelScreen(
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onNavigate = { route -> backStack.add(route) },
-            onNavigateUp = { backStack.removeLastOrNull() },
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 
-    entry<ChannelsRoutes.Channels> {
+    entry<ChannelsRoute.Channels> {
         ChannelScreen(
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onNavigate = { route -> backStack.add(route) },
-            onNavigateUp = { backStack.removeLastOrNull() },
+            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 }

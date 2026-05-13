@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,15 @@ interface BleDevice {
 
     /** Whether the device is currently connected. */
     val isConnected: Boolean
+
+    /**
+     * The RSSI reported by the most recent scan advertisement for this device, in dBm.
+     *
+     * `null` for devices that have not been observed via a scan (e.g. bonded-only devices retrieved from the OS). This
+     * is a snapshot — to see live updates, observe a flow of [BleDevice] instances from [BleScanner].
+     */
+    val rssi: Int?
+        get() = null
 
     /** Reads the current RSSI value. */
     suspend fun readRssi(): Int

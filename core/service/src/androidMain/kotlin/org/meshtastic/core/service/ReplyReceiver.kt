@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -44,7 +44,9 @@ class ReplyReceiver :
 
     private val meshServiceNotifications: MeshServiceNotifications by inject()
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val dispatchers: CoroutineDispatchers by inject()
+
+    private val scope by lazy { CoroutineScope(dispatchers.io + SupervisorJob()) }
 
     companion object {
         const val REPLY_ACTION = "org.meshtastic.app.REPLY_ACTION"
@@ -56,8 +58,8 @@ class ReplyReceiver :
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
 
         if (remoteInput != null) {
-            val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
-            val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString() ?: ""
+            val contactKey = intent.getStringExtra(CONTACT_KEY).orEmpty()
+            val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString().orEmpty()
 
             val pendingResult = goAsync()
             scope.launch {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,10 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
                         ModemPreset.LONG_MODERATE -> "LongMod"
                         ModemPreset.VERY_LONG_SLOW -> "VLongSlow"
                         ModemPreset.LONG_TURBO -> "LongTurbo"
+                        ModemPreset.LITE_FAST -> "LiteFast"
+                        ModemPreset.LITE_SLOW -> "LiteSlow"
+                        ModemPreset.NARROW_FAST -> "NarrowFast"
+                        ModemPreset.NARROW_SLOW -> "NarrowSlow"
                     }
                 } else {
                     "Custom"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ package org.meshtastic.feature.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -36,13 +37,13 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.components.TitleBar
@@ -132,11 +133,11 @@ class LocalStatsWidget :
                 Scaffold(
                     titleBar = {
                         TitleBar(
-                            startIcon = ImageProvider(R.drawable.app_icon),
+                            startIcon = ImageProvider(R.drawable.widget_app_icon),
                             title = stringResource(Res.string.meshtastic_app_name),
                             actions = {
                                 CircleIconButton(
-                                    imageProvider = ImageProvider(R.drawable.ic_refresh),
+                                    imageProvider = ImageProvider(R.drawable.widget_ic_refresh),
                                     contentDescription = stringResource(Res.string.refresh),
                                     onClick = actionRunCallback<RefreshLocalStatsAction>(),
                                     backgroundColor = null,
@@ -148,10 +149,8 @@ class LocalStatsWidget :
                     GlanceModifier.fillMaxSize()
                         .clickable(
                             actionStartActivity(
-                                android.content.ComponentName(
-                                    context.packageName,
-                                    "org.meshtastic.app.MainActivity",
-                                ),
+                                context.packageManager.getLaunchIntentForPackage(context.packageName)
+                                    ?: Intent().setClassName(context.packageName, "org.meshtastic.app.MainActivity"),
                             ),
                         ),
                 ) {
@@ -297,7 +296,7 @@ class LocalStatsWidget :
                 CircularProgressIndicator(modifier = GlanceModifier.size(24.dp))
             } else {
                 Image(
-                    provider = ImageProvider(R.drawable.app_icon),
+                    provider = ImageProvider(R.drawable.widget_app_icon),
                     contentDescription = null,
                     modifier = GlanceModifier.size(32.dp),
                 )

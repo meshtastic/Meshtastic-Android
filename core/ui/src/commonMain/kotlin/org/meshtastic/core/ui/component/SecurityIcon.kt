@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,11 +53,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_lock
+import org.meshtastic.core.resources.ic_lock_open
+import org.meshtastic.core.resources.ic_warning
 import org.meshtastic.core.resources.security_icon_badge_warning_description
 import org.meshtastic.core.resources.security_icon_description
 import org.meshtastic.core.resources.security_icon_help_dismiss
@@ -73,10 +78,7 @@ import org.meshtastic.core.resources.security_icon_insecure_no_precise
 import org.meshtastic.core.resources.security_icon_insecure_precise_only
 import org.meshtastic.core.resources.security_icon_secure
 import org.meshtastic.core.resources.security_icon_warning_precise_mqtt
-import org.meshtastic.core.ui.icon.Lock
-import org.meshtastic.core.ui.icon.LockOpen
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
@@ -99,16 +101,16 @@ private const val PRECISE_POSITION_BITS = 32
  */
 @Immutable
 enum class SecurityState(
-    @Stable val icon: ImageVector,
+    @Stable val icon: DrawableResource,
     @Stable val color: @Composable () -> Color,
     val descriptionResId: StringResource,
     val helpTextResId: StringResource,
-    @Stable val badgeIcon: ImageVector? = null,
+    @Stable val badgeIcon: DrawableResource? = null,
     @Stable val badgeIconColor: @Composable () -> Color? = { null },
 ) {
     /** State for a secure channel (green lock). */
     SECURE(
-        icon = MeshtasticIcons.Lock,
+        icon = Res.drawable.ic_lock,
         color = { colorScheme.StatusGreen },
         descriptionResId = Res.string.security_icon_secure,
         helpTextResId = Res.string.security_icon_help_green_lock,
@@ -119,7 +121,7 @@ enum class SecurityState(
      * warning. (yellow open lock)
      */
     INSECURE_NO_PRECISE(
-        icon = MeshtasticIcons.LockOpen,
+        icon = Res.drawable.ic_lock_open,
         color = { colorScheme.StatusYellow },
         descriptionResId = Res.string.security_icon_insecure_no_precise,
         helpTextResId = Res.string.security_icon_help_yellow_open_lock,
@@ -130,7 +132,7 @@ enum class SecurityState(
      * lock)
      */
     INSECURE_PRECISE_ONLY(
-        icon = MeshtasticIcons.LockOpen,
+        icon = Res.drawable.ic_lock_open,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.security_icon_insecure_precise_only,
         helpTextResId = Res.string.security_icon_help_red_open_lock,
@@ -141,11 +143,11 @@ enum class SecurityState(
      * badge).
      */
     INSECURE_PRECISE_MQTT_WARNING(
-        icon = MeshtasticIcons.LockOpen,
+        icon = Res.drawable.ic_lock_open,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.security_icon_warning_precise_mqtt,
         helpTextResId = Res.string.security_icon_help_warning_precise_mqtt,
-        badgeIcon = MeshtasticIcons.Warning,
+        badgeIcon = Res.drawable.ic_warning,
         badgeIconColor = { colorScheme.StatusYellow },
     ),
 }
@@ -205,11 +207,8 @@ private fun determineSecurityState(
     isMqttEnabled: Boolean,
 ): SecurityState = when {
     !isLowEntropyKey -> SecurityState.SECURE
-
     isMqttEnabled && isPreciseLocation -> SecurityState.INSECURE_PRECISE_MQTT_WARNING
-
     isPreciseLocation -> SecurityState.INSECURE_PRECISE_ONLY
-
     else -> SecurityState.INSECURE_NO_PRECISE
 }
 
@@ -238,11 +237,11 @@ fun SecurityIcon(
         },
     ) {
         SecurityIconDisplay(
-            icon = securityState.icon,
-            mainIconTint = securityState.color.invoke(),
+            icon = vectorResource(securityState.icon),
+            mainIconTint = securityState.color(),
             contentDescription = fullContentDescription,
-            badgeIcon = securityState.badgeIcon,
-            badgeIconColor = securityState.badgeIconColor.invoke(),
+            badgeIcon = securityState.badgeIcon?.let { vectorResource(it) },
+            badgeIconColor = securityState.badgeIconColor(),
         )
     }
 
@@ -453,12 +452,12 @@ private fun SecurityHelpDialog(securityState: SecurityState, onDismiss: () -> Un
 private fun ContextualSecurityState(securityState: SecurityState) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         SecurityIconDisplay(
-            icon = securityState.icon,
-            mainIconTint = securityState.color.invoke(),
+            icon = vectorResource(securityState.icon),
+            mainIconTint = securityState.color(),
             contentDescription = stringResource(securityState.descriptionResId),
             modifier = Modifier.size(48.dp),
-            badgeIcon = securityState.badgeIcon,
-            badgeIconColor = securityState.badgeIconColor.invoke(),
+            badgeIcon = securityState.badgeIcon?.let { vectorResource(it) },
+            badgeIconColor = securityState.badgeIconColor(),
         )
         Spacer(Modifier.height(16.dp))
         Text(text = stringResource(securityState.helpTextResId), style = MaterialTheme.typography.bodyMedium)
@@ -479,12 +478,12 @@ private fun AllSecurityStates() {
             // Uses enum entries
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SecurityIconDisplay(
-                    icon = state.icon,
-                    mainIconTint = state.color.invoke(),
+                    icon = vectorResource(state.icon),
+                    mainIconTint = state.color(),
                     contentDescription = stringResource(state.descriptionResId),
                     modifier = Modifier.size(48.dp),
-                    badgeIcon = state.badgeIcon,
-                    badgeIconColor = state.badgeIconColor.invoke(),
+                    badgeIcon = state.badgeIcon?.let { vectorResource(it) },
+                    badgeIconColor = state.badgeIconColor(),
                 )
                 Column(modifier = Modifier.padding(start = 16.dp)) {
                     Text(text = stringResource(state.descriptionResId), style = MaterialTheme.typography.titleMedium)
@@ -503,56 +502,61 @@ private fun AllSecurityStates() {
 @Preview(name = "Secure Channel Icon")
 @Composable
 private fun PreviewSecureChannel() {
-    SecurityIcon(securityState = SecurityState.SECURE)
+    AppTheme { SecurityIcon(securityState = SecurityState.SECURE) }
 }
 
 @Preview(name = "Insecure Precise Icon")
 @Composable
 private fun PreviewInsecureChannelWithPreciseLocation() {
-    SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_ONLY)
+    AppTheme { SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_ONLY) }
 }
 
 @Preview(name = "Insecure Channel Icon")
 @Composable
 private fun PreviewInsecureChannelWithoutPreciseLocation() {
-    SecurityIcon(securityState = SecurityState.INSECURE_NO_PRECISE)
+    AppTheme { SecurityIcon(securityState = SecurityState.INSECURE_NO_PRECISE) }
 }
 
 @Preview(name = "MQTT Enabled Icon")
 @Composable
 private fun PreviewMqttEnabled() {
-    SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_MQTT_WARNING)
+    AppTheme { SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_MQTT_WARNING) }
 }
 
 @Preview(name = "All Security Icons with Dialog")
 @Composable
-private fun PreviewAllSecurityIconsWithDialog() {
-    var showHelpDialogFor by remember { mutableStateOf<SecurityState?>(null) }
-    val stateLabels = remember {
-        // Using SecurityState.entries to build the map keys
-        mapOf(
-            SecurityState.SECURE to "Secure",
-            SecurityState.INSECURE_NO_PRECISE to "Insecure (No Precise Location)",
-            SecurityState.INSECURE_PRECISE_ONLY to "Insecure (Precise Location Only)",
-            SecurityState.INSECURE_PRECISE_MQTT_WARNING to "Insecure (Precise Location + MQTT Warning)",
-        )
-    }
-
-    Column(
-        modifier = Modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text(text = "Security Icons Preview (Click for Help)", style = MaterialTheme.typography.headlineSmall)
-
-        SecurityState.entries.forEach { state ->
-            // Iterate over enum entries
-            val label = stateLabels[state] ?: "Unknown State (${state.name})" // Fallback to enum name
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                SecurityIcon(securityState = state, externalOnClick = { showHelpDialogFor = state })
-                Text(label)
-            }
+fun PreviewAllSecurityIconsWithDialog() {
+    AppTheme {
+        var showHelpDialogFor by remember { mutableStateOf<SecurityState?>(null) }
+        val stateLabels = remember {
+            // Using SecurityState.entries to build the map keys
+            mapOf(
+                SecurityState.SECURE to "Secure",
+                SecurityState.INSECURE_NO_PRECISE to "Insecure (No Precise Location)",
+                SecurityState.INSECURE_PRECISE_ONLY to "Insecure (Precise Location Only)",
+                SecurityState.INSECURE_PRECISE_MQTT_WARNING to "Insecure (Precise Location + MQTT Warning)",
+            )
         }
-        showHelpDialogFor?.let { SecurityHelpDialog(securityState = it, onDismiss = { showHelpDialogFor = null }) }
+
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(text = "Security Icons Preview (Click for Help)", style = MaterialTheme.typography.headlineSmall)
+
+            SecurityState.entries.forEach { state ->
+                // Iterate over enum entries
+                val label = stateLabels[state] ?: "Unknown State (${state.name})" // Fallback to enum name
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SecurityIcon(securityState = state, externalOnClick = { showHelpDialogFor = state })
+                    Text(label)
+                }
+            }
+            showHelpDialogFor?.let { SecurityHelpDialog(securityState = it, onDismiss = { showHelpDialogFor = null }) }
+        }
     }
 }

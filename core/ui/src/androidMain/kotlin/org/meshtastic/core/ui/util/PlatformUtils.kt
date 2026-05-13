@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,24 +20,28 @@ package org.meshtastic.core.ui.util
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
+import com.eygraber.uri.toAndroidUri
+import com.eygraber.uri.toKmpUri
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.ioDispatcher
 import java.net.URLEncoder
 
 @Composable
@@ -102,16 +106,14 @@ actual fun rememberOpenUrl(): (url: String) -> Unit {
 @Composable
 @Suppress("Wrapping")
 actual fun rememberSaveFileLauncher(
-    onUriReceived: (org.meshtastic.core.common.util.MeshtasticUri) -> Unit,
+    onUriReceived: (org.meshtastic.core.common.util.CommonUri) -> Unit,
 ): (defaultFilename: String, mimeType: String) -> Unit {
     val launcher =
         androidx.activity.compose.rememberLauncherForActivityResult(
             androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
         ) { result ->
             if (result.resultCode == android.app.Activity.RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    onUriReceived(uri.toString().let { org.meshtastic.core.common.util.MeshtasticUri(it) })
-                }
+                result.data?.data?.let { uri -> onUriReceived(uri.toKmpUri()) }
             }
         }
 
@@ -132,21 +134,21 @@ actual fun rememberSaveFileLauncher(
 actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit {
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            onUriReceived(uri?.let { CommonUri(it) })
+            onUriReceived(uri?.let { it.toKmpUri() })
         }
     return remember(launcher) { { mimeType -> launcher.launch(mimeType) } }
 }
 
 @Suppress("Wrapping")
 @Composable
-actual fun rememberReadTextFromUri(): suspend (CommonUri, Int) -> String? {
+actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? {
     val context = LocalContext.current
     return remember(context) {
         { uri, maxChars ->
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 @Suppress("TooGenericExceptionCaught")
                 try {
-                    val androidUri = Uri.parse(uri.toString())
+                    val androidUri = uri.toAndroidUri()
                     context.contentResolver.openInputStream(androidUri)?.use { stream ->
                         stream.bufferedReader().use { reader ->
                             val buffer = CharArray(maxChars)
@@ -176,11 +178,6 @@ actual fun KeepScreenOn(enabled: Boolean) {
             }
         }
     }
-}
-
-@Composable
-actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) {
-    BackHandler(enabled = enabled, onBack = onBack)
 }
 
 @Composable
@@ -215,4 +212,98 @@ actual fun rememberOpenLocationSettings(): () -> Unit {
         ) { _ ->
         }
     return remember(launcher) { { launcher.launch(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)) } }
+}
+
+@Composable
+actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // On pre-Android 12, BLE scanning is gated by location permission, not Bluetooth.
+        return remember { { onGranted() } }
+    }
+    val currentOnGranted = rememberUpdatedState(onGranted)
+    val currentOnDenied = rememberUpdatedState(onDenied)
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.values.all { it }) currentOnGranted.value() else currentOnDenied.value()
+        }
+    return remember(launcher) {
+        {
+            launcher.launch(
+                arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT),
+            )
+        }
+    }
+}
+
+@Composable
+actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+        // Pre-Android 13, no runtime notification permission required.
+        return remember { { onGranted() } }
+    }
+    val currentOnGranted = rememberUpdatedState(onGranted)
+    val currentOnDenied = rememberUpdatedState(onDenied)
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) currentOnGranted.value() else currentOnDenied.value()
+        }
+    return remember(launcher) { { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) } }
+}
+
+@Composable
+actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // Pre-Android 12, no local network permission required
+        return remember { { onGranted() } }
+    }
+    val currentOnGranted = rememberUpdatedState(onGranted)
+    val currentOnDenied = rememberUpdatedState(onDenied)
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) currentOnGranted.value() else currentOnDenied.value()
+        }
+    return remember(launcher) { { launcher.launch(android.Manifest.permission.ACCESS_LOCAL_NETWORK) } }
+}
+
+@Composable
+actual fun isLocalNetworkPermissionGranted(): Boolean {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        // Pre-Android 12, no runtime local-network permission exists; access is implicit via INTERNET.
+        return true
+    }
+    val context = LocalContext.current
+    return rememberOnResumeState {
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_LOCAL_NETWORK,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+}
+
+@Composable
+actual fun isLocationPermissionGranted(): Boolean {
+    val context = LocalContext.current
+    return rememberOnResumeState {
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+}
+
+@Composable
+actual fun isGpsDisabled(): Boolean {
+    val context = LocalContext.current
+    return rememberOnResumeState { context.gpsDisabled() }
+}
+
+/**
+ * Remembers a boolean state that is re-evaluated on each [Lifecycle.Event.ON_RESUME], ensuring the value stays fresh
+ * when the user returns from a permission dialog or system settings screen.
+ */
+@Composable
+private fun rememberOnResumeState(check: () -> Boolean): Boolean {
+    val state = remember { mutableStateOf(check()) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { state.value = check() }
+    return state.value
 }

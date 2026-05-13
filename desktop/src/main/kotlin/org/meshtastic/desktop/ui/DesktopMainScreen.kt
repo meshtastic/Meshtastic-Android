@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,10 @@ import org.meshtastic.core.ui.component.MeshtasticNavigationSuite
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
 
-/** Desktop main screen — uses shared navigation components. */
+/**
+ * Desktop main screen — assembles the shared [MeshtasticAppShell], [MeshtasticNavigationSuite], and
+ * [MeshtasticNavDisplay] with the desktop-specific [desktopNavGraph] entry provider.
+ */
 @Composable
 fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) {
     val backStack = multiBackstack.activeBackStack
@@ -47,7 +50,7 @@ fun DesktopMainScreen(uiViewModel: UIViewModel, multiBackstack: MultiBackstack) 
                 uiViewModel = uiViewModel,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel) }
+                val provider = entryProvider<NavKey> { desktopNavGraph(backStack, uiViewModel, multiBackstack) }
                 MeshtasticNavDisplay(
                     multiBackstack = multiBackstack,
                     entryProvider = provider,

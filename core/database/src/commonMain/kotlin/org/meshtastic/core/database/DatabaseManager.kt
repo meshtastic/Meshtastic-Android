@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -135,10 +136,12 @@ open class DatabaseManager(
         // Also mark the previous DB as used "just now" so LRU has an accurate, recent timestamp
         previousDbName?.let { markLastUsed(it) }
 
-        // Now safe to close the previous DB — collectors have switched to the new instance.
-        if (previousDbName != null && previousDbName != dbName) {
-            closeCachedDatabase(previousDbName)
-        }
+        // Do NOT close the previous DB synchronously here. Even though _currentDb has been
+        // updated, in-flight `withDb` calls may still hold a reference to the old database
+        // (captured before the emission). Closing the connection pool while those queries are
+        // executing causes "Connection pool is closed" crashes. Instead, let LRU eviction
+        // (enforceCacheLimit) handle cleanup — it only runs on databases that are not the
+        // active target and have not been used recently.
 
         // Defer LRU eviction so switch is not blocked by filesystem work
         managerScope.launch(dispatchers.io) { enforceCacheLimit(activeDbName = dbName) }
@@ -167,19 +170,49 @@ open class DatabaseManager(
     private val limitedIo = dispatchers.io.limitedParallelism(4)
 
     /** Execute [block] with the current DB instance. */
+    @Suppress("TooGenericExceptionCaught")
     override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = withContext(limitedIo) {
         val db = _currentDb.value ?: return@withContext null
         val active = buildDbName(_currentAddress.value)
         markLastUsed(active)
-        block(db)
+        try {
+            block(db)
+        } catch (e: CancellationException) {
+            throw e // Preserve structured concurrency cancellation propagation.
+        } catch (e: Exception) {
+            // If the connection pool was closed between capturing `db` and executing the query
+            // (e.g., during a database switch), retry once with the current DB instance.
+            if (e.message?.contains("Connection pool is closed") == true) {
+                Logger.w { "withDb: connection pool closed, retrying with current DB" }
+                val retryDb = _currentDb.value ?: return@withContext null
+                block(retryDb)
+            } else {
+                throw e
+            }
+        }
     }
 
-    /** Returns true if a database exists for the given device address. */
+    /**
+     * Returns true if a database exists for the given device address. Android Room stores DB files without an
+     * extension; JVM/iOS append `.db`. We check both to stay platform-agnostic.
+     */
     override fun hasDatabaseFor(address: String?): Boolean {
         if (address.isNullOrBlank() || address == "n") return false
         val dbName = buildDbName(address)
-        val path = getDatabaseDirectory().resolve("$dbName.db")
-        return getFileSystem().exists(path)
+        return dbFileExists(dbName)
+    }
+
+    private fun dbFileExists(dbName: String): Boolean {
+        val dir = getDatabaseDirectory()
+        val fs = getFileSystem()
+        return fs.exists(dir.resolve(dbName)) || fs.exists(dir.resolve("$dbName.db"))
+    }
+
+    private fun dbFileMetadataMillis(dbName: String): Long? {
+        val dir = getDatabaseDirectory()
+        val fs = getFileSystem()
+        return fs.metadataOrNull(dir.resolve(dbName))?.lastModifiedAtMillis
+            ?: fs.metadataOrNull(dir.resolve("$dbName.db"))?.lastModifiedAtMillis
     }
 
     private fun markLastUsed(dbName: String) {
@@ -190,8 +223,7 @@ open class DatabaseManager(
         val key = lastUsedKey(dbName)
         val v = datastore.data.first()[key] ?: 0L
         return if (v == 0L) {
-            val path = getDatabaseDirectory().resolve("$dbName.db")
-            getFileSystem().metadataOrNull(path)?.lastModifiedAtMillis ?: 0L
+            dbFileMetadataMillis(dbName) ?: 0L
         } else {
             v
         }
@@ -203,11 +235,14 @@ open class DatabaseManager(
         if (!fs.exists(dir)) return emptyList()
 
         return fs.list(dir)
+            .asSequence()
             .map { it.name }
             .filter { it.startsWith(DatabaseConstants.DB_PREFIX) }
-            .filter { it.endsWith(".db") }
+            // Skip Room-internal sidecar files (-wal/-shm/-journal) and lock files so each DB appears exactly once.
+            .filterNot { it.endsWith("-wal") || it.endsWith("-shm") || it.endsWith("-journal") || it.endsWith(".lck") }
             .map { it.removeSuffix(".db") }
             .distinct()
+            .toList()
     }
 
     private suspend fun enforceCacheLimit(activeDbName: String) = mutex.withLock {
@@ -223,6 +258,7 @@ open class DatabaseManager(
 
         victims.forEach { name ->
             runCatching {
+                // runCatching intentional: best-effort cleanup must not abort on cancellation
                 closeCachedDatabase(name)
                 deleteDatabase(name)
                 datastore.edit { it.remove(lastUsedKey(name)) }
@@ -242,12 +278,9 @@ open class DatabaseManager(
             return@withLock
         }
 
-        val dir = getDatabaseDirectory()
-        val fs = getFileSystem()
-        val legacyPath = dir.resolve("$legacy.db")
-
-        if (fs.exists(legacyPath)) {
+        if (dbFileExists(legacy)) {
             runCatching {
+                // runCatching intentional: best-effort cleanup must not abort on cancellation
                 closeCachedDatabase(legacy)
                 deleteDatabase(legacy)
             }

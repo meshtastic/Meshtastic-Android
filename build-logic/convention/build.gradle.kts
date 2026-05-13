@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ plugins {
     `kotlin-dsl`
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 group = "org.meshtastic.buildlogic"
@@ -49,14 +50,14 @@ dependencies {
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
     compileOnly(libs.google.services.gradlePlugin)
     compileOnly(libs.koin.gradlePlugin)
-    implementation(libs.kover.gradlePlugin)
+    compileOnly(libs.kover.gradlePlugin)
     implementation(libs.mokkery.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.androidx.room.gradlePlugin)
-    compileOnly(libs.secrets.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
     compileOnly(libs.test.retry.gradlePlugin)
+    compileOnly(libs.aboutlibraries.gradlePlugin)
 
     detektPlugins(libs.detekt.formatting)
 }
@@ -94,6 +95,12 @@ detekt {
     allRules = false
     baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-convention.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
 }
 
 gradlePlugin {
@@ -185,6 +192,16 @@ gradlePlugin {
         register("root") {
             id = "meshtastic.root"
             implementationClass = "RootConventionPlugin"
+        }
+
+        register("publishing") {
+            id = "meshtastic.publishing"
+            implementationClass = "PublishingConventionPlugin"
+        }
+
+        register("aboutLibraries") {
+            id = "meshtastic.aboutlibraries"
+            implementationClass = "AboutLibrariesConventionPlugin"
         }
     }
 }

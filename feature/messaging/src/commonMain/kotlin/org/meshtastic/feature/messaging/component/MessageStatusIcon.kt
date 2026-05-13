@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,13 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.ui.icon.Acknowledged
-import org.meshtastic.core.ui.icon.CloudDone
-import org.meshtastic.core.ui.icon.CloudOffTwoTone
-import org.meshtastic.core.ui.icon.CloudSync
-import org.meshtastic.core.ui.icon.CloudTwoTone
+import org.meshtastic.core.ui.icon.AddLink
+import org.meshtastic.core.ui.icon.CloudUpload
+import org.meshtastic.core.ui.icon.LinkIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.MessageEnroute
+import org.meshtastic.core.ui.icon.MessageError
+import org.meshtastic.core.ui.icon.MqttDelivered
 import org.meshtastic.core.ui.icon.Warning
 
 @Composable
@@ -36,12 +38,12 @@ fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier) {
     val icon =
         when (status) {
             MessageStatus.RECEIVED -> MeshtasticIcons.Acknowledged
-            MessageStatus.QUEUED -> MeshtasticIcons.CloudSync
-            MessageStatus.DELIVERED -> MeshtasticIcons.CloudDone
-            MessageStatus.SFPP_ROUTING -> MeshtasticIcons.CloudSync
-            MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.CloudDone
-            MessageStatus.ENROUTE -> MeshtasticIcons.CloudTwoTone
-            MessageStatus.ERROR -> MeshtasticIcons.CloudOffTwoTone
+            MessageStatus.QUEUED -> MeshtasticIcons.CloudUpload
+            MessageStatus.DELIVERED -> MeshtasticIcons.MqttDelivered
+            MessageStatus.SFPP_ROUTING -> MeshtasticIcons.AddLink
+            MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.LinkIcon
+            MessageStatus.ENROUTE -> MeshtasticIcons.MessageEnroute
+            MessageStatus.ERROR -> MeshtasticIcons.MessageError
             else -> MeshtasticIcons.Warning
         }
     Icon(

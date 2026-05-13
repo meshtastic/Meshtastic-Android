@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
@@ -38,13 +37,17 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
+import org.meshtastic.core.common.util.safeCatching
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /** BLE transport implementation for ESP32 Unified OTA protocol using Kable. */
 class BleOtaTransport(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
     private val address: String,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher,
 ) : UnifiedOtaProtocol {
 
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
@@ -68,16 +71,16 @@ class BleOtaTransport(
             tag = "BLE OTA",
             serviceUuid = OTA_SERVICE_UUID,
             retryCount = SCAN_RETRY_COUNT,
-            retryDelayMs = SCAN_RETRY_DELAY_MS,
+            retryDelay = SCAN_RETRY_DELAY,
         ) {
             it.address in targetAddresses
         }
     }
 
     @Suppress("MagicNumber")
-    override suspend fun connect(): Result<Unit> = runCatching {
-        Logger.i { "BLE OTA: Waiting ${REBOOT_DELAY_MS}ms for device to reboot into OTA mode..." }
-        delay(REBOOT_DELAY_MS)
+    override suspend fun connect(): Result<Unit> = safeCatching {
+        Logger.i { "BLE OTA: Waiting $REBOOT_DELAY for device to reboot into OTA mode..." }
+        delay(REBOOT_DELAY)
 
         Logger.i { "BLE OTA: Connecting to $address using Kable..." }
 
@@ -96,7 +99,7 @@ class BleOtaTransport(
             .launchIn(transportScope)
 
         try {
-            val finalState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+            val finalState = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
             if (finalState is BleConnectionState.Disconnected) {
                 Logger.w { "BLE OTA: Failed to connect to ${device.address} (state=$finalState)" }
                 throw OtaProtocolException.ConnectionFailed("Failed to connect to device at address ${device.address}")
@@ -137,7 +140,7 @@ class BleOtaTransport(
                 .launchIn(this)
 
             // Allow time for the BLE subscription to be established before proceeding.
-            delay(SUBSCRIPTION_SETTLE_MS)
+            delay(SUBSCRIPTION_SETTLE)
             if (!subscribed.isCompleted) subscribed.complete(Unit)
 
             subscribed.await()
@@ -149,14 +152,14 @@ class BleOtaTransport(
         sizeBytes: Long,
         sha256Hash: String,
         onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = safeCatching {
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
         val packetsSent = sendCommand(command)
 
         var handshakeComplete = false
         var responsesReceived = 0
         while (!handshakeComplete) {
-            val response = waitForResponse(ERASING_TIMEOUT_MS)
+            val response = waitForResponse(ERASING_TIMEOUT)
             responsesReceived++
             when (val parsed = OtaResponse.parse(response)) {
                 is OtaResponse.Ok -> {
@@ -164,16 +167,19 @@ class BleOtaTransport(
                         handshakeComplete = true
                     }
                 }
+
                 is OtaResponse.Erasing -> {
                     Logger.i { "BLE OTA: Device erasing flash..." }
                     onHandshakeStatus(OtaHandshakeStatus.Erasing)
                 }
+
                 is OtaResponse.Error -> {
                     if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
                         throw OtaProtocolException.HashRejected(sha256Hash)
                     }
                     throw OtaProtocolException.CommandFailed(command, parsed)
                 }
+
                 else -> {
                     Logger.w { "BLE OTA: Unexpected handshake response: $response" }
                 }
@@ -186,7 +192,7 @@ class BleOtaTransport(
         data: ByteArray,
         chunkSize: Int,
         onProgress: suspend (Float) -> Unit,
-    ): Result<Unit> = runCatching {
+    ): Result<Unit> = safeCatching {
         val totalBytes = data.size
         var sentBytes = 0
 
@@ -203,24 +209,27 @@ class BleOtaTransport(
 
             val nextSentBytes = sentBytes + currentChunkSize
             repeat(packetsSentForChunk) { i ->
-                val response = waitForResponse(ACK_TIMEOUT_MS)
+                val response = waitForResponse(ACK_TIMEOUT)
                 val isLastPacketOfChunk = i == packetsSentForChunk - 1
 
                 when (val parsed = OtaResponse.parse(response)) {
                     is OtaResponse.Ack -> {}
+
                     is OtaResponse.Ok -> {
                         if (nextSentBytes >= totalBytes && isLastPacketOfChunk) {
                             sentBytes = nextSentBytes
                             onProgress(1.0f)
-                            return@runCatching Unit
+                            return@safeCatching Unit
                         }
                     }
+
                     is OtaResponse.Error -> {
                         if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
                             throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
                         }
                         throw OtaProtocolException.TransferFailed("Transfer failed: ${parsed.message}")
                     }
+
                     else -> throw OtaProtocolException.TransferFailed("Unexpected response: $response")
                 }
             }
@@ -229,15 +238,17 @@ class BleOtaTransport(
             onProgress(sentBytes.toFloat() / totalBytes)
         }
 
-        val finalResponse = waitForResponse(VERIFICATION_TIMEOUT_MS)
+        val finalResponse = waitForResponse(VERIFICATION_TIMEOUT)
         when (val parsed = OtaResponse.parse(finalResponse)) {
             is OtaResponse.Ok -> Unit
+
             is OtaResponse.Error -> {
                 if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
                     throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
                 }
                 throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
             }
+
             else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
         }
     }
@@ -274,21 +285,21 @@ class BleOtaTransport(
         return packetsSent
     }
 
-    private suspend fun waitForResponse(timeoutMs: Long): String = try {
-        withTimeout(timeoutMs) { responseChannel.receive() }
+    private suspend fun waitForResponse(timeout: Duration): String = try {
+        withTimeout(timeout) { responseChannel.receive() }
     } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
-        throw OtaProtocolException.Timeout("Timeout waiting for response after ${timeoutMs}ms")
+        throw OtaProtocolException.Timeout("Timeout waiting for response after $timeout")
     }
 
     companion object {
-        private const val CONNECTION_TIMEOUT_MS = 15_000L
-        private const val SUBSCRIPTION_SETTLE_MS = 500L
-        private const val ERASING_TIMEOUT_MS = 60_000L
-        private const val ACK_TIMEOUT_MS = 10_000L
-        private const val VERIFICATION_TIMEOUT_MS = 10_000L
-        private const val REBOOT_DELAY_MS = 5_000L
+        private val CONNECTION_TIMEOUT = 15.seconds
+        private val SUBSCRIPTION_SETTLE = 500.milliseconds
+        private val ERASING_TIMEOUT = 60.seconds
+        private val ACK_TIMEOUT = 10.seconds
+        private val VERIFICATION_TIMEOUT = 10.seconds
+        private val REBOOT_DELAY = 5.seconds
         private const val SCAN_RETRY_COUNT = 3
-        private const val SCAN_RETRY_DELAY_MS = 2_000L
+        private val SCAN_RETRY_DELAY = 2.seconds
         const val RECOMMENDED_CHUNK_SIZE = 512
     }
 }

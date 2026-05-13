@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -32,7 +34,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -44,6 +47,8 @@ import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MqttConnectionState
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
@@ -53,6 +58,7 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -62,6 +68,7 @@ import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
 import org.meshtastic.core.resources.timeout
 import org.meshtastic.core.ui.util.getChannelList
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.proto.AdminMessage
@@ -125,8 +132,9 @@ open class RadioConfigViewModel(
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase,
     private val locationService: LocationService,
     private val fileService: FileService,
+    private val mqttManager: MqttManager,
 ) : ViewModel() {
-    var analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
+    val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
     fun toggleAnalyticsAllowed() {
         toggleAnalyticsUseCase()
@@ -136,6 +144,41 @@ open class RadioConfigViewModel(
 
     fun toggleHomoglyphCharactersEncodingEnabled() {
         toggleHomoglyphEncodingUseCase()
+    }
+
+    /** MQTT proxy connection state for the settings UI. */
+    val mqttConnectionState: StateFlow<MqttConnectionState> = mqttManager.mqttConnectionState
+
+    private val _mqttProbeStatus = MutableStateFlow<MqttProbeStatus?>(null)
+
+    /** Latest result from a [probeMqttConnection] call, or `null` if no probe has been run. */
+    val mqttProbeStatus: StateFlow<MqttProbeStatus?> = _mqttProbeStatus.asStateFlow()
+
+    private var probeJob: Job? = null
+
+    /**
+     * Run a one-shot reachability/credentials probe against an MQTT broker. Cancels any in-flight probe before starting
+     * a new one. Result is exposed via [mqttProbeStatus].
+     */
+    fun probeMqttConnection(address: String, tlsEnabled: Boolean, username: String?, password: String?) {
+        probeJob?.cancel()
+        _mqttProbeStatus.value = MqttProbeStatus.Probing
+        probeJob =
+            viewModelScope.launch {
+                val result =
+                    safeCatching { mqttManager.probe(address, tlsEnabled, username, password) }
+                        .getOrElse { e ->
+                            Logger.w(e) { "MQTT probe threw" }
+                            MqttProbeStatus.Other(message = e.message)
+                        }
+                _mqttProbeStatus.value = result
+            }
+    }
+
+    /** Clear the latest probe result (e.g. when the user edits the address). */
+    fun clearMqttProbeStatus() {
+        probeJob?.cancel()
+        _mqttProbeStatus.value = null
     }
 
     private val destNumFlow = MutableStateFlow(savedStateHandle.get<Int>("destNum"))
@@ -155,7 +198,7 @@ open class RadioConfigViewModel(
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
     fun setPreserveFavorites(preserveFavorites: Boolean) {
-        viewModelScope.launch { _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) } }
+        _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) }
     }
 
     private val _currentDeviceProfile = MutableStateFlow(DeviceProfile())
@@ -242,7 +285,7 @@ open class RadioConfigViewModel(
 
     fun setOwner(user: User) {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch {
+        safeLaunch(tag = "setOwner") {
             _radioConfigState.update { it.copy(userConfig = user) }
             val packetId = radioConfigUseCase.setOwner(destNum, user)
             registerRequestId(packetId)
@@ -252,14 +295,14 @@ open class RadioConfigViewModel(
     fun updateChannels(new: List<ChannelSettings>, old: List<ChannelSettings>) {
         val destNum = destNode.value?.num ?: return
         getChannelList(new, old).forEach { channel ->
-            viewModelScope.launch {
+            safeLaunch(tag = "setRemoteChannel") {
                 val packetId = radioConfigUseCase.setRemoteChannel(destNum, channel)
                 registerRequestId(packetId)
             }
         }
 
         if (destNum == myNodeNum) {
-            viewModelScope.launch {
+            safeLaunch(tag = "migrateChannels") {
                 packetRepository.migrateChannelsByPSK(old, new)
                 radioConfigRepository.replaceAllSettings(new)
             }
@@ -269,7 +312,7 @@ open class RadioConfigViewModel(
 
     fun setConfig(config: Config) {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch {
+        safeLaunch(tag = "setConfig") {
             _radioConfigState.update { state ->
                 state.copy(
                     radioConfig =
@@ -293,7 +336,7 @@ open class RadioConfigViewModel(
     @Suppress("CyclomaticComplexMethod")
     fun setModuleConfig(config: ModuleConfig) {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch {
+        safeLaunch(tag = "setModuleConfig") {
             _radioConfigState.update { state ->
                 state.copy(
                     moduleConfig =
@@ -326,13 +369,13 @@ open class RadioConfigViewModel(
     fun setRingtone(ringtone: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(ringtone = ringtone) }
-        viewModelScope.launch { radioConfigUseCase.setRingtone(destNum, ringtone) }
+        safeLaunch(tag = "setRingtone") { radioConfigUseCase.setRingtone(destNum, ringtone) }
     }
 
     fun setCannedMessages(messages: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
-        viewModelScope.launch { radioConfigUseCase.setCannedMessages(destNum, messages) }
+        safeLaunch(tag = "setCannedMessages") { radioConfigUseCase.setCannedMessages(destNum, messages) }
     }
 
     private fun sendAdminRequest(destNum: Int) {
@@ -343,16 +386,17 @@ open class RadioConfigViewModel(
 
         when (route) {
             AdminRoute.REBOOT.name ->
-                viewModelScope.launch {
+                safeLaunch(tag = "reboot") {
                     val packetId = adminActionsUseCase.reboot(destNum)
                     registerRequestId(packetId)
                 }
+
             AdminRoute.SHUTDOWN.name ->
                 with(radioConfigState.value) {
                     if (metadata?.canShutdown != true) {
                         sendError(Res.string.cant_shutdown)
                     } else {
-                        viewModelScope.launch {
+                        safeLaunch(tag = "shutdown") {
                             val packetId = adminActionsUseCase.shutdown(destNum)
                             registerRequestId(packetId)
                         }
@@ -360,13 +404,14 @@ open class RadioConfigViewModel(
                 }
 
             AdminRoute.FACTORY_RESET.name ->
-                viewModelScope.launch {
+                safeLaunch(tag = "factoryReset") {
                     val isLocal = (destNum == myNodeNum)
                     val packetId = adminActionsUseCase.factoryReset(destNum, isLocal)
                     registerRequestId(packetId)
                 }
+
             AdminRoute.NODEDB_RESET.name ->
-                viewModelScope.launch {
+                safeLaunch(tag = "nodedbReset") {
                     val isLocal = (destNum == myNodeNum)
                     val packetId = adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal)
                     registerRequestId(packetId)
@@ -376,55 +421,43 @@ open class RadioConfigViewModel(
 
     fun setFixedPosition(position: Position) {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch { radioConfigUseCase.setFixedPosition(destNum, position) }
+        safeLaunch(tag = "setFixedPosition") { radioConfigUseCase.setFixedPosition(destNum, position) }
     }
 
     fun removeFixedPosition() {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch { radioConfigUseCase.removeFixedPosition(destNum) }
+        safeLaunch(tag = "removeFixedPosition") { radioConfigUseCase.removeFixedPosition(destNum) }
     }
 
-    fun importProfile(uri: MeshtasticUri, onResult: (DeviceProfile) -> Unit) {
-        viewModelScope.launch {
-            try {
-                var profile: DeviceProfile? = null
-                fileService.read(uri) { source ->
-                    importProfileUseCase(source).onSuccess { profile = it }.onFailure { throw it }
-                }
-                profile?.let { onResult(it) }
-            } catch (ex: Exception) {
-                Logger.e { "Import DeviceProfile error: ${ex.message}" }
+    fun importProfile(uri: CommonUri, onResult: (DeviceProfile) -> Unit) {
+        safeLaunch(tag = "importProfile") {
+            var profile: DeviceProfile? = null
+            fileService.read(uri) { source ->
+                importProfileUseCase(source).onSuccess { profile = it }.onFailure { throw it }
+            }
+            profile?.let { onResult(it) }
+        }
+    }
+
+    fun exportProfile(uri: CommonUri, profile: DeviceProfile) {
+        safeLaunch(tag = "exportProfile") {
+            fileService.write(uri) { sink ->
+                exportProfileUseCase(sink, profile).onSuccess { /* Success */ }.onFailure { throw it }
             }
         }
     }
 
-    fun exportProfile(uri: MeshtasticUri, profile: DeviceProfile) {
-        viewModelScope.launch {
-            try {
-                fileService.write(uri) { sink ->
-                    exportProfileUseCase(sink, profile).onSuccess { /* Success */ }.onFailure { throw it }
-                }
-            } catch (ex: Exception) {
-                Logger.e { "Can't write file error: ${ex.message}" }
-            }
-        }
-    }
-
-    fun exportSecurityConfig(uri: MeshtasticUri, securityConfig: Config.SecurityConfig) {
-        viewModelScope.launch {
-            try {
-                fileService.write(uri) { sink ->
-                    exportSecurityConfigUseCase(sink, securityConfig).onSuccess { /* Success */ }.onFailure { throw it }
-                }
-            } catch (ex: Exception) {
-                Logger.e { "Can't write security keys JSON error: ${ex.message}" }
+    fun exportSecurityConfig(uri: CommonUri, securityConfig: Config.SecurityConfig) {
+        safeLaunch(tag = "exportSecurityConfig") {
+            fileService.write(uri) { sink ->
+                exportSecurityConfigUseCase(sink, securityConfig).onSuccess { /* Success */ }.onFailure { throw it }
             }
         }
     }
 
     fun installProfile(protobuf: DeviceProfile) {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
+        safeLaunch(tag = "installProfile") { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
     }
 
     fun clearPacketResponse() {
@@ -439,17 +472,17 @@ open class RadioConfigViewModel(
 
         when (route) {
             ConfigRoute.USER ->
-                viewModelScope.launch {
+                safeLaunch(tag = "getOwner") {
                     val packetId = radioConfigUseCase.getOwner(destNum)
                     registerRequestId(packetId)
                 }
 
             ConfigRoute.CHANNELS -> {
-                viewModelScope.launch {
+                safeLaunch(tag = "getChannel0") {
                     val packetId = radioConfigUseCase.getChannel(destNum, 0)
                     registerRequestId(packetId)
                 }
-                viewModelScope.launch {
+                safeLaunch(tag = "getLoraConfig") {
                     val packetId = radioConfigUseCase.getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value)
                     registerRequestId(packetId)
                 }
@@ -458,7 +491,7 @@ open class RadioConfigViewModel(
             }
 
             is AdminRoute -> {
-                viewModelScope.launch {
+                safeLaunch(tag = "getSessionKeyConfig") {
                     val packetId =
                         radioConfigUseCase.getConfig(destNum, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value)
                     registerRequestId(packetId)
@@ -468,18 +501,18 @@ open class RadioConfigViewModel(
 
             is ConfigRoute -> {
                 if (route == ConfigRoute.LORA) {
-                    viewModelScope.launch {
+                    safeLaunch(tag = "getChannel0ForLora") {
                         val packetId = radioConfigUseCase.getChannel(destNum, 0)
                         registerRequestId(packetId)
                     }
                 }
                 if (route == ConfigRoute.NETWORK) {
-                    viewModelScope.launch {
+                    safeLaunch(tag = "getConnectionStatus") {
                         val packetId = radioConfigUseCase.getDeviceConnectionStatus(destNum)
                         registerRequestId(packetId)
                     }
                 }
-                viewModelScope.launch {
+                safeLaunch(tag = "getConfig") {
                     val packetId = radioConfigUseCase.getConfig(destNum, route.type)
                     registerRequestId(packetId)
                 }
@@ -487,18 +520,18 @@ open class RadioConfigViewModel(
 
             is ModuleRoute -> {
                 if (route == ModuleRoute.CANNED_MESSAGE) {
-                    viewModelScope.launch {
+                    safeLaunch(tag = "getCannedMessages") {
                         val packetId = radioConfigUseCase.getCannedMessages(destNum)
                         registerRequestId(packetId)
                     }
                 }
                 if (route == ModuleRoute.EXT_NOTIFICATION) {
-                    viewModelScope.launch {
+                    safeLaunch(tag = "getRingtone") {
                         val packetId = radioConfigUseCase.getRingtone(destNum)
                         registerRequestId(packetId)
                     }
                 }
-                viewModelScope.launch {
+                safeLaunch(tag = "getModuleConfig") {
                     val packetId = radioConfigUseCase.getModuleConfig(destNum, route.type)
                     registerRequestId(packetId)
                 }
@@ -568,7 +601,7 @@ open class RadioConfigViewModel(
         }
 
         val requestTimeout = 30.seconds
-        viewModelScope.launch {
+        safeLaunch(tag = "requestTimeout") {
             delay(requestTimeout)
             if (requestIds.value.contains(packetId)) {
                 requestIds.update { it.apply { remove(packetId) } }
@@ -585,7 +618,13 @@ open class RadioConfigViewModel(
         val route = radioConfigState.value.route
 
         when (result) {
-            is RadioResponseResult.Error -> sendError(result.message)
+            is RadioResponseResult.Error -> {
+                sendError(result.message)
+                // Abort the AdminRoute flow — do not fire the destructive action
+                // (reboot/shutdown/factory_reset) if the metadata preflight failed.
+                return
+            }
+
             is RadioResponseResult.Success -> {
                 if (route.isEmpty()) {
                     val data = packet.decoded!!
@@ -623,7 +662,7 @@ open class RadioConfigViewModel(
                     val index = response.index
                     if (index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                         // Not done yet, request next channel
-                        viewModelScope.launch {
+                        safeLaunch(tag = "getNextChannel") {
                             val packetId = radioConfigUseCase.getChannel(destNum, index + 1)
                             registerRequestId(packetId)
                         }
@@ -704,6 +743,12 @@ open class RadioConfigViewModel(
                 incrementCompleted()
             }
         }
+
+        // Routing ACKs (Success) share the same request_id as the upcoming ADMIN_APP response.
+        // Removing the id here would cause the actual admin response to be silently dropped,
+        // because processRadioResponseUseCase checks `request_id in requestIds`.
+        // The Success branch already handles its own id removal when route is empty (set flow).
+        if (result is RadioResponseResult.Success) return
 
         if (AdminRoute.entries.any { it.name == route }) {
             sendAdminRequest(destNum)

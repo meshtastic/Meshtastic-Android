@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,18 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import org.meshtastic.core.common.util.nowMillis
 
 @Composable
 actual fun rememberTimeTickWithLifecycle(): Long {
     val context = LocalContext.current
-    var value by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var value by remember { mutableLongStateOf(nowMillis) }
 
     DisposableEffect(context) {
         val receiver =
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
-                    value = System.currentTimeMillis()
+                    value = nowMillis
                 }
             }
 

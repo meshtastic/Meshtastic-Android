@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.PacketRepository
 
@@ -38,7 +38,9 @@ class MarkAsReadReceiver :
 
     private val serviceNotifications: MeshServiceNotifications by inject()
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val dispatchers: CoroutineDispatchers by inject()
+
+    private val scope by lazy { CoroutineScope(dispatchers.io + SupervisorJob()) }
 
     companion object {
         const val MARK_AS_READ_ACTION = "com.geeksville.mesh.MARK_AS_READ"

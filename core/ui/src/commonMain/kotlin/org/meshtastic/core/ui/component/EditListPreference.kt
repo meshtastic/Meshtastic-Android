@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +44,9 @@ import org.meshtastic.core.resources.gpio_pin
 import org.meshtastic.core.resources.ignore_incoming
 import org.meshtastic.core.resources.name
 import org.meshtastic.core.resources.type
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.RemoteHardwarePin
 import org.meshtastic.proto.RemoteHardwarePinType
 
@@ -85,7 +86,7 @@ inline fun <reified T> EditListPreference(
                         },
                     ) {
                         Icon(
-                            imageVector = Icons.TwoTone.Close,
+                            imageVector = MeshtasticIcons.Close,
                             contentDescription = stringResource(Res.string.delete),
                             modifier = Modifier.wrapContentSize(),
                         )
@@ -106,6 +107,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                 }
+
                 is okio.ByteString -> {
                     EditBase64Preference(
                         title = "${index + 1}/$maxCount",
@@ -119,6 +121,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                 }
+
                 is RemoteHardwarePin -> {
                     EditTextPreference(
                         title = stringResource(Res.string.gpio_pin),
@@ -185,27 +188,29 @@ inline fun <reified T> EditListPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun EditListPreferencePreview() {
-    Column {
-        EditListPreference(
-            title = stringResource(Res.string.ignore_incoming),
-            summary = "This is a summary",
-            list = listOf(12345, 67890),
-            maxCount = 4,
-            enabled = true,
-            keyboardActions = KeyboardActions {},
-            onValuesChanged = {},
-        )
-        EditListPreference(
-            title = "Available pins",
-            list =
-            listOf(
-                RemoteHardwarePin(gpio_pin = 12, name = "Front door", type = RemoteHardwarePinType.DIGITAL_READ),
-            ),
-            maxCount = 4,
-            enabled = true,
-            keyboardActions = KeyboardActions {},
-            onValuesChanged = {},
-        )
+fun EditListPreferencePreview() {
+    AppTheme {
+        Column {
+            EditListPreference(
+                title = stringResource(Res.string.ignore_incoming),
+                summary = "This is a summary",
+                list = listOf(12345, 67890),
+                maxCount = 4,
+                enabled = true,
+                keyboardActions = KeyboardActions {},
+                onValuesChanged = {},
+            )
+            EditListPreference(
+                title = "Available pins",
+                list =
+                listOf(
+                    RemoteHardwarePin(gpio_pin = 12, name = "Front door", type = RemoteHardwarePinType.DIGITAL_READ),
+                ),
+                maxCount = 4,
+                enabled = true,
+                keyboardActions = KeyboardActions {},
+                onValuesChanged = {},
+            )
+        }
     }
 }

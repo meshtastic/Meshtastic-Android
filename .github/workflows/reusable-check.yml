@@ -9,15 +9,15 @@ on:
       run_unit_tests:
         type: boolean
         default: true
-      run_instrumented_tests:
-        type: boolean
-        default: true
       run_coverage:
         type: boolean
         default: true
-      api_levels:
-        type: string
-        default: '[35]'
+      run_desktop_builds:
+        type: boolean
+        default: true
+      run_desktop_flatpak_src:
+        type: boolean
+        default: false
       upload_artifacts:
         type: boolean
         default: true
@@ -97,11 +97,202 @@ jobs:
 
       - name: Lint, Analysis & KMP Smoke Compile
         if: inputs.run_lint == true
-        run: ./gradlew spotlessCheck detekt app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug mesh_service_example:lintDebug kmpSmokeCompile -Pci=true --continue --scan
+        run: ./gradlew spotlessCheck detekt app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug kmpSmokeCompile -Pci=true --continue --scan
 
       - name: KMP Smoke Compile (lint skipped)
         if: inputs.run_lint == false
         run: ./gradlew kmpSmokeCompile -Pci=true --continue --scan
+
+      - name: Screenshot Test Validation
+        id: screenshot-validation
+        if: inputs.run_lint == true
+        run: ./gradlew :screenshot-tests:validateDebugScreenshotTest -Pci=true --scan
+
+      - name: Upload screenshot diff report
+        if: always() && steps.screenshot-validation.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshot-diff-report
+          path: screenshot-tests/build/reports/screenshotTest/
+          retention-days: 14
+          if-no-files-found: warn
+
+  # ── Reproducible Build Verification ─────────────────────────────────
+  rb-check:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    if: inputs.run_lint == true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: 'true'
+
+      - name: Verify Reproducible Build (fdroid)
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          # Comprehensive RB verification for F-Droid/IzzyOnDroid.
+          # Based on: https://izzyondroid.org/docs/reproducibleBuilds/DebugFailedRBs/
+          # Catches regressions that have historically broken reproducibility:
+          #   1. aboutlibraries.json non-determinism (network fetching)
+          #   2. Datadog buildId leaking into fdroid APK
+          #   3. Google/Firebase/GMS/MLKit classes in fdroid APK
+          #   4. DEPENDENCY_INFO_BLOCK in signing block
+          #   5. Native library stripping (NDK version mismatch)
+          #   6. aboutlibraries "generated" timestamp in res/M7.json
+          #   7. baseline.prof determinism (flaky builds)
+          # See: https://github.com/meshtastic/Meshtastic-Android/issues/3231
+
+          echo "── Step 1: Verify aboutlibraries.json determinism ──"
+          rm -f app/src/main/resources/aboutlibraries.json
+          ./gradlew :app:exportLibraryDefinitions -Pci=true --no-configuration-cache
+          cp app/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run1.json
+
+          rm -f app/src/main/resources/aboutlibraries.json
+          ./gradlew :app:exportLibraryDefinitions -Pci=true --no-configuration-cache --rerun-tasks
+          cp app/src/main/resources/aboutlibraries.json /tmp/aboutlibraries-run2.json
+
+          if ! diff -q /tmp/aboutlibraries-run1.json /tmp/aboutlibraries-run2.json; then
+            echo "::error::aboutlibraries.json is NOT deterministic across runs!"
+            diff /tmp/aboutlibraries-run1.json /tmp/aboutlibraries-run2.json | head -20
+            exit 1
+          fi
+          echo "✅ aboutlibraries.json is deterministic"
+
+          echo "── Step 2: Build fdroid release APK ──"
+          ./gradlew :app:assembleFdroidRelease -Pci=true -Pmeshtastic.disableAbiSplits=true --no-configuration-cache
+
+          APK=$(find app/build/outputs/apk/fdroid/release -name "*.apk" | head -1)
+          if [ -z "$APK" ]; then
+            echo "::error::No fdroid release APK found"
+            exit 1
+          fi
+          echo "Checking APK: $APK"
+
+          echo "── Step 3: Check for datadog.buildId ──"
+          if unzip -l "$APK" | grep -q "datadog.buildId"; then
+            echo "::error::fdroid APK contains assets/datadog.buildId — breaks RB!"
+            exit 1
+          fi
+          echo "✅ No datadog.buildId in fdroid APK"
+
+          echo "── Step 4: Check for proprietary libraries (dex scan) ──"
+          TMPDIR=$(mktemp -d)
+          unzip -q "$APK" -d "$TMPDIR"
+          OFFENDERS=""
+          for pattern in "com/google/firebase" "com/google/android/gms" "com/crashlytics" "com/google/mlkit" "com/google/android/datatransport" "androidx/privacysandbox/ads"; do
+            for dex in "$TMPDIR"/classes*.dex; do
+              if [ -f "$dex" ] && strings "$dex" | grep -q "L${pattern}/"; then
+                OFFENDERS="${OFFENDERS}\n  - $pattern"
+                break
+              fi
+            done
+          done
+
+          if [ -n "$OFFENDERS" ]; then
+            echo -e "::error::fdroid APK contains proprietary libraries:${OFFENDERS}"
+            rm -rf "$TMPDIR"
+            exit 1
+          fi
+          echo "✅ No proprietary libraries in fdroid APK"
+
+          echo "── Step 5: Check for DEPENDENCY_INFO_BLOCK (signing block blob) ──"
+          # Parse the APK Signing Block structure to find the dependency info pair.
+          # Naive byte scans produce false positives in large APKs.
+          if python3 << 'PYEOF'
+          import struct, sys
+
+          with open("$APK", "rb") as f:
+              data = f.read()
+
+          magic = b"APK Sig Block 42"
+          idx = data.rfind(magic)
+          if idx < 0:
+              sys.exit(0)
+
+          block_size = struct.unpack_from("<Q", data, idx - 8)[0]
+          block_start = idx + 16 - 8 - block_size
+          pos = int(block_start)
+          end = idx - 8
+
+          while pos + 12 <= end:
+              pair_size = struct.unpack_from("<Q", data, pos)[0]
+              pair_id = struct.unpack_from("<I", data, pos + 8)[0]
+              if pair_id == 0x504b4453:
+                  print(f"DEPENDENCY_INFO_BLOCK found (id=0x{pair_id:08x})")
+                  sys.exit(1)
+              pos += 8 + int(pair_size)
+
+          sys.exit(0)
+          PYEOF
+          then
+            echo "::error::fdroid APK contains DEPENDENCY_INFO_BLOCK — remove with dependenciesInfo { includeInApk = false }"
+            rm -rf "$TMPDIR"
+            exit 1
+          fi
+          echo "✅ No DEPENDENCY_INFO_BLOCK in signing block"
+
+          echo "── Step 6: Check native libraries have debug symbols (not stripped) ──"
+          STRIPPED_LIBS=""
+          for so in $(find "$TMPDIR" -name "*.so" 2>/dev/null); do
+            # If .symtab section is missing, the library was stripped
+            if ! readelf -S "$so" 2>/dev/null | grep -q "\.symtab"; then
+              # Libraries without symtab are stripped — this is only a problem
+              # if keepDebugSymbols is not working as expected
+              LIB_NAME=$(basename "$so")
+              STRIPPED_LIBS="${STRIPPED_LIBS} ${LIB_NAME}"
+            fi
+          done
+          # Note: Some third-party .so files arrive pre-stripped, which is OK.
+          # We only warn here; a hard failure would be too aggressive.
+          if [ -n "$STRIPPED_LIBS" ]; then
+            echo "::warning::Some native libraries appear stripped (may cause NDK-version-dependent RB failures):${STRIPPED_LIBS}"
+          else
+            echo "✅ Native libraries retain debug symbols"
+          fi
+
+          echo "── Step 7: Check aboutlibraries 'generated' timestamp not in APK ──"
+          # The M7.json (or aboutlibraries.json in Java resources) should NOT contain
+          # a "generated" field, which introduces a build-time timestamp.
+          ABOUT_JSON=""
+          if [ -f "$TMPDIR/aboutlibraries.json" ]; then
+            ABOUT_JSON="$TMPDIR/aboutlibraries.json"
+          else
+            # May be in res/ as M7.json or similar
+            ABOUT_JSON=$(find "$TMPDIR/res" -name "*.json" -exec grep -l "aboutLibraries" {} \; 2>/dev/null | head -1)
+          fi
+          if [ -n "$ABOUT_JSON" ] && grep -q '"generated"' "$ABOUT_JSON"; then
+            echo "::error::aboutlibraries contains 'generated' timestamp field — add excludeFields = listOf(\"generated\") to build config"
+            rm -rf "$TMPDIR"
+            exit 1
+          fi
+          echo "✅ No 'generated' timestamp in aboutlibraries data"
+
+          echo "── Step 8: Verify build from clean tree (version-control-info) ──"
+          if [ -f "$TMPDIR/META-INF/version-control-info.textproto" ]; then
+            if grep -q "modified: true" "$TMPDIR/META-INF/version-control-info.textproto"; then
+              echo "::warning::APK built from dirty tree (version-control-info shows modified:true). Release builds must use a clean tree."
+            else
+              echo "✅ Built from clean tree"
+            fi
+          else
+            echo "ℹ️ No version-control-info.textproto (AGP may not embed it for debug-signed builds)"
+          fi
+
+          rm -rf "$TMPDIR"
+          echo ""
+          echo "🎉 All RB checks passed"
 
   # ── Sharded Unit Tests ──────────────────────────────────────────────
   # Tests are split into 3 shards that run in parallel:
@@ -176,14 +367,12 @@ jobs:
               :desktop:test
               :core:barcode:testFdroidDebugUnitTest
               :core:barcode:testGoogleDebugUnitTest
-              :mesh_service_example:test
             kover: >-
               :app:koverXmlReportFdroidDebug
               :app:koverXmlReportGoogleDebug
               :core:barcode:koverXmlReportFdroidDebug
               :core:barcode:koverXmlReportGoogleDebug
               :desktop:koverXmlReport
-              :mesh_service_example:koverXmlReportDebug
 
     steps:
       - name: Checkout code
@@ -218,7 +407,7 @@ jobs:
           files: "**/build/test-results/**/*.xml"
 
       - name: Upload coverage to Codecov
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.run_coverage }}
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -237,7 +426,7 @@ jobs:
             **/build/test-results
           retention-days: 7
 
-  # ── Android Build & Instrumented Tests ──────────────────────────────
+  # ── Android Build ────────────────────────────────────────────────────
   android-check:
     runs-on: ubuntu-24.04
     permissions:
@@ -246,10 +435,6 @@ jobs:
     needs: lint-check
     env:
       VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
-    strategy:
-      fail-fast: true
-      matrix:
-        api_level: ${{ fromJson(inputs.api_levels) }}
 
     steps:
       - name: Checkout code
@@ -264,110 +449,38 @@ jobs:
           gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
-      - name: Determine matrix metadata
-        id: matrix_meta
-        shell: bash
-        run: |
-          first_api=$(python3 - <<'PY'
-          import json
-          print(json.loads('${{ inputs.api_levels }}')[0])
-          PY
-          )
-
-          if [[ "${{ matrix.api_level }}" == "$first_api" ]]; then
-            echo "is_first_api=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_first_api=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Determine Android tasks
-        id: tasks
-        shell: bash
-        run: |
-          tasks=(
-            "app:assembleFdroidDebug"
-            "app:assembleGoogleDebug"
-            "mesh_service_example:assembleDebug"
-          )
-
-          if [[ "${{ inputs.run_instrumented_tests }}" == "true" ]]; then
-            tasks+=(
-              "app:connectedFdroidDebugAndroidTest"
-              "app:connectedGoogleDebugAndroidTest"
-              "core:barcode:connectedFdroidDebugAndroidTest"
-              "core:barcode:connectedGoogleDebugAndroidTest"
-            )
-          fi
-
-          printf 'tasks=%s\n' "${tasks[*]}" >> "$GITHUB_OUTPUT"
-
-      - name: Enable KVM group perms
-        if: inputs.run_instrumented_tests == true
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Run Android Build & Instrumented Tests
-        if: inputs.run_instrumented_tests == true
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api_level }}
-          arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true --parallel --configuration-cache --continue --scan
-
-      - name: Run Android Build
-        if: inputs.run_instrumented_tests == false
-        run: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true --parallel --configuration-cache --continue --scan
-
-      - name: Upload instrumented test results to Codecov
-        if: ${{ !cancelled() && inputs.run_instrumented_tests && steps.matrix_meta.outputs.is_first_api == 'true' }}
-        uses: codecov/codecov-action@v6
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: meshtastic/Meshtastic-Android
-          flags: android-instrumented
-          fail_ci_if_error: false
-          report_type: test_results
-          files: "**/build/outputs/androidTest-results/**/*.xml"
+      - name: Build Android APKs
+        run: ./gradlew app:assembleFdroidDebug app:assembleGoogleDebug -Pci=true --parallel --configuration-cache --continue --scan
 
       - name: Upload debug artifact
-        if: ${{ steps.matrix_meta.outputs.is_first_api == 'true' && inputs.upload_artifacts }}
+        if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
           name: app-debug-apks
           path: app/build/outputs/apk/*/debug/*.apk
-          retention-days: 14
+          retention-days: 7
 
       - name: Report App Size
-        if: ${{ always() && steps.matrix_meta.outputs.is_first_api == 'true' }}
+        if: always()
         run: |
           echo "### App Size Report" >> $GITHUB_STEP_SUMMARY
           echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           find app/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload Android reports
-        if: ${{ always() && inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: reports-android-api-${{ matrix.api_level }}
-          path: |
-            **/build/outputs/androidTest-results
-          retention-days: 7
-          if-no-files-found: ignore
-
   # ── Desktop Build ───────────────────────────────────────────────────
   build-desktop:
-    name: Build Desktop Debug
-    runs-on: ubuntu-24.04
+    name: Build Desktop Debug (${{ matrix.os }})
+    if: inputs.run_desktop_builds == true
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     timeout-minutes: 60
     needs: lint-check
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
     env:
       VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
 
@@ -385,12 +498,71 @@ jobs:
           cache_read_only: ${{ needs.lint-check.outputs.cache_read_only }}
 
       - name: Build Desktop
-        run: ./gradlew :desktop:packageDistributionForCurrentOS -Pci=true --scan
+        run: ./gradlew :desktop:createDistributable -Pci=true --scan
 
       - name: Upload Desktop artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
-          name: desktop-app
-          path: desktop/build/compose/binaries/main/app/Meshtastic/bin/*
+          name: desktop-app-${{ runner.os }}-${{ runner.arch }}
+          path: desktop/build/compose/binaries/main/app/
+          retention-days: 7
+
+  # ── Flatpak Sources ───────────────────────────────────────────────────
+  build-flatpak-src:
+    name: Generate Flatpak Sources (${{ matrix.os }})
+    if: inputs.run_desktop_flatpak_src == true
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    timeout-minutes: 60
+    needs: lint-check
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    env:
+      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: true
+      
+      - name: Python Setup
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Install ast-grep
+        run: pip install ast-grep-cli
+
+      # Remove Android/iOS targets and other non-desktop bits
+      # that would break the flatpakGradleGenerator
+      - name: Prepare Offline Desktop Build
+        run: ./scripts/desktop-only-prep.sh
+
+      - name: Generate Flatpak Sources
+        env:
+          DESKTOP_ONLY: true
+        run: >
+          ./gradlew :build-logic:convention:flatpakGradleGenerator flatpakGradleGenerator
+          --no-configuration-cache --refresh-dependencies --no-parallel
+      
+      - run: ls -lah flatpak-sources-*.json
+
+      - name: Upload Flatpak Sources
+        if: ${{ inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-sources-${{ runner.arch }}
+          path: flatpak-sources-*.json
           retention-days: 7

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.meshtastic.buildlogic.isDesktopOnly
 import org.meshtastic.buildlogic.library
 import org.meshtastic.buildlogic.libs
 
@@ -42,8 +43,8 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
             extensions.configure<KotlinMultiplatformExtension> {
                 sourceSets.getByName("commonMain").dependencies {
                     // Compose Multiplatform UI
+                    implementation(libs.library("compose-multiplatform-animation"))
                     implementation(libs.library("compose-multiplatform-material3"))
-                    implementation(libs.library("compose-multiplatform-materialIconsExtended"))
 
                     // Lifecycle & ViewModel (JetBrains KMP forks — safe in commonMain)
                     implementation(libs.library("jetbrains-lifecycle-viewmodel-compose"))
@@ -54,19 +55,20 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
 
                     // Logging
                     implementation(libs.library("kermit"))
+
+                    // @Preview available in commonMain since CMP 1.11 (androidx.compose.ui.tooling.preview.Preview)
+                    // org.jetbrains.compose.ui.tooling.preview.Preview is deprecated in 1.11
+                    implementation(libs.library("compose-multiplatform-ui-tooling-preview"))
                 }
 
-                sourceSets.getByName("androidMain").dependencies {
-                    // Compose BOM for consistent Android Compose versions
-                    implementation(target.dependencies.platform(libs.library("androidx-compose-bom")))
+                if (!isDesktopOnly) {
+                    sourceSets.getByName("androidMain").dependencies {
+                        // Common Android Compose dependencies
+                        implementation(libs.library("accompanist-permissions"))
+                        implementation(libs.library("androidx-activity-compose"))
 
-                    // Common Android Compose dependencies
-                    implementation(libs.library("accompanist-permissions"))
-                    implementation(libs.library("androidx-activity-compose"))
-                    implementation(libs.library("androidx-compose-material3"))
-                    implementation(libs.library("androidx-compose-material-iconsExtended"))
-                    implementation(libs.library("androidx-compose-ui-text"))
-                    implementation(libs.library("androidx-compose-ui-tooling-preview"))
+                        implementation(libs.library("compose-multiplatform-ui"))
+                    }
                 }
 
                 sourceSets.getByName("commonTest").dependencies { implementation(project(":core:testing")) }

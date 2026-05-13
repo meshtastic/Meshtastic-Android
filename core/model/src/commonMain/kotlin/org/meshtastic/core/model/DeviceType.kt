@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,16 @@ enum class DeviceType {
     companion object {
         fun fromAddress(address: String): DeviceType? = when (address.firstOrNull()) {
             'x' -> BLE
+
             's' -> USB
+
             't' -> TCP
-            'm' -> USB // Treat mock as USB for UI purposes
+
+            'm' -> USB
+
+            // Treat mock as USB for UI purposes
             'n' -> null
+
             else -> null
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,6 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,13 +30,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.eygraber.uri.toKmpUri
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.export_keys
 import org.meshtastic.core.resources.export_keys_confirmation
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
@@ -54,7 +54,7 @@ actual fun ExportSecurityConfigButton(
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri.toMeshtasticUri(), securityConfig) }
+                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri.toKmpUri(), securityConfig) }
             }
         }
 
@@ -81,7 +81,7 @@ actual fun ExportSecurityConfigButton(
         modifier = Modifier.padding(horizontal = 8.dp),
         title = stringResource(Res.string.export_keys),
         enabled = enabled,
-        icon = Icons.TwoTone.Warning,
+        icon = MeshtasticIcons.Warning,
         onClick = { showEditSecurityConfigDialog = true },
     )
 }

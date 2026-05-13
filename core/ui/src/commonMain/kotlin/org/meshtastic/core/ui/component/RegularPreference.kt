@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,9 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun RegularPreference(
@@ -80,7 +82,13 @@ fun RegularPreference(
             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         }
 
-    Column(modifier = modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick).padding(all = 16.dp)) {
+    Column(
+        modifier =
+        modifier
+            .fillMaxWidth()
+            .clickable(enabled = enabled, onClick = onClick, role = Role.Button)
+            .padding(all = 16.dp),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             FlowRow(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
@@ -116,6 +124,6 @@ fun RegularPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun RegularPreferencePreview() {
-    RegularPreference(title = "Advanced settings", subtitle = "Text2", onClick = {})
+fun RegularPreferencePreview() {
+    AppTheme { RegularPreference(title = "Advanced settings", subtitle = "Text2", onClick = {}) }
 }

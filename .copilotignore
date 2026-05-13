@@ -1,0 +1,54 @@
+# Meshtastic Android - GitHub Copilot Ignore List
+# This saves context window tokens and prevents Copilot from hallucinating off of minified code.
+
+# ── Build & Generated ─────────────────────────────────────────────────────────
+**/build/**
+.gradle/
+.kotlin/
+**/generated/**
+.cxx/
+.externalNativeBuild/
+
+# ── IDE & Environment ─────────────────────────────────────────────────────────
+.idea/
+.run/
+.claude/
+.gemini/
+.jdk
+local.properties
+secrets.properties
+*.jks
+.DS_Store
+
+# ── Agent Artifacts (Large volumes of logs/images) ───────────────────────────
+.agent_artifacts/
+# Note: .agent_plans/ is NOT ignored to maintain implementation context.
+.agent_refs/
+tmp/
+*.log
+
+# ── Binary Assets & Media ─────────────────────────────────────────────────────
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.webp
+**/*.svg
+**/*.ico
+**/*.gif
+**/*.mp3
+**/*.wav
+**/*.ogg
+**/*.pdf
+**/*.ttf
+**/*.otf
+**/*.jar
+**/*.aar
+**/*.apk
+
+# ── External & Submodules ─────────────────────────────────────────────────────
+core/proto/
+
+# ── Resources ────────────────────────────────────────────────────────────────
+# Ignore translations (reduces churn and indexing tokens)
+**/values-*/strings.xml
+**/composeResources/**/values*/*.xml

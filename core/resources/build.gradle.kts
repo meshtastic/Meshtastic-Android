@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,16 +23,15 @@ plugins {
 kotlin {
     jvm()
 
-    @Suppress("UnstableApiUsage")
     android {
-        androidResources.enable = true
+        androidResources {
+            enable = true
+            resourcePrefix = "meshtastic_"
+        }
         withHostTest { isIncludeAndroidResources = true }
     }
 
-    sourceSets {
-        commonMain.dependencies { implementation(projects.core.common) }
-        commonTest.dependencies { implementation(kotlin("test")) }
-    }
+    sourceSets { commonMain.dependencies { implementation(projects.core.common) } }
 }
 
 compose.resources {

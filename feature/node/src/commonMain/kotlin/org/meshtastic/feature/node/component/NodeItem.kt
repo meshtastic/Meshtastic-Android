@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,11 +29,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,11 +45,12 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.formatString
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
-import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
@@ -90,13 +88,13 @@ import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
 private const val GRID_COLUMNS = 3
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
 fun NodeItem(
@@ -108,6 +106,7 @@ fun NodeItem(
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
     connectionState: ConnectionState,
+    deviceType: DeviceType? = null,
     isActive: Boolean = false,
 ) {
     val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
@@ -168,6 +167,7 @@ fun NodeItem(
                 isMuted = isMuted,
                 isUnmessageable = unmessageable,
                 connectionState = connectionState,
+                deviceType = deviceType,
                 contentColor = contentColor,
             )
 
@@ -178,7 +178,7 @@ fun NodeItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.Notes,
+                        imageVector = MeshtasticIcons.Notes,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = contentColor.copy(alpha = 0.7f),
@@ -259,14 +259,14 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     icon = MeshtasticIcons.ChannelUtilization,
                     contentDescription = stringResource(Res.string.channel_utilization),
                     label = stringResource(Res.string.channel_utilization),
-                    text = formatString("%.1f%%", thatNode.deviceMetrics.channel_utilization),
+                    text = MetricFormatter.percent(thatNode.deviceMetrics.channel_utilization ?: 0f),
                     contentColor = contentColor,
                 )
                 IconInfo(
                     icon = MeshtasticIcons.AirUtilization,
                     contentDescription = stringResource(Res.string.air_utilization),
                     label = stringResource(Res.string.air_utilization),
-                    text = formatString("%.1f%%", thatNode.deviceMetrics.air_util_tx),
+                    text = MetricFormatter.percent(thatNode.deviceMetrics.air_util_tx ?: 0f),
                     contentColor = contentColor,
                 )
             }
@@ -284,7 +284,7 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                         if (thatNode.snr < 100f && thatNode.rssi < 0) {
                             val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
                             IconInfo(
-                                icon = quality.imageVector,
+                                icon = vectorResource(quality.icon),
                                 contentDescription = stringResource(Res.string.signal_quality),
                                 contentColor = quality.color.invoke(),
                                 text = stringResource(quality.nameRes),
@@ -319,31 +319,24 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     }
 
     if ((env.temperature ?: 0f) != 0f) {
-        val temp =
-            if (tempInFahrenheit) {
-                formatString("%.1f°F", celsiusToFahrenheit(env.temperature ?: 0f))
-            } else {
-                formatString("%.1f°C", env.temperature ?: 0f)
-            }
+        val temp = MetricFormatter.temperature(env.temperature ?: 0f, tempInFahrenheit)
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
     if ((env.relative_humidity ?: 0f) != 0f) {
         items.add {
-            HumidityInfo(humidity = formatString("%.0f%%", env.relative_humidity ?: 0f), contentColor = contentColor)
+            HumidityInfo(humidity = MetricFormatter.humidity(env.relative_humidity ?: 0f), contentColor = contentColor)
         }
     }
     if ((env.barometric_pressure ?: 0f) != 0f) {
         items.add {
-            PressureInfo(pressure = formatString("%.1fhPa", env.barometric_pressure ?: 0f), contentColor = contentColor)
+            PressureInfo(
+                pressure = MetricFormatter.pressure(env.barometric_pressure ?: 0f),
+                contentColor = contentColor,
+            )
         }
     }
     if ((env.soil_temperature ?: 0f) != 0f) {
-        val temp =
-            if (tempInFahrenheit) {
-                formatString("%.1f°F", celsiusToFahrenheit(env.soil_temperature ?: 0f))
-            } else {
-                formatString("%.1f°C", env.soil_temperature ?: 0f)
-            }
+        val temp = MetricFormatter.temperature(env.soil_temperature ?: 0f, tempInFahrenheit)
         items.add { SoilTemperatureInfo(temp = temp, contentColor = contentColor) }
     }
     if ((env.soil_moisture ?: 0) != 0 && (env.soil_temperature ?: 0f) != 0f) {
@@ -352,7 +345,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.voltage ?: 0f) != 0f) {
         items.add {
             PowerInfo(
-                value = formatString("%.2fV", env.voltage ?: 0f),
+                value = MetricFormatter.voltage(env.voltage ?: 0f),
                 label = stringResource(Res.string.voltage),
                 contentColor = contentColor,
             )
@@ -361,7 +354,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.current ?: 0f) != 0f) {
         items.add {
             PowerInfo(
-                value = formatString("%.1fmA", env.current ?: 0f),
+                value = MetricFormatter.current(env.current ?: 0f),
                 label = stringResource(Res.string.current),
                 contentColor = contentColor,
             )
@@ -391,7 +384,6 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun NodeItemHeader(
     thatNode: Node,
@@ -403,6 +395,7 @@ private fun NodeItemHeader(
     isMuted: Boolean,
     isUnmessageable: Boolean,
     connectionState: ConnectionState,
+    deviceType: DeviceType?,
     contentColor: Color,
 ) {
     Row(
@@ -448,6 +441,7 @@ private fun NodeItemHeader(
             isMuted = isMuted,
             isUnmessageable = isUnmessageable,
             connectionState = connectionState,
+            deviceType = deviceType,
             contentColor = contentColor,
         )
     }

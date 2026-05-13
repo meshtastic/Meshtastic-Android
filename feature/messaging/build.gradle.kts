@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.kmp.feature) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.flatpak.gradle.generator)
+}
 
 kotlin {
-    jvm()
-
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.messaging"
         androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets {
@@ -43,7 +42,6 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.jetbrains.navigation3.ui)
-            implementation(libs.jetbrains.navigationevent.compose)
             implementation(libs.androidx.paging.common)
             implementation(libs.androidx.paging.compose)
 
@@ -56,12 +54,39 @@ kotlin {
 
         androidMain.dependencies { implementation(libs.androidx.work.runtime.ktx) }
 
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.androidx.work.testing)
-                implementation(libs.androidx.test.core)
-                implementation(libs.robolectric)
-            }
-        }
+        commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
+
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
+}
+
+// Gradle's KMP variant resolution follows `available-at` redirects in module
+// metadata and needs android variant `.module` files for disambiguation, even
+// when building desktop-only offline. The androidCompileClasspath configuration
+// can't be resolved by the flatpak generator due to AGP variant ambiguity on
+// project dependencies, so we capture android KMP metadata via a dedicated
+// configuration that only holds external dependencies.
+val flatpakKmpAndroidMeta by
+    configurations.creating {
+        isCanBeResolved = true
+        isCanBeConsumed = false
+    }
+
+dependencies { flatpakKmpAndroidMeta("androidx.paging:paging-compose-android:${libs.versions.paging.get()}") }
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-feature-messaging.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidRuntimeClasspath",
+            "androidMainLintChecksClasspath",
+            "androidCompileClasspath",
+            "androidHostTestCompileClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }

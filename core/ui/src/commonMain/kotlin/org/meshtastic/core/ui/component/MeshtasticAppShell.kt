@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import org.meshtastic.core.navigation.MultiBackstack
-import org.meshtastic.core.navigation.NodeDetailRoutes
+import org.meshtastic.core.navigation.NodeDetailRoute
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
@@ -43,8 +44,11 @@ fun MeshtasticAppShell(
     MeshtasticCommonAppSetup(
         uiViewModel = uiViewModel,
         onNavigateToTracerouteMap = { destNum, requestId, logUuid ->
-            multiBackstack.activeBackStack.add(
-                NodeDetailRoutes.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid),
+            multiBackstack.handleDeepLink(
+                listOf(
+                    NodesRoute.NodesGraph,
+                    NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid),
+                ),
             )
         },
     )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,24 +27,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -54,26 +48,31 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
 import org.meshtastic.core.resources.channel_2
 import org.meshtastic.core.resources.channel_3
+import org.meshtastic.core.resources.channel_4
+import org.meshtastic.core.resources.channel_5
+import org.meshtastic.core.resources.channel_6
+import org.meshtastic.core.resources.channel_7
+import org.meshtastic.core.resources.channel_8
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.power_metrics_log
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
-import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
+import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
 
 private enum class PowerMetric(val color: Color) {
@@ -85,22 +84,17 @@ private enum class PowerChannel(val strRes: StringResource) {
     ONE(Res.string.channel_1),
     TWO(Res.string.channel_2),
     THREE(Res.string.channel_3),
+    FOUR(Res.string.channel_4),
+    FIVE(Res.string.channel_5),
+    SIX(Res.string.channel_6),
+    SEVEN(Res.string.channel_7),
+    EIGHT(Res.string.channel_8),
 }
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(
-            nameRes = Res.string.current,
-            color = PowerMetric.CURRENT.color,
-            isLine = true,
-            environmentMetric = null,
-        ),
-        LegendData(
-            nameRes = Res.string.voltage,
-            color = PowerMetric.VOLTAGE.color,
-            isLine = true,
-            environmentMetric = null,
-        ),
+        LegendData(nameRes = Res.string.current, color = PowerMetric.CURRENT.color, isLine = true),
+        LegendData(nameRes = Res.string.voltage, color = PowerMetric.VOLTAGE.color, isLine = true),
     )
 
 @Suppress("LongMethod")
@@ -110,7 +104,16 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.powerMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
-    var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
+
+    val exportLauncher = rememberSaveFileLauncher { uri -> viewModel.savePowerMetricsCSV(uri, data) }
+
+    val availableChannels =
+        remember(data) {
+            PowerChannel.entries.filter { channel ->
+                data.any { !retrieveVoltage(channel, it).isNaN() || !retrieveCurrent(channel, it).isNaN() }
+            }
+        }
+    var selectedChannel by rememberSaveable { mutableStateOf(PowerChannel.ONE) }
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
@@ -120,6 +123,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         data = data,
         timeProvider = { it.time.toDouble() },
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.POWER) },
+        onExportCsv = { exportLauncher("power_metrics.csv", "text/csv") },
         controlPart = {
             Column {
                 TimeFrameSelector(
@@ -130,10 +134,11 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    modifier =
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp).horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    PowerChannel.entries.forEach { channel ->
+                    availableChannels.forEach { channel ->
                         FilterChip(
                             selected = selectedChannel == channel,
                             onClick = { selectedChannel = channel },
@@ -169,7 +174,6 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
 
 @Suppress("LongMethod")
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun PowerMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
@@ -178,20 +182,20 @@ private fun PowerMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    Column(modifier = modifier) {
-        if (telemetries.isEmpty()) return@Column
-
-        val modelProducer = remember { CartesianChartModelProducer() }
+    MetricChartScaffold(isEmpty = telemetries.isEmpty(), legendData = LEGEND_DATA, modifier = modifier) {
+            modelProducer,
+            chartModifier,
+        ->
         val currentColor = PowerMetric.CURRENT.color
         val voltageColor = PowerMetric.VOLTAGE.color
         val marker =
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(alpha = 1f)) {
-                        currentColor -> formatString("Current: %.0f mA", value)
-                        voltageColor -> formatString("Voltage: %.1f V", value)
-                        else -> formatString("%.1f", value)
+                    when (color) {
+                        currentColor -> "Current: ${MetricFormatter.current(value.toFloat(), 0)}"
+                        voltageColor -> "Voltage: ${NumberFormatter.format(value.toFloat(), 1)} V"
+                        else -> NumberFormatter.format(value.toFloat(), 1)
                     }
                 },
             )
@@ -205,7 +209,7 @@ private fun PowerMetricsChart(
                 telemetries.filter { !retrieveVoltage(selectedChannel, it).isNaN() }
             }
 
-        LaunchedEffect(currentData, voltageData) {
+        LaunchedEffect(selectedChannel, currentData, voltageData) {
             modelProducer.runTransaction {
                 if (currentData.isNotEmpty()) {
                     lineSeries {
@@ -227,43 +231,31 @@ private fun PowerMetricsChart(
         }
 
         val currentLayer =
-            if (currentData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createBoldLine(currentColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
-                    ),
-                    verticalAxisPosition = Axis.Position.Vertical.Start,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = currentData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createBoldLine(currentColor)),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+            )
 
         val voltageLayer =
-            if (voltageData.isNotEmpty()) {
-                rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(voltageColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
-                    ),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
-                )
-            } else {
-                null
-            }
+            rememberConditionalLayer(
+                hasData = voltageData.isNotEmpty(),
+                lineProvider = LineCartesianLayer.LineProvider.series(ChartStyling.createGradientLine(voltageColor)),
+                verticalAxisPosition = Axis.Position.Vertical.End,
+            )
 
         val layers = remember(currentLayer, voltageLayer) { listOfNotNull(currentLayer, voltageLayer) }
 
         if (layers.isNotEmpty()) {
             GenericMetricChart(
                 modelProducer = modelProducer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                modifier = chartModifier,
                 layers = layers,
                 startAxis =
                 if (currentData.isNotEmpty()) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = currentColor),
-                        valueFormatter = { _, value, _ -> formatString("%.0f mA", value) },
+                        valueFormatter = { _, value, _ -> MetricFormatter.current(value.toFloat(), 0) },
                     )
                 } else {
                     null
@@ -272,77 +264,43 @@ private fun PowerMetricsChart(
                 if (voltageData.isNotEmpty()) {
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                        valueFormatter = { _, value, _ -> formatString("%.1f V", value) },
+                        valueFormatter = { _, value, _ -> "${NumberFormatter.format(value.toFloat(), 1)} V" },
                     )
                 } else {
                     null
                 },
-                bottomAxis =
-                HorizontalAxis.rememberBottom(
-                    label = ChartStyling.rememberAxisLabel(),
-                    valueFormatter = CommonCharts.dynamicTimeFormatter,
-                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-                    labelRotationDegrees = 45f,
-                ),
+                bottomAxis = CommonCharts.rememberBottomTimeAxis(),
                 marker = marker,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,
                 vicoScrollState = vicoScrollState,
             )
         }
-
-        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
 }
 
 @Composable
-@Suppress("CyclomaticComplexMethod")
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val time = telemetry.time.toLong() * MS_PER_SEC
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        colors =
-        CardDefaults.cardColors(
-            containerColor =
-            if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            },
-        ),
-    ) {
-        Surface {
-            SelectionContainer {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        /* Time */
-                        Row {
-                            Text(
-                                text = CommonCharts.formatDateTime(time),
-                                style = MaterialTheme.typography.titleMediumEmphasized,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        }
+    SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                /* Time */
+                Row {
+                    Text(
+                        text = DateFormatter.formatDateTime(time),
+                        style = MaterialTheme.typography.titleMediumEmphasized,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                            val pm = telemetry.power_metrics
-                            if (pm != null) {
-                                if (pm.ch1_current != null || pm.ch1_voltage != null) {
-                                    PowerChannelColumn(Res.string.channel_1, pm.ch1_voltage ?: 0f, pm.ch1_current ?: 0f)
-                                }
-                                if (pm.ch2_current != null || pm.ch2_voltage != null) {
-                                    PowerChannelColumn(Res.string.channel_2, pm.ch2_voltage ?: 0f, pm.ch2_current ?: 0f)
-                                }
-                                if (pm.ch3_current != null || pm.ch3_voltage != null) {
-                                    PowerChannelColumn(Res.string.channel_3, pm.ch3_voltage ?: 0f, pm.ch3_current ?: 0f)
-                                }
-                            }
-                        }
-                    }
+                val pm = telemetry.power_metrics
+                if (pm != null) {
+                    PowerChannelsRow1(pm)
+                    PowerChannelsExtraRows(pm)
                 }
             }
         }
@@ -350,7 +308,59 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun PowerChannelsRow1(pm: org.meshtastic.proto.PowerMetrics) {
+    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+        if (pm.ch1_current != null || pm.ch1_voltage != null) {
+            PowerChannelColumn(Res.string.channel_1, pm.ch1_voltage ?: 0f, pm.ch1_current ?: 0f)
+        }
+        if (pm.ch2_current != null || pm.ch2_voltage != null) {
+            PowerChannelColumn(Res.string.channel_2, pm.ch2_voltage ?: 0f, pm.ch2_current ?: 0f)
+        }
+        if (pm.ch3_current != null || pm.ch3_voltage != null) {
+            PowerChannelColumn(Res.string.channel_3, pm.ch3_voltage ?: 0f, pm.ch3_current ?: 0f)
+        }
+    }
+}
+
+@Composable
+@Suppress("CyclomaticComplexMethod")
+private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics) {
+    val hasCh456 =
+        hasChannelData(pm.ch4_voltage, pm.ch4_current) ||
+            hasChannelData(pm.ch5_voltage, pm.ch5_current) ||
+            hasChannelData(pm.ch6_voltage, pm.ch6_current)
+    val hasCh78 = hasChannelData(pm.ch7_voltage, pm.ch7_current) || hasChannelData(pm.ch8_voltage, pm.ch8_current)
+
+    if (hasCh456) {
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            if (hasChannelData(pm.ch4_voltage, pm.ch4_current)) {
+                PowerChannelColumn(Res.string.channel_4, pm.ch4_voltage ?: 0f, pm.ch4_current ?: 0f)
+            }
+            if (hasChannelData(pm.ch5_voltage, pm.ch5_current)) {
+                PowerChannelColumn(Res.string.channel_5, pm.ch5_voltage ?: 0f, pm.ch5_current ?: 0f)
+            }
+            if (hasChannelData(pm.ch6_voltage, pm.ch6_current)) {
+                PowerChannelColumn(Res.string.channel_6, pm.ch6_voltage ?: 0f, pm.ch6_current ?: 0f)
+            }
+        }
+    }
+    if (hasCh78) {
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            if (hasChannelData(pm.ch7_voltage, pm.ch7_current)) {
+                PowerChannelColumn(Res.string.channel_7, pm.ch7_voltage ?: 0f, pm.ch7_current ?: 0f)
+            }
+            if (hasChannelData(pm.ch8_voltage, pm.ch8_current)) {
+                PowerChannelColumn(Res.string.channel_8, pm.ch8_voltage ?: 0f, pm.ch8_current ?: 0f)
+            }
+        }
+    }
+}
+
+private fun hasChannelData(voltage: Float?, current: Float?): Boolean = voltage != null || current != null
+
+@Composable
 private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current: Float) {
     Column {
         Text(
@@ -358,39 +368,33 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = MaterialTheme.typography.labelLarge.fontSize,
         )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            MetricIndicator(PowerMetric.VOLTAGE.color)
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = formatString("%.2fV", voltage),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            MetricIndicator(PowerMetric.CURRENT.color)
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = formatString("%.1fmA", current),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-            )
-        }
+        MetricValueRow(color = PowerMetric.VOLTAGE.color, text = MetricFormatter.voltage(voltage))
+        MetricValueRow(color = PowerMetric.CURRENT.color, text = MetricFormatter.current(current))
     }
 }
 
 /** Retrieves the appropriate voltage depending on `channelSelected`. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Suppress("CyclomaticComplexMethod")
 private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
     PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: Float.NaN
     PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: Float.NaN
     PowerChannel.THREE -> telemetry.power_metrics?.ch3_voltage ?: Float.NaN
+    PowerChannel.FOUR -> telemetry.power_metrics?.ch4_voltage ?: Float.NaN
+    PowerChannel.FIVE -> telemetry.power_metrics?.ch5_voltage ?: Float.NaN
+    PowerChannel.SIX -> telemetry.power_metrics?.ch6_voltage ?: Float.NaN
+    PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_voltage ?: Float.NaN
+    PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_voltage ?: Float.NaN
 }
 
 /** Retrieves the appropriate current depending on `channelSelected`. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Suppress("CyclomaticComplexMethod")
 private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
     PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: Float.NaN
     PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: Float.NaN
     PowerChannel.THREE -> telemetry.power_metrics?.ch3_current ?: Float.NaN
+    PowerChannel.FOUR -> telemetry.power_metrics?.ch4_current ?: Float.NaN
+    PowerChannel.FIVE -> telemetry.power_metrics?.ch5_current ?: Float.NaN
+    PowerChannel.SIX -> telemetry.power_metrics?.ch6_current ?: Float.NaN
+    PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_current ?: Float.NaN
+    PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_current ?: Float.NaN
 }

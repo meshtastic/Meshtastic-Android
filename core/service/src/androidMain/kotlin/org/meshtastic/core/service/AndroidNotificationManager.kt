@@ -24,6 +24,7 @@ import androidx.core.content.getSystemService
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_alerts_notifications
@@ -36,15 +37,26 @@ import android.app.NotificationManager as SystemNotificationManager
 @Single
 class AndroidNotificationManager(private val context: Context) : NotificationManager {
 
-    private val notificationManager = context.getSystemService<SystemNotificationManager>()!!
+    private val notificationManager =
+        checkNotNull(context.getSystemService<SystemNotificationManager>()) { "NotificationManager not found" }
 
     private data class ChannelConfig(val id: String, val importance: Int)
 
-    init {
-        initChannels()
-    }
+    /**
+     * Tracks whether notification channels have been created.
+     *
+     * Channels are **not** created in the constructor because this singleton is instantiated by Koin during
+     * [org.meshtastic.core.service.MeshService.onCreate] on the main thread. The CMP [getString] helper uses
+     * [kotlinx.coroutines.runBlocking] which can fail in that context, crashing the entire service startup chain.
+     * Instead, channels are lazily ensured before the first [dispatch] call. Note that
+     * [MeshServiceNotificationsImpl.initChannels] already creates a superset of these channels when the orchestrator
+     * starts, so this lazy path is only a safety net for notifications dispatched before orchestrator initialization.
+     */
+    private var channelsInitialized = false
 
-    private fun initChannels() {
+    private fun ensureChannelsInitialized() {
+        if (channelsInitialized) return
+        channelsInitialized = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channels =
                 listOf(
@@ -74,28 +86,33 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
                 id = NotificationChannels.MESSAGES,
                 importance = SystemNotificationManager.IMPORTANCE_HIGH,
             )
+
         Notification.Category.NodeEvent ->
             ChannelConfig(
                 id = NotificationChannels.NEW_NODES,
                 importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
             )
+
         Notification.Category.Battery ->
             ChannelConfig(
                 id = NotificationChannels.LOW_BATTERY,
                 importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
             )
+
         Notification.Category.Alert ->
             ChannelConfig(id = NotificationChannels.ALERTS, importance = SystemNotificationManager.IMPORTANCE_HIGH)
+
         Notification.Category.Service ->
             ChannelConfig(id = NotificationChannels.SERVICE, importance = SystemNotificationManager.IMPORTANCE_MIN)
     }
 
     override fun dispatch(notification: Notification) {
+        ensureChannelsInitialized()
         val builder =
             NotificationCompat.Builder(context, notification.category.channelConfig().id)
                 .setContentTitle(notification.title)
                 .setContentText(notification.message)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(drawable.meshtastic_ic_notification)
                 .setAutoCancel(true)
                 .setSilent(notification.isSilent)
 

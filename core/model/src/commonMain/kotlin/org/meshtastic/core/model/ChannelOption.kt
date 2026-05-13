@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -307,6 +307,10 @@ enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float) {
     SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f),
     SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f),
     SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f),
+    LITE_FAST(ModemPreset.LITE_FAST, 0.125f),
+    LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f),
+    NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f),
+    NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f),
     ;
 
     companion object {

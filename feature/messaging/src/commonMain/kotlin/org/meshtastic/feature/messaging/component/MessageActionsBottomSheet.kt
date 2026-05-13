@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.Reply
-import androidx.compose.material.icons.rounded.AddReaction
-import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,12 +36,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.action_copy_message
+import org.meshtastic.core.resources.action_delete_message
+import org.meshtastic.core.resources.action_react_with_emoji
+import org.meshtastic.core.resources.action_select_message
+import org.meshtastic.core.resources.action_send_reply
+import org.meshtastic.core.resources.action_show_message_status
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.device_metrics_label_value
@@ -55,7 +55,14 @@ import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.more_reactions
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.select
+import org.meshtastic.core.ui.icon.AddReaction
+import org.meshtastic.core.ui.icon.Copy
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Reply
+import org.meshtastic.core.ui.icon.SelectAll
 
+@Suppress("LongMethod")
 @Composable
 fun MessageActionsContent(
     quickEmojis: List<String>,
@@ -84,34 +91,59 @@ fun MessageActionsContent(
                     Text(stringResource(Res.string.device_metrics_label_value, title, statusText.orEmpty()))
                 },
                 leadingContent = { MessageStatusIcon(status = status) },
-                modifier = Modifier.clickable(onClick = onStatus),
+                modifier =
+                Modifier.clickable(
+                    onClickLabel = stringResource(Res.string.action_show_message_status),
+                    role = Role.Button,
+                    onClick = onStatus,
+                ),
             )
         }
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.reply)) },
-            leadingContent = {
-                Icon(Icons.AutoMirrored.Rounded.Reply, contentDescription = stringResource(Res.string.reply))
-            },
-            modifier = Modifier.clickable(onClick = onReply),
+            leadingContent = { Icon(MeshtasticIcons.Reply, contentDescription = stringResource(Res.string.reply)) },
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_send_reply),
+                role = Role.Button,
+                onClick = onReply,
+            ),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.copy)) },
-            leadingContent = { Icon(Icons.Rounded.ContentCopy, contentDescription = stringResource(Res.string.copy)) },
-            modifier = Modifier.clickable(onClick = onCopy),
+            leadingContent = { Icon(MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy)) },
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_copy_message),
+                role = Role.Button,
+                onClick = onCopy,
+            ),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.select)) },
-            leadingContent = { Icon(Icons.Rounded.SelectAll, contentDescription = stringResource(Res.string.select)) },
-            modifier = Modifier.clickable(onClick = onSelect),
+            leadingContent = {
+                Icon(MeshtasticIcons.SelectAll, contentDescription = stringResource(Res.string.select))
+            },
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_select_message),
+                role = Role.Button,
+                onClick = onSelect,
+            ),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.delete)) },
-            leadingContent = { Icon(Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete)) },
-            modifier = Modifier.clickable(onClick = onDelete),
+            leadingContent = { Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete)) },
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_delete_message),
+                role = Role.Button,
+                onClick = onDelete,
+            ),
         )
     }
 }
@@ -131,10 +163,15 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
                 Modifier.size(40.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { onReact(emoji) },
+                    .clickable(
+                        onClickLabel = stringResource(Res.string.action_react_with_emoji),
+                        role = Role.Button,
+                    ) {
+                        onReact(emoji)
+                    },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = emoji, fontSize = 20.sp)
+                Text(text = emoji, style = MaterialTheme.typography.titleMedium)
             }
         }
 
@@ -143,7 +180,7 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
             modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
         ) {
             Icon(
-                Icons.Rounded.AddReaction,
+                MeshtasticIcons.AddReaction,
                 contentDescription = stringResource(Res.string.more_reactions),
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,

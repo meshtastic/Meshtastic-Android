@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 package org.meshtastic.feature.settings
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,12 +24,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import okio.BufferedSink
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -41,6 +39,7 @@ import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
@@ -50,6 +49,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 
@@ -84,7 +84,9 @@ class SettingsViewModel(
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     val isConnected =
-        radioController.connectionState.map { it.isConnected() }.stateInWhileSubscribed(initialValue = false)
+        radioController.connectionState
+            .map { it is ConnectionState.Connected }
+            .stateInWhileSubscribed(initialValue = false)
 
     val localConfig: StateFlow<LocalConfig> =
         radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
@@ -143,12 +145,12 @@ class SettingsViewModel(
     val meshLogLoggingEnabled: StateFlow<Boolean> = _meshLogLoggingEnabled.asStateFlow()
 
     fun setMeshLogRetentionDays(days: Int) {
-        viewModelScope.launch { setMeshLogSettingsUseCase.setRetentionDays(days) }
+        safeLaunch(tag = "setMeshLogRetentionDays") { setMeshLogSettingsUseCase.setRetentionDays(days) }
         _meshLogRetentionDays.value = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
     }
 
     fun setMeshLogLoggingEnabled(enabled: Boolean) {
-        viewModelScope.launch { setMeshLogSettingsUseCase.setLoggingEnabled(enabled) }
+        safeLaunch(tag = "setMeshLogLoggingEnabled") { setMeshLogSettingsUseCase.setLoggingEnabled(enabled) }
         _meshLogLoggingEnabled.value = enabled
     }
 
@@ -179,8 +181,10 @@ class SettingsViewModel(
      * @param uri The destination URI for the CSV file.
      * @param filterPortnum If provided, only packets with this port number will be exported.
      */
-    fun saveDataCsv(uri: MeshtasticUri, filterPortnum: Int? = null) {
-        viewModelScope.launch { fileService.write(uri) { writer -> performDataExport(writer, filterPortnum) } }
+    fun saveDataCsv(uri: CommonUri, filterPortnum: Int? = null) {
+        safeLaunch(tag = "saveDataCsv") {
+            fileService.write(uri) { writer -> performDataExport(writer, filterPortnum) }
+        }
     }
 
     private suspend fun performDataExport(writer: BufferedSink, filterPortnum: Int?) {

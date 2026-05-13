@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,6 +87,11 @@ internal class SerialConnectionImpl(
 
         port.open(usbDeviceConnection)
         port.setParameters(115200, UsbSerialPort.DATABITS_8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+
+        // Assert DTR/RTS so native USB-CDC firmware (RAK4631 / nRF52840) recognizes the host as
+        // present and starts its serial-side Meshtastic protocol. Empirically, omitting these
+        // signals causes the firmware to never respond to WAKE_BYTES, stalling the handshake at
+        // Stage 1. Bridge-chip boards (CH340, CP210x, FTDI) tolerate the assertion.
         port.dtr = true
         port.rts = true
 

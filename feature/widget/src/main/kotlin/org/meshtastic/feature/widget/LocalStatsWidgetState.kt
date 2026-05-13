@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,14 +26,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.onlineTimeThreshold
-import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.LocalStats
@@ -79,11 +77,7 @@ data class LocalStatsWidgetUiState(
 )
 
 @Single
-class LocalStatsWidgetStateProvider(
-    nodeRepository: NodeRepository,
-    serviceRepository: ServiceRepository,
-    appWidgetUpdater: AppWidgetUpdater,
-) {
+class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, serviceRepository: ServiceRepository) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -104,8 +98,6 @@ class LocalStatsWidgetStateProvider(
             .map { input ->
                 mapToUiState(input.connectionState, input.totalNodes, input.onlineNodes, input.stats, input.localNode)
             }
-            .distinctUntilChanged()
-            .onEach { appWidgetUpdater.updateAll() }
             .stateIn(scope = scope, started = SharingStarted.Eagerly, initialValue = LocalStatsWidgetUiState())
 
     private data class StateInput(

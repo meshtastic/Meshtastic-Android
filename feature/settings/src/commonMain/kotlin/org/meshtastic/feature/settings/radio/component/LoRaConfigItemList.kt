@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val primarySettings = state.channelList.getOrNull(0) ?: return
     val formState = rememberConfigState(initialValue = loraConfig)
 
-    val primaryChannel by remember(formState.value) { mutableStateOf(Channel(primarySettings, formState.value)) }
+    val primaryChannel = remember(formState.value) { Channel(primarySettings, formState.value) }
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

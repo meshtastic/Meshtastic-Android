@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,6 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Power
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,18 +37,18 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.icon.BatteryEmpty
 import org.meshtastic.core.ui.icon.BatteryUnknown
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PowerSupply
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
-private const val FORMAT = "%d%%"
 private const val SIZE_ICON = 16
 
 @Suppress("MagicNumber", "LongMethod")
@@ -61,7 +59,7 @@ fun MaterialBatteryInfo(
     voltage: Float? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    val levelString = formatString(FORMAT, level)
+    val levelString = level?.let { MetricFormatter.percent(it) } ?: stringResource(Res.string.unknown)
 
     Row(
         modifier = modifier,
@@ -78,7 +76,7 @@ fun MaterialBatteryInfo(
         } else if (level > 100) {
             Icon(
                 modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
-                imageVector = Icons.Rounded.Power,
+                imageVector = MeshtasticIcons.PowerSupply,
                 tint = contentColor.copy(alpha = 0.65f),
                 contentDescription = levelString,
             )
@@ -131,7 +129,7 @@ fun MaterialBatteryInfo(
             ?.takeIf { it > 0 }
             ?.let {
                 Text(
-                    text = formatString("%.2fV", it),
+                    text = MetricFormatter.voltage(it),
                     color = contentColor.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
                 )

@@ -144,6 +144,36 @@ class FakeUiPrefs : UiPrefs {
         showQuickChat.value = show
     }
 
+    override val bleAutoScan = MutableStateFlow(false)
+
+    override fun setBleAutoScan(enabled: Boolean) {
+        bleAutoScan.value = enabled
+    }
+
+    override val networkAutoScan = MutableStateFlow(false)
+
+    override fun setNetworkAutoScan(enabled: Boolean) {
+        networkAutoScan.value = enabled
+    }
+
+    override val showBleTransport = MutableStateFlow(true)
+
+    override fun setShowBleTransport(enabled: Boolean) {
+        showBleTransport.value = enabled
+    }
+
+    override val showNetworkTransport = MutableStateFlow(true)
+
+    override fun setShowNetworkTransport(enabled: Boolean) {
+        showNetworkTransport.value = enabled
+    }
+
+    override val showUsbTransport = MutableStateFlow(true)
+
+    override fun setShowUsbTransport(enabled: Boolean) {
+        showUsbTransport.value = enabled
+    }
+
     private val nodeLocationEnabled = mutableMapOf<Int, MutableStateFlow<Boolean>>()
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
@@ -229,15 +259,6 @@ class FakeMeshPrefs : MeshPrefs {
 
     override fun setDeviceAddress(address: String?) {
         deviceAddress.value = address
-    }
-
-    private val provideLocation = mutableMapOf<Int?, MutableStateFlow<Boolean>>()
-
-    override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> =
-        provideLocation.getOrPut(nodeNum) { MutableStateFlow(true) }
-
-    override fun setShouldProvideNodeLocation(nodeNum: Int?, provide: Boolean) {
-        provideLocation.getOrPut(nodeNum) { MutableStateFlow(provide) }.value = provide
     }
 
     private val lastRequest = mutableMapOf<String?, MutableStateFlow<Int>>()

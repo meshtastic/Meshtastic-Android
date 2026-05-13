@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             ),
             cameraPositionState = cameraState,
         ) {
-            val precisionMeters = precisionBitsToMeters(node.position.precision_bits ?: 0)
+            val precisionMeters = precisionBitsToMeters(node.position.precision_bits)
             val latLng = LatLng(node.latitude, node.longitude)
             if (precisionMeters > 0) {
                 Circle(

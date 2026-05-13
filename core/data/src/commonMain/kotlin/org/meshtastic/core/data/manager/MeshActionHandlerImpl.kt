@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,15 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreExceptionSuspend
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MessageStatus
@@ -42,6 +45,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -60,16 +64,13 @@ class MeshActionHandlerImpl(
     private val dataHandler: Lazy<MeshDataHandler>,
     private val analytics: PlatformAnalytics,
     private val meshPrefs: MeshPrefs,
+    private val uiPrefs: UiPrefs,
     private val databaseManager: DatabaseManager,
     private val notificationManager: NotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
     private val radioConfigRepository: RadioConfigRepository,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : MeshActionHandler {
-    private lateinit var scope: CoroutineScope
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-    }
 
     companion object {
         private const val DEFAULT_REBOOT_DELAY = 5
@@ -89,18 +90,24 @@ class MeshActionHandlerImpl(
             }
             when (action) {
                 is ServiceAction.Favorite -> handleFavorite(action, myNodeNum)
+
                 is ServiceAction.Ignore -> handleIgnore(action, myNodeNum)
+
                 is ServiceAction.Mute -> handleMute(action, myNodeNum)
+
                 is ServiceAction.Reaction -> handleReaction(action, myNodeNum)
+
                 is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
+
                 is ServiceAction.SendContact -> {
                     val accepted =
-                        runCatching {
+                        safeCatching {
                             commandSender.sendAdminAwait(myNodeNum) { AdminMessage(add_contact = action.contact) }
                         }
                             .getOrDefault(false)
                     action.result.complete(accepted)
                 }
+
                 is ServiceAction.GetDeviceMetadata -> {
                     commandSender.sendAdmin(action.destNum, wantResponse = true) {
                         AdminMessage(get_device_metadata_request = true)
@@ -202,19 +209,21 @@ class MeshActionHandlerImpl(
         commandSender.sendData(p)
         serviceBroadcasts.broadcastMessageStatus(p.id, p.status ?: MessageStatus.UNKNOWN)
         dataHandler.value.rememberDataPacket(p, myNodeNum, false)
-        val bytes = p.bytes ?: okio.ByteString.EMPTY
+        val bytes = p.bytes ?: ByteString.EMPTY
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
     }
 
     override fun handleRequestPosition(destNum: Int, position: Position, myNodeNum: Int) {
         if (destNum != myNodeNum) {
-            val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum).value
+            val provideLocation = uiPrefs.shouldProvideNodeLocation(myNodeNum).value
             val currentPosition =
                 when {
                     provideLocation && position.isValid() -> position
+
                     provideLocation ->
                         nodeManager.nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
                             ?: Position(0.0, 0.0, 0)
+
                     else -> Position(0.0, 0.0, 0)
                 }
             commandSender.requestPosition(destNum, currentPosition)
@@ -248,6 +257,11 @@ class MeshActionHandlerImpl(
     override fun handleSetRemoteConfig(id: Int, destNum: Int, payload: ByteArray) {
         val c = Config.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_config = c) }
+        // When targeting the local node, optimistically persist the config so the
+        // UI reflects changes immediately (matching handleSetConfig behaviour).
+        if (destNum == nodeManager.myNodeNum.value) {
+            scope.handledLaunch { radioConfigRepository.setLocalConfig(c) }
+        }
     }
 
     override fun handleGetRemoteConfig(id: Int, destNum: Int, config: Int) {
@@ -310,6 +324,11 @@ class MeshActionHandlerImpl(
         if (payload != null) {
             val c = Channel.ADAPTER.decode(payload)
             commandSender.sendAdmin(destNum, id) { AdminMessage(set_channel = c) }
+            // When targeting the local node, optimistically persist the channel so
+            // the UI reflects changes immediately (matching handleSetChannel behaviour).
+            if (destNum == nodeManager.myNodeNum.value) {
+                scope.handledLaunch { radioConfigRepository.updateChannelSettings(c) }
+            }
         }
     }
 
@@ -349,7 +368,7 @@ class MeshActionHandlerImpl(
     override fun handleRequestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
         val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
         val otaEvent =
-            AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: okio.ByteString.EMPTY)
+            AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: ByteString.EMPTY)
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(ota_request = otaEvent) }
     }
 

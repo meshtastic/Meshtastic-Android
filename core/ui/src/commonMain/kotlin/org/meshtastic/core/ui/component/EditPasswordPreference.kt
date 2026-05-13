@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,12 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.VisibilityOff
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -37,6 +35,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.hide_password
 import org.meshtastic.core.resources.show_password
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Visibility
+import org.meshtastic.core.ui.icon.VisibilityOff
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun EditPasswordPreference(
@@ -48,7 +50,7 @@ fun EditPasswordPreference(
     onValueChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isPasswordVisible by remember { mutableStateOf(false) }
+    var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
 
     EditTextPreference(
         title = title,
@@ -63,9 +65,9 @@ fun EditPasswordPreference(
         onFocusChanged = {},
         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
-            IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+            IconToggleButton(checked = isPasswordVisible, onCheckedChange = { isPasswordVisible = it }) {
                 Icon(
-                    imageVector = if (isPasswordVisible) Icons.TwoTone.VisibilityOff else Icons.TwoTone.VisibilityOff,
+                    imageVector = if (isPasswordVisible) MeshtasticIcons.VisibilityOff else MeshtasticIcons.Visibility,
                     contentDescription =
                     if (isPasswordVisible) {
                         stringResource(Res.string.hide_password)
@@ -81,13 +83,15 @@ fun EditPasswordPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun EditPasswordPreferencePreview() {
-    EditPasswordPreference(
-        title = "Password",
-        value = "top secret",
-        maxSize = 63,
-        enabled = true,
-        keyboardActions = KeyboardActions {},
-        onValueChanged = {},
-    )
+fun EditPasswordPreferencePreview() {
+    AppTheme {
+        EditPasswordPreference(
+            title = "Password",
+            value = "top secret",
+            maxSize = 63,
+            enabled = true,
+            keyboardActions = KeyboardActions {},
+            onValueChanged = {},
+        )
+    }
 }

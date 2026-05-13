@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -186,7 +186,6 @@ constructor(
             val availableLogs = buildSet {
                 if (metricsState.hasDeviceMetrics()) add(LogsType.DEVICE)
                 if (metricsState.hasPositionLogs()) {
-                    add(LogsType.NODE_MAP)
                     add(LogsType.POSITIONS)
                 }
                 if (environmentState.hasEnvironmentMetrics()) add(LogsType.ENVIRONMENT)

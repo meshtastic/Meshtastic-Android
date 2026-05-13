@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
@@ -51,14 +51,17 @@ interface NodeManager : NodeIdLookup {
     /** Sets whether node database writes are allowed. */
     fun setAllowNodeDbWrites(allowed: Boolean)
 
-    /** Starts the node manager with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** The local node number as a thread-safe [StateFlow]. */
     val myNodeNum: StateFlow<Int?>
 
     /** Sets the local node number. */
     fun setMyNodeNum(num: Int?)
+
+    /** The firmware edition reported by the connected device. */
+    val firmwareEdition: StateFlow<FirmwareEdition?>
+
+    /** Sets the firmware edition of the connected device. */
+    fun setFirmwareEdition(edition: FirmwareEdition?)
 
     /** Loads the cached node database from the repository. */
     fun loadCachedNodeDB()

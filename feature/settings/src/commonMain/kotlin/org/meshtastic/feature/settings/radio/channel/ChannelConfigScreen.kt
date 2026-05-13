@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -64,6 +62,8 @@ import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
+import org.meshtastic.core.ui.icon.Add
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
@@ -113,9 +113,9 @@ private fun ChannelConfigScreen(
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
-    val modemPresetName by remember(loraConfig) { mutableStateOf(Channel(loraConfig = loraConfig).name) }
-    val primaryChannel by remember(loraConfig) { mutableStateOf(Channel(primarySettings, loraConfig)) }
-    val capabilities by remember(firmwareVersion) { mutableStateOf(Capabilities(firmwareVersion)) }
+    val modemPresetName = remember(loraConfig) { Channel(loraConfig = loraConfig).name }
+    val primaryChannel = remember(loraConfig) { Channel(primarySettings, loraConfig) }
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
 
     val focusManager = LocalFocusManager.current
     val settingsListInput =
@@ -141,7 +141,7 @@ private fun ChannelConfigScreen(
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
         EditChannelDialog(
-            channelSettings = with(settingsListInput) { if (size > index) get(index) else ChannelSettings() },
+            channelSettings = settingsListInput.getOrNull(index) ?: ChannelSettings(),
             modemPresetName = modemPresetName,
             onAddClick = {
                 if (settingsListInput.size > index) {
@@ -182,7 +182,7 @@ private fun ChannelConfigScreen(
                     },
                     modifier = Modifier.padding(16.dp),
                 ) {
-                    Icon(Icons.TwoTone.Add, stringResource(Res.string.add))
+                    Icon(MeshtasticIcons.Add, stringResource(Res.string.add))
                 }
             }
         },

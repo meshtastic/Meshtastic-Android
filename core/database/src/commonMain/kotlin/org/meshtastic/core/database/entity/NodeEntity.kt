@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,6 +118,7 @@ data class MetadataEntity(
         Index(value = ["hops_away"]),
         Index(value = ["is_favorite"]),
         Index(value = ["last_heard", "is_favorite"]),
+        Index(value = ["public_key"]),
     ],
 )
 data class NodeEntity(

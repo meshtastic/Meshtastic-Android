@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,6 +117,7 @@ enum class IntervalConfiguration {
     val allowedIntervals: List<FixedUpdateIntervals> by lazy {
         when (this) {
             ALL -> FixedUpdateIntervals.entries
+
             BROADCAST_SHORT ->
                 listOf(
                     FixedUpdateIntervals.THIRTY_MINUTES,
@@ -133,6 +134,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
                 )
+
             BROADCAST_MEDIUM ->
                 listOf(
                     FixedUpdateIntervals.ONE_HOUR,
@@ -148,6 +150,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
                 )
+
             BROADCAST_LONG ->
                 listOf(
                     FixedUpdateIntervals.THREE_HOURS,
@@ -161,6 +164,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
                 )
+
             NODE_INFO_BROADCAST ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
@@ -175,6 +179,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
                 )
+
             OUTPUT ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
@@ -185,6 +190,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FIVE_SECONDS,
                     FixedUpdateIntervals.TEN_SECONDS,
                 )
+
             DETECTION_SENSOR_MINIMUM ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
@@ -209,6 +215,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
                 )
+
             DETECTION_SENSOR_STATE ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
@@ -227,6 +234,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
                 )
+
             NAG_TIMEOUT ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
@@ -237,6 +245,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.THIRTY_SECONDS,
                     FixedUpdateIntervals.ONE_MINUTE,
                 )
+
             PAX_COUNTER ->
                 listOf(
                     FixedUpdateIntervals.FIFTEEN_MINUTES,
@@ -254,6 +263,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
                 )
+
             POSITION ->
                 listOf(
                     FixedUpdateIntervals.ONE_SECOND,
@@ -272,6 +282,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.THIRTY_MINUTES,
                     FixedUpdateIntervals.ONE_HOUR,
                 )
+
             POSITION_BROADCAST ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
@@ -292,6 +303,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
                 )
+
             GPS_UPDATE ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
@@ -310,6 +322,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.TWELVE_HOURS,
                     FixedUpdateIntervals.TWENTY_FOUR_HOURS,
                 )
+
             RANGE_TEST_SENDER ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
@@ -323,6 +336,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.THIRTY_MINUTES,
                     FixedUpdateIntervals.ONE_HOUR,
                 )
+
             SMART_BROADCAST_MINIMUM ->
                 listOf(
                     FixedUpdateIntervals.FIFTEEN_SECONDS,

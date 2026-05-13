@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,11 +37,11 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
@@ -51,6 +51,7 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.R.raw
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
@@ -111,7 +112,8 @@ class MeshServiceNotificationsImpl(
     private val nodeRepository: Lazy<NodeRepository>,
 ) : MeshServiceNotifications {
 
-    private val notificationManager = context.getSystemService<NotificationManager>()!!
+    private val notificationManager =
+        checkNotNull(context.getSystemService<NotificationManager>()) { "NotificationManager not found" }
 
     companion object {
         const val MAX_BATTERY_LEVEL = 100
@@ -267,7 +269,8 @@ class MeshServiceNotificationsImpl(
                         enableLights(true)
                         enableVibration(true)
                         setBypassDnd(true)
-                        val alertSoundUri = "${SCHEME_ANDROID_RESOURCE}://${context.packageName}/${raw.alert}".toUri()
+                        val alertSoundUri =
+                            "${SCHEME_ANDROID_RESOURCE}://${context.packageName}/${raw.meshtastic_alert}".toUri()
                         setSound(
                             alertSoundUri,
                             AudioAttributes.Builder()
@@ -289,20 +292,32 @@ class MeshServiceNotificationsImpl(
     private var cachedLocalStats: LocalStats? = null
     private var nextStatsUpdateMillis: Long = 0
     private var cachedMessage: String? = null
+    private var cachedServiceNotification: Notification? = null
+
+    /**
+     * Returns the last-built service state notification, or builds a default one if none exists. This is used by
+     * [MeshService] for [android.app.Service.startForeground].
+     */
+    fun getServiceNotification(): Notification = cachedServiceNotification
+        ?: createServiceStateNotification(
+            name = getString(Res.string.meshtastic_app_name),
+            message = null,
+            nextUpdateAt = 0,
+        )
 
     // region Public Notification Methods
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
-    override fun updateServiceStateNotification(
-        state: org.meshtastic.core.model.ConnectionState,
-        telemetry: Telemetry?,
-    ): Notification {
+    override fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?) {
         val summaryString =
             when (state) {
-                is org.meshtastic.core.model.ConnectionState.Connected ->
+                is ConnectionState.Connected ->
                     getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
-                is org.meshtastic.core.model.ConnectionState.Disconnected -> getString(Res.string.disconnected)
-                is org.meshtastic.core.model.ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
-                is org.meshtastic.core.model.ConnectionState.Connecting -> getString(Res.string.connecting)
+
+                is ConnectionState.Disconnected -> getString(Res.string.disconnected)
+
+                is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
+
+                is ConnectionState.Connecting -> getString(Res.string.connecting)
             }
 
         // Update caches if telemetry is provided
@@ -319,9 +334,9 @@ class MeshServiceNotificationsImpl(
             val repo = nodeRepository.value
             val myNodeNum = repo.myNodeInfo.value?.myNodeNum
             if (myNodeNum != null) {
-                // We use runBlocking here because this is called from MeshConnectionManager's synchronous methods,
-                // and we only do this once if the cache is empty.
-                val nodes = runBlocking { repo.nodeDBbyNum.first() }
+                // Use .value instead of runBlocking { .first() } to avoid potential deadlock
+                // if called on the same dispatcher the Flow's upstream coroutine needs.
+                val nodes = repo.nodeDBbyNum.value
                 nodes[myNodeNum]?.let { node ->
                     if (cachedDeviceMetrics == null) {
                         cachedDeviceMetrics = node.deviceMetrics
@@ -358,8 +373,8 @@ class MeshServiceNotificationsImpl(
                 message = cachedMessage,
                 nextUpdateAt = nextStatsUpdateMillis,
             )
+        cachedServiceNotification = notification
         notificationManager.notify(SERVICE_NOTIFY_ID, notification)
-        return notification
     }
 
     override suspend fun updateMessageNotification(
@@ -408,7 +423,7 @@ class MeshServiceNotificationsImpl(
                     if (nodeId == DataPacket.ID_LOCAL) {
                         ourNode ?: nodeRepository.value.getNode(nodeId)
                     } else {
-                        nodeRepository.value.getNode(nodeId ?: "")
+                        nodeRepository.value.getNode(nodeId.orEmpty())
                     }
                 }
                 .first()
@@ -470,7 +485,7 @@ class MeshServiceNotificationsImpl(
 
         val summaryNotification =
             commonBuilder(NotificationType.DirectMessage)
-                .setSmallIcon(context.applicationInfo.icon)
+                .setSmallIcon(drawable.meshtastic_ic_notification)
                 .setStyle(messagingStyle)
                 .setGroup(GROUP_KEY_MESSAGES)
                 .setGroupSummary(true)
@@ -716,7 +731,7 @@ class MeshServiceNotificationsImpl(
     private val openAppIntent: PendingIntent by lazy {
         val intent =
             Intent(context, Class.forName("org.meshtastic.app.MainActivity")).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
         PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
@@ -748,7 +763,7 @@ class MeshServiceNotificationsImpl(
     }
 
     private fun createOpenNodeDetailIntent(nodeNum: Int): PendingIntent {
-        val deepLinkUri = "$DEEP_LINK_BASE_URI/node?destNum=$nodeNum".toUri()
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/nodes/$nodeNum".toUri()
         val deepLinkIntent =
             Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName("org.meshtastic.app.MainActivity")).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -831,7 +846,7 @@ class MeshServiceNotificationsImpl(
         type: NotificationType,
         contentIntent: PendingIntent? = null,
     ): NotificationCompat.Builder {
-        val smallIcon = context.applicationInfo.icon
+        val smallIcon = drawable.meshtastic_ic_notification
 
         return NotificationCompat.Builder(context, type.channelId)
             .setSmallIcon(smallIcon)

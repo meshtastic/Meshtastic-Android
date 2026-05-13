@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun TextDividerPreference(
@@ -76,6 +77,6 @@ fun TextDividerPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun TextDividerPreferencePreview() {
-    TextDividerPreference(title = "Advanced settings")
+fun TextDividerPreferencePreview() {
+    AppTheme { TextDividerPreference(title = "Advanced settings") }
 }

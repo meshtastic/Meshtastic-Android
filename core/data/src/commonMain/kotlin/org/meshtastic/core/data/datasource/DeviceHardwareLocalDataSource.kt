@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,4 +45,6 @@ class DeviceHardwareLocalDataSource(
 
     suspend fun getByModelAndTarget(hwModel: Int, target: String): DeviceHardwareEntity? =
         withContext(dispatchers.io) { deviceHardwareDao.getByModelAndTarget(hwModel, target) }
+
+    suspend fun hasAnyEntries(): Boolean = withContext(dispatchers.io) { deviceHardwareDao.count() > 0 }
 }

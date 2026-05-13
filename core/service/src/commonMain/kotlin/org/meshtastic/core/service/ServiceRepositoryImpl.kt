@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.ServiceAction
@@ -42,7 +42,7 @@ import org.meshtastic.proto.MeshPacket
 @Suppress("TooManyFunctions")
 open class ServiceRepositoryImpl : ServiceRepository {
 
-    // Connection state to our radio device
+    // Canonical app-level connection state — written exclusively by MeshConnectionManager.
     private val _connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState>
         get() = _connectionState
@@ -88,8 +88,8 @@ open class ServiceRepositoryImpl : ServiceRepository {
     }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 64)
-    override val meshPacketFlow: SharedFlow<MeshPacket>
-        get() = _meshPacketFlow
+    override val meshPacketFlow: Flow<MeshPacket>
+        get() = _meshPacketFlow.asFlow()
 
     override suspend fun emitMeshPacket(packet: MeshPacket) {
         _meshPacketFlow.emit(packet)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@ import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
@@ -45,11 +45,12 @@ import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
+import com.eygraber.uri.toKmpUri
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
-import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
@@ -57,8 +58,8 @@ import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
-import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
@@ -68,18 +69,31 @@ import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
+import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
+import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
+import org.meshtastic.core.ui.util.LocalNodeMapScreenProvider
+import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
+import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
+import org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import org.meshtastic.feature.intro.IntroViewModel
+import org.meshtastic.feature.map.MapScreen
+import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.node.NodeMapViewModel
+import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModel()
+
+    private val usbRepository: UsbRepository by inject()
 
     /**
      * Activity-lifecycle-aware client that binds to the mesh service. Note: This is used implicitly as it registers
@@ -154,9 +168,22 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Belt-and-suspenders for the Android 12+ attach-intent quirk: if the activity is
+        // resumed while a USB device is already attached (e.g. process restart, returning
+        // from another app), the manifest-declared attach intent may have already fired
+        // before UsbRepository was constructed. Re-poll deviceList here so the UI reflects
+        // reality without requiring the user to physically replug.
+        usbRepository.refreshState()
+    }
+
+    @Suppress("LongMethod")
     @Composable
     private fun AppCompositionLocals(content: @Composable () -> Unit) {
+        val eventEdition by model.eventEdition.collectAsStateWithLifecycle()
         CompositionLocalProvider(
+            LocalEventBranding provides eventEdition,
             LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
             LocalBarcodeScannerSupported provides true,
@@ -164,32 +191,48 @@ class MainActivity : ComponentActivity() {
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
             LocalMapViewProvider provides getMapViewProvider(),
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
+            LocalNodeTrackMapProvider provides
+                { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
+                    org.meshtastic.app.map.node.NodeTrackMap(
+                        destNum,
+                        positions,
+                        modifier,
+                        selectedPositionTime,
+                        onPositionSelected,
+                    )
+                },
             LocalTracerouteMapOverlayInsetsProvider provides getTracerouteMapOverlayInsets(),
-            org.meshtastic.core.ui.util.LocalNodeMapScreenProvider provides
+            LocalTracerouteMapProvider provides
+                { overlay, nodePositions, onMappableCountChanged, modifier ->
+                    org.meshtastic.app.map.traceroute.TracerouteMap(
+                        tracerouteOverlay = overlay,
+                        tracerouteNodePositions = nodePositions,
+                        onMappableCountChanged = onMappableCountChanged,
+                        modifier = modifier,
+                    )
+                },
+            LocalNodeMapScreenProvider provides
                 { destNum, onNavigateUp ->
-                    val vm = koinViewModel<org.meshtastic.feature.map.node.NodeMapViewModel>()
+                    val vm = koinViewModel<NodeMapViewModel>()
                     vm.setDestNum(destNum)
                     org.meshtastic.app.map.node.NodeMapScreen(vm, onNavigateUp = onNavigateUp)
                 },
-            org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider provides
+            LocalTracerouteMapScreenProvider provides
                 { destNum, requestId, logUuid, onNavigateUp ->
-                    val metricsViewModel =
-                        koinViewModel<org.meshtastic.feature.node.metrics.MetricsViewModel> {
-                            org.koin.core.parameter.parametersOf(destNum)
-                        }
+                    val metricsViewModel = koinViewModel<MetricsViewModel> { parametersOf(destNum) }
                     metricsViewModel.setNodeId(destNum)
 
-                    org.meshtastic.feature.node.metrics.TracerouteMapScreen(
+                    TracerouteMapScreen(
                         metricsViewModel = metricsViewModel,
                         requestId = requestId,
                         logUuid = logUuid,
                         onNavigateUp = onNavigateUp,
                     )
                 },
-            org.meshtastic.core.ui.util.LocalMapMainScreenProvider provides
+            LocalMapMainScreenProvider provides
                 { onClickNodeChip, navigateToNodeDetails, waypointId ->
-                    val viewModel = koinViewModel<org.meshtastic.feature.map.SharedMapViewModel>()
-                    org.meshtastic.feature.map.MapScreen(
+                    val viewModel = koinViewModel<SharedMapViewModel>()
+                    MapScreen(
                         viewModel = viewModel,
                         onClickNodeChip = onClickNodeChip,
                         navigateToNodeDetails = navigateToNodeDetails,
@@ -229,7 +272,12 @@ class MainActivity : ComponentActivity() {
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
                 Logger.d { "USB device attached" }
-                showSettingsPage()
+                // Android 12+ delivers ACTION_USB_DEVICE_ATTACHED only to manifest-declared
+                // receivers, so the runtime-registered UsbBroadcastReceiver inside UsbRepository
+                // never sees this event. Forward it explicitly so the serialDevices StateFlow
+                // refreshes and the device shows up in the Connect → Serial tab.
+                usbRepository.refreshState()
+                showConnectionsPage()
             }
 
             Intent.ACTION_MAIN -> {}
@@ -250,7 +298,7 @@ class MainActivity : ComponentActivity() {
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
 
-        model.handleDeepLink(uri.toMeshtasticUri()) { lifecycleScope.launch { showToast(Res.string.channel_invalid) } }
+        model.handleDeepLink(uri.toKmpUri()) { lifecycleScope.launch { showToast(Res.string.channel_invalid) } }
     }
 
     private fun createShareIntent(message: String): PendingIntent {
@@ -268,7 +316,7 @@ class MainActivity : ComponentActivity() {
         return resultPendingIntent!!
     }
 
-    private fun createSettingsIntent(): PendingIntent {
+    private fun createConnectionsIntent(): PendingIntent {
         val deepLink = "$DEEP_LINK_BASE_URI/connections"
         val startActivityIntent =
             Intent(Intent.ACTION_VIEW, deepLink.toUri(), this, MainActivity::class.java).apply {
@@ -283,7 +331,7 @@ class MainActivity : ComponentActivity() {
         return resultPendingIntent!!
     }
 
-    private fun showSettingsPage() {
-        createSettingsIntent().send()
+    private fun showConnectionsPage() {
+        createConnectionsIntent().send()
     }
 }

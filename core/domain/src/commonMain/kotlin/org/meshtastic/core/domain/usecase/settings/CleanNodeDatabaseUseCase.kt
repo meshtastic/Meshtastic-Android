@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,8 +57,8 @@ constructor(
         if (nodeNums.isEmpty()) return
 
         nodeRepository.deleteNodes(nodeNums)
-        val packetId = radioController.getPacketId()
         for (nodeNum in nodeNums) {
+            val packetId = radioController.getPacketId()
             radioController.removeByNodenum(packetId, nodeNum)
         }
     }

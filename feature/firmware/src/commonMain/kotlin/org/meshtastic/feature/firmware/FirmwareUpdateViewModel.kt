@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,10 +33,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -69,6 +74,7 @@ private const val DEVICE_DETACH_TIMEOUT = 30_000L
 private const val VERIFY_TIMEOUT = 60_000L
 private const val VERIFY_DELAY = 2000L
 private const val MIN_BATTERY_LEVEL = 10
+private const val LOCAL_RELEASE_ID = "local"
 
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
@@ -88,6 +94,7 @@ class FirmwareUpdateViewModel(
     private val firmwareUpdateManager: FirmwareUpdateManager,
     private val usbManager: FirmwareUsbManager,
     private val fileHandler: FirmwareFileHandler,
+    private val applicationScope: ApplicationCoroutineScope,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
@@ -121,7 +128,12 @@ class FirmwareUpdateViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.launch { tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile) }
+        // viewModelScope is already cancelled when onCleared() runs, so launch cleanup on the
+        // application-wide scope (SupervisorJob + ioDispatcher). ATOMIC start + NonCancellable
+        // context keeps cleanup running even if something tries to cancel it mid-flight.
+        applicationScope.launch(start = CoroutineStart.ATOMIC) {
+            withContext(NonCancellable) { tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile) }
+        }
     }
 
     fun setReleaseType(type: FirmwareReleaseType) {
@@ -141,7 +153,7 @@ class FirmwareUpdateViewModel(
         updateJob =
             viewModelScope.launch {
                 _state.value = FirmwareUpdateState.Checking
-                runCatching {
+                safeCatching {
                     val ourNode = nodeRepository.myNodeInfo.value
                     val address = radioPrefs.devAddr.value?.drop(1)
                     if (address == null || ourNode == null) {
@@ -175,7 +187,9 @@ class FirmwareUpdateViewModel(
                                     }
 
                                     radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
+
                                     radioPrefs.isTcp() -> FirmwareUpdateMethod.Wifi
+
                                     else -> FirmwareUpdateMethod.Unknown
                                 }
                             _state.value =
@@ -194,7 +208,6 @@ class FirmwareUpdateViewModel(
                     }
                 }
                     .onFailure { e ->
-                        if (e is CancellationException) throw e
                         Logger.e(e) { "Error checking for updates" }
                         val unknownError = UiText.Resource(Res.string.firmware_update_unknown_error)
                         _state.value =
@@ -230,7 +243,7 @@ class FirmwareUpdateViewModel(
                                 tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                             }
                         } catch (e: CancellationException) {
-                            Logger.i { "Firmware update cancelled" }
+                            Logger.w(e) { "Firmware update cancelled — cause: ${e.cause} message: ${e.message}" }
                             _state.value = FirmwareUpdateState.Idle
                             checkForUpdates()
                             throw e
@@ -294,8 +307,7 @@ class FirmwareUpdateViewModel(
 
                     val updateArtifact =
                         firmwareUpdateManager.startUpdate(
-                            release =
-                            FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                            release = FirmwareRelease(id = LOCAL_RELEASE_ID, zipUrl = "", releaseNotes = ""),
                             hardware = currentState.deviceHardware,
                             address = currentState.address,
                             updateState = { _state.value = it },
@@ -385,7 +397,7 @@ private suspend fun cleanupTemporaryFiles(
     fileHandler: FirmwareFileHandler,
     tempFirmwareFile: FirmwareArtifact?,
 ): FirmwareArtifact? {
-    runCatching {
+    safeCatching {
         tempFirmwareFile?.takeIf { it.isTemporary }?.let { fileHandler.deleteFile(it) }
         fileHandler.cleanupAllTemporaryFiles()
     }

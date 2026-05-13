@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,33 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.model.MqttConnectionState
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.proto.MqttClientProxyMessage
 
 /** Interface for managing MQTT proxy communication. */
 interface MqttManager {
-    /** Starts the MQTT manager with the given coroutine scope and settings. */
-    fun start(scope: CoroutineScope, enabled: Boolean, proxyToClientEnabled: Boolean)
+    /** Observable MQTT proxy connection state for UI consumption. */
+    val mqttConnectionState: StateFlow<MqttConnectionState>
+
+    /** Starts the MQTT proxy with the given settings. */
+    fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean)
 
     /** Stops the MQTT manager. */
     fun stop()
 
     /** Handles an MQTT proxy message from the radio. */
     fun handleMqttProxyMessage(message: MqttClientProxyMessage)
+
+    /**
+     * Probe an MQTT broker to verify connectivity and credentials without joining the proxy lifecycle. Intended for UI
+     * "Test Connection" affordances.
+     *
+     * @param address Raw broker address as the user would type it (host, host:port, or full URL).
+     * @param tlsEnabled `true` to upgrade bare addresses to `wss://` (ignored when [address] already has a scheme).
+     * @param username Optional MQTT username.
+     * @param password Optional MQTT password.
+     */
+    suspend fun probe(address: String, tlsEnabled: Boolean, username: String?, password: String?): MqttProbeStatus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("detekt:ALL")
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -25,33 +23,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
-
-@Deprecated(message = "Use overload that accepts Strings for button text.")
-@Composable
-fun PreferenceFooter(
-    enabled: Boolean,
-    negativeText: StringResource,
-    onNegativeClicked: () -> Unit,
-    positiveText: StringResource,
-    onPositiveClicked: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    PreferenceFooter(
-        modifier = modifier,
-        enabled = enabled,
-        negativeText = stringResource(negativeText),
-        onNegativeClicked = onNegativeClicked,
-        positiveText = stringResource(positiveText),
-        onPositiveClicked = onPositiveClicked,
-    )
-}
 
 @Composable
 fun PreferenceFooter(
@@ -67,22 +44,30 @@ fun PreferenceFooter(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val mediumHeight = ButtonDefaults.MediumContainerHeight
         if (negativeText != null) {
+            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
             ElevatedButton(
-                modifier = Modifier.height(48.dp).weight(1f),
+                shapes = ButtonDefaults.shapesFor(mediumHeight),
+                modifier = Modifier.height(mediumHeight).weight(1f),
                 colors = ButtonDefaults.filledTonalButtonColors(),
+                enabled = enabled,
                 onClick = onNegativeClicked,
             ) {
-                Text(text = negativeText)
+                Text(text = negativeText, style = ButtonDefaults.textStyleFor(mediumHeight))
             }
         }
         if (positiveText != null) {
+            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
             ElevatedButton(
-                modifier = Modifier.height(48.dp).weight(1f),
+                shapes = ButtonDefaults.shapesFor(mediumHeight),
+                modifier = Modifier.height(mediumHeight).weight(1f),
                 colors = ButtonDefaults.buttonColors(),
-                onClick = { if (enabled) onPositiveClicked() },
+                enabled = enabled,
+                onClick = onPositiveClicked,
             ) {
-                Text(text = positiveText)
+                Text(text = positiveText, style = ButtonDefaults.textStyleFor(mediumHeight))
             }
         }
     }

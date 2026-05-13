@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,11 @@ import android.os.PowerManager
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import org.koin.android.ext.android.inject
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.util.toRemoteExceptions
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.MeshUser
@@ -43,6 +43,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
@@ -50,7 +51,14 @@ import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.PortNum
 
-@Suppress("TooManyFunctions", "LargeClass")
+/**
+ * Android foreground service that hosts the Meshtastic mesh radio connection.
+ *
+ * Acts as the lifecycle anchor for the [MeshServiceOrchestrator], which manages all manager initialization and
+ * connection state. Exposes an AIDL binder for external client integration via [core:api].
+ */
+// IMeshService is deprecated but still required for AIDL binding
+@Suppress("TooManyFunctions", "LargeClass", "DEPRECATION")
 class MeshService : Service() {
 
     private val radioInterfaceService: RadioInterfaceService by inject()
@@ -67,12 +75,22 @@ class MeshService : Service() {
 
     private val connectionManager: MeshConnectionManager by inject()
 
+    private val notifications: MeshServiceNotifications by inject()
+
+    /** Android-typed accessor for the foreground service notification. */
+    private val androidNotifications: MeshServiceNotificationsImpl
+        get() = notifications as MeshServiceNotificationsImpl
+
     private val orchestrator: MeshServiceOrchestrator by inject()
 
     private val router: MeshRouter by inject()
 
+    private val dispatchers: CoroutineDispatchers by inject()
+
     private val serviceJob = Job()
-    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+    private val serviceScope by lazy { CoroutineScope(dispatchers.io + serviceJob) }
+
+    private var isServiceInitialized = false
 
     /**
      * Partial wake lock held while the foreground service is running. Prevents the CPU
@@ -97,7 +115,6 @@ class MeshService : Service() {
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)
 
         fun changeDeviceAddress(context: Context, service: IMeshService, address: String?) {
-            @Suppress("DEPRECATION") // Internal use: routes address change through AIDL binder
             service.setDeviceAddress(address)
             startService(context)
         }
@@ -107,29 +124,40 @@ class MeshService : Service() {
     }
 
     override fun onCreate() {
-        try {
-            super.onCreate()
-        } catch (e: IllegalStateException) {
-            // Koin can throw IllegalStateException in tests if the component is not created.
-            // This can happen if the service is started by the system (e.g. after a crash or on boot)
-            // before the test rule has a chance to create the component.
-            if (e.message?.contains("HiltAndroidRule") == true || e.message?.contains("Koin") == true) {
-                Logger.w(e) { "MeshService created before DI component was ready in test, stopping service" }
-                stopSelf()
-                return
-            }
-            throw e
-        }
+        super.onCreate()
         Logger.i { "Creating mesh service" }
 
-        orchestrator.start()
+        try {
+            orchestrator.start()
+            isServiceInitialized = true
+        } catch (e: IllegalStateException) {
+            // Koin throws IllegalStateException when the DI graph is not yet initialized.
+            // This can happen if the system restarts the service (e.g. after a crash or on boot)
+            // before Application.onCreate() has finished setting up Koin.
+            // In release builds, R8 may merge Koin's InstanceCreationException with unrelated
+            // exception classes (observed as io.ktor.http.URLDecodeException), so we cannot rely
+            // on the exception type alone. We catch IllegalStateException narrowly around the
+            // orchestrator/DI access — not around super.onCreate() — so framework exceptions
+            // still propagate normally.
+            Logger.e(e) { "MeshService: DI not ready, stopping service" }
+            stopSelf()
+            return
+        }
     }
 
+    @Suppress("ReturnCount")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!isServiceInitialized) {
+            Logger.w { "onStartCommand called but service is not initialized (likely DI failure). Stopping." }
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         val a = radioInterfaceService.getDeviceAddress()
         val wantForeground = a != null && a != "n"
 
-        val notification = connectionManager.updateStatusNotification() as android.app.Notification
+        connectionManager.updateStatusNotification()
+        val notification = androidNotifications.getServiceNotification()
 
         val foregroundServiceType =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -142,9 +170,24 @@ class MeshService : Service() {
                 0
             }
 
+        startForegroundSafely(notification, foregroundServiceType)
+
+        return if (!wantForeground) {
+            Logger.i { "Stopping mesh service because no device is selected" }
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            START_NOT_STICKY
+        } else {
+            START_STICKY
+        }
+    }
+
+    private fun startForegroundSafely(notification: android.app.Notification, foregroundServiceType: Int) {
         @Suppress("TooGenericExceptionCaught")
         try {
             ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, foregroundServiceType)
+        } catch (ex: android.app.ForegroundServiceStartNotAllowedException) {
+            Logger.e(ex) { "ForegroundServiceStartNotAllowedException: OS restricted background start." }
         } catch (ex: SecurityException) {
             // On Android 14+ starting a location FGS from the background can fail with SecurityException
             // if the app is not in an allowed state. Retry without the location type if that was requested.
@@ -160,6 +203,8 @@ class MeshService : Service() {
                 }
                 try {
                     ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, connectedDeviceOnly)
+                } catch (retryEx: android.app.ForegroundServiceStartNotAllowedException) {
+                    Logger.e(retryEx) { "ForegroundServiceStartNotAllowedException on retry." }
                 } catch (retryEx: Exception) {
                     Logger.e(retryEx) { "Failed to start foreground service even after retry" }
                 }
@@ -228,7 +273,9 @@ class MeshService : Service() {
         Logger.i { "Destroying mesh service" }
         releaseWakeLock()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        orchestrator.stop()
+        if (isServiceInitialized) {
+            orchestrator.stop()
+        }
         serviceJob.cancel()
         super.onDestroy()
     }

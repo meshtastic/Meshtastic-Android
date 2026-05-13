@@ -116,6 +116,7 @@ class FirmwareUpdateViewModelFileTest {
         firmwareUpdateManager,
         usbManager,
         fileHandler,
+        TestApplicationCoroutineScope(testDispatcher),
     )
 
     // -----------------------------------------------------------------------

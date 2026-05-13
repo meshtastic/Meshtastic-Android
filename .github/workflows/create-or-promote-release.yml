@@ -28,7 +28,8 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
+  statuses: write
   id-token: write
   attestations: write
 
@@ -130,6 +131,7 @@ jobs:
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
       build_desktop: ${{ inputs.build_desktop }}
+      build_flatpak_src: ${{ inputs.build_desktop }}
     secrets: inherit
 
   call-promote-workflow:

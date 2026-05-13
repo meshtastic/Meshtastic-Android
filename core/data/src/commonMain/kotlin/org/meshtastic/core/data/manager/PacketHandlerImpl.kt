@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,19 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.asDeferred
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
@@ -60,6 +65,7 @@ class PacketHandlerImpl(
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val serviceRepository: ServiceRepository,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : PacketHandler {
 
     companion object {
@@ -67,10 +73,14 @@ class PacketHandlerImpl(
     }
 
     private var queueJob: Job? = null
-    private lateinit var scope: CoroutineScope
 
     private val queueMutex = Mutex()
     private val queuedPackets = mutableListOf<MeshPacket>()
+
+    // Unbounded channel preserves FIFO ordering of fire-and-forget sendToRadio(MeshPacket)
+    // calls. The non-suspend entry point does trySend (always succeeds for UNLIMITED) and
+    // a single consumer coroutine enqueues packets under queueMutex in arrival order.
+    private val outboundChannel = Channel<MeshPacket>(Channel.UNLIMITED)
 
     // Set to true by stopPacketQueue() under queueMutex. Checked by startPacketQueueLocked()
     // and the queue processor's finally block to prevent restarting a stopped queue.
@@ -79,9 +89,18 @@ class PacketHandlerImpl(
     private val responseMutex = Mutex()
     private val queueResponse = mutableMapOf<Int, CompletableDeferred<Boolean>>()
 
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
-        queueStopped = false // Safe: called before any concurrent operations on this scope.
+    init {
+        // Single consumer serializes enqueues from the non-suspend sendToRadio(MeshPacket)
+        // entry point, preserving FIFO across rapid concurrent callers.
+        scope.launch {
+            outboundChannel.consumeAsFlow().collect { packet ->
+                queueMutex.withLock {
+                    queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
+                    queuedPackets.add(packet)
+                    startPacketQueueLocked()
+                }
+            }
+        }
     }
 
     override fun sendToRadio(p: ToRadio) {
@@ -108,12 +127,9 @@ class PacketHandlerImpl(
     }
 
     override fun sendToRadio(packet: MeshPacket) {
-        scope.launch {
-            queueMutex.withLock {
-                queuedPackets.add(packet)
-                startPacketQueueLocked()
-            }
-        }
+        // Non-suspend entry point — order-preserving via unbounded channel drained by
+        // a single consumer coroutine. trySend on UNLIMITED never fails for capacity.
+        outboundChannel.trySend(packet)
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -123,6 +139,7 @@ class PacketHandlerImpl(
         val deferred = CompletableDeferred<Boolean>()
         responseMutex.withLock { queueResponse[packet.id] = deferred }
         queueMutex.withLock {
+            queueStopped = false // Allow queue to resume after a disconnect/reconnect cycle.
             queuedPackets.add(packet)
             startPacketQueueLocked()
         }
@@ -199,15 +216,18 @@ class PacketHandlerImpl(
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} success $success" }
                         } catch (e: TimeoutCancellationException) {
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
+                            // Clean up the deferred for this packet. sendToRadioAndAwait callers
+                            // also clean up in their own finally block (idempotent remove).
+                            responseMutex.withLock { queueResponse.remove(packet.id) }
                         } catch (e: CancellationException) {
                             throw e // Preserve structured concurrency cancellation propagation.
                         } catch (e: Exception) {
                             Logger.d { "queueJob packet id=${packet.id.toUInt()} failed" }
+                            responseMutex.withLock { queueResponse.remove(packet.id) }
                         }
-                        // Do NOT remove from queueResponse here. Removal is owned by:
-                        // - handleQueueStatus (normal completion path)
-                        // - sendToRadioAndAwait's finally block (for await-style callers)
-                        // - stopPacketQueue (bulk cleanup on disconnect)
+                        // Deferred cleanup is now handled in the catch blocks above.
+                        // handleQueueStatus (normal success) and stopPacketQueue (bulk cleanup)
+                        // also remove entries, and these removals are idempotent.
                     }
                 } finally {
                     // Hold queueMutex so that clearing queueJob and the restart decision are
@@ -242,7 +262,7 @@ class PacketHandlerImpl(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    private suspend fun sendPacket(packet: MeshPacket): CompletableDeferred<Boolean> {
+    private suspend fun sendPacket(packet: MeshPacket): Deferred<Boolean> {
         // Reuse a deferred pre-registered by sendToRadioAndAwait, or create a new one.
         val deferred = responseMutex.withLock { queueResponse.getOrPut(packet.id) { CompletableDeferred() } }
         try {
@@ -257,7 +277,10 @@ class PacketHandlerImpl(
             Logger.e(ex) { "sendToRadio error: ${ex.message}" }
             deferred.complete(false)
         }
-        return deferred
+        // Return a read-only Deferred view (kotlinx.coroutines 1.11+) so callers can await it
+        // without being able to complete the underlying CompletableDeferred; cancellation is
+        // still exposed via Deferred/Job.
+        return deferred.asDeferred()
     }
 
     private fun insertMeshLog(packetToSave: MeshLog) {

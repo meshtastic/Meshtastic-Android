@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.node"
         androidResources.enable = false
@@ -49,7 +46,6 @@ kotlin {
             implementation(projects.feature.map)
 
             implementation(libs.jetbrains.navigation3.ui)
-            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)
@@ -62,21 +58,6 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.navigation3)
         }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.appcompat)
-
-            implementation(libs.markdown.renderer.android)
-        }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.robolectric)
-                implementation(libs.turbine)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.compose.ui.test.junit4)
-                implementation(libs.androidx.test.ext.junit)
-            }
-        }
+        androidMain.dependencies { implementation(libs.markdown.renderer.android) }
     }
 }

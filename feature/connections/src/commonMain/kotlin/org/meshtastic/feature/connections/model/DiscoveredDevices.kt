@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 package org.meshtastic.feature.connections.model
 
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.network.repository.DiscoveredService
 
 data class DiscoveredDevices(
     val bleDevices: List<DeviceListEntry> = emptyList(),
@@ -26,5 +27,12 @@ data class DiscoveredDevices(
 )
 
 interface GetDiscoveredDevicesUseCase {
-    fun invoke(showMock: Boolean): Flow<DiscoveredDevices>
+    /**
+     * Returns a flow of all discovered devices (BLE, USB, TCP).
+     *
+     * @param resolvedList the NSD/mDNS resolved services flow. On Android 15+, subscribing to
+     *   `NetworkRepository.resolvedList` triggers a system consent dialog, so callers should pass `flowOf(emptyList())`
+     *   unless the user has explicitly requested a network scan.
+     */
+    fun invoke(showMock: Boolean, resolvedList: Flow<List<DiscoveredService>>): Flow<DiscoveredDevices>
 }

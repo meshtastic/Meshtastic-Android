@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -47,11 +47,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
-import org.meshtastic.core.navigation.ContactsRoutes
+import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.MultiBackstack
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
@@ -79,7 +80,7 @@ fun MeshtasticNavigationSuite(
     val unreadMessageCount by uiViewModel.unreadMessageCount.collectAsStateWithLifecycle()
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
-    val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
+    val adaptiveInfo = currentWindowAdaptiveInfoV2()
 
     val currentTabRoute = multiBackstack.currentTabRoute
     val topLevelDestination = TopLevelDestination.fromNavKey(currentTabRoute)
@@ -140,22 +141,24 @@ private fun handleNavigation(
         val currentKey = multiBackstack.activeBackStack.lastOrNull()
         when (destination) {
             TopLevelDestination.Nodes -> {
-                val onNodesList = currentKey is NodesRoutes.NodesGraph || currentKey is NodesRoutes.Nodes
+                val onNodesList = currentKey is NodesRoute.NodesGraph || currentKey is NodesRoute.Nodes
                 if (!onNodesList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                 }
             }
+
             TopLevelDestination.Conversations -> {
                 val onConversationsList =
-                    currentKey is ContactsRoutes.ContactsGraph || currentKey is ContactsRoutes.Contacts
+                    currentKey is ContactsRoute.ContactsGraph || currentKey is ContactsRoute.Contacts
                 if (!onConversationsList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                 }
             }
+
             else -> {
                 if (currentKey != destination.route) {
                     multiBackstack.navigateTopLevel(destination.route)
@@ -225,7 +228,7 @@ private fun NavigationIconContent(
             ) {
                 Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
                     Icon(
-                        imageVector = destination.icon,
+                        imageVector = vectorResource(destination.icon),
                         contentDescription = stringResource(destination.label),
                         tint = if (isSelectedState) colorScheme.primary else LocalContentColor.current,
                     )

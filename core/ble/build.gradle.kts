@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,12 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     id("meshtastic.koin")
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
     jvm()
 
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.ble"
         androidResources.enable = false
@@ -47,15 +47,25 @@ kotlin {
         }
 
         commonTest.dependencies {
-            implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
-        }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.androidx.lifecycle.testing)
-            }
+            implementation(projects.core.testing)
         }
     }
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-ble.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidRuntimeClasspath",
+            "androidCompileClasspath",
+            "androidMainLintChecksClasspath",
+            "androidHostTestCompileClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }

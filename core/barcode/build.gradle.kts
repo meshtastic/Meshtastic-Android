@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,9 @@ dependencies {
     implementation(projects.core.ui)
 
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.compose.runtime)
-    implementation(libs.androidx.compose.ui)
+    implementation(libs.compose.multiplatform.material3)
+    implementation(libs.compose.multiplatform.runtime)
+    implementation(libs.compose.multiplatform.ui)
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
 
@@ -53,9 +52,6 @@ dependencies {
     testImplementation(libs.junit)
     testRuntimeOnly(libs.junit.vintage.engine)
     testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.compose.ui.test.junit4)
-
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.compose.multiplatform.ui.test)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

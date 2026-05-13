@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,9 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.wire)
-    `maven-publish`
+    id("meshtastic.publishing")
+    alias(libs.plugins.flatpak.gradle.generator)
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
     // Override minSdk for ATAK compatibility (standard is 26)
@@ -62,4 +61,10 @@ publishing {
             artifactId = baseId.replace("proto-", "meshtastic-android-proto-")
         }
     }
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-proto.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
 }

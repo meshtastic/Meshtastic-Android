@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
  */
 package org.meshtastic.desktop.ui
 
-import org.meshtastic.core.navigation.ConnectionsRoutes
-import org.meshtastic.core.navigation.ContactsRoutes
-import org.meshtastic.core.navigation.FirmwareRoutes
-import org.meshtastic.core.navigation.MapRoutes
-import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.ConnectionsRoute
+import org.meshtastic.core.navigation.ContactsRoute
+import org.meshtastic.core.navigation.FirmwareRoute
+import org.meshtastic.core.navigation.MapRoute
+import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import kotlin.reflect.KClass
 import kotlin.test.Test
@@ -41,11 +41,11 @@ class DesktopTopLevelDestinationParityTest {
 
         val androidParityRoutes: Set<KClass<out Route>> =
             setOf(
-                ContactsRoutes.ContactsGraph::class,
-                NodesRoutes.NodesGraph::class,
-                MapRoutes.Map::class,
-                SettingsRoutes.SettingsGraph::class,
-                ConnectionsRoutes.ConnectionsGraph::class,
+                ContactsRoute.ContactsGraph::class,
+                NodesRoute.NodesGraph::class,
+                MapRoute.Map::class,
+                SettingsRoute.SettingsGraph::class,
+                ConnectionsRoute.ConnectionsGraph::class,
             )
 
         assertEquals(
@@ -60,7 +60,7 @@ class DesktopTopLevelDestinationParityTest {
         val desktopRoutes: Set<KClass<out Route>> = TopLevelDestination.entries.map { it.route::class }.toSet()
 
         assertFalse(
-            actual = desktopRoutes.contains(FirmwareRoutes.FirmwareGraph::class),
+            actual = desktopRoutes.contains(FirmwareRoute.FirmwareGraph::class),
             message = "Firmware must stay in-flow and not appear in the desktop top-level rail",
         )
     }

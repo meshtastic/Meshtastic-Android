@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 package org.meshtastic.core.database
 
 import okio.ByteString.Companion.encodeUtf8
+import org.meshtastic.core.common.util.normalizeAddress
 
 object DatabaseConstants {
     const val DB_PREFIX: String = "meshtastic_database"
@@ -40,17 +41,6 @@ object DatabaseConstants {
     const val ADDRESS_ANON_EDGE_LEN: Int = 2
 }
 
-fun normalizeAddress(addr: String?): String {
-    val u = addr?.trim()?.uppercase()
-    val normalized =
-        when {
-            u.isNullOrBlank() -> "DEFAULT"
-            u == "N" || u == "NULL" -> "DEFAULT"
-            else -> u.replace(":", "")
-        }
-    return normalized
-}
-
 fun shortSha1(s: String): String = s.encodeUtf8().sha1().hex().take(DatabaseConstants.DB_NAME_HASH_LEN)
 
 fun buildDbName(address: String?): String = if (address.isNullOrBlank()) {
@@ -61,7 +51,9 @@ fun buildDbName(address: String?): String = if (address.isNullOrBlank()) {
 
 fun anonymizeAddress(address: String?): String = when {
     address == null -> "null"
+
     address.length <= DatabaseConstants.ADDRESS_ANON_SHORT_LEN -> address
+
     else ->
         address.take(DatabaseConstants.ADDRESS_ANON_EDGE_LEN) +
             "…" +

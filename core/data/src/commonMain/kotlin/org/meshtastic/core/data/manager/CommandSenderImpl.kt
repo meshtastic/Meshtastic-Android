@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
@@ -36,22 +37,31 @@ import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.SessionManager
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Constants
 import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.HostMetrics
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Neighbor
 import org.meshtastic.proto.NeighborInfo
+import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.Telemetry
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
+import org.meshtastic.proto.Position as ProtoPosition
 
-@Suppress("TooManyFunctions", "CyclomaticComplexMethod")
+@Suppress("TooManyFunctions", "CyclomaticComplexMethod", "LongParameterList")
 @Single
 class CommandSenderImpl(
     private val packetHandler: PacketHandler,
@@ -59,20 +69,15 @@ class CommandSenderImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
+    private val sessionManager: SessionManager,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : CommandSender {
-    private lateinit var scope: CoroutineScope
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
-    private val sessionPasskey = atomic(ByteString.EMPTY)
 
     private val localConfig = MutableStateFlow(LocalConfig())
     private val channelSet = MutableStateFlow(ChannelSet())
 
-    // We'll need a way to track connection state in shared code,
-    // maybe via ServiceRepository or similar.
-    // For now I'll assume it's injected or available.
-
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
+    init {
         radioConfigRepository.localConfigFlow.onEach { localConfig.value = it }.launchIn(scope)
         radioConfigRepository.channelSetFlow.onEach { channelSet.value = it }.launchIn(scope)
     }
@@ -89,36 +94,38 @@ class CommandSenderImpl(
         return ((next % numPacketIds) + 1L).toInt()
     }
 
-    override fun setSessionPasskey(key: ByteString) {
-        sessionPasskey.value = key
-    }
-
     private fun computeHopLimit(): Int = (localConfig.value.lora?.hop_limit ?: 0).takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
 
     /**
      * Resolves the correct channel index for sending a packet to [toNum].
      *
-     * When both the local node and the destination support PKC, returns [DataPacket.PKC_CHANNEL_INDEX] so that
-     * [buildMeshPacket] enables PKI encryption. Otherwise falls back to the node's heard-on channel (for general
-     * packets) or the dedicated admin channel (for admin packets).
+     * PKI encryption ([DataPacket.PKC_CHANNEL_INDEX]) is only used for **admin** packets, where end-to-end encryption
+     * is appropriate. Protocol-level requests (traceroute, telemetry, position, nodeinfo, neighborinfo) must NOT use
+     * PKI because relay nodes need to read and/or modify the inner payload (e.g. traceroute appends each hop's node
+     * number). These requests fall back to the node's heard-on channel.
      */
-    private fun getChannelIndex(toNum: Int, isAdmin: Boolean = false): Int {
+    private fun getAdminChannelIndex(toNum: Int): Int {
         val myNum = nodeManager.myNodeNum.value ?: return 0
         val myNode = nodeManager.nodeDBbyNodeNum[myNum]
         val destNode = nodeManager.nodeDBbyNodeNum[toNum]
 
         return when {
             myNum == toNum -> 0
+
             myNode?.hasPKC == true && destNode?.hasPKC == true -> DataPacket.PKC_CHANNEL_INDEX
-            isAdmin ->
+
+            else ->
                 channelSet.value.settings
                     .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
                     .coerceAtLeast(0)
-            else -> destNode?.channel ?: 0
         }
     }
 
-    private fun getAdminChannelIndex(toNum: Int): Int = getChannelIndex(toNum, isAdmin = true)
+    /**
+     * Returns the heard-on channel for a non-admin request to [toNum]. Does NOT use PKI — protocol-level requests need
+     * clear inner payloads.
+     */
+    private fun getChannelIndex(toNum: Int): Int = nodeManager.nodeDBbyNodeNum[toNum]?.channel ?: 0
 
     override fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()
@@ -137,14 +144,11 @@ class CommandSenderImpl(
         if (!Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)) {
             val actualSize = Data.ADAPTER.encodedSize(data)
             p.status = MessageStatus.ERROR
-            // throw RemoteException("Message too long: $actualSize bytes (max ${Constants.DATA_PAYLOAD_LEN.value})")
-            // RemoteException is Android specific. For KMP we might want a custom exception.
             error("Message too long: $actualSize bytes")
         } else {
             p.status = MessageStatus.QUEUED
         }
 
-        // TODO: Check connection state
         sendNow(p)
     }
 
@@ -169,7 +173,7 @@ class CommandSenderImpl(
     }
 
     override fun sendAdmin(destNum: Int, requestId: Int, wantResponse: Boolean, initFn: () -> AdminMessage) {
-        val adminMsg = initFn().copy(session_passkey = sessionPasskey.value)
+        val adminMsg = initFn().copy(session_passkey = sessionManager.getPasskey(destNum))
         val packet =
             buildAdminPacket(to = destNum, id = requestId, wantResponse = wantResponse, adminMessage = adminMsg)
         packetHandler.sendToRadio(packet)
@@ -181,13 +185,13 @@ class CommandSenderImpl(
         wantResponse: Boolean,
         initFn: () -> AdminMessage,
     ): Boolean {
-        val adminMsg = initFn().copy(session_passkey = sessionPasskey.value)
+        val adminMsg = initFn().copy(session_passkey = sessionManager.getPasskey(destNum))
         val packet =
             buildAdminPacket(to = destNum, id = requestId, wantResponse = wantResponse, adminMessage = adminMsg)
         return packetHandler.sendToRadioAndAwait(packet)
     }
 
-    override fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {
+    override fun sendPosition(pos: ProtoPosition, destNum: Int?, wantResponse: Boolean) {
         val myNum = nodeManager.myNodeNum.value ?: return
         val idNum = destNum ?: myNum
         Logger.d { "Sending our position/time to=$idNum $pos" }
@@ -213,7 +217,7 @@ class CommandSenderImpl(
 
     override fun requestPosition(destNum: Int, currentPosition: Position) {
         val meshPosition =
-            org.meshtastic.proto.Position(
+            ProtoPosition(
                 latitude_i = Position.degI(currentPosition.latitude),
                 longitude_i = Position.degI(currentPosition.longitude),
                 altitude = currentPosition.altitude,
@@ -236,7 +240,7 @@ class CommandSenderImpl(
 
     override fun setFixedPosition(destNum: Int, pos: Position) {
         val meshPos =
-            org.meshtastic.proto.Position(
+            ProtoPosition(
                 latitude_i = Position.degI(pos.latitude),
                 longitude_i = Position.degI(pos.longitude),
                 altitude = pos.altitude,
@@ -289,21 +293,17 @@ class CommandSenderImpl(
 
         if (type == TelemetryType.PAX) {
             portNum = PortNum.PAXCOUNTER_APP
-            payloadBytes = org.meshtastic.proto.Paxcount().encode().toByteString()
+            payloadBytes = Paxcount().encode().toByteString()
         } else {
             portNum = PortNum.TELEMETRY_APP
             payloadBytes =
                 Telemetry(
-                    device_metrics =
-                    if (type == TelemetryType.DEVICE) org.meshtastic.proto.DeviceMetrics() else null,
-                    environment_metrics =
-                    if (type == TelemetryType.ENVIRONMENT) org.meshtastic.proto.EnvironmentMetrics() else null,
-                    air_quality_metrics =
-                    if (type == TelemetryType.AIR_QUALITY) org.meshtastic.proto.AirQualityMetrics() else null,
-                    power_metrics = if (type == TelemetryType.POWER) org.meshtastic.proto.PowerMetrics() else null,
-                    local_stats =
-                    if (type == TelemetryType.LOCAL_STATS) org.meshtastic.proto.LocalStats() else null,
-                    host_metrics = if (type == TelemetryType.HOST) org.meshtastic.proto.HostMetrics() else null,
+                    device_metrics = if (type == TelemetryType.DEVICE) DeviceMetrics() else null,
+                    environment_metrics = if (type == TelemetryType.ENVIRONMENT) EnvironmentMetrics() else null,
+                    air_quality_metrics = if (type == TelemetryType.AIR_QUALITY) AirQualityMetrics() else null,
+                    power_metrics = if (type == TelemetryType.POWER) PowerMetrics() else null,
+                    local_stats = if (type == TelemetryType.LOCAL_STATS) LocalStats() else null,
+                    host_metrics = if (type == TelemetryType.HOST) HostMetrics() else null,
                 )
                     .encode()
                     .toByteString()
@@ -375,6 +375,7 @@ class CommandSenderImpl(
 
     fun resolveNodeNum(toId: String): Int = when (toId) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
+
         else -> {
             val numericNum =
                 if (toId.startsWith(NODE_ID_PREFIX)) {

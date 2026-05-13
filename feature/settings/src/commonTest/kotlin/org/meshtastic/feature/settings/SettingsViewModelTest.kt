@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,13 @@ package org.meshtastic.feature.settings
 
 import app.cash.turbine.test
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
@@ -35,7 +39,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okio.Buffer
+import okio.BufferedSink
+import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -47,6 +55,7 @@ import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCas
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeAppPreferences
@@ -56,12 +65,18 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -253,6 +268,81 @@ class SettingsViewModelTest {
 
         viewModel.setProvideLocation(false)
         appPreferences.ui.shouldProvideNodeLocation(myNodeNum).value shouldBe false
+    }
+
+    @Test
+    fun `saveDataCsv writes filtered export via file service`() = runTest {
+        val myNodeNum = 456
+        val senderNodeNum = 123
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = myNodeNum))
+        nodeRepository.setNodes(
+            listOf(TestDataFactory.createTestNode(num = senderNodeNum, longName = "Sender Node", shortName = "SN")),
+        )
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog(
+                    uuid = "match",
+                    message_type = "TEXT",
+                    received_date = 1_700_000_000_000,
+                    raw_message = "",
+                    fromNum = senderNodeNum,
+                    portNum = PortNum.TEXT_MESSAGE_APP.value,
+                    fromRadio =
+                    FromRadio(
+                        packet =
+                        MeshPacket(
+                            from = senderNodeNum,
+                            rx_snr = 5.0f,
+                            decoded =
+                            Data(
+                                portnum = PortNum.TEXT_MESSAGE_APP,
+                                payload = "Hello settings".encodeUtf8(),
+                            ),
+                        ),
+                    ),
+                ),
+                MeshLog(
+                    uuid = "filtered-out",
+                    message_type = "RANGE",
+                    received_date = 1_700_000_001_000,
+                    raw_message = "",
+                    fromNum = senderNodeNum,
+                    portNum = PortNum.RANGE_TEST_APP.value,
+                    fromRadio =
+                    FromRadio(
+                        packet =
+                        MeshPacket(
+                            from = senderNodeNum,
+                            rx_snr = 6.0f,
+                            decoded = Data(
+                                portnum = PortNum.RANGE_TEST_APP,
+                                payload = "Ignore me".encodeUtf8(),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val uri = CommonUri.parse("content://test/export.csv")
+        viewModel.saveDataCsv(uri, filterPortnum = PortNum.TEXT_MESSAGE_APP.value)
+        runCurrent()
+
+        verifySuspend { fileService.write(uri, any()) }
+
+        val csvOutput = buffer.readUtf8()
+        assertTrue(csvOutput.startsWith("\"date\",\"time\",\"from\""))
+        assertTrue(csvOutput.contains("\"123\",\"Sender Node\""))
+        assertTrue(csvOutput.contains("Hello settings"))
+        assertFalse(csvOutput.contains("Ignore me"))
     }
 
     @Test

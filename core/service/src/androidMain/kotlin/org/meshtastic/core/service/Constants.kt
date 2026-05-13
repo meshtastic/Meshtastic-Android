@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,24 +28,10 @@ const val ACTION_MESH_DISCONNECTED = MeshtasticIntent.ACTION_MESH_DISCONNECTED
 const val ACTION_CONNECTION_CHANGED = MeshtasticIntent.ACTION_CONNECTION_CHANGED
 const val ACTION_MESSAGE_STATUS = MeshtasticIntent.ACTION_MESSAGE_STATUS
 
-const val ACTION_RECEIVED_TEXT_MESSAGE_APP = MeshtasticIntent.ACTION_RECEIVED_TEXT_MESSAGE_APP
-const val ACTION_RECEIVED_POSITION_APP = MeshtasticIntent.ACTION_RECEIVED_POSITION_APP
-const val ACTION_RECEIVED_NODEINFO_APP = MeshtasticIntent.ACTION_RECEIVED_NODEINFO_APP
-const val ACTION_RECEIVED_TELEMETRY_APP = MeshtasticIntent.ACTION_RECEIVED_TELEMETRY_APP
-const val ACTION_RECEIVED_ATAK_PLUGIN = MeshtasticIntent.ACTION_RECEIVED_ATAK_PLUGIN
-const val ACTION_RECEIVED_ATAK_FORWARDER = MeshtasticIntent.ACTION_RECEIVED_ATAK_FORWARDER
-const val ACTION_RECEIVED_DETECTION_SENSOR_APP = MeshtasticIntent.ACTION_RECEIVED_DETECTION_SENSOR_APP
-const val ACTION_RECEIVED_PRIVATE_APP = MeshtasticIntent.ACTION_RECEIVED_PRIVATE_APP
-
 fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
 
-//
-// standard EXTRA bundle definitions
-//
-
+// Standard EXTRA bundle definitions
 const val EXTRA_CONNECTED = MeshtasticIntent.EXTRA_CONNECTED
-const val EXTRA_PROGRESS = "$PREFIX.Progress"
-const val EXTRA_PERMANENT = "$PREFIX.Permanent"
 
 const val EXTRA_PAYLOAD = MeshtasticIntent.EXTRA_PAYLOAD
 const val EXTRA_NODEINFO = MeshtasticIntent.EXTRA_NODEINFO

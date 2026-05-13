@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,38 +17,89 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 
-/** Interface for the low-level radio interface that handles raw byte communication. */
-interface RadioInterfaceService {
+/**
+ * Interface for the low-level radio interface that handles raw byte communication.
+ *
+ * This is the **transport layer** — it manages the raw hardware connection (BLE, TCP, Serial, USB) to a Meshtastic
+ * radio. Its [connectionState] reflects whether the physical link is up or down, **before** any handshake or
+ * config-loading logic is applied.
+ *
+ * **Important:** UI and feature modules should **never** observe [connectionState] directly. Instead, they should use
+ * [ServiceRepository.connectionState], which is the canonical app-level connection state that accounts for handshake
+ * progress, light-sleep policy, and other higher-level concerns. The only legitimate consumer of this transport-level
+ * flow is [MeshConnectionManager], which bridges transport state changes into the app-level
+ * [ServiceRepository.connectionState].
+ *
+ * @see ServiceRepository.connectionState
+ */
+interface RadioInterfaceService : RadioTransportCallback {
     /** The device types supported by this platform's radio interface. */
     val supportedDeviceTypes: List<DeviceType>
 
-    /** Reactive connection state of the radio. */
+    /**
+     * Transport-level connection state of the radio hardware.
+     *
+     * This flow reflects the raw state of the physical link (BLE, TCP, Serial, USB):
+     * - [ConnectionState.Connected] — the transport link is established
+     * - [ConnectionState.Disconnected] — the transport link is down (permanent)
+     * - [ConnectionState.DeviceSleep] — the transport link is down (transient, device sleeping)
+     *
+     * **This is NOT the canonical app-level connection state.** The transport may report [ConnectionState.Connected]
+     * while the app is still performing the mesh handshake (config + node-info exchange), during which the app-level
+     * state remains [ConnectionState.Connecting].
+     *
+     * Only [MeshConnectionManager] should observe this flow. All other consumers (ViewModels, feature modules, UI) must
+     * use [ServiceRepository.connectionState].
+     *
+     * @see ServiceRepository.connectionState
+     */
     val connectionState: StateFlow<ConnectionState>
 
     /** Flow of the current device address. */
     val currentDeviceAddressFlow: StateFlow<String?>
 
-    /** Whether we are currently using a mock interface. */
-    fun isMockInterface(): Boolean
+    /** Whether we are currently using a mock transport. */
+    fun isMockTransport(): Boolean
 
-    /** Flow of raw data received from the radio. */
-    val receivedData: SharedFlow<ByteArray>
+    /**
+     * Flow of raw data received from the radio.
+     *
+     * Emissions preserve the order in which bytes arrived from the hardware — this is required because the firmware
+     * handshake (initial config packet ordering) depends on strict FIFO delivery. Implementations MUST guarantee
+     * ordering; do not swap in a [SharedFlow] without preserving order.
+     */
+    val receivedData: Flow<ByteArray>
 
     /** Flow of radio activity events. */
-    val meshActivity: SharedFlow<MeshActivity>
+    val meshActivity: Flow<MeshActivity>
+
+    /**
+     * Drains any bytes currently buffered in [receivedData] without emitting them to collectors.
+     *
+     * Callers invoke this before attaching a fresh collector after a stop/start cycle so stale bytes buffered while no
+     * collector was attached do not get replayed ahead of the next session's handshake.
+     */
+    fun resetReceivedBuffer()
 
     /** Sends a raw byte array to the radio. */
     fun sendToRadio(bytes: ByteArray)
 
     /** Initiates the connection to the radio. */
     fun connect()
+
+    /**
+     * Explicitly tears down the active transport, sending a polite `ToRadio(disconnect = true)` goodbye frame first
+     * when a transport is live. Safe to call when nothing is connected — implementations must no-op in that case.
+     * Suspends until the teardown completes.
+     */
+    suspend fun disconnect()
 
     /** Returns the current device address. */
     fun getDeviceAddress(): String?
@@ -59,17 +110,8 @@ interface RadioInterfaceService {
     /** Constructs a full radio address for the specific interface type. */
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String
 
-    /** Called by an interface when it has successfully connected. */
-    fun onConnect()
-
-    /** Called by an interface when it has disconnected. */
-    fun onDisconnect(isPermanent: Boolean, errorMessage: String? = null)
-
-    /** Called by an interface when it has received raw data from the radio. */
-    fun handleFromRadio(bytes: ByteArray)
-
     /** Flow of user-facing connection error messages (e.g. permission failures). */
-    val connectionError: SharedFlow<String>
+    val connectionError: Flow<String>
 
     /** The scope in which interface-related coroutines should run. */
     val serviceScope: CoroutineScope

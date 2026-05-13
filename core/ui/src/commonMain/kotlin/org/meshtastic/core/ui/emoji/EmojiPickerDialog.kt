@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,7 +58,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -73,13 +70,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.search_emoji
 import org.meshtastic.core.ui.component.BottomSheetDialog
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Search
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -117,8 +116,8 @@ fun EmojiPickerDialog(
     onConfirm: (String) -> Unit,
 ) {
     val viewModel: EmojiPickerViewModel = koinViewModel()
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedCategoryIndex by remember { mutableStateOf(0) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var selectedCategoryIndex by rememberSaveable { mutableStateOf(0) }
 
     val recentEmojis by
         remember(viewModel.customEmojiFrequency) { derivedStateOf { parseRecents(viewModel.customEmojiFrequency) } }
@@ -218,13 +217,13 @@ private fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
             )
         },
         leadingIcon = {
-            Icon(imageVector = Icons.Rounded.Search, contentDescription = null, modifier = Modifier.size(20.dp))
+            Icon(imageVector = MeshtasticIcons.Search, contentDescription = null, modifier = Modifier.size(20.dp))
         },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
                     Icon(
-                        imageVector = Icons.Rounded.Close,
+                        imageVector = MeshtasticIcons.Close,
                         contentDescription = stringResource(Res.string.clear),
                         modifier = Modifier.size(20.dp),
                     )
@@ -287,15 +286,17 @@ private fun EmojiGrid(
     onEmojiSelected: (String) -> Unit,
 ) {
     val gridState = rememberLazyGridState()
-    val scope = rememberCoroutineScope()
     val hasRecents = recentEmojis.isNotEmpty()
     val tabOffset = if (hasRecents) 1 else 0
 
     val gridItems: List<GridItem> = remember(searchQuery, recentEmojis) { buildGridItems(searchQuery, recentEmojis) }
+    var animationTargetIndex by remember { mutableStateOf<Int?>(null) }
 
     // Scroll to category when tab changes
     LaunchedEffect(selectedCategoryIndex) {
         if (searchQuery.isNotBlank()) return@LaunchedEffect
+        if (selectedCategoryIndex == animationTargetIndex) return@LaunchedEffect
+
         val targetKey =
             if (hasRecents && selectedCategoryIndex == 0) {
                 RECENTS_HEADER_KEY
@@ -310,7 +311,12 @@ private fun EmojiGrid(
         targetKey?.let { key ->
             val itemIndex = gridItems.indexOfFirst { it is GridItem.Header && it.key == key }
             if (itemIndex >= 0) {
-                scope.launch { gridState.animateScrollToItem(itemIndex) }
+                try {
+                    animationTargetIndex = selectedCategoryIndex
+                    gridState.animateScrollToItem(itemIndex)
+                } finally {
+                    animationTargetIndex = null
+                }
             }
         }
     }
@@ -320,6 +326,7 @@ private fun EmojiGrid(
         if (searchQuery.isNotBlank()) return@LaunchedEffect
         snapshotFlow { gridState.firstVisibleItemIndex }
             .collect { firstVisible ->
+                if (animationTargetIndex != null) return@collect
                 for (i in firstVisible downTo 0) {
                     val item = gridItems.getOrNull(i)
                     if (item is GridItem.Header) {
@@ -350,6 +357,7 @@ private fun EmojiGrid(
             when (item) {
                 is GridItem.Header ->
                     item(span = { GridItemSpan(maxLineSpan) }, key = item.key) { SectionHeader(title = item.title) }
+
                 is GridItem.EmojiCell ->
                     item(key = item.key) {
                         EmojiCellWithSkinTone(
@@ -427,7 +435,7 @@ private fun SectionHeader(title: String) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun EmojiCellWithSkinTone(emoji: Emoji, isSelected: Boolean, onSelect: (String) -> Unit) {
-    var showSkinTonePopup by remember { mutableStateOf(false) }
+    var showSkinTonePopup by rememberSaveable { mutableStateOf(false) }
 
     Box {
         Box(

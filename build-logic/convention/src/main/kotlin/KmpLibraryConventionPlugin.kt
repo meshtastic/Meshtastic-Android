@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.configure
 import org.meshtastic.buildlogic.configureAndroidMarketplaceFallback
+import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKmpTestDependencies
 import org.meshtastic.buildlogic.configureKotlinMultiplatform
 import org.meshtastic.buildlogic.configureTestOptions
+import org.meshtastic.buildlogic.isDesktopOnly
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
@@ -30,8 +30,10 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = libs.plugin("kotlin-multiplatform").get().pluginId)
-            apply(plugin = libs.plugin("android-kotlin-multiplatform-library").get().pluginId)
-            apply(plugin = "meshtastic.android.lint")
+            if (!isDesktopOnly) {
+                apply(plugin = libs.plugin("android-kotlin-multiplatform-library").get().pluginId)
+                apply(plugin = "meshtastic.android.lint")
+            }
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
             apply(plugin = "meshtastic.dokka")
@@ -39,12 +41,13 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "org.gradle.test-retry")
             apply(plugin = libs.plugin("mokkery").get().pluginId)
 
-            extensions.configure<MokkeryGradleExtension> { stubs.allowConcreteClassInstantiation.set(true) }
-
             configureKotlinMultiplatform()
             configureKmpTestDependencies()
             configureTestOptions()
-            configureAndroidMarketplaceFallback()
+            configureGraphTasks()
+            if (!isDesktopOnly) {
+                configureAndroidMarketplaceFallback()
+            }
         }
     }
 }

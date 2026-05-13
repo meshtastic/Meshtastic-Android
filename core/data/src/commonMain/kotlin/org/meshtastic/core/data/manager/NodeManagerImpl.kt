@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import okio.ByteString
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceMetrics
@@ -44,6 +46,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
@@ -59,8 +62,8 @@ class NodeManagerImpl(
     private val nodeRepository: NodeRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val notificationManager: NotificationManager,
+    @Named("ServiceScope") private val scope: CoroutineScope,
 ) : NodeManager {
-    private lateinit var scope: CoroutineScope
 
     private val _nodeDBbyNodeNum = atomic(persistentMapOf<Int, Node>())
     private val _nodeDBbyID = atomic(persistentMapOf<String, Node>())
@@ -88,8 +91,10 @@ class NodeManagerImpl(
         myNodeNum.value = num
     }
 
-    override fun start(scope: CoroutineScope) {
-        this.scope = scope
+    override val firmwareEdition = MutableStateFlow<FirmwareEdition?>(null)
+
+    override fun setFirmwareEdition(edition: FirmwareEdition?) {
+        firmwareEdition.value = edition
     }
 
     companion object {
@@ -115,6 +120,7 @@ class NodeManagerImpl(
         isNodeDbReady.value = false
         allowNodeDbWrites.value = false
         myNodeNum.value = null
+        firmwareEdition.value = null
     }
 
     override fun getMyNodeInfo(): MyNodeInfo? {
@@ -170,19 +176,27 @@ class NodeManagerImpl(
         }
 
     override fun updateNode(nodeNum: Int, withBroadcast: Boolean, channel: Int, transform: (Node) -> Node) {
-        val next = transform(_nodeDBbyNodeNum.value[nodeNum] ?: getOrCreateNode(nodeNum, channel))
-
-        _nodeDBbyNodeNum.update { it.put(nodeNum, next) }
-        if (next.user.id.isNotEmpty()) {
-            _nodeDBbyID.update { it.put(next.user.id, next) }
+        // Perform read + transform inside update{} to ensure atomicity.
+        // Without this, concurrent calls for the same nodeNum could read the same snapshot
+        // and the last writer would silently overwrite the other's changes.
+        var next: Node? = null
+        _nodeDBbyNodeNum.update { map ->
+            val current = map[nodeNum] ?: getOrCreateNode(nodeNum, channel)
+            val transformed = transform(current)
+            next = transformed
+            map.put(nodeNum, transformed)
+        }
+        val result = next ?: return
+        if (result.user.id.isNotEmpty()) {
+            _nodeDBbyID.update { it.put(result.user.id, result) }
         }
 
-        if (next.user.id.isNotEmpty() && isNodeDbReady.value) {
-            scope.handledLaunch { nodeRepository.upsert(next) }
+        if (result.user.id.isNotEmpty() && isNodeDbReady.value) {
+            scope.handledLaunch { nodeRepository.upsert(result) }
         }
 
         if (withBroadcast) {
-            serviceBroadcasts.broadcastNodeChange(next)
+            serviceBroadcasts.broadcastNodeChange(result)
         }
     }
 
@@ -228,7 +242,8 @@ class NodeManagerImpl(
         }
 
         updateNode(fromNum) { node ->
-            val posTime = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()
+            val rawPosTime = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()
+            val posTime = clampTimestampToNow(rawPosTime)
             val newLastHeard = maxOf(node.lastHeard, posTime)
 
             val newPos =
@@ -255,7 +270,7 @@ class NodeManagerImpl(
             telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
             telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
             val telemetryTime = if (telemetry.time != 0) telemetry.time else node.lastHeard
-            val newLastHeard = maxOf(node.lastHeard, telemetryTime)
+            val newLastHeard = clampTimestampToNow(maxOf(node.lastHeard, telemetryTime))
             nextNode.copy(lastHeard = newLastHeard)
         }
     }
@@ -282,7 +297,7 @@ class NodeManagerImpl(
                 } else {
                     var newUser =
                         user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
-                    if (info.via_mqtt) {
+                    if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
                         newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
                     }
                     next = next.copy(user = newUser, publicKey = newUser.public_key)
@@ -290,11 +305,12 @@ class NodeManagerImpl(
             }
             val position = info.position
             if (position != null) {
-                next = next.copy(position = position)
+                val clampedPos = position.copy(time = clampTimestampToNow(position.time))
+                next = next.copy(position = clampedPos)
             }
             next =
                 next.copy(
-                    lastHeard = info.last_heard,
+                    lastHeard = clampTimestampToNow(info.last_heard),
                     deviceMetrics = info.device_metrics ?: next.deviceMetrics,
                     channel = info.channel,
                     viaMqtt = info.via_mqtt,

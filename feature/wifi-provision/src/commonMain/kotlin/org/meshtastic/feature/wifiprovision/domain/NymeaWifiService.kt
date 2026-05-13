@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
@@ -36,21 +35,24 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_CONNECT_HIDDEN
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_CONNECTION
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_GET_NETWORKS
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CMD_SCAN
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.COMMANDER_RESPONSE_UUID
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.CONNECTION_INFO_TIMEOUT
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_SUCCESS
-import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_TIMEOUT_MS
-import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT_MS
-import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SUBSCRIPTION_SETTLE_MS
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.RESPONSE_TIMEOUT
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SCAN_TIMEOUT
+import org.meshtastic.feature.wifiprovision.NymeaBleConstants.SUBSCRIPTION_SETTLE
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_COMMANDER_UUID
 import org.meshtastic.feature.wifiprovision.NymeaBleConstants.WIRELESS_SERVICE_UUID
 import org.meshtastic.feature.wifiprovision.model.ProvisionResult
 import org.meshtastic.feature.wifiprovision.model.WifiNetwork
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration
 
 /**
  * GATT client for the nymea-networkmanager WiFi provisioning profile.
@@ -67,9 +69,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class NymeaWifiService(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
-    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher,
 ) {
-
     private val serviceScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(serviceScope, TAG)
 
@@ -87,26 +88,20 @@ class NymeaWifiService(
      *
      * @param address Optional MAC address filter. If null, the first advertising device is used.
      * @return The discovered device's advertised name on success.
-     * @throws IllegalStateException if no device is found within [SCAN_TIMEOUT_MS].
+     * @throws IllegalStateException if no device is found within [SCAN_TIMEOUT].
      */
-    suspend fun connect(address: String? = null): Result<String> = runCatching {
+    suspend fun connect(address: String? = null): Result<String> = safeCatching {
         Logger.i { "$TAG: Scanning for nymea-networkmanager device (address=$address)…" }
 
         val device =
-            withTimeout(SCAN_TIMEOUT_MS) {
-                scanner
-                    .scan(
-                        timeout = SCAN_TIMEOUT_MS.milliseconds,
-                        serviceUuid = WIRELESS_SERVICE_UUID,
-                        address = address,
-                    )
-                    .first()
+            withTimeout(SCAN_TIMEOUT) {
+                scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = WIRELESS_SERVICE_UUID, address = address).first()
             }
 
         val deviceName = device.name ?: device.address
         Logger.i { "$TAG: Found device: ${device.name} @ ${device.address}" }
 
-        val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT_MS)
+        val state = bleConnection.connectAndAwait(device, SCAN_TIMEOUT)
         check(state is BleConnectionState.Connected) { "Failed to connect to ${device.address} — final state: $state" }
 
         Logger.i { "$TAG: Connected. Discovering wireless service…" }
@@ -130,7 +125,7 @@ class NymeaWifiService(
                 }
                 .launchIn(this)
 
-            delay(SUBSCRIPTION_SETTLE_MS)
+            delay(SUBSCRIPTION_SETTLE)
             if (!subscribed.isCompleted) subscribed.complete(Unit)
             subscribed.await()
 
@@ -145,7 +140,7 @@ class NymeaWifiService(
      *
      * Sends: CMD_SCAN (4), waits for ack, then CMD_GET_NETWORKS (0).
      */
-    suspend fun scanNetworks(): Result<List<WifiNetwork>> = runCatching {
+    suspend fun scanNetworks(): Result<List<WifiNetwork>> = safeCatching {
         // Trigger scan
         sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_SCAN)))
         val scanAck = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
@@ -187,11 +182,13 @@ class NymeaWifiService(
                 NymeaConnectCommand(command = cmd, params = NymeaConnectParams(ssid = ssid, password = password)),
             )
 
-        return runCatching {
+        return safeCatching {
             sendCommand(json)
             val response = NymeaJson.decodeFromString<NymeaResponse>(waitForResponse())
             if (response.responseCode == RESPONSE_SUCCESS) {
-                ProvisionResult.Success
+                val ipAddress =
+                    response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() } ?: fetchConnectionIpAddress()
+                ProvisionResult.Success(ipAddress = ipAddress)
             } else {
                 ProvisionResult.Failure(response.responseCode, nymeaErrorMessage(response.responseCode))
             }
@@ -235,8 +232,26 @@ class NymeaWifiService(
         }
     }
 
-    /** Wait up to [RESPONSE_TIMEOUT_MS] for a complete JSON response from the notification channel. */
-    private suspend fun waitForResponse(): String = withTimeout(RESPONSE_TIMEOUT_MS) { responseChannel.receive() }
+    /** Wait up to [RESPONSE_TIMEOUT] for a complete JSON response from the notification channel. */
+    private suspend fun waitForResponse(timeout: Duration = RESPONSE_TIMEOUT): String =
+        withTimeout(timeout) { responseChannel.receive() }
+
+    /**
+     * Best-effort query for current connection info (`CMD_GET_CONNECTION`), returning the reported IP address.
+     *
+     * Uses a short timeout because this is an optional enrichment for UX, not a provisioning success criterion.
+     */
+    private suspend fun fetchConnectionIpAddress(): String? = safeCatching {
+        sendCommand(NymeaJson.encodeToString(NymeaSimpleCommand(CMD_GET_CONNECTION)))
+        val response =
+            NymeaJson.decodeFromString<NymeaResponse>(waitForResponse(timeout = CONNECTION_INFO_TIMEOUT))
+        if (response.responseCode == RESPONSE_SUCCESS) {
+            response.connectionInfo?.ipAddress?.takeIf { it.isNotBlank() }
+        } else {
+            null
+        }
+    }
+        .getOrNull()
 
     private fun nymeaErrorMessage(code: Int): String = when (code) {
         NymeaBleConstants.RESPONSE_INVALID_COMMAND -> "Invalid command"

@@ -65,10 +65,11 @@ class AndroidNotificationManagerTest {
     }
 
     @Test
-    fun `init removes legacy node channel and creates canonical node channel`() {
+    fun `dispatch removes legacy node channel and creates canonical node channel`() {
         createChannel("NodeEvent")
 
-        AndroidNotificationManager(context)
+        val manager = AndroidNotificationManager(context)
+        manager.dispatch(Notification(title = "Node", message = "Seen", category = Notification.Category.NodeEvent))
 
         assertNull(systemNotificationManager.getNotificationChannel("NodeEvent"))
         assertNotNull(systemNotificationManager.getNotificationChannel(NotificationChannels.NEW_NODES))

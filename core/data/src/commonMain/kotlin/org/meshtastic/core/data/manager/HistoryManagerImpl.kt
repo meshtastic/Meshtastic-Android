@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.PacketHandler
@@ -94,7 +95,7 @@ class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHan
                 "lastRequest=$lastRequest window=$window max=$max",
         )
 
-        runCatching {
+        safeCatching {
             packetHandler.sendToRadio(
                 MeshPacket(
                     from = myNodeNum,

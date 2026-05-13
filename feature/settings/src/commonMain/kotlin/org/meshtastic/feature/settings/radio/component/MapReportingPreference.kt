@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ fun MapReportingPreference(
                     val precisionMeters = precisionBitsToMeters(positionPrecision).toInt()
                     val unit = DistanceUnit.Companion.getFromLocale()
                     Text(
-                        text = precisionMeters.toDistanceString(unit),
+                        text = "± ${precisionMeters.toDistanceString(unit)}",
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                         fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                         overflow = TextOverflow.Companion.Ellipsis,

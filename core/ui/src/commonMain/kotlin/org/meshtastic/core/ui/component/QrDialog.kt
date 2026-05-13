@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +44,8 @@ import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.qr_code
 import org.meshtastic.core.resources.url
+import org.meshtastic.core.ui.icon.Copy
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.SetScreenBrightness
 import org.meshtastic.core.ui.util.createClipEntry
 
@@ -91,10 +91,7 @@ fun QrDialog(title: String, uriString: String, qrPainter: Painter?, onDismiss: (
                             coroutineScope.launch { clipboardManager.setClipEntry(createClipEntry(uriString)) }
                         },
                     ) {
-                        Icon(
-                            imageVector = Icons.TwoTone.ContentCopy,
-                            contentDescription = stringResource(Res.string.copy),
-                        )
+                        Icon(imageVector = MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy))
                     }
                 }
             }

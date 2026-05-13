@@ -11,8 +11,8 @@ Contains general-purpose extensions and helpers:
 - **Time**: Utilities for handling timestamps and durations.
 - **Exceptions**: Standardized exception types for common error scenarios.
 
-### 2. `ByteUtils.kt`
-Low-level operations for working with `ByteArray` and binary data, essential for parsing radio protocol packets.
+### 2. `MetricFormatter.kt`
+Centralized utility for display strings — temperature, voltage, current, percent, humidity, pressure, SNR, RSSI. Ensures consistent unit spacing and formatting across all UI surfaces.
 
 ### 3. `BuildConfigProvider.kt`
 An interface for accessing build-time configuration in a multiplatform-friendly way.

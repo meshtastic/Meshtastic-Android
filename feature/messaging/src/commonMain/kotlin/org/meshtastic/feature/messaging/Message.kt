@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,8 +35,6 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,8 +52,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -66,6 +71,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getChannel
@@ -76,6 +82,8 @@ import org.meshtastic.core.resources.type_a_message
 import org.meshtastic.core.resources.unknown_channel
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Send
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.feature.messaging.component.ActionModeTopBar
@@ -97,9 +105,11 @@ private const val MAX_LINES = 3
  * @param message An optional message to pre-fill in the input field.
  * @param viewModel The [MessageViewModel] instance for handling business logic and state.
  * @param navigateToNodeDetails Callback to navigate to a node's detail screen.
+ * @param navigateToQuickChatOptions Callback to navigate to the quick chat options screen.
+ * @param navigateToFilterSettings Callback to navigate to the message filter settings screen.
  * @param onNavigateBack Callback to navigate back from this screen.
  */
-@Suppress("LongMethod", "CyclomaticComplexMethod") // Due to multiple states and event handling
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MessageScreen(
     contactKey: String,
@@ -107,6 +117,7 @@ fun MessageScreen(
     viewModel: MessageViewModel,
     navigateToNodeDetails: (Int) -> Unit,
     navigateToQuickChatOptions: () -> Unit,
+    navigateToFilterSettings: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -239,8 +250,11 @@ fun MessageScreen(
                     is MessageScreenEvent.NodeDetails -> navigateToNodeDetails(event.node.num)
 
                     is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
+
                     is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
+
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
+
                     is MessageScreenEvent.CopyToClipboard -> {
                         coroutineScope.launch { clipboardManager.setClipEntry(createClipEntry(event.text, event.text)) }
                         selectedMessageIds.value = emptySet()
@@ -286,7 +300,9 @@ fun MessageScreen(
                             }
 
                             MessageMenuAction.Delete -> showDeleteDialog = true
+
                             MessageMenuAction.Dismiss -> selectedMessageIds.value = emptySet()
+
                             MessageMenuAction.SelectAll -> {
                                 // Note: Select All is disabled with pagination since we don't have
                                 // access to the full message list. This would need to be reworked
@@ -319,6 +335,7 @@ fun MessageScreen(
                     filteredCount = filteredCount,
                     showFiltered = showFiltered,
                     onToggleShowFiltered = viewModel::toggleShowFiltered,
+                    onNavigateToFilterSettings = navigateToFilterSettings,
                 )
             }
         },
@@ -326,7 +343,7 @@ fun MessageScreen(
             Column {
                 AnimatedVisibility(visible = showQuickChat) {
                     QuickChatRow(
-                        enabled = connectionState.isConnected(),
+                        enabled = connectionState is ConnectionState.Connected,
                         actions = quickChatActions,
                         onClick = { action ->
                             handleQuickChatAction(
@@ -343,7 +360,7 @@ fun MessageScreen(
                     ourNode = ourNode,
                 )
                 MessageInput(
-                    isEnabled = connectionState.isConnected(),
+                    isEnabled = connectionState is ConnectionState.Connected,
                     isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
                     textFieldState = messageInputState,
                     onSendMessage = {
@@ -452,7 +469,18 @@ private fun MessageInput(
     val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
 
     OutlinedTextField(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+        modifier =
+        modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).onKeyEvent { keyEvent ->
+            val isEnterNoShift = keyEvent.key == Key.Enter && !keyEvent.isShiftPressed
+            if (isEnterNoShift) {
+                if (keyEvent.type == KeyEventType.KeyUp && canSend) {
+                    onSendMessage()
+                }
+                true // consume both KeyDown and KeyUp to prevent newline insertion
+            } else {
+                false
+            }
+        },
         state = textFieldState,
         lineLimits = TextFieldLineLimits.MultiLine(1, MAX_LINES),
         label = { Text(stringResource(Res.string.message_input_label)) },
@@ -460,7 +488,9 @@ private fun MessageInput(
         shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
         isError = isOverLimit,
         placeholder = { Text(stringResource(Res.string.type_a_message)) },
-        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+        keyboardOptions =
+        KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
+        onKeyboardAction = { if (canSend) onSendMessage() },
         supportingText = {
             if (isEnabled) { // Only show supporting text if input is enabled
                 Text(
@@ -483,10 +513,7 @@ private fun MessageInput(
         // cursor position and multi-byte characters, likely outside simple inputTransformation.
         trailingIcon = {
             IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(Res.string.send),
-                )
+                Icon(imageVector = MeshtasticIcons.Send, contentDescription = stringResource(Res.string.send))
             }
         },
     )
@@ -494,7 +521,7 @@ private fun MessageInput(
 
 @PreviewLightDark
 @Composable
-private fun MessageInputPreview() {
+fun MessageInputPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(8.dp)) {

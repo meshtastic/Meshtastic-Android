@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import org.meshtastic.core.repository.ServiceRepository
  * in `MeshService`.
  */
 @Single(binds = [ServiceRepository::class, AndroidServiceRepository::class])
+@Suppress("DEPRECATION") // IMeshService is deprecated but still required for AIDL binding
 class AndroidServiceRepository : ServiceRepositoryImpl() {
     var meshService: IMeshService? = null
         private set

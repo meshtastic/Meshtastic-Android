@@ -1,1 +1,1 @@
-For detailed release notes, please visit: https://github.com/meshtastic/Meshtastic-Android/releases/
+Pentru note detaliate pentru versiuni, vizitați: https://github.com/meshtastic/Meshtastic-Android/releases/

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.firmware"
         androidResources.enable = false
@@ -56,25 +53,8 @@ kotlin {
             implementation(libs.markdown.renderer.m3)
         }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.appcompat)
-            implementation(libs.markdown.renderer.android)
-        }
+        androidMain.dependencies { implementation(libs.markdown.renderer.android) }
 
-        commonTest.dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.turbine)
-        }
-
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.robolectric)
-                implementation(libs.turbine)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.androidx.compose.ui.test.junit4)
-                implementation(libs.androidx.test.ext.junit)
-            }
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

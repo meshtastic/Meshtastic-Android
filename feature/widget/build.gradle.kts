@@ -18,11 +18,12 @@
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
-    alias(libs.plugins.meshtastic.koin)
+    id("meshtastic.koin")
 }
 
 android {
     namespace = "org.meshtastic.feature.widget"
+    resourcePrefix = "widget_"
 
     defaultConfig { minSdk = 26 }
 }
@@ -33,7 +34,7 @@ dependencies {
     implementation(projects.core.resources)
     implementation(projects.core.repository)
 
-    implementation(libs.androidx.compose.ui) // LocalConfiguration, LocalDensity
+    implementation(libs.compose.multiplatform.ui) // LocalConfiguration, LocalDensity
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.glance.preview)

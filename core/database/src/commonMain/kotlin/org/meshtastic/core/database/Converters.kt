@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ package org.meshtastic.core.database
 
 import androidx.room3.TypeConverter
 import co.touchlab.kermit.Logger
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -33,10 +34,12 @@ import org.meshtastic.proto.User
 
 @Suppress("TooManyFunctions")
 class Converters {
+    @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         isLenient = true
         ignoreUnknownKeys = true
         encodeDefaults = true
+        exceptionsWithDebugInfo = false
     }
 
     @TypeConverter fun dataFromString(value: String): DataPacket = json.decodeFromString(DataPacket.serializer(), value)

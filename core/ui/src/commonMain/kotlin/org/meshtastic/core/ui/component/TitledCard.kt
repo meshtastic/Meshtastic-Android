@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,6 @@ fun TitledCard(title: String?, modifier: Modifier = Modifier, content: @Composab
 
 @PreviewLightDark
 @Composable
-private fun TitledCardPreview() {
+fun TitledCardPreview() {
     AppTheme { Surface { TitledCard(title = "Title") { Box(modifier = Modifier.fillMaxWidth().height(100.dp)) {} } } }
 }

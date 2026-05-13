@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,7 +107,7 @@ fun compareUsers(oldUser: User, newUser: User): String {
     return if (changes.isEmpty()) {
         "No changes detected."
     } else {
-        "Changes:\n" + changes.joinToString("\n")
+        "Changes:\n${changes.joinToString("\n")}"
     }
 }
 

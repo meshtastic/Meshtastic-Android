@@ -38,7 +38,9 @@ platform :android do
       task: "assembleFdroidRelease",
       properties: {
         "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE']
+        "android.injected.version.code" => ENV['VERSION_CODE'],
+        # Intentionally omit aboutLibraries.release — fdroid builds must use
+        # offlineMode so the output matches F-Droid's reproducible rebuild.
       }
     )
   end
@@ -50,7 +52,9 @@ platform :android do
       print_command: false,
       properties: {
         "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE']
+        "android.injected.version.code" => ENV['VERSION_CODE'],
+        "aboutLibraries.release" => "true",
+        "meshtastic.disableAbiSplits" => "true"
       }
     )
     lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]

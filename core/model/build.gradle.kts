@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,13 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.kmp.jvm.android")
-    `maven-publish`
+    id("meshtastic.publishing")
+    alias(libs.plugins.flatpak.gradle.generator)
 }
-
-apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
     jvm()
 
-    @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = false
         withHostTest { isIncludeAndroidResources = true }
@@ -52,19 +50,14 @@ kotlin {
             api(libs.androidx.annotation)
             api(libs.androidx.core.ktx)
         }
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.junit)
-                implementation(libs.robolectric)
-                implementation(libs.androidx.test.ext.junit)
-            }
-        }
         val androidDeviceTest by getting {
             dependencies {
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.androidx.test.runner)
             }
         }
+
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }
 
@@ -79,4 +72,24 @@ publishing {
             artifactId = baseId.replace("model-", "meshtastic-android-model-")
         }
     }
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-model.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidRuntimeClasspath",
+            "androidMainLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestCompileClasspath",
+            "androidDeviceTestRuntimeClasspath",
+            "androidDeviceTestLintChecksClasspath",
+            "androidDeviceTestCompileClasspath",
+            "androidCompileClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }

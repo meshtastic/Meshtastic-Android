@@ -1,8 +1,13 @@
 name: "Pull Request Labeler"
 on:
-- pull_request_target
-# Do not execute arbitary code on this workflow. 
+  pull_request_target:
+    types: [opened, synchronize]
+# Do not execute arbitrary code on this workflow.
 # See warnings at https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request_target
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   labeler:
@@ -11,5 +16,79 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-24.04-arm
     steps:
-    - id: label-the-PR
-      uses: actions/labeler@v6
+    - name: Auto-label PR
+      uses: actions/github-script@v9
+      with:
+        script: |
+          const branch = context.payload.pull_request.head.ref;
+          const title = context.payload.pull_request.title || '';
+          const labels = new Set();
+
+          // Match branch prefix (e.g. feat/..., fix/..., chore-something)
+          // Also parse conventional-commit-style PR titles as a fallback
+          const branchPrefix = branch.split(/[\/\-_]/)[0].toLowerCase();
+          const titlePrefix = (title.match(/^(\w+)[\(:]/) || [])[1]?.toLowerCase();
+
+          const prefix = branchPrefix || titlePrefix;
+
+          // Map prefixes to changelog-aligned labels
+          const prefixMap = {
+            'feat':     'enhancement',
+            'feature':  'enhancement',
+            'fix':      'bugfix',
+            'bug':      'bugfix',
+            'bugfix':   'bugfix',
+            'hotfix':   'bugfix',
+            'refactor': 'refactor',
+            'chore':    'chore',
+            'build':    'build',
+            'ci':       'ci',
+            'test':     'testing',
+            'tests':    'testing',
+            'docs':     'documentation',
+            'doc':      'documentation',
+            'perf':     'enhancement',
+            'style':    'refactor',
+            'repo':     'repo',
+            'release':  'release',
+          };
+
+          // Label from branch prefix
+          if (prefixMap[branchPrefix]) labels.add(prefixMap[branchPrefix]);
+
+          // Label from PR title prefix (if different from branch)
+          if (titlePrefix && prefixMap[titlePrefix] && !labels.has(prefixMap[titlePrefix])) {
+            labels.add(prefixMap[titlePrefix]);
+          }
+
+          // Also label 'repo' if .github/ or build-logic/ files were changed
+          if (!labels.has('repo') && !labels.has('ci') && !labels.has('build')) {
+            try {
+              const files = await github.paginate(
+                github.rest.pulls.listFiles,
+                { owner: context.repo.owner, repo: context.repo.repo, pull_number: context.payload.pull_request.number, per_page: 100 },
+                (res) => res.data.map(f => f.filename)
+              );
+              if (files.some(f => f.startsWith('.github/'))) labels.add('repo');
+              if (files.some(f => f.startsWith('build-logic/'))) labels.add('build');
+            } catch (e) {
+              core.warning(`Could not list PR files (rate limited?): ${e.message}`);
+            }
+          }
+
+          if (labels.size > 0) {
+            const labelArray = [...labels];
+            core.info(`Applying labels: ${labelArray.join(', ')}`);
+            try {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: labelArray,
+              });
+            } catch (e) {
+              core.warning(`Could not apply labels (rate limited?): ${e.message}`);
+            }
+          } else {
+            core.info('No labels matched for this PR.');
+          }

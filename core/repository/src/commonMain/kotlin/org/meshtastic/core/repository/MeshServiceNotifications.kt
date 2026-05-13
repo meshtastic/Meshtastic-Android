@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.repository
 
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
@@ -28,7 +29,7 @@ interface MeshServiceNotifications {
 
     fun initChannels()
 
-    fun updateServiceStateNotification(state: org.meshtastic.core.model.ConnectionState, telemetry: Telemetry?): Any
+    fun updateServiceStateNotification(state: ConnectionState, telemetry: Telemetry?)
 
     suspend fun updateMessageNotification(
         contactKey: String,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,10 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.MeshPacket
 
 /** Interface for processing incoming radio messages and mesh packets. */
 interface MeshMessageProcessor {
-    /** Starts the processor with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
     /** Handles a raw message received from the radio. */
     fun handleFromRadio(bytes: ByteArray, myNodeNum: Int?)
 

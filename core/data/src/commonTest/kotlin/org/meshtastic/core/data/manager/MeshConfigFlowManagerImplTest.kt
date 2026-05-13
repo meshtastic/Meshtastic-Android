@@ -17,11 +17,13 @@
 package org.meshtastic.core.data.manager
 
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +37,7 @@ import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -42,6 +45,7 @@ import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FileInfo
+import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.NodeInfo
 import kotlin.test.BeforeTest
@@ -61,6 +65,7 @@ class MeshConfigFlowManagerImplTest {
     private val analytics = mock<PlatformAnalytics>(MockMode.autofill)
     private val commandSender = mock<CommandSender>(MockMode.autofill)
     private val packetHandler = mock<PacketHandler>(MockMode.autofill)
+    private val notificationPrefs = mock<NotificationPrefs>(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -86,6 +91,8 @@ class MeshConfigFlowManagerImplTest {
         every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } returns Unit
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
+        every { notificationPrefs.nodeEventsEnabled } returns MutableStateFlow(true)
 
         manager =
             MeshConfigFlowManagerImpl(
@@ -97,9 +104,10 @@ class MeshConfigFlowManagerImplTest {
                 serviceBroadcasts = serviceBroadcasts,
                 analytics = analytics,
                 commandSender = commandSender,
-                packetHandler = packetHandler,
+                heartbeatSender = DataLayerHeartbeatSender(packetHandler),
+                notificationPrefs = notificationPrefs,
+                scope = testScope,
             )
-        manager.start(testScope)
     }
 
     // ---------- handleMyInfo ----------
@@ -170,6 +178,49 @@ class MeshConfigFlowManagerImplTest {
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
         advanceUntilIdle()
 
+        verify { connectionManager.onRadioConfigLoaded() }
+        verify { connectionManager.startNodeInfoOnly() }
+    }
+
+    @Test
+    fun `Stage 1 complete sends heartbeat with non-zero nonce between stages`() = testScope.runTest {
+        val sentPackets = mutableListOf<org.meshtastic.proto.ToRadio>()
+        every { packetHandler.sendToRadio(any<org.meshtastic.proto.ToRadio>()) } calls
+            { call ->
+                sentPackets.add(call.arg(0))
+            }
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(metadata)
+        advanceUntilIdle()
+
+        sentPackets.clear() // Clear any packets from prior phases
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceUntilIdle()
+
+        val heartbeats = sentPackets.filter { it.heartbeat != null }
+        assertEquals(1, heartbeats.size, "Expected exactly one inter-stage heartbeat")
+        assertEquals(
+            true,
+            heartbeats[0].heartbeat!!.nonce != 0,
+            "Inter-stage heartbeat should have a non-zero nonce",
+        )
+    }
+
+    @Test
+    fun `Stage 1 complete with old firmware logs warning but continues handshake`() = testScope.runTest {
+        val oldMetadata =
+            DeviceMetadata(firmware_version = "2.3.0", hw_model = HardwareModel.HELTEC_V3, hasWifi = false)
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+        manager.handleLocalMetadata(oldMetadata)
+        advanceUntilIdle()
+
+        manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
+        advanceUntilIdle()
+
+        // Handshake should still progress despite old firmware
         verify { connectionManager.onRadioConfigLoaded() }
         verify { connectionManager.startNodeInfoOnly() }
     }
@@ -373,5 +424,52 @@ class MeshConfigFlowManagerImplTest {
         advanceUntilIdle()
 
         verify { nodeManager.setMyNodeNum(99999) }
+    }
+
+    // ---------- Event firmware notification defaults ----------
+
+    @Test
+    fun `handleMyInfo disables node notifications for event firmware`() = testScope.runTest {
+        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
+
+        val eventMyInfo = protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON)
+        manager.handleMyInfo(eventMyInfo)
+        advanceUntilIdle()
+
+        verify { notificationPrefs.setNodeEventsEnabled(false) }
+        verify { notificationPrefs.setNodeEventsAutoDisabledForEvent(true) }
+    }
+
+    @Test
+    fun `handleMyInfo does not re-disable if already auto-disabled`() = testScope.runTest {
+        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(true)
+
+        val eventMyInfo = protoMyNodeInfo.copy(firmware_edition = FirmwareEdition.DEFCON)
+        manager.handleMyInfo(eventMyInfo)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsEnabled(any()) }
+    }
+
+    @Test
+    fun `handleMyInfo re-enables node notifications when vanilla firmware reconnects`() = testScope.runTest {
+        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(true)
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+
+        verify { notificationPrefs.setNodeEventsEnabled(true) }
+        verify { notificationPrefs.setNodeEventsAutoDisabledForEvent(false) }
+    }
+
+    @Test
+    fun `handleMyInfo does not touch prefs for vanilla when not previously auto-disabled`() = testScope.runTest {
+        every { notificationPrefs.nodeEventsAutoDisabledForEvent } returns MutableStateFlow(false)
+
+        manager.handleMyInfo(protoMyNodeInfo)
+        advanceUntilIdle()
+
+        verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsEnabled(any()) }
+        verify(mode = VerifyMode.not) { notificationPrefs.setNodeEventsAutoDisabledForEvent(any()) }
     }
 }

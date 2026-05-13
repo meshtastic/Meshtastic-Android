@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,18 +34,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -69,6 +70,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -127,6 +131,7 @@ import org.meshtastic.core.resources.learn_more
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.CloudDownload
@@ -139,7 +144,6 @@ import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.KeepScreenOn
-import org.meshtastic.core.ui.util.PlatformBackHandler
 import org.meshtastic.core.ui.util.rememberOpenFileLauncher
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
@@ -161,9 +165,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
         uri?.let { viewModel.startUpdateFromFile(it) }
     }
 
-    val saveFileLauncher = rememberSaveFileLauncher { meshtasticUri ->
-        viewModel.saveDfuFile(CommonUri.parse(meshtasticUri.uriString))
-    }
+    val saveFileLauncher = rememberSaveFileLauncher { uri -> viewModel.saveDfuFile(uri) }
 
     val actions =
         remember(viewModel, onNavigateUp) {
@@ -185,7 +187,12 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
 
     KeepScreenOn(shouldKeepFirmwareScreenOn(state))
 
-    PlatformBackHandler(enabled = shouldKeepFirmwareScreenOn(state)) { showExitConfirmation = true }
+    val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = backHandlerState,
+        isBackEnabled = shouldKeepFirmwareScreenOn(state),
+        onBackCompleted = { showExitConfirmation = true },
+    )
 
     if (showExitConfirmation) {
         MeshtasticDialog(
@@ -233,7 +240,7 @@ private fun FirmwareUpdateScaffold(
                 title = { Text(stringResource(Res.string.firmware_update_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onNavigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
+                        Icon(MeshtasticIcons.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
             )
@@ -315,19 +322,21 @@ private fun FirmwareUpdateContent(
                 ProgressContent(state.progressState, onCancel = actions.onCancel, isUpdating = true)
 
             is FirmwareUpdateState.Verifying -> VerifyingState()
+
             is FirmwareUpdateState.VerificationFailed ->
                 VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
 
             is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
 
             is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
+
             is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
         }
     }
 }
 
 @Composable
-private fun VerifyingState() {
+internal fun VerifyingState() {
     CircularProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_verifying), style = MaterialTheme.typography.titleMedium)
@@ -342,7 +351,7 @@ private fun VerifyingState() {
 }
 
 @Composable
-private fun CheckingState() {
+internal fun CheckingState() {
     CircularProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_checking), style = MaterialTheme.typography.bodyLarge)
@@ -382,24 +391,35 @@ private fun ReadyState(
     Spacer(Modifier.height(16.dp))
 
     if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val largeHeight = ButtonDefaults.LargeContainerHeight
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showDisclaimer = true
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shapes = ButtonDefaults.shapesFor(largeHeight),
+            modifier = Modifier.fillMaxWidth().height(largeHeight),
         ) {
             Icon(MeshtasticIcons.Folder, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(Res.string.firmware_update_select_file))
+            Text(
+                stringResource(Res.string.firmware_update_select_file),
+                style = ButtonDefaults.textStyleFor(largeHeight),
+            )
         }
     } else if (state.release != null) {
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val largeHeight = ButtonDefaults.LargeContainerHeight
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         Button(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showDisclaimer = true
             },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shapes = ButtonDefaults.shapesFor(largeHeight),
+            modifier = Modifier.fillMaxWidth().height(largeHeight),
         ) {
             Icon(
                 imageVector =
@@ -417,6 +437,7 @@ private fun ReadyState(
                     resource = Res.string.firmware_update_method_detail,
                     stringResource(state.updateMethod.description),
                 ),
+                style = ButtonDefaults.textStyleFor(largeHeight),
             )
         }
         Spacer(Modifier.height(24.dp))
@@ -425,7 +446,7 @@ private fun ReadyState(
 }
 
 @Composable
-private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+internal fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     MeshtasticDialog(
         onDismiss = onDismiss,
         title = stringResource(Res.string.firmware_update_disclaimer_title),
@@ -681,7 +702,8 @@ private fun ProgressContent(
                 tint = MaterialTheme.colorScheme.primary,
             )
         } else {
-            CircularProgressIndicator(
+            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+            CircularWavyProgressIndicator(
                 progress = { if (isUpdating) progressState.progress else 1f },
                 modifier = Modifier.size(64.dp),
             )
@@ -709,7 +731,8 @@ private fun ProgressContent(
         Spacer(Modifier.height(12.dp))
 
         if (isDownloading || isUpdating) {
-            LinearProgressIndicator(
+            @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+            LinearWavyProgressIndicator(
                 progress = { progressState.progress },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             )
@@ -809,7 +832,7 @@ private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
 }
 
 @Composable
-private fun ErrorState(error: UiText, onRetry: () -> Unit) {
+internal fun ErrorState(error: UiText, onRetry: () -> Unit) {
     Icon(
         MeshtasticIcons.Dangerous,
         contentDescription = null,
@@ -832,7 +855,7 @@ private fun ErrorState(error: UiText, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun SuccessState(onDone: () -> Unit) {
+internal fun SuccessState(onDone: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(Unit) { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
 
@@ -851,8 +874,15 @@ private fun SuccessState(onDone: () -> Unit) {
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(32.dp))
-        Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text(stringResource(Res.string.firmware_update_done))
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        val largeHeight = ButtonDefaults.LargeContainerHeight
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        Button(
+            onClick = onDone,
+            shapes = ButtonDefaults.shapesFor(largeHeight),
+            modifier = Modifier.fillMaxWidth().height(largeHeight),
+        ) {
+            Text(stringResource(Res.string.firmware_update_done), style = ButtonDefaults.textStyleFor(largeHeight))
         }
     }
 }

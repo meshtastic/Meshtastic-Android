@@ -28,3 +28,5 @@ internal actual fun createPeripheral(address: String, builderAction: PeripheralB
     throw UnsupportedOperationException("iOS Peripheral not yet implemented")
 
 internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? = null
+
+internal actual fun Peripheral.requestHighConnectionPriority(): Boolean = false

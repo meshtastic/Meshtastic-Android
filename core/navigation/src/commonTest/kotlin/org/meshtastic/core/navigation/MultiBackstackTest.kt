@@ -29,7 +29,7 @@ class MultiBackstackTest {
         val multiBackstack = MultiBackstack(startTab)
 
         val nodesStack =
-            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoutes.Nodes)) }
+            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
         val mapStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Map.route)) }
 
         multiBackstack.backStacks =
@@ -51,7 +51,7 @@ class MultiBackstackTest {
         val multiBackstack = MultiBackstack(startTab)
 
         val nodesStack =
-            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoutes.Nodes)) }
+            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
         multiBackstack.backStacks = mapOf(TopLevelDestination.Nodes.route to nodesStack)
 
         assertEquals(2, multiBackstack.activeBackStack.size)
@@ -68,7 +68,7 @@ class MultiBackstackTest {
         val multiBackstack = MultiBackstack(startTab)
 
         val nodesStack =
-            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoutes.Nodes)) }
+            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
         multiBackstack.backStacks = mapOf(TopLevelDestination.Nodes.route to nodesStack)
 
         multiBackstack.goBack()
@@ -104,11 +104,42 @@ class MultiBackstackTest {
         val settingsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Settings.route)) }
         multiBackstack.backStacks = mapOf(TopLevelDestination.Settings.route to settingsStack)
 
-        val deepLinkPath = listOf(TopLevelDestination.Settings.route, SettingsRoutes.About)
+        val deepLinkPath = listOf(TopLevelDestination.Settings.route, SettingsRoute.About)
         multiBackstack.handleDeepLink(deepLinkPath)
 
         assertEquals(TopLevelDestination.Settings.route, multiBackstack.currentTabRoute)
         assertEquals(2, multiBackstack.activeBackStack.size)
-        assertEquals(SettingsRoutes.About, multiBackstack.activeBackStack.last())
+        assertEquals(SettingsRoute.About, multiBackstack.activeBackStack.last())
+    }
+
+    @Test
+    fun `handleDeepLink from different tab switches tab and sets stack`() {
+        // Start on Connections tab
+        val startTab = TopLevelDestination.Connections.route
+        val multiBackstack = MultiBackstack(startTab)
+
+        val connectionsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connections.route)) }
+        val nodesStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route)) }
+
+        multiBackstack.backStacks =
+            mapOf(
+                TopLevelDestination.Connections.route to connectionsStack,
+                TopLevelDestination.Nodes.route to nodesStack,
+            )
+
+        // Verify we start on Connections
+        assertEquals(TopLevelDestination.Connections.route, multiBackstack.currentTabRoute)
+
+        // Deep-link to a TracerouteMap on the Nodes tab (this is the exact pattern
+        // MeshtasticAppShell uses for traceroute alert "View on Map")
+        val tracerouteMap = NodeDetailRoute.TracerouteMap(destNum = 100, requestId = 42, logUuid = "abc")
+        multiBackstack.handleDeepLink(listOf(NodesRoute.NodesGraph, tracerouteMap))
+
+        // Should have switched to the Nodes tab
+        assertEquals(TopLevelDestination.Nodes.route, multiBackstack.currentTabRoute)
+        // Stack should contain the graph root + the traceroute map route
+        assertEquals(2, multiBackstack.activeBackStack.size)
+        assertEquals(NodesRoute.NodesGraph, multiBackstack.activeBackStack.first())
+        assertEquals(tracerouteMap, multiBackstack.activeBackStack.last())
     }
 }
