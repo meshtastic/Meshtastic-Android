@@ -1,6 +1,7 @@
 ---
 title: Nodes
 nav_order: 4
+last_updated: 2026-05-12
 aliases:
   - node-list
   - mesh-nodes

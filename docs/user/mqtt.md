@@ -1,6 +1,7 @@
 ---
 title: MQTT
 nav_order: 11
+last_updated: 2026-05-12
 aliases:
   - mqtt
   - internet-bridge

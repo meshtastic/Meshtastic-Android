@@ -1,6 +1,7 @@
 ---
 title: Desktop App
 nav_order: 14
+last_updated: 2026-05-12
 aliases:
   - desktop
   - linux
@@ -97,7 +98,7 @@ The Desktop app uses the same Compose Multiplatform UI with adaptations for larg
 
 The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts:
 
-![Settings panel showing toggles for message, new node, and low battery notification preferences](/assets/screenshots/settings_notifications.png)
+<!-- TODO: Add screenshot settings_notifications.png -->
 
 ## Building from Source
 

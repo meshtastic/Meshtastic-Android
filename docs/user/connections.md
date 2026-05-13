@@ -1,6 +1,7 @@
 ---
 title: Connections
 nav_order: 2
+last_updated: 2026-05-12
 aliases:
   - bluetooth
   - usb

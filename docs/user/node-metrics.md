@@ -1,6 +1,7 @@
 ---
 title: Node Metrics
 nav_order: 5
+last_updated: 2026-05-12
 aliases:
   - metrics
   - telemetry
@@ -26,7 +27,7 @@ Basic operating information reported by each node:
 
 Device metrics are displayed as individual cards showing battery, voltage, channel utilization, airtime, and uptime:
 
-![Card displaying battery level, voltage, channel utilization, air utilization, and uptime values](/assets/screenshots/nodes_device_metrics_card.png)
+<!-- TODO: Add screenshot nodes_device_metrics_card.png -->
 
 ## Environment Metrics
 
@@ -42,7 +43,7 @@ Environmental sensor data (requires compatible hardware):
 
 Environment metrics are charted over time for easy trend analysis:
 
-![Charts showing temperature, humidity, and pressure trends over time](/assets/screenshots/nodes_environment_metrics.png)
+<!-- TODO: Add screenshot nodes_environment_metrics.png -->
 
 > 💡 **Tip:** Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data.
 

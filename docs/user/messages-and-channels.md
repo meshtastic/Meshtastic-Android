@@ -1,6 +1,7 @@
 ---
 title: Messages & Channels
 nav_order: 3
+last_updated: 2026-05-12
 aliases:
   - channels
   - direct-messages
@@ -76,7 +77,7 @@ The channel list shows each channel with its latest message preview:
 
 Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted original:
 
-![Chat bubbles showing sent and received messages with timestamps and delivery status](/assets/screenshots/messages_message_items.png)
+<!-- TODO: Add screenshot messages_message_items.png -->
 
 ### Reactions
 
@@ -87,7 +88,7 @@ React to messages with emoji:
 - Multiple users can react to the same message
 - React to your own messages or others' messages
 
-![Emoji reaction badges displayed beneath a message](/assets/screenshots/messages_reactions.png)
+![Emoji reaction badges displayed beneath a message](/assets/screenshots/messages_reaction.png)
 
 > 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
 

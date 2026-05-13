@@ -2,6 +2,7 @@
 title: Units, Measurement & Locale
 parent: User Guide
 nav_order: 16
+last_updated: 2026-05-12
 ---
 
 # Units, Measurement & Locale

@@ -1,6 +1,7 @@
 ---
 title: TAK Integration
 nav_order: 10
+last_updated: 2026-05-12
 aliases:
   - tak
   - atak

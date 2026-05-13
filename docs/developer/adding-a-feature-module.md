@@ -1,6 +1,7 @@
 ---
 title: Adding a Feature Module
 nav_order: 3
+last_updated: 2026-05-12
 aliases:
   - new-module
   - feature-module

@@ -137,7 +137,9 @@ jobs:
             }
 
       - name: Set check status
-        # Always succeed — this is advisory, not blocking.
-        # Upgrade to `exit 1` here if you want to enforce docs as a required check.
-        run: echo "Docs staleness check complete (advisory only)."
+        if: steps.changed.outputs.stale == 'true'
+        run: |
+          echo "::error::UI source files changed without corresponding docs/ updates."
+          echo "Add the 'skip-docs-check' label if this PR does not require a doc update."
+          exit 1
 

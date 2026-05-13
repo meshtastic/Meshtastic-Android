@@ -1,6 +1,7 @@
 ---
 title: Transport
 nav_order: 5
+last_updated: 2026-05-12
 aliases:
   - ble
   - serial

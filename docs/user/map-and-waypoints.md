@@ -1,6 +1,7 @@
 ---
 title: Map & Waypoints
 nav_order: 6
+last_updated: 2026-05-12
 aliases:
   - map
   - waypoints
@@ -38,7 +39,7 @@ Node markers on the map indicate:
 
 The floating toolbar provides quick access to compass, filters, refresh, and location tracking:
 
-![Floating toolbar with compass, filter, refresh, and location tracking buttons](/assets/screenshots/map_controls_overlay.png)
+<!-- TODO: Add screenshot map_controls_overlay.png -->
 
 ## Waypoints
 

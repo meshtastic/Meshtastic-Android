@@ -1,6 +1,7 @@
 ---
 title: Settings — Radio & User
 nav_order: 7
+last_updated: 2026-05-12
 aliases:
   - settings
   - radio-config

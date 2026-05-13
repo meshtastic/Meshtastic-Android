@@ -1,6 +1,7 @@
 ---
 title: Measurement & Formatting
 nav_order: 9
+last_updated: 2026-05-13
 aliases:
   - measurement
   - metric-formatter

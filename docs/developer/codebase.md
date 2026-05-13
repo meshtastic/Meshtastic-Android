@@ -1,6 +1,7 @@
 ---
 title: Codebase
 nav_order: 2
+last_updated: 2026-05-12
 aliases:
   - repository-layout
   - project-structure

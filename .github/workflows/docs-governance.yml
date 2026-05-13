@@ -1,0 +1,46 @@
+name: Docs Governance
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'feature/docs/**'
+      - 'scripts/validate-doc-links.js'
+      - 'scripts/check-doc-freshness.js'
+      - 'scripts/check-doc-coverage.js'
+      - '.github/workflows/docs-governance.yml'
+  schedule:
+    - cron: "0 6 * * 1" # Every Monday at 6 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Docs quality gates
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate internal links
+        run: node scripts/validate-doc-links.js docs
+
+      - name: Check doc coverage
+        run: node scripts/check-doc-coverage.js .
+
+      - name: Check doc freshness
+        # Advisory — warns on stale pages but does not block PRs
+        continue-on-error: true
+        run: node scripts/check-doc-freshness.js docs --max-age-days=180

@@ -1,6 +1,7 @@
 ---
 title: Discovery
 nav_order: 12
+last_updated: 2026-05-12
 aliases:
   - mesh-discovery
   - local-discovery

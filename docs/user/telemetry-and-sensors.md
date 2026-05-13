@@ -1,6 +1,7 @@
 ---
 title: Telemetry & Sensors
 nav_order: 9
+last_updated: 2026-05-12
 aliases:
   - sensors
   - environment

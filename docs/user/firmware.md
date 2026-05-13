@@ -1,6 +1,7 @@
 ---
 title: Firmware Updates
 nav_order: 13
+last_updated: 2026-05-12
 aliases:
   - firmware
   - update

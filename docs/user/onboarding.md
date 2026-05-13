@@ -1,6 +1,7 @@
 ---
 title: Getting Started
 nav_order: 1
+last_updated: 2026-05-12
 aliases:
   - first-launch
   - setup

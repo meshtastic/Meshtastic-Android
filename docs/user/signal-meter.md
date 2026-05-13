@@ -1,6 +1,7 @@
 ---
 title: Signal Meter
 nav_order: 15
+last_updated: 2026-05-12
 aliases:
   - signal
   - signal-meter

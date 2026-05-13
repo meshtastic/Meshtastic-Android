@@ -1,6 +1,7 @@
 ---
 title: Navigation & Deep Links
 nav_order: 4
+last_updated: 2026-05-12
 aliases:
   - deeplinks
   - navigation-3

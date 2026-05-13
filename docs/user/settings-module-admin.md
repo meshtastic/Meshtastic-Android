@@ -1,6 +1,7 @@
 ---
 title: Settings — Modules & Admin
 nav_order: 8
+last_updated: 2026-05-12
 aliases:
   - modules
   - module-config
