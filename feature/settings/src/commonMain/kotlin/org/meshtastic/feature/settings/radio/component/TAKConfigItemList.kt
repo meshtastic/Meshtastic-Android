@@ -21,10 +21,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -54,17 +50,31 @@ import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.export_tak_data_package
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.tak_config
 import org.meshtastic.core.resources.tak_role
+import org.meshtastic.core.resources.tak_server
 import org.meshtastic.core.resources.tak_server_enabled
 import org.meshtastic.core.resources.tak_server_enabled_desc
+import org.meshtastic.core.resources.tak_server_export_data_package_desc
+import org.meshtastic.core.resources.tak_server_section
+import org.meshtastic.core.resources.tak_server_test_card_title
+import org.meshtastic.core.resources.tak_server_test_idle
+import org.meshtastic.core.resources.tak_server_test_results
+import org.meshtastic.core.resources.tak_server_test_run
+import org.meshtastic.core.resources.tak_server_test_running
 import org.meshtastic.core.resources.tak_team
 import org.meshtastic.core.takserver.TAKDataPackageGenerator
 import org.meshtastic.core.takserver.TakMeshTestRunner
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.ArrowBack
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PlayArrow
+import org.meshtastic.core.ui.icon.Share
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.tak.TakPermissionHandler
@@ -144,19 +154,22 @@ fun TakServerScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("TAK Server") },
+                title = { Text(stringResource(Res.string.tak_server)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            imageVector = MeshtasticIcons.ArrowBack,
+                            contentDescription = stringResource(Res.string.back),
                         )
                     }
                 },
                 actions = {
                     if (isTakServerEnabled) {
                         IconButton(onClick = { exportLauncher("Meshtastic_TAK_Server.zip") }) {
-                            Icon(imageVector = Icons.Default.Share, contentDescription = "Export TAK Data Package")
+                            Icon(
+                                imageVector = MeshtasticIcons.Share,
+                                contentDescription = stringResource(Res.string.export_tak_data_package),
+                            )
                         }
                     }
                 },
@@ -164,7 +177,7 @@ fun TakServerScreen(onBack: () -> Unit) {
         },
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 16.dp)) {
-            TitledCard(title = "Server") {
+            TitledCard(title = stringResource(Res.string.tak_server_section)) {
                 SwitchPreference(
                     title = stringResource(Res.string.tak_server_enabled),
                     summary = stringResource(Res.string.tak_server_enabled_desc),
@@ -183,17 +196,20 @@ fun TakServerScreen(onBack: () -> Unit) {
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Export Data Package",
+                                text = stringResource(Res.string.export_tak_data_package),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                             Text(
-                                text = "Generate .zip for ATAK/iTAK to connect to this server",
+                                text = stringResource(Res.string.tak_server_export_data_package_desc),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         IconButton(onClick = { exportLauncher("Meshtastic_TAK_Server.zip") }) {
-                            Icon(imageVector = Icons.Default.Share, contentDescription = "Export TAK Data Package")
+                            Icon(
+                                imageVector = MeshtasticIcons.Share,
+                                contentDescription = stringResource(Res.string.export_tak_data_package),
+                            )
                         }
                     }
                 }
@@ -222,7 +238,7 @@ private fun TakMeshTestCard() {
     val passed = results.count { it.passed }
     val failed = results.count { !it.passed }
 
-    TitledCard(title = "TAK Mesh Test (Debug)") {
+    TitledCard(title = stringResource(Res.string.tak_server_test_card_title)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -230,12 +246,22 @@ private fun TakMeshTestCard() {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (isRunning) "Running: ${currentFixture ?: "..."}" else "Send all ${TakMeshTestRunner.FIXTURE_NAMES.size} test fixtures to mesh",
+                    text = if (isRunning) {
+                        stringResource(Res.string.tak_server_test_running, currentFixture ?: "...")
+                    } else {
+                        stringResource(Res.string.tak_server_test_idle, TakMeshTestRunner.FIXTURE_NAMES.size)
+                    },
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 if (results.isNotEmpty()) {
                     Text(
-                        text = "$passed passed, $failed failed of ${results.size}/${TakMeshTestRunner.FIXTURE_NAMES.size}",
+                        text = stringResource(
+                            Res.string.tak_server_test_results,
+                            passed,
+                            failed,
+                            results.size,
+                            TakMeshTestRunner.FIXTURE_NAMES.size,
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (failed > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -245,8 +271,8 @@ private fun TakMeshTestCard() {
                 CircularProgressIndicator()
             } else {
                 Button(onClick = { scope.launch { testRunner.runAll() } }) {
-                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null)
-                    Text("Run")
+                    Icon(imageVector = MeshtasticIcons.PlayArrow, contentDescription = null)
+                    Text(stringResource(Res.string.tak_server_test_run))
                 }
             }
         }

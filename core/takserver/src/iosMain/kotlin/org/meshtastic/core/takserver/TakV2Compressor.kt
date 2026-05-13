@@ -9,6 +9,7 @@
 
 package org.meshtastic.core.takserver
 
+import org.meshtastic.core.takserver.TAKPacketV2Conversion.toCoTMessage
 import org.meshtastic.proto.TAKPacketV2
 
 /**
@@ -32,9 +33,12 @@ internal actual object TakV2Compressor {
     }
 
     actual fun decompressToXml(wirePayload: ByteArray): String {
-        // iOS stub: decompress and convert via toCoTMessage().toXml() as fallback
+        // iOS stub: decompress the packet and convert to CoT XML via the common conversion path.
         val packet = decompress(wirePayload)
-        return packet.toString() // placeholder — iOS uses Swift SDK directly
+        return packet.toCoTMessage()?.toXml()
+            ?: throw UnsupportedOperationException(
+                "iOS stub: TAKPacketV2 could not be converted to CoT XML for packet: $packet"
+            )
     }
 
     actual fun decompress(wirePayload: ByteArray): TAKPacketV2 {

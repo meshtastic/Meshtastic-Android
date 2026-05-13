@@ -68,6 +68,7 @@ class MeshServiceOrchestratorTest {
     private val serviceNotifications: MeshServiceNotifications = mock(MockMode.autofill)
     private val takServerManager: TAKServerManager = mock(MockMode.autofill)
     private val takPrefs: TakPrefs = mock(MockMode.autofill)
+    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
 
@@ -94,6 +95,7 @@ class MeshServiceOrchestratorTest {
         every { takServerManager.isRunning } returns takRunningFlow
         every { takServerManager.inboundMessages } returns MutableSharedFlow()
         every { router.actionHandler } returns actionHandler
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
         val takMeshIntegration =
             TAKMeshIntegration(
@@ -101,6 +103,7 @@ class MeshServiceOrchestratorTest {
                 commandSender = commandSender,
                 serviceRepository = serviceRepository,
                 meshConfigHandler = meshConfigHandler,
+                nodeRepository = nodeRepository,
             )
 
         return MeshServiceOrchestrator(

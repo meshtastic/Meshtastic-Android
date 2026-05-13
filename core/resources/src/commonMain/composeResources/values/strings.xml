@@ -1165,8 +1165,16 @@
     <string name="tak_role_teamlead">Team Lead</string>
     <string name="tak_role_teammember">Team Member</string>
     <string name="tak_role_unspecified">Unspecified</string>
+    <string name="tak_server">TAK Server</string>
     <string name="tak_server_enabled">Enable Local TAK Server</string>
     <string name="tak_server_enabled_desc">Starts a TCP server on port 8089 for ATAK connections</string>
+    <string name="tak_server_export_data_package_desc">Generate .zip for ATAK/iTAK to connect to this server</string>
+    <string name="tak_server_section">Server</string>
+    <string name="tak_server_test_card_title">TAK Mesh Test (Debug)</string>
+    <string name="tak_server_test_idle">Send all %1$d test fixtures to mesh</string>
+    <string name="tak_server_test_results">%1$d passed, %2$d failed of %3$d/%4$d</string>
+    <string name="tak_server_test_run">Run</string>
+    <string name="tak_server_test_running">Running: %1$s</string>
     <string name="tak_team">Team Color</string>
     <string name="tak_team_blue">Blue</string>
     <string name="tak_team_brown">Brown</string>

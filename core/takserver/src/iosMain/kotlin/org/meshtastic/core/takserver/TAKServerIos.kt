@@ -35,11 +35,13 @@ import org.meshtastic.core.di.CoroutineDispatchers
 private class NoopTAKServer : TAKServer {
     private val _connectionCount = MutableStateFlow(0)
     override val connectionCount: StateFlow<Int> = _connectionCount.asStateFlow()
-    override var onMessage: ((CoTMessage) -> Unit)? = null
+    override var onMessage: ((CoTMessage, TAKClientInfo?) -> Unit)? = null
+    override var onClientConnected: (() -> Unit)? = null
 
     override suspend fun start(scope: CoroutineScope): Result<Unit> = Result.success(Unit)
     override fun stop() = Unit
     override suspend fun broadcast(cotMessage: CoTMessage) = Unit
+    override suspend fun broadcastRawXml(xml: String) = Unit
     override suspend fun hasConnections(): Boolean = false
 }
 
