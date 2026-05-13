@@ -25,11 +25,11 @@
 
 **Purpose**: Design gate, density enum, DataStore preference keys, and string resources required by all user stories.
 
-- [ ] NL-T001 `[UI-GATE]` Review `.skills/design-standards/SKILL.md` and upstream Meshtastic design standards; record constraints for `NodeItemCompact`, `NodeLayoutSettings`, density picker, and `NodeListHelp` sheet styling. This phase blocks all UI work.
-- [ ] NL-T002 [P] Create `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/model/NodeListDensity.kt` with `enum class NodeListDensity { COMPLETE, COMPACT }` (FR-001, FR-002).
-- [ ] NL-T003 [P] Create `NodeListLayoutPreferences` enum in `core/prefs/src/commonMain/kotlin/org/meshtastic/core/prefs/ui/NodeListLayoutPreferences.kt` defining all 10 DataStore keys (`nodeListDensity` + 9 compact toggles) with their defaults per data-model.md (NFR-003).
-- [ ] NL-T004 Add DataStore preference accessors for all 10 keys in `core/prefs/src/commonMain/kotlin/org/meshtastic/core/prefs/ui/UiPrefsImpl.kt` — density as `StateFlow<NodeListDensity>` (fallback to `COMPLETE` for invalid values), 9 toggles as `StateFlow<Boolean>` with eager seeding via `SharingStarted.Eagerly` (FR-002, FR-004, FR-005).
-- [ ] NL-T005 Add string resources for all toggle labels, density option labels ("Complete", "Compact"), settings section header ("Node Layout"), help sheet text, signal quality labels, and complete-mode descriptive text to `core/resources/src/commonMain/composeResources/values/strings.xml`. Run `python3 scripts/sort-strings.py` after.
+- [x] NL-T001 `[UI-GATE]` Review `.skills/design-standards/SKILL.md` and upstream Meshtastic design standards; record constraints for `NodeItemCompact`, `NodeLayoutSettings`, density picker, and `NodeListHelp` sheet styling. This phase blocks all UI work.
+- [x] NL-T002 [P] Create `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/model/NodeListDensity.kt` with `enum class NodeListDensity { COMPLETE, COMPACT }` (FR-001, FR-002).
+- [x] NL-T003 [P] Create `NodeListLayoutPreferences` enum in `core/prefs/src/commonMain/kotlin/org/meshtastic/core/prefs/ui/NodeListLayoutPreferences.kt` defining all 10 DataStore keys (`nodeListDensity` + 9 compact toggles) with their defaults per data-model.md (NFR-003).
+- [x] NL-T004 Add DataStore preference accessors for all 10 keys in `core/prefs/src/commonMain/kotlin/org/meshtastic/core/prefs/ui/UiPrefsImpl.kt` — density as `StateFlow<NodeListDensity>` (fallback to `COMPLETE` for invalid values), 9 toggles as `StateFlow<Boolean>` with eager seeding via `SharingStarted.Eagerly` (FR-002, FR-004, FR-005).
+- [x] NL-T005 Add string resources for all toggle labels, density option labels ("Complete", "Compact"), settings section header ("Node Layout"), help sheet text, signal quality labels, and complete-mode descriptive text to `core/resources/src/commonMain/composeResources/values/strings.xml`. Run `python3 scripts/sort-strings.py` after.
 
 **Dependencies**: NL-T001 blocks all UI phases (2+). NL-T002 and NL-T003 are independent. NL-T004 depends on NL-T002 + NL-T003.
 **Checkpoint**: Preference infrastructure ready — all user stories can now begin.
@@ -42,10 +42,10 @@
 
 **⚠️ CRITICAL**: The existing `NodeItem` has zero row-level semantics — TalkBack reads 8–12 separate focus stops per node row. This is a HIGH priority fix (audit §2.1).
 
-- [ ] NL-T006 **[HIGH]** Add `Modifier.semantics(mergeDescendants = true)` with a composed `contentDescription` (aggregating name, connection status, favorite, last heard, online/offline, role, hops, battery, distance, heading, signal strength) and `role = Role.Button` on the outer `Card` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/NodeItem.kt` (FR-025, audit §2.1, §2.3). Extract a `buildNodeDescription()` helper for reuse by `NodeItemCompact`.
-- [ ] NL-T007 Ensure `NodeItem` uses `titleMediumEmphasized` for node names (already at line 423 — verify no regressions) and confirm Complete rows have 3.dp top/bottom padding (FR-027). Adjust `Column` padding from 12.dp if needed to meet the 3.dp outer spec.
-- [ ] NL-T008 Ensure `NodeItem` uses `LoraSignalIndicator` / `NodeSignalQuality` composables for signal display in Complete mode — quality icon + SNR/RSSI text with quality color, not just a colored icon (FR-022). Verify existing `NodeSignalRow` at line 250 matches spec.
-- [ ] NL-T009 Modify `NodeListViewModel` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/list/NodeListViewModel.kt` to expose `nodeListDensity: StateFlow<NodeListDensity>` and all 9 compact toggle `StateFlow<Boolean>` values from `UiPrefsImpl` (FR-002, FR-004).
+- [x] NL-T006 **[HIGH]** Add `Modifier.semantics(mergeDescendants = true)` with a composed `contentDescription` (aggregating name, connection status, favorite, last heard, online/offline, role, hops, battery, distance, heading, signal strength) and `role = Role.Button` on the outer `Card` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/NodeItem.kt` (FR-025, audit §2.1, §2.3). Extract a `buildNodeDescription()` helper for reuse by `NodeItemCompact`.
+- [x] NL-T007 Ensure `NodeItem` uses `titleMediumEmphasized` for node names (already at line 423 — verify no regressions) and confirm Complete rows have 3.dp top/bottom padding (FR-027). Adjust `Column` padding from 12.dp if needed to meet the 3.dp outer spec.
+- [x] NL-T008 Ensure `NodeItem` uses `LoraSignalIndicator` / `NodeSignalQuality` composables for signal display in Complete mode — quality icon + SNR/RSSI text with quality color, not just a colored icon (FR-022). Verify existing `NodeSignalRow` at line 250 matches spec.
+- [x] NL-T009 Modify `NodeListViewModel` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/list/NodeListViewModel.kt` to expose `nodeListDensity: StateFlow<NodeListDensity>` and all 9 compact toggle `StateFlow<Boolean>` values from `UiPrefsImpl` (FR-002, FR-004).
 
 **Dependencies**: Phase 1 (NL-T002–NL-T004) must complete first.
 **Checkpoint**: Foundation ready — existing NodeItem is accessible, ViewModel exposes density state.
@@ -60,15 +60,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] NL-T010 [P] [US1] Create `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/NodeItemCompact.kt` with the two-column `Row` layout scaffold: Column 1 (fixed width: `NodeChip` + optional battery), Column 2 (`Modifier.weight(1f)`: `Column(verticalArrangement = spacedBy(2.dp))`) (FR-009, FR-026, FR-027).
-- [ ] NL-T011 [US1] Implement Row 1 (always visible) in `NodeItemCompact.kt`: `NodeKeyStatusIcon` (PKC/key status), long name using `titleMediumEmphasized` (M3 Expressive), and favorite star icon. Row is non-toggleable (FR-012, FR-025).
-- [ ] NL-T012 [US1] Add `Modifier.semantics(mergeDescendants = true)` on the outer `Card` in `NodeItemCompact.kt` with composed `contentDescription` (reuse `buildNodeDescription()` from NL-T006) and `role = Role.Button` for TalkBack (FR-025, audit §2.1, §2.3).
-- [ ] NL-T013 [US1] Add compact row padding: 2.dp top/bottom on outer `Column` (FR-027 — intentional M3 deviation for density).
-- [ ] NL-T014 [P] [US1] Create `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/NodeLayoutSettings.kt` with `SingleChoiceSegmentedButtonRow` + `SegmentedButton` for Complete/Compact density selection. Write selected density to DataStore (FR-001, FR-002).
-- [ ] NL-T015 [US1] Add descriptive text in `NodeLayoutSettings.kt`: "The Complete layout displays all available node data. Fields with no data are automatically hidden." — shown when Complete is selected (FR-007).
-- [ ] NL-T016 [US1] Integrate `NodeLayoutSettings` into the existing App Settings screen in `feature/settings/` (R-005 — embedded section, no new navigation route).
-- [ ] NL-T017 [US1] Modify `NodeListScreen` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/list/NodeListScreen.kt` to collect `nodeListDensity` from ViewModel and delegate to `NodeItem` (Complete) or `NodeItemCompact` (Compact) per row (FR-009).
-- [ ] NL-T018 [US1] Ensure `LazyColumn` in `NodeListScreen.kt` uses stable `key = { it.num }` for both layout variants (already present at line 187 — verify no regression) (NFR-004).
+- [x] NL-T010 [P] [US1] Create `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/NodeItemCompact.kt` with the two-column `Row` layout scaffold: Column 1 (fixed width: `NodeChip` + optional battery), Column 2 (`Modifier.weight(1f)`: `Column(verticalArrangement = spacedBy(2.dp))`) (FR-009, FR-026, FR-027).
+- [x] NL-T011 [US1] Implement Row 1 (always visible) in `NodeItemCompact.kt`: `NodeKeyStatusIcon` (PKC/key status), long name using `titleMediumEmphasized` (M3 Expressive), and favorite star icon. Row is non-toggleable (FR-012, FR-025).
+- [x] NL-T012 [US1] Add `Modifier.semantics(mergeDescendants = true)` on the outer `Card` in `NodeItemCompact.kt` with composed `contentDescription` (reuse `buildNodeDescription()` from NL-T006) and `role = Role.Button` for TalkBack (FR-025, audit §2.1, §2.3).
+- [x] NL-T013 [US1] Add compact row padding: 2.dp top/bottom on outer `Column` (FR-027 — intentional M3 deviation for density).
+- [x] NL-T014 [P] [US1] Create `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/NodeLayoutSettings.kt` with `SingleChoiceSegmentedButtonRow` + `SegmentedButton` for Complete/Compact density selection. Write selected density to DataStore (FR-001, FR-002).
+- [x] NL-T015 [US1] Add descriptive text in `NodeLayoutSettings.kt`: "The Complete layout displays all available node data. Fields with no data are automatically hidden." — shown when Complete is selected (FR-007).
+- [x] NL-T016 [US1] Integrate `NodeLayoutSettings` into the existing App Settings screen in `feature/settings/` (R-005 — embedded section, no new navigation route).
+- [x] NL-T017 [US1] Modify `NodeListScreen` in `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/list/NodeListScreen.kt` to collect `nodeListDensity` from ViewModel and delegate to `NodeItem` (Complete) or `NodeItemCompact` (Compact) per row (FR-009).
+- [x] NL-T018 [US1] Ensure `LazyColumn` in `NodeListScreen.kt` uses stable `key = { it.num }` for both layout variants (already present at line 187 — verify no regression) (NFR-004).
 
 **Checkpoint**: User Story 1 complete — density switching works end-to-end. Compact shows name-only rows, Complete shows existing full layout. Both persist across app restarts.
 
@@ -82,18 +82,18 @@
 
 ### Implementation for User Story 2
 
-- [ ] NL-T019 [US2] Implement Row 2 (toggle: `shouldShowLastHeard`) in `NodeItemCompact.kt`: online/offline icon (green checkmark / orange moon) + timestamp via `LastHeardInfo`, with relative time support via `lastHeardIsRelative`. Guard with future date filter (> 1 year) (FR-013, FR-028).
-- [ ] NL-T020 [US2] Implement Row 3 combined icons in `NodeItemCompact.kt` as `Row(horizontalArrangement = spacedBy(6.dp), modifier = Modifier.height(IntrinsicSize.Min))` with `VerticalDivider(modifier = Modifier.fillMaxHeight())` separators (FR-014, audit §1.4). Render in order: Distance+Bearing, Hops Away, Signal, Channel, Device Role, Log Icons — each gated by its toggle AND data conditions.
-- [ ] NL-T021 [US2] Implement Distance+Bearing rendering in Row 3: gate on `shouldShowLocation` toggle + node has positions + node is not connected node + valid location data for both user and node. Use `NumberFormatter.format()` for float values (FR-015, FR-028).
-- [ ] NL-T022 [US2] Implement Hops Away rendering in Row 3: gate on `shouldShowHops` toggle + `node.hopsAway > 0` (FR-016).
-- [ ] NL-T023 [US2] Implement Signal rendering in Row 3: gate on `shouldShowSignal` toggle + `node.hopsAway == 0` + `node.snr != 0` + `!node.viaMqtt`. Icon color via `determineSignalQuality(snr, rssi)`. **MUST** include `contentDescription = stringResource(quality.nameRes)` (e.g., "Signal: Good") for WCAG 1.4.1 — no color-only information (FR-017, audit §2.6).
-- [ ] NL-T024 [US2] Implement Channel rendering in Row 3: gate on `shouldShowChannel` toggle + `node.channel > 0` (FR-018).
-- [ ] NL-T025 [US2] Implement Device Role rendering in Row 3: gate on `shouldShowRole` toggle. Show role's `MeshtasticIcons` icon + conditional unmessagable, store-and-forward, and MQTT icons (FR-019).
-- [ ] NL-T026 [US2] Implement Log Icons rendering in Row 3: gate on `shouldShowTelemetry` toggle + node has at least one of: positions, environment metrics, detection sensor metrics, or trace routes. Show device metrics, positions (mappin), environment, detection sensor, trace routes (signpost) icons from `MeshtasticIcons` (FR-020).
-- [ ] NL-T027 [US2] Implement conditional battery rendering below `NodeChip` in Column 1: gate on `shouldShowPower` toggle + `node.batteryLevel != null` (FR-003 toggle order, spec §Toggle Reference).
-- [ ] NL-T028 [US2] Add 9 `SwitchPreference` toggles (from `core:ui`, NOT raw `Switch`) in `NodeLayoutSettings.kt`, ordered by layout position: Power, Last Heard Time, Relative Last Heard Time, Distance and Bearing, Hops Away, Signal (Direct Only), Channel, Device Role, Log Icons. Show only when Compact is selected (FR-003, audit §1.1).
-- [ ] NL-T029 [US2] Implement "Relative Last Heard Time" toggle disabled state (`enabled = false`) when "Last Heard Time" is toggled off in `NodeLayoutSettings.kt` (FR-006).
-- [ ] NL-T030 [US2] Implement live preview composable in `NodeLayoutSettings.kt` below toggles: query first node from Room KMP sorted by `lastHeard` descending, render via `NodeItem` or `NodeItemCompact` based on current density + toggle state using `collectAsState()`. Show placeholder text when database is empty (FR-008).
+- [x] NL-T019 [US2] Implement Row 2 (toggle: `shouldShowLastHeard`) in `NodeItemCompact.kt`: online/offline icon (green checkmark / orange moon) + timestamp via `LastHeardInfo`, with relative time support via `lastHeardIsRelative`. Guard with future date filter (> 1 year) (FR-013, FR-028).
+- [x] NL-T020 [US2] Implement Row 3 combined icons in `NodeItemCompact.kt` as `Row(horizontalArrangement = spacedBy(6.dp), modifier = Modifier.height(IntrinsicSize.Min))` with `VerticalDivider(modifier = Modifier.fillMaxHeight())` separators (FR-014, audit §1.4). Render in order: Distance+Bearing, Hops Away, Signal, Channel, Device Role, Log Icons — each gated by its toggle AND data conditions.
+- [x] NL-T021 [US2] Implement Distance+Bearing rendering in Row 3: gate on `shouldShowLocation` toggle + node has positions + node is not connected node + valid location data for both user and node. Use `NumberFormatter.format()` for float values (FR-015, FR-028).
+- [x] NL-T022 [US2] Implement Hops Away rendering in Row 3: gate on `shouldShowHops` toggle + `node.hopsAway > 0` (FR-016).
+- [x] NL-T023 [US2] Implement Signal rendering in Row 3: gate on `shouldShowSignal` toggle + `node.hopsAway == 0` + `node.snr != 0` + `!node.viaMqtt`. Icon color via `determineSignalQuality(snr, rssi)`. **MUST** include `contentDescription = stringResource(quality.nameRes)` (e.g., "Signal: Good") for WCAG 1.4.1 — no color-only information (FR-017, audit §2.6).
+- [x] NL-T024 [US2] Implement Channel rendering in Row 3: gate on `shouldShowChannel` toggle + `node.channel > 0` (FR-018).
+- [x] NL-T025 [US2] Implement Device Role rendering in Row 3: gate on `shouldShowRole` toggle. Show role's `MeshtasticIcons` icon + conditional unmessagable, store-and-forward, and MQTT icons (FR-019).
+- [x] NL-T026 [US2] Implement Log Icons rendering in Row 3: gate on `shouldShowTelemetry` toggle + node has at least one of: positions, environment metrics, detection sensor metrics, or trace routes. Show device metrics, positions (mappin), environment, detection sensor, trace routes (signpost) icons from `MeshtasticIcons` (FR-020).
+- [x] NL-T027 [US2] Implement conditional battery rendering below `NodeChip` in Column 1: gate on `shouldShowPower` toggle + `node.batteryLevel != null` (FR-003 toggle order, spec §Toggle Reference).
+- [x] NL-T028 [US2] Add 9 `SwitchPreference` toggles (from `core:ui`, NOT raw `Switch`) in `NodeLayoutSettings.kt`, ordered by layout position: Power, Last Heard Time, Relative Last Heard Time, Distance and Bearing, Hops Away, Signal (Direct Only), Channel, Device Role, Log Icons. Show only when Compact is selected (FR-003, audit §1.1).
+- [x] NL-T029 [US2] Implement "Relative Last Heard Time" toggle disabled state (`enabled = false`) when "Last Heard Time" is toggled off in `NodeLayoutSettings.kt` (FR-006).
+- [x] NL-T030 [US2] Implement live preview composable in `NodeLayoutSettings.kt` below toggles: query first node from Room KMP sorted by `lastHeard` descending, render via `NodeItem` or `NodeItemCompact` based on current density + toggle state using `collectAsState()`. Show placeholder text when database is empty (FR-008).
 
 **Checkpoint**: User Story 2 complete — all 9 toggles control compact field visibility, live preview updates in real time, toggle states persist across app launches.
 
@@ -107,9 +107,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] NL-T031 [US3] Implement `lineCount` computed property in `NodeItemCompact.kt`: count active row groups (1 base + 1 if `shouldShowLastHeard` + 1 if any combined-row toggle is enabled). Derive from toggle state, NOT actual data presence (R-003, data-model.md §Adaptive Chip Sizing).
-- [ ] NL-T032 [US3] Implement adaptive chip sizing in `NodeItemCompact.kt`: `max(36.dp, min(70.dp, 24.dp × lineCount))`. Use `Modifier.defaultMinSize()` (not hard `Modifier.size()`) to allow growth with system font scaling > 100% (FR-011, audit §2.8).
-- [ ] NL-T033 [US3] Ensure `NodeChip` always renders as a `NodeChip` composable at all sizes — maintaining consistent M3 `Card` styling (FR-010).
+- [x] NL-T031 [US3] Implement `lineCount` computed property in `NodeItemCompact.kt`: count active row groups (1 base + 1 if `shouldShowLastHeard` + 1 if any combined-row toggle is enabled). Derive from toggle state, NOT actual data presence (R-003, data-model.md §Adaptive Chip Sizing).
+- [x] NL-T032 [US3] Implement adaptive chip sizing in `NodeItemCompact.kt`: `max(36.dp, min(70.dp, 24.dp × lineCount))`. Use `Modifier.defaultMinSize()` (not hard `Modifier.size()`) to allow growth with system font scaling > 100% (FR-011, audit §2.8).
+- [x] NL-T033 [US3] Ensure `NodeChip` always renders as a `NodeChip` composable at all sizes — maintaining consistent M3 `Card` styling (FR-010).
 
 **Checkpoint**: User Story 3 complete — chip scales smoothly across 36.dp/48.dp/70.dp sizes based on toggle configuration.
 
@@ -123,10 +123,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] NL-T034 [P] [US4] Create `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/NodeListHelp.kt` as a `ModalBottomSheet` with `rememberModalBottomSheetState(skipPartiallyExpanded = true)` (FR-023, audit §1.1).
-- [ ] NL-T035 [US4] Add "Node Details" section with 4 signal quality entries: Good (green, SNR > −7 dB, RSSI > −115 dBm), Fair (yellow, SNR > −12 dB, RSSI > −120 dBm), Bad (orange, SNR > −18 dB, RSSI > −125 dBm), None (red, below all thresholds). Use `Quality` enum drawables from `LoraSignalIndicator.kt` (FR-023).
-- [ ] NL-T036 [US4] Add `LoraSignalIndicator` composable documentation entry in `NodeListHelp.kt` showing the quality icon + description explaining how SNR and RSSI combine into a quality level (Complete layout only) (FR-024).
-- [ ] NL-T037 [US4] Add help `IconButton` (NOT raw `Icon` + `clickable`) trigger to `NodeListScreen.kt` that opens the help sheet via state. Use M3 `IconButton` for built-in 48dp minimum touch target (audit §2.5).
+- [x] NL-T034 [P] [US4] Create `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/component/NodeListHelp.kt` as a `ModalBottomSheet` with `rememberModalBottomSheetState(skipPartiallyExpanded = true)` (FR-023, audit §1.1).
+- [x] NL-T035 [US4] Add "Node Details" section with 4 signal quality entries: Good (green, SNR > −7 dB, RSSI > −115 dBm), Fair (yellow, SNR > −12 dB, RSSI > −120 dBm), Bad (orange, SNR > −18 dB, RSSI > −125 dBm), None (red, below all thresholds). Use `Quality` enum drawables from `LoraSignalIndicator.kt` (FR-023).
+- [x] NL-T036 [US4] Add `LoraSignalIndicator` composable documentation entry in `NodeListHelp.kt` showing the quality icon + description explaining how SNR and RSSI combine into a quality level (Complete layout only) (FR-024).
+- [x] NL-T037 [US4] Add help `IconButton` (NOT raw `Icon` + `clickable`) trigger to `NodeListScreen.kt` that opens the help sheet via state. Use M3 `IconButton` for built-in 48dp minimum touch target (audit §2.5).
 
 **Checkpoint**: User Story 4 complete — signal help is discoverable and documents all quality levels.
 
@@ -136,16 +136,16 @@
 
 **Purpose**: Performance validation, edge case hardening, and verification across all stories.
 
-- [ ] NL-T038 [P] Verify smooth scrolling at 60fps with 200+ nodes in Compact mode. Use `derivedStateOf` for computed states to avoid unnecessary recompositions (NFR-002).
-- [ ] NL-T039 [P] Ensure all float values in both layouts use `NumberFormatter.format()` before display — distance, SNR, voltage, etc. (FR-028, Constitution §III).
-- [ ] NL-T040 Validate edge cases in `NodeItemCompact.kt`: all-toggles-disabled state (name row + 36.dp chip only, battery hidden), missing data (field absent, no placeholder), signal/hops mutual exclusivity, channel 0 hiding, connected node distance exclusion, MQTT signal exclusion, future date guard (spec §Edge Cases).
-- [ ] NL-T041 [P] Write unit tests for `NodeListDensity` enum, `lineCount` calculation logic (1/2/3 row cases), and invalid density string fallback to `COMPLETE` in `feature/node/src/commonTest/`.
-- [ ] NL-T042 [P] Write unit tests for DataStore preference defaults (all `true` except `lastHeardIsRelative` = `false`) in `core/prefs/src/commonTest/`.
-- [ ] NL-T043 [P] Write unit tests for edge cases: future date filtering (> 1 year), channel 0 hiding, signal/hops mutual exclusivity (`hopsAway == 0` vs `hopsAway > 0`), connected node distance exclusion, MQTT signal exclusion (`viaMqtt == true`) in `feature/node/src/commonTest/`.
-- [ ] NL-T044 [P] Write Compose UI tests for `NodeItemCompact` with various toggle combinations (all on, all off, partial) in `feature/node/src/commonTest/`.
-- [ ] NL-T045 [P] Write Compose UI tests for density switching in `NodeListScreen` (Complete → Compact → Complete round-trip) in `feature/node/src/commonTest/`.
-- [ ] NL-T046 Run `./gradlew :feature:node:allTests :feature:settings:allTests :core:prefs:allTests` to validate module tests.
-- [ ] NL-T047 Run `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests` for full verification (Constitution §II, §VI).
+- [x] NL-T038 [P] Verify smooth scrolling at 60fps with 200+ nodes in Compact mode. Use `derivedStateOf` for computed states to avoid unnecessary recompositions (NFR-002).
+- [x] NL-T039 [P] Ensure all float values in both layouts use `NumberFormatter.format()` before display — distance, SNR, voltage, etc. (FR-028, Constitution §III).
+- [x] NL-T040 Validate edge cases in `NodeItemCompact.kt`: all-toggles-disabled state (name row + 36.dp chip only, battery hidden), missing data (field absent, no placeholder), signal/hops mutual exclusivity, channel 0 hiding, connected node distance exclusion, MQTT signal exclusion, future date guard (spec §Edge Cases).
+- [x] NL-T041 [P] Write unit tests for `NodeListDensity` enum, `lineCount` calculation logic (1/2/3 row cases), and invalid density string fallback to `COMPLETE` in `feature/node/src/commonTest/`.
+- [x] NL-T042 [P] Write unit tests for DataStore preference defaults (all `true` except `lastHeardIsRelative` = `false`) in `core/prefs/src/commonTest/`.
+- [x] NL-T043 [P] Write unit tests for edge cases: future date filtering (> 1 year), channel 0 hiding, signal/hops mutual exclusivity (`hopsAway == 0` vs `hopsAway > 0`), connected node distance exclusion, MQTT signal exclusion (`viaMqtt == true`) in `feature/node/src/commonTest/`.
+- [x] NL-T044 [P] Write Compose UI tests for `NodeItemCompact` with various toggle combinations (all on, all off, partial) in `feature/node/src/commonTest/`.
+- [x] NL-T045 [P] Write Compose UI tests for density switching in `NodeListScreen` (Complete → Compact → Complete round-trip) in `feature/node/src/commonTest/`.
+- [x] NL-T046 Run `./gradlew :feature:node:allTests :feature:settings:allTests :core:prefs:allTests` to validate module tests.
+- [x] NL-T047 Run `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests` for full verification (Constitution §II, §VI).
 
 ---
 
