@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -50,7 +49,7 @@ interface TAKServerManager {
     fun broadcastRawXml(xml: String)
 }
 
-class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager {
+internal class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager {
 
     private var scope: CoroutineScope? = null
 
@@ -67,6 +66,7 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
     // clients are connected, then drains them when a client reconnects. Entries
     // expire after OFFLINE_QUEUE_TTL to avoid delivering stale situational data.
     private data class QueuedMessage(val cotMessage: CoTMessage, val enqueuedAt: kotlin.time.Instant)
+
     private val offlineQueue = ArrayDeque<QueuedMessage>()
     private val offlineQueueMutex = Mutex()
 
@@ -148,17 +148,20 @@ class TAKServerManagerImpl(private val takServer: TAKServer) : TAKServerManager 
         scope?.launch { takServer.broadcastRawXml(xml) }
     }
 
-    /** Drain any queued messages to the newly connected TAK client. Called by the server
-     *  when a TAK client connects (Connected event). */
+    /**
+     * Drain any queued messages to the newly connected TAK client. Called by the server when a TAK client connects
+     * (Connected event).
+     */
     internal fun drainOfflineQueue() {
         if (!_isRunning.value) return
         scope?.launch {
-            val messages = offlineQueueMutex.withLock {
-                val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL
-                val valid = offlineQueue.filter { it.enqueuedAt >= cutoff }.map { it.cotMessage }
-                offlineQueue.clear()
-                valid
-            }
+            val messages =
+                offlineQueueMutex.withLock {
+                    val cutoff = Clock.System.now() - OFFLINE_QUEUE_TTL
+                    val valid = offlineQueue.filter { it.enqueuedAt >= cutoff }.map { it.cotMessage }
+                    offlineQueue.clear()
+                    valid
+                }
             if (messages.isNotEmpty()) {
                 Logger.i { "Draining ${messages.size} queued message(s) to reconnected TAK client" }
                 messages.forEach { takServer.broadcast(it) }

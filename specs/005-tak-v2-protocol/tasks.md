@@ -4,7 +4,7 @@
 **Prerequisites**: plan.md ✅, spec.md ✅, research.md ✅, data-model.md ✅, contracts/ ✅
 **Status**: Retroactive — documents work completed in PR #5434 (99 files, +4698 lines). Use as verification checklist.
 
-**Tests**: Included — the implementation ships with 9 test classes and 65+ test methods covering all CoT types.
+**Tests**: Included — the implementation ships with 12 test classes and 89+ test methods covering all CoT types.
 
 **Verification**: Constitution-required validation tasks included (spotlessCheck, detekt, compile, allTests).
 
@@ -182,13 +182,16 @@
 - [X] T068 [P] Review `TAKConfigItemList.kt` against [Meshtastic design standards](https://raw.githubusercontent.com/meshtastic/design/refs/heads/master/standards/meshtastic_design_standards_latest.md) — verify M3 components, accessibility (TalkBack), touch targets
 - [X] T069 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto` submodule
 - [X] T070 [P] Run constitution-required verification: `./gradlew spotlessApply spotlessCheck detekt assembleDebug :core:takserver:allTests :feature:settings:allTests`
-- [X] T071 [P] Verify all 9 test classes pass (65+ methods): `./gradlew :core:takserver:allTests`
+- [X] T071 [P] Verify all 12 test classes pass (89+ methods): `./gradlew :core:takserver:allTests`
 - [X] T072 [P] Validate quickstart.md instructions produce successful build from clean checkout
 - [X] T073 Run `gh pr checks 5434` to confirm CI passes all checks
 - [X] T074 [P] [US3] Add test for offline message queue: verify FIFO eviction at 50-message cap, per-message TTL expiry after 5 minutes, and replay of queued messages on client reconnect
 - [X] T075 [P] [US4] Add test for ACCESS_LOCAL_NETWORK permission denied on Android 17+: verify TAK server displays user-visible error and does not crash
 - [X] T076 [P] [US3] Add test for TAKServerJvm port-conflict error: verify graceful failure with user-visible error when port 8089 is already in use
 - [X] T077 [P] [US1] Add test for MAX_DECOMPRESSED_SIZE boundary: verify `TakV2Compressor` rejects payloads exceeding the decompression size limit
+- [X] T078 [P] [US1] Create `TAKMeshIntegrationTest.kt` in `core/takserver/src/commonTest/` with lifecycle, inbound mesh, firmware gating, and GeoChat enrichment tests (10 tests)
+- [X] T079 [P] [US3] Add `broadcastRawXml` tests to `TAKServerManagerTest.kt`: verify forward-to-TAKServer when running and no-op when not running (2 tests)
+- [X] T080 [P] Restrict `TAKServerManagerImpl` visibility to `internal` in `TAKServerManager.kt` — consumers use the `TAKServerManager` interface via Koin
 
 ---
 
