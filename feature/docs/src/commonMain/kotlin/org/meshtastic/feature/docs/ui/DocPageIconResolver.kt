@@ -77,6 +77,8 @@ internal fun DocPage.resolveIcon(): ImageVector = when (iconId) {
 
     "units-locale" -> MeshtasticIcons.Language
 
+    "translate" -> MeshtasticIcons.Language
+
     // Developer Guide
     "architecture" -> MeshtasticIcons.ForkLeft
 
@@ -93,6 +95,8 @@ internal fun DocPage.resolveIcon(): ImageVector = when (iconId) {
     "testing" -> MeshtasticIcons.BugReport
 
     "contributing" -> MeshtasticIcons.Group
+
+    "measurement" -> MeshtasticIcons.Chart
 
     else -> MeshtasticIcons.Notes
 }

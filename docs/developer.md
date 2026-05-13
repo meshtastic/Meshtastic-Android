@@ -34,6 +34,8 @@ Things that trip up first-time contributors — check these before requesting re
 Keep the last 5–8 entries and trim older ones from the bottom.
 -->
 
+**May 2026** — [Measurement & Formatting](developer/measurement) — New page documenting the `MetricFormatter` API, locale-aware unit conversion patterns, and how to add new measurement types.
+
 **May 2026** — [Testing](developer/testing) — Compose Preview Screenshot Testing (CST) integrated: `screenshot-tests/` module, `@PreviewTest` wrappers, CI validation, docs asset pipeline.
 
 **May 2026** — In-app documentation system added: markdown source under `docs/user/` and `docs/developer/` is bundled as Compose Resources and rendered via `multiplatform-markdown-renderer-m3`.

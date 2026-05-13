@@ -35,6 +35,7 @@ import org.meshtastic.core.resources.doc_keywords_settings_radio
 import org.meshtastic.core.resources.doc_keywords_signal_meter
 import org.meshtastic.core.resources.doc_keywords_tak
 import org.meshtastic.core.resources.doc_keywords_telemetry
+import org.meshtastic.core.resources.doc_keywords_translate
 import org.meshtastic.core.resources.doc_keywords_units
 import org.meshtastic.core.resources.doc_title_connections
 import org.meshtastic.core.resources.doc_title_desktop
@@ -51,6 +52,7 @@ import org.meshtastic.core.resources.doc_title_settings_radio
 import org.meshtastic.core.resources.doc_title_signal_meter
 import org.meshtastic.core.resources.doc_title_tak
 import org.meshtastic.core.resources.doc_title_telemetry
+import org.meshtastic.core.resources.doc_title_translate
 import org.meshtastic.core.resources.doc_title_units
 import org.meshtastic.feature.docs.model.DocBundle
 import org.meshtastic.feature.docs.model.DocPage
@@ -319,6 +321,16 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 3800,
                 "units-locale",
             ),
+            UserPageDef(
+                "translate",
+                CoreRes.string.doc_title_translate,
+                CoreRes.string.doc_keywords_translate,
+                "docs/user/translate.html",
+                17,
+                listOf("crowdin", "localization", "language", "i18n", "contribute"),
+                3700,
+                "translate",
+            ),
         )
 
     private suspend fun buildUserGuideIndex(): List<KeywordIndexEntry> = userPages.map { def ->
@@ -428,6 +440,17 @@ class DefaultDocBundleLoader : DocBundleLoader {
             listOf("contributing", "pull-request", "branch-naming"),
             2900,
             "contributing",
+        ),
+        KeywordIndexEntry(
+            "measurement",
+            "Measurement & Formatting",
+            "developer",
+            "docs/developer/measurement.html",
+            9,
+            listOf("formatter", "metric", "number", "locale", "temperature", "conversion", "api"),
+            listOf("metric-formatter", "number-formatter", "measurement"),
+            5400,
+            "measurement",
         ),
     )
 

@@ -20,6 +20,8 @@ Documentation for using the Meshtastic Android and Desktop app.
 Keep the last 5–8 entries and archive older ones by removing them.
 -->
 
+**May 2026** — [Translate the App](user/translate) — New page explaining how to contribute translations to the Meshtastic app via Crowdin.
+
 **May 2026** — [Units & Locale](user/units-and-locale) — New page explaining how the app automatically adapts temperatures, distances, speeds, and times to your device's regional settings.
 
 **May 2026** — [Signal Meter](user/signal-meter) — New page explaining how the LoRa signal quality meter works, why negative SNR values are normal, and how to interpret RSSI vs. SNR.

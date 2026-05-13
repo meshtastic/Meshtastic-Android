@@ -309,6 +309,7 @@ doc_keywords_desktop
 doc_keywords_discovery
 doc_keywords_firmware
 doc_keywords_map
+doc_keywords_measurement
 doc_keywords_messages
 doc_keywords_mqtt
 doc_keywords_node_metrics
@@ -319,6 +320,7 @@ doc_keywords_settings_radio
 doc_keywords_signal_meter
 doc_keywords_tak
 doc_keywords_telemetry
+doc_keywords_translate
 doc_keywords_units
 doc_search_placeholder
 doc_section_developer
@@ -328,6 +330,7 @@ doc_title_desktop
 doc_title_discovery
 doc_title_firmware
 doc_title_map
+doc_title_measurement
 doc_title_messages
 doc_title_mqtt
 doc_title_node_metrics
@@ -338,6 +341,7 @@ doc_title_settings_radio
 doc_title_signal_meter
 doc_title_tak
 doc_title_telemetry
+doc_title_translate
 doc_title_units
 done
 dont_show_again_for_device
