@@ -23,11 +23,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -59,10 +59,10 @@ import org.meshtastic.core.resources.tak_server
 import org.meshtastic.core.resources.tak_server_enabled
 import org.meshtastic.core.resources.tak_server_enabled_desc
 import org.meshtastic.core.resources.tak_server_export_data_package_desc
+import org.meshtastic.core.resources.tak_server_loading
 import org.meshtastic.core.resources.tak_server_section
 import org.meshtastic.core.resources.tak_server_test_card_title
 import org.meshtastic.core.resources.tak_server_test_idle
-import org.meshtastic.core.resources.tak_server_loading
 import org.meshtastic.core.resources.tak_server_test_result_bytes
 import org.meshtastic.core.resources.tak_server_test_result_unknown_error
 import org.meshtastic.core.resources.tak_server_test_results
@@ -71,6 +71,7 @@ import org.meshtastic.core.resources.tak_server_test_running
 import org.meshtastic.core.resources.tak_team
 import org.meshtastic.core.takserver.TAKDataPackageGenerator
 import org.meshtastic.core.takserver.TakMeshTestRunner
+import org.meshtastic.core.takserver.TakTestResult
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -82,7 +83,9 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.tak.TakPermissionHandler
 import org.meshtastic.feature.settings.tak.rememberDataPackageExporter
+import org.meshtastic.proto.MemberRole
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.Team
 
 // ── TAK Config Screen (Module Settings) ─────────────────────────────────────
 // Shows only the firmware module config: team and role dropdowns.
@@ -95,10 +98,11 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 
     LaunchedEffect(takConfig) { formState.value = takConfig }
 
-    val effectiveResponseState = when (state.responseState) {
-        is ResponseState.Loading -> ResponseState.Empty
-        else -> state.responseState
-    }
+    val effectiveResponseState =
+        when (state.responseState) {
+            is ResponseState.Loading -> ResponseState.Empty
+            else -> state.responseState
+        }
 
     RadioConfigScreenList(
         title = stringResource(Res.string.tak),
@@ -113,25 +117,43 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         },
     ) {
         item {
-            TitledCard(title = stringResource(Res.string.tak_config)) {
-                DropDownPreference(
-                    title = stringResource(Res.string.tak_team),
-                    enabled = state.connected,
-                    selectedItem = formState.value.team,
-                    itemLabel = { stringResource(getStringResFrom(it)) },
-                    itemColor = { Color(getColorFrom(it)) },
-                    onItemSelected = { formState.value = formState.value.copy(team = it) },
-                )
-                HorizontalDivider()
-                DropDownPreference(
-                    title = stringResource(Res.string.tak_role),
-                    enabled = state.connected,
-                    selectedItem = formState.value.role,
-                    itemLabel = { stringResource(getStringResFrom(it)) },
-                    onItemSelected = { formState.value = formState.value.copy(role = it) },
-                )
-            }
+            TakConfigCard(
+                team = formState.value.team,
+                role = formState.value.role,
+                enabled = state.connected,
+                onTeamSelected = { formState.value = formState.value.copy(team = it) },
+                onRoleSelected = { formState.value = formState.value.copy(role = it) },
+            )
         }
+    }
+}
+
+/** Stateless TAK team/role config card — previewable without DI. */
+@Composable
+internal fun TakConfigCard(
+    team: Team,
+    role: MemberRole,
+    enabled: Boolean,
+    onTeamSelected: (Team) -> Unit,
+    onRoleSelected: (MemberRole) -> Unit,
+) {
+    TitledCard(title = stringResource(Res.string.tak_config)) {
+        DropDownPreference(
+            title = stringResource(Res.string.tak_team),
+            enabled = enabled,
+            selectedItem = team,
+            itemLabel = { stringResource(getStringResFrom(it)) },
+            itemColor = { Color(getColorFrom(it)) },
+            onItemSelected = onTeamSelected,
+        )
+        HorizontalDivider()
+        DropDownPreference(
+            title = stringResource(Res.string.tak_role),
+            enabled = enabled,
+            selectedItem = role,
+            itemLabel = { stringResource(getStringResFrom(it)) },
+            onItemSelected = onRoleSelected,
+        )
     }
 }
 
@@ -180,46 +202,52 @@ fun TakServerScreen(onBack: () -> Unit) {
         },
     ) { padding ->
         Column(modifier = Modifier.padding(padding).padding(horizontal = 16.dp)) {
-            TitledCard(title = stringResource(Res.string.tak_server_section)) {
-                SwitchPreference(
-                    title = stringResource(Res.string.tak_server_enabled),
-                    summary = stringResource(Res.string.tak_server_enabled_desc),
-                    checked = isTakServerEnabled,
-                    enabled = true,
-                    onCheckedChange = { takPrefs.setTakServerEnabled(it) },
-                )
-                if (isTakServerEnabled) {
-                    HorizontalDivider()
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(Res.string.export_tak_data_package),
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Text(
-                                text = stringResource(Res.string.tak_server_export_data_package_desc),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        IconButton(onClick = { exportLauncher("Meshtastic_TAK_Server.zip") }) {
-                            Icon(
-                                imageVector = MeshtasticIcons.Share,
-                                contentDescription = stringResource(Res.string.export_tak_data_package),
-                            )
-                        }
-                    }
+            TakServerSection(
+                isTakServerEnabled = isTakServerEnabled,
+                onEnabledChange = { takPrefs.setTakServerEnabled(it) },
+                onExport = { exportLauncher("Meshtastic_TAK_Server.zip") },
+            )
+            TakMeshTestCard()
+        }
+    }
+}
+
+/** Stateless TAK server enable/disable section — previewable without DI. */
+@Composable
+internal fun TakServerSection(isTakServerEnabled: Boolean, onEnabledChange: (Boolean) -> Unit, onExport: () -> Unit) {
+    TitledCard(title = stringResource(Res.string.tak_server_section)) {
+        SwitchPreference(
+            title = stringResource(Res.string.tak_server_enabled),
+            summary = stringResource(Res.string.tak_server_enabled_desc),
+            checked = isTakServerEnabled,
+            enabled = true,
+            onCheckedChange = onEnabledChange,
+        )
+        if (isTakServerEnabled) {
+            HorizontalDivider()
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(Res.string.export_tak_data_package),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = stringResource(Res.string.tak_server_export_data_package_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(onClick = onExport) {
+                    Icon(
+                        imageVector = MeshtasticIcons.Share,
+                        contentDescription = stringResource(Res.string.export_tak_data_package),
+                    )
                 }
             }
-
-            // Debug-only test harness
-            TakMeshTestCard()
         }
     }
 }
@@ -238,9 +266,27 @@ private fun TakMeshTestCard() {
     val currentFixture by testRunner.currentFixture.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
+    TakMeshTestCardContent(
+        results = results,
+        isRunning = isRunning,
+        currentFixture = currentFixture,
+        fixtureCount = TakMeshTestRunner.FIXTURE_NAMES.size,
+        onRunTests = { scope.launch { testRunner.runAll() } },
+    )
+}
+
+/** Stateless TAK test results card — previewable without DI. */
+@Composable
+internal fun TakMeshTestCardContent(
+    results: List<TakTestResult>,
+    isRunning: Boolean,
+    currentFixture: String?,
+    fixtureCount: Int,
+    onRunTests: () -> Unit,
+) {
+    val loadingLabel = stringResource(Res.string.tak_server_loading)
     val passed = results.count { it.passed }
     val failed = results.count { !it.passed }
-    val loadingLabel = stringResource(Res.string.tak_server_loading)
 
     TitledCard(title = stringResource(Res.string.tak_server_test_card_title)) {
         Row(
@@ -250,31 +296,38 @@ private fun TakMeshTestCard() {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (isRunning) {
+                    text =
+                    if (isRunning) {
                         stringResource(Res.string.tak_server_test_running, currentFixture ?: loadingLabel)
                     } else {
-                        stringResource(Res.string.tak_server_test_idle, TakMeshTestRunner.FIXTURE_NAMES.size)
+                        stringResource(Res.string.tak_server_test_idle, fixtureCount)
                     },
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 if (results.isNotEmpty()) {
                     Text(
-                        text = stringResource(
+                        text =
+                        stringResource(
                             Res.string.tak_server_test_results,
                             passed,
                             failed,
                             results.size,
-                            TakMeshTestRunner.FIXTURE_NAMES.size,
+                            fixtureCount,
                         ),
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (failed > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color =
+                        if (failed > 0) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                     )
                 }
             }
             if (isRunning) {
                 CircularProgressIndicator()
             } else {
-                Button(onClick = { scope.launch { testRunner.runAll() } }) {
+                Button(onClick = onRunTests) {
                     Icon(imageVector = MeshtasticIcons.PlayArrow, contentDescription = null)
                     Text(stringResource(Res.string.tak_server_test_run))
                 }
@@ -295,7 +348,8 @@ private fun TakMeshTestCard() {
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = if (result.passed) {
+                    text =
+                    if (result.passed) {
                         stringResource(Res.string.tak_server_test_result_bytes, result.compressedBytes)
                     } else {
                         result.error ?: stringResource(Res.string.tak_server_test_result_unknown_error)
