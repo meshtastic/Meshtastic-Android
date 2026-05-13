@@ -81,7 +81,6 @@ import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
-private const val CHIP_SIZE_DP = 48
 private const val COMPACT_ICON_SIZE_DP = 16
 
 @Composable
@@ -181,7 +180,7 @@ fun NodeItemCompact(
         ) {
             // Column 1: NodeChip + optional battery
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                NodeChip(node = thatNode, modifier = Modifier.size(CHIP_SIZE_DP.dp))
+                NodeChip(node = thatNode)
                 if (showPower && thatNode.batteryLevel != null) {
                     MaterialBatteryInfo(
                         level = thatNode.batteryLevel ?: 0,
