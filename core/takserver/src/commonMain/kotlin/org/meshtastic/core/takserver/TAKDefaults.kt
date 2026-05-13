@@ -65,6 +65,9 @@ internal const val TAK_DIRECT_MESSAGE_PARTS_MIN = 3
  */
 internal const val MAX_TAK_WIRE_PAYLOAD_BYTES = 225
 
+/** Default CoT type for PLI (Position Location Information) — friendly ground unit. */
+internal const val DEFAULT_PLI_COT_TYPE = "a-f-G-U-C"
+
 /**
  * Max characters of raw CoT XML we'll write to logcat when dropping an oversized
  * packet. ATAK can emit events several KB long; logging the whole thing floods

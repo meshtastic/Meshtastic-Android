@@ -40,8 +40,12 @@ object TAKPacketV2Conversion {
 
         val battery = status?.battery?.coerceAtLeast(0) ?: 0
 
-        // PLI (position reports)
-        if (type.startsWith("a-f-G") || type.startsWith("a-f-g") || type.startsWith("a-")) {
+        // PLI (position reports): match all atom CoT types ("a-*").
+        // The original type is preserved via cot_type_id/cot_type_str so that hostile
+        // (a-h-*), neutral (a-n-*), and unknown (a-u-*) markers round-trip correctly.
+        // toCoTMessage() restores the exact type from those fields instead of defaulting
+        // to DEFAULT_PLI_COT_TYPE, so all atom markers are treated as PLI on the wire.
+        if (type.startsWith("a-")) {
             val callsign = contact?.callsign ?: "UNKNOWN"
             val deviceCallsign = uid
 
@@ -152,6 +156,13 @@ object TAKPacketV2Conversion {
         // PLI
         if (pli != null) {
             val staleMinutes = if (stale_seconds > 0) (stale_seconds / 60) else DEFAULT_TAK_STALE_MINUTES
+            // Restore the original CoT type and how from the packet — pli() defaults to
+            // DEFAULT_PLI_COT_TYPE/"m-g" but the sending node may have been hostile (a-h-*),
+            // neutral (a-n-*), unknown (a-u-*), etc.
+            val resolvedType = cot_type_str.ifEmpty {
+                TakV2TypeMapper.cotTypeToString(cot_type_id) ?: DEFAULT_PLI_COT_TYPE
+            }
+            val resolvedHow = TakV2TypeMapper.cotHowToString(how) ?: "m-g"
             return CoTMessage.pli(
                 uid = senderUid.ifEmpty { uid },
                 callsign = senderCallsign,
@@ -164,7 +175,7 @@ object TAKPacketV2Conversion {
                 role = TakConversionHelpers.roleToName(role),
                 battery = battery,
                 staleMinutes = staleMinutes,
-            )
+            ).copy(type = resolvedType, how = resolvedHow)
         }
 
         // GeoChat
@@ -211,7 +222,7 @@ object TAKPacketV2Conversion {
         if (rawDetail != null) {
             val rawXml = rawDetail.utf8()
             val resolvedType = cot_type_str.ifEmpty {
-                TakV2TypeMapper.cotTypeToString(cot_type_id) ?: "a-f-G-U-C"
+                TakV2TypeMapper.cotTypeToString(cot_type_id) ?: DEFAULT_PLI_COT_TYPE
             }
             val resolvedHow = TakV2TypeMapper.cotHowToString(how) ?: "m-g"
             val staleTime = timeNow + if (stale_seconds > 0) {

@@ -42,6 +42,7 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.TAKPacket
 import org.meshtastic.proto.Team
 import kotlin.concurrent.Volatile
+import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -384,8 +385,13 @@ class TAKMeshIntegration(
         val chat = takPacket.chat
         if (chat != null) {
             val timeNow = Clock.System.now()
+            // Include chatroom in UID so ATAK routes DMs correctly — the UID format
+            // "GeoChat.<senderUid>.<chatroom>.<msgId>" is what ATAK uses to determine routing.
+            // Hardcoding "All Chat Rooms" here loses DM routing from legacy v1 nodes.
+            val chatroom = chat.to ?: "All Chat Rooms"
+            val msgId = Random.Default.nextInt().toString(TAK_HEX_RADIX)
             return CoTMessage(
-                uid = "GeoChat.$senderUid.All Chat Rooms",
+                uid = "GeoChat.$senderUid.$chatroom.$msgId",
                 type = "b-t-f",
                 how = "h-g-i-g-o",
                 time = timeNow,
@@ -397,7 +403,7 @@ class TAKMeshIntegration(
                 group = CoTGroup(name = teamName, role = roleName),
                 status = CoTStatus(battery = battery),
                 chat = CoTChat(
-                    chatroom = chat.to ?: "All Chat Rooms",
+                    chatroom = chatroom,
                     senderCallsign = callsign,
                     message = chat.message,
                 ),
@@ -417,13 +423,19 @@ class TAKMeshIntegration(
         private val MIN_MESH_STALE_TTL = 15.minutes
         private val STATIC_COT_PREFIXES = listOf("b-m-r", "u-d-", "b-m-p-")
         private val EVENT_TYPE_RE = Regex("""<event\s[^>]*\btype="([^"]*)"""")
+        // Matches the stale attribute ONLY within the <event> opening tag to avoid
+        // accidentally matching a stale="..." on a <link> or other child element.
+        private val EVENT_TAG_RE = Regex("""<event\b[^>]*>""")
         private val STALE_ATTR_RE = Regex("""\bstale="([^"]*)"""")
 
         fun ensureMinimumStaleForMesh(xml: String): String {
             val type = EVENT_TYPE_RE.find(xml)?.groupValues?.getOrNull(1) ?: return xml
             if (STATIC_COT_PREFIXES.none { type.startsWith(it) }) return xml
-            val staleMatch = STALE_ATTR_RE.find(xml) ?: return xml
-            val staleStr = staleMatch.groupValues[1]
+            // Search for stale only inside the <event> opening tag, not in child elements
+            val eventTagMatch = EVENT_TAG_RE.find(xml) ?: return xml
+            val eventTag = eventTagMatch.value
+            val staleInTag = STALE_ATTR_RE.find(eventTag) ?: return xml
+            val staleStr = staleInTag.groupValues[1]
             val staleInstant = try {
                 kotlin.time.Instant.parse(staleStr)
             } catch (_: IllegalArgumentException) {
@@ -441,7 +453,9 @@ class TAKMeshIntegration(
             val newStale = now + MIN_MESH_STALE_TTL
             val newStaleStr = newStale.toString().replace(Regex("""\.\d+"""), "") // strip fractional seconds
             Logger.i { "Extended stale for $type: $staleStr → $newStaleStr (was ${remaining.inWholeSeconds}s remaining, now ${MIN_MESH_STALE_TTL.inWholeSeconds}s)" }
-            return xml.replaceRange(staleMatch.range, """stale="$newStaleStr"""")
+            // Replace the stale value only within the event tag, then splice the patched tag back
+            val newEventTag = eventTag.replaceRange(staleInTag.range, """stale="$newStaleStr"""")
+            return xml.replaceRange(eventTagMatch.range, newEventTag)
         }
 
         /**

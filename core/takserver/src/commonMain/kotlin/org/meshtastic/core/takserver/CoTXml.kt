@@ -32,12 +32,12 @@ import kotlin.time.Instant
 fun CoTMessage.toXml(): String {
     val sb = StringBuilder()
     sb.append(
-        "<event version='2.0' uid='${uid.xmlEscaped()}' type='$type' time='${time.toXmlString()}' start='${start.toXmlString()}' stale='${stale.toXmlString()}' how='$how'><point lat='$latitude' lon='$longitude' hae='$hae' ce='$ce' le='$le'/><detail>",
+        "<event version='2.0' uid='${uid.xmlEscaped()}' type='${type.xmlEscaped()}' time='${time.toXmlString()}' start='${start.toXmlString()}' stale='${stale.toXmlString()}' how='${how.xmlEscaped()}'><point lat='$latitude' lon='$longitude' hae='$hae' ce='$ce' le='$le'/><detail>",
     )
 
     contact?.let {
         sb.append(
-            "<contact endpoint='${it.endpoint ?: DEFAULT_TAK_ENDPOINT}' callsign='${it.callsign.xmlEscaped()}'/><uid Droid='${it.callsign.xmlEscaped()}'/>",
+            "<contact endpoint='${(it.endpoint ?: DEFAULT_TAK_ENDPOINT).xmlEscaped()}' callsign='${it.callsign.xmlEscaped()}'/><uid Droid='${it.callsign.xmlEscaped()}'/>",
         )
     }
 
@@ -51,7 +51,7 @@ fun CoTMessage.toXml(): String {
         val senderUid = uid.geoChatSenderUid()
         val messageId = uid.geoChatMessageId()
         sb.append(
-            "<__chat parent='RootContactGroup' groupOwner='false' messageId='$messageId' chatroom='${chat.chatroom.xmlEscaped()}' id='${chat.chatroom.xmlEscaped()}' senderCallsign='${chat.senderCallsign?.xmlEscaped() ?: ""}'><chatgrp uid0='${senderUid.xmlEscaped()}' uid1='${chat.chatroom.xmlEscaped()}' id='${chat.chatroom.xmlEscaped()}'/></__chat>",
+            "<__chat parent='RootContactGroup' groupOwner='false' messageId='${messageId.xmlEscaped()}' chatroom='${chat.chatroom.xmlEscaped()}' id='${chat.chatroom.xmlEscaped()}' senderCallsign='${chat.senderCallsign?.xmlEscaped() ?: ""}'><chatgrp uid0='${senderUid.xmlEscaped()}' uid1='${chat.chatroom.xmlEscaped()}' id='${chat.chatroom.xmlEscaped()}'/></__chat>",
         )
         sb.append("<link uid='${senderUid.xmlEscaped()}' type='a-f-G-U-C' relation='p-p'/>")
         sb.append("<__serverdestination destinations='0.0.0.0:4242:tcp:${senderUid.xmlEscaped()}'/>")

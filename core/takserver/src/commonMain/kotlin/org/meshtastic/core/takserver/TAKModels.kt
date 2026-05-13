@@ -78,7 +78,7 @@ data class CoTMessage(
             val now = Clock.System.now()
             return CoTMessage(
                 uid = uid,
-                type = "a-f-G-U-C",
+                type = DEFAULT_PLI_COT_TYPE,
                 time = now,
                 start = now,
                 stale = now + staleMinutes.minutes,
