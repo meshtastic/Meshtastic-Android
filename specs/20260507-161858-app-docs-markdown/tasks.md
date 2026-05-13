@@ -207,6 +207,8 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - Phase 6 depends on Phase 5 because AI retrieval uses the keyword index and search engine.
 - Phase 7 depends on Phases 2 and 3.
 - Phase 8 depends on all preceding phases.
+- Phase 10 depends on Phases 1–9 (all content and CI must be in place before Docusaurus sync).
+- Phase 11 depends on Phases 9–10 (governance workflows and sync script must exist before consolidation).
 
 ## Recommended Delivery Order
 
@@ -262,3 +264,40 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T234 [US1] Run final verification: `./gradlew spotlessApply detekt :feature:docs:allTests`.
 
 **Checkpoint**: Android docs published on meshtastic.org, translate contributor page live, developer measurement docs complete.
+
+---
+
+## Phase 11: Governance Consolidation & Script Optimization
+
+**Purpose**: Eliminate duplication across docs governance scripts and CI workflows. Reduce the number of places that must be manually updated when adding a doc page from 3 to 2 (markdown file + DocBundleLoader only).
+
+**Depends on**: Phases 9–10 (governance workflows and sync script must exist).
+
+### Shared Library
+
+- [X] T240 [P] [US5] [FR-044] Create `scripts/lib/frontmatter.js` with `parseFrontmatter()`, `discoverSlugs()`, and `forEachDocPage()` utilities. Consolidates 4 independent frontmatter parsers and directory traversal patterns.
+- [X] T241 [P] [US5] [FR-044] Refactor `scripts/validate-doc-links.js` to use shared `discoverSlugs()` and `forEachDocPage()`.
+- [X] T242 [P] [US5] [FR-044] Refactor `scripts/check-doc-freshness.js` to use shared `parseFrontmatter()` and `forEachDocPage()`.
+- [X] T243 [P] [US5] [FR-044] Refactor `scripts/check-doc-coverage.js` to use shared `forEachDocPage()`.
+- [X] T244 [P] [US5] [FR-044] Refactor `scripts/sync-android-docs.js` to use shared `discoverSlugs()` — replace hardcoded `KNOWN_USER_SLUGS` and `KNOWN_DEV_SLUGS` sets with filesystem-derived discovery.
+
+### Workflow Consolidation
+
+- [X] T250 [P] [US5] [FR-045] Merge `docs-staleness.yml` into `docs-governance.yml` as a parallel `staleness` job. The staleness job uses `fetch-depth: 0` for git diff; the `validate` job uses `fetch-depth: 1`.
+- [X] T251 [P] [US5] [FR-045] Remove standalone `.github/workflows/docs-staleness.yml`.
+- [X] T252 [US5] Remove slug registry validation step from `docs-governance.yml` (no longer needed since slugs are filesystem-derived).
+- [X] T253 [US5] Remove duplicate link validation step and Node.js setup from `docs-deploy.yml`. Remove unused `pull-requests: write` permission.
+
+### 3-Consumer Propagation
+
+- [X] T260 [P] [US5] [FR-043] Update Constitution principle VI to explicitly name in-app, Jekyll, and Docusaurus consumers with propagation rules.
+- [X] T261 [US5] Update staleness check PR comment to include new-page checklist for all 3 consumer registries.
+- [X] T262 [US5] Add `DocBundleLoader` registry validation step to `docs-governance.yml` (ensures every doc page is registered in the in-app index).
+
+### Cleanup
+
+- [X] T270 [US5] Remove duplicate `sync-android-docs.js` from meshtastic/meshtastic PR #2405 (workflow runs from Android clone).
+- [X] T271 [US5] Update `docs/developer.md` references from `docs-staleness` to consolidated `Docs Governance` workflow.
+- [X] T272 [US5] Verify all 4 scripts pass locally: `validate-doc-links`, `check-doc-freshness`, `check-doc-coverage`, `sync-android-docs --dry-run`.
+
+**Checkpoint**: Single docs governance workflow, shared frontmatter library, filesystem-derived slugs, 3-consumer propagation model enforced.

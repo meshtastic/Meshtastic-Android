@@ -151,6 +151,9 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **FR-040**: The docs site sync pipeline SHOULD convert screenshot PNGs to WebP format before publishing to the Docusaurus site. A `--convert-webp` flag or equivalent MUST be supported. Original PNGs remain canonical in-repo; WebP is a site-publishing optimization only.
 - **FR-041**: A `docs/user/translate.md` page MUST explain how contributors can translate the Android app via Crowdin. The page MUST link to the Crowdin project, describe which resource files are translatable (composeResources strings, user guide markdown), and provide step-by-step contribution instructions. This is a contributor guide, not a runtime translation feature.
 - **FR-042**: A `docs/developer/measurement.md` page MUST document the `MetricFormatter` API, locale-aware unit conversion patterns, and how to add new measurement types. This provides developer-facing guidance complementing the user-facing `units-and-locale.md`.
+- **FR-043**: Documentation governance MUST enforce a 3-consumer propagation model: every doc page automatically flows to (1) the in-app docs browser via `syncDocsToComposeResources`, (2) the Jekyll/GitHub Pages site via `docs-deploy.yml`, and (3) the Docusaurus meshtastic.org site via `sync-android-docs.js`. CI MUST validate that every `docs/**/*.md` page slug is registered in `DocBundleLoader.kt` for in-app discovery.
+- **FR-044**: Doc governance scripts MUST share a common frontmatter parsing library (`scripts/lib/frontmatter.js`) to avoid duplication across link validation, freshness checks, coverage checks, and sync scripts. Slug discovery MUST be filesystem-derived, not hardcoded.
+- **FR-045**: All docs CI checks (staleness, link validation, coverage, freshness, registry validation) MUST be consolidated into a single `docs-governance.yml` workflow with separate jobs for staleness detection and quality gates.
 - **FR-038**: The Compose Multiplatform markdown renderer (`multiplatform-markdown-renderer-m3`) used by `DocsPageRouteScreen` on non-WebView targets MUST be configured with a custom `ImageTransformer` that resolves relative image paths (e.g., `assets/screenshots/*.png`) to bundled Compose resource URIs via `Res.getUri()` and loads them asynchronously using Coil 3 (`rememberAsyncImagePainter`). The default `NoOpImageTransformerImpl` MUST NOT be used for docs rendering. The `syncDocsToComposeResources` task MUST include screenshot assets alongside markdown files so that images are available at runtime. The `copyDocsScreenshots` task from `screenshot-tests/` MUST be wired as a dependency of `syncDocsToComposeResources` to ensure generated screenshots are available before resource bundling.
 
 ### Key Entities
@@ -182,6 +185,8 @@ When documentation-relevant UI or workflow changes merge to `main`, GitHub Actio
 - **SC-015**: Android docs are published on meshtastic.org under `docs/software/android/` and stay current via automated sync workflow.
 - **SC-016**: A "Translate the App" page exists in the User Guide and links to the Crowdin project with step-by-step contribution instructions.
 - **SC-017**: A developer measurement/locale page exists documenting `MetricFormatter` internals and locale-aware patterns.
+- **SC-018**: All docs CI checks (staleness, links, coverage, freshness, registry) run in a single consolidated `docs-governance.yml` workflow with no duplicate validation steps across workflows.
+- **SC-019**: Sync script slug discovery is filesystem-derived — adding a new `.md` file under `docs/` requires no hardcoded string updates in scripts.
 
 ## Clarifications
 
@@ -247,3 +252,13 @@ Gap analysis against PR [meshtastic/meshtastic#2393](https://github.com/meshtast
 
 **Confirmed non-goals:**
 - `docs/user/watch.md`, `docs/user/carplay.md`, `docs/developer/carplay.md` — remain Apple-only.
+
+**Implemented (Phase 11 — Governance & Consolidation):**
+
+Audit of docs infrastructure identified duplication across 4 JS scripts, 3 CI workflows, and hardcoded slug registries. Consolidation implemented:
+
+1. **Shared frontmatter library** — `scripts/lib/frontmatter.js` provides `parseFrontmatter()`, `discoverSlugs()`, and `forEachDocPage()` used by all governance scripts. Eliminated 4 independent frontmatter parsers (FR-044).
+2. **Filesystem-derived slugs** — `sync-android-docs.js` now auto-discovers page slugs from `docs/user/` and `docs/developer/` instead of maintaining hardcoded `KNOWN_*_SLUGS` sets (26 strings eliminated). The slug registry CI check is no longer needed (FR-044).
+3. **Workflow consolidation** — `docs-staleness.yml` merged into `docs-governance.yml` as a parallel `staleness` job alongside the existing `validate` job. Duplicate link validation removed from `docs-deploy.yml` (FR-045).
+4. **3-consumer propagation** — Constitution principle VI updated to explicitly name in-app, Jekyll, and Docusaurus consumers with propagation rules. Staleness check comment includes new-page checklist (FR-043).
+5. **Duplicate script removal** — `sync-android-docs.js` copy removed from meshtastic/meshtastic PR #2405 since the workflow runs from the Android repo clone.

@@ -410,6 +410,7 @@ Update `feature/settings/.../SettingsNavigation.kt` so Help & Documentation appe
 9. **Phase 8 – Polish**: accessibility, dark mode, edge cases, documentation cleanup.
 10. **Phase 9 – Apple alignment**: per-page TOC icons, signal-meter/units-locale pages, staleness CI.
 11. **Phase 10 – Docusaurus sync & content gaps**: meshtastic.org sync script + workflow, WebP optimization, translate page, developer measurement page.
+12. **Phase 11 – Governance consolidation**: shared frontmatter library, filesystem-derived slugs, workflow merge, 3-consumer propagation model.
 
 ## Validation Matrix
 
@@ -432,3 +433,5 @@ Update `feature/settings/.../SettingsNavigation.kt` so Help & Documentation appe
 - Documentation and assets remain under the configured bundle-size ceiling.
 - Android docs are synced to meshtastic.org via automated workflow under `docs/software/android/`.
 - A "Translate the App" user page and a developer measurement page exist.
+- All docs CI checks are consolidated into a single `docs-governance.yml` workflow.
+- Governance scripts share a common frontmatter library with filesystem-derived slug discovery.
