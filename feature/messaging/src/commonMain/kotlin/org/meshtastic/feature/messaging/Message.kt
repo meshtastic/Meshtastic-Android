@@ -143,6 +143,8 @@ fun MessageScreen(
     val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
+    val hasCompletedSwipeAction by viewModel.hasCompletedSwipeAction.collectAsStateWithLifecycle()
+    val hasShownHintThisSession by viewModel.hasShownHintThisSession.collectAsStateWithLifecycle()
 
     // Prevent the message TextField from stealing focus when the screen opens
     LaunchedEffect(contactKey) { focusManager.clearFocus() }
@@ -389,6 +391,8 @@ fun MessageScreen(
                     filteredCount = filteredCount,
                     showFiltered = showFiltered,
                     filteringDisabled = filteringDisabled,
+                    hasCompletedSwipeAction = hasCompletedSwipeAction,
+                    hasShownHintThisSession = hasShownHintThisSession,
                 ),
                 handlers =
                 MessageListHandlers(
@@ -400,6 +404,8 @@ fun MessageScreen(
                     onDeleteMessages = { viewModel.deleteMessages(it) },
                     onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
                     onReply = { message -> replyingToPacketId = message?.packetId },
+                    onSwipeActionCompleted = { viewModel.markSwipeActionCompleted() },
+                    onHintShownThisSession = { viewModel.markHintShownThisSession() },
                 ),
                 quickEmojis = viewModel.frequentEmojis,
             )
