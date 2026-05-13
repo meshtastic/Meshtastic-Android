@@ -119,5 +119,10 @@ Requirements:
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
 
+## Related Topics
+
+- [Connections](connections) — connection methods overview
+- [Firmware Updates](firmware) — use the [Web Flasher](https://flasher.meshtastic.org) for desktop firmware updates
+
 ---
 

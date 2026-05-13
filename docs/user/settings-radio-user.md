@@ -54,7 +54,7 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Frequency Offset | Fine-tune frequency (MHz) | 0 |
 | Channel Bandwidth | Bandwidth setting | Default for preset |
 
-> ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations.
+> ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
 ### Modem Presets
 
@@ -133,6 +133,13 @@ Settings use standard preference controls — dropdowns, toggles, and sliders:
 | Dropdown | ![Dropdown](/assets/screenshots/settings_dropdown.png) |
 | Toggle | ![Toggle](/assets/screenshots/settings_switch.png) |
 | Slider | ![Slider](/assets/screenshots/settings_slider.png) |
+
+## Related Topics
+
+- [Settings — Modules & Admin](settings-module-admin) — optional feature modules and device administration
+- [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
+- [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
+- [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
 
 ---
 

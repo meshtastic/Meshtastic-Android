@@ -42,7 +42,7 @@ The most common update method for Android users:
 
 For recovery or when OTA is unavailable:
 - Use the [Meshtastic Web Flasher](https://flasher.meshtastic.org)
-- Or the Meshtastic CLI tool on desktop
+- Or the [Meshtastic CLI tool](https://meshtastic.org/docs/getting-started/flashing-firmware) on desktop
 
 ## Version Channels
 
@@ -94,6 +94,13 @@ The app may show warnings when:
 - Deprecated features need migration
 
 > ⚠️ **Important:** Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.
+
+## Related Topics
+
+- [Connections](connections) — reconnecting after a firmware update
+- [Flashing firmware guide](https://meshtastic.org/docs/getting-started/flashing-firmware) — full firmware flashing walkthrough on meshtastic.org
+- [Supported devices](https://meshtastic.org/docs/hardware/devices) — check firmware compatibility by device
+- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
 
 ---
 

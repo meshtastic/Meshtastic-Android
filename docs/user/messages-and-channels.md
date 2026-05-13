@@ -124,6 +124,7 @@ Messages are queued and transmitted based on priority:
 - [Nodes](nodes) — tap a node to start a direct message
 - [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
 - [MQTT](mqtt) — bridge channel messages to the internet
+- [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
 
 ---
 

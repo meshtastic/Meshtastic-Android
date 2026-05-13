@@ -127,6 +127,7 @@ Understanding the layered encryption model:
 
 - [Settings — Modules & Admin](settings-module-admin) — MQTT module configuration reference
 - [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
+- [MQTT integration guide](https://meshtastic.org/docs/software/integrations/mqtt) — detailed MQTT documentation on meshtastic.org
 
 ---
 

@@ -219,5 +219,17 @@ View detailed diagnostic information:
 - Mesh packet log
 - Connection state details
 
+### Troubleshooting Remote Admin
+
+- **"No response from target node"** — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.
+- **Changes not applying** — some settings require a reboot to take effect. Try the Reboot action after saving.
+- **Can't see remote settings** — ensure your node has the admin key for the target node and that Admin Channel is enabled in Security Config.
+
+## Related Topics
+
+- [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
+- [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
+- [FAQ](https://meshtastic.org/docs/about/faq) — common questions on meshtastic.org
+
 ---
 
