@@ -104,8 +104,8 @@
 - [ ] T026 [P] [US3] Upgrade `SliderPreference` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SliderPreference.kt` — apply spring-based `animateFloatAsState` for thumb positioning per research.md RQ-2
 - [ ] T027 [P] [US3] Upgrade `AlertDialogs` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/AlertDialogs.kt` — apply expressive shape and motion to dialog enter/exit transitions
 - [ ] T028 [P] [US3] Ensure all progress indicators across feature modules use expressive wavy variants (`CircularWavyProgressIndicator`, `LinearWavyProgressIndicator`) for indeterminate states — audit `feature/firmware/src/commonMain/` and any other modules with progress indicators
-- [ ] T029 [P] [US3] Apply expressive button styling (`ButtonDefaults` with expressive shapes) to primary action buttons across `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/` button composables
-- [ ] T030 [P] [US3] Upgrade connection FABs in `feature/connections/src/commonMain/` — apply expressive sizing and tooltip labels
+- [X] T029 [P] [US3] Apply expressive button styling (`ButtonDefaults` with expressive shapes) to primary action buttons across `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/` button composables
+- [X] T030 [P] [US3] Upgrade connection FABs in `feature/connections/src/commonMain/` — apply expressive sizing and tooltip labels
 - [ ] T031 [US3] Verify all expressive component animations maintain 60fps on mid-range device per NFR-001 (manual check with Layout Inspector/animation profiler)
 
 **Checkpoint**: All interactive components use expressive styling with spring physics and dynamic shapes
@@ -120,18 +120,18 @@
 
 ### Implementation for User Story 4
 
-- [ ] T032 [US4] Integrate `SwipeToRevealBox` into node list items in `feature/node/src/commonMain/kotlin/com/geeksville/mesh/ui/node/list/NodeListScreen.kt` — right-swipe = request position action, left-swipe = mute node action
-- [ ] T033 [P] [US4] Create action composables for node swipe (RequestPositionAction, MuteNodeAction) with appropriate icons from `MeshtasticIcons` and color styling
-- [ ] T034 [US4] Integrate `SwipeToRevealBox` into message list items in `feature/messaging/src/commonMain/` — left-swipe only = delete/archive action (`enableStartSwipe = false`)
-- [ ] T035 [P] [US4] Create action composable for message swipe (DeleteMessageAction) with appropriate icon and color styling
-- [ ] T036 [US4] Connect `hasCompletedSwipeAction` DataStore preference to node list ViewModel — expose as `StateFlow<Boolean>` for hint visibility
-- [ ] T036a [P] [US4] Add `hasShownHintThisSession` transient boolean to node list and message list ViewModels — controls per-session hint display (resets on app restart, set true after hint plays once per screen visit)
-- [ ] T037 [US4] Connect `hasCompletedSwipeAction` DataStore preference to message list ViewModel — expose as `StateFlow<Boolean>` for hint visibility
-- [ ] T038 [US4] Apply `Modifier.swipeHint` to first visible item in node list when `!hasCompletedSwipeAction` — animate edge-peek per contract (24dp, per-session until first successful swipe)
-- [ ] T039 [US4] Apply `Modifier.swipeHint` to first visible item in message list when `!hasCompletedSwipeAction`
-- [ ] T040 [US4] Set `hasCompletedSwipeAction = true` in DataStore after first successful swipe-to-action execution in either list
-- [ ] T041 [US4] Add TalkBack accessibility `customActions` semantics to `SwipeToRevealBox` so swipe actions are announced for screen reader users
-- [ ] T042 [US4] Verify swipe gestures are NOT enabled on channel list (which uses drag-and-drop reordering) per edge case in spec
+- [X] T032 [US4] Integrate `SwipeToRevealBox` into node list items in `feature/node/src/commonMain/kotlin/com/geeksville/mesh/ui/node/list/NodeListScreen.kt` — right-swipe = request position action, left-swipe = mute node action
+- [X] T033 [P] [US4] Create action composables for node swipe (RequestPositionAction, MuteNodeAction) with appropriate icons from `MeshtasticIcons` and color styling
+- [X] T034 [US4] Integrate `SwipeToRevealBox` into message list items in `feature/messaging/src/commonMain/` — left-swipe only = delete/archive action (`enableStartSwipe = false`)
+- [X] T035 [P] [US4] Create action composable for message swipe (DeleteMessageAction) with appropriate icon and color styling
+- [X] T036 [US4] Connect `hasCompletedSwipeAction` DataStore preference to node list ViewModel — expose as `StateFlow<Boolean>` for hint visibility
+- [X] T036a [P] [US4] Add `hasShownHintThisSession` transient boolean to node list and message list ViewModels — controls per-session hint display (resets on app restart, set true after hint plays once per screen visit)
+- [X] T037 [US4] Connect `hasCompletedSwipeAction` DataStore preference to message list ViewModel — expose as `StateFlow<Boolean>` for hint visibility
+- [X] T038 [US4] Apply `Modifier.swipeHint` to first visible item in node list when `!hasCompletedSwipeAction` — animate edge-peek per contract (24dp, per-session until first successful swipe)
+- [X] T039 [US4] Apply `Modifier.swipeHint` to first visible item in message list when `!hasCompletedSwipeAction`
+- [X] T040 [US4] Set `hasCompletedSwipeAction = true` in DataStore after first successful swipe-to-action execution in either list
+- [X] T041 [US4] Add TalkBack accessibility `customActions` semantics to `SwipeToRevealBox` so swipe actions are announced for screen reader users
+- [X] T042 [US4] Verify swipe gestures are NOT enabled on channel list (which uses drag-and-drop reordering) per edge case in spec
 
 **Checkpoint**: Node and message lists support swipe-to-action with discoverability hint and accessibility support
 
