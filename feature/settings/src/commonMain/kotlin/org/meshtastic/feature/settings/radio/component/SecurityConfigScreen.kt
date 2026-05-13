@@ -63,6 +63,7 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.feature.settings.lockdown.LockdownSessionStatus
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 import kotlin.random.Random
@@ -214,10 +215,15 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 )
                 HorizontalDivider()
                 // TODO(lockdown): Re-implement Lock Now button with KMP-compatible UI (Phase 5, T025-T026)
+                val tokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
+                val authorized by viewModel.sessionAuthorized.collectAsStateWithLifecycle()
+                if (authorized) {
+                    LockdownSessionStatus(tokenInfo = tokenInfo)
+                }
                 NodeActionButton(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     title = "Lock Now",
-                    enabled = state.connected,
+                    enabled = state.connected && authorized,
                     onClick = { viewModel.sendLockNow() },
                 )
             }

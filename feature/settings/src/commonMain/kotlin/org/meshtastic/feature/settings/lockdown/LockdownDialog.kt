@@ -74,6 +74,7 @@ fun LockdownDialog(
     if (!shouldShow) return
 
     var passphrase by rememberSaveable { mutableStateOf("") }
+    var confirmPassphrase by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var boots by rememberSaveable { mutableIntStateOf(DEFAULT_BOOTS) }
     var hours by rememberSaveable { mutableIntStateOf(0) }
@@ -81,7 +82,9 @@ fun LockdownDialog(
     val isProvisioning = lockdownState is LockdownState.NeedsProvision
     val title = if (isProvisioning) "Set Passphrase" else "Enter Passphrase"
     val inBackoff = lockdownState is LockdownState.UnlockBackoff
-    val isValid = passphrase.isNotEmpty() && passphrase.length <= MAX_PASSPHRASE_LEN && !inBackoff
+    val passphraseValid = passphrase.isNotEmpty() && passphrase.length <= MAX_PASSPHRASE_LEN
+    val confirmValid = !isProvisioning || passphrase == confirmPassphrase
+    val isValid = passphraseValid && confirmValid && !inBackoff
 
     AlertDialog(
         onDismissRequest = {}, // Non-dismissable
@@ -138,6 +141,21 @@ fun LockdownDialog(
                 )
 
                 if (isProvisioning) {
+                    Spacer(modifier = Modifier.height(SPACING_DP.dp))
+                    OutlinedTextField(
+                        value = confirmPassphrase,
+                        onValueChange = { if (it.length <= MAX_PASSPHRASE_LEN) confirmPassphrase = it },
+                        label = { Text("Confirm passphrase") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        isError = confirmPassphrase.isNotEmpty() && passphrase != confirmPassphrase,
+                        supportingText = if (confirmPassphrase.isNotEmpty() && passphrase != confirmPassphrase) {
+                            { Text("Passphrases do not match") }
+                        } else {
+                            null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                     Spacer(modifier = Modifier.height(SPACING_DP.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),

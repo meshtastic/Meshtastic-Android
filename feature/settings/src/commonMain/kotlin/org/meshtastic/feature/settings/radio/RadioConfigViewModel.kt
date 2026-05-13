@@ -140,6 +140,9 @@ open class RadioConfigViewModel(
     private val lockdownCoordinator: LockdownCoordinator,
 ) : ViewModel() {
 
+    val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
+    val sessionAuthorized = serviceRepository.sessionAuthorized
+
     fun sendLockNow() {
         viewModelScope.launch { lockdownCoordinator.lockNow() }
     }

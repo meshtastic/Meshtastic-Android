@@ -32,6 +32,7 @@ import co.touchlab.kermit.Logger
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.navigation.rememberMultiBackstack
@@ -76,6 +77,12 @@ fun MainScreen() {
         },
         onDisconnect = { viewModel.setDeviceAddress("n") },
     )
+    // Auto-disconnect when firmware acknowledges Lock Now
+    LaunchedEffect(lockdownState) {
+        if (lockdownState is LockdownState.LockNowAcknowledged) {
+            viewModel.setDeviceAddress("n")
+        }
+    }
 
     MeshtasticAppShell(multiBackstack = multiBackstack, uiViewModel = viewModel, hostModifier = Modifier) {
         MeshtasticNavigationSuite(
