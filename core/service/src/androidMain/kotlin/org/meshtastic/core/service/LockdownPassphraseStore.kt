@@ -21,12 +21,8 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import org.koin.core.annotation.Single
-
-data class StoredPassphrase(
-    val passphrase: String,
-    val boots: Int,
-    val hours: Int,
-)
+import org.meshtastic.core.repository.LockdownPassphraseStore
+import org.meshtastic.core.repository.StoredPassphrase
 
 /**
  * Encrypted per-device storage for lockdown passphrases.
@@ -35,8 +31,8 @@ data class StoredPassphrase(
  * available). The key is intentionally NOT gated behind biometric authentication so that
  * auto-unlock can run in the background without user interaction.
  */
-@Single
-class LockdownPassphraseStore(app: Application) {
+@Single(binds = [LockdownPassphraseStore::class])
+class LockdownPassphraseStoreImpl(app: Application) : LockdownPassphraseStore {
 
     private val prefs: SharedPreferences by lazy {
         val masterKey =
@@ -50,15 +46,15 @@ class LockdownPassphraseStore(app: Application) {
         )
     }
 
-    fun getPassphrase(deviceAddress: String): StoredPassphrase? {
+    override fun getPassphrase(deviceAddress: String): StoredPassphrase? {
         val key = sanitizeKey(deviceAddress)
         val passphrase = prefs.getString("${key}_passphrase", null) ?: return null
-        val boots = prefs.getInt("${key}_boots", DEFAULT_BOOTS)
+        val boots = prefs.getInt("${key}_boots", LockdownPassphraseStore.DEFAULT_BOOTS)
         val hours = prefs.getInt("${key}_hours", 0)
         return StoredPassphrase(passphrase, boots, hours)
     }
 
-    fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int) {
+    override fun savePassphrase(deviceAddress: String, passphrase: String, boots: Int, hours: Int) {
         val key = sanitizeKey(deviceAddress)
         prefs
             .edit()
@@ -68,15 +64,14 @@ class LockdownPassphraseStore(app: Application) {
             .apply()
     }
 
-    fun clearPassphrase(deviceAddress: String) {
+    override fun clearPassphrase(deviceAddress: String) {
         val key = sanitizeKey(deviceAddress)
         prefs.edit().remove("${key}_passphrase").remove("${key}_boots").remove("${key}_hours").apply()
     }
 
     private fun sanitizeKey(address: String): String = address.replace(":", "_")
 
-    companion object {
+    private companion object {
         private const val PREFS_FILE_NAME = "lockdown_passphrase_store"
-        const val DEFAULT_BOOTS = 50
     }
 }

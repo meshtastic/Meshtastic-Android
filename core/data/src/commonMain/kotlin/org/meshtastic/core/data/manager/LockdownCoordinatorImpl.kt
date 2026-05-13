@@ -14,40 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service
+package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.LockdownCoordinator
+import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.LockdownStatus
 
 @Single(binds = [LockdownCoordinator::class])
-class LockdownHandlerImpl(
+class LockdownCoordinatorImpl(
     private val serviceRepository: ServiceRepository,
     private val commandSender: CommandSender,
     private val passphraseStore: LockdownPassphraseStore,
     private val radioInterfaceService: RadioInterfaceService,
-) : LockdownCoordinator, KoinComponent {
-    private val connectionManager: MeshConnectionManager by inject()
+    private val connectionManager: MeshConnectionManager,
+) : LockdownCoordinator {
     @Volatile private var wasAutoAttempt = false
-
     @Volatile private var wasLockNow = false
-
     @Volatile private var pendingPassphrase: String? = null
-
     @Volatile private var pendingBoots: Int = LockdownPassphraseStore.DEFAULT_BOOTS
-
     @Volatile private var pendingHours: Int = 0
 
-    /** Called when the BLE connection is established, before the first config request. */
     override fun onConnect() {
         serviceRepository.setSessionAuthorized(false)
         wasAutoAttempt = false
@@ -57,7 +51,6 @@ class LockdownHandlerImpl(
         pendingHours = 0
     }
 
-    /** Called when the BLE connection is lost. */
     override fun onDisconnect() {
         serviceRepository.setSessionAuthorized(false)
         serviceRepository.setLockdownTokenInfo(null)
@@ -67,16 +60,10 @@ class LockdownHandlerImpl(
         pendingPassphrase = null
     }
 
-    /**
-     * Called on every config_complete_id. Once [sessionAuthorized] is true (set on UNLOCKED),
-     * this is a no-op — preventing the startConfigOnly config_complete_id from triggering any
-     * further lockdown handling.
-     */
     override fun onConfigComplete() {
         if (serviceRepository.sessionAuthorized.value) return
     }
 
-    /** Routes typed firmware [LockdownStatus] to per-state handlers. */
     override fun handleLockdownStatus(status: LockdownStatus) {
         when (status.state) {
             LockdownStatus.State.NEEDS_PROVISION -> handleNeedsProvision()
@@ -93,9 +80,7 @@ class LockdownHandlerImpl(
         wasAutoAttempt = false
         wasLockNow = false
         pendingPassphrase = null
-        // Purge cached config; fresh config is loaded after successful re-authentication.
         connectionManager.clearRadioConfig()
-        // Signal the UI to disconnect — no dialog, just drop the connection.
         serviceRepository.setLockdownState(LockdownState.LockNowAcknowledged)
     }
 
@@ -108,7 +93,7 @@ class LockdownHandlerImpl(
         if (deviceAddress != null) {
             val stored = passphraseStore.getPassphrase(deviceAddress)
             if (stored != null) {
-                Logger.i { "Lockdown: Auto-unlocking (reason=$lockReason) with stored passphrase for $deviceAddress" }
+                Logger.i { "Lockdown: Auto-unlocking with stored passphrase" }
                 wasAutoAttempt = true
                 commandSender.sendLockdownPassphrase(stored.passphrase, stored.boots, stored.hours)
                 return
@@ -126,7 +111,7 @@ class LockdownHandlerImpl(
         val passphrase = pendingPassphrase
         if (deviceAddress != null && passphrase != null) {
             passphraseStore.savePassphrase(deviceAddress, passphrase, pendingBoots, pendingHours)
-            Logger.i { "Lockdown: Saved passphrase for $deviceAddress" }
+            Logger.i { "Lockdown: Saved passphrase for device" }
         }
         pendingPassphrase = null
         serviceRepository.setLockdownTokenInfo(
@@ -136,9 +121,6 @@ class LockdownHandlerImpl(
             ),
         )
         serviceRepository.setLockdownState(LockdownState.Unlocked)
-        // Mark session authorized BEFORE calling startConfigOnly(). When the resulting
-        // config_complete_id arrives, onConfigComplete() will see sessionAuthorized=true and
-        // return immediately — no passphrase re-send, no loop.
         serviceRepository.setSessionAuthorized(true)
         connectionManager.startConfigOnly()
     }
@@ -154,7 +136,7 @@ class LockdownHandlerImpl(
                 val deviceAddress = radioInterfaceService.getDeviceAddress()
                 if (deviceAddress != null) {
                     passphraseStore.clearPassphrase(deviceAddress)
-                    Logger.i { "Lockdown: Auto-unlock failed (wrong passphrase), cleared stored passphrase for $deviceAddress" }
+                    Logger.i { "Lockdown: Auto-unlock failed, cleared stored passphrase" }
                 }
                 serviceRepository.setLockdownState(LockdownState.Locked())
             }
@@ -174,7 +156,7 @@ class LockdownHandlerImpl(
         pendingHours = hours
         wasAutoAttempt = false
         wasLockNow = false
-        serviceRepository.setLockdownState(LockdownState.None) // hide dialog while awaiting response
+        serviceRepository.setLockdownState(LockdownState.None)
         commandSender.sendLockdownPassphrase(passphrase, boots, hours)
     }
 
@@ -183,7 +165,7 @@ class LockdownHandlerImpl(
         commandSender.sendLockNow()
     }
 
-    companion object {
+    private companion object {
         private const val UINT32_MASK = 0xFFFFFFFFL
     }
 }
