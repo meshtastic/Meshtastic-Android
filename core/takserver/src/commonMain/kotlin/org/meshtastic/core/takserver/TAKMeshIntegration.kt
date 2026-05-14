@@ -362,10 +362,10 @@ class TAKMeshIntegration(
     }
 
     /**
-     * v1 receive path (firmware <= 2.7.x): decode bare protobuf [TAKPacket] (no compression) from port 72
-     * (ATAK_PLUGIN) and convert to CoT for forwarding to attached TAK clients. Kept indefinitely so users on
-     * stable 2.7.x firmware retain PLI + GeoChat interop; new typed payloads (shapes, markers, routes, etc.)
-     * still require a v2-capable radio (firmware >= 2.8.0).
+     * v1 receive path (firmware <= 2.7.x): decode bare protobuf [TAKPacket] (no compression) from port 72 (ATAK_PLUGIN)
+     * and convert to CoT for forwarding to attached TAK clients. Kept indefinitely so users on stable 2.7.x firmware
+     * retain PLI + GeoChat interop; new typed payloads (shapes, markers, routes, etc.) still require a v2-capable radio
+     * (firmware >= 2.8.0).
      */
     private suspend fun handleV1Packet(payload: okio.ByteString) {
         try {
