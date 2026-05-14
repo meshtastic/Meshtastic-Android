@@ -132,13 +132,16 @@ data class AIDocAssistantSessionState(
     val draftQuestion: String = "",
 )
 
+/** Reference to a source doc page shown as a chip in Chirpy replies. */
+@Serializable data class SourceRef(val id: String, val title: String)
+
 /** A single message in the Chirpy conversation. */
 @Serializable
 data class ChirpyMessage(
     val id: String,
     val role: ChirpyRole,
     val text: String,
-    val sourcePageIds: List<String> = emptyList(),
+    val sources: List<SourceRef> = emptyList(),
 )
 
 /** Message author role. */

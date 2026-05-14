@@ -16,20 +16,20 @@
  */
 package org.meshtastic.feature.docs.ai
 
-import org.meshtastic.feature.docs.model.AIDocAssistantResult
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import org.koin.core.annotation.Single
+import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 
 /**
- * Shared abstraction over the platform-specific docs AI assistant.
+ * Global Chirpy conversation state shared across all docs panes.
  *
- * Bindings:
- * - Android `google` flavor: Gemini Nano implementation
- * - Android `fdroid` flavor: keyword-search fallback
- * - Desktop/iOS: keyword-search fallback
+ * Registered as a Koin singleton so both the list and detail entries access the same conversation. Uses Compose
+ * snapshot state so reads trigger recomposition automatically.
  */
-interface AIDocAssistant {
-    /** Whether the AI assistant is available on the current platform/device. */
-    suspend fun isSupported(): Boolean
-
-    /** Answer a user question about Meshtastic using bundled documentation context. */
-    suspend fun answer(question: String, currentPageId: String? = null): AIDocAssistantResult
+@Single
+class ChirpySessionHolder {
+    var showSheet by mutableStateOf(false)
+    var sessionState by mutableStateOf(AIDocAssistantSessionState())
 }

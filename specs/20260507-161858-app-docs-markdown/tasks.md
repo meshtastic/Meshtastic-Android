@@ -6,7 +6,7 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 
 **Input**: Design documents from `specs/003-app-docs-markdown/`  
 **Prerequisites**: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`  
-**Status**: Not Started
+**Status**: Complete (Phases 0–13)
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -209,6 +209,8 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - Phase 8 depends on all preceding phases.
 - Phase 10 depends on Phases 1–9 (all content and CI must be in place before Docusaurus sync).
 - Phase 11 depends on Phases 9–10 (governance workflows and sync script must exist before consolidation).
+- Phase 12 depends on Phase 6 (Chirpy assistant must exist before UX polish).
+- Phase 13 depends on Phase 12 (Chirpy bubble redesign must exist before further polish).
 
 ## Recommended Delivery Order
 
@@ -311,3 +313,76 @@ description: "Task list for feature: App Documentation (Android/KMP)"
 - [X] T284 [US5] Add dismiss-on-resolve logic: clear preview/screenshot advisory comments when both conditions resolve.
 
 **Checkpoint**: Unified UI & Docs Governance workflow with advisory checks for docs, previews, and screenshot references.
+
+---
+
+## Phase 12: Chirpy UX & M3 Adaptive Nav Polish
+
+**Purpose**: Bring Chirpy assistant and docs navigation up to M3 adaptive navigation best practices and improve conversational UX.
+
+### M3 Adaptive Navigation
+
+- [X] T300 [P] [US2] Integrate `ListDetailSceneStrategy` metadata into `DocsNavigation.kt` — `listPane()` for `HelpDocs`, `detailPane()` for `HelpDocPage`. Enables proper dual-pane layout on tablets/desktop.
+- [X] T301 [P] [US2] Add `feature/docs/build.gradle.kts` dependency on `libs.jetbrains.compose.material3.adaptive.navigation3`.
+
+### Global Chirpy State
+
+- [X] T310 [P] [US3] Create `feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/ai/ChirpySessionHolder.kt` — Koin `@Single` with Compose snapshot state (`showSheet`, `sessionState`) for shared Chirpy conversation across panes.
+- [X] T311 [P] [US3] Refactor `DocsNavigation.kt` `rememberChirpyState()` to inject `ChirpySessionHolder` and derive `showFab` from backstack — FAB shows on list pane only when no detail is selected, always on detail pane.
+- [X] T312 [P] [US3] Add auto-intro prompt: Chirpy generates a natural introduction when the sheet first opens with no messages.
+
+### Chirpy Bubble Redesign (MessageItem Parity)
+
+- [X] T320 [P] [US3] Rewrite `ChirpyAssistantSheet.kt` bubbles to use `Surface` + `BorderStroke(0.5.dp)` + `RoundedCornerShape` matching `MessageItem.kt` sender/receiver pattern — user bubbles right-aligned with `primaryContainer`, Chirpy bubbles left-aligned with `surfaceVariant`.
+- [X] T321 [P] [US3] Add 24dp Chirpy avatar (`img_chirpy`) to the left of every assistant reply bubble.
+- [X] T322 [P] [US3] Update `DocsPreviews.kt` with matching bubble styles and avatar.
+
+### Thinking State & Source Navigation
+
+- [X] T330 [P] [US3] Replace plain "Chirpy is thinking..." text with proper `ThinkingBubble` composable — assistant-styled bubble with Chirpy avatar and pulsing alpha animation.
+- [X] T331 [P] [US3] Add `SourceRef(id, title)` data class to `DocModels.kt`; update `ChirpyMessage.sources` to carry page titles alongside IDs.
+- [X] T332 [P] [US3] Replace plain-text source list with tappable `SuggestionChip`s in `AssistantBubble` using `FlowRow` layout and `secondaryContainer` colors.
+- [X] T333 [P] [US3] Add `onNavigateToPage` to `ChirpyUiState` — dismisses sheet and navigates to referenced doc page. Wire through `DocsBrowserScreen` and `DocsPageRouteScreen`.
+- [X] T334 [US3] Update `DocsPreviews.kt` with `SourceRef` sample data, `PreviewThinkingBubble`, and chip-enabled `ChirpyBubble`.
+
+### Verification
+
+- [X] T340 [US3] Verify M3 FAB behavior: confirmed no existing FABs implement hide-on-scroll (consistent with M3 guidelines which do not prescribe it). Chirpy FAB is always-visible, matching all other FABs in the app.
+- [X] T341 [US3] Build, detekt, spotless, and all `feature:docs` tests pass. Deployed and verified on Pixel 9 Pro.
+
+**Checkpoint**: Chirpy assistant follows M3 adaptive nav best practices with global state, MessageItem-style bubbles, thinking animation, and tappable source chips.
+
+---
+
+## Phase 13: Chirpy Messaging UI Polish & Firebase AI Hybrid
+
+> Align Chirpy chat with messaging module conventions; add markdown rendering; update Firebase AI binding.
+
+- Phase 13 depends on Phase 12 (Chirpy bubble redesign must exist before further polish).
+
+### Firebase AI Logic Hybrid API
+
+- [X] T350 [P] [US3] Update `GeminiNanoDocAssistant.kt` to use `gemini-2.5-flash-lite` model with `InferenceMode.PREFER_ON_DEVICE` — hybrid on-device/cloud inference via Firebase AI Logic.
+- [X] T351 [P] [US3] Implement paragraph extraction with markdown stripping and 8K character context budget with 3K retry fallback on token limit errors.
+- [X] T352 [P] [US3] Migrate imports from deprecated `com.google.firebase.ai.ondevice` to `com.google.firebase.ai`.
+
+### Markdown Rendering in Assistant Messages
+
+- [X] T360 [US3] Replace `Text()` with mikepenz `Markdown()` composable in `AssistantBubble` — Chirpy responses now render rich markdown (headers, lists, bold, code blocks, links).
+
+### ChirpyChip Sender Label
+
+- [X] T370 [P] [US3] Create `ChirpyChip` composable in `ChirpyAssistantSheet.kt` — simplified `NodeChip` pattern using `Card` with `tertiaryContainer` colors, 28dp height, 18dp Chirpy avatar + "Chirpy" text label.
+- [X] T371 [P] [US3] Replace inline avatar-beside-bubble layout in `AssistantBubble` and `ThinkingBubble` with `ChirpyChip` positioned above the bubble — matching how `NodeChip` appears above received messages in `MessageItem.kt`.
+
+### MessageInput-Style Text Field
+
+- [X] T380 [P] [US3] Replace `OutlinedTextField` + `TextButton("Send")` with messaging-style input: `RoundedCornerShape(50f)` pill shape, `IconButton` with `MeshtasticIcons.Send`.
+- [X] T381 [P] [US3] Add `KeyboardOptions(capitalization = Sentences, imeAction = Send)` + `KeyboardActions(onSend)` for keyboard submit support.
+- [X] T382 [P] [US3] Add `LocalSoftwareKeyboardController.current?.hide()` on send to dismiss keyboard after submitting a message.
+
+### Verification
+
+- [X] T390 [US3] Build, detekt, spotless, and all tests pass. Deployed and verified on Pixel 9 Pro.
+
+**Checkpoint**: Chirpy chat fully aligned with messaging module conventions — NodeChip-style sender label, MessageInput-style text field, markdown rendering, and Firebase AI hybrid inference.

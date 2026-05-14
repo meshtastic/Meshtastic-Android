@@ -16,10 +16,12 @@
  */
 package org.meshtastic.feature.docs.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,11 +48,13 @@ import com.mikepenz.markdown.compose.elements.MarkdownTableHeader
 import com.mikepenz.markdown.compose.elements.MarkdownTableRow
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.model.markdownDimens
+import org.jetbrains.compose.resources.painterResource
+import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.ui.icon.ArrowBack
-import org.meshtastic.core.ui.icon.ChatBubbleOutline
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.DocPageContent
+import org.meshtastic.core.resources.Res as CoreRes
 
 /** Routes a page ID to the appropriate page renderer surface. */
 @Suppress("LongMethod", "LongParameterList")
@@ -67,6 +71,7 @@ fun DocsPageRouteScreen(
     onChirpyDismiss: () -> Unit = {},
     onChirpyDraftChange: (String) -> Unit = {},
     onChirpySubmit: () -> Unit = {},
+    onChirpyNavigateToPage: (String) -> Unit = {},
     onBack: () -> Unit,
     onNavigateToPage: (String) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -85,7 +90,11 @@ fun DocsPageRouteScreen(
         floatingActionButton = {
             if (isAiSupported) {
                 FloatingActionButton(onClick = onChirpyToggle) {
-                    Icon(imageVector = MeshtasticIcons.ChatBubbleOutline, contentDescription = "Ask Chirpy")
+                    Image(
+                        painter = painterResource(CoreRes.drawable.img_chirpy),
+                        contentDescription = "Ask Chirpy",
+                        modifier = Modifier.size(32.dp),
+                    )
                 }
             }
         },
@@ -174,6 +183,7 @@ fun DocsPageRouteScreen(
                 onDraftChange = onChirpyDraftChange,
                 onSubmit = onChirpySubmit,
                 onDismiss = onChirpyDismiss,
+                onNavigateToPage = onChirpyNavigateToPage,
             )
         }
     }

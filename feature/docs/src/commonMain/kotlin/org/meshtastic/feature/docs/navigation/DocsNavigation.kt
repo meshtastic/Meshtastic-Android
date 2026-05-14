@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.docs.navigation
 
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,28 +35,122 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.docs.ai.AIDocAssistant
+import org.meshtastic.feature.docs.ai.ChirpySessionHolder
 import org.meshtastic.feature.docs.data.DocBundleLoader
 import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
-import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.ChirpyMessage
 import org.meshtastic.feature.docs.model.ChirpyRole
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
+import org.meshtastic.feature.docs.model.SourceRef
 import org.meshtastic.feature.docs.ui.DocsBrowserScreen
 import org.meshtastic.feature.docs.ui.DocsPageRouteScreen
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /** Registers docs navigation entries into the Settings navigation graph. */
+@OptIn(ExperimentalUuidApi::class, ExperimentalMaterial3AdaptiveApi::class)
 fun EntryProviderScope<NavKey>.docsEntries(backStack: NavBackStack<NavKey>) {
-    entry<SettingsRoute.HelpDocs> { DocsHelpScreen(backStack = backStack) }
+    entry<SettingsRoute.HelpDocs>(metadata = { ListDetailSceneStrategy.listPane() }) {
+        val hasDetailSelected = remember(backStack) { backStack.any { it is SettingsRoute.HelpDocPage } }
+        val chirpy = rememberChirpyState(backStack = backStack, currentPageId = null, showFab = !hasDetailSelected)
+        DocsHelpScreen(backStack = backStack, chirpy = chirpy)
+    }
 
-    entry<SettingsRoute.HelpDocPage> { route -> DocsPageScreen(pageId = route.pageId, backStack = backStack) }
+    entry<SettingsRoute.HelpDocPage>(metadata = { ListDetailSceneStrategy.detailPane() }) { route ->
+        val chirpy = rememberChirpyState(backStack = backStack, currentPageId = route.pageId, showFab = true)
+        DocsPageScreen(pageId = route.pageId, backStack = backStack, chirpy = chirpy)
+    }
 }
 
+// ── Shared Chirpy state holder ──────────────────────────────────────────────────
+
+/** All Chirpy UI state needed by screen composables. */
+class ChirpyUiState(
+    val isSupported: Boolean,
+    val showFab: Boolean,
+    val showSheet: Boolean,
+    val sessionState: org.meshtastic.feature.docs.model.AIDocAssistantSessionState,
+    val onToggle: () -> Unit,
+    val onDismiss: () -> Unit,
+    val onDraftChange: (String) -> Unit,
+    val onSubmit: () -> Unit,
+    val onNavigateToPage: (String) -> Unit,
+)
+
+@OptIn(ExperimentalUuidApi::class)
 @Composable
-private fun DocsHelpScreen(backStack: NavBackStack<NavKey>) {
+private fun rememberChirpyState(
+    backStack: NavBackStack<NavKey>,
+    currentPageId: String?,
+    showFab: Boolean,
+): ChirpyUiState {
+    val aiAssistant = koinInject<AIDocAssistant>()
+    val holder = koinInject<ChirpySessionHolder>()
+    val scope = rememberCoroutineScope()
+
+    var isSupported by remember { mutableStateOf(false) }
+
+    // Poll for AI availability.
+    LaunchedEffect(Unit) {
+        repeat(AI_SUPPORT_CHECK_RETRIES) {
+            isSupported = aiAssistant.isSupported()
+            if (isSupported) return@LaunchedEffect
+            kotlinx.coroutines.delay(AI_SUPPORT_CHECK_INTERVAL_MS)
+        }
+    }
+
+    // Auto-introduce Chirpy when the sheet first opens.
+    LaunchedEffect(holder.showSheet) {
+        if (holder.showSheet && holder.sessionState.messages.isEmpty() && !holder.sessionState.isLoading) {
+            holder.sessionState = holder.sessionState.copy(isLoading = true)
+            val result = aiAssistant.answer(CHIRPY_INTRO_PROMPT, currentPageId = currentPageId)
+            val introMsg = chirpyResultToMessage(result)
+            holder.sessionState =
+                holder.sessionState.copy(messages = holder.sessionState.messages + introMsg, isLoading = false)
+        }
+    }
+
+    fun submit() {
+        val question = holder.sessionState.draftQuestion.trim()
+        if (question.isNotBlank() && !holder.sessionState.isLoading) {
+            val userMsg = ChirpyMessage(id = Uuid.random().toString(), role = ChirpyRole.USER, text = question)
+            holder.sessionState =
+                holder.sessionState.copy(
+                    messages = holder.sessionState.messages + userMsg,
+                    draftQuestion = "",
+                    isLoading = true,
+                )
+            scope.launch {
+                val result = aiAssistant.answer(question, currentPageId = currentPageId)
+                val responseMsg = chirpyResultToMessage(result)
+                holder.sessionState =
+                    holder.sessionState.copy(messages = holder.sessionState.messages + responseMsg, isLoading = false)
+            }
+        }
+    }
+
+    return ChirpyUiState(
+        isSupported = isSupported,
+        showFab = showFab,
+        showSheet = holder.showSheet,
+        sessionState = holder.sessionState,
+        onToggle = { holder.showSheet = !holder.showSheet },
+        onDismiss = { holder.showSheet = false },
+        onDraftChange = { holder.sessionState = holder.sessionState.copy(draftQuestion = it) },
+        onSubmit = ::submit,
+        onNavigateToPage = { pageId ->
+            holder.showSheet = false
+            backStack.add(SettingsRoute.HelpDocPage(pageId))
+        },
+    )
+}
+
+// ── Screen composables ──────────────────────────────────────────────────────────
+
+@Composable
+private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiState) {
     val bundleLoader = koinInject<DocBundleLoader>()
     val searchEngine = koinInject<KeywordSearchEngine>()
 
@@ -88,29 +184,29 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>) {
         onSearchQueryChange = { searchQuery = it },
         onSelectPage = { pageId -> backStack.add(SettingsRoute.HelpDocPage(pageId)) },
         onBack = { backStack.removeLastOrNull() },
+        isAiSupported = chirpy.isSupported,
+        showFab = chirpy.showFab,
+        showChirpy = chirpy.showSheet,
+        chirpyState = chirpy.sessionState,
+        onChirpyToggle = chirpy.onToggle,
+        onChirpyDismiss = chirpy.onDismiss,
+        onChirpyDraftChange = chirpy.onDraftChange,
+        onChirpySubmit = chirpy.onSubmit,
+        onChirpyNavigateToPage = chirpy.onNavigateToPage,
     )
 }
 
-@Suppress("LongMethod")
-@OptIn(ExperimentalUuidApi::class)
 @Composable
-private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>) {
+private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chirpy: ChirpyUiState) {
     val bundleLoader = koinInject<DocBundleLoader>()
-    val aiAssistant = koinInject<AIDocAssistant>()
-    val scope = rememberCoroutineScope()
 
     var content by remember { mutableStateOf<DocPageContent?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    var isAiSupported by remember { mutableStateOf(false) }
-    var showChirpy by remember { mutableStateOf(false) }
-    var chirpyState by remember { mutableStateOf(AIDocAssistantSessionState()) }
 
     LaunchedEffect(pageId) {
         content = bundleLoader.readPage(pageId)
         isLoading = false
     }
-
-    LaunchedEffect(Unit) { isAiSupported = aiAssistant.isSupported() }
 
     val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
     NavigationBackHandler(state = backHandlerState, onBackCompleted = { backStack.removeLastOrNull() })
@@ -119,50 +215,53 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>) {
         pageId = pageId,
         content = content,
         isLoading = isLoading,
-        isAiSupported = isAiSupported,
-        showChirpy = showChirpy,
-        chirpyState = chirpyState,
-        onChirpyToggle = { showChirpy = !showChirpy },
-        onChirpyDismiss = { showChirpy = false },
-        onChirpyDraftChange = { chirpyState = chirpyState.copy(draftQuestion = it) },
-        onChirpySubmit = {
-            val question = chirpyState.draftQuestion.trim()
-            if (question.isNotBlank() && !chirpyState.isLoading) {
-                val userMsg = ChirpyMessage(id = Uuid.random().toString(), role = ChirpyRole.USER, text = question)
-                chirpyState =
-                    chirpyState.copy(messages = chirpyState.messages + userMsg, draftQuestion = "", isLoading = true)
-                scope.launch {
-                    val result = aiAssistant.answer(question)
-                    val responseMsg =
-                        when (result) {
-                            is AIDocAssistantResult.Success ->
-                                ChirpyMessage(
-                                    id = Uuid.random().toString(),
-                                    role = ChirpyRole.ASSISTANT,
-                                    text = result.answer,
-                                    sourcePageIds = result.sourcePages.map { it.id },
-                                )
-
-                            is AIDocAssistantResult.Fallback ->
-                                ChirpyMessage(
-                                    id = Uuid.random().toString(),
-                                    role = ChirpyRole.ASSISTANT,
-                                    text = result.message,
-                                    sourcePageIds = result.suggestedPages.map { it.id },
-                                )
-
-                            is AIDocAssistantResult.Error ->
-                                ChirpyMessage(
-                                    id = Uuid.random().toString(),
-                                    role = ChirpyRole.SYSTEM,
-                                    text = "Sorry, I couldn't answer that. ${result.reason}",
-                                )
-                        }
-                    chirpyState = chirpyState.copy(messages = chirpyState.messages + responseMsg, isLoading = false)
-                }
-            }
-        },
+        isAiSupported = chirpy.isSupported,
+        showChirpy = chirpy.showSheet,
+        chirpyState = chirpy.sessionState,
+        onChirpyToggle = chirpy.onToggle,
+        onChirpyDismiss = chirpy.onDismiss,
+        onChirpyDraftChange = chirpy.onDraftChange,
+        onChirpySubmit = chirpy.onSubmit,
+        onChirpyNavigateToPage = chirpy.onNavigateToPage,
         onBack = { backStack.removeLastOrNull() },
         onNavigateToPage = { targetPageId -> backStack.add(SettingsRoute.HelpDocPage(targetPageId)) },
     )
+}
+
+// ── Constants & helpers ─────────────────────────────────────────────────────────
+
+/** How often to re-check AI model availability while waiting for download. */
+private const val AI_SUPPORT_CHECK_INTERVAL_MS = 3_000L
+
+/** Maximum number of AI support checks before giving up. */
+private const val AI_SUPPORT_CHECK_RETRIES = 15
+
+/** Prompt sent automatically when the Chirpy sheet opens to generate a natural introduction. */
+private const val CHIRPY_INTRO_PROMPT = "Introduce yourself briefly. Who are you and what can you help with?"
+
+/** Maps an [AIDocAssistantResult] to a [ChirpyMessage]. */
+@OptIn(ExperimentalUuidApi::class)
+private fun chirpyResultToMessage(result: AIDocAssistantResult): ChirpyMessage = when (result) {
+    is AIDocAssistantResult.Success ->
+        ChirpyMessage(
+            id = Uuid.random().toString(),
+            role = ChirpyRole.ASSISTANT,
+            text = result.answer,
+            sources = result.sourcePages.map { SourceRef(id = it.id, title = it.title) },
+        )
+
+    is AIDocAssistantResult.Fallback ->
+        ChirpyMessage(
+            id = Uuid.random().toString(),
+            role = ChirpyRole.ASSISTANT,
+            text = result.message,
+            sources = result.suggestedPages.map { SourceRef(id = it.id, title = it.title) },
+        )
+
+    is AIDocAssistantResult.Error ->
+        ChirpyMessage(
+            id = Uuid.random().toString(),
+            role = ChirpyRole.SYSTEM,
+            text = "Sorry, I couldn't answer that. ${result.reason}",
+        )
 }

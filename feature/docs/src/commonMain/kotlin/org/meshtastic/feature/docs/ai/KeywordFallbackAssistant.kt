@@ -26,7 +26,7 @@ class KeywordFallbackAssistant(private val searchEngine: KeywordSearchEngine) : 
 
     override suspend fun isSupported(): Boolean = false
 
-    override suspend fun answer(question: String): AIDocAssistantResult {
+    override suspend fun answer(question: String, currentPageId: String?): AIDocAssistantResult {
         val pages = searchEngine.selectForTokenBudget(question, maxChars = 20_000)
         return if (pages.isNotEmpty()) {
             AIDocAssistantResult.Fallback(

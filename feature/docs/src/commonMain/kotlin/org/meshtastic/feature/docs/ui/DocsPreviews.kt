@@ -16,16 +16,21 @@
  */
 package org.meshtastic.feature.docs.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -36,12 +41,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.painterResource
+import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.ChirpyMessage
 import org.meshtastic.feature.docs.model.ChirpyRole
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocSection
+import org.meshtastic.feature.docs.model.SourceRef
+import org.meshtastic.core.resources.Res as CoreRes
 
 private val sampleUserGuidePages =
     listOf(
@@ -208,7 +217,7 @@ private val sampleMarkdown =
 
 private val sampleChirpyMessages =
     listOf(
-        ChirpyMessage("1", ChirpyRole.USER, "How do I connect to my radio?", emptyList()),
+        ChirpyMessage("1", ChirpyRole.USER, "How do I connect to my radio?"),
         ChirpyMessage(
             "2",
             ChirpyRole.ASSISTANT,
@@ -216,9 +225,9 @@ private val sampleChirpyMessages =
                 "1. Power on your radio\n2. Open the app → Connections\n" +
                 "3. Tap Scan for Devices\n4. Select your device from the list\n\n" +
                 "Make sure Bluetooth and Location permissions are granted.",
-            listOf("connections"),
+            sources = listOf(SourceRef("connections", "Connections"), SourceRef("onboarding", "Getting Started")),
         ),
-        ChirpyMessage("3", ChirpyRole.USER, "What if my device doesn't appear in the scan?", emptyList()),
+        ChirpyMessage("3", ChirpyRole.USER, "What if my device doesn't appear in the scan?"),
     )
 
 // region DocsBrowserScreen Previews
@@ -303,6 +312,7 @@ fun ChirpyAssistantContentPreview() {
                 AIDocAssistantSessionState(messages = sampleChirpyMessages, isLoading = false, draftQuestion = ""),
                 onDraftChange = {},
                 onSubmit = {},
+                onNavigateToPage = {},
             )
         }
     }
@@ -323,6 +333,7 @@ fun ChirpyAssistantLoadingPreview() {
                 ),
                 onDraftChange = {},
                 onSubmit = {},
+                onNavigateToPage = {},
             )
         }
     }
@@ -334,6 +345,7 @@ fun ChirpyAssistantContent(
     state: AIDocAssistantSessionState,
     onDraftChange: (String) -> Unit,
     onSubmit: () -> Unit,
+    onNavigateToPage: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
@@ -345,19 +357,12 @@ fun ChirpyAssistantContent(
 
         LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth()) {
             items(state.messages, key = { it.id }) { message ->
-                ChirpyBubble(message = message)
+                ChirpyBubble(message = message, onNavigateToPage = onNavigateToPage)
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
             if (state.isLoading) {
-                item {
-                    Text(
-                        text = "Chirpy is thinking...",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
-                }
+                item { PreviewThinkingBubble() }
             }
         }
 
@@ -377,31 +382,106 @@ fun ChirpyAssistantContent(
     }
 }
 
-private const val BUBBLE_WIDTH_FRACTION = 0.85f
+private val PreviewBubbleCorner = 8.dp
 
+@Suppress("LongMethod")
 @Composable
-private fun ChirpyBubble(message: ChirpyMessage, modifier: Modifier = Modifier) {
+private fun ChirpyBubble(message: ChirpyMessage, onNavigateToPage: (String) -> Unit, modifier: Modifier = Modifier) {
     val isUser = message.role == ChirpyRole.USER
-    val alignment = if (isUser) Alignment.End else Alignment.Start
-    val colors =
-        if (isUser) {
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        } else {
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-        }
 
-    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = alignment) {
-        Card(colors = colors, modifier = Modifier.fillMaxWidth(BUBBLE_WIDTH_FRACTION)) {
-            Text(text = message.text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(12.dp))
+    if (isUser) {
+        val bubbleColor = MaterialTheme.colorScheme.primaryContainer
+        val borderColor = MaterialTheme.colorScheme.primary
+        Column(modifier = modifier.fillMaxWidth().padding(start = 48.dp), horizontalAlignment = Alignment.End) {
+            Surface(
+                shape = RoundedCornerShape(PreviewBubbleCorner, PreviewBubbleCorner, 0.dp, PreviewBubbleCorner),
+                color = bubbleColor,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                border = BorderStroke(0.5.dp, borderColor),
+            ) {
+                Text(
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                )
+            }
         }
+    } else {
+        val bubbleColor = MaterialTheme.colorScheme.surfaceVariant
+        val borderColor = MaterialTheme.colorScheme.outline
+        Column(modifier = modifier.fillMaxWidth().padding(end = 48.dp), horizontalAlignment = Alignment.Start) {
+            Row(verticalAlignment = Alignment.Top) {
+                Image(
+                    painter = painterResource(CoreRes.drawable.img_chirpy),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp).padding(top = 2.dp),
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Surface(
+                    shape = RoundedCornerShape(0.dp, PreviewBubbleCorner, PreviewBubbleCorner, PreviewBubbleCorner),
+                    color = bubbleColor,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    border = BorderStroke(0.5.dp, borderColor),
+                ) {
+                    Text(
+                        text = message.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                    )
+                }
+            }
 
-        if (message.sourcePageIds.isNotEmpty()) {
-            Text(
-                text = "Sources: ${message.sourcePageIds.joinToString(", ")}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp, start = 4.dp),
+            if (message.sources.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(top = 4.dp, start = 30.dp),
+                ) {
+                    message.sources.forEach { source ->
+                        Surface(
+                            shape = RoundedCornerShape(PreviewBubbleCorner),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
+                            onClick = { onNavigateToPage(source.id) },
+                        ) {
+                            Text(
+                                text = source.title,
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Preview-safe thinking bubble without infinite animations. */
+@Composable
+private fun PreviewThinkingBubble(modifier: Modifier = Modifier) {
+    val bubbleColor = MaterialTheme.colorScheme.surfaceVariant
+    val borderColor = MaterialTheme.colorScheme.outline
+
+    Column(modifier = modifier.fillMaxWidth().padding(end = 48.dp), horizontalAlignment = Alignment.Start) {
+        Row(verticalAlignment = Alignment.Top) {
+            Image(
+                painter = painterResource(CoreRes.drawable.img_chirpy),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp).padding(top = 2.dp),
             )
+            Spacer(modifier = Modifier.width(6.dp))
+            Surface(
+                shape = RoundedCornerShape(0.dp, PreviewBubbleCorner, PreviewBubbleCorner, PreviewBubbleCorner),
+                color = bubbleColor,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                border = BorderStroke(0.5.dp, borderColor),
+            ) {
+                Text(
+                    text = "Chirpy is thinking…",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                )
+            }
         }
     }
 }
