@@ -57,6 +57,15 @@
       "automerge": true
     },
     {
+      "description": "TAKPacket-SDK on JitPack — strip 'v' prefix from release tags so the 0.x automerge rule recognises it as unstable (without this, matchCurrentVersion: '!/^0/' wrongly matches 'v0.2.1' and treats it as stable).",
+      "matchPackageNames": [
+        "com.github.meshtastic.TAKPacket-SDK:takpacket-sdk-jvm"
+      ],
+      "versioning": "semver",
+      "extractVersion": "^v(?<version>.+)$",
+      "changelogUrl": "https://github.com/meshtastic/TAKPacket-SDK/releases"
+    },
+    {
       "description": "Group CMP and the androidx.compose artifacts that track it so Renovate bumps them together (see PR #5180)",
       "groupName": "compose-multiplatform",
       "matchPackageNames": [
