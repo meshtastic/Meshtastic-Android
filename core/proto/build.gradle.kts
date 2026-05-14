@@ -62,7 +62,7 @@ kotlin {
             //     `:core:takserver`'s jvmMain re-adds it for desktop.
             // Both excludes are no-ops on iOS (the SDK's iOS klibs use the
             // bundled CZstd C interop, not zstd-jni).
-            api("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk:v0.3.0") {
+            api("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk:v0.2.3") {
                 exclude(group = "com.github.luben", module = "zstd-jni")
                 exclude(group = "org.ogce", module = "xpp3")
             }
