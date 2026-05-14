@@ -87,7 +87,7 @@ kable = "0.43.0"
 mqttastic = "0.3.6"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
-takpacket-sdk = "v0.2.3"
+takpacket-sdk = "0.2.3"
 
 [libraries]
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
