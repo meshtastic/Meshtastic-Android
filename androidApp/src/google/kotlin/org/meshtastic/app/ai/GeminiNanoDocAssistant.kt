@@ -20,6 +20,8 @@ import co.touchlab.kermit.Logger
 import com.google.firebase.Firebase
 import com.google.firebase.ai.InferenceMode
 import com.google.firebase.ai.OnDeviceConfig
+import com.google.firebase.ai.OnDeviceModelOption
+import com.google.firebase.ai.OnDeviceModelStatus
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.ai.type.PublicPreviewAPI
@@ -32,8 +34,10 @@ import org.meshtastic.feature.docs.model.DocsAiError
 /**
  * Gemini Nano on-device AI assistant for the Google flavor.
  *
- * Uses Firebase AI Logic with [InferenceMode.ONLY_ON_DEVICE] for privacy — no data leaves the device. Falls back to
- * keyword search results when the on-device model is unavailable.
+ * Uses Firebase AI Logic with [InferenceMode.ONLY_ON_DEVICE] for privacy — no data leaves the device. Supported on
+ * Pixel 9+, Samsung Galaxy S25/S26, OnePlus 13/15, and many other devices with AICore.
+ *
+ * @see <a href="https://developers.google.com/ml-kit/genai#prompt-device">Supported devices</a>
  */
 @OptIn(PublicPreviewAPI::class)
 class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, private val bundleLoader: DocBundleLoader) :
@@ -43,20 +47,22 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         Firebase.ai(backend = GenerativeBackend.googleAI())
             .generativeModel(
                 modelName = "gemini-2.0-flash-lite",
-                onDeviceConfig = OnDeviceConfig(mode = InferenceMode.ONLY_ON_DEVICE),
+                onDeviceConfig =
+                OnDeviceConfig(mode = InferenceMode.ONLY_ON_DEVICE, modelOption = OnDeviceModelOption.STABLE),
             )
     }
 
     override suspend fun isSupported(): Boolean = try {
-        // Attempt a no-op to verify the model is reachable
-        model.countTokens("test")
-        true
+        val status = model.onDeviceExtension?.checkStatus()
+        status == OnDeviceModelStatus.AVAILABLE || status == OnDeviceModelStatus.DOWNLOADING
     } catch (_: Exception) {
         false
     }
 
     @Suppress("TooGenericExceptionCaught")
     override suspend fun answer(question: String): AIDocAssistantResult = try {
+        model.onDeviceExtension?.warmUp()
+
         val contextPages = searchEngine.selectForTokenBudget(question, maxChars = MAX_CONTEXT_CHARS)
         val contextSnippets =
             contextPages.mapNotNull { page ->
@@ -75,6 +81,8 @@ class GeminiNanoDocAssistant(private val searchEngine: KeywordSearchEngine, priv
         val errorType =
             when {
                 e.message?.contains("BUSY", ignoreCase = true) == true -> DocsAiError.Busy
+                e.message?.contains("BATTERY", ignoreCase = true) == true -> DocsAiError.Busy
+                e.message?.contains("BACKGROUND", ignoreCase = true) == true -> DocsAiError.Busy
                 e.message?.contains("UNAVAILABLE", ignoreCase = true) == true -> DocsAiError.ModelUnavailable
                 else -> DocsAiError.Unknown
             }
