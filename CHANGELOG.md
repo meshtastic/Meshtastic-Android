@@ -9,6 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update spotless to v8.5.0 (#5458) by @renovate[bot] in [`cfa9206de`](https://github.com/meshtastic/Meshtastic-Android/commit/cfa9206de96fe5323d5882cd0bf59820403c90c1)
+* chore(deps): update takpacket.sdk to v0.2.3 (#5464) by @renovate[bot] in [`427471c51`](https://github.com/meshtastic/Meshtastic-Android/commit/427471c51e200a6753c9a1e131ae8fb71e04738c)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5460) by @James Rich in [`b32aa1b9f`](https://github.com/meshtastic/Meshtastic-Android/commit/b32aa1b9f20d4c742a162921a6c22c2546d88861)
+* docs: update CHANGELOG.md (#5462) by @github-actions[bot] in [`dc1c93e12`](https://github.com/meshtastic/Meshtastic-Android/commit/dc1c93e12c7df0137dd5125834f7353021156efc)
 * fix: TAKPacket-SDK proto ownership and desktop/flatpak CI fixes (#5459) by @James Rich in [`6edac97d5`](https://github.com/meshtastic/Meshtastic-Android/commit/6edac97d5fcee38eabdd43f2898c11873807d78f)
 * docs: update CHANGELOG.md (#5456) by @github-actions[bot] in [`d8b183a41`](https://github.com/meshtastic/Meshtastic-Android/commit/d8b183a41408f53c74595e16ac40fc9bb780ec58)
 * chore(deps): update ktor to v3.5.0 (#5450) by @renovate[bot] in [`63e8f1587`](https://github.com/meshtastic/Meshtastic-Android/commit/63e8f15872ff0a0ccc4429108f8c1f77567bdbe3)
