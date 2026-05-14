@@ -9,6 +9,8 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update dd.sdk.android to v3.10.0 (#5451) by @renovate[bot] in [`a71ac210f`](https://github.com/meshtastic/Meshtastic-Android/commit/a71ac210f76a28a133056bec4502fc4b0984cb1d)
+* docs: update CHANGELOG.md (#5448) by @github-actions[bot] in [`c0b690974`](https://github.com/meshtastic/Meshtastic-Android/commit/c0b69097419a7d9c90527729747fc91135628282)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5438) by @James Rich in [`13865e7c8`](https://github.com/meshtastic/Meshtastic-Android/commit/13865e7c8b7f9a47cd3b572bd44d8ec355b2d3a9)
 * chore(deps): update com.juul.kable:kable-core to v0.43.0 (#5449) by @renovate[bot] in [`8d61d22e9`](https://github.com/meshtastic/Meshtastic-Android/commit/8d61d22e93bec5afae021fdf2d64bca58dc57d67)
 * chore(deps): batch bump KSP, Wire, CMP, Material (#5447) by @James Rich in [`550c517d7`](https://github.com/meshtastic/Meshtastic-Android/commit/550c517d70ca2ed472ac1a5c3b203c69e12a1707)
