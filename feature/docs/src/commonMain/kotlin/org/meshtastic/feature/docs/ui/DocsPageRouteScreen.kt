@@ -24,6 +24,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,17 +47,26 @@ import com.mikepenz.markdown.compose.elements.MarkdownTableRow
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.model.markdownDimens
 import org.meshtastic.core.ui.icon.ArrowBack
+import org.meshtastic.core.ui.icon.ChatBubbleOutline
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
 import org.meshtastic.feature.docs.model.DocPageContent
 
 /** Routes a page ID to the appropriate page renderer surface. */
-@Suppress("LongMethod")
+@Suppress("LongMethod", "LongParameterList")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocsPageRouteScreen(
     pageId: String,
     content: DocPageContent?,
     isLoading: Boolean,
+    isAiSupported: Boolean = false,
+    showChirpy: Boolean = false,
+    chirpyState: AIDocAssistantSessionState = AIDocAssistantSessionState(),
+    onChirpyToggle: () -> Unit = {},
+    onChirpyDismiss: () -> Unit = {},
+    onChirpyDraftChange: (String) -> Unit = {},
+    onChirpySubmit: () -> Unit = {},
     onBack: () -> Unit,
     onNavigateToPage: (String) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -71,6 +81,13 @@ fun DocsPageRouteScreen(
                     }
                 },
             )
+        },
+        floatingActionButton = {
+            if (isAiSupported) {
+                FloatingActionButton(onClick = onChirpyToggle) {
+                    Icon(imageVector = MeshtasticIcons.ChatBubbleOutline, contentDescription = "Ask Chirpy")
+                }
+            }
         },
         modifier = modifier,
     ) { innerPadding ->
@@ -148,6 +165,16 @@ fun DocsPageRouteScreen(
                     }
                 }
             }
+        }
+
+        if (showChirpy) {
+            ChirpyAssistantSheet(
+                state = chirpyState,
+                isSupported = isAiSupported,
+                onDraftChange = onChirpyDraftChange,
+                onSubmit = onChirpySubmit,
+                onDismiss = onChirpyDismiss,
+            )
         }
     }
 }

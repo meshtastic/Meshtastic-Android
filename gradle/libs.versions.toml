@@ -155,6 +155,8 @@ jetbrains-compose-material3-adaptive-navigation3 = { module = "org.jetbrains.com
 jetbrains-compose-material3-adaptive-navigation-suite = { module = "org.jetbrains.compose.material3:material3-adaptive-navigation-suite", version.ref = "compose-multiplatform-material3" }
 
 # Google
+firebase-ai = { module = "com.google.firebase:firebase-ai" }
+firebase-ai-ondevice = { module = "com.google.firebase:firebase-ai-ondevice", version = "16.0.0-beta02" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.13.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }

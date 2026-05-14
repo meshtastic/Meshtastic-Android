@@ -17,7 +17,12 @@
 package org.meshtastic.app.di
 
 import org.koin.core.annotation.Module
-import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
+import org.koin.core.annotation.Single
+import org.meshtastic.feature.docs.ai.AIDocAssistant
+import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 
-@Module(includes = [GoogleNetworkModule::class, GoogleMapsKoinModule::class, GoogleAiModule::class])
-class FlavorModule
+/** Provides keyword-only fallback AI assistant for the F-Droid flavor (no on-device model). */
+@Module
+class FdroidAiModule {
+    @Single fun aiDocAssistant(fallback: KeywordFallbackAssistant): AIDocAssistant = fallback
+}

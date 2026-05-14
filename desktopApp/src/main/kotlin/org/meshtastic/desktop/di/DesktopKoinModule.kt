@@ -78,6 +78,8 @@ import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
 import org.meshtastic.desktop.stub.NoopServiceBroadcasts
+import org.meshtastic.feature.docs.ai.AIDocAssistant
+import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.MagneticFieldProvider
 import org.meshtastic.feature.node.compass.PhoneLocationProvider
@@ -193,6 +195,9 @@ private fun desktopPlatformStubsModule() = module {
     single<CompassHeadingProvider> { NoopCompassHeadingProvider() }
     single<PhoneLocationProvider> { NoopPhoneLocationProvider() }
     single<MagneticFieldProvider> { NoopMagneticFieldProvider() }
+
+    // AI assistant: keyword-only fallback on desktop (no on-device model)
+    single<AIDocAssistant> { get<KeywordFallbackAssistant>() }
 
     // Desktop uses the real ApiService implementation (no flavor stub needed)
     single<ApiService> { ApiServiceImpl(client = get()) }

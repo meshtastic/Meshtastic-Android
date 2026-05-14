@@ -21,7 +21,7 @@ import org.meshtastic.feature.docs.data.KeywordSearchEngine
 import org.meshtastic.feature.docs.model.AIDocAssistantResult
 
 /** Keyword-search-only fallback AI assistant implementation. Used on Desktop, iOS, and Android fdroid flavor. */
-@Single
+@Single(binds = [])
 class KeywordFallbackAssistant(private val searchEngine: KeywordSearchEngine) : AIDocAssistant {
 
     override suspend fun isSupported(): Boolean = false

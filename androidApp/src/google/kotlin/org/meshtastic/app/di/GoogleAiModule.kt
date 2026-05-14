@@ -17,7 +17,16 @@
 package org.meshtastic.app.di
 
 import org.koin.core.annotation.Module
-import org.meshtastic.app.map.prefs.di.GoogleMapsKoinModule
+import org.koin.core.annotation.Single
+import org.meshtastic.app.ai.GeminiNanoDocAssistant
+import org.meshtastic.feature.docs.ai.AIDocAssistant
+import org.meshtastic.feature.docs.data.DocBundleLoader
+import org.meshtastic.feature.docs.data.KeywordSearchEngine
 
-@Module(includes = [GoogleNetworkModule::class, GoogleMapsKoinModule::class, GoogleAiModule::class])
-class FlavorModule
+/** Provides the on-device Gemini Nano AI assistant for the Google flavor. */
+@Module
+class GoogleAiModule {
+    @Single
+    fun aiDocAssistant(searchEngine: KeywordSearchEngine, bundleLoader: DocBundleLoader): AIDocAssistant =
+        GeminiNanoDocAssistant(searchEngine, bundleLoader)
+}
