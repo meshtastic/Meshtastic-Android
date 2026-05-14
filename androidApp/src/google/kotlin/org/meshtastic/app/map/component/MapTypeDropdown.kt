@@ -14,12 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.app.map.component
 
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,38 +62,16 @@ internal fun MapTypeDropdown(
         )
 
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
-        googleMapTypes.forEach { (name, type) ->
-            DropdownMenuItem(
-                text = { Text(name) },
-                onClick = {
-                    mapViewModel.setSelectedGoogleMapType(type)
-                    onDismissRequest() // Close menu
-                },
-                trailingIcon =
-                if (selectedCustomUrl == null && selectedGoogleMapType == type) {
-                    {
-                        Icon(
-                            MeshtasticIcons.Check,
-                            contentDescription = stringResource(Res.string.selected_map_type),
-                        )
-                    }
-                } else {
-                    null
-                },
-            )
-        }
-
-        if (customTileProviders.isNotEmpty()) {
-            HorizontalDivider()
-            customTileProviders.forEach { config ->
+        DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            googleMapTypes.forEach { (name, type) ->
                 DropdownMenuItem(
-                    text = { Text(config.name) },
+                    text = { Text(name) },
                     onClick = {
-                        mapViewModel.selectCustomTileProvider(config)
-                        onDismissRequest() // Close menu
+                        mapViewModel.setSelectedGoogleMapType(type)
+                        onDismissRequest()
                     },
                     trailingIcon =
-                    if (selectedCustomUrl == config.urlTemplate) {
+                    if (selectedCustomUrl == null && selectedGoogleMapType == type) {
                         {
                             Icon(
                                 MeshtasticIcons.Check,
@@ -102,7 +84,31 @@ internal fun MapTypeDropdown(
                 )
             }
         }
-        HorizontalDivider()
+
+        if (customTileProviders.isNotEmpty()) {
+            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                customTileProviders.forEach { config ->
+                    DropdownMenuItem(
+                        text = { Text(config.name) },
+                        onClick = {
+                            mapViewModel.selectCustomTileProvider(config)
+                            onDismissRequest()
+                        },
+                        trailingIcon =
+                        if (selectedCustomUrl == config.urlTemplate) {
+                            {
+                                Icon(
+                                    MeshtasticIcons.Check,
+                                    contentDescription = stringResource(Res.string.selected_map_type),
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                    )
+                }
+            }
+        }
         DropdownMenuItem(
             text = { Text(stringResource(Res.string.manage_custom_tile_sources)) },
             onClick = {

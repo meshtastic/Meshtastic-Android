@@ -14,16 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.app.map.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,55 +56,56 @@ import kotlin.math.roundToInt
 internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, mapViewModel: MapViewModel) {
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
-        DropdownMenuItem(
-            text = { Text(stringResource(Res.string.only_favorites)) },
-            onClick = { mapViewModel.toggleOnlyFavorites() },
-            leadingIcon = {
-                Icon(
-                    imageVector = MeshtasticIcons.Favorite,
-                    contentDescription = stringResource(Res.string.only_favorites),
-                )
-            },
-            trailingIcon = {
-                Checkbox(
-                    checked = mapFilterState.onlyFavorites,
-                    onCheckedChange = { mapViewModel.toggleOnlyFavorites() },
-                )
-            },
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(Res.string.show_waypoints)) },
-            onClick = { mapViewModel.toggleShowWaypointsOnMap() },
-            leadingIcon = {
-                Icon(
-                    imageVector = MeshtasticIcons.PinDrop,
-                    contentDescription = stringResource(Res.string.show_waypoints),
-                )
-            },
-            trailingIcon = {
-                Checkbox(
-                    checked = mapFilterState.showWaypoints,
-                    onCheckedChange = { mapViewModel.toggleShowWaypointsOnMap() },
-                )
-            },
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(Res.string.show_precision_circle)) },
-            onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
-            leadingIcon = {
-                Icon(
-                    imageVector = MeshtasticIcons.Lens,
-                    contentDescription = stringResource(Res.string.show_precision_circle),
-                )
-            },
-            trailingIcon = {
-                Checkbox(
-                    checked = mapFilterState.showPrecisionCircle,
-                    onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
-                )
-            },
-        )
-        HorizontalDivider()
+        DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.only_favorites)) },
+                onClick = { mapViewModel.toggleOnlyFavorites() },
+                leadingIcon = {
+                    Icon(
+                        imageVector = MeshtasticIcons.Favorite,
+                        contentDescription = stringResource(Res.string.only_favorites),
+                    )
+                },
+                trailingIcon = {
+                    Checkbox(
+                        checked = mapFilterState.onlyFavorites,
+                        onCheckedChange = { mapViewModel.toggleOnlyFavorites() },
+                    )
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.show_waypoints)) },
+                onClick = { mapViewModel.toggleShowWaypointsOnMap() },
+                leadingIcon = {
+                    Icon(
+                        imageVector = MeshtasticIcons.PinDrop,
+                        contentDescription = stringResource(Res.string.show_waypoints),
+                    )
+                },
+                trailingIcon = {
+                    Checkbox(
+                        checked = mapFilterState.showWaypoints,
+                        onCheckedChange = { mapViewModel.toggleShowWaypointsOnMap() },
+                    )
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.show_precision_circle)) },
+                onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
+                leadingIcon = {
+                    Icon(
+                        imageVector = MeshtasticIcons.Lens,
+                        contentDescription = stringResource(Res.string.show_precision_circle),
+                    )
+                },
+                trailingIcon = {
+                    Checkbox(
+                        checked = mapFilterState.showPrecisionCircle,
+                        onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
+                    )
+                },
+            )
+        }
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             val filterOptions = LastHeardFilter.entries
             val selectedIndex = filterOptions.indexOf(mapFilterState.lastHeardFilter)

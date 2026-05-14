@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("TooManyFunctions")
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package org.meshtastic.feature.messaging.component
 
@@ -36,13 +37,16 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -389,13 +393,17 @@ private fun OverFlowMenu(
 ) {
     if (expanded) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-            QuickChatToggleMenuItem(showQuickChat, onDismiss, onToggleQuickChat)
-            QuickChatOptionsMenuItem(onDismiss, onNavigateToQuickChatOptions)
-            if (filteredCount > 0 && !filteringDisabled) {
-                FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
+            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                QuickChatToggleMenuItem(showQuickChat, onDismiss, onToggleQuickChat)
+                QuickChatOptionsMenuItem(onDismiss, onNavigateToQuickChatOptions)
             }
-            FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
-            FilterSettingsMenuItem(onDismiss, onNavigateToFilterSettings)
+            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                if (filteredCount > 0 && !filteringDisabled) {
+                    FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
+                }
+                FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
+                FilterSettingsMenuItem(onDismiss, onNavigateToFilterSettings)
+            }
         }
     }
 }
