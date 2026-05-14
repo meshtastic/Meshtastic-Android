@@ -37,6 +37,8 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 2. Enable the MQTT module.
 3. Configure the broker connection:
 
+![MQTT toggle switch](/assets/screenshots/settings_switch.png)
+
 | Setting | Description | Default |
 |---------|-------------|---------|
 | Server Address | MQTT broker hostname | mqtt.meshtastic.org |

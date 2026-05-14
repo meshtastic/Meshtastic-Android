@@ -15,6 +15,12 @@ Configure optional feature modules and perform device administration. Modules ex
 
 > 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration.
 
+Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:
+
+![Toggle switch](/assets/screenshots/settings_switch.png)
+
+![Dropdown selector](/assets/screenshots/settings_dropdown.png)
+
 ## Module Configuration
 
 ### MQTT Module

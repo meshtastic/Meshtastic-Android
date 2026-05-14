@@ -40,6 +40,8 @@ Node markers on the map indicate:
 
 The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
 
+![Map controls overlay](/assets/screenshots/map_controls_overlay.png)
+
 ## Waypoints
 
 Waypoints are shared geographic points of interest that all mesh members can see.
