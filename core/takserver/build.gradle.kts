@@ -49,54 +49,14 @@ kotlin {
             implementation(libs.ktor.network)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kermit)
-        }
 
-        jvmAndroidMain.dependencies {
-            // TAKPacket-SDK for v2 compression/decompression (via JitPack).
-            //
-            // We depend on the `-jvm` variant directly rather than the parent
-            // `com.github.meshtastic:TAKPacket-SDK` coordinate. JitPack does
-            // not publish a root-level Gradle module metadata (.module) file
-            // for the KMP parent, only per-target ones. With just the parent
-            // POM, Gradle reads the four KMP variants (jvm, iosarm64,
-            // iossimulatorarm64, metadata) as unconditional Maven deps and
-            // tries to resolve them ALL against this Android consumer — the
-            // iOS klibs declare `platform.type=native` with no androidJvm
-            // variant, so variant selection fails with "No matching variant".
-            //
-            // Depending directly on `takpacket-sdk-jvm` skips the parent POM
-            // entirely and goes straight to the JVM artifact's own module
-            // metadata, which is compatible with both `jvm()` and Android
-            // targets in this `jvmAndroidMain` source set. It still pulls
-            // zstd-jni + xpp3 + wire-runtime-jvm + kotlin-stdlib as
-            // transitive deps from the JVM variant's POM.
-            //
-            // zstd-jni's @aar variant is still declared explicitly in the
-            // androidMain source set below so Android gets the .so files.
-            implementation("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk-jvm:v0.2.1") {
-                // Issue #5: pre-0.2.1 the SDK JAR bundled `org.meshtastic.proto.*`
-                // (Wire-generated TAKPacketV2 + friends) inside the same JAR as
-                // `org.meshtastic.tak.*`. Our own `:core:proto` module runs its
-                // own Wire codegen against the same protobufs submodule and emits
-                // the identical classes, so R8 hit "Type is defined multiple
-                // times" errors during release builds. v0.2.1 strips the proto
-                // classes from the JAR entirely — the SDK's bytecode still
-                // REFERENCES them, but they come from `:core:proto` on our
-                // classpath. No exclude needed; the SDK simply doesn't ship them.
-                // The SDK's jvmMain declares zstd-jni as a runtime dep (standard
-                // JAR with desktop native libs). Android needs the @aar variant
-                // instead (ships arm/arm64/x86/x86_64 .so files). Both packaging
-                // formats contain the same Java classes, so Android's dex merger
-                // hits "Duplicate class" errors if both land on the classpath.
-                // Exclude here; androidMain re-adds it as @aar below, and jvmMain
-                // re-adds the JAR for desktop.
-                exclude(group = "com.github.luben", module = "zstd-jni")
-                // xpp3 bundles org.xmlpull.v1.XmlPullParser which Android provides
-                // as a platform class (android.content.res.XmlResourceParser
-                // implements it). R8 fails when both the library and program
-                // classpaths define the same type.
-                exclude(group = "org.ogce", module = "xpp3")
-            }
+            // TAKPacket-SDK is `api`-exported by `:core:proto` (see issue
+            // https://github.com/meshtastic/TAKPacket-SDK/issues/6). That
+            // gives us `org.meshtastic.proto.TAKPacketV2` and friends, plus
+            // the SDK's own `org.meshtastic.tak.*` parser/builder/compressor.
+            // No declaration here — Gradle resolves it transitively. zstd-jni
+            // and xpp3 are excluded at the SDK dep site in `:core:proto` and
+            // re-added per-target below.
         }
 
         jvmMain.dependencies {
