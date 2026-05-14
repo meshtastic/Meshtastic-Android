@@ -73,7 +73,7 @@ kotlin {
             //
             // zstd-jni's @aar variant is still declared explicitly in the
             // androidMain source set below so Android gets the .so files.
-            implementation("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk-jvm:v0.2.1") {
+            implementation("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk-jvm:v0.2.3") {
                 // Issue #5: pre-0.2.1 the SDK JAR bundled `org.meshtastic.proto.*`
                 // (Wire-generated TAKPacketV2 + friends) inside the same JAR as
                 // `org.meshtastic.tak.*`. Our own `:core:proto` module runs its
