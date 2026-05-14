@@ -250,10 +250,18 @@ actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied
     return remember(launcher) { { launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS) } }
 }
 
+// API level at which ACCESS_LOCAL_NETWORK became a real runtime permission (Android 17 / API 37).
+// Hardcoded as an integer literal because Build.VERSION_CODES does not yet expose a named constant
+// for API 37 in the SDK we compile against (current max named constant is VANILLA_ICE_CREAM / API 35).
+// On older API levels the permission string is unknown to the system and requestPermission() returns
+// an immediate denial, which would incorrectly disable any caller that disables itself on denial.
+private const val LOCAL_NETWORK_PERMISSION_API = 37
+
 @Composable
 actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-        // Pre-Android 12, no local network permission required
+    if (android.os.Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API) {
+        // Pre-Android 17, ACCESS_LOCAL_NETWORK is not a runtime permission. Localhost / LAN access
+        // works implicitly under the INTERNET permission, so report granted without prompting.
         return remember { { onGranted() } }
     }
     val currentOnGranted = rememberUpdatedState(onGranted)
@@ -267,8 +275,8 @@ actual fun rememberRequestLocalNetworkPermission(onGranted: () -> Unit, onDenied
 
 @Composable
 actual fun isLocalNetworkPermissionGranted(): Boolean {
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-        // Pre-Android 12, no runtime local-network permission exists; access is implicit via INTERNET.
+    if (android.os.Build.VERSION.SDK_INT < LOCAL_NETWORK_PERMISSION_API) {
+        // Pre-Android 17, no runtime local-network gate; access is implicit via INTERNET.
         return true
     }
     val context = LocalContext.current
