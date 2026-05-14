@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update ktor to v3.5.0 (#5450) by @renovate[bot] in [`63e8f1587`](https://github.com/meshtastic/Meshtastic-Android/commit/63e8f15872ff0a0ccc4429108f8c1f77567bdbe3)
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5455) by @James Rich in [`33184fef9`](https://github.com/meshtastic/Meshtastic-Android/commit/33184fef99befdac1ad7d1aea1706a9e142dba85)
+* docs: update CHANGELOG.md (#5453) by @github-actions[bot] in [`6a9391022`](https://github.com/meshtastic/Meshtastic-Android/commit/6a939102213dcbf4bcbc4718f334a28fd0e346e7)
 * chore(deps): update com.github.luben:zstd-jni to v1.5.7-8 (#5454) by @renovate[bot] in [`f1c793db5`](https://github.com/meshtastic/Meshtastic-Android/commit/f1c793db5de3df9e987de16ddcda23f3757ba3db)
 * feat: TAK v2 protocol integration with zstd compression and full CoT type support (#5434) by @Ben Meadors in [`a04a261b8`](https://github.com/meshtastic/Meshtastic-Android/commit/a04a261b80b7d617447651af1fd67ec623775efa)
 * docs: update CHANGELOG.md (#5452) by @github-actions[bot] in [`0ef3072f3`](https://github.com/meshtastic/Meshtastic-Android/commit/0ef3072f3c28a44c1f0e18ad4b1c617aaff706b0)
