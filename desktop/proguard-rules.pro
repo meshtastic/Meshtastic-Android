@@ -77,3 +77,12 @@
 # ---- Kotlin 2.3+ stdlib intrinsics not present on JDK 17 --------------------
 -dontwarn kotlin.concurrent.atomics.**
 -dontwarn kotlin.uuid.UuidV7Generator
+
+# ---- TAKPacket-SDK / proto ABI tolerance ------------------------------------
+# The SDK's TakPacketV2Serializer is compiled against atak.proto at a specific
+# commit. If the protobufs submodule advances ahead of the SDK release, minor
+# signature mismatches (e.g. optional field boxing) produce warnings. These are
+# harmless at runtime — affected code paths only execute when TAK packets use
+# the changed fields, and the SDK is rebuilt on each release. Suppress to avoid
+# blocking desktop builds while we coordinate proto alignment.
+-dontwarn org.meshtastic.tak.TakPacketV2Serializer
