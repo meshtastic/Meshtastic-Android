@@ -1154,7 +1154,7 @@
     <string name="tak_role_teammember">Teammitglied</string>
     <string name="tak_role_unspecified">Unspecified</string>
     <string name="tak_server_enabled">Lokalen TAK Server aktivieren</string>
-    <string name="tak_server_enabled_desc">Startet einen TCP Server auf Port 8089 für ATAK Verbindungen</string>
+    <string name="tak_server_section">Server</string>
     <string name="tak_team">Teamfarbe</string>
     <string name="tak_team_blue">Blau</string>
     <string name="tak_team_brown">Braun</string>

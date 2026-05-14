@@ -1169,7 +1169,7 @@
     <string name="tak_role_teammember">Участник команды</string>
     <string name="tak_role_unspecified">Не определена</string>
     <string name="tak_server_enabled">Включить локальный сервер TAK</string>
-    <string name="tak_server_enabled_desc">Запустить TCP-сервер на порту 8089 для подключений ATAK</string>
+    <string name="tak_server_section">Сервер</string>
     <string name="tak_team">Цвет команды</string>
     <string name="tak_team_blue">Синий</string>
     <string name="tak_team_brown">Коричневый</string>

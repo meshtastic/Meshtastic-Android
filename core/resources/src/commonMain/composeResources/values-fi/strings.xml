@@ -1157,7 +1157,7 @@
     <string name="tak_role_teammember">Tiimin jäsen</string>
     <string name="tak_role_unspecified">Määrittelemätön</string>
     <string name="tak_server_enabled">Ota paikallinen TAK-palvelin käyttöön</string>
-    <string name="tak_server_enabled_desc">Käynnistää TCP-palvelimen porttiin 8089 ATAK-yhteyksiä varten</string>
+    <string name="tak_server_section">Palvelin</string>
     <string name="tak_team">Tiimin väri</string>
     <string name="tak_team_blue">Sininen</string>
     <string name="tak_team_brown">Ruskea</string>

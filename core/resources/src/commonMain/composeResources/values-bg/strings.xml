@@ -926,7 +926,7 @@
     <string name="tak_role_teammember">Член на екипа</string>
     <string name="tak_role_unspecified">Неопределена</string>
     <string name="tak_server_enabled">Активиране на локален TAK сървър</string>
-    <string name="tak_server_enabled_desc">Стартира TCP сървър на порт 8089 за ATAK връзки</string>
+    <string name="tak_server_section">Сървър</string>
     <string name="tak_team">Цвят на екипа</string>
     <string name="tak_team_blue">Син</string>
     <string name="tak_team_brown">Кафяв</string>

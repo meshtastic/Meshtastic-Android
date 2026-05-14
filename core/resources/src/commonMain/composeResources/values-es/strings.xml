@@ -801,6 +801,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="sx126x_rx_boosted_gain">Aumentar ganancia de RX</string>
     <string name="system_settings">Ajustes del sistema</string>
     <!-- TAK -->
+    <string name="tak_server_section">Servidor</string>
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="tak_team_red">Rojo</string>

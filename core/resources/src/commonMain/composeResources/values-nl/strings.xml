@@ -412,6 +412,7 @@
     <string name="ssid">SSID</string>
     <string name="supported">Ondersteund</string>
     <!-- TAK -->
+    <string name="tak_server_section">Server</string>
     <string name="tak_team_blue">Blauw</string>
     <string name="tak_team_green">Groen</string>
     <string name="tak_team_red">Rood</string>

@@ -809,6 +809,7 @@
     <string name="sx126x_rx_boosted_gain">RX fokozott erősítés</string>
     <string name="system_settings">Rendszerbeállítások</string>
     <!-- TAK -->
+    <string name="tak_server_section">Szerver</string>
     <string name="tak_team_blue">Kék</string>
     <string name="tak_team_green">Zöld</string>
     <string name="tak_team_red">Piros</string>

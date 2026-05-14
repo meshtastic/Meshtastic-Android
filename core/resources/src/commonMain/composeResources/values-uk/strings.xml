@@ -1055,6 +1055,7 @@
     <string name="tak_role_teamlead">Лідер команди</string>
     <string name="tak_role_teammember">Член команди</string>
     <string name="tak_role_unspecified">Невизначений</string>
+    <string name="tak_server_section">Сервер</string>
     <string name="tak_team_blue">Синій</string>
     <string name="tak_team_brown">Коричневий</string>
     <string name="tak_team_cyan">Ціановий</string>

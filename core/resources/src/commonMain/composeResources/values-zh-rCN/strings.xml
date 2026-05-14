@@ -1032,6 +1032,7 @@
     <string name="tak_role_teamlead">团队组长</string>
     <string name="tak_role_teammember">团队成员</string>
     <string name="tak_role_unspecified">未指定</string>
+    <string name="tak_server_section">服务器</string>
     <string name="tak_team">队伍颜色</string>
     <string name="tak_team_blue">蓝</string>
     <string name="tak_team_brown">棕色</string>

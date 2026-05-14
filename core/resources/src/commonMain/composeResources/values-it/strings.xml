@@ -904,6 +904,7 @@
     <string name="sx126x_rx_boosted_gain">Migliora guadagno in Ricezione</string>
     <string name="system_settings">Impostazioni di Sistema</string>
     <!-- TAK -->
+    <string name="tak_server_section">Server</string>
     <string name="tak_team_blue">Blu</string>
     <string name="tak_team_green">Verde</string>
     <string name="tak_team_red">Rosso</string>

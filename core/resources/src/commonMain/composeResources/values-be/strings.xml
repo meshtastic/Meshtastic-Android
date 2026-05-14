@@ -260,6 +260,7 @@
     <string name="speed">Хуткасць</string>
     <string name="ssid">SSID</string>
     <!-- TAK -->
+    <string name="tak_server_section">Сервер</string>
     <string name="tak_team_blue">Сіні</string>
     <string name="tak_team_green">Зялёны</string>
     <string name="tak_team_red">Чырвоны</string>
