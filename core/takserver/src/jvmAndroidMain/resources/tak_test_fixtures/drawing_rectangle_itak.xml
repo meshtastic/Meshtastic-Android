@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="5f839e4c-0d95-4c5f-85a9-c8b4f914bc10" type="u-d-r" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <contact callsign="iPad.RectangleShape.1"/>
+    <link point="33.12940, -107.25380"/>
+    <link point="33.12940, -107.25180"/>
+    <link point="33.12740, -107.25180"/>
+    <link point="33.12740, -107.25380"/>
+    <strokeColor value="-9601793"/>
+    <fillColor value="2137881855"/>
+    <strokeWeight value="1.0"/>
+    <labels_on value="false"/>
+    <precisionLocation altsrc="???" geopointsrc="???"/>
+  </detail>
+</event>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="bc7a8f3e-2514-4d89-9a3b-d50128374691" type="u-r-b-bullseye" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <shape>
+      <ellipse major="500.0" minor="500.0" angle="360"/>
+    </shape>
+    <bullseye distance="500.0" bearingRef="M" rangeRingVisible="true" hasRangeRings="true" edgeToCenter="false" mils="false"/>
+    <strokeColor value="-65536"/>
+    <strokeWeight value="3.0"/>
+    <contact callsign="Bullseye 1"/>
+    <remarks/>
+    <archive/>
+    <labels_on value="true"/>
+    <precisionlocation altsrc="???"/>
+  </detail>
+</event>

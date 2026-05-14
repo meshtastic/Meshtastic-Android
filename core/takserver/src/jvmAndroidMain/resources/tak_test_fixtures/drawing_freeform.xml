@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="b112202e-dd33-4fc7-8d3d-09a14e296011" type="u-d-f" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <link point="33.12852,-107.25265"/>
+    <link point="33.12882,-107.25236"/>
+    <link point="33.12902,-107.25183"/>
+    <link point="33.12882,-107.25134"/>
+    <link point="33.12832,-107.25148"/>
+    <link point="33.12803,-107.25209"/>
+    <strokeColor value="-65536"/>
+    <strokeWeight value="3.0"/>
+    <contact callsign="Freeform 1"/>
+    <remarks/>
+    <archive/>
+    <labels_on value="false"/>
+    <precisionlocation altsrc="???"/>
+  </detail>
+</event>

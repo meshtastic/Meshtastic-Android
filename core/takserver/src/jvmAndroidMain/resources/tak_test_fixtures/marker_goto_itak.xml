@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e" type="b-m-p-w-GOTO" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-g-i-g-o">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <link uid="ANDROID-0000000000000003" type="a-f-G-U-C" parent_callsign="ETHEL" relation="p-p"/>
+    <contact callsign="Rally Point Bravo"/>
+    <color argb="-256"/>
+    <usericon iconsetpath="34ae1613-9645-4222-a9d2-e5f243dea2865/Military/CP.png"/>
+  </detail>
+</event>

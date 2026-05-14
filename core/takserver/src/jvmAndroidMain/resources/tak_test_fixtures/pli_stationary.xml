@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="F7749720-1356-4A23-80F4-0010A587DF6C" type="a-f-G-U-C" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-15T14:27:10Z" how="m-g">
+  <point lat="18.05000" lon="140.05000" hae="109.2" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <contact endpoint="*:-1:stcp" callsign="iPadTAKAware"/>
+    <uid Droid="iPadTAKAware"/>
+    <__group role="Team Member" name="Cyan"/>
+    <status battery="30"/>
+    <track course="-1.0" speed="-1.0"/>
+    <takv device="iPad" platform="TAKAware-CIV" version="1.7.3.233" os="iPadOS"/>
+  </detail>
+</event>

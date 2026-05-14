@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="a3f58c21-91e4-4b76-8d5f-6291704835ab" type="b-m-r" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <__routeinfo/>
+    <link_attr method="Driving" direction="Infil" prefix="CP" stroke="3"/>
+    <link uid="wp-a1b2c3d4-0001" type="b-m-p-w" callsign="CP1" point="33.12840,-107.25280"/>
+    <link uid="wp-a1b2c3d4-0002" type="b-m-p-w" callsign="CP2" point="33.12960,-107.25130"/>
+    <link uid="wp-a1b2c3d4-0003" type="b-m-p-w" callsign="CP3" point="33.13090,-107.25000"/>
+    <contact callsign="Route Alpha"/>
+    <remarks/>
+    <archive/>
+    <labels_on value="false"/>
+    <precisionlocation altsrc="???"/>
+  </detail>
+</event>

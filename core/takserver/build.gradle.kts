@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ plugins {
 }
 
 kotlin {
+    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.takserver"
         androidResources.enable = false
@@ -50,9 +51,75 @@ kotlin {
             implementation(libs.kermit)
         }
 
+        jvmAndroidMain.dependencies {
+            // TAKPacket-SDK for v2 compression/decompression (via JitPack).
+            //
+            // We depend on the `-jvm` variant directly rather than the parent
+            // `com.github.meshtastic:TAKPacket-SDK` coordinate. JitPack does
+            // not publish a root-level Gradle module metadata (.module) file
+            // for the KMP parent, only per-target ones. With just the parent
+            // POM, Gradle reads the four KMP variants (jvm, iosarm64,
+            // iossimulatorarm64, metadata) as unconditional Maven deps and
+            // tries to resolve them ALL against this Android consumer — the
+            // iOS klibs declare `platform.type=native` with no androidJvm
+            // variant, so variant selection fails with "No matching variant".
+            //
+            // Depending directly on `takpacket-sdk-jvm` skips the parent POM
+            // entirely and goes straight to the JVM artifact's own module
+            // metadata, which is compatible with both `jvm()` and Android
+            // targets in this `jvmAndroidMain` source set. It still pulls
+            // zstd-jni + xpp3 + wire-runtime-jvm + kotlin-stdlib as
+            // transitive deps from the JVM variant's POM.
+            //
+            // zstd-jni's @aar variant is still declared explicitly in the
+            // androidMain source set below so Android gets the .so files.
+            implementation("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk-jvm:v0.2.1") {
+                // Issue #5: pre-0.2.1 the SDK JAR bundled `org.meshtastic.proto.*`
+                // (Wire-generated TAKPacketV2 + friends) inside the same JAR as
+                // `org.meshtastic.tak.*`. Our own `:core:proto` module runs its
+                // own Wire codegen against the same protobufs submodule and emits
+                // the identical classes, so R8 hit "Type is defined multiple
+                // times" errors during release builds. v0.2.1 strips the proto
+                // classes from the JAR entirely — the SDK's bytecode still
+                // REFERENCES them, but they come from `:core:proto` on our
+                // classpath. No exclude needed; the SDK simply doesn't ship them.
+                // The SDK's jvmMain declares zstd-jni as a runtime dep (standard
+                // JAR with desktop native libs). Android needs the @aar variant
+                // instead (ships arm/arm64/x86/x86_64 .so files). Both packaging
+                // formats contain the same Java classes, so Android's dex merger
+                // hits "Duplicate class" errors if both land on the classpath.
+                // Exclude here; androidMain re-adds it as @aar below, and jvmMain
+                // re-adds the JAR for desktop.
+                exclude(group = "com.github.luben", module = "zstd-jni")
+                // xpp3 bundles org.xmlpull.v1.XmlPullParser which Android provides
+                // as a platform class (android.content.res.XmlResourceParser
+                // implements it). R8 fails when both the library and program
+                // classpaths define the same type.
+                exclude(group = "org.ogce", module = "xpp3")
+            }
+        }
+
+        jvmMain.dependencies {
+            // Desktop JVM: standard JAR bundles native libs for desktop archs.
+            implementation("com.github.luben:zstd-jni:1.5.7-7")
+            // xpp3 is excluded from jvmAndroidMain (Android ships it as a
+            // platform class), but Desktop JVM still needs it for XmlPullParser.
+            implementation("org.ogce:xpp3:1.1.6")
+        }
+
+        androidMain.dependencies {
+            // Android: @aar variant ships .so files for arm/arm64/x86/x86_64.
+            // Without this, zstd-jni's ZstdDictCompress.<clinit> throws
+            // UnsatisfiedLinkError and poisons TakV2Compressor permanently.
+            implementation("com.github.luben:zstd-jni:1.5.7-7@aar")
+        }
+
         commonTest.dependencies {
             implementation(projects.core.testing)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
+            implementation(libs.kotest.assertions)
+            implementation(libs.kotest.property)
         }
     }
 }

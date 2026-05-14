@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="67ebaf59-a216-4b0c-bd24-9ae5ee4d65e6" type="u-d-c-c" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-e">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <shape>
+      <ellipse major="393.14" minor="393.14" angle="360"/>
+    </shape>
+    <strokeColor value="-48571"/>
+    <strokeWeight value="3.0"/>
+    <fillColor value="0"/>
+    <contact callsign="Shape 324"/>
+    <labels_on value="false"/>
+    <uid Droid="Shape 324"/>
+  </detail>
+</event>

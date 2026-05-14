@@ -27,33 +27,22 @@ import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServer
 import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.core.takserver.TAKServerManagerImpl
-import org.meshtastic.core.takserver.fountain.CoTHandler
-import org.meshtastic.core.takserver.fountain.GenericCoTHandler
+import org.meshtastic.core.takserver.createTAKServer
 
 @Module
 class CoreTakServerModule {
-    @Single fun provideTAKServer(dispatchers: CoroutineDispatchers): TAKServer = TAKServer(dispatchers = dispatchers)
+    @Single
+    fun provideTAKServer(dispatchers: CoroutineDispatchers): TAKServer = createTAKServer(dispatchers = dispatchers)
 
     @Single fun provideTAKServerManager(takServer: TAKServer): TAKServerManager = TAKServerManagerImpl(takServer)
-
-    @Single
-    fun provideGenericCoTHandler(commandSender: CommandSender, takServerManager: TAKServerManager): CoTHandler =
-        GenericCoTHandler(commandSender, takServerManager)
 
     @Single
     fun provideTAKMeshIntegration(
         takServerManager: TAKServerManager,
         commandSender: CommandSender,
-        nodeRepository: NodeRepository,
         serviceRepository: ServiceRepository,
         meshConfigHandler: MeshConfigHandler,
-        cotHandler: CoTHandler,
-    ): TAKMeshIntegration = TAKMeshIntegration(
-        takServerManager,
-        commandSender,
-        nodeRepository,
-        serviceRepository,
-        meshConfigHandler,
-        cotHandler,
-    )
+        nodeRepository: NodeRepository,
+    ): TAKMeshIntegration =
+        TAKMeshIntegration(takServerManager, commandSender, serviceRepository, meshConfigHandler, nodeRepository)
 }

@@ -172,6 +172,8 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object CleanNodeDb : SettingsRoute
 
+    @Serializable data object TakServer : SettingsRoute
+
     @Serializable data object DebugPanel : SettingsRoute
 
     @Serializable data object About : SettingsRoute

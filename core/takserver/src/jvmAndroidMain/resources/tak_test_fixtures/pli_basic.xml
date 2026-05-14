@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="testnode" type="a-f-G-U-C" how="m-g" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-15T14:22:55Z">
+  <point lat="37.7749" lon="-122.4194" hae="-22" ce="4.9" le="9999999"/>
+  <detail><contact endpoint="*:-1:stcp" callsign="testnode"/><uid Droid="testnode"/><_flow-tags_ TAK-Server-00000000000000000000000000000001="2026-03-15T14:22:10Z"/></detail>
+</event>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<event version="2.0" uid="4a0f4f84-240c-4ff9-b7b0-d08beec900b3" type="a-u-G" time="2026-03-15T14:22:10Z" start="2026-03-15T14:22:10Z" stale="2026-03-16T14:22:10Z" how="h-g-i-g-o">
+  <point lat="33.12840" lon="-107.25280" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+  <detail>
+    <status readiness="true"/>
+    <archive/>
+    <link uid="ANDROID-0000000000000001" production_time="2026-03-15T14:21:34Z" type="a-f-G-U-C" parent_callsign="SIM-01" relation="p-p"/>
+    <contact callsign="hiker 1"/>
+    <remarks/>
+    <color argb="-1"/>
+    <precisionlocation altsrc="???"/>
+    <usericon iconsetpath="f7f71666-8b28-4b57-9fbb-e38e61d33b79/Google/hiker.png"/>
+  </detail>
+</event>
