@@ -55,12 +55,10 @@ dependencyResolutionManagement {
             url = uri("https://central.sonatype.com/repository/maven-snapshots/")
             mavenContent { snapshotsOnly() }
         }
-        if (!desktopOnly) {
-            maven {
-                url = uri("https://jitpack.io")
-                content {
-                    includeGroupByRegex("com\\.github\\..*")
-                }
+        maven {
+            url = uri("https://jitpack.io")
+            content {
+                includeGroupByRegex("com\\.github\\..*")
             }
         }
         maven { url = uri("./offline-repository") }
