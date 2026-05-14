@@ -9,6 +9,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore(deps): update com.github.luben:zstd-jni to v1.5.7-8 (#5454) by @renovate[bot] in [`f1c793db5`](https://github.com/meshtastic/Meshtastic-Android/commit/f1c793db5de3df9e987de16ddcda23f3757ba3db)
+* feat: TAK v2 protocol integration with zstd compression and full CoT type support (#5434) by @Ben Meadors in [`a04a261b8`](https://github.com/meshtastic/Meshtastic-Android/commit/a04a261b80b7d617447651af1fd67ec623775efa)
+* docs: update CHANGELOG.md (#5452) by @github-actions[bot] in [`0ef3072f3`](https://github.com/meshtastic/Meshtastic-Android/commit/0ef3072f3c28a44c1f0e18ad4b1c617aaff706b0)
 * chore(deps): update dd.sdk.android to v3.10.0 (#5451) by @renovate[bot] in [`a71ac210f`](https://github.com/meshtastic/Meshtastic-Android/commit/a71ac210f76a28a133056bec4502fc4b0984cb1d)
 * docs: update CHANGELOG.md (#5448) by @github-actions[bot] in [`c0b690974`](https://github.com/meshtastic/Meshtastic-Android/commit/c0b69097419a7d9c90527729747fc91135628282)
 * chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5438) by @James Rich in [`13865e7c8`](https://github.com/meshtastic/Meshtastic-Android/commit/13865e7c8b7f9a47cd3b572bd44d8ec355b2d3a9)
