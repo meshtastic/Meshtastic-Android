@@ -9,16 +9,20 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+* chore: Scheduled updates (Firmware, Hardware, Translations, Graphs) (#5438) by @James Rich in [`13865e7c8`](https://github.com/meshtastic/Meshtastic-Android/commit/13865e7c8b7f9a47cd3b572bd44d8ec355b2d3a9)
+* chore(deps): update com.juul.kable:kable-core to v0.43.0 (#5449) by @renovate[bot] in [`8d61d22e9`](https://github.com/meshtastic/Meshtastic-Android/commit/8d61d22e93bec5afae021fdf2d64bca58dc57d67)
+* chore(deps): batch bump KSP, Wire, CMP, Material (#5447) by @James Rich in [`550c517d7`](https://github.com/meshtastic/Meshtastic-Android/commit/550c517d70ca2ed472ac1a5c3b203c69e12a1707)
+
+### Internal (v2.7.14-internal.91)
+Changes since [`v2.7.14-open.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.8):
+
+* docs: update CHANGELOG.md (#5437) by @github-actions[bot] in [`fc8f3bff3`](https://github.com/meshtastic/Meshtastic-Android/commit/fc8f3bff3c9e582ea1f434a760981ee523a25262)
 * refactor: use immutable destNum in RadioConfigViewModel (#5436) by @James Rich in [`1976808a3`](https://github.com/meshtastic/Meshtastic-Android/commit/1976808a361942f2c358329807d3605b8898e36d)
 * docs: update CHANGELOG.md (#5431) by @github-actions[bot] in [`57b0200b6`](https://github.com/meshtastic/Meshtastic-Android/commit/57b0200b6123e87f5037b12128411b69eee2ad23)
 * Flatpak: Add Maven/Gradle mirror URLs (#5433) by @Austin in [`ada16f4f5`](https://github.com/meshtastic/Meshtastic-Android/commit/ada16f4f5f2e859624ad8588ff07cdbff945aac0)
 * fix: update screenshots (#5435) by @James Rich in [`cf0a7cdab`](https://github.com/meshtastic/Meshtastic-Android/commit/cf0a7cdabff85e97accf4522709dfcb0fd5d4298)
 * chore: clean up brownfield specs and migrate to timestamp naming (#5432) by @James Rich in [`73469b415`](https://github.com/meshtastic/Meshtastic-Android/commit/73469b415e742a6601790b9574e1cf8a4a43a52c)
 * revert: Update retry settings in gradle-wrapper.properties (#5430) by @James Rich in [`ff9d6881c`](https://github.com/meshtastic/Meshtastic-Android/commit/ff9d6881c01b8e9ec7654179bfa559e93bea9974)
-
-### Internal (v2.7.14-internal.90)
-Changes since [`v2.7.14-open.8`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.7.14-open.8):
-
 * docs: update CHANGELOG.md (#5427) by @github-actions[bot] in [`1b902ba07`](https://github.com/meshtastic/Meshtastic-Android/commit/1b902ba07c7a6f5b41bba9f4cb439e7de0925e4c)
 * chore(deps): update gradle to v9.5.1 (#5429) by @renovate[bot] in [`010ff358d`](https://github.com/meshtastic/Meshtastic-Android/commit/010ff358d0cf5c586b557af186ffdd1ef719be81)
 * fix: clarify position precision as ± radius (#5428) by @James Rich in [`dcb147163`](https://github.com/meshtastic/Meshtastic-Android/commit/dcb147163c3a5c8dada885ee6e84790fcc24f651)
