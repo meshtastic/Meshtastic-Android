@@ -50,6 +50,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.DocPageContent
 
 /** Routes a page ID to the appropriate page renderer surface. */
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocsPageRouteScreen(
@@ -112,7 +113,8 @@ fun DocsPageRouteScreen(
                             content = markdownText,
                             imageTransformer = ComposeResourceImageTransformer(),
                             dimens = markdownDimens(tableCellWidth = 108.dp),
-                            components = markdownComponents(
+                            components =
+                            markdownComponents(
                                 table = {
                                     MarkdownTable(
                                         content = it.content,
@@ -156,7 +158,7 @@ fun DocsPageRouteScreen(
  * Relative links like `connections`, `../developer/architecture`, or anchor-only `#section` are resolved to a page ID
  * and dispatched via [onNavigateToPage]. External `http(s)://` URLs are forwarded to the [fallback] platform handler.
  */
-private class DocsLinkUriHandler(private val onNavigateToPage: (String) -> Unit, private val fallback: UriHandler) :
+internal class DocsLinkUriHandler(private val onNavigateToPage: (String) -> Unit, private val fallback: UriHandler) :
     UriHandler {
     override fun openUri(uri: String) {
         if (uri.startsWith("http://") || uri.startsWith("https://")) {
