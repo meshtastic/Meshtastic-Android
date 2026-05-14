@@ -30,16 +30,25 @@ kotlin {
         commonMain.dependencies {
             api(libs.wire.runtime)
 
-            // TAKPacket-SDK owns `meshtastic/atak.proto` Wire codegen (issue
-            // https://github.com/meshtastic/TAKPacket-SDK/issues/6). The
-            // `prune` directives below stop this module from emitting those
-            // classes; the SDK ships them and we re-export it via `api` so
-            // every consumer of `:core:proto` (`:core:model`,
-            // `:core:takserver`, `:feature:settings`, etc.) picks up
-            // `org.meshtastic.proto.TAKPacketV2`, `Team`, `MemberRole`, and
-            // the rest transitively. No second codegen, no R8 duplicates,
-            // no cross-repo ABI drift the way the issue-#5 strip strategy
-            // had.
+            // TAKPacket-SDK owns `meshtastic/atak.proto` Wire codegen for
+            // almost every type (issue https://github.com/meshtastic/TAKPacket-SDK/issues/6).
+            // The `prune` directives in the `wire { ... }` block below stop
+            // this module from emitting those classes; the SDK ships them
+            // and we re-export it via `api` so every consumer of
+            // `:core:proto` (`:core:model`, `:core:takserver`,
+            // `:feature:settings`, etc.) picks up
+            // `org.meshtastic.proto.TAKPacketV2`, `AircraftTrack`,
+            // `DrawnShape`, and the rest transitively. No second codegen,
+            // no R8 duplicates, no cross-repo ABI drift the way the issue-#5
+            // strip strategy had.
+            //
+            // The two exceptions are `Team` and `MemberRole` — `:core:proto`
+            // still generates them locally because `module_config.proto`'s
+            // `ModuleConfig.TAKConfig` references them and Wire's prune is
+            // cascading (pruning the enums would remove the team/role
+            // fields). The SDK strips them from its JVM JAR on its side so
+            // the classpath has exactly one source per class. See the
+            // `wire { prune(...) }` block comment for the full rationale.
             //
             // The KMP parent coord (no `-jvm` suffix) routes each consuming
             // target to the right SDK variant: `jvm()` and Android pick up
@@ -53,7 +62,7 @@ kotlin {
             //     `:core:takserver`'s jvmMain re-adds it for desktop.
             // Both excludes are no-ops on iOS (the SDK's iOS klibs use the
             // bundled CZstd C interop, not zstd-jni).
-            api("org.meshtastic:takpacket-sdk:0.2.1") {
+            api("com.github.meshtastic.TAKPacket-SDK:takpacket-sdk:v0.3.0") {
                 exclude(group = "com.github.luben", module = "zstd-jni")
                 exclude(group = "org.ogce", module = "xpp3")
             }
@@ -91,12 +100,12 @@ wire {
     //
     // Consuming code that imports `org.meshtastic.proto.TAKPacketV2` etc.
     // still compiles because the SDK provides those classes transitively
-    // from `:core:takserver`'s commonMain dependency. `Team` and
-    // `MemberRole` are pruned too, even though `module_config.proto`'s
-    // ModuleConfig.TAKConfig has fields of those enum types — Wire's
-    // generated `ModuleConfig.TAKConfig` adapter references the FQN
-    // `org.meshtastic.proto.Team` which resolves transitively from the
-    // SDK at Kotlin compile time.
+    // via the `api` dependency above.
+    //
+    // The two exceptions are `Team` and `MemberRole` — see the comment
+    // below the prune list for why they stay generated here. The SDK
+    // strips them from its JVM JAR (and only those two) so the classpath
+    // ends up with exactly one source per class.
     //
     // Keep this list in sync with the top-level messages and enums in
     // `meshtastic/atak.proto`. Any new top-level type added there must be
@@ -139,15 +148,14 @@ wire {
     prune("meshtastic.GeoPointSource")
     // `Team` and `MemberRole` are NOT pruned: module_config.proto's
     // ModuleConfig.TAKConfig has `Team team = 1` and `MemberRole role = 2`
-    // fields. Wire prune is cascading — removing the enum types would
-    // also remove the fields that reference them from the generated
-    // ModuleConfig.TAKConfig, breaking every call site that reads
-    // `takConfig.team` / `takConfig.role`. The SDK also ships these two
-    // enums (it has its own copies of TAKPacketV2.team / .role) but
-    // both sides generate byte-identical Kotlin from the same enum
-    // definition, so R8's strict duplicate-class check is the only thing
-    // we have to worry about. That's handled in the app's release build
-    // config via a Wire-classpath-exclusion (see :app's R8 rules).
+    // fields. Wire's prune is cascading — pruning the enums also removes
+    // every field that references them, so a hypothetical `prune("Team")`
+    // would silently drop `takConfig.team` and break every call site that
+    // reads it (verified empirically before settling on the current
+    // arrangement). The SDK strips just these two classes from its JVM
+    // JAR on the publish side so we end up with exactly one source per
+    // class on the classpath — see the JAR-packaging block in
+    // TAKPacket-SDK's `kotlin/build.gradle.kts` for the matching strip.
 }
 
 // Modern KMP publication uses the project name as the artifactId by default.
