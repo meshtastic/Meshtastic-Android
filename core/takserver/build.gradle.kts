@@ -101,7 +101,7 @@ kotlin {
 
         jvmMain.dependencies {
             // Desktop JVM: standard JAR bundles native libs for desktop archs.
-            implementation("com.github.luben:zstd-jni:1.5.7-7")
+            implementation("com.github.luben:zstd-jni:1.5.7-8")
             // xpp3 is excluded from jvmAndroidMain (Android ships it as a
             // platform class), but Desktop JVM still needs it for XmlPullParser.
             implementation("org.ogce:xpp3:1.1.6")
@@ -111,7 +111,7 @@ kotlin {
             // Android: @aar variant ships .so files for arm/arm64/x86/x86_64.
             // Without this, zstd-jni's ZstdDictCompress.<clinit> throws
             // UnsatisfiedLinkError and poisons TakV2Compressor permanently.
-            implementation("com.github.luben:zstd-jni:1.5.7-7@aar")
+            implementation("com.github.luben:zstd-jni:1.5.7-8@aar")
         }
 
         commonTest.dependencies {
