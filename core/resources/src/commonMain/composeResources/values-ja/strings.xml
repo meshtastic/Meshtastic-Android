@@ -629,6 +629,7 @@
     <string name="tak_role_teamlead">チームリーダー</string>
     <string name="tak_role_teammember">チームメンバー</string>
     <string name="tak_role_unspecified">未指定</string>
+    <string name="tak_server_section">サーバー</string>
     <string name="tak_team">チームカラー</string>
     <string name="tak_team_blue">青</string>
     <string name="tak_team_brown">茶色</string>

@@ -720,6 +720,7 @@
     <string name="supported">Obsługiwane</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->
+    <string name="tak_server_section">Serwer</string>
     <string name="tak_team_blue">Niebieski</string>
     <string name="tak_team_green">Zielony</string>
     <string name="tak_team_red">Czerwony</string>

@@ -527,6 +527,7 @@
     <string name="state_broadcast_seconds">Durum yayını (saniye)</string>
     <string name="supported">Desteklenen</string>
     <!-- TAK -->
+    <string name="tak_server_section">Sunucu</string>
     <string name="tak_team_blue">Mavi</string>
     <string name="tak_team_green">Yeşil</string>
     <string name="tak_team_red">Kırmızı</string>

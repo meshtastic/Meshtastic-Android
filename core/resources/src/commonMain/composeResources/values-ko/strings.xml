@@ -521,6 +521,7 @@
     <string name="state_broadcast_seconds">상태 전송 간격 (초)</string>
     <string name="supported">지원됨</string>
     <!-- TAK -->
+    <string name="tak_server_section">서버</string>
     <string name="tak_team_blue">파랑</string>
     <string name="tak_team_green">초록</string>
     <string name="tak_team_red">빨강</string>

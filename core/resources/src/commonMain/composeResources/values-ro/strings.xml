@@ -1051,7 +1051,7 @@
     <string name="tak_role_teammember">Membrii Echipei</string>
     <string name="tak_role_unspecified">Nespecificat</string>
     <string name="tak_server_enabled">Activare server TAK local</string>
-    <string name="tak_server_enabled_desc">Pornește un server TCP pe portul 8089 pentru conexiunile ATAK</string>
+    <string name="tak_server_section">Server</string>
     <string name="tak_team">Culoarea echipei</string>
     <string name="tak_team_blue">Albastru</string>
     <string name="tak_team_brown">Maro</string>

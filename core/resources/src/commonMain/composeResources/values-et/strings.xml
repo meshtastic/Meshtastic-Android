@@ -1154,7 +1154,7 @@
     <string name="tak_role_teammember">Meeskonnaliige</string>
     <string name="tak_role_unspecified">Määramata</string>
     <string name="tak_server_enabled">Kohaliku TAK-serveri lubamine</string>
-    <string name="tak_server_enabled_desc">Käivitab TCP-serveri pordil 8089 ATAK-ühenduste jaoks</string>
+    <string name="tak_server_section">Server</string>
     <string name="tak_team">Meeskonna värv</string>
     <string name="tak_team_blue">Sinine</string>
     <string name="tak_team_brown">Pruun</string>

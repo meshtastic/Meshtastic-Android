@@ -503,6 +503,7 @@
     <string name="state_broadcast_seconds">Transmissão de estado (segundos)</string>
     <string name="supported">Suportado</string>
     <!-- TAK -->
+    <string name="tak_server_section">Servidor</string>
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="tak_team_red">Vermelho</string>

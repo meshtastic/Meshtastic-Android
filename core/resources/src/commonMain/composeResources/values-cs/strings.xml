@@ -954,6 +954,7 @@
     <string name="sx126x_rx_boosted_gain">Zvýšené zesílení přijímače (RX)</string>
     <string name="system_settings">Nastavení systému</string>
     <!-- TAK -->
+    <string name="tak_server_section">Server</string>
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>
     <string name="tak_team_red">Červená</string>

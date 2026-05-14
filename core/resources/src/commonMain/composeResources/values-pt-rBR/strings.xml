@@ -640,6 +640,7 @@
     <string name="supported">Suportado</string>
     <string name="supported_by_community">Apoiado pela Comunidade Meshtastic</string>
     <!-- TAK -->
+    <string name="tak_server_section">Servidor</string>
     <string name="tak_team_blue">Azul</string>
     <string name="tak_team_green">Verde</string>
     <string name="tak_team_red">Vermelho</string>
