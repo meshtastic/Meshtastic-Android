@@ -710,6 +710,10 @@ mark_as_read
 match_all
 match_any
 max
+### MESH ###
+mesh_discovery_beacon_summary
+mesh_discovery_beacons
+mesh_discovery_beacons_summary
 mesh_map_location
 mesh_map_location_description
 ### MESHTASTIC ###

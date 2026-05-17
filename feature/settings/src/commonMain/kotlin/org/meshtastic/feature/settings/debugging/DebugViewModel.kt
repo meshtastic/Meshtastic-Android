@@ -34,6 +34,7 @@ import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.model.MeshDiscoveryBeacon
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
@@ -495,7 +496,9 @@ class DebugViewModel(
 
                 PortNum.TRACEROUTE_APP.value -> decodeTraceroute(packet, payload)
 
-                else -> payload.joinToString(" ") { it.toHex() }
+                else ->
+                    MeshDiscoveryBeacon.decode(portnumValue, decoded.payload)?.toDebugString()
+                        ?: payload.joinToString(" ") { it.toHex() }
             }
         } catch (e: Exception) {
             "Failed to decode payload: ${e.message}"

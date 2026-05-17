@@ -740,6 +740,10 @@
     <string name="match_all">Match All | Any</string>
     <string name="match_any">Match Any | All</string>
     <string name="max">Max</string>
+    <!-- MESH -->
+    <string name="mesh_discovery_beacon_summary">%1$s MHz • %2$s • SF%3$d CR4/%4$d • %5$s • %6$s</string>
+    <string name="mesh_discovery_beacons">Nearby mesh beacons</string>
+    <string name="mesh_discovery_beacons_summary">These passive beacons advertise nearby mesh settings. Review them before changing your radio configuration.</string>
     <string name="mesh_map_location">Mesh Map Location</string>
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
     <!-- MESHTASTIC -->

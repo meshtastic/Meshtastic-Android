@@ -130,6 +130,12 @@
 - Cleaned up leftover speed-up workarounds: completely removed the Flatpak Gradle Generator plugin application and tasks from the root project and all other library/feature subprojects (`core:ble`, `core:common`, `core:database`, `core:model`, `core:navigation`, `core:proto`, and `feature:messaging`), including deleting the unused `flatpakKmpAndroidMeta` configuration from `feature:messaging`.
 - Verified that local execution of `:desktopApp:flatpakGradleGenerator` runtimeClasspath resolution speed dropped from 46 seconds to 12 seconds, and all Spotless and Detekt linting checks passed.
 
+## 2026-05-17 — Added provisional mesh discovery beacon support
+- Added `MeshDiscoveryBeacon` in `core:model` with conservative fixed-width decoding for the discovery/config beacon discussed in meshtastic/firmware#7183 and #10243.
+- Surfaced decoded beacons passively on the LoRa settings screen and in debug payload decoding; the app never applies radio settings automatically.
+- Guarded decoding to candidate discovery ports (`PRIVATE_APP` and `UNKNOWN_APP`) and accepted both sub-GHz and LORA_24 frequencies.
+- Verified with `:core:model:jvmTest`, `:feature:settings:compileKotlinJvm`, scoped `spotlessCheck`, and clean `codex review --base origin/main`.
+
 ## 2026-05-12 — Implemented Apple alignment for docs feature (FR-038)
 - Branch: `feat/20260507-161858-app-docs-markdown`
 - Gap analysis against `meshtastic-apple` completed. Implemented 4 alignment items:

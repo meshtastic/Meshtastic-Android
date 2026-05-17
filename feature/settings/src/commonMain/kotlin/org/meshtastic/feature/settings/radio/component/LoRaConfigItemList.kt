@@ -27,8 +27,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ChannelOption
+import org.meshtastic.core.model.MeshDiscoveryBeacon
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.resources.Res
@@ -43,6 +45,9 @@ import org.meshtastic.core.resources.frequency_slot
 import org.meshtastic.core.resources.hop_limit
 import org.meshtastic.core.resources.ignore_mqtt
 import org.meshtastic.core.resources.lora
+import org.meshtastic.core.resources.mesh_discovery_beacon_summary
+import org.meshtastic.core.resources.mesh_discovery_beacons
+import org.meshtastic.core.resources.mesh_discovery_beacons_summary
 import org.meshtastic.core.resources.modem_preset
 import org.meshtastic.core.resources.ok_to_mqtt
 import org.meshtastic.core.resources.options
@@ -57,6 +62,7 @@ import org.meshtastic.core.resources.tx_power_dbm
 import org.meshtastic.core.resources.use_modem_preset
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -89,6 +95,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             viewModel.setConfig(config)
         },
     ) {
+        if (state.meshDiscoveryBeacons.isNotEmpty()) {
+            item { MeshDiscoveryBeaconCard(beacons = state.meshDiscoveryBeacons) }
+        }
+
         item {
             TitledCard(title = stringResource(Res.string.options)) {
                 DropDownPreference(
@@ -278,5 +288,31 @@ private fun ManualModemSettings(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun MeshDiscoveryBeaconCard(beacons: List<MeshDiscoveryBeacon>) {
+    TitledCard(title = stringResource(Res.string.mesh_discovery_beacons)) {
+        ListItem(text = stringResource(Res.string.mesh_discovery_beacons_summary), trailingIcon = null)
+        beacons.forEach { beacon ->
+            HorizontalDivider()
+            val frequency = NumberFormatter.format(beacon.frequencyMHz, 3)
+            ListItem(
+                text = beacon.primaryChannelName.ifBlank { beacon.nodeIdString },
+                supportingText =
+                stringResource(
+                    Res.string.mesh_discovery_beacon_summary,
+                    frequency,
+                    beacon.bandwidth.label,
+                    beacon.spreadingFactor,
+                    beacon.codingRate,
+                    beacon.forwardingHint.name,
+                    beacon.nodeIdString,
+                ),
+                trailingIcon = null,
+                copyable = true,
+            )
+        }
     }
 }

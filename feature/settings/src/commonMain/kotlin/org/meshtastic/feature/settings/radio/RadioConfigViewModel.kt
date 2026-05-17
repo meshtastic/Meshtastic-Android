@@ -49,6 +49,7 @@ import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MeshDiscoveryBeacon
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
@@ -109,6 +110,7 @@ data class RadioConfigState(
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = true,
     val nodeDbResetPreserveFavorites: Boolean = false,
+    val meshDiscoveryBeacons: List<MeshDiscoveryBeacon> = emptyList(),
 )
 
 @KoinViewModel
@@ -259,7 +261,12 @@ open class RadioConfigViewModel(
             .onEach { manifest -> _radioConfigState.update { it.copy(fileManifest = manifest) } }
             .launchIn(viewModelScope)
 
-        serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
+        serviceRepository.meshPacketFlow
+            .onEach {
+                processPacketResponse(it)
+                processMeshDiscoveryBeacon(it)
+            }
+            .launchIn(viewModelScope)
 
         combine(serviceRepository.connectionState, radioConfigState) { connState, _ ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.Connected) }
@@ -775,5 +782,23 @@ open class RadioConfigViewModel(
                 setResponseStateSuccess()
             }
         }
+    }
+
+    private fun processMeshDiscoveryBeacon(packet: MeshPacket) {
+        val decoded = packet.decoded ?: return
+        val beacon = MeshDiscoveryBeacon.decode(decoded.portnum.value, decoded.payload) ?: return
+        _radioConfigState.update { state ->
+            val withoutPrevious =
+                state.meshDiscoveryBeacons.filterNot {
+                    it.nodeId == beacon.nodeId &&
+                        it.primaryChannelHash == beacon.primaryChannelHash &&
+                        it.primaryChannelName == beacon.primaryChannelName
+                }
+            state.copy(meshDiscoveryBeacons = (listOf(beacon) + withoutPrevious).take(MAX_DISCOVERY_BEACONS))
+        }
+    }
+
+    companion object {
+        private const val MAX_DISCOVERY_BEACONS = 8
     }
 }
