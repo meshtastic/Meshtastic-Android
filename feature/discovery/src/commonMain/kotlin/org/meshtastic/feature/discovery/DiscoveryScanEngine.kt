@@ -307,7 +307,8 @@ class DiscoveryScanEngine(
             persistCurrentDwellResults()
         }
 
-        // All presets scanned
+        // All presets scanned — unregister packet collector before analysis
+        collectorRegistry.collector = null
         _scanState.value = DiscoveryScanState.Analysis
         restoreHomePreset()
         generateAiSummaries()

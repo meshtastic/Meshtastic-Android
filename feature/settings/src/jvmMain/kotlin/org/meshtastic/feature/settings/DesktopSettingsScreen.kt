@@ -49,6 +49,7 @@ import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.device_db_cache_limit
 import org.meshtastic.core.resources.device_db_cache_limit_summary
+import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.modules_already_unlocked
@@ -215,8 +216,11 @@ fun DesktopSettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = "Local Mesh Discovery") {
-                    ListItem(text = "Local Mesh Discovery", leadingIcon = MeshtasticIcons.PermScanWifi) {
+                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
+                    ListItem(
+                        text = stringResource(Res.string.discovery_local_mesh),
+                        leadingIcon = MeshtasticIcons.PermScanWifi,
+                    ) {
                         onNavigate(DiscoveryRoute.DiscoveryGraph)
                     }
                 }

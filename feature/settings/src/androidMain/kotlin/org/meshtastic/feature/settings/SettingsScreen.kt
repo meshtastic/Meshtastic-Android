@@ -46,6 +46,7 @@ import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bottom_nav_settings
+import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.export_configuration
 import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.help_and_documentation
@@ -253,8 +254,11 @@ fun SettingsScreen(
                     }
                 }
 
-                ExpressiveSection(title = "Local Mesh Discovery") {
-                    ListItem(text = "Local Mesh Discovery", leadingIcon = MeshtasticIcons.PermScanWifi) {
+                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
+                    ListItem(
+                        text = stringResource(Res.string.discovery_local_mesh),
+                        leadingIcon = MeshtasticIcons.PermScanWifi,
+                    ) {
                         onNavigate(DiscoveryRoute.DiscoveryGraph)
                     }
                 }
