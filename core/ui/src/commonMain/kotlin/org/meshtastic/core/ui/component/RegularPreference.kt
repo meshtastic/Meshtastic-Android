@@ -14,19 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -63,7 +61,6 @@ fun RegularPreference(
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RegularPreference(
     title: String,
@@ -82,44 +79,31 @@ fun RegularPreference(
             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         }
 
-    Column(
-        modifier =
-        modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick, role = Role.Button)
-            .padding(all = 16.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            FlowRow(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color =
-                    if (enabled) {
-                        Color.Unspecified
-                    } else {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    },
-                )
-
+    ListItem(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        trailingContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = subtitle, style = MaterialTheme.typography.bodyLarge, color = color)
-            }
-            if (trailingIcon != null) {
-                Box {
-                    Icon(
-                        imageVector = trailingIcon,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 8.dp).wrapContentWidth(Alignment.End),
-                        tint = color,
-                    )
-                    dropdownMenu()
+                if (trailingIcon != null) {
+                    Box {
+                        Icon(
+                            imageVector = trailingIcon,
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 8.dp).wrapContentWidth(Alignment.End),
+                            tint = color,
+                        )
+                        dropdownMenu()
+                    }
                 }
             }
-        }
-        if (summary != null) {
-            Text(text = summary, style = MaterialTheme.typography.bodyMedium, color = color)
-        }
-    }
+        },
+        supportingContent =
+        summary?.let { { Text(text = it, style = MaterialTheme.typography.bodyMedium, color = color) } },
+        content = { Text(text = title, style = MaterialTheme.typography.bodyLarge) },
+    )
 }
 
 @Preview(showBackground = true)
