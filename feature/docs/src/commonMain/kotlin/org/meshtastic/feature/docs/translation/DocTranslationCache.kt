@@ -16,7 +16,11 @@
  */
 package org.meshtastic.feature.docs.translation
 
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okio.FileSystem
+import okio.IOException
 import okio.Path
 import okio.buffer
 import org.koin.core.annotation.Single
@@ -25,7 +29,7 @@ import org.koin.core.annotation.Single
  * File-based cache for ML Kit translated markdown pages.
  *
  * Cache key: `{pageId}#{locale}#{md5(sourceContent)}` When the English source changes, the md5 changes and the old
- * cache entry becomes stale. LRU eviction at [maxCacheSizeBytes] (default 50MB).
+ * cache entry becomes stale. Eviction by oldest-access at [maxCacheSizeBytes] (default 50MB).
  */
 @Single
 class DocTranslationCache(
@@ -38,62 +42,88 @@ class DocTranslationCache(
         private const val CACHE_SUBDIR = "docs_translation_cache"
         private const val EVICTION_TARGET_PERCENT = 75
         private const val PERCENT_DIVISOR = 100
+        private const val TAG = "DocTranslationCache"
     }
+
+    private val mutex = Mutex()
 
     private val cacheRoot: Path
         get() = cacheDir / CACHE_SUBDIR
 
     /** Get a cached translation, or null if not cached or stale. */
-    fun get(pageId: String, locale: String, sourceHash: String): String? {
+    suspend fun get(pageId: String, locale: String, sourceHash: String): String? = mutex.withLock {
         val file = cacheFile(pageId, locale, sourceHash)
-        return try {
+        try {
             if (fileSystem.exists(file)) {
                 val bufferedSource = fileSystem.source(file).buffer()
                 val content = bufferedSource.readUtf8()
                 bufferedSource.close()
+                // Touch file to update access time for eviction ordering
+                touchFile(file)
                 content
             } else {
                 null
             }
-        } catch (_: Exception) {
+        } catch (e: IOException) {
+            Logger.w(tag = TAG) { "Cache read failed for $pageId/$locale: ${e.message}" }
             null
         }
     }
 
     /** Store a translated page in the cache. Evicts old entries if over size limit. */
-    fun put(pageId: String, locale: String, sourceHash: String, translatedMarkdown: String) {
+    suspend fun put(pageId: String, locale: String, sourceHash: String, translatedMarkdown: String) = mutex.withLock {
         try {
             fileSystem.createDirectories(cacheRoot)
             val file = cacheFile(pageId, locale, sourceHash)
-            val bufferedSink = fileSystem.sink(file).buffer()
+            // Write to temp file then move for atomicity
+            val tmpFile = cacheRoot / "${file.name}.tmp"
+            val bufferedSink = fileSystem.sink(tmpFile).buffer()
             bufferedSink.writeUtf8(translatedMarkdown)
             bufferedSink.close()
+            fileSystem.atomicMove(tmpFile, file)
             evictIfNeeded()
-        } catch (_: Exception) {
-            // Cache write failure is non-fatal
+        } catch (e: IOException) {
+            Logger.w(tag = TAG) { "Cache write failed for $pageId/$locale: ${e.message}" }
         }
     }
 
     /** Remove all cached translations. */
-    fun clear() {
+    suspend fun clear() = mutex.withLock {
         try {
             if (fileSystem.exists(cacheRoot)) {
                 fileSystem.deleteRecursively(cacheRoot)
             }
-        } catch (_: Exception) {
-            // Best effort
+        } catch (e: IOException) {
+            Logger.w(tag = TAG) { "Cache clear failed: ${e.message}" }
         }
     }
 
     /** Total bytes used by the cache. */
-    fun sizeBytes(): Long = try {
+    suspend fun sizeBytes(): Long = mutex.withLock { sizeBytesInternal() }
+
+    private fun sizeBytesInternal(): Long = try {
         if (!fileSystem.exists(cacheRoot)) return 0L
         fileSystem
             .listRecursively(cacheRoot)
             .filter { fileSystem.metadata(it).isRegularFile }
             .sumOf { fileSystem.metadata(it).size ?: 0L }
-    } catch (_: Exception) {
+    } catch (e: IOException) {
+        Logger.w(tag = TAG) { "Cache size calculation failed: ${e.message}" }
         0L
+    }
+
+    private fun touchFile(file: Path) {
+        // Re-write to update mtime — Okio doesn't have a direct touch API
+        try {
+            val source = fileSystem.source(file).buffer()
+            val content = source.readUtf8()
+            source.close()
+            val sink = fileSystem.sink(file).buffer()
+            sink.writeUtf8(content)
+            sink.close()
+        } catch (_: IOException) {
+            // Non-fatal: eviction order may be slightly off
+        }
     }
 
     private fun cacheFile(pageId: String, locale: String, sourceHash: String): Path {
@@ -102,26 +132,26 @@ class DocTranslationCache(
     }
 
     private fun evictIfNeeded() {
-        if (sizeBytes() <= maxCacheSizeBytes) return
+        if (sizeBytesInternal() <= maxCacheSizeBytes) return
 
         try {
-            // LRU eviction: delete oldest files first (by last modified time)
             val files =
                 fileSystem
                     .listRecursively(cacheRoot)
                     .filter { fileSystem.metadata(it).isRegularFile }
+                    .filter { !it.name.endsWith(".tmp") }
                     .sortedBy { fileSystem.metadata(it).lastModifiedAtMillis ?: 0L }
                     .toList()
 
-            var currentSize = sizeBytes()
+            var currentSize = sizeBytesInternal()
             for (file in files) {
                 if (currentSize <= maxCacheSizeBytes * EVICTION_TARGET_PERCENT / PERCENT_DIVISOR) break
                 val fileSize = fileSystem.metadata(file).size ?: 0L
                 fileSystem.delete(file)
                 currentSize -= fileSize
             }
-        } catch (_: Exception) {
-            // Best effort eviction
+        } catch (e: IOException) {
+            Logger.w(tag = TAG) { "Cache eviction failed: ${e.message}" }
         }
     }
 }

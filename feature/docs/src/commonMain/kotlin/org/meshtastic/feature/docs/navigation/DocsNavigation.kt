@@ -32,8 +32,10 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.util.currentLocaleCode
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.ChirpySessionHolder
@@ -208,13 +210,15 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
     var isLoading by remember { mutableStateOf(true) }
     var translationSource by remember { mutableStateOf<TranslationSource>(TranslationSource.BUNDLED) }
 
-    LaunchedEffect(pageId) {
+    val locale = currentLocaleCode()
+
+    LaunchedEffect(pageId, locale) {
         isLoading = true
-        val loaded = bundleLoader.readPage(pageId)
-        val locale = currentLocaleCode()
+        val loaded = withContext(ioDispatcher) { bundleLoader.readPage(pageId) }
         if (loaded != null && locale != "en" && !bundleLoader.hasTranslatedResource(pageId, locale)) {
             // No Crowdin translation bundled for this locale — attempt ML Kit runtime translation
-            val result = translationService.translatePage(pageId, loaded.markdown ?: "", locale)
+            val result =
+                withContext(ioDispatcher) { translationService.translatePage(pageId, loaded.markdown ?: "", locale) }
             when (result) {
                 is TranslationResult.Success -> {
                     content = loaded.copy(markdown = result.translatedMarkdown)

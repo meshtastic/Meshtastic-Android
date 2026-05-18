@@ -74,7 +74,12 @@ class MlKitDocTranslator(private val cache: DocTranslationCache) : DocTranslatio
                             translator
                                 .translate(text)
                                 .addOnSuccessListener { cont.resume(it) }
-                                .addOnFailureListener { cont.resume(text) }
+                                .addOnFailureListener { e ->
+                                    Logger.w(tag = "MlKitDocTranslator") {
+                                        "Segment translation failed, using source: ${e.message}"
+                                    }
+                                    cont.resume(text)
+                                }
                         }
                     }
 

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.docs.translation
 
+import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -43,34 +44,34 @@ class DocTranslationCacheTest {
     }
 
     @Test
-    fun `get returns null for uncached page`() {
+    fun `get returns null for uncached page`() = runTest {
         val result = cache.get("onboarding", "es", "abc123")
         assertNull(result)
     }
 
     @Test
-    fun `put then get returns cached content`() {
+    fun `put then get returns cached content`() = runTest {
         cache.put("onboarding", "es", "hash1", "# Bienvenido")
         val result = cache.get("onboarding", "es", "hash1")
         assertEquals("# Bienvenido", result)
     }
 
     @Test
-    fun `different hash returns null (stale cache)`() {
+    fun `different hash returns null (stale cache)`() = runTest {
         cache.put("onboarding", "es", "hash1", "# Bienvenido")
         val result = cache.get("onboarding", "es", "hash2")
         assertNull(result)
     }
 
     @Test
-    fun `different locale returns null`() {
+    fun `different locale returns null`() = runTest {
         cache.put("onboarding", "es", "hash1", "# Bienvenido")
         val result = cache.get("onboarding", "fr", "hash1")
         assertNull(result)
     }
 
     @Test
-    fun `clear removes all cached entries`() {
+    fun `clear removes all cached entries`() = runTest {
         cache.put("page1", "es", "h1", "content1")
         cache.put("page2", "fr", "h2", "content2")
         cache.clear()
@@ -79,14 +80,14 @@ class DocTranslationCacheTest {
     }
 
     @Test
-    fun `sizeBytes reports total cache size`() {
+    fun `sizeBytes reports total cache size`() = runTest {
         assertEquals(0L, cache.sizeBytes())
         cache.put("page1", "es", "h1", "Hello")
         assertTrue(cache.sizeBytes() > 0)
     }
 
     @Test
-    fun `eviction removes oldest entries when over limit`() {
+    fun `eviction removes oldest entries when over limit`() = runTest {
         // Fill cache beyond 1KB limit with multiple entries
         val largeContent = "x".repeat(300)
         cache.put("page1", "es", "h1", largeContent)
