@@ -865,6 +865,7 @@
     <string name="node_layout_log_icons">Log Icons</string>
     <string name="node_layout_no_preview_available">No nodes available for preview.</string>
     <string name="node_layout_power">Power</string>
+    <string name="node_layout_preview">Preview</string>
     <string name="node_layout_relative_last_heard">Relative Last Heard Time</string>
     <string name="node_layout_section_title">Node Layout</string>
     <string name="node_layout_signal_direct_only">Signal (Direct Only)</string>

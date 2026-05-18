@@ -835,6 +835,7 @@ node_layout_last_heard_time
 node_layout_log_icons
 node_layout_no_preview_available
 node_layout_power
+node_layout_preview
 node_layout_relative_last_heard
 node_layout_section_title
 node_layout_signal_direct_only
