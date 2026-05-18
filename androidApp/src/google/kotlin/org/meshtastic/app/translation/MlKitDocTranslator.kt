@@ -23,6 +23,7 @@ import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.TranslateRemoteModel
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.meshtastic.feature.docs.translation.DocTranslationCache
 import org.meshtastic.feature.docs.translation.DocTranslationService
 import org.meshtastic.feature.docs.translation.DownloadResult
@@ -30,7 +31,6 @@ import org.meshtastic.feature.docs.translation.MarkdownTranslationSegmenter
 import org.meshtastic.feature.docs.translation.TranslationResult
 import org.meshtastic.feature.docs.translation.md5Hash
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * ML Kit-powered document translation service for the Google flavor.
@@ -70,7 +70,7 @@ class MlKitDocTranslator(private val cache: DocTranslationCache) : DocTranslatio
             try {
                 val translated =
                     MarkdownTranslationSegmenter.translateMarkdown(markdown) { text ->
-                        suspendCoroutine { cont ->
+                        suspendCancellableCoroutine { cont ->
                             translator
                                 .translate(text)
                                 .addOnSuccessListener { cont.resume(it) }
@@ -102,7 +102,7 @@ class MlKitDocTranslator(private val cache: DocTranslationCache) : DocTranslatio
         val model = TranslateRemoteModel.Builder(lang).build()
         val conditions = DownloadConditions.Builder().build()
 
-        return suspendCoroutine { cont ->
+        return suspendCancellableCoroutine { cont ->
             modelManager
                 .download(model, conditions)
                 .addOnSuccessListener { cont.resume(DownloadResult.Success) }
@@ -110,7 +110,7 @@ class MlKitDocTranslator(private val cache: DocTranslationCache) : DocTranslatio
         }
     }
 
-    private suspend fun isModelDownloaded(lang: String): Boolean = suspendCoroutine { cont ->
+    private suspend fun isModelDownloaded(lang: String): Boolean = suspendCancellableCoroutine { cont ->
         val model = TranslateRemoteModel.Builder(lang).build()
         modelManager
             .isModelDownloaded(model)

@@ -211,11 +211,10 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
     LaunchedEffect(pageId) {
         isLoading = true
         val loaded = bundleLoader.readPage(pageId)
-        if (loaded != null && currentLocaleCode() != "en") {
-            // CMP may have already resolved a Crowdin translation (locale-qualified resource).
-            // Attempt ML Kit translation as fallback — if Crowdin translation was served,
-            // it's already in the loaded content. ML Kit only runs if we're on English source.
-            val result = translationService.translatePage(pageId, loaded.markdown ?: "", currentLocaleCode())
+        val locale = currentLocaleCode()
+        if (loaded != null && locale != "en" && !bundleLoader.hasTranslatedResource(pageId, locale)) {
+            // No Crowdin translation bundled for this locale — attempt ML Kit runtime translation
+            val result = translationService.translatePage(pageId, loaded.markdown ?: "", locale)
             when (result) {
                 is TranslationResult.Success -> {
                     content = loaded.copy(markdown = result.translatedMarkdown)
@@ -229,6 +228,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
             }
         } else {
             content = loaded
+            translationSource = if (locale != "en") TranslationSource.BUNDLED else TranslationSource.BUNDLED
         }
         isLoading = false
     }

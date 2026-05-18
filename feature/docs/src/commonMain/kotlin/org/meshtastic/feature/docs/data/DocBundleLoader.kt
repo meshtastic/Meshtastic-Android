@@ -67,6 +67,9 @@ interface DocBundleLoader {
 
     suspend fun readPage(pageId: String): DocPageContent?
 
+    /** Check whether a Crowdin-translated resource exists for the given page and locale. */
+    suspend fun hasTranslatedResource(pageId: String, locale: String): Boolean
+
     fun pagesBySection(section: DocSection): List<DocPage>
 }
 
@@ -106,6 +109,24 @@ class DefaultDocBundleLoader : DocBundleLoader {
 
         val markdown = loadMarkdownContent(page)
         return DocPageContent(page = page, markdown = markdown, cssPath = null)
+    }
+
+    override suspend fun hasTranslatedResource(pageId: String, locale: String): Boolean {
+        val bundle = load()
+        val page = bundle.pageIndex[pageId] ?: return false
+        val section =
+            when (page.section) {
+                DocSection.UserGuide -> "user"
+                DocSection.DeveloperGuide -> "developer"
+            }
+        // CMP locale-qualified resources are under "files-{locale}/docs/{section}/{id}.md"
+        val localePath = "files-$locale/docs/$section/${page.id}.md"
+        return try {
+            Res.readBytes(localePath)
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private suspend fun loadMarkdownContent(page: DocPage): String {
