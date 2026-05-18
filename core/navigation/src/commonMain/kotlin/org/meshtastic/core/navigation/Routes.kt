@@ -55,10 +55,6 @@ sealed interface MapRoute : Route {
 sealed interface NodesRoute : Route {
     @Serializable data object Nodes : NodesRoute, Graph
 
-    @Serializable data class NodeDetailGraph(val destNum: Int? = null) :
-        NodesRoute,
-        Graph
-
     @Serializable data class NodeDetail(val destNum: Int? = null) : NodesRoute
 }
 

@@ -127,7 +127,7 @@
     <ID>PreviewPublic:SwitchPreference.kt:@Preview(showBackground = true) @Composable fun SwitchPreferencePreview</ID>
     <ID>PreviewPublic:TextDividerPreference.kt:@Preview(showBackground = true) @Composable fun TextDividerPreferencePreview</ID>
     <ID>PreviewPublic:TitledCard.kt:@PreviewLightDark @Composable fun TitledCardPreview</ID>
-    <ID>ViewModelForwarding:MeshtasticAppShell.kt:MeshtasticCommonAppSetup( uiViewModel = uiViewModel, onNavigateToTracerouteMap = { destNum, requestId, logUuid -> multiBackstack.handleDeepLink( listOf( NodesRoute.NodesGraph, NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid), ), ) }, )</ID>
+    <ID>ViewModelForwarding:MeshtasticAppShell.kt:MeshtasticCommonAppSetup( uiViewModel = uiViewModel, onNavigateToTracerouteMap = { destNum, requestId, logUuid -> multiBackstack.handleDeepLink( listOf( NodesRoute.Nodes, NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid), ), ) }, )</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:FirmwareVersionCheck(viewModel = uiViewModel)</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:SharedDialogs(uiViewModel = uiViewModel)</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:TracerouteAlertHandler(uiViewModel = uiViewModel, onNavigateToMap = onNavigateToTracerouteMap)</ID>

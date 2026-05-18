@@ -150,8 +150,7 @@ private fun handleNavigation(
             }
 
             TopLevelDestination.Conversations -> {
-                val onConversationsList =
-                    currentKey is ContactsRoute.Contacts
+                val onConversationsList = currentKey is ContactsRoute.Contacts
                 if (!onConversationsList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {

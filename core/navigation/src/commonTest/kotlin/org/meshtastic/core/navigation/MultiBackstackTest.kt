@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.navigation
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlin.test.Test
@@ -23,10 +24,15 @@ import kotlin.test.assertEquals
 
 class MultiBackstackTest {
 
+    private fun createMultiBackstack(startTab: NavKey): MultiBackstack {
+        val tabRoute = TopLevelDestination.fromNavKey(startTab)?.route ?: startTab
+        return MultiBackstack(startTab, mutableStateOf(tabRoute))
+    }
+
     @Test
     fun `navigateTopLevel to different tab preserves previous tab stack and activates new tab stack`() {
         val startTab = TopLevelDestination.Nodes.route
-        val multiBackstack = MultiBackstack(startTab)
+        val multiBackstack = createMultiBackstack(startTab)
 
         val nodesStack =
             NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
@@ -48,7 +54,7 @@ class MultiBackstackTest {
     @Test
     fun `navigateTopLevel to same tab resets stack to root`() {
         val startTab = TopLevelDestination.Nodes.route
-        val multiBackstack = MultiBackstack(startTab)
+        val multiBackstack = createMultiBackstack(startTab)
 
         val nodesStack =
             NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
@@ -65,7 +71,7 @@ class MultiBackstackTest {
     @Test
     fun `goBack pops current stack if size is greater than 1`() {
         val startTab = TopLevelDestination.Nodes.route
-        val multiBackstack = MultiBackstack(startTab)
+        val multiBackstack = createMultiBackstack(startTab)
 
         val nodesStack =
             NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
@@ -80,7 +86,7 @@ class MultiBackstackTest {
     @Test
     fun `goBack on root of non-start tab returns to start tab`() {
         val startTab = TopLevelDestination.Connections.route
-        val multiBackstack = MultiBackstack(startTab)
+        val multiBackstack = createMultiBackstack(startTab)
 
         val mapStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Map.route)) }
         val connectionsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connections.route)) }
@@ -99,7 +105,7 @@ class MultiBackstackTest {
     @Test
     fun `handleDeepLink sets target tab and populates stack`() {
         val startTab = TopLevelDestination.Nodes.route
-        val multiBackstack = MultiBackstack(startTab)
+        val multiBackstack = createMultiBackstack(startTab)
 
         val settingsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Settings.route)) }
         multiBackstack.backStacks = mapOf(TopLevelDestination.Settings.route to settingsStack)
@@ -116,7 +122,7 @@ class MultiBackstackTest {
     fun `handleDeepLink from different tab switches tab and sets stack`() {
         // Start on Connections tab
         val startTab = TopLevelDestination.Connections.route
-        val multiBackstack = MultiBackstack(startTab)
+        val multiBackstack = createMultiBackstack(startTab)
 
         val connectionsStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connections.route)) }
         val nodesStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route)) }

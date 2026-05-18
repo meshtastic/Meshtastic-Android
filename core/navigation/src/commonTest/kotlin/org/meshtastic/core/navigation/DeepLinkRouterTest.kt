@@ -143,7 +143,7 @@ class DeepLinkRouterTest {
         assertEquals(
             listOf(
                 NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 1234),
+                NodesRoute.NodeDetail(destNum = 1234),
                 NodeDetailRoute.DeviceMetrics(destNum = 1234),
             ),
             route("/nodes/1234/device-metrics"),
@@ -155,7 +155,7 @@ class DeepLinkRouterTest {
         assertEquals(
             listOf(
                 NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 5678),
+                NodesRoute.NodeDetail(destNum = 5678),
                 NodeDetailRoute.PositionLog(destNum = 5678),
             ),
             route("/nodes/5678/map"),
@@ -165,11 +165,7 @@ class DeepLinkRouterTest {
     @Test
     fun `nodes with destNum and position sub-route`() {
         assertEquals(
-            listOf(
-                NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 100),
-                NodeDetailRoute.PositionLog(destNum = 100),
-            ),
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), NodeDetailRoute.PositionLog(destNum = 100)),
             route("/nodes/100/position"),
         )
     }
@@ -179,7 +175,7 @@ class DeepLinkRouterTest {
         assertEquals(
             listOf(
                 NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.EnvironmentMetrics(destNum = 100),
             ),
             route("/nodes/100/environment"),
@@ -191,7 +187,7 @@ class DeepLinkRouterTest {
         assertEquals(
             listOf(
                 NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.SignalMetrics(destNum = 100),
             ),
             route("/nodes/100/signal"),
@@ -201,11 +197,7 @@ class DeepLinkRouterTest {
     @Test
     fun `nodes with destNum and power sub-route`() {
         assertEquals(
-            listOf(
-                NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 100),
-                NodeDetailRoute.PowerMetrics(destNum = 100),
-            ),
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), NodeDetailRoute.PowerMetrics(destNum = 100)),
             route("/nodes/100/power"),
         )
     }
@@ -215,7 +207,7 @@ class DeepLinkRouterTest {
         assertEquals(
             listOf(
                 NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.TracerouteLog(destNum = 100),
             ),
             route("/nodes/100/traceroute"),
@@ -227,7 +219,7 @@ class DeepLinkRouterTest {
         assertEquals(
             listOf(
                 NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.HostMetricsLog(destNum = 100),
             ),
             route("/nodes/100/host-metrics"),
@@ -237,11 +229,7 @@ class DeepLinkRouterTest {
     @Test
     fun `nodes with destNum and pax sub-route`() {
         assertEquals(
-            listOf(
-                NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 100),
-                NodeDetailRoute.PaxMetrics(destNum = 100),
-            ),
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), NodeDetailRoute.PaxMetrics(destNum = 100)),
             route("/nodes/100/pax"),
         )
     }
@@ -251,7 +239,7 @@ class DeepLinkRouterTest {
         assertEquals(
             listOf(
                 NodesRoute.Nodes,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.NeighborInfoLog(destNum = 100),
             ),
             route("/nodes/100/neighbors"),
@@ -260,10 +248,7 @@ class DeepLinkRouterTest {
 
     @Test
     fun `nodes with destNum and unknown sub-route falls back to NodeDetail`() {
-        assertEquals(
-            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 1234)),
-            route("/nodes/1234/unknown-sub"),
-        )
+        assertEquals(listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 1234)), route("/nodes/1234/unknown-sub"))
     }
 
     @Test
@@ -292,10 +277,7 @@ class DeepLinkRouterTest {
 
     @Test
     fun `settings with destNum and sub-route`() {
-        assertEquals(
-            listOf(SettingsRoute.Settings(destNum = 1234), SettingsRoute.About),
-            route("/settings/1234/about"),
-        )
+        assertEquals(listOf(SettingsRoute.Settings(destNum = 1234), SettingsRoute.About), route("/settings/1234/about"))
     }
 
     @Test

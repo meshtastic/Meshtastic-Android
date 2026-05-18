@@ -18,6 +18,8 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -68,7 +70,7 @@ fun MeshtasticNavDisplay(
 
 /** Shared [NavDisplay] wrapper for a single backstack. */
 @Suppress("LongMethod")
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun MeshtasticNavDisplay(
     backStack: NavBackStack<NavKey>,
@@ -115,28 +117,32 @@ fun MeshtasticNavDisplay(
     val activeDecorators =
         remember(backStack, saveableDecorator, vmStoreDecorator) { listOf(saveableDecorator, vmStoreDecorator) }
 
-    NavDisplay(
-        backStack = backStack,
-        entryProvider = entryProvider,
-        entryDecorators = activeDecorators,
-        onBack =
-        onBack
-            ?: {
-                if (backStack.size > 1) {
-                    backStack.removeLastOrNull()
-                }
-            },
-        sceneStrategies =
-        listOf(
-            DialogSceneStrategy(),
-            listDetailSceneStrategy,
-            supportingPaneSceneStrategy,
-            SinglePaneSceneStrategy(),
-        ),
-        transitionSpec = meshtasticTransitionSpec(),
-        popTransitionSpec = meshtasticTransitionSpec(),
-        modifier = modifier,
-    )
+    SharedTransitionLayout {
+        NavDisplay(
+            backStack = backStack,
+            entryProvider = entryProvider,
+            entryDecorators = activeDecorators,
+            onBack =
+            onBack
+                ?: {
+                    if (backStack.size > 1) {
+                        backStack.removeLastOrNull()
+                    }
+                },
+            sceneStrategies =
+            listOf(
+                DialogSceneStrategy(),
+                listDetailSceneStrategy,
+                supportingPaneSceneStrategy,
+                SinglePaneSceneStrategy(),
+            ),
+            sharedTransitionScope = this@SharedTransitionLayout,
+            transitionSpec = meshtasticTransitionSpec(),
+            popTransitionSpec = meshtasticTransitionSpec(),
+            predictivePopTransitionSpec = meshtasticPredictivePopTransitionSpec(),
+            modifier = modifier,
+        )
+    }
 }
 
 /** Shared crossfade [ContentTransform] used for both forward and pop navigation. */
@@ -146,3 +152,13 @@ private fun meshtasticTransitionSpec(): AnimatedContentTransitionScope<Scene<Nav
         fadeOut(animationSpec = tween(TRANSITION_DURATION_MS)),
     )
 }
+
+/** Crossfade transition for predictive back gestures (Android 14+). */
+private fun meshtasticPredictivePopTransitionSpec():
+    AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform =
+    {
+        ContentTransform(
+            fadeIn(animationSpec = tween(TRANSITION_DURATION_MS)),
+            fadeOut(animationSpec = tween(TRANSITION_DURATION_MS)),
+        )
+    }

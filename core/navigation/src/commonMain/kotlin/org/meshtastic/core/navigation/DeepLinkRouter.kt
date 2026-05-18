@@ -97,10 +97,7 @@ object DeepLinkRouter {
                 val contactKey = if (segments.size > 1) segments[1] else uri.getQueryParameter("contactKey") ?: ""
                 val message = uri.getQueryParameter("message") ?: ""
                 if (contactKey.isNotBlank()) {
-                    listOf(
-                        ContactsRoute.Contacts,
-                        ContactsRoute.Messages(contactKey = contactKey, message = message),
-                    )
+                    listOf(ContactsRoute.Contacts, ContactsRoute.Messages(contactKey = contactKey, message = message))
                 } else {
                     listOf(ContactsRoute.Contacts)
                 }
@@ -126,7 +123,7 @@ object DeepLinkRouter {
             val subRouteStr = segments[2].lowercase()
             val detailRouteFn = nodeDetailSubRoutes[subRouteStr]
             if (detailRouteFn != null) {
-                listOf(NodesRoute.Nodes, NodesRoute.NodeDetailGraph(destNum), detailRouteFn(destNum))
+                listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum), detailRouteFn(destNum))
             } else {
                 listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum))
             }

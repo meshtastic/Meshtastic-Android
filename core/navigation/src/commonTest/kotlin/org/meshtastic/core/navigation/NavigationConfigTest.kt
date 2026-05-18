@@ -52,8 +52,6 @@ class NavigationConfigTest {
             MapRoute.Map(waypointId = 42),
             // NodesRoute
             NodesRoute.Nodes,
-            NodesRoute.NodeDetailGraph(destNum = 1234),
-            NodesRoute.NodeDetailGraph(),
             NodesRoute.NodeDetail(destNum = 5678),
             NodesRoute.NodeDetail(),
             // NodeDetailRoute
@@ -177,7 +175,6 @@ class NavigationConfigTest {
         val routesWithDefaults: List<Pair<NavKey, NavKey>> =
             listOf(
                 MapRoute.Map() to MapRoute.Map(waypointId = null),
-                NodesRoute.NodeDetailGraph() to NodesRoute.NodeDetailGraph(destNum = null),
                 NodesRoute.NodeDetail() to NodesRoute.NodeDetail(destNum = null),
                 SettingsRoute.Settings() to SettingsRoute.Settings(destNum = null),
                 WifiProvisionRoute.WifiProvision() to WifiProvisionRoute.WifiProvision(address = null),

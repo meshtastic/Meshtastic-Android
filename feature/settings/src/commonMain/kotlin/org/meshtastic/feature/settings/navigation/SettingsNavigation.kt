@@ -74,10 +74,11 @@ import kotlin.reflect.KClass
 
 @Composable
 fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: Int? = null): RadioConfigViewModel {
-    val destNum = destNumOverride
-        ?: remember(backStack.toList()) {
-            backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
-        }
+    val destNum =
+        destNumOverride
+            ?: remember(backStack.toList()) {
+                backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
+            }
     return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) {
         parametersOf(SavedStateHandle(mapOf("destNum" to destNum)))
     }
@@ -225,7 +226,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         }
     }
 
-    entry<SettingsRoute.TakServer> { TakServerScreen(onBack = { backStack.removeLastOrNull() }) }
+    entry<SettingsRoute.TakServer> { TakServerScreen(onBack = dropUnlessResumed { backStack.removeLastOrNull() }) }
 
     entry<SettingsRoute.DebugPanel> {
         val viewModel: DebugViewModel = koinViewModel()
