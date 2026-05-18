@@ -50,14 +50,14 @@ fun ListItem(
     text: String,
     modifier: Modifier = Modifier,
     supportingText: String? = null,
-    textColor: Color = LocalContentColor.current,
-    supportingTextColor: Color = LocalContentColor.current,
+    textColor: Color = Color.Unspecified,
+    supportingTextColor: Color = Color.Unspecified,
     copyable: Boolean = false,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    leadingIconTint: Color = LocalContentColor.current,
+    leadingIconTint: Color = Color.Unspecified,
     trailingIcon: ImageVector? = MeshtasticIcons.ChevronRight,
-    trailingIconTint: Color = LocalContentColor.current,
+    trailingIconTint: Color = Color.Unspecified,
     onClick: (() -> Unit)? = null,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
@@ -90,10 +90,10 @@ fun SwitchListItem(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    textColor: Color = LocalContentColor.current,
+    textColor: Color = Color.Unspecified,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    leadingIconTint: Color = LocalContentColor.current,
+    leadingIconTint: Color = Color.Unspecified,
 ) {
     BasicListItem(
         text = text,
@@ -114,7 +114,8 @@ fun SwitchListItem(
  * This is a core component that should facilitate most list item use cases. Please carefully consider if modifying this
  * is really necessary before doing so.
  *
- * Uses the M3 Expressive interactive [ListItem] overload which provides built-in shape morphing on press/hover.
+ * Uses the M3 Expressive interactive [ListItem] overload which provides built-in shape morphing on press/hover and
+ * proper disabled styling.
  *
  * @see [LinkedCoordinatesItem] for example usage
  */
@@ -122,12 +123,12 @@ fun SwitchListItem(
 fun BasicListItem(
     text: String,
     modifier: Modifier = Modifier,
-    textColor: Color = LocalContentColor.current,
+    textColor: Color = Color.Unspecified,
     supportingText: String? = null,
-    supportingTextColor: Color = LocalContentColor.current,
+    supportingTextColor: Color = Color.Unspecified,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    leadingIconTint: Color = LocalContentColor.current,
+    leadingIconTint: Color = Color.Unspecified,
     trailingContent: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
@@ -157,8 +158,12 @@ fun BasicListItem(
 }
 
 @Composable
-fun ImageVector?.icon(tint: Color = LocalContentColor.current): @Composable (() -> Unit)? =
-    this?.let { { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint) } }
+fun ImageVector?.icon(tint: Color = Color.Unspecified): @Composable (() -> Unit)? = this?.let {
+    {
+        val resolvedTint = if (tint == Color.Unspecified) LocalContentColor.current else tint
+        Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = resolvedTint)
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
