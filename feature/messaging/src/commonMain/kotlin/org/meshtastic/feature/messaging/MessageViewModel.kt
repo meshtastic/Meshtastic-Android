@@ -223,21 +223,6 @@ class MessageViewModel(
     fun deleteMessages(uuidList: List<Long>) =
         safeLaunch(context = ioDispatcher, tag = "deleteMessages") { packetRepository.deleteMessages(uuidList) }
 
-    /** Whether the user has ever completed a swipe action (permanent dismissal). */
-    val hasCompletedSwipeAction: StateFlow<Boolean> = uiPrefs.hasCompletedSwipeAction
-
-    /** Transient per-session flag: has the hint already been shown this session? */
-    private val _hasShownHintThisSession = MutableStateFlow(false)
-    val hasShownHintThisSession: StateFlow<Boolean> = _hasShownHintThisSession
-
-    fun markHintShownThisSession() {
-        _hasShownHintThisSession.value = true
-    }
-
-    fun markSwipeActionCompleted() {
-        uiPrefs.setHasCompletedSwipeAction(true)
-    }
-
     fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
         safeLaunch(context = ioDispatcher, tag = "clearUnreadCount") {
             val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE

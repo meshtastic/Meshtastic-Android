@@ -33,10 +33,8 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeRadioInterfaceService
-import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
 import org.meshtastic.feature.node.detail.NodeManagementActions
-import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -53,7 +51,6 @@ class NodeListViewModelTest {
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private val nodeFilterPreferences: NodeFilterPreferences = mock(MockMode.autofill)
     private val nodeManagementActions: NodeManagementActions = mock(MockMode.autofill)
-    private val nodeRequestActions: NodeRequestActions = mock(MockMode.autofill)
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase = mock(MockMode.autofill)
 
     @BeforeTest
@@ -87,10 +84,8 @@ class NodeListViewModelTest {
         radioController = radioController,
         radioInterfaceService = radioInterfaceService,
         nodeManagementActions = nodeManagementActions,
-        nodeRequestActions = nodeRequestActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,
         nodeFilterPreferences = nodeFilterPreferences,
-        uiPrefs = FakeUiPrefs(),
     )
 
     @Test

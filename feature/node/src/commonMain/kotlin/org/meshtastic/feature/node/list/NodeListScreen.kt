@@ -34,7 +34,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -63,8 +62,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
-import org.meshtastic.core.resources.exchange_position
-import org.meshtastic.core.resources.mute_notifications
 import org.meshtastic.core.resources.node_count_template
 import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.nodes_empty_disconnected_hint
@@ -75,19 +72,13 @@ import org.meshtastic.core.resources.set_up_connection
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.component.SwipeDirection
-import org.meshtastic.core.ui.component.SwipeToRevealBox
-import org.meshtastic.core.ui.component.rememberSwipeToRevealState
 import org.meshtastic.core.ui.component.smartScrollToTop
-import org.meshtastic.core.ui.component.swipeHintModifier
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
-import org.meshtastic.feature.node.component.MuteNodeAction
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
-import org.meshtastic.feature.node.component.RequestPositionAction
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -111,9 +102,6 @@ fun NodeListScreen(
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
-
-    val hasCompletedSwipeAction by viewModel.hasCompletedSwipeAction.collectAsStateWithLifecycle()
-    val hasShownHintThisSession by viewModel.hasShownHintThisSession.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -198,23 +186,10 @@ fun NodeListScreen(
 
                 items(nodes, key = { it.num }) { node ->
                     var expanded by remember { mutableStateOf(false) }
-                    val isThisNode = remember(node) { ourNode?.num == node.num }
-                    val isOtherNode = !isThisNode
 
-                    // Swipe hint: only show for the first visible other-node item
-                    // when user has not yet completed a swipe action and hint not shown this session.
-                    val isFirstOtherNode =
-                        remember(nodes, ourNode) { nodes.firstOrNull { it.num != ourNode?.num }?.num == node.num }
-                    val shouldShowHint = isFirstOtherNode && !hasCompletedSwipeAction && !hasShownHintThisSession
-                    val hintModifier =
-                        swipeHintModifier(
-                            enabled = shouldShowHint,
-                            onHintFinish = { viewModel.markHintShownThisSession() },
-                        )
-
-                    Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp).then(hintModifier)) {
+                    Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                         val longClick =
-                            if (isOtherNode) {
+                            if (node.num != ourNode?.num) {
                                 { expanded = true }
                             } else {
                                 null
@@ -222,50 +197,20 @@ fun NodeListScreen(
 
                         val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
 
-                        if (isOtherNode) {
-                            val swipeState = rememberSwipeToRevealState()
-                            SwipeToRevealBox(
-                                state = swipeState,
-                                startContent = { RequestPositionAction() },
-                                endContent = { MuteNodeAction() },
-                                startActionLabel = stringResource(Res.string.exchange_position),
-                                endActionLabel = stringResource(Res.string.mute_notifications),
-                                onActionTrigger = { direction ->
-                                    when (direction) {
-                                        SwipeDirection.StartToEnd -> viewModel.requestPosition(node)
-                                        SwipeDirection.EndToStart -> viewModel.muteNode(node)
-                                    }
-                                    viewModel.markSwipeActionCompleted()
-                                },
-                                modifier = Modifier.animateItem(),
-                            ) {
-                                NodeItem(
-                                    thisNode = ourNode,
-                                    thatNode = node,
-                                    distanceUnits = state.distanceUnits,
-                                    tempInFahrenheit = state.tempInFahrenheit,
-                                    onClick = { navigateToNodeDetails(node.num) },
-                                    onLongClick = longClick,
-                                    connectionState = connectionState,
-                                    deviceType = deviceType,
-                                    isActive = isActive,
-                                )
-                            }
-                        } else {
-                            NodeItem(
-                                modifier = Modifier.animateItem(),
-                                thisNode = ourNode,
-                                thatNode = node,
-                                distanceUnits = state.distanceUnits,
-                                tempInFahrenheit = state.tempInFahrenheit,
-                                onClick = { navigateToNodeDetails(node.num) },
-                                onLongClick = longClick,
-                                connectionState = connectionState,
-                                deviceType = deviceType,
-                                isActive = isActive,
-                            )
-                        }
-                        if (isOtherNode) {
+                        NodeItem(
+                            modifier = Modifier.animateItem(),
+                            thisNode = ourNode,
+                            thatNode = node,
+                            distanceUnits = state.distanceUnits,
+                            tempInFahrenheit = state.tempInFahrenheit,
+                            onClick = { navigateToNodeDetails(node.num) },
+                            onLongClick = longClick,
+                            connectionState = connectionState,
+                            deviceType = deviceType,
+                            isActive = isActive,
+                        )
+                        val isThisNode = remember(node) { ourNode?.num == node.num }
+                        if (!isThisNode) {
                             NodeContextMenu(
                                 expanded = expanded,
                                 node = node,
@@ -298,7 +243,6 @@ fun NodeListScreen(
  * supporting hint. When the user has no device selected (or is otherwise disconnected), an action button routes them to
  * the Connections tab; when connected with no nodes yet we show a passive "searching" state.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun NodeListEmptyState(
     connectionState: ConnectionState,
@@ -347,9 +291,7 @@ private fun NodeListEmptyState(
         )
         if (!isConnected) {
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onNavigateToConnections, shapes = ButtonDefaults.shapes()) {
-                Text(stringResource(Res.string.set_up_connection))
-            }
+            Button(onClick = onNavigateToConnections) { Text(stringResource(Res.string.set_up_connection)) }
         }
     }
 }

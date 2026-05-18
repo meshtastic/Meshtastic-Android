@@ -102,8 +102,6 @@ class MessageViewModelTest {
         every { homoglyphPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
         every { uiPrefs.showQuickChat } returns showQuickChatFlow
         every { uiPrefs.setShowQuickChat(any()) } returns Unit
-        every { uiPrefs.hasCompletedSwipeAction } returns MutableStateFlow(false)
-        every { uiPrefs.setHasCompletedSwipeAction(any()) } returns Unit
 
         every { packetRepository.getContactSettings() } returns contactSettingsFlow
         every { packetRepository.getFirstUnreadMessageUuid(any<String>()) } returns MutableStateFlow(null)

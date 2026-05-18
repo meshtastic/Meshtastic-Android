@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Box
@@ -27,8 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -56,17 +53,10 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.action_delete_message
-import org.meshtastic.core.ui.component.SwipeToRevealBox
-import org.meshtastic.core.ui.component.rememberSwipeToRevealState
-import org.meshtastic.core.ui.component.swipeHintModifier
-import org.meshtastic.feature.messaging.component.DeleteMessageAction
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.MessageStatusDialog
 import org.meshtastic.feature.messaging.component.ReactionDialog
@@ -79,8 +69,6 @@ internal data class MessageListHandlers(
     val onDeleteMessages: (List<Long>) -> Unit,
     val onSendMessage: (String, String) -> Unit,
     val onReply: (Message?) -> Unit,
-    val onSwipeActionCompleted: () -> Unit = {},
-    val onHintShownThisSession: () -> Unit = {},
 )
 
 internal data class MessageListPagedState(
@@ -94,8 +82,6 @@ internal data class MessageListPagedState(
     val filteredCount: Int = 0,
     val showFiltered: Boolean = false,
     val filteringDisabled: Boolean = false,
-    val hasCompletedSwipeAction: Boolean = true,
-    val hasShownHintThisSession: Boolean = true,
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -243,73 +229,11 @@ private fun MessageListPagedContent(
                     val isFirstUnread = state.hasUnreadMessages && unreadDividerIndex == index
                     val itemModifier = if (enableAnimations) Modifier.animateItem() else Modifier
 
-                    // Swipe hint: show on first message item when user hasn't yet swiped
-                    val isFirstMessage = index == 0
-                    val shouldShowHint =
-                        isFirstMessage &&
-                            !state.hasCompletedSwipeAction &&
-                            !state.hasShownHintThisSession &&
-                            !inSelectionMode
-                    val hintModifier =
-                        swipeHintModifier(
-                            enabled = shouldShowHint,
-                            onHintFinish = { handlers.onHintShownThisSession() },
-                        )
-
-                    // Disable swipe during selection mode
-                    val enableSwipe = !inSelectionMode
-
                     if (isFirstUnread) {
                         // Wrap in Column to prevent overlapping of divider and message item
                         // Apply animation to the container Column once
-                        Column(modifier = itemModifier.then(hintModifier)) {
+                        Column(modifier = itemModifier) {
                             UnreadMessagesDivider()
-                            val swipeState = rememberSwipeToRevealState()
-                            SwipeToRevealBox(
-                                state = swipeState,
-                                startContent = {},
-                                endContent = { DeleteMessageAction() },
-                                enableStartSwipe = false,
-                                enableEndSwipe = enableSwipe,
-                                endActionLabel = stringResource(Res.string.action_delete_message),
-                                onActionTrigger = {
-                                    handlers.onDeleteMessages(listOf(message.uuid))
-                                    handlers.onSwipeActionCompleted()
-                                },
-                            ) {
-                                RenderPagedChatMessageRow(
-                                    message = message,
-                                    state = state,
-                                    nodeMap = nodeMap,
-                                    handlers = handlers,
-                                    inSelectionMode = inSelectionMode,
-                                    coroutineScope = coroutineScope,
-                                    haptics = haptics,
-                                    listState = listState,
-                                    onShowStatusDialog = onShowStatusDialog,
-                                    onShowReactions = onShowReactions,
-                                    showUserName = !hasSamePrev,
-                                    hasSamePrev = hasSamePrev,
-                                    hasSameNext = hasSameNext,
-                                    quickEmojis = quickEmojis,
-                                )
-                            }
-                        }
-                    } else {
-                        val swipeState = rememberSwipeToRevealState()
-                        SwipeToRevealBox(
-                            state = swipeState,
-                            startContent = {},
-                            endContent = { DeleteMessageAction() },
-                            enableStartSwipe = false,
-                            enableEndSwipe = enableSwipe,
-                            endActionLabel = stringResource(Res.string.action_delete_message),
-                            onActionTrigger = {
-                                handlers.onDeleteMessages(listOf(message.uuid))
-                                handlers.onSwipeActionCompleted()
-                            },
-                            modifier = itemModifier.then(hintModifier),
-                        ) {
                             RenderPagedChatMessageRow(
                                 message = message,
                                 state = state,
@@ -327,6 +251,24 @@ private fun MessageListPagedContent(
                                 quickEmojis = quickEmojis,
                             )
                         }
+                    } else {
+                        RenderPagedChatMessageRow(
+                            message = message,
+                            state = state,
+                            nodeMap = nodeMap,
+                            handlers = handlers,
+                            inSelectionMode = inSelectionMode,
+                            coroutineScope = coroutineScope,
+                            haptics = haptics,
+                            listState = listState,
+                            onShowStatusDialog = onShowStatusDialog,
+                            onShowReactions = onShowReactions,
+                            modifier = itemModifier,
+                            showUserName = !hasSamePrev,
+                            hasSamePrev = hasSamePrev,
+                            hasSameNext = hasSameNext,
+                            quickEmojis = quickEmojis,
+                        )
                     }
                 }
             }
@@ -340,7 +282,7 @@ private fun MessageListPagedContent(
                                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                CircularWavyProgressIndicator()
+                                CircularProgressIndicator()
                             }
                         }
                     }

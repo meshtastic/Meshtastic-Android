@@ -148,11 +148,6 @@ interface UiPrefs {
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)
-
-    /** Whether the user has completed at least one swipe-to-action, permanently dismissing the hint. */
-    val hasCompletedSwipeAction: StateFlow<Boolean>
-
-    fun setHasCompletedSwipeAction(completed: Boolean)
 }
 
 /** Reactive interface for notification preferences. */
