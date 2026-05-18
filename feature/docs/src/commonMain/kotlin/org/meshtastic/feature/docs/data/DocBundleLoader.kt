@@ -54,6 +54,7 @@ import org.meshtastic.core.resources.doc_title_tak
 import org.meshtastic.core.resources.doc_title_telemetry
 import org.meshtastic.core.resources.doc_title_translate
 import org.meshtastic.core.resources.doc_title_units
+import org.meshtastic.core.common.util.currentLocaleQualifier
 import org.meshtastic.feature.docs.model.DocBundle
 import org.meshtastic.feature.docs.model.DocPage
 import org.meshtastic.feature.docs.model.DocPageContent
@@ -132,6 +133,26 @@ class DefaultDocBundleLoader : DocBundleLoader {
         return DocPageContent(page = page, markdown = markdown, cssPath = null) to false
     }
 
+    private suspend fun loadLocalizedMarkdownContent(page: DocPage, locale: String): String? {
+        val section =
+            when (page.section) {
+                DocSection.UserGuide -> "user"
+                DocSection.DeveloperGuide -> "developer"
+            }
+        // Try qualifiers in specificity order (mirrors Android resource resolution):
+        // "pt-rBR" → "pt" → give up
+        for (qualifier in localeQualifiers(locale)) {
+            val localePath = "files-$qualifier/docs/$section/${page.id}.md"
+            try {
+                val bytes = Res.readBytes(localePath)
+                return stripFrontmatter(bytes.decodeToString())
+            } catch (_: Exception) {
+                continue
+            }
+        }
+        return null
+    }
+
     override suspend fun hasTranslatedResource(pageId: String, locale: String): Boolean {
         val bundle = load()
         val page = bundle.pageIndex[pageId] ?: return false
@@ -140,29 +161,27 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 DocSection.UserGuide -> "user"
                 DocSection.DeveloperGuide -> "developer"
             }
-        // CMP locale-qualified resources are under "files-{locale}/docs/{section}/{id}.md"
-        val localePath = "files-$locale/docs/$section/${page.id}.md"
-        return try {
-            Res.readBytes(localePath)
-            true
-        } catch (_: Exception) {
-            false
+        return localeQualifiers(locale).any { qualifier ->
+            val localePath = "files-$qualifier/docs/$section/${page.id}.md"
+            try {
+                Res.readBytes(localePath)
+                true
+            } catch (_: Exception) {
+                false
+            }
         }
     }
 
-    private suspend fun loadLocalizedMarkdownContent(page: DocPage, locale: String): String? {
-        val section =
-            when (page.section) {
-                DocSection.UserGuide -> "user"
-                DocSection.DeveloperGuide -> "developer"
-            }
-        val localePath = "files-$locale/docs/$section/${page.id}.md"
-        return try {
-            val bytes = Res.readBytes(localePath)
-            val raw = bytes.decodeToString()
-            stripFrontmatter(raw)
-        } catch (_: Exception) {
-            null
+    /**
+     * Produces CMP resource qualifier candidates in specificity order.
+     * Tries region-qualified first (e.g. "pt-rBR"), then language-only ("pt").
+     * Deduplicates when device has no region (both would be "fr").
+     */
+    private fun localeQualifiers(language: String): List<String> {
+        val fullQualifier = currentLocaleQualifier()
+        return buildList {
+            if (fullQualifier != language) add(fullQualifier)
+            add(language)
         }
     }
 

@@ -127,12 +127,14 @@ val syncTranslatedDocsToComposeResources by
 
         into(targetBase)
 
-        // Remap Crowdin locale dirs to CMP qualifier format: {locale}/user/foo.md → files-{locale}/docs/user/foo.md
+        // Remap Crowdin locale dirs to CMP qualifier format:
+        //   fr/user/foo.md      → files-fr/docs/user/foo.md
+        //   pt-BR/user/foo.md   → files-pt-rBR/docs/user/foo.md
         eachFile {
             val segments = relativePath.segments
             if (segments.size >= 3) {
                 val locale = segments[0]
-                val cmpLocale = locale.replace("-", "-r")
+                val cmpLocale = bcp47ToCmpQualifier(locale)
                 val rest = segments.drop(1).joinToString("/")
                 path = "files-$cmpLocale/docs/$rest"
             }
@@ -148,3 +150,16 @@ tasks
             it.name.contains("convertXmlValueResources")
     }
     .configureEach { dependsOn(syncTranslatedDocsToComposeResources) }
+
+/**
+ * Converts a BCP-47 locale tag (e.g. "pt-BR") to Android/CMP resource qualifier format ("pt-rBR").
+ * Handles: "fr" → "fr", "pt-BR" → "pt-rBR", "sr-Latn" → "b+sr+Latn" (script tags).
+ */
+fun bcp47ToCmpQualifier(bcp47: String): String {
+    val parts = bcp47.split("-")
+    return when {
+        parts.size == 1 -> parts[0] // "fr"
+        parts.size == 2 && parts[1].length == 2 -> "${parts[0]}-r${parts[1]}" // "pt-BR" → "pt-rBR"
+        else -> "b+" + parts.joinToString("+") // script/variant: "sr-Latn" → "b+sr+Latn"
+    }
+}
