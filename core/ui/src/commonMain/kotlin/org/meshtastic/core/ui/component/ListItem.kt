@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -113,6 +114,8 @@ fun SwitchListItem(
  * This is a core component that should facilitate most list item use cases. Please carefully consider if modifying this
  * is really necessary before doing so.
  *
+ * Uses the M3 Expressive interactive [ListItem] overload which provides built-in shape morphing on press/hover.
+ *
  * @see [LinkedCoordinatesItem] for example usage
  */
 @Composable
@@ -129,21 +132,28 @@ fun BasicListItem(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
-    ListItem(
-        modifier =
-        if (onLongClick != null) {
-            modifier.combinedClickable(enabled = enabled, onLongClick = onLongClick, onClick = onClick ?: {})
-        } else if (onClick != null) {
-            modifier.clickable(enabled = enabled, onClick = onClick)
-        } else {
-            modifier
-        },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text(text = text, color = textColor) },
-        supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
-        leadingContent = leadingIcon.icon(leadingIconTint),
-        trailingContent = trailingContent,
-    )
+    if (onClick != null) {
+        ListItem(
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            onLongClick = onLongClick,
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            leadingContent = leadingIcon.icon(leadingIconTint),
+            trailingContent = trailingContent,
+            supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
+            content = { Text(text = text, color = textColor) },
+        )
+    } else {
+        ListItem(
+            modifier = modifier,
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            headlineContent = { Text(text = text, color = textColor) },
+            supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
+            leadingContent = leadingIcon.icon(leadingIconTint),
+            trailingContent = trailingContent,
+        )
+    }
 }
 
 @Composable
