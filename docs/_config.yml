@@ -197,10 +197,10 @@ defaults:
       locale: pt
       nav_exclude: true
   - scope:
-      path: "pt-BR"
+      path: "pt-rBR"
     values:
       layout: locale_page
-      locale: pt-BR
+      locale: pt-rBR
       nav_exclude: true
   - scope:
       path: "ro"
@@ -257,16 +257,16 @@ defaults:
       locale: uk
       nav_exclude: true
   - scope:
-      path: "zh-CN"
+      path: "zh-rCN"
     values:
       layout: locale_page
-      locale: zh-CN
+      locale: zh-rCN
       nav_exclude: true
   - scope:
-      path: "zh-TW"
+      path: "zh-rTW"
     values:
       layout: locale_page
-      locale: zh-TW
+      locale: zh-rTW
       nav_exclude: true
 
 # Callouts (just-the-docs v0.11+)

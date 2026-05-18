@@ -81,7 +81,7 @@ pl:
 pt:
   name: "Português"
   dir: ltr
-pt-BR:
+pt-rBR:
   name: "Português (Brasil)"
   dir: ltr
 ro:
@@ -111,9 +111,9 @@ tr:
 uk:
   name: "Українська"
   dir: ltr
-zh-CN:
+zh-rCN:
   name: "中文 (简体)"
   dir: ltr
-zh-TW:
+zh-rTW:
   name: "中文 (繁體)"
   dir: ltr

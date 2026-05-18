@@ -11,10 +11,10 @@ files:
   - source: /fastlane/metadata/android/en-US/changelogs/default.txt
     translation: /fastlane/metadata/android/%locale%/changelogs/%original_file_name%
   # In-app docs — user guide only (developer guide is English-only)
-  # Uses %locale% to distinguish regional variants (pt vs pt-BR, zh-CN vs zh-TW)
+  # Uses %android_code% to output Android/CMP qualifier format directly (pt-rBR, zh-rCN, fr)
   - source: /docs/user/*.md
-    translation: /docs/%locale%/user/%original_file_name%
+    translation: /docs/%android_code%/user/%original_file_name%
     type: md
   - source: /docs/index.md
-    translation: /docs/%locale%/%original_file_name%
+    translation: /docs/%android_code%/%original_file_name%
     type: md

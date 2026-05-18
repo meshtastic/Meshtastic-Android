@@ -115,8 +115,7 @@ val syncTranslatedDocsToComposeResources by
         val targetBase = layout.projectDirectory.dir("src/commonMain/composeResources")
 
         from(docsDir) {
-            // Include locale directories: 2-char (es) or region-qualified (pt-BR, zh-CN)
-            // The glob * matches any single path segment including hyphenated ones
+            // Crowdin outputs dirs in Android qualifier format (fr, pt-rBR, zh-rCN)
             include("*/user/**/*.md")
             exclude("user/**")
             exclude("developer/**")
@@ -127,16 +126,14 @@ val syncTranslatedDocsToComposeResources by
 
         into(targetBase)
 
-        // Remap Crowdin locale dirs to CMP qualifier format:
-        //   fr/user/foo.md      → files-fr/docs/user/foo.md
-        //   pt-BR/user/foo.md   → files-pt-rBR/docs/user/foo.md
+        // Crowdin %android_code% already outputs CMP qualifier format (pt-rBR),
+        // so we just need to prepend "files-" and nest under docs/
         eachFile {
             val segments = relativePath.segments
             if (segments.size >= 3) {
-                val locale = segments[0]
-                val cmpLocale = bcp47ToCmpQualifier(locale)
+                val qualifier = segments[0]
                 val rest = segments.drop(1).joinToString("/")
-                path = "files-$cmpLocale/docs/$rest"
+                path = "files-$qualifier/docs/$rest"
             }
         }
         includeEmptyDirs = false
@@ -150,16 +147,3 @@ tasks
             it.name.contains("convertXmlValueResources")
     }
     .configureEach { dependsOn(syncTranslatedDocsToComposeResources) }
-
-/**
- * Converts a BCP-47 locale tag (e.g. "pt-BR") to Android/CMP resource qualifier format ("pt-rBR").
- * Handles: "fr" → "fr", "pt-BR" → "pt-rBR", "sr-Latn" → "b+sr+Latn" (script tags).
- */
-fun bcp47ToCmpQualifier(bcp47: String): String {
-    val parts = bcp47.split("-")
-    return when {
-        parts.size == 1 -> parts[0] // "fr"
-        parts.size == 2 && parts[1].length == 2 -> "${parts[0]}-r${parts[1]}" // "pt-BR" → "pt-rBR"
-        else -> "b+" + parts.joinToString("+") // script/variant: "sr-Latn" → "b+sr+Latn"
-    }
-}
