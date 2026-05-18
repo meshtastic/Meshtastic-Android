@@ -21,6 +21,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.settings.component.AppInfoSectionPreview
 import org.meshtastic.feature.settings.component.AppearanceSectionPreview
+import org.meshtastic.feature.settings.component.NodeLayoutSettingsCompactMinimalPreview
 import org.meshtastic.feature.settings.component.NodeLayoutSettingsCompactPreview
 import org.meshtastic.feature.settings.component.NodeLayoutSettingsCompletePreview
 import org.meshtastic.feature.settings.component.NotificationSectionPreview
@@ -118,4 +119,11 @@ fun ScreenshotNodeLayoutSettingsCompact() {
 @Composable
 fun ScreenshotNodeLayoutSettingsComplete() {
     NodeLayoutSettingsCompletePreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeLayoutSettingsCompactMinimal() {
+    NodeLayoutSettingsCompactMinimalPreview()
 }

@@ -83,3 +83,35 @@ fun NodeLayoutSettingsCompletePreview() {
         }
     }
 }
+
+@Suppress("PreviewPublic")
+@PreviewLightDark
+@Composable
+fun NodeLayoutSettingsCompactMinimalPreview() {
+    AppTheme {
+        Surface {
+            NodeLayoutSettings(
+                density = NodeListDensity.COMPACT,
+                onDensityChange = {},
+                showPower = false,
+                onShowPowerChange = {},
+                showLastHeard = true,
+                onShowLastHeardChange = {},
+                lastHeardIsRelative = false,
+                onLastHeardIsRelativeChange = {},
+                showLocation = false,
+                onShowLocationChange = {},
+                showHops = false,
+                onShowHopsChange = {},
+                showSignal = true,
+                onShowSignalChange = {},
+                showChannel = false,
+                onShowChannelChange = {},
+                showRole = false,
+                onShowRoleChange = {},
+                showTelemetry = false,
+                onShowTelemetryChange = {},
+            )
+        }
+    }
+}
