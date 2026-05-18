@@ -129,6 +129,7 @@ fun NodeLayoutSettingsCompactMinimalPreview() {
 // ---------------------------------------------------------------------------
 
 private val sampleNode = previewSampleNode()
+private val localNode = previewLocalNode()
 
 /** Sample node rendered in Complete density (all fields visible). */
 @Suppress("PreviewPublic")
@@ -139,7 +140,7 @@ fun SampleNodeCompletePreview() {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 NodeItem(
-                    thisNode = null,
+                    thisNode = localNode,
                     thatNode = sampleNode,
                     distanceUnits = 0,
                     tempInFahrenheit = false,
@@ -158,7 +159,7 @@ fun SampleNodeCompactAllFieldsPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                NodeItemCompact(thisNode = null, thatNode = sampleNode, distanceUnits = 0)
+                NodeItemCompact(thisNode = localNode, thatNode = sampleNode, distanceUnits = 0)
             }
         }
     }
@@ -173,7 +174,7 @@ fun SampleNodeCompactSignalOnlyPreview() {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 NodeItemCompact(
-                    thisNode = null,
+                    thisNode = localNode,
                     thatNode = sampleNode,
                     distanceUnits = 0,
                     showPower = false,
@@ -200,7 +201,7 @@ fun SampleNodeCompactNameOnlyPreview() {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 NodeItemCompact(
-                    thisNode = null,
+                    thisNode = localNode,
                     thatNode = sampleNode,
                     distanceUnits = 0,
                     showPower = false,
@@ -226,7 +227,7 @@ fun SampleNodeCompleteFahrenheitPreview() {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 NodeItem(
-                    thisNode = null,
+                    thisNode = localNode,
                     thatNode = sampleNode,
                     distanceUnits = 0,
                     tempInFahrenheit = true,
@@ -246,7 +247,7 @@ fun SampleNodeCompleteImperialPreview() {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 NodeItem(
-                    thisNode = null,
+                    thisNode = localNode,
                     thatNode = sampleNode,
                     distanceUnits = 1,
                     tempInFahrenheit = true,

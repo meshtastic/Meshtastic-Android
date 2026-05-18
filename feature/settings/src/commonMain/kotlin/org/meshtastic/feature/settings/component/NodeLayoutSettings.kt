@@ -178,11 +178,12 @@ fun NodeLayoutSettings(
         )
 
         val previewNode = remember { previewSampleNode() }
+        val localNode = remember { previewLocalNode() }
 
         when (density) {
             NodeListDensity.COMPLETE ->
                 NodeItem(
-                    thisNode = null,
+                    thisNode = localNode,
                     thatNode = previewNode,
                     distanceUnits = 0,
                     tempInFahrenheit = false,
@@ -191,7 +192,7 @@ fun NodeLayoutSettings(
 
             NodeListDensity.COMPACT ->
                 NodeItemCompact(
-                    thisNode = null,
+                    thisNode = localNode,
                     thatNode = previewNode,
                     distanceUnits = 0,
                     showPower = showPower,
@@ -237,4 +238,20 @@ internal fun previewSampleNode(): Node = Node(
     EnvironmentMetrics(temperature = 24.5F, relative_humidity = 45.0F, barometric_pressure = 1013.25F),
     isFavorite = true,
     hopsAway = 1,
+)
+
+/** Local device node used as reference point for distance calculation in previews. */
+@Suppress("MagicNumber")
+internal fun previewLocalNode(): Node = Node(
+    num = 0xDEADBEEF.toInt(),
+    user =
+    User(
+        id = "!deadbeef",
+        long_name = "My Radio",
+        short_name = "MyRd",
+        hw_model = HardwareModel.HELTEC_V3,
+        role = Config.DeviceConfig.Role.CLIENT,
+    ),
+    position = Position(latitude_i = 338000000, longitude_i = -1179000000, altitude = 50, sats_in_view = 10),
+    lastHeard = (nowSeconds - 30).toInt(),
 )
