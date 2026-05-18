@@ -169,7 +169,7 @@ open class DatabaseManager(
 
     private val limitedIo = dispatchers.io.limitedParallelism(4)
 
-    /** Execute [block] with the current DB instance. */
+    /** Execute [block] with the current DB instance. Retries once if the pool closes during a DB switch. */
     @Suppress("TooGenericExceptionCaught")
     override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = withContext(limitedIo) {
         val db = _currentDb.value ?: return@withContext null
@@ -180,16 +180,31 @@ open class DatabaseManager(
         } catch (e: CancellationException) {
             throw e // Preserve structured concurrency cancellation propagation.
         } catch (e: Exception) {
-            // If the connection pool was closed between capturing `db` and executing the query
-            // (e.g., during a database switch), retry once with the current DB instance.
-            if (e.message?.contains("Connection pool is closed") == true) {
-                Logger.w { "withDb: connection pool closed, retrying with current DB" }
-                val retryDb = _currentDb.value ?: return@withContext null
-                block(retryDb)
+            // If the active database switched while we held a reference to the old one,
+            // and the exception indicates a closed pool/connection, retry with the new DB.
+            val retryDb = _currentDb.value
+            if (retryDb != null && retryDb !== db && isDbClosedException(e)) {
+                Logger.w { "withDb: database closed during switch (${e.message}), retrying with current DB" }
+                try {
+                    block(retryDb)
+                } catch (retryEx: Exception) {
+                    retryEx.addSuppressed(e)
+                    throw retryEx
+                }
             } else {
                 throw e
             }
         }
+    }
+
+    private fun isDbClosedException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
+        .any { throwable ->
+            val msg = throwable.message?.lowercase() ?: return@any false
+            "closed" in msg && DB_TERMS.any { it in msg }
+        }
+
+    private companion object {
+        val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
     }
 
     /**
