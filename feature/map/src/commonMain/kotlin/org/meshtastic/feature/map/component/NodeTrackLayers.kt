@@ -49,7 +49,7 @@ private const val SELECTED_OPACITY = 0.9f
 internal fun NodeTrackLayers(
     positions: List<org.meshtastic.proto.Position>,
     selectedPositionTime: Int? = null,
-    onPositionSelected: ((Int) -> Unit)? = null,
+    onSelectPosition: ((Int) -> Unit)? = null,
 ) {
     if (positions.size < 2) return
 
@@ -87,8 +87,8 @@ internal fun NodeTrackLayers(
         strokeColor = const(Color.White),
         onClick = { features ->
             val time = features.firstOrNull()?.properties?.get("time")?.jsonPrimitive?.content?.toIntOrNull()
-            if (time != null && onPositionSelected != null) {
-                onPositionSelected(time)
+            if (time != null && onSelectPosition != null) {
+                onSelectPosition(time)
                 ClickResult.Consume
             } else {
                 ClickResult.Pass

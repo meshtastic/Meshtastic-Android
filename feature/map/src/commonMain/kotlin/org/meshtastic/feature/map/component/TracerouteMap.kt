@@ -53,7 +53,7 @@ private const val BOUNDS_PADDING_DP = 64
 fun TracerouteMap(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
-    onMappableCountChanged: (shown: Int, total: Int) -> Unit,
+    onMappableCountChange: (shown: Int, total: Int) -> Unit,
     modifier: Modifier = Modifier,
     nodes: Map<Int, Node> = emptyMap(),
 ) {
@@ -91,7 +91,7 @@ fun TracerouteMap(
             overlay = tracerouteOverlay,
             nodePositions = tracerouteNodePositions,
             nodes = nodes,
-            onMappableCountChanged = onMappableCountChanged,
+            onMappableCountChange = onMappableCountChange,
         )
     }
 }

@@ -19,6 +19,7 @@ package org.meshtastic.feature.map.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -66,7 +67,7 @@ internal fun TracerouteLayers(
     overlay: TracerouteOverlay?,
     nodePositions: Map<Int, org.meshtastic.proto.Position>,
     nodes: Map<Int, Node>,
-    onMappableCountChanged: (shown: Int, total: Int) -> Unit,
+    onMappableCountChange: (shown: Int, total: Int) -> Unit,
 ) {
     if (overlay == null) return
 
@@ -81,7 +82,8 @@ internal fun TracerouteLayers(
     // Report mappable count via side effect (avoid state updates during composition)
     val mappableCount = routeData.hopFeatures.features.size
     val totalCount = overlay.relatedNodeNums.size
-    LaunchedEffect(mappableCount, totalCount) { onMappableCountChanged(mappableCount, totalCount) }
+    val currentOnMappableCountChange = rememberUpdatedState(onMappableCountChange)
+    LaunchedEffect(mappableCount, totalCount) { currentOnMappableCountChange.value(mappableCount, totalCount) }
 
     // Forward route line
     if (routeData.forwardLine.features.isNotEmpty()) {

@@ -698,7 +698,12 @@ map_reporting_interval_seconds
 map_reporting_summary
 map_select_download_region
 map_start_download
+map_style_dark
+map_style_light
+map_style_osm
+map_style_road_map
 map_style_selection
+map_style_terrain
 map_subDescription
 map_tile_download_estimate
 map_tile_source
@@ -887,6 +892,13 @@ notifications_on_message_receipt
 now
 ntp_server
 number_of_records
+### OFFLINE ###
+offline_download
+offline_download_visible_region
+offline_downloaded_regions
+offline_maps
+offline_saves_tiles
+offline_unnamed_region
 ok_to_mqtt
 okay
 oled_type
@@ -1419,3 +1431,4 @@ wind_speed
 you
 zh_CN
 zh_TW
+zoom_to_fit_all

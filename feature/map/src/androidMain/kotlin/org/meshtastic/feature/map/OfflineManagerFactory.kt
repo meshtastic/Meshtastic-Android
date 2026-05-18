@@ -54,7 +54,7 @@ import org.meshtastic.core.resources.offline_unnamed_region
 import org.meshtastic.core.ui.icon.CloudDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "ModifierMissing")
 @Composable
 actual fun OfflineMapContent(styleUri: String, cameraState: CameraState) {
     val offlineManager = rememberOfflineManager()

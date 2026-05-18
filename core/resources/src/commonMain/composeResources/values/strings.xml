@@ -728,7 +728,12 @@
     <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
     <string name="map_select_download_region">Select download region</string>
     <string name="map_start_download">Start Download</string>
+    <string name="map_style_dark">Dark</string>
+    <string name="map_style_light">Light</string>
+    <string name="map_style_osm">OpenStreetMap</string>
+    <string name="map_style_road_map">Road Map</string>
     <string name="map_style_selection">Map style selection</string>
+    <string name="map_style_terrain">Terrain</string>
     <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
     <string name="map_tile_source">Tile Source</string>
@@ -917,6 +922,13 @@
     <string name="now">Now</string>
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Number of records</string>
+    <!-- OFFLINE -->
+    <string name="offline_download">Download</string>
+    <string name="offline_download_visible_region">Download visible region</string>
+    <string name="offline_downloaded_regions">Downloaded Regions</string>
+    <string name="offline_maps">Offline Maps</string>
+    <string name="offline_saves_tiles">Saves tiles for offline use</string>
+    <string name="offline_unnamed_region">Unnamed Region</string>
     <string name="ok_to_mqtt">Ok to MQTT</string>
     <string name="okay">OK</string>
     <string name="oled_type">OLED type</string>
@@ -1248,53 +1260,6 @@
     <string name="sx126x_rx_boosted_gain">RX Boosted Gain</string>
     <string name="system_settings">System Settings</string>
     <!-- TAK -->
-    <string name="generate_qr_code">Generate QR Code</string>
-    <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
-    <string name="all_time">All</string>
-
-    <string name="bluetooth_permission">Bluetooth</string>
-    <string name="configure_bluetooth_permissions">Configure Bluetooth Permissions</string>
-    <string name="bluetooth_feature_discovery">Discovery</string>
-    <string name="bluetooth_feature_discovery_description">Find and identify Meshtastic devices near you.</string>
-    <string name="bluetooth_feature_config">Configuration</string>
-    <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
-    <string name="map_style_selection">Map style selection</string>
-    <string name="map_style_osm">OpenStreetMap</string>
-    <string name="map_style_light">Light</string>
-    <string name="map_style_terrain">Terrain</string>
-    <string name="map_style_road_map">Road Map</string>
-    <string name="map_style_dark">Dark</string>
-    <string name="offline_maps">Offline Maps</string>
-    <string name="offline_download">Download</string>
-    <string name="offline_download_visible_region">Download visible region</string>
-    <string name="offline_saves_tiles">Saves tiles for offline use</string>
-    <string name="offline_downloaded_regions">Downloaded Regions</string>
-    <string name="offline_unnamed_region">Unnamed Region</string>
-
-    <string name="local_stats_battery">Battery: %1$d%</string>
-    <string name="local_stats_nodes">Nodes: %1$d online / %2$d total</string>
-    <string name="local_stats_uptime">Uptime: %1$s</string>
-    <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
-    <string name="local_stats_traffic">Traffic: TX %1$d / RX %2$d (D: %3$d)</string>
-    <string name="local_stats_relays">Relays: %1$d (Canceled: %2$d)</string>
-    <string name="local_stats_diagnostics_prefix">Diagnostics: %1$s</string>
-    <string name="local_stats_noise">Noise %1$d dBm</string>
-    <string name="local_stats_bad">Bad %1$d</string>
-    <string name="local_stats_dropped">Dropped %1$d</string>
-    <string name="local_stats_heap">Heap</string>
-    <string name="local_stats_heap_value">%1$d / %2$d</string>
-    <string name="local_stats_updated_at">%1$s</string>
-    <string name="powered">Powered</string>
-    <string name="refresh">Refresh</string>
-    <string name="updated">Updated</string>
-
-    <!-- Network Map Layers -->
-    <string name="add_network_layer">Add Network Layer</string>
-    <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml or .geojson</string>
-
-    <string name="local_mbtiles_file">Local MBTiles File</string>
-    <string name="add_local_mbtiles_file">Add Local MBTiles File</string>
-
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">TAK Configuration</string>
     <string name="tak_role">Member Role</string>
@@ -1457,6 +1422,7 @@
     <string name="warning">Warning</string>
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_edit">Edit waypoint</string>
+    <string name="waypoint_lock_to_my_node">Lock to my node</string>
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %1$s</string>
     <string name="weight">Weight</string>

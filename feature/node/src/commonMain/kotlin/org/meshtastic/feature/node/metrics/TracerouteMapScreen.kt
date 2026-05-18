@@ -118,7 +118,7 @@ private fun TracerouteMapScaffold(
             TracerouteMap(
                 tracerouteOverlay = overlay,
                 tracerouteNodePositions = snapshotPositions,
-                onMappableCountChanged = { shown: Int, total: Int ->
+                onMappableCountChange = { shown: Int, total: Int ->
                     tracerouteNodesShown = shown
                     tracerouteNodesTotal = total
                 },

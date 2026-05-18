@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -121,10 +122,10 @@ fun MaplibreMapContent(
     modifier: Modifier = Modifier,
     gestureOptions: GestureOptions = GestureOptions.Standard,
     styleState: StyleState = rememberStyleState(),
-    onCameraMoved: (CameraPosition) -> Unit = {},
+    onCameraMove: (CameraPosition) -> Unit = {},
     onWaypointClick: (Int) -> Unit = {},
-    onMapLoadFinished: () -> Unit = {},
-    onMapLoadFailed: (String?) -> Unit = {},
+    onMapLoad: () -> Unit = {},
+    onMapLoadFail: (String?) -> Unit = {},
     locationState: UserLocationState? = null,
 ) {
     MaplibreMap(
@@ -137,8 +138,8 @@ fun MaplibreMapContent(
             onMapLongClick(position)
             ClickResult.Consume
         },
-        onMapLoadFinished = onMapLoadFinished,
-        onMapLoadFailed = onMapLoadFailed,
+        onMapLoadFinished = onMapLoad,
+        onMapLoadFailed = onMapLoadFail,
     ) {
         // --- Terrain hillshade overlay ---
         if (showHillshade) {
@@ -172,9 +173,10 @@ fun MaplibreMapContent(
     }
 
     // Persist camera position when it stops moving
+    val currentOnCameraMove = rememberUpdatedState(onCameraMove)
     LaunchedEffect(cameraState.isCameraMoving) {
         if (!cameraState.isCameraMoving) {
-            onCameraMoved(cameraState.position)
+            currentOnCameraMove.value(cameraState.position)
         }
     }
 }
@@ -216,7 +218,7 @@ private fun NodeMarkerLayers(
                 cameraState.animateTo(
                     cameraState.position.copy(
                         target = target,
-                        zoom = cameraState.position.zoom + CLUSTER_ZOOM_INCREMENT,
+                        zoom = minOf(cameraState.position.zoom + CLUSTER_ZOOM_INCREMENT, PRECISION_ZOOM_MAX.toDouble()),
                     ),
                 )
             }

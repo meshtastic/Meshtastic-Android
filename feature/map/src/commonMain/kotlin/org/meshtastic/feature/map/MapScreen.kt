@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,8 +72,8 @@ private val MAP_OVERLAY_PADDING = 16.dp
 fun MapScreen(
     onClickNodeChip: (Int) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: MapViewModel,
+    modifier: Modifier = Modifier,
     waypointId: Int? = null,
 ) {
     val ourNodeInfo by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
@@ -163,7 +163,7 @@ fun MapScreen(
                 modifier = Modifier.fillMaxSize(),
                 gestureOptions = gestureOptions,
                 styleState = styleState,
-                onCameraMoved = { position -> viewModel.saveCameraPosition(position) },
+                onCameraMove = { position -> viewModel.saveCameraPosition(position) },
                 onWaypointClick = { wpId ->
                     editingWaypointId = wpId
                     longPressPosition = null
@@ -235,10 +235,12 @@ fun MapScreen(
                                 // TrackBearing → TrackNorth
                                 bearingUpdate = BearingUpdate.ALWAYS_NORTH
                             }
+
                             BearingUpdate.ALWAYS_NORTH -> {
                                 // TrackNorth → Off
                                 isLocationTrackingEnabled = false
                             }
+
                             BearingUpdate.IGNORE -> {
                                 isLocationTrackingEnabled = false
                             }

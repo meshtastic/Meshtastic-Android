@@ -67,7 +67,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 positions = positions,
                 modifier = modifier,
                 selectedPositionTime = selectedTime,
-                onPositionSelected = { time -> onPointSelected(time.toDouble()) },
+                onSelectPosition = { time -> onPointSelected(time.toDouble()) },
             )
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->

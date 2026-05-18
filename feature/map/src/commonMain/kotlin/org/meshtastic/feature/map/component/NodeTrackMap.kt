@@ -39,8 +39,8 @@ private const val BOUNDS_PADDING_DP = 48
 /**
  * Embeddable position-track map showing a polyline with markers for the given positions.
  *
- * Supports synchronized selection: [selectedPositionTime] highlights the corresponding marker and [onPositionSelected]
- * is called when a marker is tapped, passing the `Position.time` for the host screen to synchronize its card list.
+ * Supports synchronized selection: [selectedPositionTime] highlights the corresponding marker and [onSelectPosition] is
+ * called when a marker is tapped, passing the `Position.time` for the host screen to synchronize its card list.
  *
  * Replaces both the Google Maps and OSMDroid flavor-specific NodeTrackMap implementations.
  */
@@ -49,7 +49,7 @@ fun NodeTrackMap(
     positions: List<Position>,
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
-    onPositionSelected: ((Int) -> Unit)? = null,
+    onSelectPosition: ((Int) -> Unit)? = null,
 ) {
     val geoPositions =
         remember(positions) { positions.mapNotNull { pos -> toGeoPositionOrNull(pos.latitude_i, pos.longitude_i) } }
@@ -82,7 +82,7 @@ fun NodeTrackMap(
         NodeTrackLayers(
             positions = positions,
             selectedPositionTime = selectedPositionTime,
-            onPositionSelected = onPositionSelected,
+            onSelectPosition = onSelectPosition,
         )
     }
 }

@@ -263,7 +263,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)
 
-    googleImplementation(libs.dd.sdk.android.compose)
     googleImplementation(libs.dd.sdk.android.logs)
     googleImplementation(libs.dd.sdk.android.rum)
     googleImplementation(libs.dd.sdk.android.session.replay)
