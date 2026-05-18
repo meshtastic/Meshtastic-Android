@@ -715,8 +715,10 @@
     <string name="map_download_complete">Download complete!</string>
     <string name="map_download_errors">Download complete with %1$d errors</string>
     <string name="map_download_region">Download Region</string>
+    <string name="map_empty_state">No nodes with position data</string>
     <string name="map_filter">Map Filter\n</string>
     <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
+    <string name="map_load_error">Map failed to load</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Last heard: %2$s&lt;br&gt;Last position: %3$s&lt;br&gt;Battery: %4$s</string>
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
@@ -727,6 +729,7 @@
     <string name="map_reporting_interval_seconds">Map reporting interval (seconds)</string>
     <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
     <string name="map_select_download_region">Select download region</string>
+    <string name="map_showing_filtered">Showing %1$d of %2$d nodes</string>
     <string name="map_start_download">Start Download</string>
     <string name="map_style_dark">Dark</string>
     <string name="map_style_light">Light</string>
@@ -1420,11 +1423,14 @@
     <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration</string>
     <string name="wake_on_tap_or_motion">Wake on tap or motion</string>
     <string name="warning">Warning</string>
+    <!-- WAYPOINT -->
     <string name="waypoint_delete">Delete waypoint?</string>
+    <string name="waypoint_deleted">Waypoint deleted</string>
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_lock_to_my_node">Lock to my node</string>
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %1$s</string>
+    <string name="waypoint_sent">Waypoint sent</string>
     <string name="weight">Weight</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi Options</string>

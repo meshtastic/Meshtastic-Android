@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,9 +48,14 @@ import org.maplibre.compose.material3.ExpandingAttributionButton
 import org.maplibre.compose.style.rememberStyleState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map
+import org.meshtastic.core.resources.map_empty_state
+import org.meshtastic.core.resources.map_load_error
+import org.meshtastic.core.resources.waypoint_deleted
+import org.meshtastic.core.resources.waypoint_sent
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.MapEmptyState
 import org.meshtastic.feature.map.component.MapFilterDropdown
 import org.meshtastic.feature.map.component.MapStyleSelector
 import org.meshtastic.feature.map.component.MaplibreMapContent
@@ -79,6 +86,7 @@ fun MapScreen(
     val ourNodeInfo by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
     val filteredNodes by viewModel.filteredNodes.collectAsStateWithLifecycle()
+    val nodesWithPosition by viewModel.nodesWithPosition.collectAsStateWithLifecycle()
     val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val baseStyle by viewModel.baseStyle.collectAsStateWithLifecycle()
@@ -88,6 +96,7 @@ fun MapScreen(
 
     val cameraState = rememberCameraState(firstPosition = viewModel.initialCameraPosition)
     val styleState = rememberStyleState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var filterMenuExpanded by remember { mutableStateOf(false) }
 
@@ -97,6 +106,21 @@ fun MapScreen(
     var editingWaypointId by remember { mutableStateOf<Int?>(null) }
 
     val scope = rememberCoroutineScope()
+
+    // Snackbar messages for map load error
+    val mapLoadErrorMsg = stringResource(Res.string.map_load_error)
+    val waypointSentMsg = stringResource(Res.string.waypoint_sent)
+    val waypointDeletedMsg = stringResource(Res.string.waypoint_deleted)
+
+    // Active filter count for badge
+    val activeFilterCount =
+        remember(filterState) {
+            var count = 0
+            if (filterState.onlyFavorites) count++
+            if (!filterState.showWaypoints) count++
+            if (filterState.lastHeardFilter != LastHeardFilter.Any) count++
+            count
+        }
 
     // Location tracking state: 3-mode cycling (Off → Track → TrackBearing → Off)
     var isLocationTrackingEnabled by remember { mutableStateOf(false) }
@@ -132,6 +156,7 @@ fun MapScreen(
     @Suppress("ViewModelForwarding")
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             MainAppBar(
                 title = stringResource(Res.string.map),
@@ -170,7 +195,16 @@ fun MapScreen(
                     showWaypointDialog = true
                 },
                 locationState = if (locationAvailable) locationState else null,
+                onMapLoadFail = { _ -> scope.launch { snackbarHostState.showSnackbar(mapLoadErrorMsg) } },
             )
+
+            // Empty state when no nodes have positions
+            if (nodesWithPosition.isEmpty()) {
+                MapEmptyState(
+                    message = stringResource(Res.string.map_empty_state),
+                    modifier = Modifier.align(Alignment.Center),
+                )
+            }
 
             // Auto-pan camera when location tracking is enabled
             if (locationAvailable) {
@@ -197,6 +231,7 @@ fun MapScreen(
                 bearing = cameraState.position.bearing.toFloat(),
                 onCompassClick = { scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0)) } },
                 followPhoneBearing = isLocationTrackingEnabled && bearingUpdate == BearingUpdate.TRACK_LOCATION,
+                activeFilterCount = activeFilterCount,
                 filterDropdownContent = {
                     MapFilterDropdown(
                         expanded = filterMenuExpanded,
@@ -286,8 +321,15 @@ fun MapScreen(
                     existingWaypoint = editingWaypoint,
                     position = longPressPosition,
                 )
+                scope.launch { snackbarHostState.showSnackbar(waypointSentMsg) }
             },
-            onDelete = editingWaypoint?.let { wpt -> { viewModel.deleteWaypoint(wpt.id) } },
+            onDelete =
+            editingWaypoint?.let { wpt ->
+                {
+                    viewModel.deleteWaypoint(wpt.id)
+                    scope.launch { snackbarHostState.showSnackbar(waypointDeletedMsg) }
+                }
+            },
             initialName = editingWaypoint?.name ?: "",
             initialDescription = editingWaypoint?.description ?: "",
             initialIcon = editingWaypoint?.icon ?: 0,

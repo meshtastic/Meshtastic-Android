@@ -21,11 +21,15 @@ package org.meshtastic.feature.map.component
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -70,6 +74,7 @@ fun MapControlsOverlay(
     bearing: Float = 0f,
     onCompassClick: () -> Unit = {},
     followPhoneBearing: Boolean = false,
+    activeFilterCount: Int = 0,
     filterDropdownContent: @Composable () -> Unit = {},
     mapTypeContent: @Composable () -> Unit = {},
     layersContent: @Composable () -> Unit = {},
@@ -88,13 +93,23 @@ fun MapControlsOverlay(
         // Compass
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
 
-        // Filter button + dropdown
+        // Filter button + dropdown with badge
         Box {
-            MapButton(
-                icon = MeshtasticIcons.Tune,
-                contentDescription = stringResource(Res.string.map_filter),
-                onClick = onToggleFilterMenu,
-            )
+            if (activeFilterCount > 0) {
+                BadgedBox(badge = { Badge { Text(activeFilterCount.toString()) } }) {
+                    MapButton(
+                        icon = MeshtasticIcons.Tune,
+                        contentDescription = stringResource(Res.string.map_filter),
+                        onClick = onToggleFilterMenu,
+                    )
+                }
+            } else {
+                MapButton(
+                    icon = MeshtasticIcons.Tune,
+                    contentDescription = stringResource(Res.string.map_filter),
+                    onClick = onToggleFilterMenu,
+                )
+            }
             filterDropdownContent()
         }
 

@@ -685,8 +685,10 @@ map_clear_tiles
 map_download_complete
 map_download_errors
 map_download_region
+map_empty_state
 map_filter
 map_layer_formats
+map_load_error
 map_node_popup_details
 map_offline_manager
 map_purge_fail
@@ -697,6 +699,7 @@ map_reporting_consent_text
 map_reporting_interval_seconds
 map_reporting_summary
 map_select_download_region
+map_showing_filtered
 map_start_download
 map_style_dark
 map_style_light
@@ -1375,10 +1378,14 @@ voltage
 wait_for_bluetooth_duration_seconds
 wake_on_tap_or_motion
 warning
+### WAYPOINT ###
 waypoint_delete
+waypoint_deleted
 waypoint_edit
+waypoint_lock_to_my_node
 waypoint_new
 waypoint_received
+waypoint_sent
 weight
 ### WIFI ###
 wifi_config
