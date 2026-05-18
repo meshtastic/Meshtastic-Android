@@ -16,9 +16,16 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -97,6 +104,9 @@ private const val CLUSTER_OPACITY = 0.85f
 private const val LABEL_OFFSET_EM = 1.5f
 private const val CLUSTER_ZOOM_INCREMENT = 2.0
 private const val HILLSHADE_EXAGGERATION = 0.5f
+private const val PULSE_DURATION_MS = 1500
+private const val PULSE_MAX_RADIUS_DP = 14f
+private const val PULSE_START_OPACITY = 0.5f
 
 /** Free Terrain Tiles (Terrarium encoding) hosted on AWS. No API key required. */
 private val TERRAIN_TILES = listOf("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png")
@@ -199,6 +209,16 @@ private fun NodeMarkerLayers(
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
     val clusterLabelColor = MaterialTheme.colorScheme.onPrimary
 
+    // Pulsing ring animation for online nodes
+    val pulseTransition = rememberInfiniteTransition(label = "node-pulse")
+    val pulseProgress by
+        pulseTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(tween(PULSE_DURATION_MS, easing = LinearEasing), RepeatMode.Restart),
+            label = "pulse-progress",
+        )
+
     val nodesSource =
         rememberGeoJsonSource(
             data = GeoJsonData.Features(featureCollection),
@@ -239,6 +259,18 @@ private fun NodeMarkerLayers(
         textField = feature["point_count"].asString(),
         textColor = const(clusterLabelColor),
         textSize = const(1.2f.em),
+    )
+
+    // Pulsing ring behind online nodes — animated radius expanding outward with fading opacity
+    val pulseRadius = (NODE_MARKER_RADIUS.value + (PULSE_MAX_RADIUS_DP - NODE_MARKER_RADIUS.value) * pulseProgress).dp
+    val pulseOpacity = PULSE_START_OPACITY * (1f - pulseProgress)
+    CircleLayer(
+        id = "node-pulse-ring",
+        source = nodesSource,
+        filter = feature["is_online"].convertToBoolean(),
+        radius = const(pulseRadius),
+        color = const(OnlineStrokeColor),
+        opacity = const(pulseOpacity),
     )
 
     // Individual node markers with per-node background color and online-status stroke

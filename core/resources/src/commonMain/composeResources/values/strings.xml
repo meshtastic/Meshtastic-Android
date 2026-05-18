@@ -736,6 +736,7 @@
     <string name="map_style_light">Light</string>
     <string name="map_style_osm">OpenStreetMap</string>
     <string name="map_style_road_map">Road Map</string>
+    <string name="map_style_satellite">Satellite</string>
     <string name="map_style_selection">Map style selection</string>
     <string name="map_style_terrain">Terrain</string>
     <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>

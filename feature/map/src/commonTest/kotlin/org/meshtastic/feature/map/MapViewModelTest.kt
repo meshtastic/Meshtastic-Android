@@ -28,7 +28,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.maplibre.compose.style.BaseStyle
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeMapCameraPrefs
 import org.meshtastic.core.testing.FakeMapPrefs
@@ -141,7 +140,7 @@ class MapViewModelTest {
     fun baseStyleDefaultsToOpenStreetMap() = runTest(testDispatcher) {
         viewModel.baseStyle.test {
             val style = awaitItem()
-            assertEquals(BaseStyle.Uri(MapStyle.OpenStreetMap.styleUri), style)
+            assertEquals(MapStyle.OpenStreetMap.toBaseStyle(), style)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -166,7 +165,7 @@ class MapViewModelTest {
 
             viewModel.selectMapStyle(MapStyle.Dark)
             val darkStyle = awaitItem()
-            assertEquals(BaseStyle.Uri(MapStyle.Dark.styleUri), darkStyle)
+            assertEquals(MapStyle.Dark.toBaseStyle(), darkStyle)
 
             cancelAndIgnoreRemainingEvents()
         }
@@ -177,7 +176,7 @@ class MapViewModelTest {
         // selectedStyleUri defaults to "" in FakeMapCameraPrefs
         viewModel.baseStyle.test {
             val style = awaitItem()
-            assertEquals(BaseStyle.Uri(MapStyle.OpenStreetMap.styleUri), style)
+            assertEquals(MapStyle.OpenStreetMap.toBaseStyle(), style)
             cancelAndIgnoreRemainingEvents()
         }
     }

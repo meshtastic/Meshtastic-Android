@@ -25,12 +25,19 @@ import kotlin.test.assertTrue
 class MapStyleTest {
 
     @Test
-    fun toBaseStyle_returnsUriWithCorrectStyleUri() {
-        for (style in MapStyle.entries) {
+    fun toBaseStyle_returnsUriForVectorStyles() {
+        for (style in MapStyle.entries.filter { it != MapStyle.Satellite }) {
             val baseStyle = style.toBaseStyle()
             assertIs<BaseStyle.Uri>(baseStyle)
             assertEquals(style.styleUri, baseStyle.uri)
         }
+    }
+
+    @Test
+    fun toBaseStyle_returnsJsonForSatellite() {
+        val baseStyle = MapStyle.Satellite.toBaseStyle()
+        assertIs<BaseStyle.Json>(baseStyle)
+        assertTrue(baseStyle.json.contains("esri-satellite"))
     }
 
     @Test

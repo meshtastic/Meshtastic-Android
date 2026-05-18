@@ -706,6 +706,7 @@ map_style_dark
 map_style_light
 map_style_osm
 map_style_road_map
+map_style_satellite
 map_style_selection
 map_style_terrain
 map_subDescription

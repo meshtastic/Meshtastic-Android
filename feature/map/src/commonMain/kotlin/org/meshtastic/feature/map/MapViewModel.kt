@@ -73,17 +73,15 @@ class MapViewModel(
                 bearing = mapCameraPrefs.cameraBearing.value.toDouble(),
             )
 
-    /** Active map base style. */
-    val baseStyle: StateFlow<BaseStyle> =
-        mapCameraPrefs.selectedStyleUri
-            .map { uri -> if (uri.isBlank()) MapStyle.OpenStreetMap.toBaseStyle() else BaseStyle.Uri(uri) }
-            .stateInWhileSubscribed(MapStyle.OpenStreetMap.toBaseStyle())
-
     /** Currently selected map style enum index. */
     val selectedMapStyle: StateFlow<MapStyle> =
         mapCameraPrefs.selectedStyleUri
             .map { uri -> MapStyle.entries.find { it.styleUri == uri } ?: MapStyle.OpenStreetMap }
             .stateInWhileSubscribed(MapStyle.OpenStreetMap)
+
+    /** Active map base style derived from the selected [MapStyle]. */
+    val baseStyle: StateFlow<BaseStyle> =
+        selectedMapStyle.map { it.toBaseStyle() }.stateInWhileSubscribed(MapStyle.OpenStreetMap.toBaseStyle())
 
     /** Persist camera position to DataStore. */
     fun saveCameraPosition(position: CameraPosition) {

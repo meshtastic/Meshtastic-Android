@@ -23,12 +23,13 @@ import org.meshtastic.core.resources.map_style_dark
 import org.meshtastic.core.resources.map_style_light
 import org.meshtastic.core.resources.map_style_osm
 import org.meshtastic.core.resources.map_style_road_map
+import org.meshtastic.core.resources.map_style_satellite
 import org.meshtastic.core.resources.map_style_terrain
 
 /**
  * Predefined map tile styles available in the app.
  *
- * Uses free tile sources that do not require API keys. All styles are vector-based and work across platforms.
+ * Uses free tile sources that do not require API keys.
  */
 enum class MapStyle(val label: StringResource, val styleUri: String) {
     /** OpenStreetMap default tiles via OpenFreeMap Liberty style. */
@@ -45,7 +46,25 @@ enum class MapStyle(val label: StringResource, val styleUri: String) {
 
     /** Dark mode style via OpenFreeMap Fiord. */
     Dark(label = Res.string.map_style_dark, styleUri = "https://tiles.openfreemap.org/styles/fiord"),
+
+    /** Satellite imagery via Esri World Imagery (free for non-commercial use). */
+    Satellite(label = Res.string.map_style_satellite, styleUri = SATELLITE_STYLE_URI),
     ;
 
-    fun toBaseStyle(): BaseStyle = BaseStyle.Uri(styleUri)
+    fun toBaseStyle(): BaseStyle = when (this) {
+        Satellite -> BaseStyle.Json(SATELLITE_STYLE_JSON)
+        else -> BaseStyle.Uri(styleUri)
+    }
 }
+
+/** Stable URI used as persistence key for satellite style selection. */
+private const val SATELLITE_STYLE_URI = "satellite://esri-world-imagery"
+
+/**
+ * Inline MapLibre style JSON for raster satellite imagery.
+ *
+ * Uses Esri World Imagery tiles which are free for non-commercial and educational use.
+ */
+@Suppress("MaxLineLength")
+private const val SATELLITE_STYLE_JSON: String =
+    """{"version":8,"name":"Satellite","sources":{"esri-satellite":{"type":"raster","tiles":["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],"tileSize":256,"maxzoom":18,"attribution":"Esri, Maxar, Earthstar Geographics"}},"layers":[{"id":"satellite","type":"raster","source":"esri-satellite"}]}"""
