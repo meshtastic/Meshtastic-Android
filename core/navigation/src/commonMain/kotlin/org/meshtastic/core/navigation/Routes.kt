@@ -96,11 +96,9 @@ sealed interface NodeDetailRoute : Route {
 
 @Serializable
 sealed interface SettingsRoute : Route {
-    @Serializable data class SettingsGraph(val destNum: Int? = null) :
+    @Serializable data class Settings(val destNum: Int? = null) :
         SettingsRoute,
         Graph
-
-    @Serializable data class Settings(val destNum: Int? = null) : SettingsRoute
 
     @Serializable data object DeviceConfiguration : SettingsRoute
 

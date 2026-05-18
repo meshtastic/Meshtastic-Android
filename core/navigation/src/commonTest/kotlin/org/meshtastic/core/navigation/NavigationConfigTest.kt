@@ -73,8 +73,6 @@ class NavigationConfigTest {
             NodeDetailRoute.PaxMetrics(destNum = 100),
             NodeDetailRoute.NeighborInfoLog(destNum = 100),
             // SettingsRoute
-            SettingsRoute.SettingsGraph(),
-            SettingsRoute.SettingsGraph(destNum = 999),
             SettingsRoute.Settings(),
             SettingsRoute.Settings(destNum = 999),
             SettingsRoute.DeviceConfiguration,
@@ -185,7 +183,6 @@ class NavigationConfigTest {
                 MapRoute.Map() to MapRoute.Map(waypointId = null),
                 NodesRoute.NodeDetailGraph() to NodesRoute.NodeDetailGraph(destNum = null),
                 NodesRoute.NodeDetail() to NodesRoute.NodeDetail(destNum = null),
-                SettingsRoute.SettingsGraph() to SettingsRoute.SettingsGraph(destNum = null),
                 SettingsRoute.Settings() to SettingsRoute.Settings(destNum = null),
                 WifiProvisionRoute.WifiProvision() to WifiProvisionRoute.WifiProvision(address = null),
             )

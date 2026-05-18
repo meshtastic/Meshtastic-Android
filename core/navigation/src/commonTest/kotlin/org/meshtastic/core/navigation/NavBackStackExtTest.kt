@@ -37,10 +37,10 @@ class NavBackStackExtTest {
     @Test
     fun `replaceLast on single-element list replaces that element`() {
         val stack = mutableListOf<NavKey>(NodesRoute.NodesGraph)
-        stack.replaceLast(SettingsRoute.SettingsGraph())
+        stack.replaceLast(SettingsRoute.Settings())
 
         assertEquals(1, stack.size)
-        assertEquals(SettingsRoute.SettingsGraph(), stack[0])
+        assertEquals(SettingsRoute.Settings(), stack[0])
     }
 
     @Test
@@ -69,7 +69,7 @@ class NavBackStackExtTest {
     @Test
     fun `replaceAll replaces entire stack with new routes`() {
         val stack = mutableListOf<NavKey>(NodesRoute.NodesGraph, NodesRoute.Nodes)
-        val newRoutes = listOf<NavKey>(SettingsRoute.SettingsGraph(), SettingsRoute.About)
+        val newRoutes = listOf<NavKey>(SettingsRoute.Settings(), SettingsRoute.About)
 
         stack.replaceAll(newRoutes)
 
@@ -79,12 +79,12 @@ class NavBackStackExtTest {
     @Test
     fun `replaceAll with shorter list trims excess elements`() {
         val stack = mutableListOf<NavKey>(NodesRoute.NodesGraph, NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 42))
-        val newRoutes = listOf<NavKey>(SettingsRoute.SettingsGraph())
+        val newRoutes = listOf<NavKey>(SettingsRoute.Settings())
 
         stack.replaceAll(newRoutes)
 
         assertEquals(1, stack.size)
-        assertEquals(SettingsRoute.SettingsGraph(), stack[0])
+        assertEquals(SettingsRoute.Settings(), stack[0])
     }
 
     @Test

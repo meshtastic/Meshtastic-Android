@@ -281,31 +281,31 @@ class DeepLinkRouterTest {
     // region settings
 
     @Test
-    fun `settings root returns SettingsGraph`() {
-        assertEquals(listOf(SettingsRoute.SettingsGraph(destNum = null)), route("/settings"))
+    fun `settings root returns Settings`() {
+        assertEquals(listOf(SettingsRoute.Settings(destNum = null)), route("/settings"))
     }
 
     @Test
     fun `settings with destNum`() {
-        assertEquals(listOf(SettingsRoute.SettingsGraph(destNum = 1234)), route("/settings/1234"))
+        assertEquals(listOf(SettingsRoute.Settings(destNum = 1234)), route("/settings/1234"))
     }
 
     @Test
     fun `settings with destNum and sub-route`() {
         assertEquals(
-            listOf(SettingsRoute.SettingsGraph(destNum = 1234), SettingsRoute.About),
+            listOf(SettingsRoute.Settings(destNum = 1234), SettingsRoute.About),
             route("/settings/1234/about"),
         )
     }
 
     @Test
     fun `settings with sub-route without destNum`() {
-        assertEquals(listOf(SettingsRoute.SettingsGraph(destNum = null), SettingsRoute.LoRa), route("/settings/lora"))
+        assertEquals(listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.LoRa), route("/settings/lora"))
     }
 
     @Test
-    fun `settings with unknown sub-route returns SettingsGraph only`() {
-        assertEquals(listOf(SettingsRoute.SettingsGraph(destNum = null)), route("/settings/nonexistent-page"))
+    fun `settings with unknown sub-route returns Settings only`() {
+        assertEquals(listOf(SettingsRoute.Settings(destNum = null)), route("/settings/nonexistent-page"))
     }
 
     @Test
@@ -349,7 +349,7 @@ class DeepLinkRouterTest {
 
         expectedSubRoutes.forEach { (slug, expectedRoute) ->
             assertEquals(
-                listOf(SettingsRoute.SettingsGraph(destNum = null), expectedRoute),
+                listOf(SettingsRoute.Settings(destNum = null), expectedRoute),
                 route("/settings/$slug"),
                 "Settings sub-route '$slug' did not resolve to $expectedRoute",
             )

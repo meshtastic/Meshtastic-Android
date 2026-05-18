@@ -77,9 +77,6 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: In
     val destNum = destNumOverride
         ?: remember(backStack.toList()) {
             backStack.lastOrNull { it is SettingsRoute.Settings }?.let { (it as SettingsRoute.Settings).destNum }
-                ?: backStack
-                    .lastOrNull { it is SettingsRoute.SettingsGraph }
-                    ?.let { (it as SettingsRoute.SettingsGraph).destNum }
         }
     return koinViewModel<RadioConfigViewModel>(key = destNum?.toString()) {
         parametersOf(SavedStateHandle(mapOf("destNum" to destNum)))
@@ -88,22 +85,14 @@ fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>, destNumOverride: In
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
-    entry<SettingsRoute.SettingsGraph> { args ->
-        SettingsMainScreen(
-            settingsViewModel = koinViewModel(),
-            radioConfigViewModel = getRadioConfigViewModel(backStack, destNumOverride = args.destNum),
-            onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
-            onNavigate = { backStack.add(it) },
-        )
-    }
-
     entry<SettingsRoute.Settings> { args ->
+        val isTabRoot = backStack.firstOrNull() == args
         SettingsMainScreen(
             settingsViewModel = koinViewModel(),
             radioConfigViewModel = getRadioConfigViewModel(backStack, destNumOverride = args.destNum),
             onClickNodeChip = { backStack.add(NodesRoute.NodeDetail(it)) },
             onNavigate = { backStack.add(it) },
-            onBack = dropUnlessResumed { backStack.removeLastOrNull() },
+            onBack = if (isTabRoot) null else dropUnlessResumed { backStack.removeLastOrNull() },
         )
     }
 

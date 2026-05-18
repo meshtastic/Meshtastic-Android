@@ -153,14 +153,14 @@ object DeepLinkRouter {
         }
 
         if (subRouteStr == null) {
-            return listOf(SettingsRoute.SettingsGraph(destNum))
+            return listOf(SettingsRoute.Settings(destNum))
         }
 
         val subRoute = settingsSubRoutes[subRouteStr]
         return if (subRoute != null) {
-            listOf(SettingsRoute.SettingsGraph(destNum), subRoute)
+            listOf(SettingsRoute.Settings(destNum), subRoute)
         } else {
-            listOf(SettingsRoute.SettingsGraph(destNum))
+            listOf(SettingsRoute.Settings(destNum))
         }
     }
 

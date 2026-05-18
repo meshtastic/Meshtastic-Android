@@ -44,7 +44,7 @@ class DesktopTopLevelDestinationParityTest {
                 ContactsRoute.ContactsGraph::class,
                 NodesRoute.NodesGraph::class,
                 MapRoute.Map::class,
-                SettingsRoute.SettingsGraph::class,
+                SettingsRoute.Settings::class,
                 ConnectionsRoute.ConnectionsGraph::class,
             )
 
