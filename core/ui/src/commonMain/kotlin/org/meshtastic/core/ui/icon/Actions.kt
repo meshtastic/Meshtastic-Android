@@ -46,6 +46,7 @@ import org.meshtastic.core.resources.ic_qr_code
 import org.meshtastic.core.resources.ic_qr_code_2
 import org.meshtastic.core.resources.ic_qr_code_scanner
 import org.meshtastic.core.resources.ic_refresh
+import org.meshtastic.core.resources.ic_remove
 import org.meshtastic.core.resources.ic_reply
 import org.meshtastic.core.resources.ic_restart_alt
 import org.meshtastic.core.resources.ic_restore
@@ -136,3 +137,5 @@ val MeshtasticIcons.BarChart: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_bar_chart)
 val MeshtasticIcons.List: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_list)
+val MeshtasticIcons.Remove: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_remove)

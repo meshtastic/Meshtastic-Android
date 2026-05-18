@@ -714,6 +714,8 @@ map_type_hybrid
 map_type_normal
 map_type_satellite
 map_type_terrain
+map_zoom_in
+map_zoom_out
 mark_as_read
 match_all
 match_any

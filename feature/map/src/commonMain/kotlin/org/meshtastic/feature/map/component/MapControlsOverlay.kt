@@ -19,33 +19,38 @@
 package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map_filter
+import org.meshtastic.core.resources.map_zoom_in
+import org.meshtastic.core.resources.map_zoom_out
 import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.toggle_my_position
+import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
 import org.meshtastic.core.ui.icon.NearMe
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Remove
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import kotlin.math.abs
@@ -66,7 +71,7 @@ import kotlin.math.abs
  * @param onRefresh Callback when the refresh button is clicked.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LongMethod")
 @Composable
 fun MapControlsOverlay(
     onToggleFilterMenu: () -> Unit,
@@ -84,68 +89,86 @@ fun MapControlsOverlay(
     showRefresh: Boolean = false,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
+    onZoomIn: () -> Unit = {},
+    onZoomOut: () -> Unit = {},
 ) {
-    HorizontalFloatingToolbar(
-        expanded = true,
-        modifier = modifier,
-        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(),
-    ) {
-        // Compass
-        CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
+    Column(modifier = modifier, horizontalAlignment = Alignment.End) {
+        HorizontalFloatingToolbar(expanded = true, colors = FloatingToolbarDefaults.standardFloatingToolbarColors()) {
+            // Compass
+            CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
 
-        // Filter button + dropdown with badge
-        Box {
-            if (activeFilterCount > 0) {
-                BadgedBox(badge = { Badge { Text(activeFilterCount.toString()) } }) {
+            // Filter button + dropdown with badge
+            Box {
+                if (activeFilterCount > 0) {
+                    BadgedBox(badge = { Badge { Text(activeFilterCount.toString()) } }) {
+                        MapButton(
+                            icon = MeshtasticIcons.Tune,
+                            contentDescription = stringResource(Res.string.map_filter),
+                            onClick = onToggleFilterMenu,
+                        )
+                    }
+                } else {
                     MapButton(
                         icon = MeshtasticIcons.Tune,
                         contentDescription = stringResource(Res.string.map_filter),
                         onClick = onToggleFilterMenu,
                     )
                 }
-            } else {
-                MapButton(
-                    icon = MeshtasticIcons.Tune,
-                    contentDescription = stringResource(Res.string.map_filter),
-                    onClick = onToggleFilterMenu,
-                )
+                filterDropdownContent()
             }
-            filterDropdownContent()
-        }
 
-        // Map type selector (flavor-specific)
-        mapTypeContent()
+            // Map type selector (flavor-specific)
+            mapTypeContent()
 
-        // Layers button (flavor-specific)
-        layersContent()
+            // Layers button (flavor-specific)
+            layersContent()
 
-        // Refresh button (optional)
-        if (showRefresh) {
-            if (isRefreshing) {
-                Box(modifier = Modifier.padding(8.dp)) {
-                    CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
+            // Refresh button (optional)
+            if (showRefresh) {
+                if (isRefreshing) {
+                    Box(modifier = Modifier.padding(8.dp)) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    }
+                } else {
+                    MapButton(
+                        icon = MeshtasticIcons.Refresh,
+                        contentDescription = stringResource(Res.string.refresh),
+                        onClick = onRefresh,
+                    )
                 }
-            } else {
-                MapButton(
-                    icon = MeshtasticIcons.Refresh,
-                    contentDescription = stringResource(Res.string.refresh),
-                    onClick = onRefresh,
-                )
             }
+
+            // Location tracking button — 3 states: Off (MyLocation), Tracking (NearMe), TrackingNorth (LocationOn)
+            MapButton(
+                icon =
+                when {
+                    !isLocationTrackingEnabled -> MeshtasticIcons.MyLocation
+                    isTrackingBearing -> MeshtasticIcons.NearMe
+                    else -> MeshtasticIcons.LocationOn
+                },
+                contentDescription = stringResource(Res.string.toggle_my_position),
+                iconTint = if (isLocationTrackingEnabled) MaterialTheme.colorScheme.primary else null,
+                onClick = onToggleLocationTracking,
+            )
         }
 
-        // Location tracking button — 3 states: Off (MyLocation), Tracking (NearMe), TrackingNorth (LocationOn)
-        MapButton(
-            icon =
-            when {
-                !isLocationTrackingEnabled -> MeshtasticIcons.MyLocation
-                isTrackingBearing -> MeshtasticIcons.NearMe
-                else -> MeshtasticIcons.LocationOn
-            },
-            contentDescription = stringResource(Res.string.toggle_my_position),
-            iconTint = if (isLocationTrackingEnabled) MaterialTheme.colorScheme.primary else null,
-            onClick = onToggleLocationTracking,
-        )
+        // Zoom buttons (useful for desktop/accessibility where pinch isn't natural)
+        HorizontalFloatingToolbar(
+            expanded = true,
+            modifier = Modifier.padding(top = 4.dp),
+            colors = FloatingToolbarDefaults.standardFloatingToolbarColors(),
+        ) {
+            MapButton(
+                icon = MeshtasticIcons.Add,
+                contentDescription = stringResource(Res.string.map_zoom_in),
+                onClick = onZoomIn,
+            )
+            MapButton(
+                icon = MeshtasticIcons.Remove,
+                contentDescription = stringResource(Res.string.map_zoom_out),
+                onClick = onZoomOut,
+            )
+        }
     }
 }
 

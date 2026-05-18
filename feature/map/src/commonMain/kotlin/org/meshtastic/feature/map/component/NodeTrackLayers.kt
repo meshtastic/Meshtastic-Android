@@ -25,6 +25,8 @@ import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.interpolate
+import org.maplibre.compose.expressions.dsl.linear
 import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.layers.CircleLayer
@@ -33,12 +35,13 @@ import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.util.ClickResult
+import org.meshtastic.feature.map.util.lineProgress
 import org.meshtastic.feature.map.util.positionsToLineString
 import org.meshtastic.feature.map.util.positionsToPointFeatures
 
 private val TrackColor = Color(0xFF2196F3)
+private val TrackColorFaded = Color(0x662196F3)
 private val SelectedPointColor = Color(0xFFF44336)
-private const val TRACK_OPACITY = 0.8f
 private const val SELECTED_OPACITY = 0.9f
 
 /**
@@ -62,13 +65,12 @@ internal fun NodeTrackLayers(
             options = GeoJsonOptions(lineMetrics = true),
         )
 
-    // Track line with gradient
+    // Track line with gradient (oldest positions faded → newest positions vivid)
     LineLayer(
         id = "node-track-line",
         source = lineSource,
         width = const(3.dp),
-        color = const(TrackColor), // Blue
-        opacity = const(TRACK_OPACITY),
+        gradient = interpolate(linear(), lineProgress(), 0 to const(TrackColorFaded), 1 to const(TrackColor)),
         cap = const(LineCap.Round),
         join = const(LineJoin.Round),
     )

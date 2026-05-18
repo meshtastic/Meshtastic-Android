@@ -18,6 +18,9 @@ package org.meshtastic.feature.map.util
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.maplibre.compose.expressions.ast.Expression
+import org.maplibre.compose.expressions.ast.FunctionCall
+import org.maplibre.compose.expressions.value.FloatValue
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
@@ -57,3 +60,10 @@ internal fun computeBoundingBox(positions: List<GeoPosition>): BoundingBox? {
         northeast = GeoPosition(longitude = lngs.max(), latitude = lats.max()),
     )
 }
+
+/**
+ * Gets the progress along a line feature, from 0 at the start to 1 at the end. Can only be used with GeoJSON sources
+ * that specify `lineMetrics = true`. Use with [interpolate][org.maplibre.compose.expressions.dsl.interpolate] to create
+ * gradient colors.
+ */
+internal fun lineProgress(): Expression<FloatValue> = FunctionCall.of("line-progress").cast()

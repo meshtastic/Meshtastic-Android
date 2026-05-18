@@ -744,6 +744,8 @@
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satellite</string>
     <string name="map_type_terrain">Terrain</string>
+    <string name="map_zoom_in">Zoom in</string>
+    <string name="map_zoom_out">Zoom out</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="match_all">Match All | Any</string>
     <string name="match_any">Match Any | All</string>

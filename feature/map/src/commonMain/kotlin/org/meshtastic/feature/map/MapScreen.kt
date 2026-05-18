@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -65,6 +66,8 @@ import org.meshtastic.feature.map.util.toGeoPositionOrNull
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 private const val WAYPOINT_ZOOM = 15.0
+private const val MIN_ZOOM = 0.0
+private const val MAX_ZOOM = 24.0
 private val MAP_OVERLAY_PADDING = 16.dp
 
 /**
@@ -249,7 +252,7 @@ fun MapScreen(
                                     }
                                 }
                             val bbox = computeBoundingBox(positions) ?: return@MapFilterDropdown
-                            scope.launch { cameraState.animateTo(bbox) }
+                            scope.launch { cameraState.animateTo(bbox, padding = PaddingValues(48.dp)) }
                         },
                     )
                 },
@@ -280,6 +283,20 @@ fun MapScreen(
                                 isLocationTrackingEnabled = false
                             }
                         }
+                    }
+                },
+                onZoomIn = {
+                    scope.launch {
+                        cameraState.animateTo(
+                            cameraState.position.copy(zoom = minOf(cameraState.position.zoom + 1.0, MAX_ZOOM)),
+                        )
+                    }
+                },
+                onZoomOut = {
+                    scope.launch {
+                        cameraState.animateTo(
+                            cameraState.position.copy(zoom = maxOf(cameraState.position.zoom - 1.0, MIN_ZOOM)),
+                        )
                     }
                 },
             )
