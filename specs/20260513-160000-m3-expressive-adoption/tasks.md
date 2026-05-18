@@ -27,9 +27,9 @@
 
 **Purpose**: Establish expressive theme foundations and shared configuration
 
-- [ ] T001 Add `@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)` to `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Theme.kt`
-- [ ] T002 [P] Add `@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)` to `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Type.kt`
-- [ ] T003 [P] Verify `MaterialExpressiveTheme` and `MotionScheme.expressive()` are applied at root level in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Theme.kt`
+- [X] T001 Add `@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)` to `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Theme.kt`
+- [X] T002 [P] Add `@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)` to `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Type.kt`
+- [X] T003 [P] Verify `MaterialExpressiveTheme` and `MotionScheme.expressive()` are applied at root level in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Theme.kt`
 
 ---
 
@@ -39,13 +39,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Define complete expressive typescale in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Type.kt` with `bodyLarge.fontSize = 16.sp` and `bodyMedium.fontSize = 16.sp` per design standards §5 and contracts/expressive-typography-api.md
-- [ ] T004a [P] Create `LocalReduceMotion` composition local in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Motion.kt` — reads system `Settings.Global.ANIMATOR_DURATION_SCALE` via expect/actual, provides boolean to all composables. Provide from `AppTheme` in `Theme.kt`
-- [ ] T005 [P] Add `hasCompletedSwipeAction: Boolean` field to UserPreferences in `core/datastore/src/commonMain/kotlin/com/geeksville/mesh/datastore/` (DataStore proto/preferences)
-- [ ] T006 [P] Create `SwipeToRevealBox.kt` composable in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SwipeToRevealBox.kt` implementing the full contract from contracts/swipe-to-reveal-api.md (SwipeAnchor enum, SwipeDirection enum, AnchoredDraggableState, spring animations stiffness=300f/dampingRatio=0.7f for return, stiffness=400f/dampingRatio=0.8f for reveal)
-- [ ] T007 [P] Create `rememberSwipeToRevealState` composable function in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SwipeToRevealBox.kt`
-- [ ] T008 [P] Create `Modifier.swipeHint` extension in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SwipeToRevealBox.kt` implementing edge-peek animation (24.dp peek, 400ms spring offset, 1000ms hold, 400ms spring return)
-- [ ] T009 Add reduced-motion support to `SwipeToRevealBox` — instant snap when `LocalReduceMotion.current` is true, and skip hint animation per behavioral contract
+- [X] T004 Define complete expressive typescale in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Type.kt` with `bodyLarge.fontSize = 16.sp` and `bodyMedium.fontSize = 16.sp` per design standards §5 and contracts/expressive-typography-api.md
+- [X] T004a [P] Create `LocalReduceMotion` composition local in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/theme/Motion.kt` — reads system `Settings.Global.ANIMATOR_DURATION_SCALE` via expect/actual, provides boolean to all composables. Provide from `AppTheme` in `Theme.kt`
+- [X] T005 [P] Add `hasCompletedSwipeAction: Boolean` field to UserPreferences in `core/datastore/src/commonMain/kotlin/com/geeksville/mesh/datastore/` (DataStore proto/preferences)
+- [X] T006 [P] Create `SwipeToRevealBox.kt` composable in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SwipeToRevealBox.kt` implementing the full contract from contracts/swipe-to-reveal-api.md (SwipeAnchor enum, SwipeDirection enum, AnchoredDraggableState, spring animations stiffness=300f/dampingRatio=0.7f for return, stiffness=400f/dampingRatio=0.8f for reveal)
+- [X] T007 [P] Create `rememberSwipeToRevealState` composable function in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SwipeToRevealBox.kt`
+- [X] T008 [P] Create `Modifier.swipeHint` extension in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SwipeToRevealBox.kt` implementing edge-peek animation (24.dp peek, 400ms spring offset, 1000ms hold, 400ms spring return)
+- [X] T009 Add reduced-motion support to `SwipeToRevealBox` — instant snap when `LocalReduceMotion.current` is true, and skip hint animation per behavioral contract
 
 **Checkpoint**: Foundation ready — typography, DataStore preference, and SwipeToRevealBox component available for all user stories
 
@@ -59,11 +59,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Apply expressive pill-style indicators to `NavigationBar` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/MeshtasticNavigationSuite.kt` using `NavigationBarItemDefaults` expressive indicator
-- [ ] T011 [P] [US1] Apply expressive pill-style indicators to `NavigationRail` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/MeshtasticNavigationSuite.kt` using `NavigationRailItemDefaults` expressive indicator
-- [ ] T012 [US1] Apply expressive styling to `MainAppBar` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/MainAppBar.kt` — circle-background nav button, expressive `TopAppBarDefaults` colors, and emphasized typography for title
-- [ ] T013 [P] [US1] Verify spring-physics navigation indicator animations are automatically provided by `MotionScheme.expressive()` and complete within 300ms budget (SC-002) — confirm via Layout Inspector animation recording; no additional animation code should be needed per research.md RQ-5
-- [ ] T014 [US1] Add reduced-motion accessibility support to navigation — verify animations are suppressed when system animator duration scale is 0
+- [X] T010 [US1] Apply expressive pill-style indicators to `NavigationBar` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/MeshtasticNavigationSuite.kt` using `NavigationBarItemDefaults` expressive indicator
+- [X] T011 [P] [US1] Apply expressive pill-style indicators to `NavigationRail` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/MeshtasticNavigationSuite.kt` using `NavigationRailItemDefaults` expressive indicator
+- [X] T012 [US1] Apply expressive styling to `MainAppBar` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/MainAppBar.kt` — circle-background nav button, expressive `TopAppBarDefaults` colors, and emphasized typography for title
+- [X] T013 [P] [US1] Verify spring-physics navigation indicator animations are automatically provided by `MotionScheme.expressive()` and complete within 300ms budget (SC-002) — confirm via Layout Inspector animation recording; no additional animation code should be needed per research.md RQ-5
+- [X] T014 [US1] Add reduced-motion accessibility support to navigation — verify animations are suppressed when system animator duration scale is 0
 
 **Checkpoint**: Navigation experience is fully expressive with pill indicators, spring animations, and expressive app bars
 
@@ -77,15 +77,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T015 [P] [US2] Update node detail screen typography in `feature/node/src/commonMain/` — primary metric values use `headlineSmall`, labels use `bodyMedium`, node names use `bodyLargeEmphasized`
-- [ ] T016 [P] [US2] Update message thread typography in `feature/messaging/src/commonMain/` — message body uses `bodyLarge`, timestamps use `labelMedium`, sender names use `bodyLargeEmphasized`
-- [ ] T017 [P] [US2] Update settings/configuration screens typography in `feature/settings/src/commonMain/` — section headers use `titleMediumEmphasized`, preference labels use `bodyLarge`
-- [ ] T018 [P] [US2] Update connections screen typography in `feature/connections/src/commonMain/` — device names use `bodyLargeEmphasized`, status text uses `bodyMedium`
-- [ ] T019 [P] [US2] Update map screen typography in `feature/map/src/commonMain/` — apply appropriate typescale to node labels and info overlays
-- [ ] T020 [P] [US2] Update firmware screen typography in `feature/firmware/src/commonMain/` — version headers use `titleMediumEmphasized`, progress labels use `bodyMedium`
-- [ ] T021 [P] [US2] Update channel configuration typography in `feature/channel/src/commonMain/` — channel names use `titleMediumEmphasized`, descriptions use `bodyMedium`
-- [ ] T022 [P] [US2] Update radio configuration screen typography in `feature/radio/src/commonMain/` — section headers use `titleMediumEmphasized`, labels use `bodyLarge`
-- [ ] T023 [US2] Replace any remaining hardcoded `TextStyle` with `MaterialTheme.typography.*` references across all feature modules (audit pass)
+- [X] T015 [P] [US2] Update node detail screen typography in `feature/node/src/commonMain/` — primary metric values use `headlineSmall`, labels use `bodyMedium`, node names use `bodyLargeEmphasized`
+- [X] T016 [P] [US2] Update message thread typography in `feature/messaging/src/commonMain/` — message body uses `bodyLarge`, timestamps use `labelMedium`, sender names use `bodyLargeEmphasized`
+- [X] T017 [P] [US2] Update settings/configuration screens typography in `feature/settings/src/commonMain/` — section headers use `titleMediumEmphasized`, preference labels use `bodyLarge`
+- [X] T018 [P] [US2] Update connections screen typography in `feature/connections/src/commonMain/` — device names use `bodyLargeEmphasized`, status text uses `bodyMedium`
+- [N/A] T019 [P] [US2] Update map screen typography in `feature/map/src/commonMain/` — apply appropriate typescale to node labels and info overlays
+- [X] T020 [P] [US2] Update firmware screen typography in `feature/firmware/src/commonMain/` — version headers use `titleMediumEmphasized`, progress labels use `bodyMedium`
+- [N/A] T021 [P] [US2] Update channel configuration typography in `feature/channel/src/commonMain/` — channel names use `titleMediumEmphasized`, descriptions use `bodyMedium`
+- [N/A] T022 [P] [US2] Update radio configuration screen typography in `feature/radio/src/commonMain/` — section headers use `titleMediumEmphasized`, labels use `bodyLarge`
+- [X] T023 [US2] Replace any remaining hardcoded `TextStyle` with `MaterialTheme.typography.*` references across all feature modules (audit pass)
 - [ ] T024 [US2] Verify system font-size scaling up to 200% produces no layout clipping across all screens per typography behavioral contract (Dynamic Type scaling)
 
 **Checkpoint**: All screens display consistent expressive typography hierarchy
@@ -100,10 +100,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T025 [P] [US3] Enhance `MenuFAB` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/MenuFAB.kt` — add `PlainTooltip` / `TooltipBox` on long-press for FAB label, apply expressive `FloatingActionButtonDefaults.shape`
-- [ ] T026 [P] [US3] Upgrade `SliderPreference` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SliderPreference.kt` — apply spring-based `animateFloatAsState` for thumb positioning per research.md RQ-2
-- [ ] T027 [P] [US3] Upgrade `AlertDialogs` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/AlertDialogs.kt` — apply expressive shape and motion to dialog enter/exit transitions
-- [ ] T028 [P] [US3] Ensure all progress indicators across feature modules use expressive wavy variants (`CircularWavyProgressIndicator`, `LinearWavyProgressIndicator`) for indeterminate states — audit `feature/firmware/src/commonMain/` and any other modules with progress indicators
+- [X] T025 [P] [US3] Enhance `MenuFAB` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/MenuFAB.kt` — add `PlainTooltip` / `TooltipBox` on long-press for FAB label, apply expressive `FloatingActionButtonDefaults.shape`
+- [X] T026 [P] [US3] Upgrade `SliderPreference` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/SliderPreference.kt` — apply spring-based `animateFloatAsState` for thumb positioning per research.md RQ-2
+- [X] T027 [P] [US3] Upgrade `AlertDialogs` in `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/AlertDialogs.kt` — apply expressive shape and motion to dialog enter/exit transitions
+- [X] T028 [P] [US3] Ensure all progress indicators across feature modules use expressive wavy variants (`CircularWavyProgressIndicator`, `LinearWavyProgressIndicator`) for indeterminate states — audit `feature/firmware/src/commonMain/` and any other modules with progress indicators
 - [X] T029 [P] [US3] Apply expressive button styling (`ButtonDefaults` with expressive shapes) to primary action buttons across `core/ui/src/commonMain/kotlin/com/geeksville/mesh/ui/component/` button composables
 - [X] T030 [P] [US3] Upgrade connection FABs in `feature/connections/src/commonMain/` — apply expressive sizing and tooltip labels
 - [ ] T031 [US3] Verify all expressive component animations maintain 60fps on mid-range device per NFR-001 (manual check with Layout Inspector/animation profiler)
@@ -165,7 +165,7 @@
 - [ ] T051 [P] Update screenshot test reference images for swipe-to-action components (revealed action states)
 - [ ] T052 [P] Review all touched files against Meshtastic design standards — confirm no deviations in typography sizes, color roles, or accessibility
 - [ ] T053 [P] Confirm no logs, telemetry, or config changes expose PII, location data, secrets, or modify `core/proto`
-- [ ] T054 [P] Add `@OptIn(ExperimentalMaterial3ExpressiveApi::class)` annotations at function level in all feature module composables that directly call expressive APIs per research.md RQ-6
+- [X] T054 [P] Add `@OptIn(ExperimentalMaterial3ExpressiveApi::class)` annotations at function level in all feature module composables that directly call expressive APIs per research.md RQ-6
 - [ ] T055 Run constitution-required verification: `./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests`
 - [ ] T056 Verify cold-start time remains within 50ms of baseline per NFR-002
 
