@@ -39,9 +39,8 @@ import kotlin.test.assertTrue
 /**
  * Migration coverage for discovery tables (D011).
  *
- * Verifies that the discovery schema (version 38→39 auto-migration) creates
- * the expected tables, supports CRUD operations, enforces foreign key cascade
- * behavior, and respects column defaults.
+ * Verifies that the discovery schema (version 38→39 auto-migration) creates the expected tables, supports CRUD
+ * operations, enforces foreign key cascade behavior, and respects column defaults.
  */
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
@@ -71,12 +70,13 @@ class DiscoveryMigrationTest {
 
     @Test
     fun discoverySessionTable_insertAndRetrieve() = runTest {
-        val session = DiscoverySessionEntity(
-            timestamp = 1_000_000L,
-            presetsScanned = "LONG_FAST,SHORT_FAST",
-            homePreset = "LONG_FAST",
-            completionStatus = "complete",
-        )
+        val session =
+            DiscoverySessionEntity(
+                timestamp = 1_000_000L,
+                presetsScanned = "LONG_FAST,SHORT_FAST",
+                homePreset = "LONG_FAST",
+                completionStatus = "complete",
+            )
         val id = discoveryDao.insertSession(session)
         assertTrue(id > 0, "Insert should return positive auto-generated ID")
         val loaded = discoveryDao.getSession(id)
@@ -88,14 +88,15 @@ class DiscoveryMigrationTest {
     @Test
     fun discoveryPresetResultTable_insertAndRetrieve() = runTest {
         val sessionId = discoveryDao.insertSession(testSession())
-        val result = DiscoveryPresetResultEntity(
-            sessionId = sessionId,
-            presetName = "LONG_FAST",
-            dwellDurationSeconds = 30,
-            uniqueNodes = 5,
-            directNeighborCount = 3,
-            meshNeighborCount = 2,
-        )
+        val result =
+            DiscoveryPresetResultEntity(
+                sessionId = sessionId,
+                presetName = "LONG_FAST",
+                dwellDurationSeconds = 30,
+                uniqueNodes = 5,
+                directNeighborCount = 3,
+                meshNeighborCount = 2,
+            )
         val resultId = discoveryDao.insertPresetResult(result)
         assertTrue(resultId > 0)
         val results = discoveryDao.getPresetResults(sessionId)
@@ -108,17 +109,18 @@ class DiscoveryMigrationTest {
     fun discoveredNodeTable_insertAndRetrieve() = runTest {
         val sessionId = discoveryDao.insertSession(testSession())
         val presetId = discoveryDao.insertPresetResult(testPresetResult(sessionId))
-        val node = DiscoveredNodeEntity(
-            presetResultId = presetId,
-            nodeNum = 12345,
-            shortName = "TST",
-            longName = "Test Node",
-            neighborType = "direct",
-            latitude = 37.7749,
-            longitude = -122.4194,
-            snr = 8.5f,
-            rssi = -65,
-        )
+        val node =
+            DiscoveredNodeEntity(
+                presetResultId = presetId,
+                nodeNum = 12345,
+                shortName = "TST",
+                longName = "Test Node",
+                neighborType = "direct",
+                latitude = 37.7749,
+                longitude = -122.4194,
+                snr = 8.5f,
+                rssi = -65,
+            )
         val nodeId = discoveryDao.insertDiscoveredNode(node)
         assertTrue(nodeId > 0)
         val nodes = discoveryDao.getDiscoveredNodes(presetId)
@@ -134,11 +136,7 @@ class DiscoveryMigrationTest {
     @Test
     fun sessionEntity_defaultValues() = runTest {
         // Insert with only required fields — verify defaults
-        val session = DiscoverySessionEntity(
-            timestamp = 1L,
-            presetsScanned = "A",
-            homePreset = "A",
-        )
+        val session = DiscoverySessionEntity(timestamp = 1L, presetsScanned = "A", homePreset = "A")
         val id = discoveryDao.insertSession(session)
         val loaded = discoveryDao.getSession(id)!!
         assertEquals(0, loaded.totalUniqueNodes)
@@ -263,4 +261,3 @@ class DiscoveryMigrationTest {
 
     // endregion
 }
-
