@@ -72,6 +72,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -84,6 +85,7 @@ import org.meshtastic.core.resources.search_emoji
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
+import org.meshtastic.core.ui.theme.AppTheme
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -661,4 +663,90 @@ private fun recordSelection(emoji: String, viewModel: EmojiPickerViewModel) {
     freq[emoji] = (freq[emoji] ?: 0) + 1
     viewModel.customEmojiFrequency =
         freq.entries.joinToString(SPLIT_CHAR) { "${it.key}$KEY_VALUE_DELIMITER${it.value}" }
+}
+
+// ── Previews ───────────────────────────────────────────────────────────────────
+
+private val PREVIEW_CATEGORIES =
+    listOf(
+        EmojiCategory(
+            "Smileys & Emotion",
+            "😀",
+            listOf(
+                Emoji("😀", listOf("grinning", "face", "smile")),
+                Emoji("😃", listOf("smiley", "face", "happy")),
+                Emoji("😄", listOf("smile", "happy", "joy")),
+                Emoji("😁", listOf("grin", "happy")),
+                Emoji("😆", listOf("laughing", "satisfied")),
+                Emoji("😅", listOf("sweat", "smile", "hot")),
+                Emoji("🤣", listOf("rofl", "laughing", "floor")),
+                Emoji("😂", listOf("joy", "tears", "laugh")),
+                Emoji("🙂", listOf("slightly", "smile")),
+                Emoji("😉", listOf("wink", "face")),
+                Emoji("😊", listOf("blush", "happy", "smile")),
+                Emoji("😇", listOf("angel", "innocent", "halo")),
+            ),
+        ),
+        EmojiCategory(
+            "People & Body",
+            "👋",
+            listOf(
+                Emoji("👋", listOf("wave", "hand", "hello"), supportsSkinTone = true),
+                Emoji("🤚", listOf("raised", "back", "hand"), supportsSkinTone = true),
+                Emoji("🖐️", listOf("hand", "splayed", "fingers"), supportsSkinTone = true),
+                Emoji("✋", listOf("hand", "high five", "stop"), supportsSkinTone = true),
+                Emoji("👍", listOf("thumbs up", "approve", "yes"), supportsSkinTone = true),
+                Emoji("👎", listOf("thumbs down", "disapprove", "no"), supportsSkinTone = true),
+                Emoji("👏", listOf("clap", "applause"), supportsSkinTone = true),
+                Emoji("🙌", listOf("raised", "hands", "celebration"), supportsSkinTone = true),
+            ),
+        ),
+    )
+
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@PreviewLightDark
+@Composable
+fun EmojiPickerContentPreview() {
+    AppTheme {
+        Surface {
+            EmojiPickerContent(
+                searchQuery = "",
+                debouncedQuery = "",
+                onSearchQueryChange = {},
+                selectedCategoryIndex = 0,
+                onCategorySelected = {},
+                selectedEmojis = setOf("😀", "👍"),
+                recentEmojis = listOf("😀", "❤️", "👍", "🔥", "😂", "🙏"),
+                categories = PREVIEW_CATEGORIES,
+                allEmojis = PREVIEW_CATEGORIES.flatMap { it.emojis },
+                preferredSkinToneIndex = 0,
+                onSkinToneSelect = {},
+                onEmojiSelected = {},
+            )
+        }
+    }
+}
+
+@Suppress("UnusedPrivateMember", "PreviewPublic")
+@PreviewLightDark
+@Composable
+fun EmojiPickerSearchPreview() {
+    AppTheme {
+        Surface {
+            EmojiPickerContent(
+                searchQuery = "smile",
+                debouncedQuery = "smile",
+                onSearchQueryChange = {},
+                selectedCategoryIndex = 0,
+                onCategorySelected = {},
+                selectedEmojis = emptySet(),
+                recentEmojis = listOf("😀", "❤️", "👍"),
+                categories = PREVIEW_CATEGORIES,
+                allEmojis = PREVIEW_CATEGORIES.flatMap { it.emojis },
+                preferredSkinToneIndex = 0,
+                onSkinToneSelect = {},
+                onEmojiSelected = {},
+            )
+        }
+    }
 }
