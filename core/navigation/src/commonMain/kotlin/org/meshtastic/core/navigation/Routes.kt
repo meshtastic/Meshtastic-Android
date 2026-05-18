@@ -27,23 +27,17 @@ interface Graph : Route
 
 @Serializable
 sealed interface ChannelsRoute : Route {
-    @Serializable data object ChannelsGraph : ChannelsRoute, Graph
-
-    @Serializable data object Channels : ChannelsRoute
+    @Serializable data object Channels : ChannelsRoute, Graph
 }
 
 @Serializable
 sealed interface ConnectionsRoute : Route {
-    @Serializable data object ConnectionsGraph : ConnectionsRoute, Graph
-
-    @Serializable data object Connections : ConnectionsRoute
+    @Serializable data object Connections : ConnectionsRoute, Graph
 }
 
 @Serializable
 sealed interface ContactsRoute : Route {
-    @Serializable data object ContactsGraph : ContactsRoute, Graph
-
-    @Serializable data object Contacts : ContactsRoute
+    @Serializable data object Contacts : ContactsRoute, Graph
 
     @Serializable data class Messages(val contactKey: String, val message: String = "") : ContactsRoute
 
@@ -59,9 +53,7 @@ sealed interface MapRoute : Route {
 
 @Serializable
 sealed interface NodesRoute : Route {
-    @Serializable data object NodesGraph : NodesRoute, Graph
-
-    @Serializable data object Nodes : NodesRoute
+    @Serializable data object Nodes : NodesRoute, Graph
 
     @Serializable data class NodeDetailGraph(val destNum: Int? = null) :
         NodesRoute,

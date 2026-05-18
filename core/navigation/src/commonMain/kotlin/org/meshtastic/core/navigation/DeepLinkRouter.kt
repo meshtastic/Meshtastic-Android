@@ -60,7 +60,7 @@ object DeepLinkRouter {
             "quickchat",
             -> routeContacts(uri, pathSegments)
 
-            "connections" -> listOf(ConnectionsRoute.ConnectionsGraph)
+            "connections" -> listOf(ConnectionsRoute.Connections)
 
             "map" -> routeMap(uri, pathSegments)
 
@@ -68,7 +68,7 @@ object DeepLinkRouter {
 
             "settings" -> routeSettings(pathSegments)
 
-            "channels" -> listOf(ChannelsRoute.ChannelsGraph)
+            "channels" -> listOf(ChannelsRoute.Channels)
 
             "firmware" -> routeFirmware(pathSegments)
 
@@ -86,11 +86,11 @@ object DeepLinkRouter {
         return when (firstSegment) {
             "share" -> {
                 val message = uri.getQueryParameter("message") ?: ""
-                listOf(ContactsRoute.ContactsGraph, ContactsRoute.Share(message))
+                listOf(ContactsRoute.Contacts, ContactsRoute.Share(message))
             }
 
             "quickchat" -> {
-                listOf(ContactsRoute.ContactsGraph, ContactsRoute.QuickChat)
+                listOf(ContactsRoute.Contacts, ContactsRoute.QuickChat)
             }
 
             "messages" -> {
@@ -98,15 +98,15 @@ object DeepLinkRouter {
                 val message = uri.getQueryParameter("message") ?: ""
                 if (contactKey.isNotBlank()) {
                     listOf(
-                        ContactsRoute.ContactsGraph,
+                        ContactsRoute.Contacts,
                         ContactsRoute.Messages(contactKey = contactKey, message = message),
                     )
                 } else {
-                    listOf(ContactsRoute.ContactsGraph)
+                    listOf(ContactsRoute.Contacts)
                 }
             }
 
-            else -> listOf(ContactsRoute.ContactsGraph)
+            else -> listOf(ContactsRoute.Contacts)
         }
     }
 
@@ -121,17 +121,17 @@ object DeepLinkRouter {
         val destNum = destNumStr?.toIntOrNull()
 
         return if (destNum == null) {
-            listOf(NodesRoute.NodesGraph)
+            listOf(NodesRoute.Nodes)
         } else if (segments.size > 2) {
             val subRouteStr = segments[2].lowercase()
             val detailRouteFn = nodeDetailSubRoutes[subRouteStr]
             if (detailRouteFn != null) {
-                listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetailGraph(destNum), detailRouteFn(destNum))
+                listOf(NodesRoute.Nodes, NodesRoute.NodeDetailGraph(destNum), detailRouteFn(destNum))
             } else {
-                listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum))
+                listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum))
             }
         } else {
-            listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum))
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum))
         }
     }
 

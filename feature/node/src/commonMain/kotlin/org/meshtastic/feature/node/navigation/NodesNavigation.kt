@@ -76,15 +76,6 @@ fun EntryProviderScope<NavKey>.nodesGraph(
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
     onNavigateToConnections: () -> Unit = {},
 ) {
-    entry<NodesRoute.NodesGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
-        AdaptiveNodeListScreen(
-            backStack = backStack,
-            scrollToTopEvents = scrollToTopEvents,
-            onHandleDeepLink = onHandleDeepLink,
-            onNavigateToConnections = onNavigateToConnections,
-        )
-    }
-
     entry<NodesRoute.Nodes>(metadata = { ListDetailSceneStrategy.listPane() }) {
         AdaptiveNodeListScreen(
             backStack = backStack,

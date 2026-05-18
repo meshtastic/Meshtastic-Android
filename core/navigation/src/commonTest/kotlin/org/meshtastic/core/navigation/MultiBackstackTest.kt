@@ -133,13 +133,13 @@ class MultiBackstackTest {
         // Deep-link to a TracerouteMap on the Nodes tab (this is the exact pattern
         // MeshtasticAppShell uses for traceroute alert "View on Map")
         val tracerouteMap = NodeDetailRoute.TracerouteMap(destNum = 100, requestId = 42, logUuid = "abc")
-        multiBackstack.handleDeepLink(listOf(NodesRoute.NodesGraph, tracerouteMap))
+        multiBackstack.handleDeepLink(listOf(NodesRoute.Nodes, tracerouteMap))
 
         // Should have switched to the Nodes tab
         assertEquals(TopLevelDestination.Nodes.route, multiBackstack.currentTabRoute)
         // Stack should contain the graph root + the traceroute map route
         assertEquals(2, multiBackstack.activeBackStack.size)
-        assertEquals(NodesRoute.NodesGraph, multiBackstack.activeBackStack.first())
+        assertEquals(NodesRoute.Nodes, multiBackstack.activeBackStack.first())
         assertEquals(tracerouteMap, multiBackstack.activeBackStack.last())
     }
 }

@@ -38,13 +38,10 @@ class NavigationConfigTest {
     private val allRouteInstances: List<NavKey> =
         listOf(
             // ChannelsRoute
-            ChannelsRoute.ChannelsGraph,
             ChannelsRoute.Channels,
             // ConnectionsRoute
-            ConnectionsRoute.ConnectionsGraph,
             ConnectionsRoute.Connections,
             // ContactsRoute
-            ContactsRoute.ContactsGraph,
             ContactsRoute.Contacts,
             ContactsRoute.Messages(contactKey = "test-contact", message = "hello"),
             ContactsRoute.Messages(contactKey = "test-contact"),
@@ -54,7 +51,6 @@ class NavigationConfigTest {
             MapRoute.Map(),
             MapRoute.Map(waypointId = 42),
             // NodesRoute
-            NodesRoute.NodesGraph,
             NodesRoute.Nodes,
             NodesRoute.NodeDetailGraph(destNum = 1234),
             NodesRoute.NodeDetailGraph(),

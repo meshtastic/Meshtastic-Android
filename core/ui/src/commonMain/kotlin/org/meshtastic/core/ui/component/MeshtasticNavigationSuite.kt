@@ -141,7 +141,7 @@ private fun handleNavigation(
         val currentKey = multiBackstack.activeBackStack.lastOrNull()
         when (destination) {
             TopLevelDestination.Nodes -> {
-                val onNodesList = currentKey is NodesRoute.NodesGraph || currentKey is NodesRoute.Nodes
+                val onNodesList = currentKey is NodesRoute.Nodes
                 if (!onNodesList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {
@@ -151,7 +151,7 @@ private fun handleNavigation(
 
             TopLevelDestination.Conversations -> {
                 val onConversationsList =
-                    currentKey is ContactsRoute.ContactsGraph || currentKey is ContactsRoute.Contacts
+                    currentKey is ContactsRoute.Contacts
                 if (!onConversationsList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {

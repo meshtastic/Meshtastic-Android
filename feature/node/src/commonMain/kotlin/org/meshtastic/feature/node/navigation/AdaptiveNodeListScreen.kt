@@ -39,7 +39,7 @@ fun AdaptiveNodeListScreen(
     NodeListScreen(
         viewModel = nodeListViewModel,
         navigateToNodeDetails = { nodeId -> backStack.add(NodesRoute.NodeDetail(nodeId)) },
-        onNavigateToChannels = { backStack.add(ChannelsRoute.ChannelsGraph) },
+        onNavigateToChannels = { backStack.add(ChannelsRoute.Channels) },
         scrollToTopEvents = scrollToTopEvents,
         activeNodeId = null,
         onHandleDeepLink = onHandleDeepLink,

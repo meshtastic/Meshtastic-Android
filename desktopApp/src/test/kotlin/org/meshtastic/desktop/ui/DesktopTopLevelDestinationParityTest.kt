@@ -41,11 +41,11 @@ class DesktopTopLevelDestinationParityTest {
 
         val androidParityRoutes: Set<KClass<out Route>> =
             setOf(
-                ContactsRoute.ContactsGraph::class,
-                NodesRoute.NodesGraph::class,
+                ContactsRoute.Contacts::class,
+                NodesRoute.Nodes::class,
                 MapRoute.Map::class,
                 SettingsRoute.Settings::class,
-                ConnectionsRoute.ConnectionsGraph::class,
+                ConnectionsRoute.Connections::class,
             )
 
         assertEquals(
