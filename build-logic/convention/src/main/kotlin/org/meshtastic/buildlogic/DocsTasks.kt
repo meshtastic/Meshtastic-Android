@@ -258,6 +258,8 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
             .replace(Regex("^---[\\s\\S]*?---\\s*", RegexOption.MULTILINE), "")
             .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         val dir = if (locale == "ar") "rtl" else "ltr"
+        // Locale pages are one level deeper: docs/{locale}/user/foo.html vs docs/user/foo.html
+        val cssPath = if (locale != "en") "../../styles/docs.css" else "../styles/docs.css"
         return """
             |<!DOCTYPE html>
             |<html lang="$locale" dir="$dir">
@@ -265,7 +267,7 @@ abstract class GenerateDocsBundleTask : DefaultTask() {
             |  <meta charset="UTF-8">
             |  <meta name="viewport" content="width=device-width, initial-scale=1.0">
             |  <title>$title</title>
-            |  <link rel="stylesheet" href="../styles/docs.css">
+            |  <link rel="stylesheet" href="$cssPath">
             |</head>
             |<body data-page="${mdFile.nameWithoutExtension}" data-locale="$locale">
             |<pre class="markdown-content">$content</pre>

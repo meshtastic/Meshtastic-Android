@@ -99,9 +99,8 @@ object MarkdownTranslationSegmenter {
                     i++
                 }
 
-                // Heading
-                line.trimStart().startsWith("#") -> {
-                    val prefix = line.takeWhile { it == '#' || it == ' ' }
+                // Heading (ATX: # followed by space or end-of-line)
+                line.trimStart().matches(Regex("^#{1,6}(\\s.*|$)")) -> {
                     val headingPrefix =
                         line.substring(0, line.indexOf('#')) +
                             line.substring(line.indexOf('#')).takeWhile { it == '#' } +
